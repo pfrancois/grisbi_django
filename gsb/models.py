@@ -151,7 +151,6 @@ class Moyen(models.Model):
 class Rapp(models.Model):
   
     nom = models.CharField(max_length=120)
-    date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte, null=True, blank=True)
     class Meta:
         db_table = u'rapp'
