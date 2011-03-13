@@ -46,13 +46,13 @@ class Titre(models.Model):
 class Cours(models.Model):
     valeur = models.FloatField()
     isin = models.ForeignKey(Titre,to_field="isin")
-    date_cours = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=datetime.date.today)
     class Meta:
         db_table = u'cours'
         verbose_name_plural = u'cours'
-        unique_together = ("isin", "date_cours")
+        unique_together = ("isin", "date")
     def __unicode__(self):
-        return "%s le %s : %s"%(isin, date_cours, valeur)
+        return "%s le %s : %s"%(self.isin, self.date, self.valeur)
 
 
 class Banque(models.Model):
@@ -134,7 +134,7 @@ class Compte(models.Model):
     titulaire = models.CharField(max_length=120, blank=True)
     type = models.CharField(max_length=24, choices=typescpt)
     devise = models.ForeignKey(Devise)
-    banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=SET_NULL)
+    banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL)
     guichet = models.CharField(max_length=15, blank=True)
     num_compte = models.CharField(max_length=60, blank=True)
     cle_compte = models.IntegerField(null=True, blank=True)
@@ -171,7 +171,7 @@ class Moyen(models.Model):
 
 class Rapp(models.Model):
     nom = models.CharField(max_length=120)
-    compte = models.ForeignKey(Compte, null=True, blank=True, on_delete=SET_NULL)
+    compte = models.ForeignKey(Compte, null=True, blank=True, on_delete=models.SET_NULL)
     class Meta:
         db_table = u'rapp'
         verbose_name = u"rapprochement"
@@ -185,14 +185,14 @@ class Echeance(models.Model):
     montant = models.FloatField()
     devise = models.ForeignKey(Devise)
     tiers = models.ForeignKey(Tiers)
-    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=SET_NULL)
-    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=SET_NULL)
+    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL)
+    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL)
     compte_virement = models.ForeignKey(Compte, null=True, blank=True,related_name=u'compte_virement_set')
-    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=SET_NULL)
+    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True,related_name=u'moyen_virement_set')
-    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=SET_NULL)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=SET_NULL)
-    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=SET_NULL)
+    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL)
+    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL)
+    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
     inscription_automatique = models.BooleanField(default=False)
     periodicite = models.TextField(default=False)
@@ -230,17 +230,17 @@ class Ope(models.Model):
     date_val = models.DateField(null=True, blank=True)
     montant = models.FloatField()
     devise = models.ForeignKey(Devise)
-    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=SET_NULL)
-    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=SET_NULL)
-    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=SET_NULL)
+    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL)
+    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL)
+    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
-    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=SET_NULL)
+    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL)
     numcheque = models.CharField(max_length=120, blank=True)
     pointe = models.CharField(max_length=2, choices=typescpt, default=u'na')
-    rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=SET_NULL)
-    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=SET_NULL)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=SET_NULL)
-    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=SET_NULL)
+    rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL)
+    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL)
+    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL)
+    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
     jumelle = models.ForeignKey('self', null=True, blank=True, related_name=u'+')
     mere = models.ForeignKey('self', null=True, blank=True, related_name=u'filles_set')
     class Meta:

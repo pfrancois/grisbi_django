@@ -38,13 +38,16 @@ class Ope_admin(admin.ModelAdmin):
         (u'pointage',{'fields':('pointe','rapp'), 'classes': ['collapse']}),
         (u'mere et jumelles',{'fields':('mere','jumelle'), 'classes': ['collapse']}),
     ]
+class cours_admin(admin.ModelAdmin):
+    fields= ['isin', 'date', 'valeur']
+
 admin.site.register(Tiers)
 admin.site.register(Cat,Cat_admin)
 admin.site.register(Compte,Compte_admin)
 admin.site.register(Ope,Ope_admin)
 admin.site.register(Devise,Devise_admin)
 admin.site.register(Titre)
-admin.site.register(Cours)
+admin.site.register(Cours,cours_admin)
 admin.site.register(Banque)
 admin.site.register(Ib,Ib_admin)
 admin.site.register(Exercice)
