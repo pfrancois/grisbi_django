@@ -51,4 +51,3 @@ admin.site.register(Exercice)
 admin.site.register(Rapp)
 admin.site.register(Echeance)
 admin.site.register(Generalite)
-

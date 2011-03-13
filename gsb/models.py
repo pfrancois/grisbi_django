@@ -118,7 +118,7 @@ class Exercice(models.Model):
     class Meta:
         db_table = u'exercice'
     def __unicode__(self):
-        return "%s-%s"%(date_debut,date_fin)
+        return "%s au %s"%(self.date_debut,self.date_fin)
 
 class Compte(models.Model):
     typescpt = (
@@ -147,7 +147,8 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
     def solde(self):
-        return 0  #TODO
+        r= Ope.objects.filter(compte__id__exact=1,mere__exact=None).aggregate(solde=Sum('montant'))
+        return solde['solde']
 
 class Moyen(models.Model):
     compte = models.ForeignKey(Compte)
@@ -200,7 +201,7 @@ class Echeance(models.Model):
         verbose_name = u"échéance"
         verbose_name_plural = u"Echéances"
     def __unicode__(self):
-        return self.id
+        return "%s"%(self.id)
 
 class Generalite(models.Model):
     titre = models.CharField(max_length=120, blank=True)
@@ -213,7 +214,7 @@ class Generalite(models.Model):
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
     def __unicode__(self):
-        return self.id
+        return "%s"%(self.id)
 
 class Ope(models.Model):
     typescpt = (
@@ -229,7 +230,6 @@ class Ope(models.Model):
     tiers = models.ForeignKey(Tiers, null=True, blank=True)
     cat = models.ForeignKey(Cat, null=True, blank=True)
     scat = models.ForeignKey(Scat, null=True, blank=True)
-    is_mere = models.BooleanField(default=False, help_text=u"pas editable car change automatique")
     notes = models.TextField(blank=True)
     moyen = models.ForeignKey(Moyen, null=True, blank=True)
     numcheque = models.CharField(max_length=120, blank=True)
@@ -246,4 +246,4 @@ class Ope(models.Model):
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
     def __unicode__(self):
-        return self.id
+        return "%s"%(self.id)
