@@ -36,7 +36,7 @@ class Ope_admin(admin.ModelAdmin):
         (u'imputation bugétaire',{'fields':('ib','sib'), 'classes': ['collapse']}),
         (u'informations diverses', {'fields':('date_val','numcheque','notes','exercice'), 'classes': ['collapse']}),
         (u'pointage',{'fields':('pointe','rapp'), 'classes': ['collapse']}),
-        (u'mere et jumelles',{'fields':('mere','jumelle','is_mere'), 'classes': ['collapse']}),
+        (u'mere et jumelles',{'fields':('mere','jumelle'), 'classes': ['collapse']}),
     ]
 admin.site.register(Tiers)
 admin.site.register(Cat,Cat_admin)
