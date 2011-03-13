@@ -27,4 +27,6 @@ dist
 *.pyc
 *.pyo
 *.tmp*
-
+bdd.sqlite
+settings.py
+*.lnk

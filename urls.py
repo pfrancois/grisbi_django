@@ -2,8 +2,8 @@
 from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
     # Example:
@@ -14,4 +14,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
+    #~ (r'^ope/(?P<ope_id>\d+)/$',include('grisbi.gsb.views.ope_index')),
+    #~ (r'^compte/(?P<cpt_id>\d+)/$',include('grisbi.gsb.views.ope_index')),
+    #~ (r'^$',include('grisbi.gsb.views.index')),
 )

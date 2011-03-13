@@ -3,6 +3,7 @@
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+TEMPLATE_STRING_IF_INVALID="INVALID"
 
 ADMINS = (
     # ('francois', 'your_email@domain.com'),
@@ -10,17 +11,26 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+#~ DATABASES = {
+    #~ 'default': {
+        #~ 'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        #~ 'NAME': 'grisbi',                      # Or path to database file if using sqlite3.
+        #~ 'USER': 'root',                      # Not used with sqlite3.
+        #~ 'PASSWORD': 'mdp',                  # Not used with sqlite3.
+        #~ 'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        #~ 'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    #~ }
+#~ }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'grisbi',                      # Or path to database file if using sqlite3.
-        'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': 'mdp',                  # Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'G:/django/grisbi/bdd.sqlite',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -59,7 +69,12 @@ MEDIA_URL = '/home/francois/django/grisbi/media/'
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '3_l+)jh0xdcwuj+w_t7=xjrio$^av0%=g=m@0bvsc7h3k2u91s'
+SECRET_KEY = '23!1*8(t$a80qo^gq$lo&k%d6bgk!95q_(jndy)6!jo1+i4l#m'
+#vous pouvez en creer un nouveau avec la procedure suivante
+#~ from random import choice
+
+#~ print ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -82,6 +97,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/home/francois/django/grisbi/templates',
 )
 
 INSTALLED_APPS = (

@@ -1,0 +1,54 @@
+{% extends "generic.html" %}
+{% block content %}
+<table width="100%" id="boutons">
+	<tr>
+		<td width="50%" class="boutton" ><a href="operation.php?cpt_id={{ cpt_id }}">Nouvelle Op.</a></td>
+		<td  width="50%"  class="boutton" ><a href="comptes.php">retour liste comptes</a></td>
+			</tr>
+	<tr>
+		<td width="100%" class="boutton" colspan="2"> <a href="virement.php?cpt_id={{ cpt_id }}" > Nouveau Virement vers {{ compte_nom }} </a></td>
+	</tr>
+</table>
+<br/>
+<table width="100%" id="main">
+	<thead>
+		<tr>
+			<th >Date</th>
+			<th >Tiers</th>
+			<th >Cat&eacute;gorie</th>
+			<th >Cr&eacute;dit</th>
+			<th >D&eacute;bit</th>
+		</tr>
+	</thead>
+	{for ope in opes }}
+	{% block ope %}
+		<tr class="item hover {{ ope.class2 }}">
+			<td class="opDate"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
+			<td class="opTier"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.tiers_name|default_if_none:"aucun"  }}</a></td>
+			<td class="opTier"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.cat_name|default_if_none:"aucun"  }}</a></td>
+			<td class="opCredit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.credit|floatformat:2 }}</a></td>
+			<td class="opDebit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.debit|floatformat:2 }}</a></td>
+		</tr>
+	{% endblock ope %}
+	{% empty %}
+		<tr class="item">
+			<td colspan="5">
+				aucune op&eacute;ration n&apos;est affich&eacute;.<br/>
+				{% if nbfiltre>1 %}
+					{{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+				{% else %} {% if nbfiltre==1 %}
+					1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+				{% endif %}{% endif %}
+			</td>
+		</tr>
+	{% endfor %}
+		<tr class="footerbar">
+			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ solde_compte|floatformat:2 }}</td>
+		</tr>
+</table>
+{% if nbrapp>1 %}
+	note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+{% else %}{% if nbrapp==1 %}
+	note: 1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est rapproch&eacute;e.<br/>
+{% endif %}{% endif %}
+{% endblock content %}
