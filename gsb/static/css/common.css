@@ -1,0 +1,155 @@
+@charset "UTF-8";
+a {
+	text-decoration: none;
+	padding: 0;
+	margin: 0;
+	color: #FFFFFF;
+	display: block;
+}
+
+a:hover {
+	background-color: #706666;
+}
+
+body {
+	font-family: sans-serif;
+	background-color: #333333;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	color: #FFFFFF;
+	font-size: 100%;
+}
+
+h1 {
+	font-size: 2.5em;
+	padding-top: .3em;
+	padding-bottom: .5em;
+	font-weight: bold;
+	background-color: #990000;
+	margin-top: 0em;
+	/*margin-bottom: .5em;*/
+	text-align: center;
+}
+
+h2 {
+	font-size: 1.5em;
+	margin-top: 0.4em;
+	margin-bottom: 0.6em;
+	clear: both;
+	border-bottom: 1px solid #D8D8D8;
+}
+
+.boutton {
+	background-color: #554444;
+	border: #ffffff solid 1px;
+	text-align: center;
+	padding: 10px 0px 10px 0px;
+	font-size: 2em;
+	color: #ffffff;
+}
+
+.boutton:hover {
+	background-color: #706666;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border-width: 0;
+	empty-cells: show
+}
+
+.item {
+	background-color: #3A0000;
+}
+.item:hover {
+	background-color: #706666;
+}
+
+
+.cptLabel {
+	text-align: left;
+	width: 100%
+}
+
+.cptSolde {
+	text-align: right;
+	white-space: nowrap;
+	padding-right: .5em;
+}
+
+.progress {
+	width: 100%;
+	background: #706666;
+	text-align: center;
+	font-size: 2.5em;
+}
+
+.error {
+	width: 100%;
+	background: #ff00ff;
+	text-align: center;
+	font-size: 2.5em;
+}
+
+.creditElement {
+	background: #6699FF;
+	border: #ffffff solid;
+	border-width: 1px 1px 0 0;
+	width: 100%;
+	text-align: left;
+	padding: 0.6em 0px 0.6em 0px;
+}
+
+.opCredit {
+	white-space: nowrap;
+	text-align: right;
+	padding: 0px 0.6em 0px 0.1em;
+}
+
+.opDebit {
+	white-space: nowrap;
+	text-align: right;
+	padding: 0px 0.6em 0px 0.3em;
+}
+
+.opDate {
+	width: 70px;
+	white-space: nowrap;
+	text-align: center;
+}
+
+.opTier {
+	width: 50%;
+	padding: 0px 0px 0px 0.3em;
+	text-align: left;
+}
+
+.survol:hover {
+	background-color: #706666;
+}
+.entete>td{
+	background-color: #990000;
+	font-weight: bold;
+	padding-top: 0.4em;
+	padding-bottom: 0.6em;
+}
+.footerbar>td {
+	background-color: #990000;
+	font-weight: bold;
+	padding: .7em 0em;
+	border-top: 10px solid #333333;
+	height: 3em;
+}
+.padding>td{
+	padding-top: 0.4em;
+	padding-bottom: 0.6em;
+}
+td{
+	border-top: 1px solid #4D0000;
+}
+th {
+	background-color: #706666;
+	text-align: left;
+}

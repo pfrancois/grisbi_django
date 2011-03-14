@@ -125,8 +125,8 @@ class Exercice(models.Model):
 
 class Compte(models.Model):
     typescpt = (
-        (u'bq',u'bancaire'),
-        (u'esp',u'espece'),
+        (u'b',u'bancaire'),
+        (u'e',u'espece'),
         (u'a',u'actif'),
         (u'p',u'passif')
     )
@@ -151,7 +151,11 @@ class Compte(models.Model):
         return self.nom
     def solde(self):
         r= Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
-        return r['solde']
+        if r['solde'] == None:
+            solde=0
+        else:
+            solde=r['solde']
+        return solde
 
 class Moyen(models.Model):
     compte = models.ForeignKey(Compte)

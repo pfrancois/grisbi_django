@@ -1,0 +1,61 @@
+@charset "UTF-8";
+
+/* coding: utf-8 */
+.CreditCatElement:before {
+
+}
+
+.DebitCatElement:before {
+
+}
+
+.moyenAvecNumero {
+	display: inline;
+}
+
+.operationMainTable {
+	background: #3A0000;
+}
+
+.ligne {
+	padding: 0.5em;
+}
+
+label {
+	display: inline;
+	float: left;
+	font-size: .9em;
+	font-weight: bold;
+	width: 15%;
+}
+
+span label {
+	float: none;
+	padding-left: 0.5em;
+}
+
+input[type='text'] {
+	padding: 0.5em;
+}
+
+select {
+	padding: 0.5em;
+}
+
+input {
+	border: 0;
+}
+
+legend {
+	font-size: 110%;
+	padding-bottom: .5em;
+	color: #FFFFFF;
+}
+
+.invisible {
+	display: none;
+}
+
+#ope_date_ope {
+	width: auto;
+}

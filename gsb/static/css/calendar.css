@@ -1,0 +1,53 @@
+@charset "UTF-8";
+
+/* coding: utf-8 */
+.editDate {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0px;
+	position: absolute;
+	left: 0px;
+	visibility: hidden;
+}
+
+.calendarMain {
+	width: 100%;
+	color: #FFFFFF;
+}
+
+.calendarMain td {
+	width: 12%;
+}
+
+.calendardays {
+	border: #ffffff 1px solid;
+	background: #998888;
+}
+
+.calendarboutton {
+	background: #554444;
+	border: #ffffff solid 1px;
+	text-align: center;
+	color: #ffffff;
+}
+
+.calendarmonth {
+	background: #551111;
+}
+
+.calendardaysofweek {
+	border: #ffffff 1px solid;
+	background: #991111;
+}
+
+#calendartoday {
+	background: #00DD1D;
+}
+
+.calendarselected {
+	background: #551111;
+}
+
+.invisible {
+	visibility: hidden;
+}

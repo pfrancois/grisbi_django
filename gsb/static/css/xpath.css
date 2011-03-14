@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+/* coding: utf-8 */
+.xpath {
+	font-family: monospace;
+	font-size: 1.2em;
+	border: solid #BBB;
+	background: #DDD;
+	overflow: auto;
+}

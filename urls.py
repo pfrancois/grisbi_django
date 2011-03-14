@@ -14,7 +14,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
-    #~ (r'^ope/(?P<ope_id>\d+)/$',include('grisbi.gsb.views.ope_index')),
-    #~ (r'^compte/(?P<cpt_id>\d+)/$',include('grisbi.gsb.views.ope_index')),
-    #~ (r'^$',include('grisbi.gsb.views.index')),
+    # (r'^ope/(?P<ope_id>\d+)/$',include('grisbi.gsb.views.ope_index')),
+    #(r'^compte/(?P<cpt_id>\d+)/$',include('grisbi.gsb.views.cpt_index')),
+    (r'^comptes$','grisbi.gsb.views.index'),
+
 )
