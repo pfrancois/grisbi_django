@@ -11,7 +11,7 @@
 		</tr>
 	{% empty %}
 	<tr class="item padding">
-		<td class="cptLabel"> aucun compte</td>
+		<td class="cptLabel" colspan="2"> aucun compte</td>
 	</tr>
 {% endfor %}
 	<tr class="entete"><td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td><td class="cptSolde">{{ total_bq|cur}}</td></tr>
@@ -26,7 +26,7 @@
 	</tr>
 	{% empty %}
 	<tr class="item padding">
-		<td class="cptLabel"> aucun compte d'actif ou de passif </td>
+		<td class="cptLabel" colspan="2"> aucun compte d'actif ou de passif </td>
 	</tr>
 	{% endfor %}
 	<tr class="entete">
