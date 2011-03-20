@@ -4,6 +4,7 @@ from django.template import RequestContext, loader
 from mysite.gsb.models import Compte, Ope
 from django.http import HttpResponse
 from django.http import Http404
+from django.shortcuts import render_to_response, get_object_or_404
 def index(request):
     t=loader.get_template('index.html')
     bq=Compte.objects.filter(type__in=(u'b',u'e'))
@@ -31,7 +32,6 @@ def index(request):
 #    p = get_object_or_404(Ope,pk=ope_id)
 #    return render_to_response('detail_ope.html', {'ope': p})
 #
-def cpt_index(request,cpt_id):
+def cpt_detail(request,cpt_id):
     p = get_object_or_404(Compte,pk=cpt_id)
-    return render_to_response('cpt_detail.html', {'cpt': p})
-# Create your views here.
+    return render_to_response('cpt_detail.html', {'cpt': p}, context_instance=RequestContext(request))

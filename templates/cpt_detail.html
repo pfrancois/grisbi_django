@@ -20,8 +20,8 @@
 			<th >D&eacute;bit</th>
 		</tr>
 	</thead>
-	{for ope in opes }}
-	{% block ope %}
+    {% block ope %}
+	{% for ope in opes %}
 		<tr class="item hover {{ ope.class2 }}">
 			<td class="opDate"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
 			<td class="opTier"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.tiers_name|default_if_none:"aucun"  }}</a></td>
@@ -29,26 +29,26 @@
 			<td class="opCredit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.credit|floatformat:2 }}</a></td>
 			<td class="opDebit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.debit|floatformat:2 }}</a></td>
 		</tr>
-	{% endblock ope %}
 	{% empty %}
 		<tr class="item">
 			<td colspan="5">
-				aucune op&eacute;ration n&apos;est affich&eacute;.<br/>
-				{% if nbfiltre>1 %}
+				aucune op&eacute;ration n&apos;est affich&eacute;e.<br/>
+				{% if nbfiltre > 1 %}
 					{{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
-				{% else %} {% if nbfiltre==1 %}
+				{% else %} {% if nbfiltre == 1 %}
 					1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
 				{% endif %}{% endif %}
 			</td>
 		</tr>
 	{% endfor %}
+	{% endblock %}
 		<tr class="footerbar">
 			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ solde_compte|floatformat:2 }}</td>
 		</tr>
 </table>
-{% if nbrapp>1 %}
+{% if nbrapp > 1 %}
 	note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
-{% else %}{% if nbrapp==1 %}
+{% else %}{% if nbrapp == 1 %}
 	note: 1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est rapproch&eacute;e.<br/>
 {% endif %}{% endif %}
 {% endblock content %}
