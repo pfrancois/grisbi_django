@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from grisbi.gsb.models import *
+from mysite.gsb.models import *
 from django.contrib import admin
 
 class Scat_Inline(admin.TabularInline):

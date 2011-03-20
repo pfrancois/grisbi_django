@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
 from django.template import RequestContext, loader
-from grisbi.gsb.models import Compte, Ope
+from mysite.gsb.models import Compte, Ope
 from django.http import HttpResponse
 from django.http import Http404
 def index(request):
@@ -34,3 +34,4 @@ def index(request):
 def cpt_index(request,cpt_id):
     p = get_object_or_404(Compte,pk=cpt_id)
     return render_to_response('cpt_detail.html', {'cpt': p})
+# Create your views here.

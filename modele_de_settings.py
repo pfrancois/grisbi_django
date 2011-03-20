@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-# Django settings for grisbi project.
+# -*- coding: utf-8 -*- Django settings for mysite project.
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-TEMPLATE_STRING_IF_INVALID="INVALID"
+#TEMPLATE_STRING_IF_INVALID="INVALID"
+
+#DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
 
 ADMINS = (
     # ('francois', 'your_email@domain.com'),
@@ -12,24 +13,16 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    #~ 'default': {
-        #~ 'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        #~ 'NAME': 'grisbi',                      # Or path to database file if using sqlite3.
-        #~ 'USER': 'root',                      # Not used with sqlite3.
-        #~ 'PASSWORD': 'mdp',                  # Not used with sqlite3.
-        #~ 'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        #~ 'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    #~ }
-
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'G:/django/grisbi/bdd.sqlite',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'grisbi',                      # Or path to database file if using sqlite3.
+        'USER': 'root',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -42,6 +35,13 @@ TIME_ZONE = 'Europe-Paris'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'fr-fr'
+THOUSAND_SEPARATOR = " "
+DECIMAL_SEPARATOR = ','
+FIRST_DAY_OF_WEEK = 1
+MONTH_DAY_FORMAT = 'l j F'
+NUMBER_GROUPING=3
+USE_THOUSAND_SEPARATOR=True
+
 
 SITE_ID = 1
 
@@ -54,26 +54,46 @@ USE_I18N = True
 USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/francois/django/grisbi'
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/home/francois/django/grisbi/media/'
-
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = ''
+
+# Absolute path to the directory static files should be collected to.
+# Don't put anything in this directory yourself; store your static files
+# in apps' "static/" subdirectories and in STATICFILES_DIRS.
+# Example: "/home/media/media.lawrence.com/static/"
+STATIC_ROOT = ''
+
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
+
+# URL prefix for admin static files -- CSS, JavaScript and images.
+# Make sure to use a trailing slash.
+# Examples: "http://foo.com/static/admin/", "/static/admin/".
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+)
+
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '23!1*8(t$a80qo^gq$lo&k%d6bgk!95q_(jndy)6!jo1+i4l#m'
-#vous pouvez en creer un nouveau avec la procedure suivante
-#~ from random import choice
-
-#~ print ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-
+SECRET_KEY = '3_l+)jh0xdcwuj+w_t7=xjrio$^av0%=g=m@0bvsc7h3k2u91s'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -90,13 +110,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'grisbi.urls'
+ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/home/francois/django/grisbi/templates',
+    'G:/django/mysite/templates',
 )
 
 INSTALLED_APPS = (
@@ -105,9 +125,21 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'mysite.gsb',
     # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
+     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
-    'grisbi.gsb',
+     'django.contrib.admindocs',
+)
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+    # required by django-admin-tools
+    #'django.core.context_processors.request',
+    'django.core.context_processors.static',
+
 )
