@@ -31,12 +31,12 @@ class Compte_admin(admin.ModelAdmin):
 
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ('compte','date_ope','montant','devise','tiers','moyen')}),
+        (None, {'fields': ('compte','date','montant','devise','tiers','moyen')}),
         (u'catégorie',{'fields':('cat','scat')}),
         (u'imputation bugétaire',{'fields':('ib','sib'), 'classes': ['collapse']}),
         (u'informations diverses', {'fields':('date_val','numcheque','notes','exercice'), 'classes': ['collapse']}),
         (u'pointage',{'fields':('pointe','rapp'), 'classes': ['collapse']}),
-        (u'mere et jumelles',{'fields':('mere','jumelle'), 'classes': ['collapse']}),
+        (u'mere et jumelles',{'fields':('jumelle','mere','is_mere'), 'classes': ['collapse']}),
     ]
 class cours_admin(admin.ModelAdmin):
     fields= ['isin', 'date', 'valeur']

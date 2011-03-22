@@ -652,7 +652,7 @@ DROP TABLE IF EXISTS `ope`;
 CREATE TABLE `ope` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `compte_id` int(11) NOT NULL,
-  `date_ope` date NOT NULL,
+  `date` date NOT NULL,
   `date_val` date DEFAULT NULL,
   `montant` double NOT NULL,
   `devise_id` int(11) NOT NULL,

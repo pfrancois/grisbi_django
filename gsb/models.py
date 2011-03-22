@@ -230,7 +230,7 @@ class Ope(models.Model):
         (u'r',u'raprochée')
     )
     compte = models.ForeignKey(Compte)
-    date_ope = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=datetime.date.today)
     date_val = models.DateField(null=True, blank=True)
     montant = models.FloatField()
     devise = models.ForeignKey(Devise)
@@ -247,9 +247,10 @@ class Ope(models.Model):
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
     jumelle = models.ForeignKey('self', null=True, blank=True, related_name=u'+')
     mere = models.ForeignKey('self', null=True, blank=True, related_name=u'filles_set')
+    is_mere=models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
     class Meta:
         db_table = u'ope'
-        get_latest_by = u'date_ope'
+        get_latest_by = u'date'
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
     def __unicode__(self):
