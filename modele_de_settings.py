@@ -9,6 +9,15 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('francois', 'your_email@domain.com'),
 )
+#####################################
+#config gsb
+NB_JOURS_AFF=100
+
+
+
+
+##################
+
 
 MANAGERS = ADMINS
 
@@ -108,15 +117,19 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',#debugtoolbar
 )
 
 ROOT_URLCONF = 'mysite.urls'
+
+import os
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    'G:/django/mysite/templates',
+    os.path.join(PROJECT_PATH, 'templates'),
 )
 
 INSTALLED_APPS = (
@@ -131,6 +144,8 @@ INSTALLED_APPS = (
      'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
      'django.contrib.admindocs',
+     #'debug_toolbar',
+     #'django_extensions',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
@@ -143,3 +158,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
 
 )
+#pour la debug bar
+INTERNAL_IPS = ('127.0.0.1',)
+DEBUG_TOOLBAR_CONFIG = {
+    #'HIDE_DJANGO_SQL': True ,
+}
