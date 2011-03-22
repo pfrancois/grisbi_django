@@ -23,7 +23,7 @@
 <h2>autres comptes (Actifs et Passifs)</h2>
 <table id="placements">
 	{% for cpt in liste_cpt_pl %}
-    {% if cpt.cloture = False %}
+    {% if not cpt.cloture %}
 	<tr class="item padding">
 		<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }}</a></td>
 		<td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
@@ -45,5 +45,5 @@
 		<td class="cptSolde">{{ total|cur}}</td>
 	</tr>
 </table>
-{%if nbclos > 0 %}<p>PS: il y a {{nbclos}} compte{% if nbclos > 1 %}s{% endif %} clos.</p>{% endif%}
+{% if nb_clos > 0 %}<p>PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos.</p>{% endif%}
 {% endblock content %}

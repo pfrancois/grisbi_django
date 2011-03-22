@@ -287,7 +287,7 @@ CREATE TABLE `compte` (
   `solde_mini_autorise` double DEFAULT NULL,
   `date_dernier_releve` date DEFAULT NULL,
   `solde_dernier_releve` double DEFAULT NULL,
-  `compte_cloture` tinyint(1) NOT NULL,
+  `cloture` tinyint(1) NOT NULL,
   `nb_lignes_ope` bigint(20) DEFAULT NULL,
   `notes` longtext NOT NULL,
   PRIMARY KEY (`id`),
