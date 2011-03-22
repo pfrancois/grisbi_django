@@ -24,7 +24,7 @@ class Devise_admin(admin.ModelAdmin):
 
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ('nom','type','devise','compte_cloture')}),
+        (None, {'fields': ('nom','type','devise','cloture')}),
         (u'information sur le compte', {'fields': ('banque','guichet','num_compte','cle_compte'), 'classes': ['collapse']}),
         (u'soldes', {'fields': ('solde_init','solde_mini_voulu','solde_mini_autorise'), 'classes': ['collapse']})
     ]

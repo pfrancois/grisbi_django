@@ -143,7 +143,7 @@ class Compte(models.Model):
     solde_mini_autorise = models.FloatField(null=True, blank=True)
     date_dernier_releve = models.DateField(null=True, blank=True, default=datetime.date.today)
     solde_dernier_releve = models.FloatField(null=True, blank=True)
-    compte_cloture = models.BooleanField(default=False)
+    cloture = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
     class Meta:
         db_table = u'compte'
