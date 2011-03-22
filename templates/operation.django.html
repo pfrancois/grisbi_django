@@ -1,4 +1,4 @@
-{% extends "generic.html" %}
+{% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/common.css" />
@@ -27,7 +27,7 @@
 
 		<div class="ligne" id="div_date">
 		<label for="ope_date_ope">Date:</label>
-			<input type="text" name="ope_date_ope" id="ope_date_ope" value="{$ope.date|date_format:"%d%m%Y"}" style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
+			<input type="text" name="ope_date_ope" id="ope_date_ope" value="{{ $ope.date|date:"dmY" }}" style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
 			<a href="javascript:editDate('ope_date_ope');" style="display:inline"><img src="img/calendar.png"  alt="calendrier" /></a>
 		</div>
 
@@ -35,8 +35,8 @@
 		<label for="tiers">Tiers: </label>
 			<select name="tiers" id="tiers" onchange="verifie_numero_visible_selon_texte(this.selectedIndex,'tiers','nom_nx_tiers_span','-1','nom_nx_tiers')">
 					<option value="-1">"nouveau tiers"</option>
-				{foreach from=$tiers item=tier}
-					<option value="{$tier.id}"{if ($tier.id == $ope.tier)} selected="selected"{/if}>{$tier.nom|escape:'htmlall':'UTF-8'}</option>
+				{for tier in tiers}
+					<option value="{{ tier.id }}"{if ($tier.id == $ope.tier)} selected="selected"{/if}>{$tier.nom|escape:'htmlall':'UTF-8'}</option>
 				{/foreach}
 			</select>
 			<span id='nom_nx_tiers_span' {if ($type_action != 'new')}style="display: none"{/if}><label for="nom_nx_tiers">nom: </label>

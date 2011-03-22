@@ -1,4 +1,4 @@
-{% extends "generic.html" %}
+{% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block titre %}<h1 class="survol">Comptes</h1>{% endblock titre %}
 {% comment %} il faut mettre le lien vers les fonctions speciales{% endcomment %}
@@ -23,10 +23,12 @@
 <h2>autres comptes (Actifs et Passifs)</h2>
 <table id="placements">
 	{% for cpt in liste_cpt_pl %}
+    {% if cpt.cloture = False %}
 	<tr class="item padding">
 		<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }}</a></td>
 		<td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
 	</tr>
+    {% endif %}
 	{% empty %}
 	<tr class="item padding">
 		<td class="cptLabel" colspan="2"> aucun compte d'actif ou de passif </td>
