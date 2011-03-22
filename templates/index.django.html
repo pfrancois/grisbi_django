@@ -1,7 +1,10 @@
 {% extends "generic.html" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% block titre %}<h1 class="survol">Comptes</h1>{% endblock titre %}
+{% comment %} il faut mettre le lien vers les fonctions speciales{% endcomment %}
 {% block content %}
 {% load gsb_extras %}
-<h1 class="survol">Comptes</h1>
+
 <h2>comptes esp&egrave;ces ou bancaires</h2>
 <table id="banques">
 {% for cpt in liste_cpt_bq %}

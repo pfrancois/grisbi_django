@@ -1,12 +1,14 @@
 {% extends "generic.html" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% load gsb_extras %}
 {% block content %}
 <table width="100%" id="boutons">
 	<tr>
-		<td width="50%" class="boutton" ><a href="operation.php?cpt_id={{ cpt_id }}">Nouvelle Op.</a></td>
-		<td  width="50%"  class="boutton" ><a href="comptes.php">retour liste comptes</a></td>
+		<td width="50%" class="boutton" ><a href="{% url gsb.views.creation_ope compte.pk %}">Nouvelle Op.</a></td>
+		<td  width="50%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
 			</tr>
 	<tr>
-		<td width="100%" class="boutton" colspan="2"> <a href="virement.php?cpt_id={{ cpt_id }}" > Nouveau Virement vers {{ compte_nom }} </a></td>
+		<td width="100%" class="boutton" colspan="2"> <a href="{% url gsb.views.creation_virement compte.pk %}" > Nouveau Virement vers {{ compte.nom }} </a></td>
 	</tr>
 </table>
 <br/>
@@ -21,13 +23,13 @@
 		</tr>
 	</thead>
     {% block ope %}
-	{% for ope in opes %}
-		<tr class="item hover {{ ope.class2 }}">
-			<td class="opDate"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
-			<td class="opTier"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.tiers_name|default_if_none:"aucun"  }}</a></td>
-			<td class="opTier"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.cat_name|default_if_none:"aucun"  }}</a></td>
-			<td class="opCredit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.credit|floatformat:2 }}</a></td>
-			<td class="opDebit"><a href="operation.php?cpt_id={{ cpt_id }}&amp;ope_id={{ ope.id }}">{{ ope.debit|floatformat:2 }}</a></td>
+	{% for ope in list_ope %}
+		<tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
+			<td class="opDate"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
+			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.tiers.nom|default:"aucun tiers"  }}</a></td>
+			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie"  }}</a></td>
+			<td class="opCredit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% endif %}</a></td>
+			<td class="opDebit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% endif %}</a></td>
 		</tr>
 	{% empty %}
 		<tr class="item">
