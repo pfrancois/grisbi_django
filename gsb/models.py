@@ -152,9 +152,9 @@ class Compte(models.Model):
     def solde(self):
         r= Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
         if r['solde'] == None:
-            solde=0
+            solde=0 + self.solde_init
         else:
-            solde=r['solde']
+            solde=r['solde'] + self.solde_init
         return solde
 
 class Moyen(models.Model):
