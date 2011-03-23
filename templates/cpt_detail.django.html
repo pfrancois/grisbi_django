@@ -17,9 +17,9 @@
 		<tr>
 			<th >Date</th>
 			<th >Tiers</th>
-			<th >Cat&eacute;gorie</th>
-			<th >Cr&eacute;dit</th>
-			<th >D&eacute;bit</th>
+			<th >Catégorie</th>
+			<th >Crédit</th>
+			<th >Débit</th>
 		</tr>
 	</thead>
     {% block ope %}
@@ -28,8 +28,8 @@
 			<td class="opDate"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
 			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.tiers.nom|default:"aucun tiers"  }}</a></td>
 			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie"  }}</a></td>
-			<td class="opCredit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% endif %}</a></td>
-			<td class="opDebit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% endif %}</a></td>
+			<td class="opCredit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+			<td class="opDebit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
 		</tr>
 	{% empty %}
 		<tr class="item">
@@ -45,12 +45,10 @@
 	{% endfor %}
 	{% endblock %}
 		<tr class="footerbar">
-			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ solde_compte|floatformat:2 }}</td>
+			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ solde|cur }}</td>
 		</tr>
 </table>
-{% if nbrapp > 1 %}
-	note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
-{% else %}{% if nbrapp == 1 %}
-	note: 1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est rapproch&eacute;e.<br/>
-{% endif %}{% endif %}
+{% if nbrapp > 0 %}
+	note: des op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+{% endif %}
 {% endblock content %}

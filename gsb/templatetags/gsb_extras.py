@@ -9,7 +9,12 @@ register = template.Library()
 
 
 @register.filter()
-def cur(value, symbol = "EUR"):
+def cur(value, symbol = "&#8364;"):
+    pos_inf = 1e200 * 1e200
+    neg_inf = -1e200 * 1e200
+    nan = (1e200 * 1e200) / (1e200 * 1e200)
+    special_floats = [str(pos_inf), str(neg_inf), str(nan)]
+
     try:
         input_val = force_unicode( value )
         d = Decimal(input_val)
@@ -19,7 +24,7 @@ def cur(value, symbol = "EUR"):
         if input_val in special_floats:
             return input_val
         try:
-            d = Decimal(force_unicode(float(text)))
+            d = Decimal(force_unicode(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             return u''
     p = int(2)
@@ -46,4 +51,3 @@ def cur(value, symbol = "EUR"):
     except InvalidOperation:
         return input_val
 cur.is_safe = True
-

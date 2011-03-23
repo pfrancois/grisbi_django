@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
 from django.template import RequestContext, loader
-from mysite.gsb.models import Compte, Ope
+from mysite.gsb.models import Compte, Ope, Tiers
 from django.http import HttpResponse, Http404
+from django.db import models
 import datetime
 import settings
 from django.shortcuts import render_to_response, get_list_or_404,get_object_or_404
@@ -37,18 +38,27 @@ def cpt_detail(request,cpt_id):
     #p = get_list_or_404(Ope,compte__pk=cpt_id)
     #return render_to_response('cpt_detail.django.html', {'list_ope': p}, context_instance=RequestContext(request))
     t = loader.get_template('cpt_detail.django.html')
-    date_limite=datetime.date.today()-datetime.timedelta(days=settings.NB_JOURS_AFF)
-    p = list(Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False))
-    if not p:
-        raise Http404
+    date_limite = datetime.date.today()-datetime.timedelta(days=settings.NB_JOURS_AFF)
+    q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(pointe__in=[u'na',u'p'])
+    nb_ope_rapp=Ope.objects.filter(compte__pk=cpt_id).filter(is_mere=False).filter(pointe='r').count()
+    p = list(q)
     c = get_object_or_404(Compte,pk=cpt_id)
-    return HttpResponse(t.render(RequestContext(request, {
-        'compte':c,
-        'list_ope': p,
-        'nbrapp': 0,
-        'titre': c.nom,
-        'tiers': Tiers.objects.all()
-        })))
+    return HttpResponse(
+        t.render(
+            RequestContext(
+                request,
+                {
+                    'compte':c,
+                    'list_ope': p,
+                    'nbrapp': nb_ope_rapp,
+                    'titre': c.nom,
+                    'solde':c.solde(),
+                    'nbrapp':nb_ope_rapp,
+                }
+            )
+        )
+    )
+
 
 def creation_ope(request,cpt_id):
     pass
