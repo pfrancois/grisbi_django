@@ -4,11 +4,15 @@
 {% block content %}
 <table width="100%" id="boutons">
 	<tr>
+        {% if not compte.cloture %}
 		<td width="50%" class="boutton" ><a href="{% url gsb.views.creation_ope compte.pk %}">Nouvelle Op.</a></td>
 		<td  width="50%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
 			</tr>
 	<tr>
-		<td width="100%" class="boutton" colspan="2"> <a href="{% url gsb.views.creation_virement compte.pk %}" > Nouveau Virement vers {{ compte.nom }} </a></td>
+		<td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.creation_virement compte.pk %}" > Nouveau Virement vers {{ compte.nom }} </a></td>
+        {% else %}
+        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+        {% endif %}
 	</tr>
 </table>
 <br/>
