@@ -5,7 +5,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns('mysite.gsb.views',
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
@@ -16,9 +16,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    (r'^$','mysite.gsb.views.index'),
-    (r'^compte/(?P<cpt_id>\d+)/$','gsb.views.cpt_detail'),
-    (r'^compte/(?P<cpt_id>\d+)/ope/new','gsb.views.creation_ope'),
-    (r'^compte/(?P<cpt_id>\d+)/virement/new','gsb.views.creation_virement'),
-    (r'^ope/(?P<ope_id>\d+)','gsb.views.ope_detail'),
+    (r'^$','index'),
+    (r'^compte/',include('gsb.url_comptes')),
+    (r'^ope/',include('gsb.url_ope')),
 )

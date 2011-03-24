@@ -30,13 +30,7 @@ def index(request):
     })
     return HttpResponse(t.render(c))
 
-#def ope_index(request,ope_id):
-#    p = get_object_or_404(Ope,pk=ope_id)
-#    return render_to_response('detail_ope.django.html', {'ope': p})
-#
 def cpt_detail(request,cpt_id):
-    #p = get_list_or_404(Ope,compte__pk=cpt_id)
-    #return render_to_response('cpt_detail.django.html', {'list_ope': p}, context_instance=RequestContext(request))
     t = loader.get_template('cpt_detail.django.html')
     date_limite = datetime.date.today()-datetime.timedelta(days=settings.NB_JOURS_AFF)
     q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(pointe__in=[u'na',u'p'])
@@ -58,7 +52,6 @@ def cpt_detail(request,cpt_id):
             )
         )
     )
-
 
 def creation_ope(request,cpt_id):
     pass
