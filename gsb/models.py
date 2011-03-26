@@ -16,7 +16,7 @@ class Devise(models.Model):
     nom = models.CharField(max_length=120)
     dernier_tx_de_change = models.FloatField(default=1.0, help_text = u"il faut creer un cours")
     date_dernier_change  = models.DateField(default=datetime.date.today, help_text = u"il faut creer un cours")
-    isocode = models.CharField(max_length=3,unique=True)
+    isocode = models.CharField(max_length=3, unique=True)
     class Meta:
         db_table = u'devise'
     def __unicode__(self):
@@ -40,19 +40,19 @@ class Titre(models.Model):
     def __unicode__(self):
         return self.isin
     def latest_c (self):
-        r= Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
-        return r['solde']
+        req = Ope.objects.filter(compte__pk = self.id, mere__exact = None).aggregate(solde = models.Sum('montant'))
+        return req['solde']
 
 class Cours(models.Model):
     valeur = models.FloatField()
-    isin = models.ForeignKey(Titre,to_field="isin")
-    date = models.DateField(default=datetime.date.today)
+    isin = models.ForeignKey(Titre, to_field = "isin")
+    date = models.DateField(default = datetime.date.today)
     class Meta:
         db_table = u'cours'
         verbose_name_plural = u'cours'
         unique_together = ("isin", "date")
     def __unicode__(self):
-        return "%s le %s : %s"%(self.isin, self.date, self.valeur)
+        return u"%s le %s : %s" % (self.isin, self.date, self.valeur)
 
 
 class Banque(models.Model):
@@ -121,7 +121,7 @@ class Exercice(models.Model):
     class Meta:
         db_table = u'exercice'
     def __unicode__(self):
-        return "%s au %s"%(self.date_debut,self.date_fin)
+        return u"%s au %s" % (self.date_debut, self.date_fin)
 
 class Compte(models.Model):
     typescpt = (
@@ -150,11 +150,11 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
     def solde(self):
-        r= Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
-        if r['solde'] == None:
-            solde=0 + self.solde_init
+        req = Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
+        if req['solde'] == None:
+            solde = 0 + self.solde_init
         else:
-            solde=r['solde'] + self.solde_init
+            solde = req['solde'] + self.solde_init
         return solde
 
 class Moyen(models.Model):
@@ -191,7 +191,7 @@ class Echeance(models.Model):
     tiers = models.ForeignKey(Tiers)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL)
     scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL)
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True,related_name=u'compte_virement_set')
+    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name=u'compte_virement_set')
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True,related_name=u'moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL)
@@ -208,7 +208,7 @@ class Echeance(models.Model):
         verbose_name = u"échéance"
         verbose_name_plural = u"Echéances"
     def __unicode__(self):
-        return "%s"%(self.id)
+        return u"%s" % (self.id)
 
 class Generalite(models.Model):
     titre = models.CharField(max_length=120, blank=True)
@@ -221,7 +221,7 @@ class Generalite(models.Model):
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
     def __unicode__(self):
-        return "%s"%(self.id)
+        return u"%s" % (self.id)
 
 class Ope(models.Model):
     typescpt = (
@@ -247,11 +247,11 @@ class Ope(models.Model):
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
     jumelle = models.ForeignKey('self', null=True, blank=True, related_name=u'+')
     mere = models.ForeignKey('self', null=True, blank=True, related_name=u'filles_set')
-    is_mere=models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
+    is_mere = models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
     class Meta:
         db_table = u'ope'
         get_latest_by = u'date'
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
     def __unicode__(self):
-        return "%s"%(self.id)
+        return u"%s" % (self.id)

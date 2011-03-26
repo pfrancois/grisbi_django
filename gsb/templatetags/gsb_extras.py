@@ -47,7 +47,7 @@ def cur(value, symbol = "&#8364;"):
         if sign:
             digits.append(u'-')
         number = u''.join(reversed(digits))
-        return mark_safe("%s %s"%(formats.number_format(number, abs(p)),symbol))
+        return mark_safe("%s %s"%(formats.number_format(number, abs(p)), symbol))
     except InvalidOperation:
         return input_val
 cur.is_safe = True
