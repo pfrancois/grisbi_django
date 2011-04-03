@@ -28,7 +28,6 @@ h1 {
 	font-weight: bold;
 	background-color: #990000;
 	margin-top: 0em;
-	/*margin-bottom: .5em;*/
 	text-align: center;
 }
 
@@ -104,13 +103,11 @@ table {
 
 .opCredit {
 	white-space: nowrap;
-	text-align: right;
 	padding: 0px 0.6em 0px 0.1em;
 }
 
 .opDebit {
 	white-space: nowrap;
-	text-align: right;
 	padding: 0px 0.6em 0px 0.3em;
 }
 

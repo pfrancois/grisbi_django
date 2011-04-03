@@ -1,13 +1,18 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
-{% block titre %}<h1 class="survol">Comptes</h1>{% endblock titre %}
 {% comment %} il faut mettre le lien vers les fonctions speciales{% endcomment %}
 {% block content %}
 {% load gsb_extras %}
 <table width="100%" id="boutons">
+        {% if not compte.cloture %}
 	<tr>
-		<td width="100%" class="boutton" ><a href="comptes.php">retour liste comptes</a></td>
+		<td  width="100%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
 	</tr>
+        {% else %}
+	<tr>
+        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+	</tr>
+        {% endif %}
 </table>
 <br/>
 <table width="100%" id="main">
@@ -19,28 +24,28 @@
 			<th >total</th>
 		</tr>
 	</thead>
-	{foreach from=$titres item=titre}
-	<tr class="item hover">
-		<td class="opTier"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.nom|escape:'htmlall':'UTF-8'}</a></td>
-		<td class="opDebit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.mise|nbfr:$devise}</a></td>
-		<td class="opCredit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.pmv|nbfr:$devise}</a></td>
-		<td class="opDebit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.mise+$titre.pmv|nbfr:$devise}</a></td>
+	{% for titre in titres %}
+	<tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
+		<td class="opTier">{{ titre.nom }} ( {{ titre.type }} ) </td>
+		<td class="opDebit">{{ titre.mise|cur }}</td>
+		<td class="opCredit">{{ titre.pmv|cur }}</td>
+		<td class="opDebit">{{ titre.total|cur }}</td>
 	</tr>
-	{foreachelse}
+	{% empty %}
 		<tr class="item">
 			<td colspan="5">
-				aucune placement.<br/>
+				aucun placement.<br/>
 			</td>
 		</tr>
-	{/foreach}
+	{% endfor %}
 	<tr class="item hover">
 		<td class="opTier">compte espèce</td>
-		<td class="opDebit">{$espece|nbfr:$devise}</td>
+		<td class="opDebit">{{ especes|cur }}</td>
 		<td class="opCredit">&nbsp;</td>
-		<td class="opDebit">{$espece|nbfr:$devise}</td>
+		<td class="opDebit">{{ especes|cur }}</td>
 	</tr>
 		<tr class="footerbar">
-			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{$solde_compte|nbfr:$devise}</td>
+			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ compte.solde }}</td>
 		</tr>
 </table>
 {% endblock content %}

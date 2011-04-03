@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
+from django.db import models
 from django.template import RequestContext, loader
 from mysite.gsb.models import Compte, Ope, Tiers
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -64,6 +65,31 @@ def cpt_titre_detail(request,cpt_id):
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     if c.type == 'e':
         return HttpResponseRedirect(reverse('gsb.views.index'))
+    titre_sans_sum=Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
+    titres=[]
+    total_titres=0
+    for t in titre_sans_sum:
+
+        mise=t.ope_set.exclude(is_mere=True).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
+        pmv=t.ope_set.exclude(is_mere=True).filter(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
+        total_titres=total_titres+mise+pmv
+        titres.append({'nom':t.nom[7:],'type':t.titre_set.get().get_type_display(),'mise':mise,'pmv':pmv,'total':mise+pmv})
+    especes=c.solde()-total_titres
+    template = loader.get_template('cpt_placement.django.html')
+    return HttpResponse(
+        template.render(
+            RequestContext(
+                request,
+                {
+                    'compte':c,
+                    'titre': c.nom,
+                    'solde':c.solde(),
+                    'titres':titres,
+                    'especes':especes,
+                }
+            )
+        )
+    )
 
 def creation_ope(request,cpt_id):
     pass
@@ -80,5 +106,3 @@ def ope_detail(request,ope_id):
 
 def creation_virement(request,cpt_id):
     pass
-
-
