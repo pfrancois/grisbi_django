@@ -6,9 +6,11 @@ import datetime
 class Tiers(models.Model):
     nom = models.CharField(max_length=120)
     notes = models.TextField(blank=True)
+    is_titre=models.BooleanField(default=False)
     class Meta:
         db_table = u'tiers'
         verbose_name_plural = u'tiers'
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -19,6 +21,7 @@ class Devise(models.Model):
     isocode = models.CharField(max_length=3, unique=True)
     class Meta:
         db_table = u'devise'
+        ordering = ['nom']
     def __unicode__(self):
         return self.isocode
 
@@ -26,22 +29,20 @@ class Titre(models.Model):
     typestitres = (
         (u'ACT', u'action'),
         (u'OPC', u'opcvm'),
-        (u'LIV', u'compte sur livret'),
+        (u'CSL', u'compte sur livret'),
         (u'DEV', u'devise'),
         (u'OBL', u'obligation'),
         (u'ZZZ', u'autre')
     )
     nom = models.CharField(max_length=120)
-    isin = models.CharField(max_length=60, primary_key=True)
+    isin = models.CharField(max_length=60, unique=True)
     tiers = models.ForeignKey(Tiers)
     type = models.CharField(max_length=60, choices=typestitres)
     class Meta:
         db_table = u'titre'
+        ordering = ['nom']
     def __unicode__(self):
-        return self.isin
-    def latest_c (self):
-        req = Ope.objects.filter(compte__pk = self.id, mere__exact = None).aggregate(solde = models.Sum('montant'))
-        return req['solde']
+        return "%s (%s)"%(self.nom,self.isin)
 
 class Cours(models.Model):
     valeur = models.FloatField()
@@ -51,6 +52,7 @@ class Cours(models.Model):
         db_table = u'cours'
         verbose_name_plural = u'cours'
         unique_together = ("isin", "date")
+        ordering = ['date']
     def __unicode__(self):
         return u"%s le %s : %s" % (self.isin, self.date, self.valeur)
 
@@ -61,6 +63,7 @@ class Banque(models.Model):
     notes = models.TextField(blank=True)
     class Meta:
         db_table = u'banque'
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -75,6 +78,7 @@ class Cat(models.Model):
     class Meta:
         db_table = u'cat'
         verbose_name = u"catégorie"
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -98,6 +102,7 @@ class Ib(models.Model):
         db_table = u'ib'
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -120,6 +125,7 @@ class Exercice(models.Model):
     nom = models.CharField(max_length=120)
     class Meta:
         db_table = u'exercice'
+        ordering = ['date_debut']
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut, self.date_fin)
 
@@ -170,6 +176,7 @@ class Moyen(models.Model):
         verbose_name = u"moyen de paiment"
         verbose_name_plural = u"moyens de paiment"
         unique_together = ("compte", "grisbi_id")
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -179,6 +186,7 @@ class Rapp(models.Model):
     class Meta:
         db_table = u'rapp'
         verbose_name = u"rapprochement"
+        ordering = ['nom']
     def __unicode__(self):
         return self.nom
 
@@ -207,6 +215,7 @@ class Echeance(models.Model):
         db_table = u'echeance'
         verbose_name = u"échéance"
         verbose_name_plural = u"Echéances"
+        ordering = ['date_ech']
     def __unicode__(self):
         return u"%s" % (self.id)
 
@@ -249,9 +258,10 @@ class Ope(models.Model):
     mere = models.ForeignKey('self', null=True, blank=True, related_name=u'filles_set')
     is_mere = models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
     class Meta:
-        db_table = u'ope'
-        get_latest_by = u'date'
+        db_table = 'ope'
+        get_latest_by = 'date'
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
+        ordering = ['date']
     def __unicode__(self):
         return u"%s" % (self.id)
