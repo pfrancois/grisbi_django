@@ -2,7 +2,8 @@
 # Create your views here.
 from django.template import RequestContext, loader
 from mysite.gsb.models import Compte, Ope, Tiers
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.db import models
 import datetime
 import settings
@@ -31,12 +32,16 @@ def index(request):
     return HttpResponse(t.render(c))
 
 def cpt_detail(request,cpt_id):
+    c = get_object_or_404(Compte,pk=cpt_id)
+    if c.type == 'a':
+        return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
+    if c.type == 'p':
+        return HttpResponseRedirect(reverse('gsb.views.index'))
     t = loader.get_template('cpt_detail.django.html')
     date_limite = datetime.date.today()-datetime.timedelta(days=settings.NB_JOURS_AFF)
     q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(pointe__in=[u'na',u'p'])
     nb_ope_rapp=Ope.objects.filter(compte__pk=cpt_id).filter(is_mere=False).filter(pointe='r').count()
     p = list(q)
-    c = get_object_or_404(Compte,pk=cpt_id)
     return HttpResponse(
         t.render(
             RequestContext(
@@ -53,6 +58,13 @@ def cpt_detail(request,cpt_id):
         )
     )
 
+def cpt_titre_detail(request,cpt_id):
+    c = get_object_or_404(Compte,pk=cpt_id)
+    if c.type == 'b':
+        return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
+    if c.type == 'e':
+        return HttpResponseRedirect(reverse('gsb.views.index'))
+
 def creation_ope(request,cpt_id):
     pass
 
@@ -68,3 +80,5 @@ def ope_detail(request,ope_id):
 
 def creation_virement(request,cpt_id):
     pass
+
+

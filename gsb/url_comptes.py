@@ -1,8 +1,10 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import *
+from django.views.generic import DetailView, ListView
 
 urlpatterns = patterns('gsb.views',
     (r'^(?P<cpt_id>\d+)/$','cpt_detail'),
-    (r'(?P<cpt_id>\d+)/ope/new','creation_ope'),
+    (r'^titres/(?P<cpt_id>\d+)/$','cpt_titre_detail'),
+    (r'^(?P<cpt_id>\d+)/ope/new','creation_ope'),
     (r'^(?P<cpt_id>\d+)/virement/new','creation_virement'),
 
 )
