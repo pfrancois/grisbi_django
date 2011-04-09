@@ -43,6 +43,11 @@ class Titre(models.Model):
         ordering = ['nom']
     def __unicode__(self):
         return "%s (%s)"%(self.nom,self.isin)
+    def latest_cours (self):
+        r= Cours.objects.filter(isin=self.isin).order_by("-date")[0]
+        return r
+    def save(self, force_insert=False, force_update=False):#TODO gerer
+        super(Titre, self).save(force_insert, force_update) # Call the "real" save() method.
 
 class Cours(models.Model):
     valeur = models.FloatField()
@@ -74,7 +79,7 @@ class Cat(models.Model):
         (u'v',u'virement')
     )
     nom = models.CharField(max_length=120)
-    typecat = models.CharField(max_length=1, choices=typesdep, default=u'd', verbose_name="type de la catégorie")
+    type = models.CharField(max_length=1, choices=typesdep, default=u'd', verbose_name="type de la catégorie")
     class Meta:
         db_table = u'cat'
         verbose_name = u"catégorie"
@@ -94,10 +99,12 @@ class Scat(models.Model):
         verbose_name = u"sous-catégorie"
     def __unicode__(self):
         return self.nom
+    def save(self, force_insert=False, force_update=False):# ce serait bien de gerer les gribsi_id
+        super(Scat, self).save(force_insert, force_update) # Call the "real" save() method.
 
 class Ib(models.Model):
     nom = models.CharField(max_length=120)
-    typeimp = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
+    type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
     class Meta:
         db_table = u'ib'
         verbose_name = u"imputation budgétaire"
@@ -151,6 +158,8 @@ class Compte(models.Model):
     solde_dernier_releve = models.FloatField(null=True, blank=True)
     cloture = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
+    moyen_credit_defaut=models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set")
+    moyen_debit_defaut=models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set")
     class Meta:
         db_table = u'compte'
     def __unicode__(self):
@@ -164,9 +173,14 @@ class Compte(models.Model):
         return solde
 
 class Moyen(models.Model):
+    typesdep = (
+        (u'v',u'virement'),
+        (u'd',u'depense'),
+        (u'r',u'recette'),
+    )
     compte = models.ForeignKey(Compte)
     nom = models.CharField(max_length=120, )
-    signe = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
+    signe = models.CharField(max_length=1, choices=typesdep, blank=True)
     affiche_numero = models.BooleanField(default=False)
     num_auto = models.BooleanField(default=False)
     num_en_cours = models.BigIntegerField(null=True, blank=True)
@@ -207,7 +221,7 @@ class Echeance(models.Model):
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
     inscription_automatique = models.BooleanField(default=False)
-    periodicite = models.TextField(default=False)
+    periodicite = models.TextField(default=False)#TODO gerer ca
     intervalle = models.IntegerField()
     periode_perso = models.TextField(blank=True)
     date_limite = models.DateField(null=True, blank=True)
@@ -233,7 +247,7 @@ class Generalite(models.Model):
         return u"%s" % (self.id)
 
 class Ope(models.Model):
-    typescpt = (
+    typespointage = (
         (u'na',u'rien'),
         (u'p',u'pointée'),
         (u'r',u'raprochée')
@@ -249,12 +263,12 @@ class Ope(models.Model):
     notes = models.TextField(blank=True)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL)
     numcheque = models.CharField(max_length=120, blank=True)
-    pointe = models.CharField(max_length=2, choices=typescpt, default=u'na')
+    pointe = models.CharField(max_length=2, choices=typespointage, default=u'na')
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL)
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL)
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL)
-    jumelle = models.ForeignKey('self', null=True, blank=True, related_name=u'+')
+    jumelle = models.OneToOneField('self', null=True, blank=True, related_name=u'+')
     mere = models.ForeignKey('self', null=True, blank=True, related_name=u'filles_set')
     is_mere = models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
     class Meta:
