@@ -2,13 +2,14 @@
 # Create your views here.
 from django.db import models
 from django.template import RequestContext, loader
-from mysite.gsb.models import Compte, Ope, Tiers
+from mysite.gsb.models import *
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.db import models
 import datetime
 import settings
 from django.shortcuts import render_to_response, get_list_or_404,get_object_or_404
+
 def index(request):
     t=loader.get_template('index.django.html')
     bq=Compte.objects.filter(type__in=(u'b',u'e'))
@@ -106,3 +107,23 @@ def ope_detail(request,ope_id):
 
 def creation_virement(request,cpt_id):
     pass
+
+def export_xml(request):
+    return HttpResponse(
+        template.render(
+            RequestContext(
+                request,
+                {
+                    'comptes': Compte.objects.all(),
+                    'tiers': Tiers.objects.all(),
+                    'Ope': Ope.objects.all(),
+                    'titres':Titre.objects.all(),
+                    'devises':Devise.objects.all(),
+                    'banques':Banque.objects.all(),
+                    'cat':Cat.objects.all(),
+                    'scat':Scat.objects.all(),
+                    
+                }
+            )
+        )
+    )

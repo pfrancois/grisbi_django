@@ -1,2 +1,6 @@
-les images de 400jpg
+les images de 400.jpg
 500.jpg http://www.ronnestam.com/tag/error-500/
+
+necessite:
+django
+lxml

@@ -3,7 +3,6 @@ from mysite.gsb.models import *
 from django.http import HttpResponse
 from django.db.models import Max
 import settings
-import sys
 try:
     from lxml import etree as et
 except:
@@ -63,36 +62,36 @@ def export(request):
     q=Generalite.objects.all()[0]
     xml_generalites = et.SubElement( xml_root, "Generalites" )
     et.SubElement( xml_generalites, "Version_fichier" ).text = "0.5.0"
-    et.SubElement( xml_generalites, "Version_grisbi" ).text = "0.5.9 for Windows (GTK>=2.6.9)"#XXX
+    et.SubElement( xml_generalites, "Version_grisbi" ).text = "0.5.9 for Windows (GTK>=2.6.9)"#NOT IN BDD
     et.SubElement( xml_generalites, "Fichier_ouvert" ).text = "0"
-    et.SubElement( xml_generalites, "Backup" ).text="sauvegarde.gsb"#XXX
-    et.SubElement( xml_generalites, "Titre" ).text = str(q.titre)#XXX
-    et.SubElement( xml_generalites, "Adresse_commune" ).text = ''#XXX
-    et.SubElement( xml_generalites, "Adresse_secondaire" ).text = ''#XXX
+    et.SubElement( xml_generalites, "Backup" ).text="sauvegarde.gsb"#NOT IN BDD
+    et.SubElement( xml_generalites, "Titre" ).text = str(q.titre)#NOT IN BDD
+    et.SubElement( xml_generalites, "Adresse_commune" ).text = ''#NOT IN BDD
+    et.SubElement( xml_generalites, "Adresse_secondaire" ).text = ''#NOT IN BDD
     et.SubElement( xml_generalites, "Utilise_exercices" ).text = Format.bool(q.utilise_exercices)
     et.SubElement( xml_generalites, "Utilise_IB" ).text = Format.bool(q.utilise_ib)
     et.SubElement( xml_generalites, "Utilise_PC" ).text = Format.bool(q.utilise_pc)
-    et.SubElement( xml_generalites, "Utilise_info_BG" ).text = "0"
+    et.SubElement( xml_generalites, "Utilise_info_BG" ).text = "0"#NOT IN BDD
     et.SubElement( xml_generalites, "Numero_devise_totaux_tiers" ).text = str(q.devise_generale.id-1)
     et.SubElement( xml_generalites, "Numero_devise_totaux_categ" ).text = str(q.devise_generale.id-1)
     et.SubElement( xml_generalites, "Numero_devise_totaux_ib" ).text = str(q.devise_generale.id-1)
-    et.SubElement( xml_generalites, "Type_affichage_des_echeances" ).text = "3"
-    et.SubElement( xml_generalites, "Affichage_echeances_perso_nb_libre" ).text = "0"
-    et.SubElement( xml_generalites, "Type_affichage_perso_echeances" ).text = "0"
+    et.SubElement( xml_generalites, "Type_affichage_des_echeances" ).text = "3"#NOT IN BDD
+    et.SubElement( xml_generalites, "Affichage_echeances_perso_nb_libre" ).text = "0"#NOT IN BDD
+    et.SubElement( xml_generalites, "Type_affichage_perso_echeances" ).text = "0"#NOT IN BDD
     et.SubElement( xml_generalites, "Numero_derniere_operation" ).text = Format.max(Ope.objects)
-    et.SubElement( xml_generalites, "Echelle_date_import" ).text = "4"
-    et.SubElement( xml_generalites, "Utilise_logo" ).text = "1"#XXX
-    et.SubElement( xml_generalites, "Chemin_logo" ).text="g:/Program Files/Grisbi/pixmaps/grisbi-logo.png"#XXX
-    et.SubElement( xml_generalites, "Affichage_opes" ).text = "18-1-3-13-5-6-7-4-0-12-0-9-8-0-0-11-15-0-0-0-0-0-0-0-0-0-0-0"
-    et.SubElement( xml_generalites, "Rapport_largeur_col" ).text = "10-10-28-3-10-10-10"
-    et.SubElement( xml_generalites, "Ligne_aff_une_ligne" ).text = "0"
-    et.SubElement( xml_generalites, "Lignes_aff_deux_lignes" ).text = "0-1"
-    et.SubElement( xml_generalites, "Lignes_aff_trois_lignes" ).text = "0-1-2"
+    et.SubElement( xml_generalites, "Echelle_date_import" ).text = "2"#NOT IN BDD
+    et.SubElement( xml_generalites, "Utilise_logo" ).text = "1"#NOT IN BDD
+    et.SubElement( xml_generalites, "Chemin_logo" ).text="g:/Program Files/Grisbi/pixmaps/grisbi-logo.png"#NOT IN BDD
+    et.SubElement( xml_generalites, "Affichage_opes" ).text = "18-1-3-13-5-6-7-0-0-12-0-9-8-0-0-0-15-0-0-0-0-0-0-0-0-0-0-0"#NOT IN BDD
+    et.SubElement( xml_generalites, "Rapport_largeur_col" ).text = "7-9-33-2-10-9-7"#NOT IN BDD
+    et.SubElement( xml_generalites, "Ligne_aff_une_ligne" ).text = "0"#NOT IN BDD
+    et.SubElement( xml_generalites, "Lignes_aff_deux_lignes" ).text = "0-1"#NOT IN BDD
+    et.SubElement( xml_generalites, "Lignes_aff_trois_lignes" ).text = "0-1-2"#NOT IN BDD
     #####comptes###
     xml_comptes = et.SubElement( xml_root, "Comptes" )
     xml_generalites=et.SubElement( xml_comptes, "generalites" )
     et.SubElement( xml_generalites, "Ordre_des_comptes" ).text = '-'.join("%s"%(i-1) for i in Compte.objects.all().values_list('id', flat=True))
-    et.SubElement( xml_generalites, "Compte_courant" ).text = str(0) # ca n'existe pas dans la bdd
+    et.SubElement( xml_generalites, "Compte_courant" ).text = str(0) #NOT IN BDD
     variable=0
     for co in Compte.objects.all().order_by('id'):
         variable += 1
@@ -102,9 +101,9 @@ def export(request):
         xml_compte = et.SubElement( xml_comptes, "compte" )
         xml_detail = et.SubElement( xml_compte, "Details" )
         et.SubElement( xml_detail, "Nom" ).text = str(co.nom)
-        et.SubElement( xml_detail, "Id_compte" )
+        et.SubElement( xml_detail, "Id_compte" )#NOT IN BDD
         et.SubElement( xml_detail, "No_de_compte" ).text = str(id)
-        et.SubElement( xml_detail, "Titulaire" ).text = ''# ca n'existe pas dans la bdd
+        et.SubElement( xml_detail, "Titulaire" ).text = ''#NOT IN BDD
         et.SubElement( xml_detail, "Type_de_compte" ).text = Format.type(liste_type_compte,co.type)
         et.SubElement( xml_detail, "Nb_operations" ).text = str(Ope.objects.filter(compte=co.id).count())
         et.SubElement( xml_detail, "Devise" ).text = str(co.devise.id-1)
@@ -138,21 +137,21 @@ def export(request):
             et.SubElement( xml_detail, "Solde_dernier_releve" ).text = Format.float(0)
         et.SubElement( xml_detail, "Dernier_no_de_rapprochement" ).text = Format.max(co.rapp_set)
         et.SubElement( xml_detail, "Compte_cloture" ).text = Format.bool(co.cloture)
-        et.SubElement( xml_detail, "Affichage_r" ).text = "1" #ca n'existe pas dans la bdd
-        et.SubElement( xml_detail, "Nb_lignes_ope" ).text = "2" #ca n'existe pas dans la bdd
+        et.SubElement( xml_detail, "Affichage_r" ).text = "1" #NOT IN BDD
+        et.SubElement( xml_detail, "Nb_lignes_ope" ).text = "2" #NOT IN BDD
         et.SubElement( xml_detail, "Commentaires" ).text = co.notes
-        et.SubElement( xml_detail, "Adresse_du_titulaire" ).text='' #TODO mais ca n'existe pas dans la bdd XXX
+        et.SubElement( xml_detail, "Adresse_du_titulaire" ).text='' #NOT IN BDD
         et.SubElement( xml_detail, "Nombre_de_types" ).text = str( Moyen.objects.filter(compte=1).count())
         if co.moyen_debit_defaut!=None:
             et.SubElement( xml_detail, "Type_defaut_debit" ).text = str(co.moyen_debit_defaut.grisbi_id)
         else:
-            et.SubElement( xml_detail, "Type_defaut_debit" ).text = '0'
+            et.SubElement( xml_detail, "Type_defaut_debit" ).text = '0'#TODO NOT IN BDD
         if co.moyen_credit_defaut!=None:
             et.SubElement( xml_detail, "Type_defaut_credit" ).text = str(co.moyen_credit_defaut.grisbi_id)
         else:
-            et.SubElement( xml_detail, "Type_defaut_credit" ).text = '0'
-        et.SubElement( xml_detail, "Tri_par_type" ).text = '0'#TODO mais ca n'existe pas dans la bdd
-        et.SubElement( xml_detail, "Neutres_inclus" ).text = '1'#TODO mais ca n'existe pas dans la bdd
+        et.SubElement( xml_detail, "Type_defaut_credit" ).text = '0'#TODO NOT IN BDD
+        et.SubElement( xml_detail, "Tri_par_type" ).text = '0'#NOT IN BDD
+        et.SubElement( xml_detail, "Neutres_inclus" ).text = '1'#NOT IN BDD
         et.SubElement( xml_detail, "Ordre_du_tri" ).text = '/'.join([str(o.grisbi_id) for o in Moyen.objects.filter(compte=co.id).order_by('id')])
         ##types:
         xml_types = et.SubElement( xml_compte, "Detail_de_Types" )
@@ -171,7 +170,7 @@ def export(request):
             xml_element=et.SubElement( xml_opes,'Operation')
             #numero de l'operation
             xml_element.set('No',str(ope.id-1))
-            xml_element.set('Id','')#XXX
+            xml_element.set('Id','')#NOT IN BDD
             #date de l'operation
             xml_element.set('D',Format.date(ope.date))
             #date de valeur
@@ -181,13 +180,13 @@ def export(request):
                 xml_element.set('Db',Format.date(ope.date_val))
             xml_element.set('M',Format.float(ope.montant))
             xml_element.set('De',str(ope.devise.id-1))
-            xml_element.set('Rdc','0')#XXX mais pour l'instant ce n'est pas géré par les devises
+            xml_element.set('Rdc','0') #NOT IN BDD mais pour l'instant ce n'est pas géré par les devises de plus , je ne vois pas vraiment l'utilite
             change=str(ope.devise.dernier_tx_de_change).replace('.',',')
             if change == '1,0':
                 xml_element.set('Tc',Format.float(0))
             else:
                 xml_element.set('Tc',Format.float(ope.devise.dernier_tx_de_change))
-            xml_element.set('Fc',Format.float(0)) #XXX
+            xml_element.set('Fc',Format.float(0)) #NOT IN BDD mais inutile
             xml_element.set('T',str(ope.tiers.id-1))
             if ope.cat == None:
                 xml_element.set('C',str(0))
@@ -205,7 +204,7 @@ def export(request):
                 xml_element.set('Ty',str(ope.moyen.grisbi_id))
             xml_element.set('Ct',str(ope.numcheque))
             xml_element.set('P',Format.type(liste_type_pointage,ope.pointe))
-            xml_element.set('A',"0")#inutile
+            xml_element.set('A',"0")#NOT IN BDD mais inutile selon moi
             if ope.rapp==None:
                 xml_element.set('R',str(0))
             else:
@@ -222,8 +221,8 @@ def export(request):
                 xml_element.set('Si',str(0))
             else:
                 xml_element.set('Si',str(ope.sib.grisbi_id))
-            xml_element.set('Pc',"")#XXX
-            xml_element.set('Ibg',"")#XXX
+            xml_element.set('Pc',"")#NOT IN BDD
+            xml_element.set('Ibg',"")#NOT IN BDD
             if ope.jumelle==None:
                 num_jumelle="0"
                 num_cpt_jumelle="0"
@@ -277,7 +276,7 @@ def export(request):
             xml_element.set('Exercice',"-2")
         else:
             xml_element.set('Exercice', str(ech.exercice.id-1))
-        xml_element.set('Contenu_du_type',"")#XXX
+        xml_element.set('Contenu_du_type',"")#NOT IN BDD
         if ech.exercice==None:
             xml_element.set('Exercice',"0")
         else:
@@ -363,10 +362,10 @@ def export(request):
             xml_sub.set('Nom',c.nom)
             xml_sub.set('Code',c.isocode)
             xml_sub.set('IsoCode',c.isocode)
-            xml_sub.set('Passage_euro',"0")
+            xml_sub.set('Passage_euro',"0")#NOT IN BDD
             xml_sub.set('Date_dernier_change',Format.date(c.date_dernier_change))
-            xml_sub.set('Rapport_entre_devises',"0")
-            xml_sub.set('Devise_en_rapport','0')
+            xml_sub.set('Rapport_entre_devises',"0")#NOT IN BDD
+            xml_sub.set('Devise_en_rapport','0')#NOT IN BDD
             xml_sub.set('Change',Format.float(c.dernier_tx_de_change))
             #raison pour lesquelles il y a des attributs non modifiables
             #isocode est par construction egale à code
@@ -390,10 +389,10 @@ def export(request):
             xml_sub.set('Tel',"")
             xml_sub.set('Mail',"")
             xml_sub.set('Web',"")
-            xml_sub.set('Nom_correspondant',"")#XXX
-            xml_sub.set('Fax_correspondant',"")#XXX
-            xml_sub.set('Tel_correspondant',"")#XXX
-            xml_sub.set('Mail_correspondant',"")#XXX
+            xml_sub.set('Nom_correspondant',"")#NOT IN BDD
+            xml_sub.set('Fax_correspondant',"")#NOT IN BDD
+            xml_sub.set('Tel_correspondant',"")#NOT IN BDD
+            xml_sub.set('Mail_correspondant',"")#NOT IN BDD
             xml_sub.set('Remarques',c.notes)
             #raison pour lesquelles il y a des attributs non modifiables
             #Adresse pas ds BDD
@@ -415,7 +414,7 @@ def export(request):
             xml_sub.set('Date_debut',Format.date(c.date_debut))
             xml_sub.set('Date_fin',Format.date(c.date_fin))
             xml_sub.set('Affiche',"1")
-    ##rapprochement##TODO
+    ##rapprochement##
     xml_rapp = et.SubElement( xml_root, "Rapprochements" )
     xml_detail = et.SubElement( xml_rapp,'Detail_des_rapprochements' )
     for c in Rapp.objects.all().order_by('id'):
@@ -432,7 +431,6 @@ def export(request):
     xml=et.tostring(xml_root,method="xml",xml_declaration=True,pretty_print=True)
     avant=['&#232','&#233','&#234','&#244']
     apres=['&#xE8','&#xE9','&#xEA','&#xF4']
-    print "test"
     for car in avant:
         xml=xml.replace(car,apres[avant.index(car)])
     #return HttpResponse(et.tostring(xml_root,method="xml",xml_declaration=True,pretty_print=True),mimetype="application/xml")
