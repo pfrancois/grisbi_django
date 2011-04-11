@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
 from django.template import RequestContext, loader
-from mysite.gsb.models import Compte, Ope, Tiers
+from mysite.gsb.models import Compte, Ope, Tiers, Devise, Cat, Scat, Moyen, Exercice, Ib, Sib, Rapp
 from django.http import HttpResponse, Http404
 from django.db import models
 import datetime
@@ -53,18 +53,24 @@ def cpt_detail(request,cpt_id):
         )
     )
 
-def creation_ope(request,cpt_id):
+def ope_creation(request,cpt_id):
     pass
-
-def ope_detail(request,ope_id):
+ 
+def ope_detail(request, ope_id):
     p = get_object_or_404(Ope,pk=ope_id)
     return render_to_response('operation.django.html',
                                             {'ope': p,
-                                              'titre':"edition ",
+                                              'titre':"edition",
                                               'compte_id':p.compte.id,
                                               'action':'edit'},
                                             context_instance=RequestContext(request)
                                         )
 
-def creation_virement(request,cpt_id):
+def ope_creation(request, cpt_id):
+	cpt=get_object_or_404(Compte,pk=cpt_id)
+	devise=get_object_or_404(Devise, pk=1)
+	ope=new Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers = None, cat = None, scat= None, Notes = None, moyen = None, numcheque="", )
+	pass
+
+def virement_creation(request,cpt_id):
     pass

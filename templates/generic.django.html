@@ -23,6 +23,11 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 </head>
 <body{% block body_js %}{% endblock body_js %}>
 {% block titre %}<h1>{{ titre }}</h1>{% endblock %}
+{% block messages %} 
+{%for message in messages %}
+<div class='{{ message.css }}'>{{ message.texte }}</div>
+{% endfor %}
+{% endblock messages %}
 {% block content %}
 {%for resultat in resultats %}
 <div class='{{ resultat.css }}'>{{ resultat.texte }}</div>

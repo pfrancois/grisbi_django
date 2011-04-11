@@ -27,19 +27,19 @@
 
 		<div class="ligne" id="div_date">
 		<label for="ope_date_ope">Date:</label>
-			<input type="text" name="ope_date_ope" id="ope_date_ope" value="{{ $ope.date|date:"dmY" }}" style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
-			<a href="javascript:editDate('ope_date_ope');" style="display:inline"><img src="img/calendar.png"  alt="calendrier" /></a>
+			<input type="text" name="ope_date_ope" id="ope_date_ope" value="{{ ope.date|date:"dmY" }}" style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
+			<a href="javascript:editDate('ope_date_ope');" style="display:inline"><img src="{{ STATIC_URL }}img/calendar.png"  alt="calendrier" /></a>
 		</div>
 
 		<div class="ligne" id="div_tiers">
 		<label for="tiers">Tiers: </label>
 			<select name="tiers" id="tiers" onchange="verifie_numero_visible_selon_texte(this.selectedIndex,'tiers','nom_nx_tiers_span','-1','nom_nx_tiers')">
 					<option value="-1">"nouveau tiers"</option>
-				{for tier in tiers}
-					<option value="{{ tier.id }}"{if ($tier.id == $ope.tier)} selected="selected"{/if}>{$tier.nom|escape:'htmlall':'UTF-8'}</option>
-				{/foreach}
+				{% for tier in tiers %}
+					<option value="{{ tier.id }}"{if tier.id == ope.tier.id} selected="selected"{/if}> {{ tier.nom }}</option>
+				{% endfor %}
 			</select>
-			<span id='nom_nx_tiers_span' {if ($type_action != 'new')}style="display: none"{/if}><label for="nom_nx_tiers">nom: </label>
+			<span id='nom_nx_tiers_span' {if type_action != 'new' )}style="display: none"{% endif %}><label for="nom_nx_tiers">nom: </label>
 				<input type="text"  id="nom_nx_tiers" name="nom_nx_tiers" />
 			</span>
 		</div>
@@ -47,56 +47,57 @@
 		<div class="ligne" id="div_cat_scat">
 		<label for="cat">Cat&eacute;gorie: </label>
 			<select name="cat" id="cat">
-				{foreach from=$cats_debit item=cat_en_cours}
-					<option class="DebitCatElement" value="{$cat_en_cours.id}"{if ($cat_en_cours.id == $ope.cat)} selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(-)</option>
-				{/foreach}
+				{% for cat_en_cours in cats_debit %}
+					<option class="DebitCatElement" value="{$cat_en_cours.id}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(-)</option>
+				{% endfor %}
 				{foreach from=$cats_credit item=cat_en_cours}
-					<option class="CreditCatElement" value="{$cat_en_cours.id}"{if ($cat_en_cours.id == $ope.cat)} selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(+)</option>
-				{/foreach}
+					<option class="CreditCatElement" value="{$cat_en_cours.id}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(+)</option>
+				{% endfor %}
 			</select>
 		</div>
 
 		<div class="ligne" id="div_moyens" >
-		{if !empty($moyens)}
+		{% if $moyens %}
 			<label for="moyen">moyen de paiment: </label>
 			<select name="moyen" id="moyen" onchange="verifie_numero_visible_selon_css(this.selectedIndex,'moyen','num_chq','moyenAvecNumero','numero_chq')">
-			{foreach from=$moyens item=moyen_en_cours}
-				<option value="{$moyen_en_cours.id}" {if ($moyen_en_cours.id == $ope.moyen)} selected="selected"{/if} {if ($moyen_en_cours.entree)} class="moyenAvecNumero"{/if}>{$moyen_en_cours.nom|escape:'htmlall':'UTF-8'}{if ($moyen_en_cours.entree == 1)}(*){/if}</option>
-			{/foreach}
+			{for moyen_en_cours in moyens }
+				<option value="{{moyen_en_cours}}" {% if moyen_en_cours.id == ope.moyen %} selected="selected"{% endif %} {% if moyen_en_cours.entree %} class="moyenAvecNumero"{% endif %}>{{ moyen_en_cours.nom }}{% if moyen_en_cours.entree == 1 %}(*){% endif %}</option>
+			{% endfor %}
 			</select>
 			<span id='num_chq'  style="display: none"><label for="numero_chq">numero: </label>
 			<input type="text"  id="numero_chq" name="numero_chq" value="{$ope.num_chq}"/> </span>
-		{else}
+		{% else %}
 			<input type="hidden" id="moyen" name="moyen" value=""/>
 			<input type="hidden" id="numero_chq" name="numero_chq" value=""/>
-		{/if}
+		{% endif %}
 		</div>
 
 		<div class="ligne" id="div_montant">
 		<label for="ope_montant" id="label_montant">Montant: </label>
-			<input name="ope_montant" id="ope_montant" type="text" value="{$ope.montant}" style='-wap-input-format:"*N";'/> {$compte_devise}
+			<input name="ope_montant" id="ope_montant" type="text" value="{{ ope.montant }}" style='-wap-input-format:"*N";'/> {{ compte_devise }}
 		</div>
 		<div class="ligne" id="div_notes">
 		<label for="rem">notes: </label>
-			<textarea name="rem" id="rem" cols="20" rows="5"> {$ope.note|escape:'htmlall':"utf-8"}</textarea>
+			<textarea name="rem" id="rem" cols="20" rows="5"> {{ ope.note }}</textarea>
 		</div>
 	</fieldset>
 </form>
 <br/>
-{% boutons de validations %}
 <table class="editOperationBtns">
+{% if compte_cloture == false}
 	<tr>
 		<td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-		<td width="50%" class="boutton"><a href="operations.php?cpt_id={$compte_id}">Annuler</a></td>
+		<td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
 	</tr>
-	{if ($type_action != 'new')}
+	{% if type_action == 'edit' %}
 		 <tr>
-		<td colspan="2" class="boutton"><a href="delete_ope.php?action=delete&amp;date={$smarty.now|date_format:"%d%m%Y"}&amp;ope_id={$ope.id}&amp;cpt_id={$compte_id}">Supprimer</a></td>
+		<td colspan="2" class="boutton"><a href="{% url gsb.views.ope_suppr ope.id %}">Supprimer</a></td>
 		</tr>
-	{/if}
+	{% endif %}
+{% else %}
+
+{% endif %}
 </table>
-{% div pour le choix de la date %}
+{% comment %} div pour le choix de la date {% endcomment %}
 <div class="editDate" id="editDateId"></div>
 {% endblock content %}
-</body>
-</html>
