@@ -1,30 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
-<meta http-equiv="PRAGMA" content="NO-CACHE" />
-<meta http-equiv="EXPIRES" content="0" />
-<link rel="stylesheet" type="text/css" href="css/common.css" />
-<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/
-AAACeElEQVQ4y62TzUtUcRSGn3vvzDg64wejpk2FRpKBSSJBprSzoF2ErYI2ERRB6/oH2rQt/AMygoKkhdnCRJQyLc2kSQw1bXQ+HOfem
-bnj3I+ZO78WkqIJtuhdn/eBc877SuzRrZkzwl30sTQR5+2dRYkDtGvgwc/Loj14iYCngQxRavNB6tVT6AmDGTHEd2mMdCbDRjZJaCjK/K
-Ok5PpjvjvbKaorarEsh4QTpkXu4LjZik0eo3Ie/7EC5znLJmnmIjOEhmMAbANM02TqxzQZexSPU849pZWsPIstWfTJD8mpG5R7KnC7JCJ
-qgqVP2m5Aruggu924RBmK8KOmVGQrg2aoDMmTaI5OwYGCVKTM9lJSqpDH2QF0U0m1aVC0TALlPZRXNpOIRAiXhuk+cRrNyBHP6MyvreFV
-XNidMtkBewsQHWkTVcF27FSEzfgc0ZV36FUdzJVMMHOon+baRtrKGkmmNAK2zPRyjNh6dmeFcNyh5EiaZHyV8IKFh49krQEmXUsMpUJML
-cdoqqkBSzASWib9y4TRPW/UV26KpfFB1JiBuVng+bjBh7pq8l1Z1qU8skfCb3iIf9bhNRDd8m7fwK0IZFlCjWrkLOhqPcyNRj8GChNqii
-cxCy3qQN/u7CgAY70BgaJgpeOkNBPZX03P7avU1FVS73NzzgffnmmE3jh/JdMVenFU1LZcwEgn8Nc1cNJbSjYrYdsSLo+XnFSGbroxrf2
-j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+LcyXe/2imsXfYjNJGtxieEvgleTB
-5v/i34DxAkozbMmr3sAAAAASUVORK5CYII=" rel="icon" type="image/x-icon" />
-
-<title>Operations</title>
-</head>
-<body>
-<h1>{$compte_nom|escape:'htmlall':'UTF-8'}</h1>
+{% extends "generic.django.html" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% comment %} il faut mettre le lien vers les fonctions speciales{% endcomment %}
+{% block content %}
+{% load gsb_extras %}
 <table width="100%" id="boutons">
+        {% if not compte.cloture %}
 	<tr>
-		<td width="100%" class="boutton" ><a href="comptes.php">retour liste comptes</a></td>
+		<td  width="100%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
 	</tr>
+        {% else %}
+	<tr>
+        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+	</tr>
+        {% endif %}
 </table>
 <br/>
 <table width="100%" id="main">
@@ -36,29 +24,28 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 			<th >total</th>
 		</tr>
 	</thead>
-	{foreach from=$titres item=titre}
-	<tr class="item hover">
-		<td class="opTier"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.nom|escape:'htmlall':'UTF-8'}</a></td>
-		<td class="opDebit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.mise|nbfr:$devise}</a></td>
-		<td class="opCredit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.pmv|nbfr:$devise}</a></td>
-		<td class="opDebit"><a href="placement.php?cpt_id={$cpt_id}&amp;titre={$titre.id}">{$titre.mise+$titre.pmv|nbfr:$devise}</a></td>
+	{% for titre in titres %}
+	<tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
+		<td class="opTier">{{ titre.nom }} ( {{ titre.type }} ) </td>
+		<td class="opDebit">{{ titre.mise|cur }}</td>
+		<td class="opCredit">{{ titre.pmv|cur }}</td>
+		<td class="opDebit">{{ titre.total|cur }}</td>
 	</tr>
-	{foreachelse}
+	{% empty %}
 		<tr class="item">
 			<td colspan="5">
-				aucune placement.<br/>
+				aucun placement.<br/>
 			</td>
 		</tr>
-	{/foreach}
+	{% endfor %}
 	<tr class="item hover">
 		<td class="opTier">compte espèce</td>
-		<td class="opDebit">{$espece|nbfr:$devise}</td>
+		<td class="opDebit">{{ especes|cur }}</td>
 		<td class="opCredit">&nbsp;</td>
-		<td class="opDebit">{$espece|nbfr:$devise}</td>
+		<td class="opDebit">{{ especes|cur }}</td>
 	</tr>
 		<tr class="footerbar">
-			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{$solde_compte|nbfr:$devise}</td>
+			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ compte.solde }}</td>
 		</tr>
 </table>
-</body>
-</html>
+{% endblock content %}

@@ -26,7 +26,8 @@ class Compte_admin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ('nom','type','devise','cloture')}),
         (u'information sur le compte', {'fields': ('banque','guichet','num_compte','cle_compte'), 'classes': ['collapse']}),
-        (u'soldes', {'fields': ('solde_init','solde_mini_voulu','solde_mini_autorise'), 'classes': ['collapse']})
+        (u'soldes', {'fields': ('solde_init','solde_mini_voulu','solde_mini_autorise'), 'classes': ['collapse']}),
+        (u'moyens par défaut', {'fields':('moyen_credit_defaut','moyen_debit_defaut'), 'classes': ['collapse']}),
     ]
 
 class Ope_admin(admin.ModelAdmin):

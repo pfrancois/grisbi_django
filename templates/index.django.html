@@ -9,7 +9,7 @@
 <table id="banques">
 {% for cpt in liste_cpt_bq %}
 		<tr class="item padding">
-			<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }}</a></td>
+			<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }} {% if cpt.cloture %} (clotur&eacute;){% endif %}</a></td>
 			<td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
 		</tr>
 	{% empty %}
@@ -24,8 +24,8 @@
 <table id="placements">
 	{% for cpt in liste_cpt_pl %}
 	<tr class="item padding">
-		<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }} {% if cpt.cloture %} (clotur&eacute;){% endif %}</a></td>
-		<td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
+		<td class="cptLabel"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}" >{{ cpt.nom }} {% if cpt.cloture %} (clotur&eacute;){% endif %}</a></td>
+		<td class="cptSolde"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
 	</tr>
 
 	{% empty %}
