@@ -2,7 +2,7 @@
 
 from django.core.management import setup_environ
 import sys, os, time
-sys.path.append(r"G:\django")
+sys.path.append(r"/home/francois/django")
 from mysite import settings
 setup_environ(settings)
 from django.db import connection, transaction
@@ -70,12 +70,12 @@ for xml_element in xml_tree.findall( 'Comptes/Compte' ):
         if created == False:
             if sous.montant != 0 or sous.date != datetime.date.today or sous.moyen != None:
                 raise Exception(u'probleme avec les operations')
-        sous.date = datefr2time(xml_sous.get('D')),
+        sous.date = datefr2time(xml_sous.get('D'))
         sous.save()
         sys.exit()
-        sous.date_val = datefr2time(xml_sous.get('Db')),
-        sous.montant = fr2uk(xml_sous.get('M')),
-        sous.num_cheque=xml_sous.get('Ct'),
+        sous.date_val = datefr2time(xml_sous.get('Db'))
+        sous.montant = fr2uk(xml_sous.get('M'))
+        sous.num_cheque=xml_sous.get('Ct')
         sous.pointe=liste_type_pointage[int(xml_sous.get('P'))][0]
         sous.ismere=bool(int(xml_sous.get('Va')))
 
