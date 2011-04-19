@@ -6,7 +6,7 @@ class champs(models.Model):
     class Meta:
         abstract = True
     def save(self,*args, **kwargs):
-        super(Blog, self).save(*args, **kwargs)
+        super(champs, self).save(*args, **kwargs)
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=120)
