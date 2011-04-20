@@ -31,3 +31,4 @@ bdd.sqlite
 settings.py
 *.lnk
 grisbi.db
+.idea
