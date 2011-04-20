@@ -7,8 +7,10 @@ setup_environ(settings)
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 
-import datetime
 
+import datetime, time
+from django.http import HttpResponse
+from django.db.models import Max
 
 from mysite.gsb.models import *
 import os
@@ -54,9 +56,9 @@ def fr2uk(s):
         return None
 class Import_exception(Exception):
     pass
-def import_gsb(niv_log=10,nomfich):
+def import_gsb(nomfich, niv_log=10):
     log = LOG(niv_log , 'import_gsb.log')
-    nomfich=os.normpath(nomfich)
+    nomfich=os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers'):
         connection.cursor().execute("delete from {};".format(table))
         #log.log(u'table {} effacée'.format(table))
@@ -390,3 +392,6 @@ def import_gsb(niv_log=10,nomfich):
 
     log.log(u'{!s}'.format(time.clock()))
     log.log( u'fini')
+
+if __name__ == "__main__":
+    import_gsb("{}/fichier_test.gsb".format(os.path.dirname(os.path.abspath(__file__))),1)

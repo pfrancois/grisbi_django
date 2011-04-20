@@ -61,9 +61,6 @@ def cpt_detail(request,cpt_id):
         )
     )
 
-<<<<<<< HEAD
-def ope_creation(request,cpt_id):
-=======
 def cpt_titre_detail(request,cpt_id):
     c = get_object_or_404(Compte,pk=cpt_id)
     if c.type == 'b':
@@ -97,9 +94,8 @@ def cpt_titre_detail(request,cpt_id):
     )
 
 def creation_ope(request,cpt_id):
->>>>>>> dca2daf07dace67ed10fe8883f5eae3ae9336c76
     pass
- 
+
 def ope_detail(request, ope_id):
     p = get_object_or_404(Ope,pk=ope_id)
     return render_to_response('operation.django.html',

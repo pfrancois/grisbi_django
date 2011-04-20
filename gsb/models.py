@@ -90,7 +90,6 @@ class Cat(models.Model):
     def __unicode__(self):
         return self.nom
 
-
 class Scat(models.Model):
     cat = models.ForeignKey(Cat)
     nom = models.CharField(max_length=120)
@@ -163,13 +162,17 @@ class Compte(models.Model):
         db_table = 'compte'
     def __unicode__(self):
         return self.nom
-    def solde(self):
+    def solde(self,devise_generale=False):
         req = Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
         if req['solde'] == None:
             solde = 0 + self.solde_init
         else:
             solde = req['solde'] + self.solde_init
-        return solde
+        if devise_generale:
+            solde=solde*self.devise.dernier_tx_de_change
+            return solde
+        else:
+            return solde
 
 class Moyen(models.Model):
     typesdep = (
