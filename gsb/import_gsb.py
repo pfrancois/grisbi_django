@@ -155,7 +155,12 @@ def import_gsb(nomfich, niv_log=10):
         element = Devise(id = xml_element.get('No'))
         element.nom = xml_element.get('Nom')
         element.isocode = xml_element.get('IsoCode')
-        element.dernier_tx_de_change = fr2uk(xml_element.get('Change'))
+        if fr2uk(xml_element.get('Change')) != 0.0:
+            element.dernier_tx_de_change = fr2uk(xml_element.get('Change'))
+        else:
+            element.dernier_tx_de_change = 1
+        if datefr2time(xml_element.get('Date_dernier_change')) is not None:
+            element.date_dernier_change = datefr2time(xml_element.get('Date_dernier_change'))
         element.save()
         log.log(time.clock(), 1)
     log.log( u'{} devises'.format(nb))
@@ -267,11 +272,12 @@ def import_gsb(nomfich, niv_log=10):
                                      grisbi_id = int(xml_sous.get('No'))
                                      )
         try:
-            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id = xml_element.find( 'Details/Type_defaut_credit').text)
+            toto=int(xml_element.find( 'Details/Type_defaut_credit').text)
+            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id = toto )
         except (ObjectDoesNotExist, TypeError):
             pass
         try:
-            element.moyen_debit_defaut = element.moyen_set.get(grisbi_id = xml_element.find( 'Details/Type_defaut_debit').text)
+            element.moyen_debit_defaut = element.moyen_set.get(grisbi_id = int(xml_element.find( 'Details/Type_defaut_debit').text))
         except (ObjectDoesNotExist, TypeError):
             pass
         element.save()

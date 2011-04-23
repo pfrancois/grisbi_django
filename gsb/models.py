@@ -164,12 +164,12 @@ class Compte(models.Model):
         return self.nom
     def solde(self,devise_generale=False):
         req = Ope.objects.filter(compte__id__exact=self.id,mere__exact=None).aggregate(solde=models.Sum('montant'))
-        if req['solde'] == None:
+        if req['solde'] is None:
             solde = 0 + self.solde_init
         else:
             solde = req['solde'] + self.solde_init
         if devise_generale:
-            solde=solde*self.devise.dernier_tx_de_change
+            solde=solde/self.devise.dernier_tx_de_change
             return solde
         else:
             return solde
@@ -235,7 +235,7 @@ class Echeance(models.Model):
         verbose_name_plural = u"Echéances"
         ordering = ['date']
     def __unicode__(self):
-        return u"%s" % (self.id)
+        return u"%s" % (self.id,)
 
 class Generalite(models.Model):
     titre = models.CharField(max_length=120, blank=True)
@@ -248,7 +248,7 @@ class Generalite(models.Model):
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
     def __unicode__(self):
-        return u"%s" % (self.id)
+        return u"%s" % (self.id,)
 
 class Ope(models.Model):
     typespointage = (
@@ -282,4 +282,4 @@ class Ope(models.Model):
         verbose_name = u"opération"
         ordering = ['date']
     def __unicode__(self):
-        return u"%s" % (self.id)
+        return u"%s" % (self.id,)

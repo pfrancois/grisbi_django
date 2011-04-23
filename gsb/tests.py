@@ -17,7 +17,7 @@ class SimpleTest(TestCase):
     def test_compte_properties_cloture(self):
         self.assertEqual(Compte.objects.get(id=1).cloture,True)
     def test_compte_properties_devise_particuliere(self):
-        self.assertEqual(Compte.objects.get(id=0).devise.isocode,'ZAR')
+        self.assertEqual(Compte.objects.get(id=3).devise.isocode,'ZAR')
     def test_compte_properties(self):
         obj=Compte.objects.get(id=0)
         self.assertEqual(obj.nom,u'compte bancaire ouvert')
@@ -33,8 +33,8 @@ class SimpleTest(TestCase):
         self.assertEqual(obj.solde_mini_autorise,0.0)
         self.assertEqual(obj.cloture,False)
         self.assertEqual(obj.notes,'')
-        self.assertEqual(obj.moyen_credit_defaut.nom,u'Carte de credit')
-        self.assertEqual(obj.moyen_debit_defaut.nom,u'Depot')
+        self.assertEqual(obj.moyen_debit_defaut.nom,u'Carte de credit')
+        self.assertEqual(obj.moyen_credit_defaut.nom,u'Depot')
     def test_compte_solde(self):
         self.assertEqual(Compte.objects.get(id=2).solde(),-94.2)
     def test_compte_solde_devise(self):
@@ -49,20 +49,20 @@ class SimpleTest(TestCase):
         self.assertEqual(obj.notes,u'')
         self.assertEqual(obj.is_titre,False)
     def test_tiers_count(self):
-        self.assertEqual(Tiers.objects.count(),5)
+        self.assertEqual(Tiers.objects.count(),4)
         self.assertEqual(5,Tiers.objects.all().aggregate(max=models.Max('id'))['max'])  
     def test_devise_properties(self):
-        obj=Devise.objects.get(id=0)
+        obj=Devise.objects.get(id=1)
         self.assertEqual(obj.nom,u'Euro')
         self.assertEqual(obj.isocode,u'EUR')
         self.assertEqual(obj.dernier_tx_de_change,1)
-        self.assertEqual(obj.date_dernier_change,None)
+        self.assertEqual(obj.date_dernier_change,datetime.date.today())
     def test_devise_etrangere(self):
-        obj=Devise.objects.get(id=1)
+        obj=Devise.objects.get(id=2)
         self.assertEqual(obj.nom,u'Rand')
         self.assertEqual(obj.isocode,u'ZAR')
         self.assertEqual(obj.dernier_tx_de_change,10.0)
-        self.assertEqual(obj.date_dernier_change,'2010-1-1')
+        self.assertEqual(obj.date_dernier_change,datetime.date(day=1,month=1,year=2010))
     def test_banques_properties(self):
         obj=Banque.objects.get(id=1)
         self.assertEqual(obj.nom,u'banque test')
@@ -78,46 +78,46 @@ class SimpleTest(TestCase):
         self.assertEqual(Cat.objects.count(),5)
         self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'],21)
     def test_sous_cat(self):
-        obj=Banque.objects.get(id=6)
+        obj=Cat.objects.get(id=6)
         self.assertEqual(obj.scat_set.count(),9)
         self.assertEqual(obj.scat_set.aggregate(max=models.Max('id'))['max'],9)
-        sous=obj.scat_set.get(id=0)
+        sous=obj.scat_set.get(grisbi_id=1)
         self.assertEqual(sous.nom,u'Bar')
         self.assertEqual(sous.grisbi_id,1)
     def test_ib(self):
-        obj=Banque.objects.get(id=1)
+        obj=Ib.objects.get(id=1)
         self.assertEqual(obj.nom,u'imputation_credit')
         self.assertEqual(obj.type,'r')
     def test_ib_global(self):
         self.assertEqual(Ib.objects.count(),4)
         self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'],4)
     def test_sous_ib(self):
-        obj=Banque.objects.get(id=2)
-        self.assertEqual(obj.sib_set.count(),9)
+        obj=Ib.objects.get(id=2)
+        self.assertEqual(obj.sib_set.count(),1)
         self.assertEqual(obj.sib_set.aggregate(max=models.Max('id'))['max'],1)
-        sous=obj.sib_set.get(id=0)
+        sous=obj.sib_set.get(grisbi_id=1)
         self.assertEqual(sous.nom,u'sous_imputation')
         self.assertEqual(sous.grisbi_id,1)    
     def test_exercice(self):
-        obj=Exercice.objects.get(id=0)
-        self.assertEqual(obj.date_debut,'2010-1-1')
-        self.assertEqual(obj.date_fin,'2010-12-31')
+        obj=Exercice.objects.get(id=5)
+        self.assertEqual(obj.date_debut,datetime.date(day=1,month=1,year=2010))
+        self.assertEqual(obj.date_fin,datetime.date(day=31,month=12,year=2010))
         self.assertEqual(obj.nom,u'2010')
-        self.assertEqual(Exercice.objects.all().aggregate(max=models.Max('id'))['max'],2)
+        self.assertEqual(Exercice.objects.all().aggregate(max=models.Max('id'))['max'],6)
     def test_moyen(self):
-        obj=Compte.objects.get(id=0).Moyen_set.get(grisbi_id=1)
+        obj=Compte.objects.get(id=0).moyen_set.get(grisbi_id=1)
         self.assertEqual(obj.nom,u'Virement')
         self.assertEqual(obj.signe,'v')
         self.assertEqual(obj.affiche_numero,True)
         self.assertEqual(obj.num_auto,False)
         self.assertEqual(obj.num_en_cours,0)
     def test_moyen_avec_numero(self):
-        obj=Compte.objects.get(id=0).Moyen_set.get(grisbi_id=5)
-        self.assertEqual(obj.nom,u'chèque')
+        obj=Compte.objects.get(id=0).moyen_set.get(grisbi_id=5)
+        self.assertEqual(obj.nom,u'Chèque')
         self.assertEqual(obj.signe,'d')
         self.assertEqual(obj.affiche_numero,True)
         self.assertEqual(obj.num_auto,True)
         self.assertEqual(obj.num_en_cours,12345)    
     def test_nb_moyens_dans_compte(self):
-        self.assertEqual(Compte.objects.get(id=0).Moyen_set.count(),5)
+        self.assertEqual(Compte.objects.get(id=0).moyen_set.count(),5)
     
