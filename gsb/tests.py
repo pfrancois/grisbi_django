@@ -71,7 +71,7 @@ class SimpleTest(TestCase):
     def test_seconde_bq(self):
         self.assertEqual(Banque.objects.get(id=2).cib,u'12345')
     def test_cat(self):
-        obj=Banque.objects.get(id=5)
+        obj=Cat.objects.get(id=5)
         self.assertEqual(obj.nom,u'Revenus divers')
         self.assertEqual(obj.type,'r')
     def test_cat_global(self):
@@ -89,8 +89,8 @@ class SimpleTest(TestCase):
         self.assertEqual(obj.nom,u'imputation_credit')
         self.assertEqual(obj.type,'r')
     def test_ib_global(self):
-        self.assertEqual(ib.objects.count(),4)
-        self.assertEqual(ib.objects.all().aggregate(max=models.Max('id'))['max'],4)
+        self.assertEqual(Ib.objects.count(),4)
+        self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'],4)
     def test_sous_ib(self):
         obj=Banque.objects.get(id=2)
         self.assertEqual(obj.sib_set.count(),9)

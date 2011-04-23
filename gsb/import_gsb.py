@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
-from django.core.management import setup_environ
-import sys, time
-sys.path.append(r"c:\django")
-from mysite import settings
-setup_environ(settings)
+if __name__ == "__main__":
+    from django.core.management import setup_environ
+    import sys, time
+    sys.path.append(r"c:\django")
+    from mysite import settings
+    setup_environ(settings)
+
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
-
-
-import datetime, time
-from django.http import HttpResponse
-from django.db.models import Max
-
 from mysite.gsb.models import *
-import os
+import os,codecs, time
+
+
 liste_type_cat = Cat.typesdep
 liste_type_signe = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_pointage = Ope.typespointage
 try:
     from lxml import etree as et
-except:
+except ImportError:
     from xml.etree import cElementTree as et
 
 class LOG(object):
@@ -50,7 +48,7 @@ def datefr2time(s):
     except ValueError :
         return None
 def fr2uk(s):
-    if s != None:
+    if s is not None:
         return float(str(s).replace(',' , '.'))
     else:
         return None
@@ -219,32 +217,32 @@ def import_gsb(nomfich, niv_log=10):
         nb_moyen = 0
         nb_ope = 0
         element = Compte(id = (int(xml_element.find( 'Details/No_de_compte' ).text)))
-        element.nom = nom = xml_element.find( 'Details/Nom' ).text
+        element.nom  = xml_element.find( 'Details/Nom' ).text
         element.cloture = bool(int(xml_element.find('Details/Compte_cloture').text))
-        if xml_element.find( 'Details/Titulaire' ).text != None:
-            element.titulaire = xml_element.find( 'Details/Titulaire' ).text
-        else:
+        if xml_element.find( 'Details/Titulaire' ).text is None:
             element.titulaire = ''
+        else:
+            element.titulaire = xml_element.find( 'Details/Titulaire' ).text
         element.type = liste_type_compte[int(xml_element.find( 'Details/Type_de_compte' ).text)][0]
 
-        if xml_element.find('Details/Devise').text == None:
+        if xml_element.find('Details/Devise').text is None:
             element.devise = None
         else:
             element.devise = Devise.objects.get(id = int(xml_element.find('Details/Devise').text))
 
-        if xml_element.get('Banque') == None:
+        if xml_element.find('Details/Banque') is None or int(xml_element.find( 'Details/Banque' ).text) == 0:
             element.banque = None
         else:
             element.banque = Banque.objects.get(id = int(xml_element.find( 'Details/Banque' ).text))
-        if xml_element.find( 'Details/Guichet').text == None:
+        if xml_element.find( 'Details/Guichet').text is None:
             element.guichet = ''
         else:
             element.guichet = xml_element.find( 'Details/Guichet').text
-        if xml_element.find( 'Details/No_compte_banque').text != None:
+        if xml_element.find( 'Details/No_compte_banque').text is not None:
             element.num_compte = xml_element.find( 'Details/No_compte_banque').text
         else:
             element.num_compte == ''
-        if xml_element.find( 'Details/Cle_du_compte').text!= None:
+        if xml_element.find( 'Details/Cle_du_compte').text is not None:
             element.cle_compte = int(xml_element.find( 'Details/Cle_du_compte').text)
         else:
             element.cle_compte = 0
@@ -252,7 +250,7 @@ def import_gsb(nomfich, niv_log=10):
         element.solde_mini_voulu = fr2uk(xml_element.find( 'Details/Solde_mini_voulu').text)
         element.solde_mini_autorise = fr2uk(xml_element.find( 'Details/Solde_mini_autorise').text)
         element.solde_mini_autorise = fr2uk(xml_element.find( 'Details/Solde_mini_autorise').text)
-        if xml_element.find( 'Details/Commentaires').text != None:
+        if xml_element.find( 'Details/Commentaires').text is not None:
             element.notes = xml_element.find( 'Details/Commentaires').text
         else:
             element.notes = ''
@@ -269,21 +267,21 @@ def import_gsb(nomfich, niv_log=10):
                                      grisbi_id = int(xml_sous.get('No'))
                                      )
         try:
-            element.moyen_credit_defaut = Moyen.objects.get(id = xml_element.find( 'Details/Type_defaut_credit').text)
+            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id = xml_element.find( 'Details/Type_defaut_credit').text)
         except (ObjectDoesNotExist, TypeError):
             pass
         try:
-            element.moyen_debit_defaut = Moyen.objects.get(id = xml_element.find( 'Details/Type_defaut_debit').text)
+            element.moyen_debit_defaut = element.moyen_set.get(grisbi_id = xml_element.find( 'Details/Type_defaut_debit').text)
         except (ObjectDoesNotExist, TypeError):
             pass
         element.save()
-        log.log(u'ajout du compte "%s" et des moyens de paiment ok'%element.nom)
+        log.log(u'ajout du compte "%s" et des %s moyens de paiment ok'%(element.nom,nb_moyen))
         #--------------OPERATIONS-----------------------
         for xml_sous in xml_element.find('Detail_des_operations'):
+            nb_ope+=1
             sous, created = element.ope_set.get_or_create(id = int(xml_sous.get('No')), defaults = {'devise':Generalite.objects.get(id = 1).devise_generale, 'compte':element})
-            if created == False:
-                if sous.montant != 0 or sous.date != datetime.date.today or sous.moyen != None:
-                    raise Exception(u'probleme avec les operations')
+            if not created and (sous.montant != 0 or sous.date != datetime.date.today() or sous.moyen is not  None):
+                raise Exception(u'probleme avec les operations')
             sous.date = datefr2time(xml_sous.get('D'))
             sous.date_val = datefr2time(xml_sous.get('Db'))
             sous.montant = fr2uk(xml_sous.get('M'))
@@ -340,7 +338,7 @@ def import_gsb(nomfich, niv_log=10):
                 sous.mere, created = Ope.objects.get_or_create(id = int(xml_sous.get('Va')), defaults = {'devise':Generalite.objects.get(id = 1).devise_generale, 'compte':element})
             except (ObjectDoesNotExist, TypeError):
                 pass
-
+        log.log(u"%s operations"%nb_ope)
         log.log(time.clock(), 1)
     log.log( u'{} comptes'.format(nb))
     #gestion des echeances
@@ -394,4 +392,4 @@ def import_gsb(nomfich, niv_log=10):
     log.log( u'fini')
 
 if __name__ == "__main__":
-    import_gsb("{}/fichier_test.gsb".format(os.path.dirname(os.path.abspath(__file__))),1)
+    import_gsb("{}/fichier_test.gsb".format(os.path.dirname(os.path.abspath(__file__))),10)
