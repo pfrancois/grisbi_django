@@ -143,6 +143,42 @@ class SimpleTest(TestCase):
         self.assertEquals( obj.solde,0)
         self.assertEquals( obj.ope_set.all().count(),1)
         self.assertEquals( obj.ope_set.all()[0],Ope.objects.get(id=5))
-    
+    def test_ech(self):
+        obj=Echeance.objects.get(id=3)
+        self.assertEquals( obj.date,datetime.date(2012, 12, 31))
+        self.assertEquals( obj.compte.id,0)
+        self.assertEquals( obj.montant,decimal.Decimal('0'))
+        self.assertEquals( obj.devise.id,2)
+        self.assertEquals( obj.tiers.id,4)
+        self.assertEquals( obj.cat.id,6)
+        self.assertEquals( obj.scat.grisbi_id,2)
+        self.assertEquals( obj.compte_virement.id,0)
+        self.assertEquals( obj.moyen,3)
+        self.assertEquals( obj.moyen_virement.id,0)
+        self.assertEquals( obj.exercice.id,5)
+        self.assertEquals( obj.notes,u"automatique")
+        self.assertEquals( obj.inscription_automatique,True)
+        self.assertEquals( obj.intervalle,0)
+    def test_ech(self):
+        obj=Echeance.objects.get(id=2)
+        self.assertEquals( obj.date,datetime.date(2012, 12, 31))
+        self.assertEquals( obj.compte.id,0)
+        self.assertEquals( obj.montant,decimal.Decimal('-123'))
+        self.assertEquals( obj.devise.id,2)
+        self.assertEquals( obj.tiers.id,4)
+        self.assertEquals( obj.cat.id,21)
+        self.assertEquals( obj.scat.grisbi_id,6)
+        self.assertEquals( obj.compte_virement.id,0)
+        self.assertEquals( obj.moyen,3)
+        self.assertEquals( obj.moyen_virement.id,0)
+        self.assertEquals( obj.exercice.id,5)
+        self.assertEquals( obj.notes,u"echeance")
+        self.assertEquals( obj.inscription_automatique,false)
+        self.assertEquals( obj.intervalle,0)
+
+
+
+
+
 
 

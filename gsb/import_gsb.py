@@ -371,26 +371,21 @@ def import_gsb(nomfich,niv_log=10):
             pass
         try:
             element.cat = Cat.objects.get(id = int(xml_element.get('Categorie')))
-        except (ObjectDoesNotExist, TypeError):
-            pass
             try:
-                element.cat = Cat.objects.get(id = int(xml_sous.get('C')))
+                id=int(xml_element.get('Sous-categorie'))
+                element.scat = element.cat.scat_set.get(grisbi_id = id)
             except (ObjectDoesNotExist, TypeError):
                 pass
-            else:
-                try:
-                    element.scat = element.cat.scat_set.get(grisbi_id = int(xml_sous.get('categorie')))
-                except (ObjectDoesNotExist, TypeError):
-                    pass
+        except (ObjectDoesNotExist, TypeError):
+            pass
         try:
-            element.ib = Ib.objects.get(id = int(xml_sous.get('Imputation')))
-        except (ObjectDoesNotExist, TypeError):
-            pass
-        else:
+            element.ib = Ib.objects.get(id = int(xml_element.get('Imputation')))
             try:
-                element.sib = element.ib.sib_set.get(grisbi_id = int(xml_sous.get('Sous-imputation')))
+                element.sib = element.ib.sib_set.get(grisbi_id = int(xml_element.get('Sous-imputation')))
             except (ObjectDoesNotExist, TypeError):
                 pass
+        except (ObjectDoesNotExist, TypeError):
+            pass
         element.save()
         log.log(time.clock(), 1)
     log.log("{} echeances".format(nb))
