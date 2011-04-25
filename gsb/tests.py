@@ -13,7 +13,7 @@ from mysite.gsb.import_gsb import *
 
 class SimpleTest(TestCase):
     def setUp(self):
-        import_gsb("{}/fichier_test.gsb".format(os.path.dirname(os.path.abspath(__file__))))
+        import_gsb("{}/test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))))
     def test_compte_properties_cloture(self):
         self.assertEqual(Compte.objects.get(id=1).cloture,True)
     def test_compte_properties_devise_particuliere(self):
