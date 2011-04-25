@@ -21,7 +21,7 @@ class Tiers(models.Model):
 
 class Devise(models.Model):
     nom = models.CharField(max_length=120)
-    dernier_tx_de_change = models.FloatField(default=1.0, help_text = u"il faut creer un cours")
+    dernier_tx_de_change = models.DecimalField(max_digits=15, decimal_places=3, default='1.000')
     date_dernier_change  = models.DateField(default=datetime.date.today, help_text = u"il faut creer un cours")
     isocode = models.CharField(max_length=3, unique=True)
     class Meta:
@@ -53,7 +53,7 @@ class Titre(models.Model):
         return r
 
 class Cours(models.Model):
-    valeur = models.FloatField()
+    valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
     isin = models.ForeignKey(Titre, to_field = "isin")
     date = models.DateField(default = datetime.date.today)
     class Meta:
@@ -151,9 +151,9 @@ class Compte(models.Model):
     guichet = models.CharField(max_length=15, blank=True)
     num_compte = models.CharField(max_length=60, blank=True)
     cle_compte = models.IntegerField(null=True, blank=True)
-    solde_init = models.FloatField(default=0)
-    solde_mini_voulu = models.FloatField(null=True, blank=True)
-    solde_mini_autorise = models.FloatField(null=True, blank=True)
+    solde_init = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
+    solde_mini_voulu = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
+    solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
     cloture = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
     moyen_credit_defaut=models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set")
@@ -212,7 +212,7 @@ class Rapp(models.Model):
 class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
-    montant = models.FloatField()
+    montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
     devise = models.ForeignKey(Devise)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL,default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL,default=None)
@@ -259,7 +259,7 @@ class Ope(models.Model):
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=datetime.date.today)
     date_val = models.DateField(null=True, blank=True,default=None)
-    montant = models.FloatField(default=0)
+    montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
     devise = models.ForeignKey(Devise)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL,default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL,default=None)

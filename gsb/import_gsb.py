@@ -10,7 +10,7 @@ from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 from mysite.gsb.models import *
 import os,codecs, time
-
+import decimal
 
 liste_type_cat = Cat.typesdep
 liste_type_signe = Moyen.typesdep
@@ -41,20 +41,33 @@ class LOG(object):
             f.close()
     def set(self, niv_actuel):
         self.niv_actuel = niv_actuel
-def datefr2time(s):
+def datefr2datesql(s):
     try:
         t = time.strptime(str(s), "%d/%m/%Y")
         return "{annee}-{mois}-{jour}".format(annee = t[0], mois = t[1], jour = t[2])
     except ValueError :
         return None
-def fr2uk(s):
-    if s is not None:
-        return float(str(s).replace(',' , '.'))
+def fr2decimal(s):
+    if s != None:
+        return Decimal(str(s).replace(',' , '.'))
     else:
         return None
 class Import_exception(Exception):
     pass
-def import_gsb(nomfich, niv_log=10):
+    
+def import_view(request):
+    if request.method == 'POST':
+        form = ImportFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            f=request.FILES['file']
+            import_gsb(f)
+            return HttpResponseRedirect('/success/url/')
+    else:
+        form = UploadFileForm()
+    return render_to_response('import.django.html', {'form': form})
+
+
+def import_gsb(niv_log=10,nomfich):
     log = LOG(niv_log , 'import_gsb.log')
     nomfich=os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers'):
@@ -156,10 +169,10 @@ def import_gsb(nomfich, niv_log=10):
         element.nom = xml_element.get('Nom')
         element.isocode = xml_element.get('IsoCode')
         if fr2uk(xml_element.get('Change')) != 0.0:
-            element.dernier_tx_de_change = fr2uk(xml_element.get('Change'))
+        element.dernier_tx_de_change = fr2decimal(xml_element.get('Change'))
         else:
             element.dernier_tx_de_change = 1
-        if datefr2time(xml_element.get('Date_dernier_change')) is not None:
+        if datefr2datesql(xml_element.get('Date_dernier_change')) is not None:
             element.date_dernier_change = datefr2time(xml_element.get('Date_dernier_change'))
         element.save()
         log.log(time.clock(), 1)
@@ -197,8 +210,8 @@ def import_gsb(nomfich, niv_log=10):
         nb+= 1
         element = Exercice(id = xml_element.get('No'))
         element.nom = xml_element.get('Nom')
-        element.date_debut = datefr2time(xml_element.get('Date_debut'))
-        element.date_fin = datefr2time(xml_element.get('Date_fin'))
+        element.date_debut = datefr2datesql(xml_element.get('Date_debut'))
+        element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
         log.log(time.clock(), 1)
     log.log(u'{} exercices'.format(nb))
@@ -353,8 +366,8 @@ def import_gsb(nomfich, niv_log=10):
         nb+= 1
         element = Echeance(
             id = int(xml_element.get('No')),
-            date = datefr2time(xml_element.get('Date')),
-            montant = fr2uk(xml_element.get('Montant'))
+            date = datefr2datesql(xml_element.get('Date')),
+            montant = fr2decimal(xml_element.get('Montant'))
         )
         try:
             element.compte = Compte.objects.get(id = int(xml_element.get('Compte')))
