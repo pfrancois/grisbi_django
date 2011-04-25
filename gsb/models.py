@@ -12,6 +12,7 @@ class Tiers(models.Model):
     nom = models.CharField(max_length=120)
     notes = models.TextField(blank=True)
     is_titre=models.BooleanField(default=False)
+
     class Meta:
         db_table = 'tiers'
         verbose_name_plural = u'tiers'
@@ -198,7 +199,6 @@ class Moyen(models.Model):
 
 class Rapp(models.Model):
     nom = models.CharField(max_length=120)
-    compte = models.ForeignKey(Compte, null=True, blank=True, on_delete=models.SET_NULL,default=None)
     date = models.DateField(null=True, blank=True, default=datetime.date.today)
     solde = models.FloatField(default=0)
     class Meta:
@@ -207,7 +207,9 @@ class Rapp(models.Model):
         ordering = ['nom']
     def __unicode__(self):
         return self.nom
-
+    def compte(self):#petit raccourci mais normalement, c'est bon. on prend le compte de la premiere ope
+        if self.ope_set.all():
+            return self.ope_set.all()[0].compte.id
 
 class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)

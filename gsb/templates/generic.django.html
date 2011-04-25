@@ -6,7 +6,7 @@
 <meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
 <meta http-equiv="PRAGMA" content="NO-CACHE" />
 <meta http-equiv="EXPIRES" content="0" />
-{% block css %}<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/common.css" />{% endblock css %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/common.css" />{% block css %}{% endblock css %}
 {% block js %}{% endblock js %}
 <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/
 AAACeElEQVQ4y62TzUtUcRSGn3vvzDg64wejpk2FRpKBSSJBprSzoF2ErYI2ERRB6/oH2rQt/AMygoKkhdnCRJQyLc2kSQw1bXQ+HOfem
@@ -23,15 +23,12 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 </head>
 <body{% block body_js %}{% endblock body_js %}>
 {% block titre %}<h1>{{ titre }}</h1>{% endblock %}
-{% block messages %} 
-{%for message in messages %}
-<div class='{{ message.css }}'>{{ message.texte }}</div>
-{% endfor %}
-{% endblock messages %}
-{% block content %}
+{% block resultat %}
 {%for resultat in resultats %}
 <div class='{{ resultat.css }}'>{{ resultat.texte }}</div>
 {% endfor %}
+{% endblock resultat %}
+{% block content %}
 <div class="progress"><a href='{{ lien }}'>{ {suite }}</a></div>
 {% endblock %}
 </body>

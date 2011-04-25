@@ -2,15 +2,14 @@
 from mysite.gsb.models import *
 from django.http import HttpResponse
 from django.db.models import Max
-import settings
 try:
     from lxml import etree as et
-except:
+except ImportError:
         from xml.etree import cElementTree as et
 
 class Format:
     def date(s, defaut="0/0/0"):
-        if s==None:
+        if s is None:
             return defaut
         else:
             isinstance(s,datetime.date)
@@ -24,7 +23,7 @@ class Format:
             return "/".join(result)
     date=staticmethod(date)
     def bool(s,defaut='0'):
-        if s==None:
+        if s is None:
             return defaut
         else:
             isinstance(s, bool)
@@ -44,8 +43,8 @@ class Format:
     type=staticmethod(type)
     def max(object,defaut='0',champ='id'):
         q=object.aggregate(id=Max(champ))['id']
-        if q==None:
-            return '0'
+        if q is None:
+            return defaut
         else:
             return str(q-1)
     max=staticmethod(max)
@@ -107,20 +106,20 @@ def export(request):
         et.SubElement( xml_detail, "Type_de_compte" ).text = Format.type(liste_type_compte,co.type)
         et.SubElement( xml_detail, "Nb_operations" ).text = str(Ope.objects.filter(compte=co.id).count())
         et.SubElement( xml_detail, "Devise" ).text = str(co.devise.id-1)
-        if co.banque==None:
+        if co.banque is None:
             et.SubElement( xml_detail, "Banque" ).text= str(0)
         else:
             et.SubElement( xml_detail, "Banque" ).text= str(co.banque.id-1)
-        if int(co.guichet)==0 or co.guichet==None:
+        if int(co.guichet)==0 or co.guichet is None:
             et.SubElement( xml_detail, "Guichet" ).text = str("")
         else:
             et.SubElement( xml_detail, "Guichet" ).text = str(co.guichet)
-        if co.num_compte=='' or co.num_compte==None:
+        if co.num_compte=='' or co.num_compte is None:
             numero_compte=""
         else:
             numero_compte=co.num_compte
         et.SubElement( xml_detail, "No_compte_banque" ).text = str(numero_compte)
-        if co.cle_compte==0 or co.cle_compte==None:
+        if co.cle_compte==0 or co.cle_compte is None:
             cle_du_compte=""
         else:
             cle_du_compte=co.cle_compte
@@ -129,7 +128,7 @@ def export(request):
         et.SubElement( xml_detail, "Solde_mini_voulu" ).text = Format.float(co.solde_mini_voulu)
         et.SubElement( xml_detail, "Solde_mini_autorise" ).text = Format.float(co.solde_mini_autorise)
         et.SubElement( xml_detail, "Solde_courant" ).text = Format.float(co.solde())
-        if co.date_dernier_releve!=None:
+        if co.date_dernier_releve is not None:
             et.SubElement( xml_detail, "Date_dernier_releve" ).text = Format.date(co.date_dernier_releve)
             et.SubElement( xml_detail, "Solde_dernier_releve" ).text = Format.float(co.solde_dernier_releve)
         else:
@@ -142,14 +141,14 @@ def export(request):
         et.SubElement( xml_detail, "Commentaires" ).text = co.notes
         et.SubElement( xml_detail, "Adresse_du_titulaire" ).text='' #NOT IN BDD
         et.SubElement( xml_detail, "Nombre_de_types" ).text = str( Moyen.objects.filter(compte=1).count())
-        if co.moyen_debit_defaut!=None:
+        if co.moyen_debit_defaut is not None:
             et.SubElement( xml_detail, "Type_defaut_debit" ).text = str(co.moyen_debit_defaut.grisbi_id)
         else:
             et.SubElement( xml_detail, "Type_defaut_debit" ).text = '0'#TODO NOT IN BDD
-        if co.moyen_credit_defaut!=None:
+        if co.moyen_credit_defaut is not None:
             et.SubElement( xml_detail, "Type_defaut_credit" ).text = str(co.moyen_credit_defaut.grisbi_id)
         else:
-        et.SubElement( xml_detail, "Type_defaut_credit" ).text = '0'#TODO NOT IN BDD
+            et.SubElement( xml_detail, "Type_defaut_credit" ).text = '0'#TODO NOT IN BDD
         et.SubElement( xml_detail, "Tri_par_type" ).text = '0'#NOT IN BDD
         et.SubElement( xml_detail, "Neutres_inclus" ).text = '1'#NOT IN BDD
         et.SubElement( xml_detail, "Ordre_du_tri" ).text = '/'.join([str(o.grisbi_id) for o in Moyen.objects.filter(compte=co.id).order_by('id')])
@@ -174,7 +173,7 @@ def export(request):
             #date de l'operation
             xml_element.set('D',Format.date(ope.date))
             #date de valeur
-            if ope.date_val==None:
+            if ope.date_val is None:
                 xml_element.set('Db',"0/0/0")
             else:
                 xml_element.set('Db',Format.date(ope.date_val))
@@ -188,42 +187,42 @@ def export(request):
                 xml_element.set('Tc',Format.float(ope.devise.dernier_tx_de_change))
             xml_element.set('Fc',Format.float(0)) #NOT IN BDD mais inutile
             xml_element.set('T',str(ope.tiers.id-1))
-            if ope.cat == None:
+            if ope.cat is None:
                 xml_element.set('C',str(0))
             else:
                 xml_element.set('C',str(ope.cat.id-1))
-            if ope.scat == None:
+            if ope.scat is None:
                 xml_element.set('Sc',str(0))
             else:
                 xml_element.set('Sc',str(ope.scat.grisbi_id-1))
             xml_element.set('Ov',Format.bool(ope.is_mere))
             xml_element.set('N',ope.notes)
-            if ope.moyen==None:
+            if ope.moyen is None:
                 xml_element.set('Ty',str(0))
             else:
                 xml_element.set('Ty',str(ope.moyen.grisbi_id))
             xml_element.set('Ct',str(ope.numcheque))
             xml_element.set('P',Format.type(liste_type_pointage,ope.pointe))
             xml_element.set('A',"0")#NOT IN BDD mais inutile selon moi
-            if ope.rapp==None:
+            if ope.rapp is None:
                 xml_element.set('R',str(0))
             else:
                 xml_element.set('R',str(ope.rapp.id-1))
-            if ope.exercice==None:
+            if ope.exercice is None:
                 xml_element.set('E',str(0))
             else:
                 xml_element.set('E',str(ope.exercice.id-1))
-            if ope.ib == None:
+            if ope.ib is None:
                 xml_element.set('I',str(0))
             else:
                 xml_element.set('I',str(ope.ib.id-1))
-            if ope.sib == None:
+            if ope.sib is None:
                 xml_element.set('Si',str(0))
             else:
                 xml_element.set('Si',str(ope.sib.grisbi_id))
             xml_element.set('Pc',"")#NOT IN BDD
             xml_element.set('Ibg',"")#NOT IN BDD
-            if ope.jumelle==None:
+            if ope.jumelle is None:
                 num_jumelle="0"
                 num_cpt_jumelle="0"
             else:
@@ -231,7 +230,7 @@ def export(request):
                 num_jumelle=str(ope.jumelle.id-1)
             xml_element.set('Ro',str(num_jumelle))
             xml_element.set('Rc',str(num_cpt_jumelle))
-            if ope.mere==None:
+            if ope.mere is None:
                 num_mere="0"
             else:
                 num_mere=str(ope.mere.id-1)
@@ -252,40 +251,40 @@ def export(request):
         xml_element.set('Compte',str(ech.compte.id-1))
         xml_element.set('Montant',Format.float(ech.montant))
         xml_element.set('Devise',str(ech.devise.id-1))
-        if ech.tiers==None:
+        if ech.tiers is None:
             xml_element.set('Tiers',"0")
         else:
             xml_element.set('Tiers',str(ech.tiers.id-1))
-        if ech.cat==None:
+        if ech.cat is None:
             xml_element.set('Cat',"0")
         else:
             xml_element.set('Cat', str(ech.cat.id-1))
-        if ech.compte_virement==None:
+        if ech.compte_virement is None:
             xml_element.set('Virement_compte',"0")
         else:
             xml_element.set('Virement_compte', str(ech.compte_virement.id-1))
-        if ech.moyen==None:
+        if ech.moyen is None:
             xml_element.set('Type',"0")
         else:
             xml_element.set('Type',str(ech.moyen.id-1))
-        if ech.moyen_virement==None:
+        if ech.moyen_virement is None:
             xml_element.set('Type_contre_ope',"0")
         else:
             xml_element.set('Type_contre_ope', str(ech.moyen_virement.id-1))
-        if ech.exercice==None:
+        if ech.exercice is None:
             xml_element.set('Exercice',"-2")
         else:
             xml_element.set('Exercice', str(ech.exercice.id-1))
         xml_element.set('Contenu_du_type',"")#NOT IN BDD
-        if ech.exercice==None:
+        if ech.exercice is None:
             xml_element.set('Exercice',"0")
         else:
             xml_element.set('Exercice', str(ech.exercice.id-1))
-        if ech.ib==None:
+        if ech.ib is None:
             xml_element.set('Imputation',"0")
         else:
             xml_element.set('Imputation', str(ech.ib.id-1))
-        if ech.sib==None:
+        if ech.sib is None:
             xml_element.set('Sous-imputation',"0")
         else:
             xml_element.set('Sous-imputation', str(ech.sib.grisbi_id))
@@ -327,7 +326,7 @@ def export(request):
         xml_cate.set('Type',Format.type(liste_type_cat,c.type))
         xml_cate.set('No_derniere_sous_cagegorie',Format.max(Scat.objects.filter(cat=c.id),defaut='0',champ='grisbi_id'))
         for sc in Scat.objects.filter(cat=c.id):
-            if sc != None:
+            if sc is None:
                 xml_sub=et.SubElement( xml_cate,'Sous-categorie')
                 xml_sub.set('No',str(sc.grisbi_id))
                 xml_sub.set('Nom',sc.nom)
@@ -338,14 +337,14 @@ def export(request):
     et.SubElement( xml_generalite, "No_derniere_imputation" ).text=Format.max(Ib.objects)
     xml_detail = et.SubElement(xml_imp_root,'Detail_des_imputations')
     for c in Ib.objects.all().order_by('id'):
-        if c != None:
+        if c is None:
             xml_ib = et.SubElement( xml_detail, 'Imputation')
             xml_ib.set('No',str(c.id-1))
             xml_ib.set('Nom',c.nom)
             xml_ib.set('Type',Format.type(liste_type_cat,c.type))
             xml_ib.set('No_derniere_sous_imputation',Format.max(Sib.objects.filter(ib=c.id),defaut='0',champ='grisbi_id'))
             for simp in Sib.objects.filter(ib=c.id):
-                if simp != None:
+                if simp is None:
                     xml_sub=et.SubElement( xml_ib, 'Sous-imputation')
                     xml_sub.set('No',str(simp.grisbi_id))
                     xml_sub.set('Nom',simp.nom )
@@ -356,7 +355,7 @@ def export(request):
     et.SubElement( xml_generalite, "No_derniere_devise" ).text= Format.max(Devise.objects)
     xml_detail = et.SubElement(xml_devises,'Detail_des_devises')
     for c in Devise.objects.all().order_by('id'):
-        if c != None:
+        if c is None:
             xml_sub = et.SubElement( xml_detail, 'Devise' )
             xml_sub.set('No',str(c.id-1))
             xml_sub.set('Nom',c.nom)
@@ -380,7 +379,7 @@ def export(request):
     et.SubElement( xml_generalite, "No_derniere_banque" ).text=Format.max(Banque.objects)
     xml_detail = et.SubElement( xml_banques,'Detail_des_banques' )
     for c in Banque.objects.all().order_by('id'):
-        if c != None:
+        if c is None:
             xml_sub = et.SubElement( xml_detail, 'Banque')
             xml_sub.set('No',str(c.id-1))
             xml_sub.set('Nom',c.nom)
@@ -407,7 +406,7 @@ def export(request):
     et.SubElement( xml_generalite, "No_dernier_exercice" ).text=Format.max(Exercice.objects)
     xml_detail = et.SubElement( xml_exo,'Detail_des_exercices' )
     for c in Exercice.objects.all().order_by('id'):
-        if c != None:
+        if c is None:
             xml_sub = et.SubElement( xml_detail, 'Exercice')
             xml_sub.set('No',str(c.id-1))
             xml_sub.set('Nom',c.nom)
@@ -418,7 +417,7 @@ def export(request):
     xml_rapp = et.SubElement( xml_root, "Rapprochements" )
     xml_detail = et.SubElement( xml_rapp,'Detail_des_rapprochements' )
     for c in Rapp.objects.all().order_by('id'):
-        if c != None:
+        if c is None:
             xml_sub = et.SubElement( xml_detail, 'Rapprochement')
             xml_sub.set('No',str(c.id-1))
             xml_sub.set('Nom',c.nom)

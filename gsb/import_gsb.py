@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 if __name__ == "__main__":
     from django.core.management import setup_environ
-    import sys, time
-    sys.path.append(r"c:\django")
+    import sys, os
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__),'../..')))
     from mysite import settings
     setup_environ(settings)
 
@@ -48,34 +48,22 @@ def datefr2datesql(s):
     except ValueError :
         return None
 def fr2decimal(s):
-    if s != None:
-        return Decimal(str(s).replace(',' , '.'))
+    if s is not None:
+        return decimal.Decimal(str(s).replace(',' , '.'))
     else:
         return None
 class Import_exception(Exception):
     pass
-    
-def import_view(request):
-    if request.method == 'POST':
-        form = ImportFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            f=request.FILES['file']
-            import_gsb(f)
-            return HttpResponseRedirect('/success/url/')
-    else:
-        form = UploadFileForm()
-    return render_to_response('import.django.html', {'form': form})
 
-
-def import_gsb(niv_log=10,nomfich):
+def import_gsb(nomfich,niv_log=10):
     log = LOG(niv_log , 'import_gsb.log')
     nomfich=os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers'):
         connection.cursor().execute("delete from {};".format(table))
         #log.log(u'table {} effacée'.format(table))
     log.log(u"debut du chargement")
-    t = time.clock()
-    xml_tree = et.ElementTree(file = nomfich)
+    time.clock()
+    xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
     #verification du format
     xml_element=str(xml_tree.find('Generalites/Version_fichier').text)
@@ -168,12 +156,12 @@ def import_gsb(niv_log=10,nomfich):
         element = Devise(id = xml_element.get('No'))
         element.nom = xml_element.get('Nom')
         element.isocode = xml_element.get('IsoCode')
-        if fr2uk(xml_element.get('Change')) != 0.0:
-        element.dernier_tx_de_change = fr2decimal(xml_element.get('Change'))
+        if fr2decimal(xml_element.get('Change')) != decimal.Decimal('0'):
+            element.dernier_tx_de_change = fr2decimal(xml_element.get('Change'))
         else:
             element.dernier_tx_de_change = 1
         if datefr2datesql(xml_element.get('Date_dernier_change')) is not None:
-            element.date_dernier_change = datefr2time(xml_element.get('Date_dernier_change'))
+            element.date_dernier_change = datefr2datesql(xml_element.get('Date_dernier_change'))
         element.save()
         log.log(time.clock(), 1)
     log.log( u'{} devises'.format(nb))
@@ -191,7 +179,6 @@ def import_gsb(niv_log=10,nomfich):
     log.log( u'{} banques'.format(nb))
 
     #gestion des generalites
-    nb = 0
     xml_element = xml_tree.find( 'Generalites' )
     element = Generalite(
         titre = xml_element.find( 'Titre' ).text,
@@ -264,10 +251,10 @@ def import_gsb(niv_log=10,nomfich):
             element.cle_compte = int(xml_element.find( 'Details/Cle_du_compte').text)
         else:
             element.cle_compte = 0
-        element.solde_init = fr2uk(xml_element.find( 'Details/Solde_initial').text)
-        element.solde_mini_voulu = fr2uk(xml_element.find( 'Details/Solde_mini_voulu').text)
-        element.solde_mini_autorise = fr2uk(xml_element.find( 'Details/Solde_mini_autorise').text)
-        element.solde_mini_autorise = fr2uk(xml_element.find( 'Details/Solde_mini_autorise').text)
+        element.solde_init = fr2decimal(xml_element.find( 'Details/Solde_initial').text)
+        element.solde_mini_voulu = fr2decimal(xml_element.find( 'Details/Solde_mini_voulu').text)
+        element.solde_mini_autorise = fr2decimal(xml_element.find( 'Details/Solde_mini_autorise').text)
+        element.solde_mini_autorise = fr2decimal(xml_element.find( 'Details/Solde_mini_autorise').text)
         if xml_element.find( 'Details/Commentaires').text is not None:
             element.notes = xml_element.find( 'Details/Commentaires').text
         else:
@@ -298,65 +285,66 @@ def import_gsb(niv_log=10,nomfich):
         #--------------OPERATIONS-----------------------
         for xml_sous in xml_element.find('Detail_des_operations'):
             nb_ope+=1
+            nb_tot_ope += 1
             sous, created = element.ope_set.get_or_create(id = int(xml_sous.get('No')), defaults = {'devise':Generalite.objects.get(id = 1).devise_generale, 'compte':element})
             if not created and (sous.montant != 0 or sous.date != datetime.date.today() or sous.moyen is not  None):
                 raise Exception(u'probleme avec les operations')
-            sous.date = datefr2time(xml_sous.get('D'))
-            sous.date_val = datefr2time(xml_sous.get('Db'))
-            sous.montant = fr2uk(xml_sous.get('M'))
+            sous.date = datefr2datesql(xml_sous.get('D'))
+            sous.date_val = datefr2datesql(xml_sous.get('Db'))
+            sous.montant = fr2decimal(xml_sous.get('M'))
             sous.num_cheque = xml_sous.get('Ct')
             sous.pointe = liste_type_pointage[int(xml_sous.get('P'))][0]
             sous.ismere = bool(int(xml_sous.get('Va')))
-            try:
-                sous.devise = Devise.objects.get(id = int(xml_sous.get('De')))
-            except (ObjectDoesNotExist, TypeError):
-                pass
-            sous.save()
+            sous.devise = Devise.objects.get(id = int(xml_sous.get('De')))
             try:
                 sous.tiers = Tiers.objects.get(id = int(xml_sous.get('T')))
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.tiers=None
             try:
                 sous.cat = Cat.objects.get(id = int(xml_sous.get('C')))
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.cat=None
             else:
                 try:
                     sous.scat = sous.cat.scat_set.get(grisbi_id = int(xml_sous.get('Sc')))
                 except (ObjectDoesNotExist, TypeError):
-                    pass
+                    sous.scat=None
             try:
                 sous.ib = Ib.objects.get(id = int(xml_sous.get('I')))
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.ib=None
             else:
                 try:
                     sous.sib = sous.ib.sib_set.get(grisbi_id = int(xml_sous.get('Si')))
                 except (ObjectDoesNotExist, TypeError):
-                    pass
+                    sous.sib=None
             try:
                 sous.moyen = sous.compte.moyen_set.get(grisbi_id = int(xml_sous.get('Ty')))
             except (ObjectDoesNotExist, TypeError):
-                pass
-            try:
-                sous.rapp = Rapp.objects.get(id = int(xml_sous.get('R')))
-                if sous.rapp.date > sous.date:
-                    sous.rapp.date = sous.date
-                    sous.rapp.save()
+                sous.moyen=None
+            try: #gestion des rapprochements 
+                if int(xml_sous.get('R')):
+                    sous.rapp = Rapp.objects.get(id = int(xml_sous.get('R')))
+                    if datetime.datetime.combine(sous.rapp.date,datetime.time()) >  datetime.datetime.strptime(sous.date,"%Y-%m-%d"):
+                        sous.rapp.date = sous.date
+                        sous.rapp.save()
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.tapp=None
             try:
                 sous.exercice = Exercice.objects.get(id = int(xml_sous.get('E')))
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.exercice=None
             try:
-                sous.jumelle, created = Ope.objects.get_or_create(id = int(xml_sous.get('Ro')), defaults = {'devise':Generalite.objects.get(id = 1).devise_generale, 'compte':Compte.objects.get(id = int(xml_sous.get('Rc')))})
+                if int(xml_sous.get('Ro')):
+                    sous.jumelle, created = Ope.objects.get(id = int(xml_sous.get('Ro')), defaults = {'devise':Devise.objects.get(id=int(xml_sous.get('Rc'))), 'compte':Compte.objects.get(id = int(xml_sous.get('Rc')))})
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.jumelle=None
             try:
-                sous.mere, created = Ope.objects.get_or_create(id = int(xml_sous.get('Va')), defaults = {'devise':Generalite.objects.get(id = 1).devise_generale, 'compte':element})
+                if int(xml_sous.get('Va')):
+                    sous.mere, created = Ope.objects.get_or_create(id = int(xml_sous.get('Va')), defaults = {'devise':element.devise, 'compte':element})
             except (ObjectDoesNotExist, TypeError):
-                pass
+                sous.mere=None
+            sous.save()
         log.log(u"%s operations"%nb_ope)
         log.log(time.clock(), 1)
     log.log( u'{} comptes'.format(nb))
@@ -400,15 +388,15 @@ def import_gsb(niv_log=10,nomfich):
             pass
         else:
             try:
-                sous.sib = element.ib.sib_set.get(grisbi_id = int(xml_sous.get('Sous-imputation')))
+                element.sib = element.ib.sib_set.get(grisbi_id = int(xml_sous.get('Sous-imputation')))
             except (ObjectDoesNotExist, TypeError):
                 pass
         element.save()
         log.log(time.clock(), 1)
     log.log("{} echeances".format(nb))
-
     log.log(u'{!s}'.format(time.clock()))
     log.log( u'fini')
 
+
 if __name__ == "__main__":
-    import_gsb("{}/fichier_test.gsb".format(os.path.dirname(os.path.abspath(__file__))),10)
+   import_gsb("{}/test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))),2)

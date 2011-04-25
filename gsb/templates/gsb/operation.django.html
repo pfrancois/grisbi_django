@@ -1,15 +1,14 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block css %}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/common.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/operation.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/calendar.css" />
 {% endblock css %}
 {% block js %}
 <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/basiccalendar.js"></script>
 <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/operation.js"></script>
-{% endblock css %}
-{% block body_js %}onload="select_type_init()">{% endblock body_js %}
+{% endblock js %}
+{% block body_js %}onload="select_type_init()"{% endblock body_js %}
 {% block content %}
 <form id="form1" method="get" action="action.php" >
 	<fieldset class="operationMainTable">

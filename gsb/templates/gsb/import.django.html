@@ -1,0 +1,10 @@
+{% extends "generic.django.html" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% block content %}
+    <form enctype="multipart/form-data" action="." method="POST">
+        <table>
+            {{ form.as_table }}
+        </table>
+        <p><input type="submit" value="Submit"></p>
+    </form>
+{% endblock content %}

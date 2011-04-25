@@ -1,23 +1,29 @@
-from django.conf.urls.defaults import patterns, include, url
-
-
-# Uncomment the next two lines to enable the admin:
+# -*- coding: utf-8 -*-
+from django.conf.urls.defaults import patterns, include
 from django.contrib import admin
+
 admin.autodiscover()
 
-urlpatterns = patterns('mysite.gsb',
-    # Examples:
-    # url(r'^$', 'mysite.views.home', name='home'),
-    # url(r'^mysite/', include('mysite.foo.urls')),
+urlpatterns = patterns('',
+    # Common stuff... files, admin...
+    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    (r'^admin/', include(admin.site.urls)),
+)
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
-
+# les vues generales
+urlpatterns += patterns('gsb',
     (r'^$','views.index'),
-    (r'^compte/',include('gsb.url_comptes')),
-    (r'^ope/',include('gsb.url_ope')),
-    (r'^xml$','gsb_0_5_0.export')
+    (r'^xml$','gsb_0_5_0.export'),
+    (r'^import$','import_gsb.import_gsb'),
+)
+#les vues relatives aux operations
+urlpatterns += patterns('gsb.views',
+
+    (r'^ope/(?P<pk>\d+)/$','ope_detail'),
+)
+#les vues relatives aux comptes
+urlpatterns += patterns('gsb.views',
+    (r'^compte/(?P<cpt_id>\d+)/$','cpt_detail'),
+    (r'^compte_titre/(?P<cpt_id>\d+)/$','cpt_titre_detail'),
+
 )

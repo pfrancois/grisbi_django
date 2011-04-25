@@ -5,11 +5,11 @@
 <table width="100%" id="boutons">
 	<tr>
         {% if not compte.cloture %}
-		<td width="50%" class="boutton" ><a href="{% url gsb.views.creation_ope compte.id %}">Nouvelle Op.</a></td>
+		<td width="50%" class="boutton" ><a href="ope/{{ compte.id }}">Nouvelle Op.</a></td>
 		<td  width="50%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
 			</tr>
 	<tr>
-		<td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.creation_virement compte.id %}" > Nouveau Virement vers {{ compte.nom }} </a></td>
+		<td width="100%" class="boutton" colspan="2"><a href="ope/{{ compte.id }}"> Nouveau Virement vers {{ compte.nom }} </a></td>
         {% else %}
         <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
         {% endif %}
@@ -53,6 +53,10 @@
 		</tr>
 </table>
 {% if nbrapp > 0 %}
-	note: des op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+	note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+{% endif %}
+
+{% if nbvielles > 0 %}
+	note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
 {% endif %}
 {% endblock content %}
