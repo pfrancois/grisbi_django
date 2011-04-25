@@ -1,0 +1,8 @@
+{% extends "generic.django.html" %}
+{% block titre %}<h1>erreur serveur</h1>{% endblock %}
+
+{% block content %}
+
+    <p style="text-align: center;"><img src="{{ STATIC_URL }}img/505.jpg"> <br>
+    <div class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></div></p>
+{% endblock %}

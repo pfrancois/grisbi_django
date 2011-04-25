@@ -27,8 +27,7 @@ h1 {
 	padding-bottom: .5em;
 	font-weight: bold;
 	background-color: #990000;
-	margin-top: 0em;
-	/*margin-bottom: .5em;*/
+	margin-top: 0;
 	text-align: center;
 }
 
@@ -44,7 +43,7 @@ h2 {
 	background-color: #554444;
 	border: #ffffff solid 1px;
 	text-align: center;
-	padding: 10px 0px 10px 0px;
+	padding: 10px 0 10px 0;
 	font-size: 2em;
 	color: #ffffff;
 }
@@ -99,17 +98,17 @@ table {
 	border-width: 1px 1px 0 0;
 	width: 100%;
 	text-align: left;
-	padding: 0.6em 0px 0.6em 0px;
+	padding: 0.6em 0 0.6em 0;
 }
 
 .opCredit {
 	white-space: nowrap;
-	padding: 0px 0.6em 0px 0.1em;
+	padding: 0 0.6em 0 0.1em;
 }
 
 .opDebit {
 	white-space: nowrap;
-	padding: 0px 0.6em 0px 0.3em;
+	padding: 0 0.6em 0 0.3em;
 }
 
 .opDate {
@@ -120,7 +119,7 @@ table {
 
 .opTier {
 	width: 50%;
-	padding: 0px 0px 0px 0.3em;
+	padding: 0 0 0 0.3em;
 	text-align: left;
 }
 
@@ -136,7 +135,7 @@ table {
 .footerbar>td {
 	background-color: #990000;
 	font-weight: bold;
-	padding: .7em 0em;
+	padding: .7em 0;
 	border-top: 10px solid #333333;
 	height: 3em;
 }

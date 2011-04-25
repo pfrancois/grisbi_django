@@ -7,11 +7,11 @@ TEMPLATE_DEBUG = DEBUG
 #DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
 
 ADMINS = (
-    # ('francois', 'your_email@domain.com'),
+# ('francois', 'your_email@domain.com'),
 )
 #####################################
 #config gsb
-NB_JOURS_AFF=100
+NB_JOURS_AFF = 100
 
 
 
@@ -24,11 +24,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'grisbi',                      # Or path to database file if using sqlite3.
-        'USER': 'root',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': 'grisbi', # Or path to database file if using sqlite3.
+        'USER': 'root', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -50,7 +50,6 @@ FIRST_DAY_OF_WEEK = 1
 MONTH_DAY_FORMAT = 'l j F'
 NUMBER_GROUPING = 3
 USE_THOUSAND_SEPARATOR = True
-
 
 SITE_ID = 1
 
@@ -88,16 +87,16 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+# Put strings here, like "/home/html/static" or "C:/www/django/static".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+'django.contrib.staticfiles.finders.FileSystemFinder',
+'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -106,56 +105,57 @@ SECRET_KEY = '3_l+)jh0xdcwuj+w_t7=xjrio$^av0%=g=m@0bvsc7h3k2u91s'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
+'django.template.loaders.filesystem.Loader',
+'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',#debugtoolbar
+'django.middleware.common.CommonMiddleware',
+'django.contrib.sessions.middleware.SessionMiddleware',
+'django.middleware.csrf.CsrfViewMiddleware',
+'django.contrib.auth.middleware.AuthenticationMiddleware',
+'django.contrib.messages.middleware.MessageMiddleware',
+#'debug_toolbar.middleware.DebugToolbarMiddleware',#debugtoolbar
 )
 
 ROOT_URLCONF = 'mysite.urls'
 
 import os
+
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_PATH, 'templates'),
+# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
+os.path.join(PROJECT_PATH, 'templates'),
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'mysite.gsb',
-    # Uncomment the next line to enable the admin:
-     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-     'django.contrib.admindocs',
-     #'debug_toolbar',
-     #'django_extensions',
+'django.contrib.auth',
+'django.contrib.contenttypes',
+'django.contrib.sessions',
+'django.contrib.sites',
+'django.contrib.messages',
+'django.contrib.staticfiles',
+'mysite.gsb',
+# Uncomment the next line to enable the admin:
+'django.contrib.admin',
+# Uncomment the next line to enable admin documentation:
+'django.contrib.admindocs',
+#'debug_toolbar',
+#'django_extensions',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    # required by django-admin-tools
-    #'django.core.context_processors.request',
-    'django.core.context_processors.static',
+'django.core.context_processors.debug',
+'django.core.context_processors.i18n',
+'django.core.context_processors.media',
+'django.contrib.auth.context_processors.auth',
+'django.contrib.messages.context_processors.messages',
+# required by django-admin-tools
+#'django.core.context_processors.request',
+'django.core.context_processors.static',
 
 )
 #pour la debug bar

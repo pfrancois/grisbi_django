@@ -6,51 +6,63 @@ class Scat_Inline(admin.TabularInline):
     model = Scat
     extra = 3
 
+
 class Cat_admin(admin.ModelAdmin):
-    inlines=[Scat_Inline]
+    inlines = [Scat_Inline]
+
 
 class Sib_Inline(admin.TabularInline):
     model = Sib
     extra = 3
 
+
 class Ib_admin(admin.ModelAdmin):
-    inlines=[Sib_Inline]
+    inlines = [Sib_Inline]
+
 
 class Devise_admin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ('nom','isocode')}),
-        (u'dernier taux de change', {'fields': ('date_dernier_change','dernier_tx_de_change'), 'classes': ['collapse']}),
-    ]
+            (None, {'fields': ('nom', 'isocode')}),
+            (u'dernier taux de change',
+             {'fields': ('date_dernier_change', 'dernier_tx_de_change'), 'classes': ['collapse']}),
+            ]
+
 
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ('nom','type','devise','cloture')}),
-        (u'information sur le compte', {'fields': ('banque','guichet','num_compte','cle_compte'), 'classes': ['collapse']}),
-        (u'soldes', {'fields': ('solde_init','solde_mini_voulu','solde_mini_autorise'), 'classes': ['collapse']}),
-        (u'moyens par défaut', {'fields':('moyen_credit_defaut','moyen_debit_defaut'), 'classes': ['collapse']}),
-    ]
+            (None, {'fields': ('nom', 'type', 'devise', 'cloture')}),
+            (u'information sur le compte',
+             {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
+            (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
+            (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
+            ]
+
 
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ('compte','date','montant','devise','tiers','moyen')}),
-        (u'catégorie',{'fields':('cat','scat')}),
-        (u'imputation bugétaire',{'fields':('ib','sib'), 'classes': ['collapse']}),
-        (u'informations diverses', {'fields':('date_val','numcheque','notes','exercice'), 'classes': ['collapse']}),
-        (u'pointage',{'fields':('pointe','rapp'), 'classes': ['collapse']}),
-        (u'mere et jumelles',{'fields':('jumelle','mere','is_mere'), 'classes': ['collapse']}),
-    ]
+            (None, {'fields': ('compte', 'date', 'montant', 'devise', 'tiers', 'moyen')}),
+            (u'catégorie', {'fields': ('cat', 'scat')}),
+            (u'imputation bugétaire', {'fields': ('ib', 'sib'), 'classes': ['collapse']}),
+            (u'informations diverses',
+             {'fields': ('date_val', 'numcheque', 'notes', 'exercice'), 'classes': ['collapse']}),
+            (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
+            (u'mere et jumelles', {'fields': ('jumelle', 'mere', 'is_mere'), 'classes': ['collapse']}),
+            ]
+
+
 class cours_admin(admin.ModelAdmin):
-    fields= ['isin', 'date', 'valeur']
+    fields = ['isin', 'date', 'valeur']
+
 
 admin.site.register(Tiers)
-admin.site.register(Cat,Cat_admin)
-admin.site.register(Compte,Compte_admin)
-admin.site.register(Ope,Ope_admin)
-admin.site.register(Devise,Devise_admin)
+admin.site.register(Cat, Cat_admin)
+admin.site.register(Compte, Compte_admin)
+admin.site.register(Ope, Ope_admin)
+admin.site.register(Devise, Devise_admin)
 admin.site.register(Titre)
-admin.site.register(Cours,cours_admin)
+admin.site.register(Cours, cours_admin)
 admin.site.register(Banque)
-admin.site.register(Ib,Ib_admin)
+admin.site.register(Ib, Ib_admin)
 admin.site.register(Exercice)
 admin.site.register(Rapp)
 admin.site.register(Echeance)

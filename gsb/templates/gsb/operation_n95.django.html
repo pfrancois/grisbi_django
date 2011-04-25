@@ -1,13 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
-<meta http-equiv="PRAGMA" content="NO-CACHE" />
-<meta http-equiv="EXPIRES" content="0" />
-<link rel="stylesheet" type="text/css" href="css/reset.css" />
-<link rel="stylesheet" type="text/css" href="css/n95.css" />
-<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE"/>
+    <meta http-equiv="PRAGMA" content="NO-CACHE"/>
+    <meta http-equiv="EXPIRES" content="0"/>
+    <link rel="stylesheet" type="text/css" href="css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="css/n95.css"/>
+    <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/
 AAACeElEQVQ4y62TzUtUcRSGn3vvzDg64wejpk2FRpKBSSJBprSzoF2ErYI2ERRB6/oH2rQt/AMygoKkhdnCRJQyLc2kSQw1bXQ+HOfem
 bnj3I+ZO78WkqIJtuhdn/eBc877SuzRrZkzwl30sTQR5+2dRYkDtGvgwc/Loj14iYCngQxRavNB6tVT6AmDGTHEd2mMdCbDRjZJaCjK/K
 Ok5PpjvjvbKaorarEsh4QTpkXu4LjZik0eo3Ie/7EC5znLJmnmIjOEhmMAbANM02TqxzQZexSPU849pZWsPIstWfTJD8mpG5R7KnC7JCJ
@@ -16,92 +17,107 @@ XNidMtkBewsQHWkTVcF27FSEzfgc0ZV36FUdzJVMMHOon+baRtrKGkmmNAK2zPRyjNh6dmeFcNyh5Eia
 cdoqqkBSzASWib9y4TRPW/UV26KpfFB1JiBuVng+bjBh7pq8l1Z1qU8skfCb3iIf9bhNRDd8m7fwK0IZFlCjWrkLOhqPcyNRj8GChNqii
 cxCy3qQN/u7CgAY70BgaJgpeOkNBPZX03P7avU1FVS73NzzgffnmmE3jh/JdMVenFU1LZcwEgn8Nc1cNJbSjYrYdsSLo+XnFSGbroxrf2
 j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+LcyXe/2imsXfYjNJGtxieEvgleTB
-5v/i34DxAkozbMmr3sAAAAASUVORK5CYII=" rel="icon" type="image/x-icon" />
+5v/i34DxAkozbMmr3sAAAAASUVORK5CYII=" rel="icon" type="image/x-icon"/>
 
-<title>{if ($type_action=='edit')}modification{/if}{if ($type_action=='new')}nouvelle op&eacute;ration{/if} </title>
+    <title>{if ($type_action=='edit')}modification{/if}{if ($type_action=='new')}nouvelle op&eacute;ration{/if} </title>
 </head>
 <body>
 
 <h1>{if ($type_action=='edit')}modification{/if}{if ($type_action=='new')}nouvelle {/if} dans {$compte_nom}</h1>
-<form id="form1" method="get" action="action.php" >
-	<fieldset class="operationMainTable">
-		<legend>d&eacute;tails op&eacute;ration</legend>
-{* id du compte *}
-		<input type="hidden" name="cpt_id" value="{$compte_id}" />
-{*id de l'operation *}
-		<input type="hidden" name="ope_id" value="{$ope.id}" />
-{* type de l'operation *}
-		{if ($type_action=='new')}
-			<input type="hidden" name="action" value="new" />
-		{else}
-			<input type="hidden" name="action" value="edit" />
-		{/if}
-		<div class="ligne" >
-{* date *}
-		<label for="ope_date_ope">Date:</label>
-			<input type="text" name="ope_date_ope" id="ope_date_ope" value="{$ope.date|date_format:"%d%m%Y"}" style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
-		</div>
-		<div class="ligne">
-{* tiers *}
-			<label for="tiers">Tiers: </label>
-			<select name="tiers" id="tiers">
-					<option value="-1">"nouveau tiers"</option>
-				{foreach from=$tiers item=tier}
-					<option value="{$tier.id}" {if ($tier.id==$ope.tier)} selected="selected" {/if}>{$tier.nom|escape:'htmlall':'UTF-8'}</option>
-				{/foreach}
-			</select>
-			<label for="nom_nx_tiers">nom: </label>
-			<input type="text"  id="nom_nx_tiers" name="nom_nx_tiers" />
 
-		</div>
-		<div class="ligne">
-{* categorie *}
-			<label for="cat">Cat&eacute;gorie: </label>
-			<select name="cat" id="cat">
-				{foreach from=$cats_debit item=cat_en_cours}
-					<option class="DebitCatElement" value="{$cat_en_cours.id}"{if ($cat_en_cours.id==$ope.cat)} selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(-)</option>
-				{/foreach}
-				{foreach from=$cats_credit item=cat_en_cours}
-					<option class="CreditCatElement" value="{$cat_en_cours.id}"{if ($cat_en_cours.id==$ope.cat)} selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(+)</option>
-				{/foreach}
-			</select>
-		</div>
-		<div class="ligne">
-{* moyen *}
-		{if !empty($moyens)}
-			<label for="moyen">moyen de paiment: </label>
-			<select name="moyen" id="moyen">
-			{foreach from=$moyens item=moyen_en_cours}
-				<option value="{$moyen_en_cours.id}" {if ($moyen_en_cours.id==$ope.moyen)} selected="selected"{/if} {if ($moyen_en_cours.entree)} class="moyenAvecNumero"{/if}>{$moyen_en_cours.nom|escape:'htmlall':'UTF-8'}{if ($moyen_en_cours.entree==1)}(*){/if}</option>
-			{/foreach}
-			</select>
-			{*<span id="num_chq"><label for="numero_chq">numero: </label>*}
-			<input type="text"  id="numero_chq" name="numero_chq" value="{$ope.num_chq}"/> </span>
-		{else}
-			<input type="hidden" id="moyen" name="moyen" value=""/>
-			<input type="hidden" id="numero_chq" name="numero_chq" value=""/>
-		{/if}
-		</div>
-		<div class="ligne">
-{* montant *}
-		<label for="ope_montant" id="label_montant">Montant: </label>
-			<input name="ope_montant" id="ope_montant" type="text" value="{$ope.montant}" style='-wap-input-format:"*N";'/>{if ($compte_devise!=EUR)}{$compte_devise}{/if}
-		</div>
-		<div class="ligne">
-{* notes *}
-		<label for="rem">notes: </label>
-			<textarea name="rem" id="rem" cols="20" rows="5"> {$ope.note|escape:'htmlall':"utf-8"}</textarea>
-		</div>
-	</fieldset>
-	<fieldset id="button">
-		<button id="ok" name="ok" title="ok" type="submit" >Ok</button>
-		<br/>
-		<button id="retour" name="retour" title="annuler" type="button"  onclick="window.location.href='operations.php?cpt_id={$compte_id}'">Annuler</button>
-		<br/>
-		{if ($type_action!='new')}
-		<button class="boutton" id="delete" name="delete" title="effacer" type="button"  onclick="window.location.href='delete_ope.php?action=delete&amp;date={$smarty.now|date_format:"%d%m%Y"}&amp;ope_id={$ope.id}&amp;cpt_id={$compte_id}'">Effacer l'op&eacute;ration</button>
-		{/if}
-	</fieldset>
+<form id="form1" method="get" action="action.php">
+    <fieldset class="operationMainTable">
+        <legend>d&eacute;tails op&eacute;ration</legend>
+        {* id du compte *}
+        <input type="hidden" name="cpt_id" value="{$compte_id}"/>
+        {*id de l'operation *}
+        <input type="hidden" name="ope_id" value="{$ope.id}"/>
+        {* type de l'operation *}
+        {if ($type_action=='new')}
+        <input type="hidden" name="action" value="new"/>
+        {else}
+        <input type="hidden" name="action" value="edit"/>
+        {/if}
+        <div class="ligne">
+            {* date *}
+            <label for="ope_date_ope">Date:</label>
+            <input type="text" name="ope_date_ope" id="ope_date_ope" value="{$ope.date|date_format:"%d%m%Y"}"
+            style='-wap-input-format:"NNNNNNNN";' size="9" maxlength="8" />
+        </div>
+        <div class="ligne">
+            {* tiers *}
+            <label for="tiers">Tiers: </label>
+            <select name="tiers" id="tiers">
+                <option value="-1">"nouveau tiers"</option>
+                {foreach from=$tiers item=tier}
+                <option value="{$tier.id}"
+                {if ($tier.id==$ope.tier)} selected="selected" {/if}>{$tier.nom|escape:'htmlall':'UTF-8'}</option>
+                {/foreach}
+            </select>
+            <label for="nom_nx_tiers">nom: </label>
+            <input type="text" id="nom_nx_tiers" name="nom_nx_tiers"/>
+
+        </div>
+        <div class="ligne">
+            {* categorie *}
+            <label for="cat">Cat&eacute;gorie: </label>
+            <select name="cat" id="cat">
+                {foreach from=$cats_debit item=cat_en_cours}
+                <option class="DebitCatElement" value="{$cat_en_cours.id}"
+                {if ($cat_en_cours.id==$ope.cat)}
+                selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(-)</option>
+                {/foreach}
+                {foreach from=$cats_credit item=cat_en_cours}
+                <option class="CreditCatElement" value="{$cat_en_cours.id}"
+                {if ($cat_en_cours.id==$ope.cat)}
+                selected="selected"{/if}>{$cat_en_cours.nom|escape:'htmlall':'UTF-8'}(+)</option>
+                {/foreach}
+            </select>
+        </div>
+        <div class="ligne">
+            {* moyen *}
+            {if !empty($moyens)}
+            <label for="moyen">moyen de paiment: </label>
+            <select name="moyen" id="moyen">
+                {foreach from=$moyens item=moyen_en_cours}
+                <option value="{$moyen_en_cours.id}"
+                {if ($moyen_en_cours.id==$ope.moyen)} selected="selected"{/if} {if ($moyen_en_cours.entree)}
+                class="moyenAvecNumero"{/if}>{$moyen_en_cours.nom|escape:'htmlall':'UTF-8'}{if
+                ($moyen_en_cours.entree==1)}(*){/if}</option>
+                {/foreach}
+            </select>
+            {*<span id="num_chq"><label for="numero_chq">numero: </label>*}
+			<input type="text" id="numero_chq" name="numero_chq" value="{$ope.num_chq}"/> </span>
+            {else}
+            <input type="hidden" id="moyen" name="moyen" value=""/>
+            <input type="hidden" id="numero_chq" name="numero_chq" value=""/>
+            {/if}
+        </div>
+        <div class="ligne">
+            {* montant *}
+            <label for="ope_montant" id="label_montant">Montant: </label>
+            <input name="ope_montant" id="ope_montant" type="text" value="{$ope.montant}"
+                   style='-wap-input-format:"*N";'/>{if ($compte_devise!=EUR)}{$compte_devise}{/if}
+        </div>
+        <div class="ligne">
+            {* notes *}
+            <label for="rem">notes: </label>
+            <textarea name="rem" id="rem" cols="20" rows="5"> {$ope.note|escape:'htmlall':"utf-8"}</textarea>
+        </div>
+    </fieldset>
+    <fieldset id="button">
+        <button id="ok" name="ok" title="ok" type="submit">Ok</button>
+        <br/>
+        <button id="retour" name="retour" title="annuler" type="button"
+                onclick="window.location.href='operations.php?cpt_id={$compte_id}'">Annuler
+        </button>
+        <br/>
+        {if ($type_action!='new')}
+        <button class="boutton" id="delete" name="delete" title="effacer" type="button"
+                onclick="window.location.href='delete_ope.php?action=delete&amp;date={$smarty.now|date_format:"
+        %d%m%Y"}&amp;ope_id={$ope.id}&amp;cpt_id={$compte_id}'">Effacer l'op&eacute;ration</button>
+        {/if}
+    </fieldset>
 
 </form>
 </body>

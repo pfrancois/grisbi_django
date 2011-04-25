@@ -2,61 +2,77 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
-<table width="100%" id="boutons">
-	<tr>
-        {% if not compte.cloture %}
-		<td width="50%" class="boutton" ><a href="ope/{{ compte.id }}">Nouvelle Op.</a></td>
-		<td  width="50%"  class="boutton" ><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
-			</tr>
-	<tr>
-		<td width="100%" class="boutton" colspan="2"><a href="ope/{{ compte.id }}"> Nouveau Virement vers {{ compte.nom }} </a></td>
-        {% else %}
-        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
-        {% endif %}
-	</tr>
-</table>
-<br/>
-<table width="100%" id="main">
-	<thead>
-		<tr>
-			<th >Date</th>
-			<th >Tiers</th>
-			<th >Catégorie</th>
-			<th >Crédit</th>
-			<th >Débit</th>
-		</tr>
-	</thead>
-    {% block ope %}
-	{% for ope in list_ope %}
-		<tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-			<td class="opDate"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a></td>
-			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.tiers.nom|default:"aucun tiers"  }}</a></td>
-			<td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie"  }}</a></td>
-			<td class="opCredit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-			<td class="opDebit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-		</tr>
-	{% empty %}
-		<tr class="item">
-			<td colspan="5">
-				aucune op&eacute;ration n&apos;est affich&eacute;e.<br/>
-				{% if nbfiltre > 1 %}
-					{{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
-				{% else %} {% if nbfiltre == 1 %}
-					1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
-				{% endif %}{% endif %}
-			</td>
-		</tr>
-	{% endfor %}
-	{% endblock %}
-		<tr class="footerbar">
-			<td colspan="3" class="cptLabel">Solde</td><td colspan="2" class="cptSolde">{{ solde|cur }}</td>
-		</tr>
-</table>
-{% if nbrapp > 0 %}
-	note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
-{% endif %}
+    <table width="100%" id="boutons">
+        <tr>
+            {% if not compte.cloture %}
+                <td width="50%" class="boutton"><a href="ope/{{ compte.id }}">Nouvelle Op.</a></td>
+                <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+                </tr>
+                <tr>
+                <td width="100%" class="boutton" colspan="2"><a href="ope/{{ compte.id }}"> Nouveau Virement
+                    vers {{ compte.nom }} </a></td>
+            {% else %}
+                <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste
+                    comptes</a></td>
+            {% endif %}
+            </tr>
+    </table>
+    <br/>
+    <table width="100%" id="main">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Tiers</th>
+            <th>Catégorie</th>
+            <th>Crédit</th>
+            <th>Débit</th>
+        </tr>
+        </thead>
+        {% block ope %}
+            {% for ope in list_ope %}
+                <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
+                    <td class="opDate"><a
+                            href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.date|date:"SHORT_DATE_FORMAT" }}</a>
+                    </td>
+                    <td class="opTier"><a
+                            href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.tiers.nom|default:"aucun tiers" }}</a>
+                    </td>
+                    <td class="opTier"><a
+                            href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a>
+                    </td>
+                    <td class="opCredit"><a
+                            href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %}
+                        - {% endif %}</a></td>
+                    <td class="opDebit"><a
+                            href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %}
+                        - {% endif %}</a></td>
+                </tr>
+                {% empty %}
+                <tr class="item">
+                    <td colspan="5">
+                        aucune op&eacute;ration n&apos;est affich&eacute;e.<br/>
+                        {% if nbfiltre > 1 %}
+                            {{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au
+                            del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+                        {% else %} {% if nbfiltre == 1 %}
+                            1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la
+                            limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+                        {% endif %}{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endblock %}
+        <tr class="footerbar">
+            <td colspan="3" class="cptLabel">Solde</td>
+            <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
+        </tr>
+    </table>
+    {% if nbrapp > 0 %}
+        note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.
+        <br/>
+    {% endif %}
 
-{% if nbvielles > 0 %}
-	note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
-{% endif %}
+    {% if nbvielles > 0 %}
+        note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
+    {% endif %}
 {% endblock content %}

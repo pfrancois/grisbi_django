@@ -4,19 +4,20 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.utils import formats
 from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe, SafeData
+from django.utils.safestring import mark_safe
+
 register = template.Library()
 
 
 @register.filter()
-def cur(value, symbol = "&#8364;"):
+def cur(value, symbol="&#8364;"):
     pos_inf = 1e200 * 1e200
     neg_inf = -1e200 * 1e200
     nan = (1e200 * 1e200) / (1e200 * 1e200)
     special_floats = [str(pos_inf), str(neg_inf), str(nan)]
 
     try:
-        input_val = force_unicode( value )
+        input_val = force_unicode(value)
         d = Decimal(input_val)
     except UnicodeEncodeError:
         return u''
@@ -47,7 +48,8 @@ def cur(value, symbol = "&#8364;"):
         if sign:
             digits.append(u'-')
         number = u''.join(reversed(digits))
-        return mark_safe("%s %s"%(formats.number_format(number, abs(p)), symbol))
+        return mark_safe("%s %s" % (formats.number_format(number, abs(p)), symbol))
     except InvalidOperation:
         return input_val
+
 cur.is_safe = True

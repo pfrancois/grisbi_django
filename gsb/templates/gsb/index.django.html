@@ -3,54 +3,60 @@
 {% block titre %}<h1 class="survol">Comptes</h1>{% endblock titre %}
 {% comment %} il faut mettre le lien vers les fonctions speciales{% endcomment %}
 {% block content %}
-{% load gsb_extras %}
+    {% load gsb_extras %}
 
-<h2>comptes esp&egrave;ces ou bancaires</h2>
-<table id="banques">
-{% for cpt in liste_cpt_bq %}
-		<tr class="item padding">
-			<td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.nom }} {% if cpt.cloture %} (clotur&eacute;){% endif %}</a></td>
-			<td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
-		</tr>
-	{% empty %}
-	<tr class="item padding">
-		<td class="cptLabel" colspan="2"> aucun compte</td>
-	</tr>
-{% endfor %}
-	<tr class="entete"><td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td><td class="cptSolde">{{ total_bq|cur}}</td></tr>
-</table>
+    <h2>comptes esp&egrave;ces ou bancaires</h2>
+    <table id="banques">
+        {% for cpt in liste_cpt_bq %}
+            <tr class="item padding">
+                <td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.nom }} {% if cpt.cloture %}
+                    (clotur&eacute;){% endif %}</a></td>
+                <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur }}</a></td>
+            </tr>
+        {% empty %}
+            <tr class="item padding">
+                <td class="cptLabel" colspan="2"> aucun compte</td>
+            </tr>
+        {% endfor %}
+        <tr class="entete">
+            <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
+            <td class="cptSolde">{{ total_bq|cur }}</td>
+        </tr>
+    </table>
 
-<h2>autres comptes (Actifs et Passifs)</h2>
-<table id="placements">
-	{% for cpt in liste_cpt_pl %}
-	<tr class="item padding">
-		<td class="cptLabel"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}" >{{ cpt.nom }} {% if cpt.cloture %} (clotur&eacute;){% endif %}</a></td>
-		<td class="cptSolde"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}" >{{ cpt.solde|cur }}</a></td>
-	</tr>
+    <h2>autres comptes (Actifs et Passifs)</h2>
+    <table id="placements">
+        {% for cpt in liste_cpt_pl %}
+            <tr class="item padding">
+                <td class="cptLabel"><a
+                        href="{% url gsb.views.cpt_titre_detail cpt.id %}">{{ cpt.nom }} {% if cpt.cloture %}
+                    (clotur&eacute;){% endif %}</a></td>
+                <td class="cptSolde"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}">{{ cpt.solde|cur }}</a></td>
+            </tr>
 
-	{% empty %}
-	<tr class="item padding">
-		<td class="cptLabel" colspan="2"> aucun compte d'actif ou de passif </td>
-	</tr>
-	{% endfor %}
-	<tr class="entete">
-		<td class="cptLabel">Solde des autres comptes</td>
-		<td class="cptSolde">{{ total_pla|cur}}</td>
-	</tr>
-</table>
-<table id="total">
-	<tr class="footerbar">
-		<td class="cptLabel">Solde GLOBAL</td>
-		<td class="cptSolde">{{ total|cur}}</td>
-	</tr>
-</table>
-{% if nb_clos > 0 %}<p>PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos.</p>{% endif%}
+        {% empty %}
+            <tr class="item padding">
+                <td class="cptLabel" colspan="2"> aucun compte d'actif ou de passif</td>
+            </tr>
+        {% endfor %}
+        <tr class="entete">
+            <td class="cptLabel">Solde des autres comptes</td>
+            <td class="cptSolde">{{ total_pla|cur }}</td>
+        </tr>
+    </table>
+    <table id="total">
+        <tr class="footerbar">
+            <td class="cptLabel">Solde GLOBAL</td>
+            <td class="cptSolde">{{ total|cur }}</td>
+        </tr>
+    </table>
+    {% if nb_clos > 0 %}<p>PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos.</p>{% endif %}
 
-{%if nbrapp > 1 %}
-	note: {{ nbrapp }} opérations ont été filtrées car elles sont rapprochées.<br/>
-{% endif %}
-{% if nbrapp %}
-    note: 1 opération a été filtrée car elle est rapprochée.<br/>
-{% endif %}
+    {% if nbrapp > 1 %}
+        note: {{ nbrapp }} opérations ont été filtrées car elles sont rapprochées.<br/>
+    {% endif %}
+    {% if nbrapp %}
+        note: 1 opération a été filtrée car elle est rapprochée.<br/>
+    {% endif %}
 
 {% endblock content %}

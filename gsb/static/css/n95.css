@@ -1,6 +1,5 @@
 @charset "UTF-8";
 
-/* coding: utf-8 */
 body {
 	position: absolute;
 	left: 0;
@@ -24,7 +23,7 @@ h1 {
 	padding-bottom: .5em;
 	font-weight: bold;
 	background-color: #990000;
-	margin-top: 0em;
+	margin-top: 0;
 	text-align: center;
 }
 
@@ -78,8 +77,7 @@ select {
 	width: 200px;
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
-	margin: 0.2em 0;
-	margin-left: 5px;
+    margin : 0.2em 0.2em 0.2em 5px;
 }
 
 button {

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Grisbi>
-  <Generalites>
+<Generalites>
     <Version_fichier>0.5.0</Version_fichier>
     <Version_grisbi>0.5.9 for Windows (GTK&gt;=2.6.9)</Version_grisbi>
     <Fichier_ouvert>0</Fichier_ouvert>
@@ -27,14 +27,14 @@
     <Ligne_aff_une_ligne>0</Ligne_aff_une_ligne>
     <Lignes_aff_deux_lignes>0-1</Lignes_aff_deux_lignes>
     <Lignes_aff_trois_lignes>0-1-2</Lignes_aff_trois_lignes>
-  </Generalites>
-  <Comptes>
-    <Generalites>
-      <Ordre_des_comptes>0-1-2-3-4-5-6</Ordre_des_comptes>
-      <Compte_courant>0</Compte_courant>
-    </Generalites>
-    <Compte>
-      <Details>
+</Generalites>
+<Comptes>
+<Generalites>
+    <Ordre_des_comptes>0-1-2-3-4-5-6</Ordre_des_comptes>
+    <Compte_courant>0</Compte_courant>
+</Generalites>
+<Compte>
+    <Details>
         <Nom>compte bancaire ouvert</Nom>
         <Id_compte/>
         <No_de_compte>0</No_de_compte>
@@ -64,15 +64,15 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="2" Nom="Depot" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="3" Nom="Carte de credit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="4" Nom="Pr&#xE9;l&#xE8;vement" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="12345"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
+    </Detail_de_Types>
+    <Detail_des_operations>
         <Operation No="1" Id="" D="28/5/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="ope avec type avec numero" Ty="5" Ct="12345" P="0" A="0" R="0" E="5" I="2" Si="1" Pc="1" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="2" Id="" D="30/5/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="1" N="" Ty="3" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="3" Id="" D="30/5/2010" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="notes sous ope1" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="2"/>
@@ -82,10 +82,10 @@
         <Operation No="10" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="0" N="virement" Ty="1" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="2" Ibg="" Ro="9" Rc="2" Va="0"/>
         <Operation No="12" Id="" D="31/5/2010" Db="0/0/0" M="-123,0000000" De="2" Rdc="1" Tc="25,0000000" Fc="3,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="1" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="11" Rc="3" Va="0"/>
         <Operation No="13" Id="" D="31/5/2010" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="6" Sc="1" Ov="0" N="echance automatique" Ty="2" Ct="" P="0" A="1" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
+    </Detail_des_operations>
+</Compte>
+<Compte>
+    <Details>
         <Nom>compte bancaire cloture</Nom>
         <Id_compte/>
         <No_de_compte>1</No_de_compte>
@@ -115,20 +115,21 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1/2/3/4/5/6/7/8</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="3" Nom="Carte de cr&#xE9;dit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="4" Nom="Pr&#xE9;l&#xE8;vement" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="0"/>
-        <Type No="8" Nom="Nouveau mode de r&#xE9;glement" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
+        <Type No="8" Nom="Nouveau mode de r&#xE9;glement" Signe="2" Affiche_entree="0" Numerotation_auto="0"
+              No_en_cours="0"/>
+    </Detail_de_Types>
+    <Detail_des_operations>
         <Operation No="14" Id="" D="20/9/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="compte clos" Ty="4" Ct="1" P="0" A="0" R="0" E="5" I="2" Si="1" Pc="1" Ibg="" Ro="0" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
+    </Detail_des_operations>
+</Compte>
+<Compte>
+    <Details>
         <Nom>caisse</Nom>
         <Id_compte/>
         <No_de_compte>2</No_de_compte>
@@ -158,17 +159,17 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1/2/2/3</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="especes" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="2" Nom="rentree" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
+    </Detail_de_Types>
+    <Detail_des_operations>
         <Operation No="9" Id="" D="31/5/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="0" N="virement" Ty="0" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="2" Ibg="" Ro="10" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
+    </Detail_des_operations>
+</Compte>
+<Compte>
+    <Details>
         <Nom>compte bancaire avec devise particuliere</Nom>
         <Id_compte/>
         <No_de_compte>3</No_de_compte>
@@ -198,21 +199,21 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="2" Nom="D&#xE9;p&#xF4;t" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="3" Nom="Carte de cr&#xE9;dit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="4" Nom="Pr&#xE9;l&#xE8;vement" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
+    </Detail_de_Types>
+    <Detail_des_operations>
         <Operation No="8" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="2" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="5" Sc="0" Ov="0" N="recette en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="11" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="2" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="12" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
+    </Detail_des_operations>
+</Compte>
+<Compte>
+    <Details>
         <Nom>emprunt</Nom>
         <Id_compte/>
         <No_de_compte>4</No_de_compte>
@@ -242,14 +243,14 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations/>
-    </Compte>
-    <Compte>
-      <Details>
+    </Detail_de_Types>
+    <Detail_des_operations/>
+</Compte>
+<Compte>
+    <Details>
         <Nom>PEE</Nom>
         <Id_compte/>
         <No_de_compte>5</No_de_compte>
@@ -279,12 +280,12 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri/>
-      </Details>
-      <Detail_de_Types/>
-      <Detail_des_operations/>
-    </Compte>
-    <Compte>
-      <Details>
+    </Details>
+    <Detail_de_Types/>
+    <Detail_des_operations/>
+</Compte>
+<Compte>
+    <Details>
         <Nom>pret clos</Nom>
         <Id_compte/>
         <No_de_compte>6</No_de_compte>
@@ -314,215 +315,215 @@
         <Tri_par_type>0</Tri_par_type>
         <Neutres_inclus>0</Neutres_inclus>
         <Ordre_du_tri>1</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
+    </Details>
+    <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations/>
-    </Compte>
-  </Comptes>
-  <Echeances>
+    </Detail_de_Types>
+    <Detail_des_operations/>
+</Compte>
+</Comptes>
+<Echeances>
     <Generalites>
-      <Nb_echeances>2</Nb_echeances>
-      <No_derniere_echeance>3</No_derniere_echeance>
+        <Nb_echeances>2</Nb_echeances>
+        <No_derniere_echeance>3</No_derniere_echeance>
     </Generalites>
     <Detail_des_echeances>
-      <Echeance No="3" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="2" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique" Automatique="1" Periodicite="2" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="2" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="2" Tiers="4" Categorie="21" Sous-categorie="6" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="echeance" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+        <Echeance No="3" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="2" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique" Automatique="1" Periodicite="2" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+        <Echeance No="2" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="2" Tiers="4" Categorie="21" Sous-categorie="6" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="echeance" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
     </Detail_des_echeances>
-  </Echeances>
-  <Tiers>
+</Echeances>
+<Tiers>
     <Generalites>
-      <Nb_tiers>5</Nb_tiers>
-      <No_dernier_tiers>6</No_dernier_tiers>
+        <Nb_tiers>5</Nb_tiers>
+        <No_dernier_tiers>6</No_dernier_tiers>
     </Generalites>
     <Detail_des_tiers>
-      <Tiers No="1" Nom="premier" Informations="" Liaison="0"/>
-      <Tiers No="2" Nom="second" Informations="" Liaison="0"/>
-      <Tiers No="4" Nom="quatrieme" Informations="" Liaison="0"/>
-      <Tiers No="5" Nom="tiers isole" Informations="" Liaison="0"/>
-      <Tiers No="6" Nom="titre_ SG" Informations="FR0000130809@ACT" Liaison="0"/>
+        <Tiers No="1" Nom="premier" Informations="" Liaison="0"/>
+        <Tiers No="2" Nom="second" Informations="" Liaison="0"/>
+        <Tiers No="4" Nom="quatrieme" Informations="" Liaison="0"/>
+        <Tiers No="5" Nom="tiers isole" Informations="" Liaison="0"/>
+        <Tiers No="6" Nom="titre_ SG" Informations="FR0000130809@ACT" Liaison="0"/>
     </Detail_des_tiers>
-  </Tiers>
-  <Categories>
+</Tiers>
+<Categories>
     <Generalites>
-      <Nb_categories>5</Nb_categories>
-      <No_derniere_categorie>21</No_derniere_categorie>
+        <Nb_categories>5</Nb_categories>
+        <No_derniere_categorie>21</No_derniere_categorie>
     </Generalites>
     <Detail_des_categories>
-      <Categorie No="5" Nom="Revenus divers" Type="0" No_derniere_sous_cagegorie="3"/>
-      <Categorie No="6" Nom="Alimentation" Type="1" No_derniere_sous_cagegorie="9">
-        <Sous-categorie No="1" Nom="Bar"/>
-        <Sous-categorie No="2" Nom="Boulangerie"/>
-        <Sous-categorie No="3" Nom="Cantine"/>
-        <Sous-categorie No="4" Nom="Confiserie"/>
-        <Sous-categorie No="5" Nom="Divers"/>
-        <Sous-categorie No="6" Nom="Epicerie"/>
-        <Sous-categorie No="7" Nom="Restaurant"/>
-        <Sous-categorie No="8" Nom="Self"/>
-        <Sous-categorie No="9" Nom="Supermarch&#xE9;"/>
-      </Categorie>
-      <Categorie No="7" Nom="Animaux domestiques" Type="1" No_derniere_sous_cagegorie="4">
-        <Sous-categorie No="1" Nom="Alimentation"/>
-        <Sous-categorie No="2" Nom="Fournitures diverses"/>
-        <Sous-categorie No="3" Nom="Toilettage"/>
-        <Sous-categorie No="4" Nom="V&#xE9;t&#xE9;rinaire"/>
-      </Categorie>
-      <Categorie No="10" Nom="Divers" Type="2" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="21" Nom="Sant&#xE9;" Type="1" No_derniere_sous_cagegorie="9">
-        <Sous-categorie No="1" Nom="Assurance"/>
-        <Sous-categorie No="2" Nom="Dentiste"/>
-        <Sous-categorie No="3" Nom="H&#xF4;pital"/>
-        <Sous-categorie No="4" Nom="Kin&#xE9;sith&#xE9;rapeute"/>
-        <Sous-categorie No="5" Nom="M&#xE9;decin"/>
-        <Sous-categorie No="6" Nom="Ophtalmologiste"/>
-        <Sous-categorie No="7" Nom="Ost&#xE9;opathe"/>
-        <Sous-categorie No="8" Nom="Pharmacie"/>
-        <Sous-categorie No="9" Nom="S&#xE9;curit&#xE9; sociale"/>
-      </Categorie>
+        <Categorie No="5" Nom="Revenus divers" Type="0" No_derniere_sous_cagegorie="3"/>
+        <Categorie No="6" Nom="Alimentation" Type="1" No_derniere_sous_cagegorie="9">
+            <Sous-categorie No="1" Nom="Bar"/>
+            <Sous-categorie No="2" Nom="Boulangerie"/>
+            <Sous-categorie No="3" Nom="Cantine"/>
+            <Sous-categorie No="4" Nom="Confiserie"/>
+            <Sous-categorie No="5" Nom="Divers"/>
+            <Sous-categorie No="6" Nom="Epicerie"/>
+            <Sous-categorie No="7" Nom="Restaurant"/>
+            <Sous-categorie No="8" Nom="Self"/>
+            <Sous-categorie No="9" Nom="Supermarch&#xE9;"/>
+        </Categorie>
+        <Categorie No="7" Nom="Animaux domestiques" Type="1" No_derniere_sous_cagegorie="4">
+            <Sous-categorie No="1" Nom="Alimentation"/>
+            <Sous-categorie No="2" Nom="Fournitures diverses"/>
+            <Sous-categorie No="3" Nom="Toilettage"/>
+            <Sous-categorie No="4" Nom="V&#xE9;t&#xE9;rinaire"/>
+        </Categorie>
+        <Categorie No="10" Nom="Divers" Type="2" No_derniere_sous_cagegorie="0"/>
+        <Categorie No="21" Nom="Sant&#xE9;" Type="1" No_derniere_sous_cagegorie="9">
+            <Sous-categorie No="1" Nom="Assurance"/>
+            <Sous-categorie No="2" Nom="Dentiste"/>
+            <Sous-categorie No="3" Nom="H&#xF4;pital"/>
+            <Sous-categorie No="4" Nom="Kin&#xE9;sith&#xE9;rapeute"/>
+            <Sous-categorie No="5" Nom="M&#xE9;decin"/>
+            <Sous-categorie No="6" Nom="Ophtalmologiste"/>
+            <Sous-categorie No="7" Nom="Ost&#xE9;opathe"/>
+            <Sous-categorie No="8" Nom="Pharmacie"/>
+            <Sous-categorie No="9" Nom="S&#xE9;curit&#xE9; sociale"/>
+        </Categorie>
     </Detail_des_categories>
-  </Categories>
-  <Imputations>
+</Categories>
+<Imputations>
     <Generalites>
-      <Nb_imputations>4</Nb_imputations>
-      <No_derniere_imputation>4</No_derniere_imputation>
+        <Nb_imputations>4</Nb_imputations>
+        <No_derniere_imputation>4</No_derniere_imputation>
     </Generalites>
     <Detail_des_imputations>
-      <Imputation No="1" Nom="imputation_credit" Type="0" No_derniere_sous_imputation="0"/>
-      <Imputation No="2" Nom="imputation_debit" Type="1" No_derniere_sous_imputation="1">
-        <Sous-imputation No="1" Nom="sous_imputation"/>
-      </Imputation>
-      <Imputation No="3" Nom="autre imputation_debit" Type="1" No_derniere_sous_imputation="1">
-        <Sous-imputation No="1" Nom="sous_imputation"/>
-      </Imputation>
-      <Imputation No="4" Nom="imputation_special" Type="2" No_derniere_sous_imputation="0"/>
+        <Imputation No="1" Nom="imputation_credit" Type="0" No_derniere_sous_imputation="0"/>
+        <Imputation No="2" Nom="imputation_debit" Type="1" No_derniere_sous_imputation="1">
+            <Sous-imputation No="1" Nom="sous_imputation"/>
+        </Imputation>
+        <Imputation No="3" Nom="autre imputation_debit" Type="1" No_derniere_sous_imputation="1">
+            <Sous-imputation No="1" Nom="sous_imputation"/>
+        </Imputation>
+        <Imputation No="4" Nom="imputation_special" Type="2" No_derniere_sous_imputation="0"/>
     </Detail_des_imputations>
-  </Imputations>
-  <Devises>
+</Imputations>
+<Devises>
     <Generalites>
-      <Nb_devises>2</Nb_devises>
-      <No_derniere_devise>2</No_derniere_devise>
+        <Nb_devises>2</Nb_devises>
+        <No_derniere_devise>2</No_derniere_devise>
     </Generalites>
     <Detail_des_devises>
-      <Devise No="1" Nom="Euro" Code="&#x20AC;" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0" Devise_en_rapport="0" Change="0,000000"/>
-      <Devise No="2" Nom="Rand" Code="" IsoCode="ZAR" Passage_euro="0" Date_dernier_change="1/1/2010" Rapport_entre_devises="1" Devise_en_rapport="1" Change="10,000000"/>
+        <Devise No="1" Nom="Euro" Code="&#x20AC;" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0" Devise_en_rapport="0" Change="0,000000"/>
+        <Devise No="2" Nom="Rand" Code="" IsoCode="ZAR" Passage_euro="0" Date_dernier_change="1/1/2010" Rapport_entre_devises="1" Devise_en_rapport="1" Change="10,000000"/>
     </Detail_des_devises>
-  </Devises>
-  <Banques>
+</Devises>
+<Banques>
     <Generalites>
-      <Nb_banques>2</Nb_banques>
-      <No_derniere_banque>0</No_derniere_banque>
+        <Nb_banques>2</Nb_banques>
+        <No_derniere_banque>0</No_derniere_banque>
     </Generalites>
     <Detail_des_banques>
-      <Banque No="1" Nom="banque test" Code="30003" Adresse="rue du paradis" Tel="0123456789" Mail="toto@toto.com" Web="http:\\www.banque.fr" Nom_correspondant="madame" Fax_correspondant="6789012345" Tel_correspondant="0987654321" Mail_correspondant="tata@toto.com" Remarques="voici qq remarques"/>
-      <Banque No="2" Nom="seconde banque" Code="12345" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
+        <Banque No="1" Nom="banque test" Code="30003" Adresse="rue du paradis" Tel="0123456789" Mail="toto@toto.com" Web="http:\\www.banque.fr" Nom_correspondant="madame" Fax_correspondant="6789012345" Tel_correspondant="0987654321" Mail_correspondant="tata@toto.com" Remarques="voici qq remarques"/>
+        <Banque No="2" Nom="seconde banque" Code="12345" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
     </Detail_des_banques>
-  </Banques>
-  <Exercices>
+</Banques>
+<Exercices>
     <Generalites>
-      <Nb_exercices>6</Nb_exercices>
-      <No_dernier_exercice>6</No_dernier_exercice>
+        <Nb_exercices>6</Nb_exercices>
+        <No_dernier_exercice>6</No_dernier_exercice>
     </Generalites>
     <Detail_des_exercices>
-      <Exercice No="5" Nom="2010" Date_debut="1/1/2010" Date_fin="31/12/2010" Affiche="1"/>
-      <Exercice No="6" Nom="2009" Date_debut="1/1/2009" Date_fin="31/12/2009" Affiche="0"/>
+        <Exercice No="5" Nom="2010" Date_debut="1/1/2010" Date_fin="31/12/2010" Affiche="1"/>
+        <Exercice No="6" Nom="2009" Date_debut="1/1/2009" Date_fin="31/12/2009" Affiche="0"/>
     </Detail_des_exercices>
-  </Exercices>
-  <Rapprochements>
+</Exercices>
+<Rapprochements>
     <Detail_des_rapprochements>
-      <Rapprochement No="1" Nom="CBO1"/>
+        <Rapprochement No="1" Nom="CBO1"/>
     </Detail_des_rapprochements>
-  </Rapprochements>
-  <Etats>
+</Rapprochements>
+<Etats>
     <Generalites>
-      <No_dernier_etat>1</No_dernier_etat>
+        <No_dernier_etat>1</No_dernier_etat>
     </Generalites>
     <Detail_des_etats>
-      <Etat>
-        <No>1</No>
-        <Nom>Revenus et depenses du mois precedent</Nom>
-        <Type_classement>1/2/3/4/5/6</Type_classement>
-        <Aff_r>0</Aff_r>
-        <Aff_ope>0</Aff_ope>
-        <Aff_nb_ope>0</Aff_nb_ope>
-        <Aff_no_ope>0</Aff_no_ope>
-        <Aff_date_ope>0</Aff_date_ope>
-        <Aff_tiers_ope>0</Aff_tiers_ope>
-        <Aff_categ_ope>0</Aff_categ_ope>
-        <Aff_ss_categ_ope>0</Aff_ss_categ_ope>
-        <Aff_type_ope>0</Aff_type_ope>
-        <Aff_ib_ope>0</Aff_ib_ope>
-        <Aff_ss_ib_ope>0</Aff_ss_ib_ope>
-        <Aff_cheque_ope>0</Aff_cheque_ope>
-        <Aff_notes_ope>0</Aff_notes_ope>
-        <Aff_pc_ope>0</Aff_pc_ope>
-        <Aff_verif_ope>0</Aff_verif_ope>
-        <Aff_rappr_ope>0</Aff_rappr_ope>
-        <Aff_infobd_ope>0</Aff_infobd_ope>
-        <Aff_exo_ope>0</Aff_exo_ope>
-        <Class_ope>0</Class_ope>
-        <Aff_titres_col>0</Aff_titres_col>
-        <Aff_titres_chgt>0</Aff_titres_chgt>
-        <Pas_detail_ventil>0</Pas_detail_ventil>
-        <Sep_rev_dep>1</Sep_rev_dep>
-        <Devise_gen>1</Devise_gen>
-        <Incl_tiers>0</Incl_tiers>
-        <Ope_click>0</Ope_click>
-        <Exo_date>0</Exo_date>
-        <Detail_exo>0</Detail_exo>
-        <No_exo/>
-        <Plage_date>7</Plage_date>
-        <Date_debut/>
-        <Date_fin/>
-        <Utilise_plages>0</Utilise_plages>
-        <Sep_plages>0</Sep_plages>
-        <Sep_exo>0</Sep_exo>
-        <Deb_sem_plages>0</Deb_sem_plages>
-        <Detail_comptes>0</Detail_comptes>
-        <No_comptes/>
-        <Grp_ope_compte>0</Grp_ope_compte>
-        <Total_compte>0</Total_compte>
-        <Aff_nom_compte>0</Aff_nom_compte>
-        <Type_vir>2</Type_vir>
-        <No_comptes_virements/>
-        <Exclure_non_vir>0</Exclure_non_vir>
-        <Categ>1</Categ>
-        <Detail_categ>0</Detail_categ>
-        <No_categ/>
-        <Exclut_categ>0</Exclut_categ>
-        <Total_categ>1</Total_categ>
-        <Aff_ss_categ>1</Aff_ss_categ>
-        <Aff_pas_ss_categ>1</Aff_pas_ss_categ>
-        <Total_ss_categ>1</Total_ss_categ>
-        <Devise_categ>1</Devise_categ>
-        <Aff_nom_categ>1</Aff_nom_categ>
-        <IB>0</IB>
-        <Detail_ib>0</Detail_ib>
-        <No_ib/>
-        <Exclut_ib>0</Exclut_ib>
-        <Total_ib>0</Total_ib>
-        <Aff_ss_ib>0</Aff_ss_ib>
-        <Aff_pas_ss_ib>0</Aff_pas_ss_ib>
-        <Total_ss_ib>0</Total_ss_ib>
-        <Devise_ib>1</Devise_ib>
-        <Aff_nom_ib>0</Aff_nom_ib>
-        <Tiers>0</Tiers>
-        <Detail_tiers>0</Detail_tiers>
-        <No_tiers/>
-        <Total_tiers>0</Total_tiers>
-        <Devise_tiers>1</Devise_tiers>
-        <Aff_nom_tiers>0</Aff_nom_tiers>
-        <Texte>0</Texte>
-        <Texte_comp>
-          <Comp Lien_struct="-1" Champ="0" Op="0" Txt="" Util_txt="1" Comp_1="0" Lien_1_2="3" Comp_2="0" Mont_1="0" Mont_2="0"/>
-        </Texte_comp>
-        <Montant>0</Montant>
-        <Montant_devise>1</Montant_devise>
-        <Montant_comp/>
-        <Excl_nul>0</Excl_nul>
-        <Detail_mod_paie>0</Detail_mod_paie>
-        <Liste_mod_paie/>
-      </Etat>
+        <Etat>
+            <No>1</No>
+            <Nom>Revenus et depenses du mois precedent</Nom>
+            <Type_classement>1/2/3/4/5/6</Type_classement>
+            <Aff_r>0</Aff_r>
+            <Aff_ope>0</Aff_ope>
+            <Aff_nb_ope>0</Aff_nb_ope>
+            <Aff_no_ope>0</Aff_no_ope>
+            <Aff_date_ope>0</Aff_date_ope>
+            <Aff_tiers_ope>0</Aff_tiers_ope>
+            <Aff_categ_ope>0</Aff_categ_ope>
+            <Aff_ss_categ_ope>0</Aff_ss_categ_ope>
+            <Aff_type_ope>0</Aff_type_ope>
+            <Aff_ib_ope>0</Aff_ib_ope>
+            <Aff_ss_ib_ope>0</Aff_ss_ib_ope>
+            <Aff_cheque_ope>0</Aff_cheque_ope>
+            <Aff_notes_ope>0</Aff_notes_ope>
+            <Aff_pc_ope>0</Aff_pc_ope>
+            <Aff_verif_ope>0</Aff_verif_ope>
+            <Aff_rappr_ope>0</Aff_rappr_ope>
+            <Aff_infobd_ope>0</Aff_infobd_ope>
+            <Aff_exo_ope>0</Aff_exo_ope>
+            <Class_ope>0</Class_ope>
+            <Aff_titres_col>0</Aff_titres_col>
+            <Aff_titres_chgt>0</Aff_titres_chgt>
+            <Pas_detail_ventil>0</Pas_detail_ventil>
+            <Sep_rev_dep>1</Sep_rev_dep>
+            <Devise_gen>1</Devise_gen>
+            <Incl_tiers>0</Incl_tiers>
+            <Ope_click>0</Ope_click>
+            <Exo_date>0</Exo_date>
+            <Detail_exo>0</Detail_exo>
+            <No_exo/>
+            <Plage_date>7</Plage_date>
+            <Date_debut/>
+            <Date_fin/>
+            <Utilise_plages>0</Utilise_plages>
+            <Sep_plages>0</Sep_plages>
+            <Sep_exo>0</Sep_exo>
+            <Deb_sem_plages>0</Deb_sem_plages>
+            <Detail_comptes>0</Detail_comptes>
+            <No_comptes/>
+            <Grp_ope_compte>0</Grp_ope_compte>
+            <Total_compte>0</Total_compte>
+            <Aff_nom_compte>0</Aff_nom_compte>
+            <Type_vir>2</Type_vir>
+            <No_comptes_virements/>
+            <Exclure_non_vir>0</Exclure_non_vir>
+            <Categ>1</Categ>
+            <Detail_categ>0</Detail_categ>
+            <No_categ/>
+            <Exclut_categ>0</Exclut_categ>
+            <Total_categ>1</Total_categ>
+            <Aff_ss_categ>1</Aff_ss_categ>
+            <Aff_pas_ss_categ>1</Aff_pas_ss_categ>
+            <Total_ss_categ>1</Total_ss_categ>
+            <Devise_categ>1</Devise_categ>
+            <Aff_nom_categ>1</Aff_nom_categ>
+            <IB>0</IB>
+            <Detail_ib>0</Detail_ib>
+            <No_ib/>
+            <Exclut_ib>0</Exclut_ib>
+            <Total_ib>0</Total_ib>
+            <Aff_ss_ib>0</Aff_ss_ib>
+            <Aff_pas_ss_ib>0</Aff_pas_ss_ib>
+            <Total_ss_ib>0</Total_ss_ib>
+            <Devise_ib>1</Devise_ib>
+            <Aff_nom_ib>0</Aff_nom_ib>
+            <Tiers>0</Tiers>
+            <Detail_tiers>0</Detail_tiers>
+            <No_tiers/>
+            <Total_tiers>0</Total_tiers>
+            <Devise_tiers>1</Devise_tiers>
+            <Aff_nom_tiers>0</Aff_nom_tiers>
+            <Texte>0</Texte>
+            <Texte_comp>
+                <Comp Lien_struct="-1" Champ="0" Op="0" Txt="" Util_txt="1" Comp_1="0" Lien_1_2="3" Comp_2="0" Mont_1="0" Mont_2="0"/>
+            </Texte_comp>
+            <Montant>0</Montant>
+            <Montant_devise>1</Montant_devise>
+            <Montant_comp/>
+            <Excl_nul>0</Excl_nul>
+            <Detail_mod_paie>0</Detail_mod_paie>
+            <Liste_mod_paie/>
+        </Etat>
     </Detail_des_etats>
-  </Etats>
+</Etats>
 </Grisbi>
