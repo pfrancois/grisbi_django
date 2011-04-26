@@ -13,9 +13,7 @@ import decimal
 class SimpleTest(TestCase):
     def setUp(self):
         import_gsb("{}/../test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))))
-        Cours(id=1, valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(id=1),
-              date=datetime.date(day=1, month=1, year=2010)).save()
-
+        Cours(id=1,valeur=decimal.Decimal('10.00'),isin=Titre.objects.get(id=1),date=datetime.date(day=1,month=1,year=2010)).save()
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)
         self.assertEqual(obj.nom, u'premier')
@@ -189,16 +187,23 @@ class SimpleTest(TestCase):
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
         self.assertEquals(obj.compte.id, 0)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
-        self.assertEquals(obj.devise.id, 2)
+        self.assertEquals(obj.devise.id, 1)
         self.assertEquals(obj.tiers.id, 4)
         self.assertEquals(obj.cat.id, 21)
         self.assertEquals(obj.scat.grisbi_id, 6)
         self.assertEquals(obj.moyen.id, 1)
         self.assertEquals(obj.exercice.id, 5)
         self.assertEquals(obj.notes, u"echeance")
-        self.assertEquals(obj.inscription_automatique, false)
+        self.assertEquals(obj.inscription_automatique, False)
         self.assertEquals(obj.intervalle, 0)
-
+        
+    def test_generalites(self):
+            obj=Generalite.gen()
+            self.assertIsInstance(obj,Generalite)
+            self.assertEquals(obj.titre,'tiitre du fichier')
+            self.assertEquals(obj.utilise_exercices,True)
+            self.assertEquals(obj.utilise_ib,True)
+            self.assertEquals(obj.utilise_pc,True)
     def test_ope(self):
         obj=Ope.objects.get(id=1)
         self.assertEquals(obj.compte.id, 0)

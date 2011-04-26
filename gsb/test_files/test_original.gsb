@@ -323,15 +323,15 @@
   </Comptes>
   <Echeances>
     <Generalites>
-      <Nb_echeances>4</Nb_echeances>
-      <No_derniere_echeance>5</No_derniere_echeance>
+      <Nb_echeances>5</Nb_echeances>
+      <No_derniere_echeance>6</No_derniere_echeance>
     </Generalites>
     <Detail_des_echeances>
       <Echeance No="3" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique" Automatique="1" Periodicite="2" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
       <Echeance No="4" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique avec periodicite personalise" Automatique="1" Periodicite="4" Intervalle_periodicite="1" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="4" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique avec periodicite personalise et date limite" Automatique="1" Periodicite="4" Intervalle_periodicite="1" Periodicite_personnalisee="1" Date_limite="01/01/2013" Ech_ventilee="0" No_ech_associee="0"/>
+      <Echeance No="5" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="6" Sous-categorie="2" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="automatique avec periodicite personalise et date limite" Automatique="1" Periodicite="4" Intervalle_periodicite="1" Periodicite_personnalisee="1" Date_limite="01/01/2013" Ech_ventilee="0" No_ech_associee="0"/>
       <Echeance No="2" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="21" Sous-categorie="6" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="echeance" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="4" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="21" Sous-categorie="6" Virement_compte="3" Type="1" Type_contre_ope="1" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="virement" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+      <Echeance No="6" Date="31/12/2012" Compte="0" Montant="-123,0000000" Devise="1" Tiers="4" Categorie="21" Sous-categorie="6" Virement_compte="3" Type="1" Type_contre_ope="1" Contenu_du_type="" Exercice="5" Imputation="0" Sous-imputation="0" Notes="virement" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Periodicite_personnalisee="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
     </Detail_des_echeances>
   </Echeances>
   <Tiers>

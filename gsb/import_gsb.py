@@ -394,6 +394,11 @@ def import_gsb(nomfich, niv_log=10):
         except (ObjectDoesNotExist, TypeError):
             element.moyen = None
         try:
+            element.exercice = Exercice.objects.get(id=int(xml_element.get('Exercice')))
+        except (ObjectDoesNotExist, TypeError):
+            element.moyen = None
+        element.notes = xml_element.get('Notes')
+        try:
             element.cat = Cat.objects.get(id=int(xml_element.get('Categorie')))
             try:
                 id = int(xml_element.get('Sous-categorie'))
