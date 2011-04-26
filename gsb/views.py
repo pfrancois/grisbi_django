@@ -74,11 +74,9 @@ def cpt_titre_detail(request, cpt_id):
     titres = []
     total_titres = 0
     for t in titre_sans_sum:
-        mise =
-        t.ope_set.exclude(is_mere=True).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))[
+        mise = t.ope_set.exclude(is_mere=True).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))[
         'sum']
-        pmv =
-        t.ope_set.exclude(is_mere=True).filter(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))[
+        pmv = t.ope_set.exclude(is_mere=True).filter(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))[
         'sum']
         total_titres = total_titres + mise + pmv
         titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'mise': mise, 'pmv': pmv,

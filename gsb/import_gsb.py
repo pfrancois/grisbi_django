@@ -424,7 +424,6 @@ def import_gsb(nomfich, niv_log=10):
         except (ObjectDoesNotExist, TypeError):
             element.compte_virement = None
             element.moyen_virement = None
-        if ()
         element.save()
         log.log(time.clock(), 1)
     log.log("{} echeances".format(nb))
