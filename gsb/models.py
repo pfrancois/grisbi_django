@@ -180,7 +180,7 @@ class Compte(models.Model):
     )
     nom = models.CharField(max_length=120)
     titulaire = models.CharField(max_length=120, blank=True, default='')
-    type = models.CharField(max_length=24, choices=typescpt)
+    type = models.CharField(max_length=24, choices=typescpt,default='b')
     devise = models.ForeignKey(Devise)
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     guichet = models.CharField(max_length=15, blank=True)
@@ -223,7 +223,7 @@ class Moyen(models.Model):
     )
     compte = models.ForeignKey(Compte)
     nom = models.CharField(max_length=120)
-    signe = models.CharField(max_length=1, choices=typesdep, blank=True)
+    signe = models.CharField(max_length=1, choices=typesdep,default='d')
     affiche_numero = models.BooleanField(default=False)
     num_auto = models.BooleanField(default=False)
     num_en_cours = models.BigIntegerField(null=True, blank=True)
@@ -259,6 +259,19 @@ class Rapp(models.Model):
 
 
 class Echeance(models.Model):
+    typesperiod = (
+        ('u', u'unique'),
+        ('h', u'hebdomadaire'),
+        ('m', u'mensuel'),
+        ('a', u'annuel'),
+        ('p', u'personalisé'),
+    )
+    typesperiodperso = (
+        ('j', u'jour'),
+        ('h', u'mois'),
+        ('m', u'annee'),
+    )
+
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
@@ -274,9 +287,9 @@ class Echeance(models.Model):
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True, default="")
     inscription_automatique = models.BooleanField(default=False)
-    periodicite = models.TextField(default="")#TODO gerer ca
+    periodicite = models.TextField(max_length=1, choices=typesperiod, blank=True, default="")
     intervalle = models.IntegerField(default=0)
-    periode_perso = models.TextField(blank=True, default="")
+    periode_perso = models.TextField(max_length=1, choices=typesperiodperso, blank=True, default="")
     date_limite = models.DateField(null=True, blank=True, default=None)
     class Meta:
         db_table = 'echeance'

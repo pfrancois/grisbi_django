@@ -178,9 +178,7 @@ class SimpleTest(TestCase):
         self.assertEquals(obj.tiers.id, 4)
         self.assertEquals(obj.cat.id, 6)
         self.assertEquals(obj.scat.grisbi_id, 2)
-        self.assertEquals(obj.compte_virement.id, 0)
         self.assertEquals(obj.moyen, 3)
-        self.assertEquals(obj.moyen_virement.id, 0)
         self.assertEquals(obj.exercice.id, 5)
         self.assertEquals(obj.notes, u"automatique")
         self.assertEquals(obj.inscription_automatique, True)
@@ -195,17 +193,13 @@ class SimpleTest(TestCase):
         self.assertEquals(obj.tiers.id, 4)
         self.assertEquals(obj.cat.id, 21)
         self.assertEquals(obj.scat.grisbi_id, 6)
-        self.assertEquals(obj.compte_virement.id, 0)
-        self.assertEquals(obj.moyen, 3)
-        self.assertEquals(obj.moyen_virement.id, 0)
+        self.assertEquals(obj.moyen.id, 1)
         self.assertEquals(obj.exercice.id, 5)
         self.assertEquals(obj.notes, u"echeance")
         self.assertEquals(obj.inscription_automatique, false)
         self.assertEquals(obj.intervalle, 0)
 
-
-
-
-
-
-
+    def test_ope(self):
+        obj=Ope.objects.get(id=1)
+        self.assertEquals(obj.compte.id, 0)
+        
