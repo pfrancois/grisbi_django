@@ -191,10 +191,8 @@ class Compte(models.Model):
     solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
     cloture = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
-    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
-                                            related_name="moyen_credit_set")
-    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
-                                           related_name="moyen_debit_set")
+    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set")
+    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set")
     class Meta:
         db_table = 'compte'
 
@@ -316,7 +314,9 @@ class Generalite(models.Model):
 
     def __unicode__(self):
         return u"%s" % (self.id,)
-
+    def gen():
+        return Generalite.objects.get(id=1)
+    gen=staticmethod(gen)
 
 class Ope(models.Model):
     typespointage = (
