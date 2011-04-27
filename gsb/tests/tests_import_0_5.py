@@ -41,17 +41,32 @@ class SimpleTest(TestCase):
         self.assertEqual(obj.dernier_tx_de_change, decimal.Decimal('10.0'))
         self.assertEqual(obj.date_dernier_change, datetime.date(day=1, month=1, year=2010))
 
-    def test_titre(self):
-        obj = Titre.objects.all()[0]
+    def test_titre_normal(self):
+        obj = Titre.objects.get(id=1)
         self.assertEquals(obj.nom, u'SG')
         self.assertEquals(obj.isin, u'FR0000130809')
         self.assertEquals(obj.tiers.id, 6)
         self.assertEquals(obj.type, u'ACT')
+        self.assertEquals(obj.devise,None)
 
-    def test_cours(self):
+    def test_titre_devise(self):
+        obj = Titre.objects.get(id=2)
+        self.assertEquals(obj.nom, u'Euro')
+        self.assertEquals(obj.isin, u'EUR')
+        self.assertEquals(obj.tiers, None)
+        self.assertEquals(obj.type, u'DEV')
+        self.assertEquals(obj.devise.id,1)
+
+    def test_cours_sg(self):
         obj = Cours.objects.get(id=1)
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
         self.assertEquals(obj.isin, Titre.objects.get(id=1))
+        self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
+
+    def test_cours_zar(self):
+        obj = Cours.objects.get(id=2)
+        self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
+        self.assertEquals(obj.isin, Titre.objects.get(id=3))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
     def test_banques_properties(self):
@@ -115,6 +130,7 @@ class SimpleTest(TestCase):
         self.assertEqual(obj.nom, u'compte bancaire ouvert')
         self.assertEqual(obj.titulaire, '')
         self.assertEqual(obj.type, 'b')
+
         self.assertIsInstance(obj.devise, Devise)
         self.assertIsInstance(obj.banque, Banque)
         self.assertEqual(obj.guichet, u'12345')

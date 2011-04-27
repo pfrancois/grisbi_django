@@ -53,7 +53,7 @@ class Titre(models.Model):
     nom = models.CharField(max_length=120)
     isin = models.CharField(max_length=60, unique=True)
     tiers = models.ForeignKey(Tiers,null=True,blank=True)
-    devise = models.ForeignKey(Devise,Null=True, blank=True)
+    devise = models.ForeignKey(Devise,null=True, blank=True)
     type = models.CharField(max_length=60, choices=typestitres)
     class Meta:
         db_table = u'titre'
