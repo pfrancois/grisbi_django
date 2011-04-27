@@ -328,7 +328,6 @@ class Ope(models.Model):
     date = models.DateField(default=datetime.date.today)
     date_val = models.DateField(null=True, blank=True, default=None)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    devise = models.ForeignKey(Devise)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL, default=None)

@@ -23,16 +23,14 @@ class Ib_admin(admin.ModelAdmin):
 class Devise_admin(admin.ModelAdmin):
     fieldsets = [
             (None, {'fields': ('nom', 'isocode')}),
-            (u'dernier taux de change',
-             {'fields': ('date_dernier_change', 'dernier_tx_de_change'), 'classes': ['collapse']}),
+            (u'dernier taux de change', {'fields': ('date_dernier_change', 'dernier_tx_de_change'), 'classes': ['collapse']}),
             ]
 
 
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
             (None, {'fields': ('nom', 'type', 'devise', 'cloture')}),
-            (u'information sur le compte',
-             {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
+            (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
             ]
@@ -40,11 +38,10 @@ class Compte_admin(admin.ModelAdmin):
 
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
-            (None, {'fields': ('compte', 'date', 'montant', 'devise', 'tiers', 'moyen')}),
+            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen')}),
             (u'catégorie', {'fields': ('cat', 'scat')}),
             (u'imputation bugétaire', {'fields': ('ib', 'sib'), 'classes': ['collapse']}),
-            (u'informations diverses',
-             {'fields': ('date_val', 'numcheque', 'notes', 'exercice'), 'classes': ['collapse']}),
+            (u'informations diverses', {'fields': ('date_val', 'numcheque', 'notes', 'exercice'), 'classes': ['collapse']}),
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             (u'mere et jumelles', {'fields': ('jumelle', 'mere', 'is_mere'), 'classes': ['collapse']}),
             ]
