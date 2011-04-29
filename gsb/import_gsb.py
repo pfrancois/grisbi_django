@@ -73,7 +73,7 @@ class Import_exception(Exception):
 def import_gsb(nomfich, niv_log=10):
     log = LOG(niv_log, 'import_gsb.log')
     nomfich = os.path.normpath(nomfich)
-    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers', 'cours'):
+    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers'):
         connection.cursor().execute("delete from {};".format(table))
         #log.log(u'table {} effacée'.format(table))
     log.log(u"debut du chargement")
@@ -182,7 +182,8 @@ def import_gsb(nomfich, niv_log=10):
         if datefr2datesql(xml_element.get('Date_dernier_change')) is not None:
             element.date_dernier_change = datefr2datesql(xml_element.get('Date_dernier_change'))
             #creation du cours
-        Cours(isin=sous, valeur=element.dernier_tx_de_change, date=element.date_dernier_change).save()
+            c, created = Cours.objects.get_or_create(isin=sous,date=element.date_dernier_change, defaults={'valeur':element.dernier_tx_de_change})
+            c.save()
         element.save()
         log.log(time.clock(), 1)
     log.log(u'{} devises'.format(nb))
