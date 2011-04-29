@@ -250,4 +250,13 @@ class importtest(TestCase):
     def test_ope_virement_ope_jumelle(self):
         self.assertEquals(Ope.objects.get(id=9).jumelle, Ope.objects.get(id=10))
         self.assertEquals(Ope.objects.get(id=10).jumelle, Ope.objects.get(id=9))
-
+        self.assertEquals(Ope.objects.get(id=10).cat, None)
+        self.assertEquals(Ope.objects.get(id=10).scat, None)
+    def test_ope_type_none(self):
+        self.assertEquals(Ope.objects.get(id=9).moyen,None)
+    def test_ope_pointee(self):
+        self.assertEquals(Ope.objects.get(id=6).pointe,True)
+    def test_ope_auto(self):
+        self.assertEquals(Ope.objects.get(id=13).automatique,True)
+    def test_ope_pc(self):
+        self.assertEquals(Ope.objects.get(id=14).piece_comptable,"1")

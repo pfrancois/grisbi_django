@@ -338,6 +338,9 @@ class Ope(models.Model):
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set')
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set')
     is_mere = models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
+    automatique = models.BooleanField(default=False)
+    piece_comptable = models.CharField(max_length=120, blank=True, default='')
+
     class Meta:
         db_table = 'ope'
         get_latest_by = 'date'
