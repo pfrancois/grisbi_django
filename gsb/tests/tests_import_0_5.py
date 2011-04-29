@@ -10,7 +10,7 @@ from django.test import TestCase
 from mysite.gsb.import_gsb import *
 import decimal
 
-class SimpleTest(TestCase):
+class importtest(TestCase):
     def setUp(self):
         import_gsb("{}/../test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))))
         Cours(id=1,valeur=decimal.Decimal('10.00'),isin=Titre.objects.get(id=1),date=datetime.date(day=1,month=1,year=2010)).save()
@@ -220,7 +220,34 @@ class SimpleTest(TestCase):
             self.assertEquals(obj.utilise_exercices,True)
             self.assertEquals(obj.utilise_ib,True)
             self.assertEquals(obj.utilise_pc,True)
+
     def test_ope(self):
         obj=Ope.objects.get(id=1)
         self.assertEquals(obj.compte.id, 0)
-        
+        self.assertEquals(obj.date, datetime.date(2010, 05, 28))
+        self.assertEquals(obj.date_val, None)
+        self.assertEquals(obj.montant, decimal.Decimal('-123'))
+        self.assertEquals(obj.tiers.id, 1)
+        self.assertEquals(obj.cat.id, 6)
+        self.assertEquals(obj.scat.grisbi_id, 2)
+        self.assertEquals(obj.notes, u'ope avec type avec numero')
+        self.assertEquals(obj.moyen.id,5)
+        self.assertEquals(obj.num_cheque,"12345")
+        self.assertEquals(obj.pointe,False)
+        self.assertEquals(obj.rapp,None)
+        self.assertEquals(obj.exercice.id,5)
+        self.assertEquals(obj.ib.id, 2)
+        self.assertEquals(obj.sib.grisbi_id, 1)
+        self.assertEquals(obj.jumelle, None)
+        self.assertEquals(obj.mere, None)
+        self.assertEquals(obj.is_mere, False)
+    def test_ope_rapp(self):
+        self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
+        self.assertEquals(Ope.objects.get(id=2).is_mere, True)
+    def test_ope_ib_none(self):
+        self.assertEquals(Ope.objects.get(id=11).ib, None)
+        self.assertEquals(Ope.objects.get(id=11).sib, None)
+    def test_ope_virement_ope_jumelle(self):
+        self.assertEquals(Ope.objects.get(id=9).jumelle, Ope.objects.get(id=10))
+        self.assertEquals(Ope.objects.get(id=10).jumelle, Ope.objects.get(id=9))
+

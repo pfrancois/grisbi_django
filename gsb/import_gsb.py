@@ -17,7 +17,9 @@ import decimal
 liste_type_cat = Cat.typesdep
 liste_type_signe = Moyen.typesdep
 liste_type_compte = Compte.typescpt
-liste_type_pointage = Ope.typespointage
+liste_type_period = Echeance.typesperiod
+liste_type_period_perso = Echeance.typesperiodperso
+
 try:
     from lxml import etree as et
 except ImportError:
@@ -309,21 +311,25 @@ def import_gsb(nomfich, niv_log=10):
             sous, created = element.ope_set.get_or_create(id=int(xml_sous.get('No')), defaults={'compte': element})
             if not created and (sous.montant != 0 or sous.date != datetime.date.today() or sous.moyen is not None):
                 raise Exception(u'probleme avec les operations')
+            #date
             sous.date = datefr2datesql(xml_sous.get('D'))
+            #date de valeur
             sous.date_val = datefr2datesql(xml_sous.get('Db'))
+            #montant et gestion des devises
             sous.montant = fr2decimal(xml_sous.get('M'))
             if int(xml_sous.get('De')) != sous.compte.devise.id:
                 sous.montant = fr2decimal(xml_sous.get('M'))/fr2decimal(xml_sous.get('Tc'))-fr2decimal(xml_sous.get('Fc'))
                 Cours(isin=Titre.objects.get(isin=Devise.objects.get(id=int(xml_sous.get('De')))),valeur=fr2decimal(xml_sous.get('Tc')),date=sous.date).save()
+            #numero du moyen de paiment
             sous.num_cheque = xml_sous.get('Ct')
-            sous.pointe = liste_type_pointage[int(xml_sous.get('P'))][0]
-            sous.is_mere = bool(int(xml_sous.get('Ov')))
-            #sous.devise = Devise.objects.get(id=int(xml_sous.get('De')))
+            #statut de pointage
+            if int(xml_sous.get('P'))==1:
+                sous.pointe = True
             try:
                 sous.tiers = Tiers.objects.get(id=int(xml_sous.get('T')))
             except (ObjectDoesNotExist, TypeError):
                 sous.tiers = None
-            try:
+            try:#cat et scat
                 sous.cat = Cat.objects.get(id=int(xml_sous.get('C')))
             except (ObjectDoesNotExist, TypeError):
                 sous.cat = None
@@ -332,7 +338,7 @@ def import_gsb(nomfich, niv_log=10):
                     sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
                 except (ObjectDoesNotExist, TypeError):
                     sous.scat = None
-            try:
+            try:#ib et sib
                 sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
             except (ObjectDoesNotExist, TypeError):
                 sous.ib = None
@@ -341,7 +347,7 @@ def import_gsb(nomfich, niv_log=10):
                     sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
                 except (ObjectDoesNotExist, TypeError):
                     sous.sib = None
-            try:
+            try:#moyen de paiment
                 sous.moyen = sous.compte.moyen_set.get(grisbi_id=int(xml_sous.get('Ty')))
             except (ObjectDoesNotExist, TypeError):
                 sous.moyen = None
@@ -353,20 +359,25 @@ def import_gsb(nomfich, niv_log=10):
                         sous.rapp.save()
             except (ObjectDoesNotExist, TypeError):
                 sous.tapp = None
+            #exercices
             try:
                 sous.exercice = Exercice.objects.get(id=int(xml_sous.get('E')))
             except (ObjectDoesNotExist, TypeError):
                 sous.exercice = None
+            #gestion des virements
             try:
                 if int(xml_sous.get('Ro')):
                     sous.jumelle, created = Ope.objects.get_or_create(id=int(xml_sous.get('Ro')), defaults={'compte': Compte.objects.get(id=int(xml_sous.get('Rc')))})
             except (ObjectDoesNotExist, TypeError):
                 sous.jumelle = None
+            #gestion des ventilations
             try:
+                sous.is_mere = bool(int(xml_sous.get('Ov')))
                 if int(xml_sous.get('Va')):
                     sous.mere, created = Ope.objects.get_or_create(id=int(xml_sous.get('Va')),defaults={'compte': element})
             except (ObjectDoesNotExist, TypeError):
                 sous.mere = None
+            sous.notes=xml_sous.get('N')
             sous.save()
         log.log(u"%s operations" % nb_ope)
         log.log(time.clock(), 1)

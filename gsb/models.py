@@ -320,11 +320,6 @@ class Generalite(models.Model):
     gen=staticmethod(gen)
 
 class Ope(models.Model):
-    typespointage = (
-    ('na', u'rien'),
-    ('p', u'pointée'),
-    ('r', u'raprochée')
-    )
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=datetime.date.today)
     date_val = models.DateField(null=True, blank=True, default=None)
@@ -334,8 +329,8 @@ class Ope(models.Model):
     scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    numcheque = models.CharField(max_length=120, blank=True, default='')
-    pointe = models.CharField(max_length=2, choices=typespointage, default=u'na')
+    num_cheque = models.CharField(max_length=120, blank=True, default='')
+    pointe = models.BooleanField(default=False)
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)

@@ -74,7 +74,7 @@
       </Detail_de_Types>
       <Detail_des_operations>
         <Operation No="1" Id="" D="28/5/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="ope avec type avec numero" Ty="5" Ct="12345" P="0" A="0" R="0" E="5" I="2" Si="1" Pc="1" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="2" Id="" D="30/5/2010" Db="0/0/0" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="1" N="" Ty="3" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+        <Operation No="2" Id="" D="30/5/2010" Db="31/5/2010" M="-123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="1" N="" Ty="3" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="3" Id="" D="30/5/2010" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="notes sous ope1" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="2"/>
         <Operation No="4" Id="" D="30/5/2010" Db="0/0/0" M="-23,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="6" Sc="2" Ov="0" N="notes sous ope 2" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="2"/>
         <Operation No="5" Id="" D="31/5/2010" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="6" Sc="1" Ov="0" N="rapprochee" Ty="2" Ct="" P="2" A="0" R="1" E="5" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
