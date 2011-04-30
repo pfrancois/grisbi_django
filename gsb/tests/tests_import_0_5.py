@@ -28,31 +28,12 @@ class importtest(TestCase):
     def test_tiers_is_titre(self):
         self.assertEquals(Tiers.objects.get(id=6).is_titre, True)
 
-    def test_devise_properties(self):
-        obj = Devise.objects.get(id=1)
-        self.assertEqual(obj.nom, u'Euro')
-        self.assertEqual(obj.isocode, u'EUR')
-        self.assertEqual(obj.dernier_tx_de_change, 1)
-        self.assertEqual(obj.date_dernier_change, datetime.date.today())
-
-    def test_devise_etrangere(self):
-        obj = Devise.objects.get(id=2)
-        self.assertEqual(obj.nom, u'Rand')
-        self.assertEqual(obj.isocode, u'ZAR')
-        self.assertEqual(obj.dernier_tx_de_change, decimal.Decimal('10.0'))
-        self.assertEqual(obj.date_dernier_change, datetime.date(day=1, month=1, year=2010))
-
-    def test_devise_count(self):
-        self.assertEqual(Devise.objects.count(), 2)
-        self.assertEqual(2, Devise.objects.all().aggregate(max=models.Max('id'))['max'])
-
     def test_titre_normal(self):
         obj = Titre.objects.get(id=1)
         self.assertEquals(obj.nom, u'SG')
         self.assertEquals(obj.isin, u'FR0000130809')
         self.assertEquals(obj.tiers.id, 6)
         self.assertEquals(obj.type, u'ACT')
-        self.assertEquals(obj.devise, None)
     def test_get_titre_normal(self):
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom,u'SG')
     def test_titre_devise(self):
@@ -61,7 +42,6 @@ class importtest(TestCase):
         self.assertEquals(obj.isin, u'EUR')
         self.assertEquals(obj.tiers, None)
         self.assertEquals(obj.type, u'DEV')
-        self.assertEquals(obj.devise.id, 1)
     def test_get_titre_devise(self):
         self.assertEquals(Titre.objects.get(isin=u'ZAR').nom,u'Rand')
 

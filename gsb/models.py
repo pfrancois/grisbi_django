@@ -26,25 +26,6 @@ class Tiers(models.Model):
     def __unicode__(self):
         return self.nom
 
-
-class Devise(models.Model):
-    nom = models.CharField(max_length=40)
-    dernier_tx_de_change = models.DecimalField(max_digits=15, decimal_places=3, default='1.000')
-    date_dernier_change = models.DateField(default=datetime.date.today, help_text=u"il faut creer un cours")
-    isocode = models.CharField(max_length=3, unique=True)
-    class Meta:
-        db_table = 'devise'
-        ordering = ['nom']
-
-
-    def __unicode__(self):
-        return self.isocode
-
-    def latest_cours (self):
-        r = Cours.objects.filter(isin=self.isocode).latest()
-        return r
-
-
 class Titre(models.Model):
     typestitres = (
     ('ACT', u'action'),
@@ -57,19 +38,20 @@ class Titre(models.Model):
     nom = models.CharField(max_length=40)
     isin = models.CharField(max_length=60, unique=True)
     tiers = models.ForeignKey(Tiers,null=True,blank=True)
-    devise = models.ForeignKey(Devise,null=True, blank=True)
     type = models.CharField(max_length=60, choices=typestitres)
+    grisbi_id = models.IntegerField(null=True,blank=True)
     class Meta:
         db_table = u'titre'
         ordering = ['nom']
 
-
     def __unicode__(self):
         return "%s (%s)" % (self.nom, self.isin)
+    def lcours(self):
+        return self.cours_set.latest().valeur
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
-    isin = models.ForeignKey(Titre, to_field="isin")
+    isin = models.ForeignKey(Titre, to_field="isin", unique_for_date="date")
     date = models.DateField(default=datetime.date.today)
     class Meta:
         db_table = 'cours'
@@ -182,7 +164,7 @@ class Compte(models.Model):
     nom = models.CharField(max_length=40)
     titulaire = models.CharField(max_length=120, blank=True, default='')
     type = models.CharField(max_length=24, choices=typescpt,default='b')
-    devise = models.ForeignKey(Devise)
+    devise = models.ForeignKey(Titre)
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     guichet = models.CharField(max_length=15, blank=True)#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
     num_compte = models.CharField(max_length=60, blank=True)
@@ -208,7 +190,7 @@ class Compte(models.Model):
         else:
             solde = req['solde'] + self.solde_init
         if devise_generale:
-            solde = solde / self.devise.dernier_tx_de_change
+            solde = solde / self.devise.lcours().valeur
             return solde
         else:
             return solde
@@ -286,7 +268,7 @@ class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    devise = models.ForeignKey(Devise)
+    devise = models.ForeignKey(Titre)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
@@ -319,7 +301,7 @@ class Generalite(models.Model):
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
-    devise_generale = models.ForeignKey(Devise)
+    devise_generale = models.ForeignKey(titre)
     class Meta:
         db_table = 'generalite'
         verbose_name = u"généralités"
