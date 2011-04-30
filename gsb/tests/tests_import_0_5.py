@@ -13,7 +13,7 @@ import decimal
 class importtest(TestCase):
     def setUp(self):
         import_gsb("{}/../test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))))
-        Cours(id=1, valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(id=1), date=datetime.date(day=1, month=1, year=2010)).save()
+        Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)
@@ -53,7 +53,8 @@ class importtest(TestCase):
         self.assertEquals(obj.tiers.id, 6)
         self.assertEquals(obj.type, u'ACT')
         self.assertEquals(obj.devise, None)
-
+    def test_get_titre_normal(self):
+        self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom,u'SG')
     def test_titre_devise(self):
         obj = Titre.objects.get(id=2)
         self.assertEquals(obj.nom, u'Euro')
@@ -61,19 +62,21 @@ class importtest(TestCase):
         self.assertEquals(obj.tiers, None)
         self.assertEquals(obj.type, u'DEV')
         self.assertEquals(obj.devise.id, 1)
+    def test_get_titre_devise(self):
+        self.assertEquals(Titre.objects.get(isin=u'ZAR').nom,u'Rand')
 
     def test_titre_count(self):
         self.assertEqual(Titre.objects.count(), 3)
 
     def test_cours_sg(self):
-        obj = Cours.objects.get(id=1)
+        obj = Titre.objects.get(isin=u'FR0000130809').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
         self.assertEquals(obj.isin, Titre.objects.get(id=1))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
     def test_cours_zar(self):
-        obj = Cours.objects.get(id=2)
-        self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
+        obj = Titre.objects.get(isin=u'ZAR').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
+        self.assertEquals(obj.valeur, decimal.Decimal('10'))
         self.assertEquals(obj.isin, Titre.objects.get(id=3))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
@@ -192,7 +195,7 @@ class importtest(TestCase):
         self.assertEquals(obj.nom, 'CBO1')
         self.assertEquals(obj.compte(), 0)
         self.assertEquals(obj.date, datetime.date(2010, 5, 31))
-        self.assertEquals(obj.solde, 0)
+        self.assertEquals(obj.solde(), 10)
         self.assertEquals(obj.ope_set.all().count(), 1)
         self.assertEquals(obj.ope_set.all()[0], Ope.objects.get(id=5))
 
