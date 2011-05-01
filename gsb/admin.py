@@ -20,12 +20,6 @@ class Ib_admin(admin.ModelAdmin):
     inlines = [Sib_Inline]
 
 
-class Devise_admin(admin.ModelAdmin):
-    fieldsets = [
-            (None, {'fields': ('nom', 'isocode')}),
-            (u'dernier taux de change', {'fields': ('date_dernier_change', 'dernier_tx_de_change'), 'classes': ['collapse']}),
-            ]
-
 
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
@@ -55,7 +49,6 @@ admin.site.register(Tiers)
 admin.site.register(Cat, Cat_admin)
 admin.site.register(Compte, Compte_admin)
 admin.site.register(Ope, Ope_admin)
-admin.site.register(Devise, Devise_admin)
 admin.site.register(Titre)
 admin.site.register(Cours, cours_admin)
 admin.site.register(Banque)

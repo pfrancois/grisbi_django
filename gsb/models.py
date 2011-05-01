@@ -46,8 +46,8 @@ class Titre(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.nom, self.isin)
-    def lcours(self):
-        return self.cours_set.latest().valeur
+    def last_cours(self):
+        return self.cours_set.latest()
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
@@ -190,7 +190,7 @@ class Compte(models.Model):
         else:
             solde = req['solde'] + self.solde_init
         if devise_generale:
-            solde = solde / self.devise.lcours().valeur
+            solde = solde / self.devise.last_cours().valeur
             return solde
         else:
             return solde
@@ -237,6 +237,8 @@ class Rapp(models.Model):
     def compte(self):#petit raccourci mais normalement, c'est bon. on prend le compte de la premiere ope
         if self.ope_set.all():
             return self.ope_set.all()[0].compte.id
+        else:
+            raise TypeError
     def solde(self, devise_generale=False):
         req = self.ope_set.aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
@@ -244,7 +246,7 @@ class Rapp(models.Model):
         else:
             solde = req['solde']
         if devise_generale:
-            solde = solde / self.compte().devise.dernier_tx_de_change
+            solde = solde / self.compte().devise.last_cours().valeur
             return solde
         else:
             return solde
@@ -301,7 +303,7 @@ class Generalite(models.Model):
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
-    devise_generale = models.ForeignKey(titre)
+    devise_generale = models.ForeignKey(Titre)
     class Meta:
         db_table = 'generalite'
         verbose_name = u"généralités"

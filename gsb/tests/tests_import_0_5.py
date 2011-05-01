@@ -119,14 +119,14 @@ class importtest(TestCase):
         self.assertEqual(Compte.objects.get(id=1).cloture, True)
 
     def test_compte_properties_devise_particuliere(self):
-        self.assertEqual(Compte.objects.get(id=3).devise.isocode, 'ZAR')
+        self.assertEqual(Compte.objects.get(id=3).devise.isin, 'ZAR')
 
     def test_compte_properties(self):
         obj = Compte.objects.get(id=0)
         self.assertEqual(obj.nom, u'compte bancaire ouvert')
         self.assertEqual(obj.titulaire, '')
         self.assertEqual(obj.type, 'b')
-        self.assertIsInstance(obj.devise, Devise)
+        self.assertIsInstance(obj.devise, Titre)
         self.assertIsInstance(obj.banque, Banque)
         self.assertEqual(obj.guichet, u'12345')
         self.assertEqual(obj.num_compte, u'12345766b76')
@@ -206,7 +206,7 @@ class importtest(TestCase):
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
         self.assertEquals(obj.compte.id, 0)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
-        self.assertEquals(obj.devise.id, 1)
+        self.assertEquals(obj.devise.grisbi_id, 1)
         self.assertEquals(obj.tiers.id, 4)
         self.assertEquals(obj.cat.id, 21)
         self.assertEquals(obj.scat.grisbi_id, 6)

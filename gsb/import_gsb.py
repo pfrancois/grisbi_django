@@ -73,7 +73,7 @@ class Import_exception(Exception):
 def import_gsb(nomfich, niv_log=10):
     log = LOG(niv_log, 'import_gsb.log')
     nomfich = os.path.normpath(nomfich)
-    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'devise', 'tiers'):
+    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
         connection.cursor().execute("delete from {};".format(table))
         #log.log(u'table {} effacée'.format(table))
     log.log(u"debut du chargement")
@@ -122,7 +122,6 @@ def import_gsb(nomfich, niv_log=10):
                         }
                     sous.type = liste_type.get(s[2], 'XXX')
             sous.tiers = element
-            sous.devise = None
             sous.save()
         log.log(time.clock(), 1)
 
@@ -169,21 +168,13 @@ def import_gsb(nomfich, niv_log=10):
     nb = 0
     for xml_element in xml_tree.find('//Detail_des_devises'):
         nb += 1
-        element = Devise(id=xml_element.get('No'))
-        element.nom = xml_element.get('Nom')
-        element.isocode = xml_element.get('IsoCode')
-        #creation du titre devise
-        sous = Titre(nom=element.nom, isin=element.isocode, tiers=None, devise=element, type='DEV', )
+        element = Titre(nom=xml_element.get('Nom'), isin=xml_element.get('IsoCode'), tiers=None, type='DEV',grisbi_id=xml_element.get('No') )
         sous.save()
         if fr2decimal(xml_element.get('Change')) != decimal.Decimal('0'):
-            element.dernier_tx_de_change = fr2decimal(xml_element.get('Change'))
+            cours, created = element.cours_set.get_or_create(isin=element.isin,date=datefr2datesql(xml_element.get('Date_dernier_change')),defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')),'valeur':fr2decimal(xml_element.get('Change'))})
         else:
-            element.dernier_tx_de_change = 1
-        if datefr2datesql(xml_element.get('Date_dernier_change')) is not None:
-            element.date_dernier_change = datefr2datesql(xml_element.get('Date_dernier_change'))
-            #creation du cours
-            c, created = Cours.objects.get_or_create(isin=sous,date=element.date_dernier_change, defaults={'valeur':element.dernier_tx_de_change})
-            c.save()
+            cours, created = element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
+        cours.save()
         element.save()
         log.log(time.clock(), 1)
     log.log(u'{} devises'.format(nb))
@@ -207,7 +198,7 @@ def import_gsb(nomfich, niv_log=10):
         utilise_exercices=bool(int(xml_element.find('Utilise_exercices').text)),
         utilise_ib=bool(int(xml_element.find('Utilise_IB').text)),
         utilise_pc=bool(int(xml_element.find('Utilise_PC').text)),
-        devise_generale=Devise.objects.get(id=int(xml_element.find('Numero_devise_totaux_ib').text)),
+        devise_generale=Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.find('Numero_devise_totaux_ib').text)),
         )
     element.save()
     log.log(time.clock(), 1)
@@ -254,7 +245,7 @@ def import_gsb(nomfich, niv_log=10):
         if xml_element.find('Details/Devise').text is None:
             element.devise = None
         else:
-            element.devise = Devise.objects.get(id=int(xml_element.find('Details/Devise').text))
+            element.devise = Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.find('Details/Devise').text))
 
         if xml_element.find('Details/Banque') is None or int(xml_element.find('Details/Banque').text) == 0:
             element.banque = None
@@ -319,9 +310,9 @@ def import_gsb(nomfich, niv_log=10):
         sous.date_val = datefr2datesql(xml_sous.get('Db'))
         #montant et gestion des devises
         sous.montant = fr2decimal(xml_sous.get('M'))
-        if int(xml_sous.get('De')) != sous.compte.devise.id:
+        if int(xml_sous.get('De')) != sous.compte.devise.grisbi_id:
             sous.montant = fr2decimal(xml_sous.get('M')) / fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
-            Cours(isin=Titre.objects.get(isin=Devise.objects.get(id=int(xml_sous.get('De')))), valeur=fr2decimal(xml_sous.get('Tc')), date=sous.date).save()
+            Titre.objects.get(type=u'DEV',grisbi_id=int(xml_sous.get('De'))).cours_set.create(valeur=fr2decimal(xml_sous.get('Tc')), date=sous.date)
             #numero du moyen de paiment
         sous.num_cheque = xml_sous.get('Ct')
         #statut de pointage
@@ -400,11 +391,11 @@ def import_gsb(nomfich, niv_log=10):
         except (ObjectDoesNotExist, TypeError):
             element.tiers = None
         try:
-            element.devise = Devise.objects.get(id=int(xml_element.get('Devise')))
+            element.devise = Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.get('Devise')))
         except (ObjectDoesNotExist, TypeError):
             element.devise = None
         try:
-            element.devise = Devise.objects.get(id=int(xml_element.get('Devise')))
+            element.devise = Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.get('Devise')))
         except (ObjectDoesNotExist, TypeError):
             element.devise = None
         try:
