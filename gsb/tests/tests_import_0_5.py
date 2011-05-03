@@ -186,22 +186,30 @@ class importtest(TestCase):
     def test_nb_ech(self):
         self.assertEqual(Echeance.objects.all().count(), 5)
         self.assertEqual(Echeance.objects.all().aggregate(max=models.Max('id'))['max'], 6)
-    def test_ech(self):
+    def test_ech_automatique(self):
         obj = Echeance.objects.get(id=3)
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
         self.assertEquals(obj.compte.id, 0)
-        self.assertEquals(obj.montant, decimal.Decimal('0'))
-        self.assertEquals(obj.devise.id, 2)
-        self.assertEquals(obj.tiers.id, 4)
-        self.assertEquals(obj.cat.id, 6)
-        self.assertEquals(obj.scat.grisbi_id, 2)
-        self.assertEquals(obj.moyen, 3)
-        self.assertEquals(obj.exercice.id, 5)
+        self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.notes, u"automatique")
         self.assertEquals(obj.inscription_automatique, True)
-        self.assertEquals(obj.intervalle, 0)
+        self.assertEquals(obj.periodicite[0],'m')
 
-    def test_ech(self):
+    def test_ech_virement(self):
+        obj= Echeance.objects.get(id=6)
+        self.assertEquals(obj.compte_virement.id, 3)
+        self.assertEquals(obj.moyen_virement.grisbi_id, 1)
+
+    def test_ech_period_perso(self):
+        obj = Echeance.objects.get(id=4)
+        self.assertEquals(obj.periodicite[0],'p')
+        self.assertEquals(obj.periode_perso[0],'m')
+        self.assertEquals(obj.intervalle,1)
+    def test_ech_date_limite(self):
+        obj = Echeance.objects.get(id=5)
+        self.assertEquals(obj.date_limite, datetime.date(2013, 1, 1))
+
+    def test_ech_standart(self):
         obj = Echeance.objects.get(id=2)
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
         self.assertEquals(obj.compte.id, 0)
@@ -210,11 +218,15 @@ class importtest(TestCase):
         self.assertEquals(obj.tiers.id, 4)
         self.assertEquals(obj.cat.id, 21)
         self.assertEquals(obj.scat.grisbi_id, 6)
-        self.assertEquals(obj.moyen.id, 1)
+        self.assertEquals(obj.ib, None)
+        self.assertEquals(obj.sib, None)
+        self.assertEquals(obj.moyen.grisbi_id, 1)
+        self.assertEquals(obj.moyen_virement, None)
+        self.assertEquals(obj.compte_virement, None)
         self.assertEquals(obj.exercice.id, 5)
         self.assertEquals(obj.notes, u"echeance")
         self.assertEquals(obj.inscription_automatique, False)
-        self.assertEquals(obj.intervalle, 0)
+        self.assertEquals(obj.periodicite[0],'u')
 
     def test_generalites(self):
         obj = Generalite.gen()
@@ -248,9 +260,16 @@ class importtest(TestCase):
         self.assertEquals(obj.jumelle, None)
         self.assertEquals(obj.mere, None)
         self.assertEquals(obj.is_mere, False)
-    def test_ope_rapp(self):
+    def test_ope_date_valeur(self):
         self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
+    def test_ope_mere(self):
         self.assertEquals(Ope.objects.get(id=2).is_mere, True)
+    def test_ope_devise(self):
+        self.assertEquals(Ope.objects.get(id=8).compte.devise.grisbi_id,2)
+    def test_ope_virement_etranger(self):
+        self.assertEquals(Ope.objects.get(id=12).montant,decimal.Decimal('-7.92'))
+        self.assertEquals(Ope.objects.get(id=12).notes, u'virement en zar')
+        self.assertEquals(Ope.objects.get(id=12).jumelle.compte.devise.grisbi_id, 2)
     def test_ope_ib_none(self):
         self.assertEquals(Ope.objects.get(id=11).ib, None)
         self.assertEquals(Ope.objects.get(id=11).sib, None)
@@ -259,7 +278,6 @@ class importtest(TestCase):
         self.assertEquals(Ope.objects.get(id=10).jumelle, Ope.objects.get(id=9))
         self.assertEquals(Ope.objects.get(id=10).cat, None)
         self.assertEquals(Ope.objects.get(id=10).scat, None)
-    def test_ope_type_none(self):
         self.assertEquals(Ope.objects.get(id=9).moyen, None)
     def test_ope_pointee(self):
         self.assertEquals(Ope.objects.get(id=6).pointe, True)

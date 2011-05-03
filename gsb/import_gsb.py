@@ -169,12 +169,11 @@ def import_gsb(nomfich, niv_log=10):
     for xml_element in xml_tree.find('//Detail_des_devises'):
         nb += 1
         element = Titre(nom=xml_element.get('Nom'), isin=xml_element.get('IsoCode'), tiers=None, type='DEV',grisbi_id=xml_element.get('No') )
-        sous.save()
+        element.save()
         if fr2decimal(xml_element.get('Change')) != decimal.Decimal('0'):
-            cours, created = element.cours_set.get_or_create(isin=element.isin,date=datefr2datesql(xml_element.get('Date_dernier_change')),defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')),'valeur':fr2decimal(xml_element.get('Change'))})
+            element.cours_set.get_or_create(isin=element.isin,date=datefr2datesql(xml_element.get('Date_dernier_change')),defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')),'valeur':fr2decimal(xml_element.get('Change'))})
         else:
-            cours, created = element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
-        cours.save()
+            element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
         log.log(time.clock(), 1)
     log.log(u'{} devises'.format(nb))
@@ -284,14 +283,12 @@ def import_gsb(nomfich, niv_log=10):
                                      grisbi_id=int(xml_sous.get('No'))
             )
         try:
-            toto = int(xml_element.find('Details/Type_defaut_credit').text)
-            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id=toto)
-        except (ObjectDoesNotExist, TypeError):
+            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id=int(xml_element.find('Details/Type_defaut_credit').text))
+        except (Moyen.DoesNotExist, TypeError):
             element.moyen_credit_defaut = None
         try:
-            element.moyen_debit_defaut = element.moyen_set.get(
-                grisbi_id=int(xml_element.find('Details/Type_defaut_debit').text))
-        except (ObjectDoesNotExist, TypeError):
+            element.moyen_debit_defaut = element.moyen_set.get(grisbi_id=int(xml_element.find('Details/Type_defaut_debit').text))
+        except (Moyen.DoesNotExist, TypeError):
             element.moyen_debit_defaut = None
         element.save()
         log.log(u'ajout du compte "%s" et des %s moyens de paiment ok' % (element.nom, nb_moyen))
@@ -311,9 +308,13 @@ def import_gsb(nomfich, niv_log=10):
         #montant et gestion des devises
         sous.montant = fr2decimal(xml_sous.get('M'))
         if int(xml_sous.get('De')) != sous.compte.devise.grisbi_id:
-            sous.montant = fr2decimal(xml_sous.get('M')) / fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
-            Titre.objects.get(type=u'DEV',grisbi_id=int(xml_sous.get('De'))).cours_set.create(valeur=fr2decimal(xml_sous.get('Tc')), date=sous.date)
-            #numero du moyen de paiment
+            if int(xml_sous.get('Rdc')):
+                sous.montant = fr2decimal(xml_sous.get('M')) / fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
+                Titre.objects.get(type=u'DEV',grisbi_id=int(xml_sous.get('De'))).cours_set.get_or_create(date=sous.date,defaults={'valeur':fr2decimal(xml_sous.get('Tc'))})
+            else:
+                sous.montant = fr2decimal(xml_sous.get('M')) * fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
+                Titre.objects.get(type=u'DEV',grisbi_id=int(xml_sous.get('De'))).cours_set.get_or_create(date=sous.date,defaults={'valeur':1/fr2decimal(xml_sous.get('Tc'))})
+        #numero du moyen de paiment
         sous.num_cheque = xml_sous.get('Ct')
         #statut de pointage
         if int(xml_sous.get('P')) == 1:
@@ -322,29 +323,29 @@ def import_gsb(nomfich, niv_log=10):
             sous.automatique = True
         try:
             sous.tiers = Tiers.objects.get(id=int(xml_sous.get('T')))
-        except (ObjectDoesNotExist, TypeError):
+        except (Tiers.DoesNotExist, TypeError):
             sous.tiers = None
         try:#cat et scat
             sous.cat = Cat.objects.get(id=int(xml_sous.get('C')))
-        except (ObjectDoesNotExist, TypeError):
+        except (Cat.DoesNotExist, TypeError):
             sous.cat = None
         else:
             try:
                 sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
-            except (ObjectDoesNotExist, TypeError):
+            except (Scat.DoesNotExist, TypeError):
                 sous.scat = None
         try:#ib et sib
             sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
-        except (ObjectDoesNotExist, TypeError):
+        except (Ib.DoesNotExist, TypeError):
             sous.ib = None
         else:
             try:
                 sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
-            except (ObjectDoesNotExist, TypeError):
+            except (Sib.DoesNotExist, TypeError):
                 sous.sib = None
         try:#moyen de paiment
             sous.moyen = sous.compte.moyen_set.get(grisbi_id=int(xml_sous.get('Ty')))
-        except (ObjectDoesNotExist, TypeError):
+        except (Moyen.DoesNotExist, TypeError):
             sous.moyen = None
         try: #gestion des rapprochements
             if int(xml_sous.get('R')):
@@ -352,25 +353,23 @@ def import_gsb(nomfich, niv_log=10):
                 if datetime.datetime.combine(sous.rapp.date, datetime.time()) > datetime.datetime.strptime(sous.date, "%Y-%m-%d"):
                     sous.rapp.date = sous.date
                     sous.rapp.save()
-        except (ObjectDoesNotExist, TypeError):
+        except (Rapp.DoesNotExist, TypeError):
             sous.tapp = None
             #exercices
         try:
             sous.exercice = Exercice.objects.get(id=int(xml_sous.get('E')))
-        except (ObjectDoesNotExist, TypeError):
+        except (Exercice.DoesNotExist, TypeError):
             sous.exercice = None
-            #gestion des virements
-        try:
-            if int(xml_sous.get('Ro')):
-                sous.jumelle, created = Ope.objects.get_or_create(id=int(xml_sous.get('Ro')), defaults={'compte': Compte.objects.get(id=int(xml_sous.get('Rc')))})
-        except (ObjectDoesNotExist, TypeError):
+        #gestion des virements
+        if int(xml_sous.get('Ro')):
+            sous.jumelle, created = Ope.objects.get_or_create(id=int(xml_sous.get('Ro')), defaults={'compte': Compte.objects.get(id=int(xml_sous.get('Rc')))})
+        else:
             sous.jumelle = None
-            #gestion des ventilations
-        try:
-            sous.is_mere = bool(int(xml_sous.get('Ov')))
-            if int(xml_sous.get('Va')):
-                sous.mere, created = Ope.objects.get_or_create(id=int(xml_sous.get('Va')), defaults={'compte': element})
-        except (ObjectDoesNotExist, TypeError):
+        #gestion des ventilations
+        sous.is_mere = bool(int(xml_sous.get('Ov')))
+        if int(xml_sous.get('Va')):
+            sous.mere, created = Ope.objects.get_or_create(id=int(xml_sous.get('Va')), defaults={'compte': element})
+        else:
             sous.mere = None
         sous.notes = xml_sous.get('N')
         sous.piece_comptable = xml_sous.get('Pc')
@@ -394,10 +393,7 @@ def import_gsb(nomfich, niv_log=10):
             element.devise = Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.get('Devise')))
         except (ObjectDoesNotExist, TypeError):
             element.devise = None
-        try:
-            element.devise = Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.get('Devise')))
-        except (ObjectDoesNotExist, TypeError):
-            element.devise = None
+        element.inscription_automatique=bool(int(xml_element.get('Automatique')))
         try:
             element.moyen = Moyen.objects.get(id=int(xml_element.get('Type')))
         except (ObjectDoesNotExist, TypeError):
@@ -426,18 +422,20 @@ def import_gsb(nomfich, niv_log=10):
         except (ObjectDoesNotExist, TypeError):
             element.ib = None
             element.sib = None
-        try:
-            if int(xml_element.get('Virement_compte')) and int(xml_element.get('Compte')):
-                element.compte_virement = Compte.objects.get(int(xml_element.get('Virement_compte')))
-                try:
-                    element.moyen_virement = element.compte_virement.moyen_set.get(grisbi_id=int(xml_element.get('Type_contre_ope')))
-                except (ObjectDoesNotExist, TypeError):
-                    element.moyen_virement = None
-            else:
-                raise ObjectDoesNotExist
-        except (ObjectDoesNotExist, TypeError):
+        if xml_element.get('Virement_compte') != xml_element.get('Compte'):#todo ca ne marche pas
+            element.compte_virement = Compte.objects.get(id=int(xml_element.get('Virement_compte')))#ici aussi
+            try:
+                element.moyen_virement = element.compte_virement.moyen_set.get(grisbi_id=int(xml_element.get('Type_contre_ope')))
+            except (Moyen.DoesNotExist, TypeError):
+                element.moyen_virement = None
+        else :
             element.compte_virement = None
             element.moyen_virement = None
+        element.periodicite=liste_type_period[int(xml_element.get('Periodicite'))][0]
+        if element.periodicite == 'p':
+            element.intervalle=int(xml_element.get('Intervalle_periodicite'))
+            element.periode_perso=liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
+        element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
     log.log(time.clock(), 1)
     log.log(u'{!s}'.format(time.clock()))

@@ -263,8 +263,8 @@ class Echeance(models.Model):
     )
     typesperiodperso = (
         ('j', u'jour'),
-        ('h', u'mois'),
-        ('m', u'annee'),
+        ('m', u'mois'),
+        ('a', u'annee'),
     )
 
     date = models.DateField(default=datetime.date.today)
