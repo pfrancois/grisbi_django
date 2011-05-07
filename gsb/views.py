@@ -104,20 +104,20 @@ def ope_detail(request, ope_id):
         if cat.scat_set.all():
             for scat in cat.scat_set.all():
                 if cat.type=='d':
-                    cats_debit.append({'id':"%s:%s"%(cat.id,scat.id),
+                    cats_debit.append({'id':"%s : %s"%(cat.id,scat.id),
                                    'nom':"%s:%s"%(cat.nom,scat.nom),
                             })
                 else:
-                    cats_credit.append({'id':"%s:%s"%(cat.id,scat.id),
+                    cats_credit.append({'id':"%s : %s"%(cat.id,scat.id),
                                    'nom':"%s:%s"%(cat.nom,scat.nom),
                             })
         else:
             if cat.type=='d':
-                cats_debit.append({'id':"%s:%s"%(cat.id,0),
+                cats_debit.append({'id':"%s : %s"%(cat.id,0),
                                'nom':"%s:%s"%(cat.nom,""),
                         })
             else:
-                cats_credit.append({'id':"%s:%s"%(cat.id,0),
+                cats_credit.append({'id':"%s : %s"%(cat.id,0),
                                'nom':"%s:%s"%(cat.nom,""),
                         })
 
