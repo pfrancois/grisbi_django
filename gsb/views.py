@@ -100,7 +100,7 @@ def ope_detail(request, ope_id):
     #depenses_cat=Cat.objects.filter(type='d').select_related()
     cats_debit=[]
     cats_credit=[]
-    for  cat in Cat.objects.all():
+    for  cat in Cat.objects.all().select_related():
         if cat.scat_set.all():
             for scat in cat.scat_set.all():
                 if cat.type=='d':
@@ -121,11 +121,11 @@ def ope_detail(request, ope_id):
                                'nom':"%s:%s"%(cat.nom,""),
                         })
 
-                
+
     return render_to_response('gsb/operation.django.html',
                               {'ope': p,
                                'titre': "edition",
-                               'compte_id': p.compte.id,
+                               'compte': p.compte,
                                'action': 'edit',
                                'cats_debit':cats_debit,
                                'cats_credit':cats_credit,
@@ -156,3 +156,6 @@ def import_file(request):
         form = gsb_forms.ImportForm()
     return render_to_response('gsb/import.django.html', {'form': form})
 
+def options(request):
+    return render_to_response('gsb/options.django.html',
+                              context_instance=RequestContext(request))

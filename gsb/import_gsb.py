@@ -123,10 +123,10 @@ def import_gsb(nomfich, niv_log=10):
                     sous.type = liste_type.get(s[2], 'XXX')
             sous.tiers = element
             sous.save()
-        log.log(time.clock(), 1)
+        log.log(nb, 1)
 
     log.log(u'{} tiers enregistrés et {} titres'.format(nb, nb_sous))
-
+    log.log(time.clock(), 1)
     #import des categories et des sous categories
     nb = 0
     for xml_element in xml_tree.find('//Detail_des_categories'):
@@ -142,8 +142,8 @@ def import_gsb(nomfich, niv_log=10):
                 nom=xml_sous.get('Nom'),
                 grisbi_id=xml_sous.get('No')
             )
-        log.log(time.clock(), 1)
-
+        log.log(nb, 1)
+    log.log(time.clock(), 1)
     log.log(u"{} catégories".format(nb))
 
     #imputations
@@ -161,7 +161,8 @@ def import_gsb(nomfich, niv_log=10):
                 nom=xml_sous.get('Nom'),
                 grisbi_id=xml_sous.get('No')
             )
-        log.log(time.clock(), 1)
+        log.log(nb, 1)
+    log.log(time.clock(), 1)
     log.log(u"{} imputations".format(nb))
 
     #gestion des devises:
@@ -175,7 +176,7 @@ def import_gsb(nomfich, niv_log=10):
         else:
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
-        log.log(time.clock(), 1)
+    log.log(time.clock(), 1)
     log.log(u'{} devises'.format(nb))
 
     #gestion des banques:
@@ -187,13 +188,17 @@ def import_gsb(nomfich, niv_log=10):
         element.cib = xml_element.get('Code')
         element.notes = xml_element.get('Remarques')
         element.save()
-        log.log(time.clock(), 1)
+    log.log(time.clock(), 1)
     log.log(u'{} banques'.format(nb))
 
     #gestion des generalites
     xml_element = xml_tree.find('Generalites')
+    if not xml_element.find('Titre').text:
+        titre_fichier=""
+    else:
+        titre_fichier=xml_element.find('Titre').text
     element = Generalite(
-        titre=xml_element.find('Titre').text,
+        titre=titre_fichier,
         utilise_exercices=bool(int(xml_element.find('Utilise_exercices').text)),
         utilise_ib=bool(int(xml_element.find('Utilise_IB').text)),
         utilise_pc=bool(int(xml_element.find('Utilise_PC').text)),
@@ -212,7 +217,7 @@ def import_gsb(nomfich, niv_log=10):
         element.date_debut = datefr2datesql(xml_element.get('Date_debut'))
         element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
-        log.log(time.clock(), 1)
+    log.log(time.clock(), 1)
     log.log(u'{} exercices'.format(nb))
 
     #gestion Des rapp
@@ -222,13 +227,12 @@ def import_gsb(nomfich, niv_log=10):
         element = Rapp(id=xml_element.get('No'))
         element.nom = xml_element.get('Nom')
         element.save()
-        log.log(time.clock(), 1)
+    log.log(time.clock(), 1)
     log.log(u'{} rapprochements'.format(nb))
 
     #gestion des comptes
     nb = 0
     nb_tot_moyen = 0
-    nb_tot_ope = 0
     for xml_element in xml_tree.findall('//Compte'):
         nb += 1
         nb_moyen = 0
@@ -291,17 +295,15 @@ def import_gsb(nomfich, niv_log=10):
         except (Moyen.DoesNotExist, TypeError):
             element.moyen_debit_defaut = None
         element.save()
-        log.log(u'ajout du compte "%s" et des %s moyens de paiment ok' % (element.nom, nb_moyen))
-        log.log(time.clock(), 1)
+        log.log(nb,1)
+    log.log(time.clock(), 1)
     log.log(u'{} comptes'.format(nb))
+    nb_tot_ope=0
     #--------------OPERATIONS-----------------------
     for xml_sous in xml_tree.findall('//Operation'):
         nb_tot_ope += 1
         cpt = Compte.objects.get(id=int(xml_sous.find('../../Details/No_de_compte').text))
-        sous, created = Ope.objects.get_or_create(id=int(xml_sous.get('No')), defaults={'compte': cpt})
-        if not created and (sous.montant != 0 or sous.date != datetime.date.today() or sous.moyen is not None):
-            raise Exception(u'probleme avec les operations')
-            #date
+        sous = Ope(id=int(xml_sous.get('No')),compte = cpt)
         sous.date = datefr2datesql(xml_sous.get('D'))
         #date de valeur
         sous.date_val = datefr2datesql(xml_sous.get('Db'))
@@ -321,30 +323,50 @@ def import_gsb(nomfich, niv_log=10):
             sous.pointe = True
         if int(xml_sous.get('A')) == 1:
             sous.automatique = True
-        try:
-            sous.tiers = Tiers.objects.get(id=int(xml_sous.get('T')))
-        except (Tiers.DoesNotExist, TypeError):
-            sous.tiers = None
-        try:#cat et scat
-            sous.cat = Cat.objects.get(id=int(xml_sous.get('C')))
-        except (Cat.DoesNotExist, TypeError):
-            sous.cat = None
+        if  int(xml_sous.get('T')):
+            sous.tiers_id = int(xml_sous.get('T'))
         else:
+            try:
+                sous.tiers = Tiers.objects.get(id=int(xml_sous.get('T')))
+            except (Tiers.DoesNotExist, TypeError):
+                sous.tiers = None
+        if int(xml_sous.get('C')):
+            sous.cat_id = int(xml_sous.get('C'))
             try:
                 sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
             except (Scat.DoesNotExist, TypeError):
                 sous.scat = None
-        try:#ib et sib
-            sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
-        except (Ib.DoesNotExist, TypeError):
-            sous.ib = None
         else:
+            try:#cat et scat
+                sous.cat = Cat.objects.get(id=int(xml_sous.get('C')))
+            except (Cat.DoesNotExist, TypeError):
+                sous.cat = None
+            else:
+                try:
+                    sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
+                except (Scat.DoesNotExist, TypeError):
+                    sous.scat = None
+        if int(xml_sous.get('I')):
+            sous.ib_id = int(xml_sous.get('I'))
             try:
                 sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
             except (Sib.DoesNotExist, TypeError):
-                sous.sib = None
+                sous.sib = None            
+        else:
+            try:#ib et sib
+                sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
+            except (Ib.DoesNotExist, TypeError):
+                sous.ib = None
+            else:
+                try:
+                    sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
+                except (Sib.DoesNotExist, TypeError):
+                    sous.sib = None
         try:#moyen de paiment
-            sous.moyen = sous.compte.moyen_set.get(grisbi_id=int(xml_sous.get('Ty')))
+            if int(xml_sous.get('Ty')):
+                sous.moyen = sous.compte.moyen_set.get(grisbi_id=int(xml_sous.get('Ty')))
+            else:
+                sous.moyen = None
         except (Moyen.DoesNotExist, TypeError):
             sous.moyen = None
         try: #gestion des rapprochements
@@ -353,6 +375,8 @@ def import_gsb(nomfich, niv_log=10):
                 if datetime.datetime.combine(sous.rapp.date, datetime.time()) > datetime.datetime.strptime(sous.date, "%Y-%m-%d"):
                     sous.rapp.date = sous.date
                     sous.rapp.save()
+            else:
+                sous.rapp = None
         except (Rapp.DoesNotExist, TypeError):
             sous.tapp = None
             #exercices
@@ -362,18 +386,16 @@ def import_gsb(nomfich, niv_log=10):
             sous.exercice = None
         #gestion des virements
         if int(xml_sous.get('Ro')):
-            sous.jumelle, created = Ope.objects.get_or_create(id=int(xml_sous.get('Ro')), defaults={'compte': Compte.objects.get(id=int(xml_sous.get('Rc')))})
-        else:
-            sous.jumelle = None
+            sous.jumelle_id = int(xml_sous.get('Ro'))
         #gestion des ventilations
         sous.is_mere = bool(int(xml_sous.get('Ov')))
         if int(xml_sous.get('Va')):
-            sous.mere, created = Ope.objects.get_or_create(id=int(xml_sous.get('Va')), defaults={'compte': element})
-        else:
-            sous.mere = None
+            sous.mere_id = int(xml_sous.get('Va'))
         sous.notes = xml_sous.get('N')
         sous.piece_comptable = xml_sous.get('Pc')
         sous.save()
+        log.log(nb_tot_ope, 1)
+    log.log(time.clock(), 1)
     log.log(u"%s operations" % nb_tot_ope)
     #gestion des echeances
     nb = 0
@@ -437,10 +459,11 @@ def import_gsb(nomfich, niv_log=10):
             element.periode_perso=liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
-    log.log(time.clock(), 1)
+        log.log(nb, 1)
     log.log(u'{!s}'.format(time.clock()))
     log.log(u'fini')
 
 
 if __name__ == "__main__":
     import_gsb("{}/test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))), 2)
+    #import_gsb("{}/20040701.gsb".format(os.path.dirname(os.path.abspath(__file__))), 1)

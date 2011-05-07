@@ -15,6 +15,7 @@ urlpatterns += patterns('gsb',
                         (r'^$', 'views.index'),
                         (r'^xml$', 'gsb_0_5_0.export'),
                         (r'^import$', 'import_gsb.import_gsb'),
+                        (r'^options$', 'views.options'),
                         )
 #les vues relatives aux operations
 urlpatterns += patterns('gsb.views',

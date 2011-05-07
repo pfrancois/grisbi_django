@@ -14,7 +14,7 @@
 <form id="form1" method="get" action="action.php">
     <fieldset class="operationMainTable">
         <legend>détails opération {{ ope.id }}</legend>
-        {# id du compte #}<input type="hidden" name="cpt_id" value="{{ ope.compte.id }}"/>
+        {# id du compte #}<input type="hidden" name="cptid" value="{{ compte.id }}"/>
         {# id de l 'operation #} <input type = "hidden" name = "ope_id" value = "{{ ope.id }}" />
         {#  type de l 'operation  #}{% if action == 'new' %}
             <input type="hidden" name="action" value="new"/>
@@ -81,16 +81,20 @@
 </form>
 <br/>
 <table class="editOperationBtns">
-    {% if ope.compte.cloture == false %}
+    {% if not compte.cloture %}
          <tr>
-         <td width = "50%" class = "boutton"> <a href = "javascript:document.forms['form1'].submit();"> Ok </a> </td>
-         <td width = "50%" class = "boutton"> <a href = "{% url gsb.views.cpt_detail ope.compte.id %}"> Annuler </a> </td>
+            <td width = "50%" class = "boutton"> <a href = "javascript:document.forms['form1'].submit();"> Ok </a> </td>
+            <td width = "50%" class = "boutton"> <a href = "{% url gsb.views.cpt_detail compte.id %}"> Annuler </a> </td>
          </tr>
         {% if type_action == 'edit' %}
             <tr>
                 <td colspan="2" class="boutton"><a href="{% url gsb.views.ope_suppr ope.id %}">Supprimer</a></td>
             </tr>
         {% endif %}
+    {% else %}
+        <tr>
+            <td width = "100%" class = "boutton"> <a href = "{% url gsb.views.cpt_detail compte.id %}"> Annuler </a> </td>
+        </tr>
     {% endif %}
 </table>
 {# div pour le choix de la date #}

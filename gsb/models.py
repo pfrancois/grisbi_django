@@ -299,7 +299,7 @@ class Echeance(models.Model):
 
 
 class Generalite(models.Model):
-    titre = models.CharField(max_length=120, blank=True)
+    titre = models.CharField(max_length=120, blank=True, default="grisbi")
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)

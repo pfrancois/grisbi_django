@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*- Django settings for mysite project.
+import os
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -102,7 +105,17 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '3_l+)jh0xdcwuj+w_t7=xjrio$^av0%=g=m@0bvsc7h3k2u91s'
+try:
+    from secret_key import *
+except ImportError:
+    SETTINGS_DIR=os.path.abspath(os.path.dirname(__file__))
+    nomfich=os.path.join(SETTINGS_DIR, 'secret_key.py')
+    from random import choice
+    secret=''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
+    fichier=open(nomfich,'w')
+    fichier.write("# -*- coding: utf-8 -*-")
+    fichier.write("SECRET_KEY=%s"%secret)
+    from secret_key import *
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -117,14 +130,11 @@ MIDDLEWARE_CLASSES = (
 'django.middleware.csrf.CsrfViewMiddleware',
 'django.contrib.auth.middleware.AuthenticationMiddleware',
 'django.contrib.messages.middleware.MessageMiddleware',
-#'debug_toolbar.middleware.DebugToolbarMiddleware',#debugtoolbar
 )
 
 ROOT_URLCONF = 'mysite.urls'
 
-import os
 
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = (
 # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -145,7 +155,6 @@ INSTALLED_APPS = (
 'django.contrib.admin',
 # Uncomment the next line to enable admin documentation:
 'django.contrib.admindocs',
-#'debug_toolbar',
 #'django_extensions',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
