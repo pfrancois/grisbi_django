@@ -2,6 +2,7 @@
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+DEBUG_TOOLBAR = False
 #TEMPLATE_STRING_IF_INVALID="INVALID"
 
 #DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
@@ -12,7 +13,7 @@ ADMINS = (
 #####################################
 #config gsb
 NB_JOURS_AFF = 100
-
+TITRE = "20040701_django.gsb"
 
 
 
@@ -158,8 +159,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 'django.core.context_processors.static',
 
 )
-#pour la debug bar
-INTERNAL_IPS = ('127.0.0.1',)
-DEBUG_TOOLBAR_CONFIG = {
-    #'HIDE_DJANGO_SQL': True ,
-}
+if DEBUG_TOOLBAR:
+    INSTALLED_APPS += ('debug_toolbar',)
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    #pour la debug bar
+    INTERNAL_IPS = ('127.0.0.1',)
+    DEBUG_TOOLBAR_CONFIG = {
+        #'HIDE_DJANGO_SQL': True ,
+    }

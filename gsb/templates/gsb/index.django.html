@@ -52,11 +52,4 @@
     </table>
     {% if nb_clos > 0 %}<p>PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos.</p>{% endif %}
 
-    {% if nbrapp > 1 %}
-        note: {{ nbrapp }} opérations ont été filtrées car elles sont rapprochées.<br/>
-    {% endif %}
-    {% if nbrapp %}
-        note: 1 opération a été filtrée car elle est rapprochée.<br/>
-    {% endif %}
-
 {% endblock content %}

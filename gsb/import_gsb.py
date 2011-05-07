@@ -422,7 +422,7 @@ def import_gsb(nomfich, niv_log=10):
         except (ObjectDoesNotExist, TypeError):
             element.ib = None
             element.sib = None
-        if xml_element.get('Virement_compte') != xml_element.get('Compte'):#todo ca ne marche pas
+        if xml_element.get('Virement_compte') != xml_element.get('Compte'):
             element.compte_virement = Compte.objects.get(id=int(xml_element.get('Virement_compte')))#ici aussi
             try:
                 element.moyen_virement = element.compte_virement.moyen_set.get(grisbi_id=int(xml_element.get('Type_contre_ope')))

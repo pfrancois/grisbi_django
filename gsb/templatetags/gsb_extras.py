@@ -33,7 +33,7 @@ def cur(value, symbol="&#8364;"):
         m = int(d) - d
     except (ValueError, OverflowError, InvalidOperation):
         return input_val
-    if p == 0:
+    if p:
         exp = Decimal(1)
     else:
         exp = Decimal(u'1.0') / (Decimal(10) ** abs(p))
@@ -51,5 +51,9 @@ def cur(value, symbol="&#8364;"):
         return mark_safe("%s %s" % (formats.number_format(number, abs(p)), symbol))
     except InvalidOperation:
         return input_val
-
 cur.is_safe = True
+
+@register.filter()
+def centimes(value):
+    return str(Decimal(str(value))*Decimal(100))
+centimes.is_safe = True

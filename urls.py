@@ -19,7 +19,7 @@ urlpatterns += patterns('gsb',
 #les vues relatives aux operations
 urlpatterns += patterns('gsb.views',
 
-                        (r'^ope/(?P<pk>\d+)/$', 'ope_detail'),
+                        (r'^ope/(?P<ope_id>\d+)/$', 'ope_detail'),
                         )
 #les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',

@@ -50,7 +50,7 @@
                 {% empty %}
                 <tr class="item">
                     <td colspan="5">
-                        aucune op&eacute;ration n&apos;est affich&eacute;e.<br/>
+                        aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
                         {% if nbfiltre > 1 %}
                             {{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au
                             del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
@@ -67,12 +67,20 @@
             <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
         </tr>
     </table>
-    {% if nbrapp > 0 %}
+    {% if nbrapp == 1 %}
+        note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.
+        <br/>
+    {% endif %}
+    {% if nbrapp > 1 %}
         note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.
         <br/>
     {% endif %}
 
-    {% if nbvielles > 0 %}
-        note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
+    {% if nbvielles > 1 %}
+        note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.
     {% endif %}
+    {% if nbvielles == 1 %}
+        note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.
+    {% endif %}
+    seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
 {% endblock content %}

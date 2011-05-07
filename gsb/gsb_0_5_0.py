@@ -10,7 +10,8 @@ from mysite.gsb.models import *
 from django.http import HttpResponse
 from django.db.models import Max
 #from django.core.exceptions import ObjectDoesNotExist
-import decimal
+#import decimal
+from django.conf import settings
 try:
     from lxml import etree as et
 except ImportError:
@@ -476,7 +477,7 @@ def export(request):
     #h=HttpResponse(xml,mimetype="application/xml")
     h=HttpResponse(xml,mimetype="application/x-grisbi-gsb")
     h["Cache-Control"] = "no-cache, must-revalidate"
-    h["Content-Disposition"] = "attachment; filename=export.gsb"
+    h["Content-Disposition"] = "attachment; filename=%s"%settings.TITRE
     return h
 
 if __name__ == "__main__":
