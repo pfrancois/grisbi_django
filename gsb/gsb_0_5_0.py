@@ -9,7 +9,7 @@ if __name__ == "__main__":
 from mysite.gsb.models import *
 from django.http import HttpResponse
 from django.db.models import Max
-from django.core.exceptions import ObjectDoesNotExist
+#from django.core.exceptions import ObjectDoesNotExist
 import decimal
 try:
     from lxml import etree as et
@@ -152,7 +152,7 @@ def _export():
             et.SubElement(xml_detail, "Date_dernier_releve").text = Format.date(Ope.objects.filter(compte=co,rapp__isnull=False).latest().rapp.date)
             et.SubElement(xml_detail, "Solde_dernier_releve").text = Format.float(Ope.objects.filter(compte=co,rapp__isnull=False).latest().rapp.solde())
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte=co,rapp__isnull=False).latest().rapp.id)
-        except ObjectDoesNotExist:
+        except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = Format.float(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
@@ -323,7 +323,7 @@ def _export():
         xml_element.set('Automatique', Format.bool(ech.inscription_automatique))
         xml_element.set('Notes', str(ech.notes))
         if ech.periodicite is None:
-            xml_element.set('Periodicite', str(0))#todo gerer ca ne conjonction avec bdd
+            xml_element.set('Periodicite', str(0))
         else:
             xml_element.set('Periodicite', Format.type(liste_type_period, ech.periodicite))
         xml_element.set('Intervalle_periodicite', str(ech.intervalle))
@@ -473,10 +473,10 @@ def _export():
 
 def export(request):
     xml=_export()
-    h=HttpResponse(xml,mimetype="application/xml")
-    #h=HttpResponse(xml,mimetype="application/x-grisbi-gsb")
+    #h=HttpResponse(xml,mimetype="application/xml")
+    h=HttpResponse(xml,mimetype="application/x-grisbi-gsb")
     h["Cache-Control"] = "no-cache, must-revalidate"
-    #h["Content-Disposition"] = "attachment; filename=%s"%(settings.TITRE)
+    h["Content-Disposition"] = "attachment; filename=export.gsb"
     return h
 
 if __name__ == "__main__":
