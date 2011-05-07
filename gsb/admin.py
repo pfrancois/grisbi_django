@@ -35,7 +35,7 @@ class Ope_admin(admin.ModelAdmin):
             (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen')}),
             (u'catégorie', {'fields': ('cat', 'scat')}),
             (u'imputation bugétaire', {'fields': ('ib', 'sib'), 'classes': ['collapse']}),
-            (u'informations diverses', {'fields': ('date_val', 'numcheque', 'notes', 'exercice'), 'classes': ['collapse']}),
+            (u'informations diverses', {'fields': ('date_val', 'num_cheque', 'notes', 'exercice'), 'classes': ['collapse']}),
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             (u'mere et jumelles', {'fields': ('jumelle', 'mere', 'is_mere'), 'classes': ['collapse']}),
             ]
