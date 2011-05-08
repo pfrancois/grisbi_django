@@ -147,14 +147,19 @@ def virement_creation(request, cpt_id):
 
 
 def import_file(request):
+    import mysite.gsb.import_gsb
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)
         if form.is_valid():
-            import_gsb.import_gsb(request.FILES['file'], 10)
+            print 'toto'
+            mysite.gsb.import_gsb.import_gsb(request.FILES['file'], 1)
             return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     else:
         form = gsb_forms.ImportForm()
-    return render_to_response('gsb/import.django.html', {'form': form})
+    return render_to_response('gsb/import.django.html',
+                              {'form': form,
+                               'titre':"importation d'un fichier"},
+                              context_instance=RequestContext(request))
 
 def options(request):
     return render_to_response('gsb/options.django.html',

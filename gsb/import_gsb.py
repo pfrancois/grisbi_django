@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from mysite.gsb.models import *
 import os, codecs, time
 import decimal
+import logging
 
 liste_type_cat = Cat.typesdep
 liste_type_signe = Moyen.typesdep
@@ -71,18 +72,19 @@ class Import_exception(Exception):
 
 
 def import_gsb(nomfich, niv_log=10):
-    log = LOG(niv_log, 'import_gsb.log')
+    logger=logging.getLogger('gsb.import')
     nomfich = os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
         connection.cursor().execute("delete from {};".format(table))
-        #log.log(u'table {} effacée'.format(table))
-    log.log(u"debut du chargement")
+        logger.info(u'table {} effacée'.format(table))
+    log.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
     #verification du format
     xml_element = str(xml_tree.find('Generalites/Version_fichier').text)
     if xml_element != '0.5.0':
+        logger.critical("le format n'est pas reconnu")
         raise Import_exception, "le format n'est pas reconnu"
         #import des tiers
     nb = 0
@@ -123,10 +125,10 @@ def import_gsb(nomfich, niv_log=10):
                     sous.type = liste_type.get(s[2], 'XXX')
             sous.tiers = element
             sous.save()
-        log.log(nb, 1)
+        logger.debug(nb)
 
-    log.log(u'{} tiers enregistrés et {} titres'.format(nb, nb_sous))
-    log.log(time.clock(), 1)
+    logger.info(u'{} tiers enregistrés et {} titres'.format(nb, nb_sous))
+    logger.debug(time.clock())
     #import des categories et des sous categories
     nb = 0
     for xml_element in xml_tree.find('//Detail_des_categories'):
@@ -142,9 +144,9 @@ def import_gsb(nomfich, niv_log=10):
                 nom=xml_sous.get('Nom'),
                 grisbi_id=xml_sous.get('No')
             )
-        log.log(nb, 1)
-    log.log(time.clock(), 1)
-    log.log(u"{} catégories".format(nb))
+        logger.debug(nb)
+    logger.debug(time.clock())
+    logger.info(u"{} catégories".format(nb))
 
     #imputations
     nb = 0
@@ -161,9 +163,9 @@ def import_gsb(nomfich, niv_log=10):
                 nom=xml_sous.get('Nom'),
                 grisbi_id=xml_sous.get('No')
             )
-        log.log(nb, 1)
-    log.log(time.clock(), 1)
-    log.log(u"{} imputations".format(nb))
+        logger.debug(nb)
+    logger.debug(time.clock())
+    logger.info(u"{} imputations".format(nb))
 
     #gestion des devises:
     nb = 0
@@ -176,8 +178,8 @@ def import_gsb(nomfich, niv_log=10):
         else:
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
-    log.log(time.clock(), 1)
-    log.log(u'{} devises'.format(nb))
+    logger.debug(time.clock())
+    logger.info(u'{} devises'.format(nb))
 
     #gestion des banques:
     nb = 0
@@ -188,8 +190,8 @@ def import_gsb(nomfich, niv_log=10):
         element.cib = xml_element.get('Code')
         element.notes = xml_element.get('Remarques')
         element.save()
-    log.log(time.clock(), 1)
-    log.log(u'{} banques'.format(nb))
+    logger.debug(time.clock())
+    logger.info(u'{} banques'.format(nb))
 
     #gestion des generalites
     xml_element = xml_tree.find('Generalites')
@@ -205,8 +207,8 @@ def import_gsb(nomfich, niv_log=10):
         devise_generale=Titre.objects.get(type=u'DEV',grisbi_id=int(xml_element.find('Numero_devise_totaux_ib').text)),
         )
     element.save()
-    log.log(time.clock(), 1)
-    log.log(u'generalites ok')
+    logger.debug(time.clock())
+    logger.info(u'generalites ok')
 
     #gestion des exercices:
     nb = 0
@@ -217,8 +219,8 @@ def import_gsb(nomfich, niv_log=10):
         element.date_debut = datefr2datesql(xml_element.get('Date_debut'))
         element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
-    log.log(time.clock(), 1)
-    log.log(u'{} exercices'.format(nb))
+    logger.debug(time.clock())
+    logger.info(u'{} exercices'.format(nb))
 
     #gestion Des rapp
     nb = 0
@@ -227,8 +229,8 @@ def import_gsb(nomfich, niv_log=10):
         element = Rapp(id=xml_element.get('No'))
         element.nom = xml_element.get('Nom')
         element.save()
-    log.log(time.clock(), 1)
-    log.log(u'{} rapprochements'.format(nb))
+    logger.debug(time.clock())
+    logger.info(u'{} rapprochements'.format(nb))
 
     #gestion des comptes
     nb = 0
@@ -295,9 +297,9 @@ def import_gsb(nomfich, niv_log=10):
         except (Moyen.DoesNotExist, TypeError):
             element.moyen_debit_defaut = None
         element.save()
-        log.log(nb,1)
-    log.log(time.clock(), 1)
-    log.log(u'{} comptes'.format(nb))
+        logger.debug(nb)
+    logger.debug(time.clock())
+    logger.info(u'{} comptes'.format(nb))
     nb_tot_ope=0
     #--------------OPERATIONS-----------------------
     for xml_sous in xml_tree.findall('//Operation'):
@@ -394,9 +396,9 @@ def import_gsb(nomfich, niv_log=10):
         sous.notes = xml_sous.get('N')
         sous.piece_comptable = xml_sous.get('Pc')
         sous.save()
-        log.log(nb_tot_ope, 1)
-    log.log(time.clock(), 1)
-    log.log(u"%s operations" % nb_tot_ope)
+        logger.debug(nb_tot_ope)
+    logger.debug(time.clock())
+    logger.info(u"%s operations" % nb_tot_ope)
     #gestion des echeances
     nb = 0
     for xml_element in xml_tree.find('Echeances/Detail_des_echeances'):
@@ -459,9 +461,9 @@ def import_gsb(nomfich, niv_log=10):
             element.periode_perso=liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
-        log.log(nb, 1)
-    log.log(u'{!s}'.format(time.clock()))
-    log.log(u'fini')
+        logger.debug(nb)
+    logger.info(u'{!s}'.format(time.clock()))
+    logger.info(u'fini')
 
 
 if __name__ == "__main__":

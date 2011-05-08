@@ -5,6 +5,7 @@
         <table>
             {{ form.as_table }}
         </table>
-        <p><input type="submit" value="Submit"></p>
+        {% csrf_token %}
+        <p><input type="submit" value="Importer"></p>
     </form>
 {% endblock content %}

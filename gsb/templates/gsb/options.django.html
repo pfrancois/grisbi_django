@@ -3,17 +3,12 @@
 {% block titre %}<h1>Outils</h1>{% endblock titre %}
 {% block content %}
 <p><a href="{% url gsb.gsb_0_5_0.export %}" class="progress"> télécharger le fichier </a></p>
+<p><a href="{% url gsb.views.import_file %}" class="progress"> import d'un fichier dans l'application</a></p>
 <p><a href="" class="error"> exporter l'ensemble des comptes en csv </a></p>
 <p><a href="" class="error"> effacer les tiers vides </a></p>
 <p><a href="" class="error">change les date des operations cartes differés</a></p>
 <p><a href="" class="error">vérifier les totaux</a></p>
 <p><a href="" class="error"> travaux en batch </a></p>
-<form method="post" action="action_telechargement.php" enctype="multipart/form-data">
-	<fieldset class="operationMainTable">
-	<legend>chargement sur le serveur d'un nouveau fichier gsb</legend>
-	<input type="file" name="temp_gsb"/><br/>
-	<input type="submit" value="Envoyer"/><br/>
-	</fieldset>
-</form>
-<p><a href=""{% url gsb.views.index %}"">retour vers le menu général</a></p>
+
+<p><a href="{% url gsb.views.index %}">retour vers le menu général</a></p>
 {% endblock content %}

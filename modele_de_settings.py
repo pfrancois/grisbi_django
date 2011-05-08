@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- Django settings for mysite project.
+# -*- coding: utf-8 
 import os
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
