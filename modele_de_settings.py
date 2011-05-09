@@ -6,6 +6,7 @@ DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DEBUG_TOOLBAR = False
+DJANGO_EXTENSION = False
 #TEMPLATE_STRING_IF_INVALID="INVALID"
 
 #DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
@@ -151,11 +152,8 @@ INSTALLED_APPS = (
 'django.contrib.messages',
 'django.contrib.staticfiles',
 'mysite.gsb',
-# Uncomment the next line to enable the admin:
 'django.contrib.admin',
-# Uncomment the next line to enable admin documentation:
 'django.contrib.admindocs',
-#'django_extensions',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
 'django.core.context_processors.debug',
@@ -163,8 +161,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 'django.core.context_processors.media',
 'django.contrib.auth.context_processors.auth',
 'django.contrib.messages.context_processors.messages',
-# required by django-admin-tools
-#'django.core.context_processors.request',
 'django.core.context_processors.static',
 
 )
@@ -176,3 +172,81 @@ if DEBUG_TOOLBAR:
     DEBUG_TOOLBAR_CONFIG = {
         #'HIDE_DJANGO_SQL': True ,
     }
+
+if DJANGO_EXTENSION:
+    INSTALLED_APPS += ('django_extensions',)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+   'formatters': {
+        'simple': {
+            'format': '[%(levelname)s] %(asctime)s - %(name)s - %(message)s'
+        },
+        'verbose': {
+            'format': '[%(levelname)s] %(asctime)s - %(name)s - M:%(module)s, P:%(process)d, T:%(thread)d, %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
+        },
+    },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'console-simple':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'log-file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            #consider: 'filename': '/var/log/<myapp>/app.log',
+            #will need perms at location below:
+            'filename': os.path.join(PROJECT_PATH, 'log','gsb_log.log'),
+            'mode': 'a', #append+create
+        },
+        #~ 'timed-log-file': {
+            #~ 'level': 'DEBUG',
+            #~ 'class': 'logging.handlers.TimedRotatingFileHandler', # Python logging lib
+            #~ 'formatter': 'parsefriendly',
+            #~ #consider: 'filename': '/var/log/<myapp>/app.log',
+            #~ #will need perms at location below:
+            #~ 'filename': os.path.join(PROJECT_PATH, 'log','gsb_timed_log.log'),
+            #~ 'when': 'midnight',
+            #~ 'backupCount': '30', #approx 1 month worth
+        #~ },
+        #~ 'watched-log-file': {
+            #~ 'level': 'DEBUG',
+            #~ 'class': 'logging.handlers.WatchedFileHandler',
+            #~ 'formatter': 'parsefriendly',
+            #~ #consider: 'filename': '/var/log/<myapp>/app.log',
+            #~ #will need perms at location below:
+            #~ 'filename': os.path.join(PROJECT_PATH, 'log','gsb_watched_log.log'),
+            #~ 'mode': 'a', #append+create
+        #~ },
+    },
+    'loggers': {
+        'django': {
+            'level':'DEBUG',
+            'handlers':['console-simple', 'log-file'],
+            'propagate': True,
+        },
+        'django.request': {
+            'level': 'DEBUG',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': False,
+        },
+        'gsb':{
+            'level':'DEBUG',
+            'handlers':['console-simple', 'log-file'],
+            'propagate': True,
+        }
+    }
+}
+

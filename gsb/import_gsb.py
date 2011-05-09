@@ -71,7 +71,7 @@ class Import_exception(Exception):
     pass
 
 
-def import_gsb(nomfich, niv_log=10):
+def import_gsb(nomfich):
     logger=logging.getLogger('gsb.import')
     nomfich = os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
@@ -467,5 +467,5 @@ def import_gsb(nomfich, niv_log=10):
 
 
 if __name__ == "__main__":
-    import_gsb("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))), 2)
+    import_gsb("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
     #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)

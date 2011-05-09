@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
 import mysite.gsb.import_gsb as import_gsb
+import logging
 
 def index(request):
     t = loader.get_template('gsb/index.django.html')
@@ -151,7 +152,7 @@ def import_file(request):
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)
         if form.is_valid():
-            print 'toto'
+
             mysite.gsb.import_gsb.import_gsb(request.FILES['file'], 1)
             return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     else:
@@ -162,5 +163,5 @@ def import_file(request):
                               context_instance=RequestContext(request))
 
 def options(request):
-    return render_to_response('gsb/options.django.html',
-                              context_instance=RequestContext(request))
+    return render_to_response('gsb/options.django.html', context_instance=RequestContext(request))
+
