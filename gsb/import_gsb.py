@@ -75,8 +75,8 @@ def import_gsb(nomfich, niv_log=10):
     logger=logging.getLogger('gsb.import')
     nomfich = os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
-        connection.cursor().execute("delete from {};".format(table))
-        logger.info(u'table {} effacée'.format(table))
+        connection.cursor().execute("delete from %s;"%(table))
+        logger.info(u'table %s effacée'%(table))
     log.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
@@ -101,13 +101,13 @@ def import_gsb(nomfich, niv_log=10):
             sous = Titre(nom=element.nom[7:])
             if s[1] == '':
                 if s[0] == '':
-                    sous.isin = "XX{}".format(nb_sous)
+                    sous.isin = "XX%s"%(nb_sous)
                 else:
                     sous.isin = s[0]
                 sous.type = "XXX"
             else:
                 if s[0] == '':
-                    sous.isin = "XX{}".format(nb_sous)
+                    sous.isin = "XX%s"%(nb_sous)
                 else:
                     sous.isin = s[0]
                     liste_type = {
@@ -127,7 +127,7 @@ def import_gsb(nomfich, niv_log=10):
             sous.save()
         logger.debug(nb)
 
-    logger.info(u'{} tiers enregistrés et {} titres'.format(nb, nb_sous))
+    logger.info(u'%s tiers enregistrés et %s titres'%(nb, nb_sous))
     logger.debug(time.clock())
     #import des categories et des sous categories
     nb = 0
@@ -146,7 +146,7 @@ def import_gsb(nomfich, niv_log=10):
             )
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"{} catégories".format(nb))
+    logger.info(u"%s catégories"%(nb))
 
     #imputations
     nb = 0
@@ -165,7 +165,7 @@ def import_gsb(nomfich, niv_log=10):
             )
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"{} imputations".format(nb))
+    logger.info(u"%s imputations"%(nb))
 
     #gestion des devises:
     nb = 0
@@ -179,7 +179,7 @@ def import_gsb(nomfich, niv_log=10):
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
     logger.debug(time.clock())
-    logger.info(u'{} devises'.format(nb))
+    logger.info(u'%s devises'%(nb))
 
     #gestion des banques:
     nb = 0
@@ -191,7 +191,7 @@ def import_gsb(nomfich, niv_log=10):
         element.notes = xml_element.get('Remarques')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'{} banques'.format(nb))
+    logger.info(u'%s banques'.format(nb))
 
     #gestion des generalites
     xml_element = xml_tree.find('Generalites')
@@ -220,7 +220,7 @@ def import_gsb(nomfich, niv_log=10):
         element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
     logger.debug(time.clock())
-    logger.info(u'{} exercices'.format(nb))
+    logger.info(u'%s exercices'.format(nb))
 
     #gestion Des rapp
     nb = 0
@@ -230,7 +230,7 @@ def import_gsb(nomfich, niv_log=10):
         element.nom = xml_element.get('Nom')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'{} rapprochements'.format(nb))
+    logger.info(u'%s rapprochements'.format(nb))
 
     #gestion des comptes
     nb = 0
@@ -299,7 +299,7 @@ def import_gsb(nomfich, niv_log=10):
         element.save()
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u'{} comptes'.format(nb))
+    logger.info(u'%s comptes'.format(nb))
     nb_tot_ope=0
     #--------------OPERATIONS-----------------------
     for xml_sous in xml_tree.findall('//Operation'):
@@ -353,7 +353,7 @@ def import_gsb(nomfich, niv_log=10):
             try:
                 sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
             except (Sib.DoesNotExist, TypeError):
-                sous.sib = None            
+                sous.sib = None
         else:
             try:#ib et sib
                 sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
@@ -467,5 +467,5 @@ def import_gsb(nomfich, niv_log=10):
 
 
 if __name__ == "__main__":
-    import_gsb("{}/test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))), 2)
-    #import_gsb("{}/20040701.gsb".format(os.path.dirname(os.path.abspath(__file__))), 1)
+    import_gsb("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))), 2)
+    #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)

@@ -12,7 +12,7 @@ import decimal
 
 class importtest(TestCase):
     def setUp(self):
-        import_gsb("{}/../test_files/test_original.gsb".format(os.path.dirname(os.path.abspath(__file__))))
+        import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
         Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
     def test_tiers_properties(self):

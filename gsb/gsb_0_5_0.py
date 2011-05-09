@@ -482,6 +482,6 @@ def export(request):
 
 if __name__ == "__main__":
     xml=_export()
-    fichier=open("{}/test_files/test.gsb".format(os.path.dirname(os.path.abspath(__file__))),"w")
+    fichier=open("%s/test_files/test.gsb"%(os.path.dirname(os.path.abspath(__file__))),"w")
     fichier.write(xml)
     fichier.close()
