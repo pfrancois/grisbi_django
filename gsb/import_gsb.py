@@ -3,7 +3,7 @@ if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
 
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..')))
     from mysite import settings
 
     setup_environ(settings)
@@ -73,11 +73,10 @@ class Import_exception(Exception):
 
 def import_gsb(nomfich):
     logger=logging.getLogger('gsb.import')
-    nomfich = os.path.normpath(nomfich)
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
         connection.cursor().execute("delete from %s;"%(table))
         logger.info(u'table %s effacée'%(table))
-    log.info(u"debut du chargement")
+    logger.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
@@ -191,7 +190,7 @@ def import_gsb(nomfich):
         element.notes = xml_element.get('Remarques')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s banques'.format(nb))
+    logger.info(u'%s banques'%nb)
 
     #gestion des generalites
     xml_element = xml_tree.find('Generalites')
@@ -220,7 +219,7 @@ def import_gsb(nomfich):
         element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s exercices'.format(nb))
+    logger.info(u'%s exercices'%nb)
 
     #gestion Des rapp
     nb = 0
@@ -230,7 +229,7 @@ def import_gsb(nomfich):
         element.nom = xml_element.get('Nom')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s rapprochements'.format(nb))
+    logger.info(u'%s rapprochements'%nb)
 
     #gestion des comptes
     nb = 0
@@ -299,7 +298,7 @@ def import_gsb(nomfich):
         element.save()
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u'%s comptes'.format(nb))
+    logger.info(u'%s comptes'%nb)
     nb_tot_ope=0
     #--------------OPERATIONS-----------------------
     for xml_sous in xml_tree.findall('//Operation'):
@@ -467,5 +466,7 @@ def import_gsb(nomfich):
 
 
 if __name__ == "__main__":
-    import_gsb("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
+    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich = os.path.normpath(nomfich)
+    import_gsb(nomfich)
     #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)
