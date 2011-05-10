@@ -233,14 +233,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'level':'DEBUG',
+            'level':'INFO',
             'handlers':['console-simple', 'log-file'],
             'propagate': True,
-        },
-        'django.request': {
-            'level': 'DEBUG',
-            'handlers': ['console-simple', 'log-file'],
-            'propagate': False,
         },
         'gsb':{
             'level':'DEBUG',

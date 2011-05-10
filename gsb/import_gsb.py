@@ -461,7 +461,7 @@ def import_gsb(nomfich):
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
         logger.debug(nb)
-    logger.info(u'{!s}'.format(time.clock()))
+    logger.debug(u'{!s}'.format(time.clock()))
     logger.info(u'fini')
 
 
