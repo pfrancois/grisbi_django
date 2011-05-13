@@ -7,18 +7,39 @@ from django.conf import settings
 from django.shortcuts import render_to_response, get_object_or_404
 from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
+from django.db import models
+import decimal
 import logging
 
 def index(request):
     t = loader.get_template('gsb/index.django.html')
-    bq = Compte.objects.filter(type__in=(u'b', u'e'))
-    pl = Compte.objects.filter(type__in=(u'a', u'p'))
-    total_pla = 0
-    total_bq = 0
-    for compte in bq:
-        total_bq = total_bq + compte.solde()
-    for compte in pl:
-        total_pla = total_pla + compte.solde()
+    bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
+    pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
+    total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e')).aggregate(solde=models.Sum('montant'))['solde']
+    solde_init_bq=bq.aggregate(init=models.Sum('solde_init'))['init']
+    if total_bq:
+        if solde_init_bq:
+            total_bq=total_bq+solde_init_bq
+        else:
+            total_bq=total_bq
+    else:
+        if solde_init_bq:
+            total_bq=solde_init_bq
+        else:
+            total_bq=decimal.Decimal('0')
+
+    total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p')).aggregate(solde=models.Sum('montant'))['solde']
+    solde_init_pla=pl.aggregate(init=models.Sum('solde_init'))['init']
+    if total_pla:
+        if solde_init_pla:
+            total_pla=total_pla+solde_init_pla
+        else:
+            total_pla=total_pla
+    else:
+        if solde_init_pla:
+            total_pla=solde_init_pla
+        else:
+            total_pla=decimal.Decimal('0')
     nb_clos = len(Compte.objects.filter(cloture=True))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
