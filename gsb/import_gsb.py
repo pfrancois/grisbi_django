@@ -26,30 +26,6 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 
-class LOG(object):
-    def __init__(self, niv_actuel, filename, niv_min_pour_apparaitre_dans_le_fichier=125):
-        super(LOG, self).__init__()
-        self.niv_actuel = niv_actuel
-        self.filename = filename
-        self.niv_min_pour_apparaitre_dans_le_fichier = niv_min_pour_apparaitre_dans_le_fichier
-
-    def log(self, s, niv_min_pour_apparaitre=2):
-        if type(s) != unicode:
-            chaine = unicode(s)
-        else:
-            chaine = s
-        if niv_min_pour_apparaitre >= self.niv_actuel:
-            print chaine
-        if niv_min_pour_apparaitre >= self.niv_min_pour_apparaitre_dans_le_fichier:
-            chaine = u"%s\n" % chaine
-            f = codecs.open(self.filename, 'a', 'utf-8')
-            f.write(chaine.encode('utf-8'))
-            f.close()
-
-    def set(self, niv_actuel):
-        self.niv_actuel = niv_actuel
-
-
 def datefr2datesql(s):
     try:
         t = time.strptime(str(s), "%d/%m/%Y")

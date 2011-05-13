@@ -1,5 +1,9 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-<p>{{ test }}</p>
+<form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
+    <table>
+        {{ form }}
+    </table>
+</form>
 {% endblock content %}

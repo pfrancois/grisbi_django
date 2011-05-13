@@ -62,17 +62,17 @@ def cpt_detail(request, cpt_id):
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     t = loader.get_template('gsb/cpt_detail.django.html')
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
-    q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(rapp__isnull=True).select_related()
+    q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(rapp__isnull=True)
     nb_ope_vielles = Ope.objects.filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(is_mere=False).filter(rapp__isnull=True).count()
     nb_ope_rapp = Ope.objects.filter(compte__pk=cpt_id).filter(is_mere=False).filter(rapp__isnull=False).count()
-    p = list(q)
+    #p = list(q)
     return HttpResponse(
         t.render(
             RequestContext(
                 request,
                 {
                     'compte': c,
-                    'list_ope': p,
+                    'list_ope': q,
                     'nbrapp': nb_ope_rapp,
                     'nbvielles': nb_ope_vielles,
                     'titre': c.nom,
@@ -167,8 +167,10 @@ def virement_creation(request, cpt_id):
     pass
 
 def ope_detail(request, ope_id):
-    form= gsb_forms.OperationForm
+    ope = get_object_or_404(Ope, pk=ope_id)
+    form = gsb_forms.OperationForm(instance=ope)
     return  render_to_response('gsb/test.django.html',
-        {'form':form}
+        {'form':form},
+        context_instance=RequestContext(request)
     )
 

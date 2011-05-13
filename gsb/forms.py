@@ -9,5 +9,8 @@ class ImportForm(forms.Form):
     ))
 
 class OperationForm(forms.ModelForm):
+    error_css_class = 'error'
     class Meta:
         model=Ope
+    def __init__(self, *args, **kwargs):
+        super (OperationForm,self).__init__(*args, **kwargs)
