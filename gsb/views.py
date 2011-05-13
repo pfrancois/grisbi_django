@@ -7,7 +7,6 @@ from django.conf import settings
 from django.shortcuts import render_to_response, get_object_or_404
 from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
-import mysite.gsb.import_gsb as import_gsb
 import logging
 
 def index(request):
@@ -96,7 +95,7 @@ def cpt_titre_detail(request, cpt_id):
     )
 
 
-def ope_detail(request, ope_id):
+def ope_detail2(request, ope_id):
     p = get_object_or_404(Ope, pk=ope_id)
     #depenses_cat=Cat.objects.filter(type='d').select_related()
     cats_debit=[]
@@ -146,5 +145,9 @@ def ope_creation(request, cpt_id):
 def virement_creation(request, cpt_id):
     pass
 
-
+def ope_detail(request, ope_id):
+    form= gsb_forms.OperationForm
+    return  render_to_response('gsb/test.django.html',
+        {'form':form}
+    )
 
