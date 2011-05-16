@@ -71,7 +71,7 @@ class Format:
 
 #definitions des listes
 liste_type_cat = Cat.typesdep
-liste_type_signe = Moyen.typesdep
+liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
@@ -162,25 +162,25 @@ def _export():
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3" #NOT IN BDD
         et.SubElement(xml_detail, "Commentaires").text = co.notes
         et.SubElement(xml_detail, "Adresse_du_titulaire").text = '' #NOT IN BDD
-        et.SubElement(xml_detail, "Nombre_de_types").text = str(Moyen.objects.filter(compte=co).count())
+        et.SubElement(xml_detail, "Nombre_de_types").text = str(Moyen.objects.count())
         if co.moyen_debit_defaut is not None:
-            et.SubElement(xml_detail, "Type_defaut_debit").text = str(co.moyen_debit_defaut.grisbi_id)
+            et.SubElement(xml_detail, "Type_defaut_debit").text = str(co.moyen_debit_defaut.id)
         else:
             et.SubElement(xml_detail, "Type_defaut_debit").text = '0'
         if co.moyen_credit_defaut is not None:
-            et.SubElement(xml_detail, "Type_defaut_credit").text = str(co.moyen_credit_defaut.grisbi_id)
+            et.SubElement(xml_detail, "Type_defaut_credit").text = str(co.moyen_credit_defaut.id)
         else:
             et.SubElement(xml_detail, "Type_defaut_credit").text = '0'
         et.SubElement(xml_detail, "Tri_par_type").text = '0'#NOT IN BDD
         et.SubElement(xml_detail, "Neutres_inclus").text = '0'#NOT IN BDD
-        et.SubElement(xml_detail, "Ordre_du_tri").text = '/'.join([str(o.grisbi_id) for o in Moyen.objects.filter(compte=co.id).order_by('id')])
+        et.SubElement(xml_detail, "Ordre_du_tri").text = '/'.join([str(o.grisbi) for o in Moyen.objects.order_by('id')])
         ##types:
         xml_types = et.SubElement(xml_compte, "Detail_de_Types")
-        for ty in Moyen.objects.filter(compte=co).order_by('grisbi_id'):
+        for ty in Moyen.objects.all().order_by('id'):
             xml_element = et.SubElement(xml_types, "Type")
-            xml_element.set('No', str(ty.grisbi_id))
+            xml_element.set('No', str(ty.id))
             xml_element.set('Nom', ty.nom)
-            xml_element.set('Signe', Format.type(liste_type_signe, ty.signe))
+            xml_element.set('Signe', Format.type(liste_type_moyen, ty.type))
             xml_element.set('Affiche_entree', Format.bool(ty.affiche_numero))
             xml_element.set('Numerotation_auto', Format.bool(ty.num_auto))
             xml_element.set('No_en_cours', str(ty.num_en_cours))
@@ -227,7 +227,7 @@ def _export():
             if ope.moyen is None:
                 xml_element.set('Ty', str(0))
             else:
-                xml_element.set('Ty', str(ope.moyen.grisbi_id))
+                xml_element.set('Ty', str(ope.moyen.id))
             xml_element.set('Ct', str(ope.num_cheque))
             if ope.pointe:
                 xml_element.set('P', str(1))

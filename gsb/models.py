@@ -202,18 +202,15 @@ class Moyen(models.Model):
     ('d', u'depense'),
     ('r', u'recette'),
     )
-    compte = models.ForeignKey(Compte)
     nom = models.CharField(max_length=20)
-    signe = models.CharField(max_length=1, choices=typesdep,default='d')
+    type = models.CharField(max_length=1, choices=typesdep,default='d')
     affiche_numero = models.BooleanField(default=False)
     num_auto = models.BooleanField(default=False)
     num_en_cours = models.BigIntegerField(null=True, blank=True)
-    grisbi_id = models.IntegerField(verbose_name=u"id dans ce compte")
     class Meta:
         db_table = 'moyen'
         verbose_name = u"moyen de paiment"
         verbose_name_plural = u"moyens de paiment"
-        unique_together = ("compte", "grisbi_id")
         ordering = ['nom']
 
 

@@ -16,7 +16,7 @@ import decimal
 import logging
 
 liste_type_cat = Cat.typesdep
-liste_type_signe = Moyen.typesdep
+liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
@@ -50,8 +50,8 @@ class Import_exception(Exception):
 def import_gsb(nomfich):
     logger=logging.getLogger('gsb.import')
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
-        connection.cursor().execute("delete from %s;"%(table))
-        logger.info(u'table %s effacée'%(table))
+        connection.cursor().execute("delete from %s;"%table)
+        logger.info(u'table %s effacée'%table)
     logger.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
@@ -76,13 +76,13 @@ def import_gsb(nomfich):
             sous = Titre(nom=element.nom[7:])
             if s[1] == '':
                 if s[0] == '':
-                    sous.isin = "XX%s"%(nb_sous)
+                    sous.isin = "XX%s"%nb_sous
                 else:
                     sous.isin = s[0]
                 sous.type = "XXX"
             else:
                 if s[0] == '':
-                    sous.isin = "XX%s"%(nb_sous)
+                    sous.isin = "XX%s"%nb_sous
                 else:
                     sous.isin = s[0]
                     liste_type = {
@@ -121,7 +121,7 @@ def import_gsb(nomfich):
             )
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"%s catégories"%(nb))
+    logger.info(u"%s catégories"%nb)
 
     #imputations
     nb = 0
@@ -140,7 +140,7 @@ def import_gsb(nomfich):
             )
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"%s imputations"%(nb))
+    logger.info(u"%s imputations"%nb)
 
     #gestion des devises:
     nb = 0
@@ -154,7 +154,7 @@ def import_gsb(nomfich):
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s devises'%(nb))
+    logger.info(u'%s devises'%nb)
 
     #gestion des banques:
     nb = 0
@@ -252,25 +252,26 @@ def import_gsb(nomfich):
         else:
             element.notes = ''
         element.save()
+        tabl_correspondance={}
         #---------------MOYENS---------------------
         for xml_sous in xml_element.find('Detail_de_Types'):
             nb_tot_moyen += 1
             nb_moyen += 1
-            element.moyen_set.create(nom=xml_sous.get('Nom'),
-                                     signe=liste_type_signe[int(xml_sous.get('Signe'))][0],
-                                     affiche_numero=bool(int(xml_sous.get('Affiche_entree'))),
-                                     num_auto=bool(int(xml_sous.get('Numerotation_auto'))),
-                                     num_en_cours=int(xml_sous.get('No_en_cours')),
-                                     grisbi_id=int(xml_sous.get('No'))
+            moyen,created = Moyen.objects.get_or_create(nom=xml_sous.get('Nom'),defaults={'nom':xml_sous.get('Nom'),
+                                     'type':liste_type_moyen[int(xml_sous.get('Signe'))][0],
+                                     'affiche_numero':bool(int(xml_sous.get('Affiche_entree'))),
+                                     'num_auto':bool(int(xml_sous.get('Numerotation_auto'))),
+                                     'num_en_cours':int(xml_sous.get('No_en_cours'))}
             )
+            tabl_correspondance[int(xml_sous.get('No'))]=moyen.id
         try:
-            element.moyen_credit_defaut = element.moyen_set.get(grisbi_id=int(xml_element.find('Details/Type_defaut_credit').text))
-        except (Moyen.DoesNotExist, TypeError):
-            element.moyen_credit_defaut = None
+            element.moyen_credit_defaut_id = tabl_correspondance[int(xml_element.find('Details/Type_defaut_credit').text)]
+        except (KeyError, TypeError):
+            element.moyen_credit_defaut_id = None
         try:
-            element.moyen_debit_defaut = element.moyen_set.get(grisbi_id=int(xml_element.find('Details/Type_defaut_debit').text))
-        except (Moyen.DoesNotExist, TypeError):
-            element.moyen_debit_defaut = None
+            element.moyen_debit_defaut_id = tabl_correspondance[int(xml_element.find('Details/Type_defaut_debit').text)]
+        except (KeyError, TypeError):
+            element.moyen_debit_defaut_id = None
         element.save()
         logger.debug(nb)
     logger.debug(time.clock())
@@ -341,7 +342,7 @@ def import_gsb(nomfich):
                     sous.sib = None
         try:#moyen de paiment
             if int(xml_sous.get('Ty')):
-                sous.moyen = sous.compte.moyen_set.get(grisbi_id=int(xml_sous.get('Ty')))
+                sous.moyen = Moyen.objects.get(id=int(xml_sous.get('Ty')))
             else:
                 sous.moyen = None
         except (Moyen.DoesNotExist, TypeError):
@@ -424,7 +425,7 @@ def import_gsb(nomfich):
         if xml_element.get('Virement_compte') != xml_element.get('Compte'):
             element.compte_virement = Compte.objects.get(id=int(xml_element.get('Virement_compte')))#ici aussi
             try:
-                element.moyen_virement = element.compte_virement.moyen_set.get(grisbi_id=int(xml_element.get('Type_contre_ope')))
+                element.moyen_virement = Moyen.objects.get(id=int(xml_element.get('Type_contre_ope')))
             except (Moyen.DoesNotExist, TypeError):
                 element.moyen_virement = None
         else :

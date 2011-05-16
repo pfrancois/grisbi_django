@@ -44,6 +44,8 @@ class Ope_admin(admin.ModelAdmin):
 class cours_admin(admin.ModelAdmin):
     fields = ['isin', 'date', 'valeur']
 
+class moyen_admin(admin.ModelAdmin):
+    fields = ['type','nom']
 
 admin.site.register(Tiers)
 admin.site.register(Cat, Cat_admin)
@@ -55,5 +57,6 @@ admin.site.register(Banque)
 admin.site.register(Ib, Ib_admin)
 admin.site.register(Exercice)
 admin.site.register(Rapp)
+admin.site.register(Moyen)
 admin.site.register(Echeance)
 admin.site.register(Generalite)

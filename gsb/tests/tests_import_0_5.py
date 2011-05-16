@@ -9,9 +9,14 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from mysite.gsb.import_gsb import *
 import decimal
+from django.conf import settings
 
 class importtest(TestCase):
     def setUp(self):
+        settings.LOGGING={
+    'version': 1,
+    'disable_existing_loggers': True
+    }
         import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
         Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
@@ -151,24 +156,20 @@ class importtest(TestCase):
         self.assertEqual(6, Compte.objects.all().aggregate(max=models.Max('id'))['max'])
 
     def test_moyen(self):
-        obj = Compte.objects.get(id=0).moyen_set.get(grisbi_id=1)
+        obj = Moyen.objects.get(id=1)
         self.assertEqual(obj.nom, u'Virement')
-        self.assertEqual(obj.signe, 'v')
+        self.assertEqual(obj.type, 'v')
         self.assertEqual(obj.affiche_numero, True)
         self.assertEqual(obj.num_auto, False)
         self.assertEqual(obj.num_en_cours, 0)
 
     def test_moyen_avec_numero(self):
-        obj = Compte.objects.get(id=0).moyen_set.get(grisbi_id=5)
+        obj = Moyen.objects.get(id=5)
         self.assertEqual(obj.nom, u'Chèque')
-        self.assertEqual(obj.signe, 'd')
+        self.assertEqual(obj.type, 'd')
         self.assertEqual(obj.affiche_numero, True)
         self.assertEqual(obj.num_auto, True)
         self.assertEqual(obj.num_en_cours, 12345)
-
-    def test_nb_moyens_dans_compte(self):
-        self.assertEqual(Compte.objects.get(id=0).moyen_set.count(), 5)
-        self.assertEqual(Compte.objects.get(id=0).moyen_set.aggregate(max=models.Max('id'))['max'], 5)
 
     def test_rapp(self):
         obj = Rapp.objects.get(id=1)
@@ -198,7 +199,7 @@ class importtest(TestCase):
     def test_ech_virement(self):
         obj= Echeance.objects.get(id=6)
         self.assertEquals(obj.compte_virement.id, 3)
-        self.assertEquals(obj.moyen_virement.grisbi_id, 1)
+        self.assertEquals(obj.moyen_virement.id, 1)
 
     def test_ech_period_perso(self):
         obj = Echeance.objects.get(id=4)
@@ -220,7 +221,6 @@ class importtest(TestCase):
         self.assertEquals(obj.scat.grisbi_id, 6)
         self.assertEquals(obj.ib, None)
         self.assertEquals(obj.sib, None)
-        self.assertEquals(obj.moyen.grisbi_id, 1)
         self.assertEquals(obj.moyen_virement, None)
         self.assertEquals(obj.compte_virement, None)
         self.assertEquals(obj.exercice.id, 5)
