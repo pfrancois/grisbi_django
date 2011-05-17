@@ -12,6 +12,8 @@ from django.db.models import Max
 #from django.core.exceptions import ObjectDoesNotExist
 #import decimal
 from django.conf import settings
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 try:
     from lxml import etree as et
 except ImportError:
@@ -473,12 +475,22 @@ def _export():
 
 
 def export(request):
-    xml=_export()
-    #h=HttpResponse(xml,mimetype="application/xml")
-    h=HttpResponse(xml,mimetype="application/x-grisbi-gsb")
-    h["Cache-Control"] = "no-cache, must-revalidate"
-    h["Content-Disposition"] = "attachment; filename=%s"%settings.TITRE
-    return h
+    nb_compte=Compte.objects.count()
+    if nb_compte:
+        xml=_export()
+        #h=HttpResponse(xml,mimetype="application/xml")
+        h=HttpResponse(xml,mimetype="application/x-grisbi-gsb")
+        h["Cache-Control"] = "no-cache, must-revalidate"
+        h["Content-Disposition"] = "attachment; filename=%s"%settings.TITRE
+        return h
+    else:
+            return render_to_response('generic.django.html',
+                {
+                    'titre':'import gsb',
+                    'resultats':({'texte':"attention, il n'y a pas de comptes donc pas de possiilité d'export."},)
+                },
+                context_instance=RequestContext(request)
+            )
 
 if __name__ == "__main__":
     xml=_export()

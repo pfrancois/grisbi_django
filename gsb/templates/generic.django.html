@@ -23,13 +23,13 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 </head>
 <body {% block body_js %}{% endblock body_js %}>
 {% block titre %}<h1>{{ titre }}</h1>{% endblock %}
-{% block resultat %}
+{% block result %}
     {% for resultat in resultats %}
         <div class='{{ resultat.css }}'>{{ resultat.texte }}</div>
     {% endfor %}
-{% endblock resultat %}
+{% endblock result %}
 {% block content %}
-    <div class="progress"><a href='{{ lien }}'>{{ suite }}</a></div>
+    <div class="progress"><a href='{% url gsb.views.index %}'>retour</a></div>
 {% endblock %}
 </body>
 </html>
