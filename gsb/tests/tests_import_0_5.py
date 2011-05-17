@@ -259,11 +259,8 @@ class importtest(TestCase):
         self.assertEquals(obj.sib.grisbi_id, 1)
         self.assertEquals(obj.jumelle, None)
         self.assertEquals(obj.mere, None)
-        self.assertEquals(obj.is_mere, False)
     def test_ope_date_valeur(self):
         self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
-    def test_ope_mere(self):
-        self.assertEquals(Ope.objects.get(id=2).is_mere, True)
     def test_ope_devise(self):
         self.assertEquals(Ope.objects.get(id=8).compte.devise.grisbi_id,2)
     def test_ope_virement_etranger(self):

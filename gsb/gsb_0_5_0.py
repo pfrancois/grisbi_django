@@ -224,7 +224,7 @@ def _export():
                 xml_element.set('Sc', str(0))
             else:
                 xml_element.set('Sc', str(ope.scat.grisbi_id ))
-            xml_element.set('Ov', Format.bool(ope.is_mere))
+            xml_element.set('Ov', Format.bool(ope.mere))
             xml_element.set('N', ope.notes)
             if ope.moyen is None:
                 xml_element.set('Ty', str(0))
@@ -487,7 +487,7 @@ def export(request):
             return render_to_response('generic.django.html',
                 {
                     'titre':'import gsb',
-                    'resultats':({'texte':"attention, il n'y a pas de comptes donc pas de possiilité d'export."},)
+                    'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
                 },
                 context_instance=RequestContext(request)
             )

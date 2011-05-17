@@ -62,10 +62,9 @@ def cpt_detail(request, cpt_id):
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     t = loader.get_template('gsb/cpt_detail.django.html')
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
-    q = Ope.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(is_mere=False).filter(rapp__isnull=True)
-    nb_ope_vielles = Ope.objects.filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(is_mere=False).filter(rapp__isnull=True).count()
-    nb_ope_rapp = Ope.objects.filter(compte__pk=cpt_id).filter(is_mere=False).filter(rapp__isnull=False).count()
-    #p = list(q)
+    q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
+    nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+    nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
     return HttpResponse(
         t.render(
             RequestContext(
@@ -94,8 +93,8 @@ def cpt_titre_detail(request, cpt_id):
     titres = []
     total_titres = 0
     for t in titre_sans_sum:
-        mise = t.ope_set.exclude(is_mere=True).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
-        pmv = t.ope_set.exclude(is_mere=True).filter(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
+        mise = t.ope_set.filter(mere=None,).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
+        pmv = t.ope_set.filter(mere=None,cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
         total_titres = total_titres + mise + pmv
         titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'mise': mise, 'pmv': pmv, 'total': mise + pmv})
     especes = c.solde() - total_titres

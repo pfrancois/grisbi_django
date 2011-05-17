@@ -331,7 +331,6 @@ class Ope(models.Model):
     sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set')
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set')
-    is_mere = models.BooleanField(default=False, help_text=u"permet d'eviter de faire de nombreuses requetes")
     automatique = models.BooleanField(default=False)
     piece_comptable = models.CharField(max_length=120, blank=True, default='')
 
@@ -341,7 +340,8 @@ class Ope(models.Model):
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
         ordering = ['date']
-
-
+    def non_meres():
+        return Ope.objects.filter(mere=None)
+    non_meres=staticmethod(non_meres)
     def __unicode__(self):
         return u"%s" % (self.id,)

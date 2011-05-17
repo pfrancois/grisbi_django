@@ -366,7 +366,7 @@ def import_gsb(nomfich):
         if int(xml_sous.get('Ro')):
             sous.jumelle_id = int(xml_sous.get('Ro'))
         #gestion des ventilations
-        sous.is_mere = bool(int(xml_sous.get('Ov')))
+        #bool(int(xml_sous.get('Ov'))) pas besoin car on regarde avec des requetes sql
         if int(xml_sous.get('Va')):
             sous.mere_id = int(xml_sous.get('Va'))
         sous.notes = xml_sous.get('N')
