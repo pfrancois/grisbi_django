@@ -84,7 +84,7 @@ class Cat(models.Model):
     ('d', u'depense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=60)
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name="type de la catégorie")
     class Meta:
         db_table = 'cat'
@@ -96,23 +96,10 @@ class Cat(models.Model):
         return self.nom
 
 
-class Scat(models.Model):
-    cat = models.ForeignKey(Cat)
-    nom = models.CharField(max_length=40)
-    grisbi_id = models.IntegerField(verbose_name=u"id dans cette catégorie")
-    class Meta:
-        db_table = 'scat'
-        order_with_respect_to = 'cat'
-        unique_together = ("cat", "grisbi_id")
-        verbose_name = u"sous-catégorie"
-
-
-    def __unicode__(self):
-        return self.nom
 
 
 class Ib(models.Model):
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=60)
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
     class Meta:
         db_table = 'ib'
@@ -124,23 +111,6 @@ class Ib(models.Model):
     def __unicode__(self):
         return self.nom
 
-
-class Sib(models.Model):
-    nom = models.CharField(max_length=40)
-    grisbi_id = models.IntegerField(verbose_name=u"id dans cette imputation")
-    ib = models.ForeignKey(Ib)
-    class Meta:
-        db_table = 'sib'
-        order_with_respect_to = 'ib'
-        unique_together = ("ib", "grisbi_id")
-        verbose_name = u"sous-imputation budgétaire"
-        verbose_name_plural = u'sous-imputations budgétaires'
-
-
-    def __unicode__(self):
-        return self.nom
-
-
 class Exercice(models.Model):
     date_debut = models.DateField(default=datetime.date.today)
     date_fin = models.DateField(null=True, blank=True)
@@ -151,7 +121,7 @@ class Exercice(models.Model):
         get_latest_by= 'date_debut'
 
     def __unicode__(self):
-        return u"%s au %s" % (self.date_debut, self.date_fin)
+        return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
 
 
 class Compte(models.Model):
@@ -163,7 +133,7 @@ class Compte(models.Model):
     )
     nom = models.CharField(max_length=40)
     titulaire = models.CharField(max_length=120, blank=True, default='')
-    type = models.CharField(max_length=24, choices=typescpt,default='b')
+    type = models.CharField(max_length=24, choices=typescpt, default='b')
     devise = models.ForeignKey(Titre)
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     guichet = models.CharField(max_length=15, blank=True)#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
@@ -261,7 +231,8 @@ class Echeance(models.Model):
     typesperiodperso = (
         ('j', u'jour'),
         ('m', u'mois'),
-        ('a', u'annee'),
+        ('a', u'année'),
+        ('na','non applicable')
     )
 
     date = models.DateField(default=datetime.date.today)
@@ -270,18 +241,16 @@ class Echeance(models.Model):
     devise = models.ForeignKey(Titre)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set')
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True, default="")
     inscription_automatique = models.BooleanField(default=False)
-    periodicite = models.TextField(max_length=1, choices=typesperiod, blank=True, default="")
+    periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     intervalle = models.IntegerField(default=0)
-    periode_perso = models.TextField(max_length=1, choices=typesperiodperso, blank=True, default="")
+    periode_perso = models.CharField(max_length=1, choices=typesperiodperso, blank=True, default="")
     date_limite = models.DateField(null=True, blank=True, default=None)
     class Meta:
         db_table = 'echeance'
@@ -320,7 +289,6 @@ class Ope(models.Model):
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    scat = models.ForeignKey(Scat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     num_cheque = models.CharField(max_length=120, blank=True, default='')
@@ -328,7 +296,6 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    sib = models.ForeignKey(Sib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set')
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set')
     automatique = models.BooleanField(default=False)
@@ -344,4 +311,4 @@ class Ope(models.Model):
         return Ope.objects.filter(mere=None)
     non_meres=staticmethod(non_meres)
     def __unicode__(self):
-        return u"%s" % (self.id,)
+        return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,self.compte.devise.isin)

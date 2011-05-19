@@ -79,6 +79,17 @@ liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
 
 def _export():
+    #creation des id pour cat et sact
+    list_cats={}
+    nb_cat=0
+    nb_scat=0
+    for cat_en_cours in Cat.objects.all().order_by('id'):
+        try:
+            cat_nom,scat_nom=cat_en_cours.split(":")
+            if scat_nom:
+                list_cats[cat_en_cours.id]={'cat':{'id':cat_en_cours.id,'nom':cat_nom,'type':cat.type},'scat':{'id':cat_en_cours.id,'nom':scat_nom}}
+        except ValueError:
+             list_cats[cat_en_cours.id]={'cat':{'id':cat_en_cours.id,'nom':cat_en_cours.nom},'scat':None}
     xml_root = et.Element("Grisbi")
     #####generalites###
     q = Generalite.objects.all()[0]
@@ -218,12 +229,13 @@ def _export():
             xml_element.set('T', str(ope.tiers.id ))
             if ope.cat is None:
                 xml_element.set('C', str(0))
-            else:
-                xml_element.set('C', str(ope.cat.id ))
-            if ope.scat is None:
                 xml_element.set('Sc', str(0))
             else:
-                xml_element.set('Sc', str(ope.scat.grisbi_id ))
+                xml_element.set('C', str(list_cats[ope.cat.id][cat][id]))
+                if list_cats[ope.cat.id][scat]:
+                    xml_element.set('Sc', str(list_cats[ope.cat.id][scat][id]))
+                else:
+                    xml_element.set('Sc', str(0))
             xml_element.set('Ov', Format.bool(ope.mere))
             xml_element.set('N', ope.notes)
             if ope.moyen is None:
@@ -290,13 +302,14 @@ def _export():
         else:
             xml_element.set('Tiers', str(ech.tiers.id ))
         if ech.cat is None:
-            xml_element.set('Categorie', "0")
+            xml_element.set('Categorie', str(0))
+            xml_element.set('Sous-categorie', str(0))
         else:
-            xml_element.set('Categorie', str(ech.cat.id ))
-            if ech.scat is None:
-                xml_element.set('Sous-categorie', "0")
+            xml_element.set('Categorie', str(list_cats[ech.cat.id][cat][id]))
+            if list_cats[ope.cat.id][scat]:
+                xml_element.set('Sous-categorie', str(list_cats[ech.cat.id][scat][id]))
             else:
-                xml_element.set('Sous-categorie', str(ech.scat.grisbi_id ))
+                xml_element.set('Sous-categorie', str(0))
         if ech.compte_virement is None:
             xml_element.set('Virement_compte', "0")
         else:
@@ -355,16 +368,21 @@ def _export():
     et.SubElement(xml_generalite, "Nb_categories").text = str(Cat.objects.count())
     et.SubElement(xml_generalite, "No_derniere_categorie").text = Format.max(Cat.objects)
     xml_detail = et.SubElement(xml_cat_root, 'Detail_des_categories')
-    for c in Cat.objects.all().order_by('id'):
-        xml_cate = et.SubElement(xml_detail, 'Categorie')
-        xml_cate.set('No', str(c.id ))
-        xml_cate.set('Nom', c.nom)
-        xml_cate.set('Type', Format.type(liste_type_cat, c.type))
-        xml_cate.set('No_derniere_sous_cagegorie', Format.max(Scat.objects.filter(cat=c.id), defaut='0', champ='grisbi_id'))
+    old_cat=''
+    for c in list_cats:
+        if old_cat != c['cat']['nom']:
+            xml_cat.set('No_derniere_sous_cagegorie', str(c['cat']['id']))
+            old_cat = c['cat']['nom']
+            xml_cate = et.SubElement(xml_detail, 'Categorie')
+            xml_cate.set('No', str(c['cat']['id']))
+            xml_cate.set('Nom', c['cat']['nom'])
+            xml_cate.set('Type', Format.type(liste_type_cat, c['cat']['type'] ))
+
         for sc in Scat.objects.filter(cat=c):
             xml_sub = et.SubElement(xml_cate, 'Sous-categorie')
             xml_sub.set('No', str(sc.grisbi_id))
             xml_sub.set('Nom', sc.nom)
+
     ##imputation
     xml_imp_root = et.SubElement(xml_root, "Imputations")
     xml_generalite = et.SubElement(xml_imp_root, "Generalites")

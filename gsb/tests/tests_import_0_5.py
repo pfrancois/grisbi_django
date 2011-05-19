@@ -79,38 +79,31 @@ class importtest(TestCase):
         self.assertEqual(2, Banque.objects.all().aggregate(max=models.Max('id'))['max'])
 
     def test_cat(self):
-        obj = Cat.objects.get(id=5)
-        self.assertEqual(obj.nom, u'Revenus divers')
+        obj = Cat.objects.get(id=1)
+        self.assertEqual(obj.nom, u'Revenus divers:')
         self.assertEqual(obj.type, 'r')
-
+    def test_cat2(self):
+        obj = Cat.objects.get(id=3)
+        self.assertEqual(obj.nom, u'Alimentation:Bar')
+        self.assertEqual(obj.type, 'd')
     def test_cat_global(self):
-        self.assertEqual(Cat.objects.count(), 5)
-        self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'], 21)
-
-    def test_sous_cat(self):
-        obj = Cat.objects.get(id=6)
-        self.assertEqual(obj.scat_set.count(), 9)
-        self.assertEqual(obj.scat_set.aggregate(max=models.Max('id'))['max'], 9)
-        sous = obj.scat_set.get(grisbi_id=1)
-        self.assertEqual(sous.nom, u'Bar')
-        self.assertEqual(sous.grisbi_id, 1)
+        self.assertEqual(Cat.objects.count(), 27)
+        self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'], 27)
 
     def test_ib(self):
         obj = Ib.objects.get(id=1)
-        self.assertEqual(obj.nom, u'imputation_credit')
+        self.assertEqual(obj.nom, u'imputation_credit:')
         self.assertEqual(obj.type, 'r')
 
-    def test_ib_global(self):
-        self.assertEqual(Ib.objects.count(), 4)
-        self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'], 4)
+    def test_ib(self):
+        obj = Ib.objects.get(id=3)
+        self.assertEqual(obj.nom, u'imputation_debit:sous_imputation')
+        self.assertEqual(obj.type, 'd')
 
-    def test_sous_ib(self):
-        obj = Ib.objects.get(id=2)
-        self.assertEqual(obj.sib_set.count(), 1)
-        self.assertEqual(obj.sib_set.aggregate(max=models.Max('id'))['max'], 1)
-        sous = obj.sib_set.get(grisbi_id=1)
-        self.assertEqual(sous.nom, u'sous_imputation')
-        self.assertEqual(sous.grisbi_id, 1)
+    def test_ib_global(self):
+        self.assertEqual(Ib.objects.count(), 6)
+        self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'], 6)
+
 
     def test_exercice(self):
         obj = Exercice.objects.get(id=5)
@@ -217,10 +210,8 @@ class importtest(TestCase):
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.devise.grisbi_id, 1)
         self.assertEquals(obj.tiers.id, 4)
-        self.assertEquals(obj.cat.id, 21)
-        self.assertEquals(obj.scat.grisbi_id, 6)
+        self.assertEquals(obj.cat.id, 24)
         self.assertEquals(obj.ib, None)
-        self.assertEquals(obj.sib, None)
         self.assertEquals(obj.moyen_virement, None)
         self.assertEquals(obj.compte_virement, None)
         self.assertEquals(obj.exercice.id, 5)
@@ -247,16 +238,14 @@ class importtest(TestCase):
         self.assertEquals(obj.date_val, None)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.tiers.id, 1)
-        self.assertEquals(obj.cat.id, 6)
-        self.assertEquals(obj.scat.grisbi_id, 2)
+        self.assertEquals(obj.cat.id, 4)
         self.assertEquals(obj.notes, u'ope avec type avec numero')
         self.assertEquals(obj.moyen.id, 5)
         self.assertEquals(obj.num_cheque, "12345")
         self.assertEquals(obj.pointe, False)
         self.assertEquals(obj.rapp, None)
         self.assertEquals(obj.exercice.id, 5)
-        self.assertEquals(obj.ib.id, 2)
-        self.assertEquals(obj.sib.grisbi_id, 1)
+        self.assertEquals(obj.ib.id, 3)
         self.assertEquals(obj.jumelle, None)
         self.assertEquals(obj.mere, None)
     def test_ope_date_valeur(self):
@@ -269,12 +258,10 @@ class importtest(TestCase):
         self.assertEquals(Ope.objects.get(id=12).jumelle.compte.devise.grisbi_id, 2)
     def test_ope_ib_none(self):
         self.assertEquals(Ope.objects.get(id=11).ib, None)
-        self.assertEquals(Ope.objects.get(id=11).sib, None)
     def test_ope_virement_ope_jumelle(self):
         self.assertEquals(Ope.objects.get(id=9).jumelle, Ope.objects.get(id=10))
         self.assertEquals(Ope.objects.get(id=10).jumelle, Ope.objects.get(id=9))
         self.assertEquals(Ope.objects.get(id=10).cat, None)
-        self.assertEquals(Ope.objects.get(id=10).scat, None)
         self.assertEquals(Ope.objects.get(id=9).moyen, None)
     def test_ope_pointee(self):
         self.assertEquals(Ope.objects.get(id=6).pointe, True)

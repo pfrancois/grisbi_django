@@ -12,10 +12,11 @@ import logging
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-
+from mysite.gsb.models import *
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
+logger=logging.getLogger('gsb.test')
 
 def test(request):
     logger=logging.getLogger('gsb.test')
@@ -28,47 +29,44 @@ def test(request):
                                                 'test':'test'},
                                             context_instance=RequestContext(request))
 
-def cur(value, symbol="&#8364;"):
-    logger=logging.getLogger('gsb.cur_tag')
-    pos_inf = 1e200 * 1e200
-    neg_inf = -1e200 * 1e200
-    nan = (1e200 * 1e200) / (1e200 * 1e200)
-    special_floats = [str(pos_inf), str(neg_inf), str(nan)]
-    try:
-        input_val = force_unicode(value)
-        d = Decimal(input_val)
-    except UnicodeEncodeError:
-        return u''
-    except InvalidOperation:
-        if input_val in special_floats:
-            return input_val
-        try:
-            d = Decimal(force_unicode(float(value)))
-        except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
-            return u''
-    p = int(2)
-    try:
-        m = int(d) - d
-    except (ValueError, OverflowError, InvalidOperation):
-        return input_val
-    if p:
-        exp = Decimal(1)
-    else:
-        exp = Decimal(u'1.0') / (Decimal(10) ** abs(p))
-    try:
-        # Avoid conversion to scientific notation by accessing `sign`, `digits`
-        # and `exponent` from `Decimal.as_tuple()` directly.
-        sign, digits, exponent = d.quantize(exp, ROUND_HALF_UP).as_tuple()
-        digits = [unicode(digit) for digit in reversed(digits)]
-        while len(digits) <= abs(exponent):
-            digits.append(u'0')
-        digits.insert(-exponent, u'.')
-        if sign:
-            digits.append(u'-')
-        number = u''.join(reversed(digits))
-        return mark_safe("%s %s" % (formats.number_format(number, abs(p)), symbol))
-    except InvalidOperation:
-        return input_val
+liste_type_cat = Cat.typesdep
+liste_type_moyen = Moyen.typesdep
+liste_type_compte = Compte.typescpt
+liste_type_period = Echeance.typesperiod
+liste_type_period_perso = Echeance.typesperiodperso
+try:
+    from lxml import etree as et
+except ImportError:
+    from xml.etree import cElementTree as et
+from django.db import connection
+import time
+def toto():
+
+    for table in ('cat',):
+        connection.cursor().execute("delete from %s;"%table)
+        logger.info(u'table %s effacée'%table)
+    logger.info(u"debut du chargement")
+    time.clock()
+    xml_tree = et.parse("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
+    root = xml_tree.getroot()
+    nb_cat = 0
+    cat_dic={}
+    for xml_element in xml_tree.find('//Detail_des_categories'):
+        nb_cat += 1
+        cat_dic[int(xml_element.get('No'))]={0:{'cat':nb_cat}}
+        cat=Cat.objects.create(id=nb_cat,nom="%s:"%xml_element.get('Nom'),type=liste_type_cat[int(xml_element.get('Type'))][0])
+        print cat
+        for xml_sous in xml_element:
+            nb_cat += 1
+            cat_dic[int(xml_element.get('No'))][int(xml_sous.get('No'))]={'cat':nb_cat}
+            query={'id':nb_cat,'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            cat=Cat.objects.create(**query)
+            print cat
+        logger.debug(nb_cat)
+    logger.debug(time.clock())
+    logger.info(u"%s catégories"%nb_cat)
+    return cat_dic
 
 if __name__ == "__main__":
-    print cur(Decimal('0.2456'))
+    t=toto()
+    print t

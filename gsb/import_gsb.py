@@ -49,7 +49,7 @@ class Import_exception(Exception):
 
 def import_gsb(nomfich):
     logger=logging.getLogger('gsb.import')
-    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'scat', 'cat', 'exercice', 'sib', 'ib', 'banque', 'titre', 'tiers'):
+    for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte',  'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
         connection.cursor().execute("delete from %s;"%table)
         logger.info(u'table %s effacée'%table)
     logger.info(u"debut du chargement")
@@ -72,9 +72,10 @@ def import_gsb(nomfich):
             nb_sous += 1
             element.is_titre = True
             element.save()
-            s = element.notes.partition('@')
+            s= unicode(xml_element.get('Informations'))
+            s = s.split('@')
             sous = Titre(nom=element.nom[7:])
-            if s[1] == '':
+            if not s[1]:
                 if s[0] == '':
                     sous.isin = "XX%s"%nb_sous
                 else:
@@ -97,7 +98,7 @@ def import_gsb(nomfich):
                         'sicav': 'OPC',
                         'OPC': 'OPC',
                         }
-                    sous.type = liste_type.get(s[2], 'XXX')
+                    sous.type = liste_type.get(s[1], 'XXX')
             sous.tiers = element
             sous.save()
         logger.debug(nb)
@@ -105,42 +106,37 @@ def import_gsb(nomfich):
     logger.info(u'%s tiers enregistrés et %s titres'%(nb, nb_sous))
     logger.debug(time.clock())
     #import des categories et des sous categories
-    nb = 0
+    nb_cat = 0
+    cat_dic={}
     for xml_element in xml_tree.find('//Detail_des_categories'):
-        nb_sous = 0
-        nb += 1
-        element = Cat(id=xml_element.get('No'))
-        element.nom = xml_element.get('Nom')
-        element.type = liste_type_cat[int(xml_element.get('Type'))][0]
-        element.save()
+        nb_cat += 1
+        cat_dic[int(xml_element.get('No'))]={0:nb_cat}
+        query={'id':nb_cat,'nom':"%s:"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        Cat.objects.create(**query)
         for xml_sous in xml_element:
-            nb_sous += 1
-            element.scat_set.create(
-                nom=xml_sous.get('Nom'),
-                grisbi_id=xml_sous.get('No')
-            )
-        logger.debug(nb)
+            nb_cat += 1
+            cat_dic[int(xml_element.get('No'))][int(xml_sous.get('No'))]=nb_cat
+            query={'id':nb_cat,'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            Cat.objects.create(**query)
     logger.debug(time.clock())
-    logger.info(u"%s catégories"%nb)
-
+    logger.info(u"%s catégories"%nb_cat)
+    
     #imputations
-    nb = 0
+    nb_ib = 0
+    ib_dic={}
     for xml_element in xml_tree.find('//Detail_des_imputations'):
-        nb_sous = 0
-        nb += 1
-        element = Ib(id=xml_element.get('No'))
-        element.nom = xml_element.get('Nom')
-        element.type = liste_type_cat[int(xml_element.get('Type'))][0]
-        element.save()
+        nb_ib += 1
+        ib_dic[int(xml_element.get('No'))]={0:nb_ib}
+        query={'id':nb_ib,'nom':"%s"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        Ib.objects.create(**query)
         for xml_sous in xml_element:
-            nb_sous += 1
-            element.sib_set.create(
-                nom=xml_sous.get('Nom'),
-                grisbi_id=xml_sous.get('No')
-            )
+            nb_ib += 1
+            ib_dic[int(xml_element.get('No'))][int(xml_sous.get('No'))]=nb_ib
+            query={'id':nb_ib,'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            Ib.objects.create(**query)
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"%s imputations"%nb)
+    logger.info(u"%s imputations"%nb_ib)
 
     #gestion des devises:
     nb = 0
@@ -308,38 +304,14 @@ def import_gsb(nomfich):
                 sous.tiers = Tiers.objects.get(id=int(xml_sous.get('T')))
             except (Tiers.DoesNotExist, TypeError):
                 sous.tiers = None
-        if int(xml_sous.get('C')):
-            sous.cat_id = int(xml_sous.get('C'))
-            try:
-                sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
-            except (Scat.DoesNotExist, TypeError):
-                sous.scat = None
+        if xml_sous.get('C') and (int(xml_sous.get('C'))):
+            sous.cat_id = cat_dic[int(xml_sous.get('C'))][int(xml_sous.get('Sc'))]
         else:
-            try:#cat et scat
-                sous.cat = Cat.objects.get(id=int(xml_sous.get('C')))
-            except (Cat.DoesNotExist, TypeError):
-                sous.cat = None
-            else:
-                try:
-                    sous.scat = sous.cat.scat_set.get(grisbi_id=int(xml_sous.get('Sc')))
-                except (Scat.DoesNotExist, TypeError):
-                    sous.scat = None
-        if int(xml_sous.get('I')):
-            sous.ib_id = int(xml_sous.get('I'))
-            try:
-                sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
-            except (Sib.DoesNotExist, TypeError):
-                sous.sib = None
+            sous.cat = None
+        if xml_sous.get('I') and int(xml_sous.get('I')):
+            sous.ib_id = ib_dic[int(xml_sous.get('I'))][int(xml_sous.get('Si'))]
         else:
-            try:#ib et sib
-                sous.ib = Ib.objects.get(id=int(xml_sous.get('I')))
-            except (Ib.DoesNotExist, TypeError):
-                sous.ib = None
-            else:
-                try:
-                    sous.sib = sous.ib.sib_set.get(grisbi_id=int(xml_sous.get('Si')))
-                except (Sib.DoesNotExist, TypeError):
-                    sous.sib = None
+            sous.ib = None
         try:#moyen de paiment
             if int(xml_sous.get('Ty')):
                 sous.moyen = Moyen.objects.get(id=int(xml_sous.get('Ty')))
@@ -403,25 +375,14 @@ def import_gsb(nomfich):
         except (ObjectDoesNotExist, TypeError):
             element.moyen = None
         element.notes = xml_element.get('Notes')
-        try:
-            element.cat = Cat.objects.get(id=int(xml_element.get('Categorie')))
-            try:
-                id = int(xml_element.get('Sous-categorie'))
-                element.scat = element.cat.scat_set.get(grisbi_id=id)
-            except (ObjectDoesNotExist, TypeError):
-                element.scat = None
-        except (ObjectDoesNotExist, TypeError):
-            element.cat = None
-            element.scat = None
-        try:
-            element.ib = Ib.objects.get(id=int(xml_element.get('Imputation')))
-            try:
-                element.sib = element.ib.sib_set.get(grisbi_id=int(xml_element.get('Sous-imputation')))
-            except (ObjectDoesNotExist, TypeError):
-                element.sib = None
-        except (ObjectDoesNotExist, TypeError):
-            element.ib = None
-            element.sib = None
+        if xml_element.get('Categorie') and int(xml_element.get('Categorie')):
+            element.cat_id = cat_dic[int(xml_element.get('Categorie'))][int(xml_element.get('Sous-categorie'))]
+        else:
+            element.cat= None
+        if xml_element.get('Imputation') and int(xml_element.get('Imputation')):
+            element.ib_id= ib_dic[int(xml_element.get('Imputation'))][int(xml_element.get('Sous-imputation'))]
+        else:
+            element.ib= None
         if xml_element.get('Virement_compte') != xml_element.get('Compte'):
             element.compte_virement = Compte.objects.get(id=int(xml_element.get('Virement_compte')))#ici aussi
             try:
@@ -438,11 +399,14 @@ def import_gsb(nomfich):
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
         logger.debug(nb)
+    logger.info(u"%s échéances" % nb)
     logger.debug(u'{!s}'.format(time.clock()))
     logger.info(u'fini')
 
 
 if __name__ == "__main__":
+    from django.conf import settings
+    settings.LOGGING['loggers']['gsb']['level']='INFO'
     nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     import_gsb(nomfich)
