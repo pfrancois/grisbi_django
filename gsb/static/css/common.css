@@ -150,3 +150,10 @@ th {
 	background-color: #706666;
 	text-align: left;
 }
+
+.required{
+    background: #009900;
+}
+.required:after{
+    content:"*";
+}

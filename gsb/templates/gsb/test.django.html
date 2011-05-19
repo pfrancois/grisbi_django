@@ -1,9 +1,62 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-<form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
+<form action="{% url gsb.views.ope_detail ope.id %}" method="post">
+{% comment %}
     <table>
         {{ form }}
+    </table>
+{% endcomment %}
+ceci est le résultat
+    <table>
+        <tr><td>{% csrf_token %}</td></tr>
+        {% if form.compte.errors %}
+        <tr><td>{{ form.compte.errors }}</td></tr>
+        {% endif %}
+        <tr><th><label for="id_compte" class="{{ form.compte.css_classes }}">Compte:</label></th><td>{{ form.compte }}</td>
+        </tr>
+        {% if form.date.errors %}
+        <tr><td>{{ form.date.errors }}</td></tr>
+        {% endif %}
+        <tr><th><label for="id_date" class="{{ form.date.css_classes }}">Date de l'opération:</label></th><td>{{ form.date }}</td>
+        </tr>
+        {% if form.date_val.errors %}
+        <tr><td>{{ form.date_val.errors }}</td></tr>
+        {% endif %}
+        <tr><th><label for="id_date_val" class="{{ form.date_val.css_classes }}">Date de valeur pour l'opération:</label></th><td>{{ form.date_val }}</td>
+        </tr>
+        {% if form.tiers.errors %}
+        <tr><td>{{ form.tiers.errors }}</td></tr>
+        {% endif %}
+        <tr><th><label for="id_tiers" class="{{ form.tiers.css_classes }}">Tiers:</label></th><td>{{ form.tiers }}</td>
+        </tr>
+        {% if form.montant.errors %}
+        <tr><td>{{ form.montant.errors }}</td></tr>
+        {% endif %}
+        <tr><th><label for="id_montant" class="{{ form.montant.css_classes }}"> Montant:</label></th><td>{{ form.montant }} {{ ope.compte.devise.isin}}</td>
+        {% comment %}
+            TODO rajouter fonction calculatrice
+            TODO ajax et js pour changer la monnaie si changement de compte
+        {% endcomment %}
+        {% if form.cat.errors %}
+        <tr><td>{{ form.cat.errors }}</td></tr>
+        {% endif %}
+         <tr class="ligne" id="div_cat">
+            <td>
+            <label for="id_cat">Cat&eacute;gorie: </label>
+            </td>
+            <td>
+            <select id="id_cat">
+                {% for cat_en_cours in cats_debit %}
+                    <option class="DebitCatElement" value="{{ cat_en_cours.id  }}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(-) </option>
+                {% endfor %}
+                {%  for cat_en_cours in cats_credit %}
+                <option class="CreditCatElement" value="{{ cat_en_cours.id  }}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(+)</option>
+                {% endfor %}
+            </select>
+            </td>
+        </tr>
+        <tr><td>{{ form.cat }}</td></tr>
     </table>
 </form>
 {% endblock content %}

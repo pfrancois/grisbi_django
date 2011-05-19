@@ -115,45 +115,6 @@ def cpt_titre_detail(request, cpt_id):
     )
 
 
-def ope_detail2(request, ope_id):
-    p = get_object_or_404(Ope, pk=ope_id)
-    #depenses_cat=Cat.objects.filter(type='d').select_related()
-    cats_debit=[]
-    cats_credit=[]
-    for  cat in Cat.objects.all().select_related():
-        if cat.scat_set.all():
-            for scat in cat.scat_set.all():
-                if cat.type=='d':
-                    cats_debit.append({'id':"%s : %s"%(cat.id,scat.id),
-                                   'nom':"%s:%s"%(cat.nom,scat.nom),
-                            })
-                else:
-                    cats_credit.append({'id':"%s : %s"%(cat.id,scat.id),
-                                   'nom':"%s:%s"%(cat.nom,scat.nom),
-                            })
-        else:
-            if cat.type=='d':
-                cats_debit.append({'id':"%s : %s"%(cat.id,0),
-                               'nom':"%s:%s"%(cat.nom,""),
-                        })
-            else:
-                cats_credit.append({'id':"%s : %s"%(cat.id,0),
-                               'nom':"%s:%s"%(cat.nom,""),
-                        })
-
-
-    return render_to_response('gsb/operation.django.html',
-                              {'ope': p,
-                               'titre': "edition",
-                               'compte': p.compte,
-                               'action': 'edit',
-                               'cats_debit':cats_debit,
-                               'cats_credit':cats_credit,
-                               'tiers':Tiers.objects.filter(is_titre=False)},
-                              context_instance=RequestContext(request)
-    )
-
-
 def ope_creation(request, cpt_id):
     cpt = get_object_or_404(Compte, pk=cpt_id)
     devise = cpt.devise
@@ -167,9 +128,42 @@ def virement_creation(request, cpt_id):
 
 def ope_detail(request, ope_id):
     ope = get_object_or_404(Ope, pk=ope_id)
-    form = gsb_forms.OperationForm(instance=ope)
-    return  render_to_response('gsb/test.django.html',
-        {'form':form},
-        context_instance=RequestContext(request)
-    )
+    if request.method == 'POST':
+        pass
+    else:
+        gen=Generalite.gen()
+        form = gsb_forms.OperationForm(instance=ope)
+        cats_debit=[]
+        cats_credit=[]
+        for  cat in Cat.objects.all().select_related():
+            if cat.scat_set.all():
+                for scat in cat.scat_set.all():
+                    if cat.type=='d':
+                        cats_debit.append({'id':scat.sub_id(),
+                                           'nom':scat.sub_nom(),
+                                        })
+                    else:
+                        cats_credit.append({'id':scat.sub_id(),
+                                           'nom':scat.sub_nom(),
+                                        })
+            else:
+                if cat.type=='d':
+                    cats_debit.append({'id':"%s : %s"%(cat.id,0),
+                                   'nom':"%s:%s"%(cat.nom,""),
+                            })
+                else:
+                    cats_credit.append({'id':"%s : %s"%(cat.id,0),
+                                   'nom':"%s:%s"%(cat.nom,""),
+                            })
+        for line in cats_credit:
+           cats_debit.append(line)
+        return  render_to_response('gsb/test.django.html',
+            {   'titre':u'édition opération',
+                'form':form,
+                'gen':gen,
+                'ope':ope,
+                'cats_debit':cats_debit,
+                'cats_credit':cats_credit,},
+            context_instance=RequestContext(request)
+        )
 
