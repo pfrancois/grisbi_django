@@ -298,6 +298,11 @@ class Ope(models.Model):
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
         ordering = ['date']
+        permissions = (
+            ('can_import','peut importer des fichiers'),
+            ('can_export','peut exporter des fichiers'),
+        )
+        
     def non_meres():
         return Ope.objects.filter(mere=None)
     non_meres=staticmethod(non_meres)
