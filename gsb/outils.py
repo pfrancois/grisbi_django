@@ -7,7 +7,9 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 import mysite.gsb.forms as gsb_forms
 import logging, os, time
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def import_file(request):
     import mysite.gsb.import_gsb
     logger=logging.getLogger('gsb.import')

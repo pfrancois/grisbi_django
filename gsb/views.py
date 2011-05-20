@@ -10,6 +10,7 @@ import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
 import logging
+from django.contrib.auth.decorators import login_required
 
 def index(request):
     t = loader.get_template('gsb/index.django.html')
@@ -114,18 +115,18 @@ def cpt_titre_detail(request, cpt_id):
         )
     )
 
-
+@login_required
 def ope_creation(request, cpt_id):
     cpt = get_object_or_404(Compte, pk=cpt_id)
     devise = cpt.devise
-    ope = Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers=None, cat=None, scat=None,
-              Notes=None, moyen=None, numcheque="", )
+    ope = Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers=None, cat=None, Notes=None, moyen=None, numcheque="", )
     pass
 
-
+@login_required
 def virement_creation(request, cpt_id):
     pass
-
+    
+@login_required
 def ope_detail(request, ope_id):
     ope = get_object_or_404(Ope, pk=ope_id)
     if request.method == 'POST':
@@ -133,28 +134,7 @@ def ope_detail(request, ope_id):
     else:
         gen=Generalite.gen()
         form = gsb_forms.OperationForm(instance=ope)
-        cats_debit=[]
-        cats_credit=[]
-        for  cat in Cat.objects.all().select_related():
-            if cat.scat_set.all():
-                for scat in cat.scat_set.all():
-                    if cat.type=='d':
-                        cats_debit.append({'id':scat.sub_id(),
-                                           'nom':scat.sub_nom(),
-                                        })
-                    else:
-                        cats_credit.append({'id':scat.sub_id(),
-                                           'nom':scat.sub_nom(),
-                                        })
-            else:
-                if cat.type=='d':
-                    cats_debit.append({'id':"%s : %s"%(cat.id,0),
-                                   'nom':"%s:%s"%(cat.nom,""),
-                            })
-                else:
-                    cats_credit.append({'id':"%s : %s"%(cat.id,0),
-                                   'nom':"%s:%s"%(cat.nom,""),
-                            })
+        cats=Cat.objects.all.orderby('type')
         for line in cats_credit:
            cats_debit.append(line)
         return  render_to_response('gsb/test.django.html',
@@ -162,8 +142,7 @@ def ope_detail(request, ope_id):
                 'form':form,
                 'gen':gen,
                 'ope':ope,
-                'cats_debit':cats_debit,
-                'cats_credit':cats_credit,},
+                'cats':cats},
             context_instance=RequestContext(request)
         )
 
