@@ -31,5 +31,9 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 {% block content %}
     <div class="progress"><a href='{% url gsb.views.index %}'>retour</a></div>
 {% endblock %}
+{% if user.is_authenticated %} <a href="/logout">logout</a>
+{% else %}
+<a href="/login">login</a>
+{% endif %}
 </body>
 </html>
