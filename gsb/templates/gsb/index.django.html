@@ -6,7 +6,7 @@
     {% load gsb_extras %}
 
     <h2>comptes esp&egrave;ces ou bancaires</h2>
-    <table id="banques">
+    <table id="banques" class="table">
         {% for cpt in liste_cpt_bq %}
             <tr class="item padding">
                 <td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.nom }} {% if cpt.cloture %}
@@ -25,7 +25,7 @@
     </table>
 
     <h2>autres comptes (Actifs et Passifs)</h2>
-    <table id="placements">
+    <table id="placements" class="table">
         {% for cpt in liste_cpt_pl %}
             <tr class="item padding">
                 <td class="cptLabel"><a
@@ -44,7 +44,7 @@
             <td class="cptSolde">{{ total_pla|cur }}</td>
         </tr>
     </table>
-    <table id="total">
+    <table id="total" class="table">
         <tr class="footerbar">
             <td class="cptLabel">Solde GLOBAL</td>
             <td class="cptSolde">{{ total|cur }}</td>

@@ -2,13 +2,12 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% block titre %}<h1>Outils</h1>{% endblock titre %}
 {% block content %}
-<p><a href="{% url gsb.gsb_0_5_0.export %}" class="progress"> exporter sous format 0.5.0</a></p>
-<p><a href="{% url gsb.outils.import_file %}" class="progress"> import d'un fichier dans l'application</a></p>
-<p><a href="" class="error"> exporter l'ensemble des comptes en csv </a></p>
-<p><a href="" class="error"> effacer les tiers vides </a></p>
-<p><a href="" class="error">change les date des operations cartes differés</a></p>
-<p><a href="" class="error">vérifier les totaux</a></p>
-<p><a href="" class="error"> travaux en batch </a></p>
-
-<p><a href="{% url gsb.views.index %}" class="progress">retour vers le menu général</a></p>
+<a href="{% url gsb.gsb_0_5_0.export %}" class="progress"> exporter sous format 0.5.0</a><br/>
+<a href="{% url gsb.outils.import_file %}" class="progress"> import d'un fichier dans l'application</a><br/>
+<a href="" class="error"> exporter l'ensemble des comptes en csv </a><br/>
+<a href="" class="error"> effacer les tiers vides </a><br/>
+<a href="" class="error">change les date des operations cartes differés</a><br/>
+<a href="" class="error">vérifier les totaux</a><br/>
+<a href="" class="error"> travaux en batch </a><br/>
+<a href="{% url gsb.views.index %}" class="progress">retour vers le menu général</a><br/>
 {% endblock content %}

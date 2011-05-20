@@ -1,39 +1,46 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
+{% block css %}<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/calendar.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/operation.css" />{% endblock css}
+{% block js %}
+<script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/basiccalendar.js"></script>
+<script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/operation.js"></script>
+{% endblock js %}
+
 {% block content %}
 <form action="{% url gsb.views.ope_detail ope.id %}" method="post">
-{% comment %}
-    <table>
-        {{ form }}
-    </table>
-{% endcomment %}
-ceci est le résultat
     <table>
         <tr><td>{% csrf_token %}</td></tr>
         {% if form.compte.errors %}
         <tr><td>{{ form.compte.errors }}</td></tr>
         {% endif %}
-        <tr><th><label for="id_compte" class="{{ form.compte.css_classes }}">Compte:</label></th><td>{{ form.compte }}</td>
-        </tr>
+        <tr><th>{{ form.compte.label_tag }</th><td>{{ form.compte }}</td></tr>
         {% if form.date.errors %}
         <tr><td>{{ form.date.errors }}</td></tr>
         {% endif %}
-        <tr><th><label for="id_date" class="{{ form.date.css_classes }}">Date de l'opération:</label></th><td>{{ form.date }}</td>
+        <tr><th>{{ form.date.label_tag }}</th><td>{{ form.date }}</td>
+        {% comment %}
+            TODO mettre comme dans admin le bouton aujourd'hui
+            TODO mettre comme dans admin le calendrier
+        {% endcomment %}
         </tr>
         {% if form.date_val.errors %}
         <tr><td>{{ form.date_val.errors }}</td></tr>
         {% endif %}
-        <tr><th><label for="id_date_val" class="{{ form.date_val.css_classes }}">Date de valeur pour l'opération:</label></th><td>{{ form.date_val }}</td>
+        <tr><th>{{ form.date_val.label_tag }}</th><td>{{ form.date_val }}</td>
         </tr>
         {% if form.tiers.errors %}
         <tr><td>{{ form.tiers.errors }}</td></tr>
         {% endif %}
-        <tr><th><label for="id_tiers" class="{{ form.tiers.css_classes }}">Tiers:</label></th><td>{{ form.tiers }}</td>
+        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }}</td>
         </tr>
+        {% comment %}
+        TODO mettre un plus comme dans l'admin
+        {% endcomment %}
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th><label for="id_montant" class="{{ form.montant.css_classes }}"> Montant:</label></th><td>{{ form.montant }} {{ ope.compte.devise.isin}}</td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {{ ope.compte.devise.isin}}</td>
         {% comment %}
             TODO rajouter fonction calculatrice
             TODO ajax et js pour changer la monnaie si changement de compte
@@ -41,22 +48,16 @@ ceci est le résultat
         {% if form.cat.errors %}
         <tr><td>{{ form.cat.errors }}</td></tr>
         {% endif %}
-         <tr class="ligne" id="div_cat">
-            <td>
-            <label for="id_cat">Cat&eacute;gorie: </label>
-            </td>
-            <td>
-            <select id="id_cat">
-                {% for cat_en_cours in cats_debit %}
-                    <option class="DebitCatElement" value="{{ cat_en_cours.id  }}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(-) </option>
-                {% endfor %}
-                {%  for cat_en_cours in cats_credit %}
-                <option class="CreditCatElement" value="{{ cat_en_cours.id  }}"{% if cat_en_cours.id == ope.cat.id %} selected="selected"{% endif %}>{{ cat_en_cours.nom }}(+)</option>
-                {% endfor %}
-            </select>
-            </td>
-        </tr>
-        <tr><td>{{ form.cat }}</td></tr>
+        <tr><th>{{ form.cat.label_tag }}</th><td>{{ form.cat }}</td></tr>
+        <tr><th>{{ form.notes.label_tag }}</th><td>{{ form.notes }}</td></tr>
+        <tr><th>{{ form.moyen.label_tag }}</th><td>{{ form.moyen }}</td></tr>
+        <tr><th>{{ form.pointe.label_tag }}</th><td>{{ form.pointe }}</td></tr>
+        <tr><th>{{ form.rapp.label_tag }}</th><td>{{ form.rapp }}</td></tr>
+        <tr><th>{{ form.exercice.label_tag }}</th><td>{{ form.exercice }}</td></tr>
+        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}</td></tr>
+        {# attention on ne met pas jumelle car les virements sont gérés autrement #}
+        <tr><th>{{ form.mere.label_tag }}</th><td>{{ form.mere }}</td></tr>
+        <tr><th>{{ form.piece_comptable.label_tag }}</th><td>{{ form.piece_comptable}}</td></tr>
     </table>
 </form>
 {% endblock content %}
