@@ -94,11 +94,18 @@ h2 {
 
 .creditElement {
 	background: #6699FF;
-	border: #ffffff solid;
-	border-width: 1px 1px 0 0;
+	/*border: #ffffff solid;*/
+    border-top: 1px solid #ffffff;
+    border-left: 0;
+    border-right: 0;
+	/*border-width: 1px 1px 0 0;*/
 	width: 100%;
 	text-align: left;
 	padding: 0.6em 0 0.6em 0;
+}
+
+.debitElement {
+    border-top: 1px solid #4D0000;
 }
 
 .opCredit {
@@ -126,13 +133,14 @@ h2 {
 .survol:hover {
 	background-color: #706666;
 }
-.entete>td{
+.entete td{
 	background-color: #990000;
 	font-weight: bold;
 	padding-top: 0.4em;
 	padding-bottom: 0.6em;
 }
-.footerbar>td {
+
+.footerbar td {
 	background-color: #990000;
 	font-weight: bold;
 	padding: .7em 0;
@@ -143,9 +151,7 @@ h2 {
 	padding-top: 0.4em;
 	padding-bottom: 0.6em;
 }
-.table>tr>td{
-	border-top: 1px solid #4D0000;
-}
+
 th {
 	background-color: #706666;
 	text-align: left;

@@ -2,25 +2,23 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
-    <table width="100%" id="boutons table">
-        <tr>
+    <table width="100%" id="boutons" class="table">
             {% if not compte.cloture %}
-                <td width="50%" class="boutton"><a href="ope/{{ compte.id }}">Nouvelle Op.</a></td>
-                <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+                <tr>
+                    <td width="50%" class="boutton"><a href="{# TODO #}">Nouvelle Op.</a></td>
+                    <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
                 </tr>
                 <tr>
-                <td width="100%" class="boutton" colspan="2"><a href="ope/{{ compte.id }}"> Nouveau Virement
-                    vers {{ compte.nom }} </a></td>
+                <td width="100%" class="boutton" colspan="2"><a href="{# TODO #}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
             {% else %}
-                <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste
-                    comptes</a></td>
+                <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste                   comptes</a></td></tr>
             {% endif %}
-            </tr>
+
     </table>
     <br/>
     <table id="main"class="table">
-        <thead>
-        <tr class="entete">
+        <thead class="entete">
+        <tr>
             <td class="opDate">Date</td>
             <td class="opTier">Tiers</td>
             <td class="opTier">Catégorie</td>
