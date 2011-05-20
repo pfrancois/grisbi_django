@@ -11,7 +11,7 @@ if __name__ == "__main__":
 from django.db import connection
 from django.core.exceptions import ObjectDoesNotExist
 from mysite.gsb.models import *
-import os, codecs, time
+import os, time
 import decimal
 import logging
 
@@ -47,12 +47,12 @@ class Import_exception(Exception):
     pass
 
 
-def import_gsb(nomfich):
+def import_gsb(nomfich,info=''):
     logger=logging.getLogger('gsb.import')
     for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte',  'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
         connection.cursor().execute("delete from %s;"%table)
         logger.info(u'table %s effacée'%table)
-    logger.info(u"debut du chargement")
+    logger.debug(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
@@ -103,7 +103,7 @@ def import_gsb(nomfich):
             sous.save()
         logger.debug(nb)
 
-    logger.info(u'%s tiers enregistrés et %s titres'%(nb, nb_sous))
+    logger.debug(u'%s tiers enregistrés et %s titres'%(nb, nb_sous))
     logger.debug(time.clock())
     #import des categories et des sous categories
     nb_cat = 0
@@ -119,7 +119,7 @@ def import_gsb(nomfich):
             query={'id':nb_cat,'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
             Cat.objects.create(**query)
     logger.debug(time.clock())
-    logger.info(u"%s catégories"%nb_cat)
+    logger.debug(u"%s catégories"%nb_cat)
     
     #imputations
     nb_ib = 0
@@ -136,7 +136,7 @@ def import_gsb(nomfich):
             Ib.objects.create(**query)
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u"%s imputations"%nb_ib)
+    logger.debug(u"%s imputations"%nb_ib)
 
     #gestion des devises:
     nb = 0
@@ -150,7 +150,7 @@ def import_gsb(nomfich):
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s devises'%nb)
+    logger.debug(u'%s devises'%nb)
 
     #gestion des banques:
     nb = 0
@@ -162,7 +162,7 @@ def import_gsb(nomfich):
         element.notes = xml_element.get('Remarques')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s banques'%nb)
+    logger.debug(u'%s banques'%nb)
 
     #gestion des generalites
     xml_element = xml_tree.find('Generalites')
@@ -179,7 +179,7 @@ def import_gsb(nomfich):
         )
     element.save()
     logger.debug(time.clock())
-    logger.info(u'generalites ok')
+    logger.debug(u'generalites ok')
 
     #gestion des exercices:
     nb = 0
@@ -191,7 +191,7 @@ def import_gsb(nomfich):
         element.date_fin = datefr2datesql(xml_element.get('Date_fin'))
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s exercices'%nb)
+    logger.debug(u'%s exercices'%nb)
 
     #gestion Des rapp
     nb = 0
@@ -201,7 +201,7 @@ def import_gsb(nomfich):
         element.nom = xml_element.get('Nom')
         element.save()
     logger.debug(time.clock())
-    logger.info(u'%s rapprochements'%nb)
+    logger.debug(u'%s rapprochements'%nb)
 
     #gestion des comptes
     nb = 0
@@ -271,7 +271,7 @@ def import_gsb(nomfich):
         element.save()
         logger.debug(nb)
     logger.debug(time.clock())
-    logger.info(u'%s comptes'%nb)
+    logger.debug(u'%s comptes'%nb)
     nb_tot_ope=0
     #--------------OPERATIONS-----------------------
     for xml_sous in xml_tree.findall('//Operation'):
@@ -346,7 +346,7 @@ def import_gsb(nomfich):
         sous.save()
         logger.debug(nb_tot_ope)
     logger.debug(time.clock())
-    logger.info(u"%s operations" % nb_tot_ope)
+    logger.debug(u"%s operations" % nb_tot_ope)
     #gestion des echeances
     nb = 0
     for xml_element in xml_tree.find('Echeances/Detail_des_echeances'):
@@ -399,15 +399,16 @@ def import_gsb(nomfich):
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
         logger.debug(nb)
-    logger.info(u"%s échéances" % nb)
+    logger.debug(u"%s échéances" % nb)
     logger.debug(u'{!s}'.format(time.clock()))
-    logger.info(u'fini')
-
+    logger.debug(u'fini')
+    if info == '':
+        logger.info(u'fichier %s importe',nomfich)
+    else:
+        logger.info(u'fichier %s importe par %s',(nomfich,info))
 
 if __name__ == "__main__":
-    from django.conf import settings
-    settings.LOGGING['loggers']['gsb']['level']='INFO'
     nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    import_gsb(nomfich)
+    import_gsb(nomfich,'script')
     #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)
