@@ -115,18 +115,15 @@ def cpt_titre_detail(request, cpt_id):
         )
     )
 
-@login_required
 def ope_creation(request, cpt_id):
     cpt = get_object_or_404(Compte, pk=cpt_id)
     devise = cpt.devise
     ope = Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers=None, cat=None, Notes=None, moyen=None, numcheque="", )
     pass
 
-@login_required
 def virement_creation(request, cpt_id):
     pass
     
-@login_required
 def ope_detail(request, ope_id):
     ope = get_object_or_404(Ope, pk=ope_id)
     if request.method == 'POST':
