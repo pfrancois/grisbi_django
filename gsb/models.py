@@ -91,11 +91,8 @@ class Cat(models.Model):
         verbose_name = u"catégorie"
         ordering = ['nom']
 
-
     def __unicode__(self):
         return self.nom
-
-
 
 
 class Ib(models.Model):
@@ -106,7 +103,6 @@ class Ib(models.Model):
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
         ordering = ['nom']
-
 
     def __unicode__(self):
         return self.nom
@@ -149,7 +145,6 @@ class Compte(models.Model):
     class Meta:
         db_table = 'compte'
 
-
     def __unicode__(self):
         return self.nom
 
@@ -182,7 +177,6 @@ class Moyen(models.Model):
         verbose_name = u"moyen de paiment"
         verbose_name_plural = u"moyens de paiment"
         ordering = ['nom']
-
 
     def __unicode__(self):
         return self.nom
@@ -217,8 +211,6 @@ class Rapp(models.Model):
             return solde
         else:
             return solde
-
-
 
 class Echeance(models.Model):
     typesperiod = (
@@ -258,7 +250,6 @@ class Echeance(models.Model):
         verbose_name_plural = u"Echéances"
         ordering = ['date']
         get_latest_by= 'date'
-
 
     def __unicode__(self):
         return u"%s" % (self.id,)

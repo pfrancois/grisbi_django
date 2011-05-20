@@ -33,7 +33,8 @@ class Ope_admin(admin.ModelAdmin):
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             (u'mère et jumelles', {'fields': ('jumelle', 'mere'), 'classes': ['collapse']}),
             ]
-
+    date_hierarchy = 'date'
+    ordering =('date',)
 
 class cours_admin(admin.ModelAdmin):
     fields = ['isin', 'date', 'valeur']
