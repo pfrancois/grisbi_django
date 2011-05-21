@@ -115,7 +115,7 @@ def cpt_titre_detail(request, cpt_id):
         )
     )
 
-def ope_creation(request, cpt_id):
+def ope_creation(request, cpt_id=0):
     cpt = get_object_or_404(Compte, pk=cpt_id)
     devise = cpt.devise
     ope = Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers=None, cat=None, Notes=None, moyen=None, numcheque="", )
