@@ -14,9 +14,16 @@ from django.contrib.auth.decorators import login_required
 
 def index(request):
     t = loader.get_template('gsb/index.django.html')
-    bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
-    pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
-    total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e')).aggregate(solde=models.Sum('montant'))['solde']
+    if Generalite.gen().affiche_clot:
+        bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
+        pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
+        total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e')).aggregate(solde=models.Sum('montant'))['solde']
+        total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p')).aggregate(solde=models.Sum('montant'))['solde']
+    else:
+        bq = Compte.objects.filter(type__in=('b', 'e'),cloture=False).select_related()
+        pl = Compte.objects.filter(type__in=('a', 'p'),cloture=False).select_related()
+        total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e'),compte__cloture=False).aggregate(solde=models.Sum('montant'))['solde']
+        total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p'),compte__cloture=False).aggregate(solde=models.Sum('montant'))['solde']
     solde_init_bq=bq.aggregate(init=models.Sum('solde_init'))['init']
     if total_bq:
         if solde_init_bq:
@@ -28,8 +35,6 @@ def index(request):
             total_bq=solde_init_bq
         else:
             total_bq=decimal.Decimal('0')
-
-    total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p')).aggregate(solde=models.Sum('montant'))['solde']
     solde_init_pla=pl.aggregate(init=models.Sum('solde_init'))['init']
     if total_pla:
         if solde_init_pla:
@@ -131,9 +136,7 @@ def ope_detail(request, ope_id):
     else:
         gen=Generalite.gen()
         form = gsb_forms.OperationForm(instance=ope)
-        cats=Cat.objects.all.orderby('type')
-        for line in cats_credit:
-           cats_debit.append(line)
+        cats=Cat.objects.all.order_by('type')
         return  render_to_response('gsb/test.django.html',
             {   'titre':u'édition opération',
                 'form':form,

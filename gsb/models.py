@@ -261,6 +261,7 @@ class Generalite(models.Model):
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
     devise_generale = models.ForeignKey(Titre)
+    affiche_clot = models.BooleanField(default=True)
     class Meta:
         db_table = 'generalite'
         verbose_name = u"généralités"

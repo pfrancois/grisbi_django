@@ -7,6 +7,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 import mysite.gsb.forms as gsb_forms
 import logging, os, time
+from mysite.gsb.models import Generalite
 from django.contrib.auth.decorators import login_required
 
 @login_required
@@ -39,3 +40,29 @@ def import_file(request):
 def options_index(request):
     return render_to_response('gsb/options.django.html', context_instance=RequestContext(request))
 
+@login_required
+def modif_gen(request):
+    logger=logging.getLogger('gsb')
+    if request.method == 'POST':
+        form = gsb_forms.GeneraliteForm(request.POST, request.FILES)
+        if form.is_valid():
+            g=Generalite.gen()
+            g.utilise_exercices=form.cleaned_data['utilise_exercices']
+            g.utilise_ib=form.cleaned_data['utilise_ib']
+            g.utilise_pc=form.cleaned_data['utilise_pc']
+            g.affiche_clot=form.cleaned_data['affiche_clot']
+            g.save()
+            return HttpResponseRedirect(reverse('gsb.outils.options_index'))
+        else:
+           return  render_to_response('gsb/outil_generalites.django.html',
+            {   'titre':u'modification de certaines options',
+                'form':form},
+            context_instance=RequestContext(request)
+        )
+    else:
+        form = gsb_forms.GeneraliteForm(instance=Generalite.gen())
+        return  render_to_response('gsb/outil_generalites.django.html',
+            {   'titre':u'modification de certaines options',
+                'form':form},
+            context_instance=RequestContext(request)
+        )

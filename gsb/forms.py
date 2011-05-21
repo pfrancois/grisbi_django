@@ -19,3 +19,12 @@ class OperationForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         super (OperationForm,self).__init__(*args, **kwargs)
+
+class GeneraliteForm(forms.ModelForm):
+    error_css_class = 'error'
+    required_css_class = 'required'
+    class Meta:
+        model=Generalite
+        fields = ('utilise_exercices','utilise_ib','utilise_pc','affiche_clot')
+    def __init__(self, *args, **kwargs):
+        super (GeneraliteForm,self).__init__(*args, **kwargs)
