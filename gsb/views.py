@@ -136,7 +136,7 @@ def ope_detail(request, ope_id):
     else:
         gen=Generalite.gen()
         form = gsb_forms.OperationForm(instance=ope)
-        cats=Cat.objects.all.order_by('type')
+        cats=Cat.objects.all().order_by('type')
         return  render_to_response('gsb/test.django.html',
             {   'titre':u'édition opération',
                 'form':form,
