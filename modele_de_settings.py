@@ -36,6 +36,8 @@ DATABASES = {
         'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
+LOGIN_URL="/login"
+LOGIN_REDIRECT_URL="/"
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -152,6 +154,7 @@ INSTALLED_APPS = (
 'django.contrib.messages',
 'django.contrib.staticfiles',
 'mysite.gsb',
+    #gestion admin
 'django.contrib.admin',
 'django.contrib.admindocs',
 )
@@ -170,7 +173,8 @@ if DEBUG_TOOLBAR:
     #pour la debug bar
     INTERNAL_IPS = ('127.0.0.1',)
     DEBUG_TOOLBAR_CONFIG = {
-        #'HIDE_DJANGO_SQL': True ,
+        'HIDE_DJANGO_SQL': True ,
+        'INTERCEPT_REDIRECTS':False,
     }
 
 if DJANGO_EXTENSION:
@@ -203,7 +207,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'log-file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
@@ -233,12 +237,22 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'level':'INFO',
+            'level':'WARNING',
             'handlers':['console-simple', 'log-file'],
             'propagate': True,
         },
+        'django.request': {
+            'level': 'DEBUG',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'WARNING',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': False,
+        },
         'gsb':{
-            'level':'DEBUG',
+            'level':'WARNING',
             'handlers':['console-simple', 'log-file'],
             'propagate': True,
         }
