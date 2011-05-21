@@ -36,5 +36,6 @@ def import_file(request):
                                'titre':"importation d'un fichier"},
                               context_instance=RequestContext(request))
 
-def options(request):
+def options_index(request):
     return render_to_response('gsb/options.django.html', context_instance=RequestContext(request))
+
