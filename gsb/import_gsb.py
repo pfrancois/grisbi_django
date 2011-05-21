@@ -329,7 +329,7 @@ def import_gsb(nomfich,info=''):
                 sous.rapp = None
         except (Rapp.DoesNotExist, TypeError):
             sous.tapp = None
-            #exercices
+        #exercices
         try:
             sous.exercice = Exercice.objects.get(id=int(xml_sous.get('E')))
         except (Exercice.DoesNotExist, TypeError):
