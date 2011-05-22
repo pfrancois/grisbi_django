@@ -1,5 +1,6 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
+{% load gsb_extras %}
 {% block content %}
 <form id='form1' action="{% url gsb.outils.modif_gen %}" method="post">
     <table>
@@ -7,10 +8,5 @@
         {{ form }}
     </table>
 </form>
-    <table class="editOperationBtns">
-	<tr>
-		<td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-		<td width="50%" class="boutton"><a href="{% url gsb.outils.options_index %}">Annuler</a></td>
-	</tr>
-    </table>
+{% bouton_form 'form1' 'gsb.outils.options_index' %}
 {% endblock content %}

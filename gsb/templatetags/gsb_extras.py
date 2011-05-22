@@ -5,6 +5,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 import logging
 
 register = template.Library()
@@ -12,7 +13,6 @@ register = template.Library()
 
 @register.filter()
 def cur(value, symbol="&#8364;"):
-    logger=logging.getLogger('gsb.cur_tag')
     pos_inf = 1e200 * 1e200
     neg_inf = -1e200 * 1e200
     nan = (1e200 * 1e200) / (1e200 * 1e200)
@@ -37,3 +37,10 @@ cur.is_safe = True
 def centimes(value):
     return str(Decimal(str(value))*Decimal(100))
 centimes.is_safe = True
+
+@register.simple_tag
+def bouton_form(id_form, url, param=None ):
+    if param:
+        return render_to_string('gsb/bouton_validation_formulaires.django.html',{'id_form':id_form,'url_annul':url,'url_param':param})
+    else:
+        return render_to_string('gsb/bouton_validation_formulaires.django.html',{'id_form':id_form,'url_annul':url})

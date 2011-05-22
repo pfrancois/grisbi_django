@@ -1,0 +1,13 @@
+{% load url from future %}
+{% comment %} coding: utf-8 {% endcomment %}
+<table class="editOperationBtns">
+<tr>
+    <td width="50%" class="boutton"><a href="javascript:document.forms['{{ id_form }}'].submit();">Ok</a></td>
+    {% if url_param %}
+    <td width="50%" class="boutton"><a href="{% url url_annul url_param %}">Annuler</a></td>
+    {% else %}
+    <td width="50%" class="boutton"><a href="{% url url_annul %}">Annuler</a></td>
+    {% endif %}
+
+</tr>
+</table>
