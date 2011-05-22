@@ -47,6 +47,7 @@ def modif_gen(request):
         form = gsb_forms.GeneraliteForm(request.POST, request.FILES)
         if form.is_valid():
             g=Generalite.gen()
+            logger.info('modification de gen')
             g.utilise_exercices=form.cleaned_data['utilise_exercices']
             g.utilise_ib=form.cleaned_data['utilise_ib']
             g.utilise_pc=form.cleaned_data['utilise_pc']
