@@ -132,7 +132,10 @@ def virement_creation(request, cpt_id):
 def ope_detail(request, ope_id):
     ope = get_object_or_404(Ope, pk=ope_id)
     if request.method == 'POST':
-        pass
+        form = gsb_forms.OperationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
     else:
         gen=Generalite.gen()
         form = gsb_forms.OperationForm(instance=ope)
