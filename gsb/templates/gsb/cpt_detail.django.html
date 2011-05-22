@@ -3,17 +3,16 @@
 {% load gsb_extras %}
 {% block content %}
     <table width="100%" id="boutons" class="table">
-            {% if not compte.cloture %}
-                <tr>
-                    <td width="50%" class="boutton"><a href="{# TODO #}">Nouvelle Op.</a></td>
-                    <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
-                </tr>
-                <tr>
-                <td width="100%" class="boutton" colspan="2"><a href="{# TODO #}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
-            {% else %}
-                <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste                   comptes</a></td></tr>
-            {% endif %}
-
+        {% if not compte.cloture %}
+            <tr>
+                <td width="50%" class="boutton"><a href="{# TODO #}">Nouvelle Op.</a></td>
+                <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+            </tr>
+            <tr>
+            <td width="100%" class="boutton" colspan="2"><a href="{# TODO #}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
+        {% else %}
+            <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
+        {% endif %}
     </table>
     <br/>
     <table id="main"class="table">
