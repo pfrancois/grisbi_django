@@ -128,24 +128,26 @@ def ope_creation(request, cpt_id=0):
 
 def virement_creation(request, cpt_id):
     pass
-    
+
+@login_required
 def ope_detail(request, ope_id):
     ope = get_object_or_404(Ope, pk=ope_id)
+    cats=Cat.objects.all().order_by('type')
+    gen=Generalite.gen()
+    logger=logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
-    else:
-        gen=Generalite.gen()
-        form = gsb_forms.OperationForm(instance=ope)
-        cats=Cat.objects.all().order_by('type')
-        return  render_to_response('gsb/test.django.html',
+        else:
+            return  render_to_response('gsb/test.django.html',
             {   'titre':u'édition opération',
                 'form':form,
                 'gen':gen,
                 'ope':ope,
                 'cats':cats},
             context_instance=RequestContext(request)
-        )
+            )
+
 
