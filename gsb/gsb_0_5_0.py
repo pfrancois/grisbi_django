@@ -20,7 +20,7 @@ try:
     from lxml import etree as et
 except ImportError:
     from xml.etree import cElementTree as et
-
+import logging
 class Format:
     def date(s, defaut="0/0/0"):
         if s is None:
@@ -83,6 +83,7 @@ liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
 
 def _export():
+    logger=logging.getLogger('gsb.export')
     #creation des id pour cat et sact
     list_cats={}
     nb_cat=0
@@ -121,9 +122,9 @@ def _export():
     et.SubElement(xml_generalites, "Utilise_IB").text = Format.bool(q.utilise_ib)
     et.SubElement(xml_generalites, "Utilise_PC").text = Format.bool(q.utilise_pc)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
-    et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.devise_generale.grisbi_id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.devise_generale.grisbi_id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.devise_generale.grisbi_id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.devise_generale_id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.devise_generale_id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.devise_generale_id)
     et.SubElement(xml_generalites, "Type_affichage_des_echeances").text = "3"#NOT IN BDD
     et.SubElement(xml_generalites, "Affichage_echeances_perso_nb_libre").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Type_affichage_perso_echeances").text = "0"#NOT IN BDD
@@ -143,8 +144,10 @@ def _export():
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
     et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0) #NOT IN BDD
+    logger.debug("gen ok")
     variable = 0
     for co in Compte.objects.all().order_by('id'):
+        logger.debug('compte %s'%co.id)
         variable += 1
         id = co.id
         xml_compte = et.SubElement(xml_comptes, "Compte")
@@ -155,7 +158,7 @@ def _export():
         et.SubElement(xml_detail, "Titulaire").text = ''#NOT IN BDD
         et.SubElement(xml_detail, "Type_de_compte").text = Format.type(liste_type_compte, co.type)
         et.SubElement(xml_detail, "Nb_operations").text = str(Ope.objects.filter(compte=co.id).count())
-        et.SubElement(xml_detail, "Devise").text = str(co.devise.grisbi_id)
+        et.SubElement(xml_detail, "Devise").text = str(co.devise_id)
         if co.banque is None:
             et.SubElement(xml_detail, "Banque").text = str(0)
         else:
@@ -206,6 +209,7 @@ def _export():
         ##types:
         xml_types = et.SubElement(xml_compte, "Detail_de_Types")
         for ty in Moyen.objects.all().order_by('id'):
+            logger.debug('moyen %s'%ty.id)
             xml_element = et.SubElement(xml_types, "Type")
             xml_element.set('No', str(ty.id))
             xml_element.set('Nom', ty.nom)
@@ -216,6 +220,7 @@ def _export():
         xml_opes = et.SubElement(xml_compte, "Detail_des_operations")
         ##operations
         for ope in Ope.objects.filter(compte=co.id).order_by('id'):
+            logger.debug('ope %s'%ope.id)
             xml_element = et.SubElement(xml_opes, 'Operation')
             #numero de l'operation
             xml_element.set('No', str(ope.id))
@@ -228,13 +233,13 @@ def _export():
             else:
                 xml_element.set('Db', Format.date(ope.date_val))
             xml_element.set('M', Format.float(ope.montant))
-            xml_element.set('De', str(co.devise.grisbi_id ))
+            xml_element.set('De', str(co.devise_id ))
             xml_element.set('Rdc','0') #NOT IN BDD
-            if ope.jumelle is not None:
+            if ope.jumelle:
                 devise_jumelle=Ope.objects.get(id=ope.id).jumelle.compte.devise
                 if co.devise != devise_jumelle and devise_jumelle != Generalite.gen().devise_generale:
                     xml_element.set('M', Format.float(ope.montant*devise_jumelle.cours_set.get(date=ope.date).valeur))
-                    xml_element.set('De', str(devise_jumelle.grisbi_id ))
+                    xml_element.set('De', str(devise_jumelle.id ))
                     xml_element.set('Rdc','1')
                     xml_element.set('Tc', Format.float(devise_jumelle.cours_set.get(date=ope.date).valeur))
                 else:
@@ -242,7 +247,10 @@ def _export():
             else:
                 xml_element.set('Tc', Format.float(0))
             xml_element.set('Fc', Format.float(0)) #NOT IN BDD mais inutile
-            xml_element.set('T', str(ope.tiers.id ))
+            if ope.tiers:
+                xml_element.set('T', str(ope.tiers.id ))
+            else:
+                xml_element.set('T', str(0 ))
             if ope.cat and ope.cat.id!=0:
                 xml_element.set('C', str(list_cats[ope.cat.id]['cat']['id']))
                 if list_cats[ope.cat.id]['scat']:
@@ -312,7 +320,7 @@ def _export():
         xml_element.set('Date', Format.date(ech.date))
         xml_element.set('Compte', str(ech.compte.id ))
         xml_element.set('Montant', Format.float(ech.montant))
-        xml_element.set('Devise', str(ech.devise.grisbi_id ))
+        xml_element.set('Devise', str(ech.devise_id ))
         if ech.tiers is None:
             xml_element.set('Tiers', "0")
         else:
@@ -434,11 +442,11 @@ def _export():
     xml_devises = et.SubElement(xml_root, "Devises")
     xml_generalite = et.SubElement(xml_devises, "Generalites")
     et.SubElement(xml_generalite, "Nb_devises").text = str(Titre.objects.filter(type='DEV').count())
-    et.SubElement(xml_generalite, "No_derniere_devise").text = Format.max(Titre.objects.filter(type='DEV'),champ = 'grisbi_id')
+    et.SubElement(xml_generalite, "No_derniere_devise").text = Format.max(Titre.objects.filter(type='DEV'),champ = 'id')
     xml_detail = et.SubElement(xml_devises, 'Detail_des_devises')
-    for c in Titre.objects.filter(type='DEV').order_by('grisbi_id'):
+    for c in Titre.objects.filter(type='DEV').order_by('id'):
         xml_sub = et.SubElement(xml_detail, 'Devise')
-        xml_sub.set('No', str(c.grisbi_id ))
+        xml_sub.set('No', str(c.id ))
         xml_sub.set('Nom', c.nom)
         xml_sub.set('Code', c.isin)
         xml_sub.set('IsoCode', c.isin)
