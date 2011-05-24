@@ -41,45 +41,18 @@ except ImportError:
 from django.db import connection
 import time
 import pprint
-def creation():
-    list_cats={}
-    nb_cat=0
-    for cat_en_cours in Cat.objects.all().order_by('id'):
-        try:
-            cat_nom,scat_nom=cat_en_cours.nom.split(":")
-            if scat_nom:
-                list_cats[cat_en_cours.id]={'cat':{'id':cat_en_cours.id,'nom':cat_nom,'type':cat_en_cours.type},'scat':{'id':cat_en_cours.id,'nom':scat_nom}}
-            else:
-                list_cats[cat_en_cours.id]={'cat':{'id':cat_en_cours.id,'nom':cat_en_cours.nom},'scat':None}
-        except ValueError:
-             list_cats[cat_en_cours.id]={'cat':{'id':cat_en_cours.id,'nom':cat_en_cours.nom},'scat':None}
-    return list_cats
+
 def toto():
-
-    xml_root = et.Element("Grisbi")
-    xml_cat_root = et.SubElement(xml_root, "Categories")
-    xml_detail = et.SubElement(xml_cat_root, 'Detail_des_categories')
-    xml_cate = et.SubElement(xml_detail, 'Categorie')
-    old_cat=''
-    l=creation()
-    for c in l.values():
-        if old_cat != c['cat']['nom']:
-
-            if old_cat == '':
-                xml_cate.set('No', str(c['cat']['id']))
-                xml_cate.set('Nom', c['cat']['nom'])
-            else:
-                xml_cate.set('No_derniere_sous_cagegorie', str(c['cat']['id']-1))
-                xml_cate = et.SubElement(xml_detail, 'Categorie')
-                xml_cate.set('No', str(c['cat']['id']))
-                xml_cate.set('Nom', unicode(c['cat']['nom']))
-            old_cat=c['cat']['nom']
-        if c['scat']:
-            xml_sub = et.SubElement(xml_cate, 'Sous-categorie')
-            xml_sub.set('No', str(c['cat']['id']))
-            xml_sub.set('Nom', unicode(c['scat']['nom']))
-    xml_cate.set('No_derniere_sous_cagegorie', str(c['cat']['id']))
-    return et.tostring(xml_root, method="xml", xml_declaration=True, pretty_print=True)
+    tabl_correspondance_banque={}
+    xml_tree = et.parse('20040701.gsb')
+    root = xml_tree.getroot()
+    connection.cursor().execute("delete from %s;"%'banque')
+    nb = 0
+    for xml_element in xml_tree.find('Banques/Detail_des_banques'):
+        nb += 1
+        element,created=Banque.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
+        tabl_correspondance_banque[xml_element.get('No')]=element.id
+    return tabl_correspondance_banque
 
 if __name__ == "__main__":
     t=toto()

@@ -3,17 +3,8 @@
 from django.db import models
 import datetime
 
-class champs(models.Model):
-    class Meta:
-        abstract = True
-
-
-    def save(self, *args, **kwargs):
-        super(champs, self).save(*args, **kwargs)
-
-
 class Tiers(models.Model):
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=40,unique=True)
     notes = models.TextField(blank=True)
     is_titre = models.BooleanField(default=False)
 
@@ -35,11 +26,10 @@ class Titre(models.Model):
     ('OBL', u'obligation'),
     ('ZZZ', u'autre')
     )
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=40,unique=True)
     isin = models.CharField(max_length=60, unique=True)
     tiers = models.ForeignKey(Tiers,null=True,blank=True)
     type = models.CharField(max_length=60, choices=typestitres)
-    grisbi_id = models.IntegerField(null=True,blank=True)
     class Meta:
         db_table = u'titre'
         ordering = ['nom']
@@ -67,7 +57,7 @@ class Cours(models.Model):
 
 class Banque(models.Model):
     cib = models.CharField(max_length=15, blank=True)
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=40,unique=True)
     notes = models.TextField(blank=True)
     class Meta:
         db_table = 'banque'
@@ -84,7 +74,7 @@ class Cat(models.Model):
     ('d', u'depense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length=60)
+    nom = models.CharField(max_length=60,unique=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name="type de la catégorie")
     class Meta:
         db_table = 'cat'
@@ -96,7 +86,7 @@ class Cat(models.Model):
 
 
 class Ib(models.Model):
-    nom = models.CharField(max_length=60)
+    nom = models.CharField(max_length=60,unique=True)
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
     class Meta:
         db_table = 'ib'
@@ -110,7 +100,7 @@ class Ib(models.Model):
 class Exercice(models.Model):
     date_debut = models.DateField(default=datetime.date.today)
     date_fin = models.DateField(null=True, blank=True)
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=40,unique=True)
     class Meta:
         db_table = 'exercice'
         ordering = ['date_debut']
@@ -127,21 +117,21 @@ class Compte(models.Model):
     ('a', u'actif'),
     ('p', u'passif')
     )
-    nom = models.CharField(max_length=40)
+    nom = models.CharField(max_length=40,unique=True)
     titulaire = models.CharField(max_length=120, blank=True, default='')
     type = models.CharField(max_length=24, choices=typescpt, default='b')
     devise = models.ForeignKey(Titre)
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    guichet = models.CharField(max_length=15, blank=True)#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
-    num_compte = models.CharField(max_length=60, blank=True)
-    cle_compte = models.IntegerField(null=True, blank=True)
+    guichet = models.CharField(max_length=15, blank=True, default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
+    num_compte = models.CharField(max_length=60, blank=True, default='')
+    cle_compte = models.IntegerField(null=True, blank=True, default=0)
     solde_init = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    solde_mini_voulu = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
-    solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
+    solde_mini_voulu = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
+    solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
     cloture = models.BooleanField(default=False)
-    notes = models.TextField(blank=True)
-    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set")
-    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set")
+    notes = models.TextField(blank=True, default='')
+    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set", default=None)
+    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set", default=None)
     class Meta:
         db_table = 'compte'
 
@@ -167,11 +157,8 @@ class Moyen(models.Model):
     ('d', u'depense'),
     ('r', u'recette'),
     )
-    nom = models.CharField(max_length=20)
+    nom = models.CharField(max_length=20,unique=True)
     type = models.CharField(max_length=1, choices=typesdep,default='d')
-    affiche_numero = models.BooleanField(default=False)
-    num_auto = models.BooleanField(default=False)
-    num_en_cours = models.BigIntegerField(null=True, blank=True)
     class Meta:
         db_table = 'moyen'
         verbose_name = u"moyen de paiment"
@@ -183,7 +170,7 @@ class Moyen(models.Model):
 
 
 class Rapp(models.Model):
-    nom = models.CharField(max_length=20)
+    nom = models.CharField(max_length=20,unique=True)
     date = models.DateField(null=True, blank=True, default=datetime.date.today)
     class Meta:
         db_table = 'rapp'
@@ -230,10 +217,10 @@ class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    devise = models.ForeignKey(Titre)
+    devise = models.ForeignKey(Titre, default=None)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set')
+    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
@@ -288,8 +275,8 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set')
-    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set')
+    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None)
+    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None)
     automatique = models.BooleanField(default=False)
     piece_comptable = models.CharField(max_length=120, blank=True, default='')
 
@@ -303,7 +290,7 @@ class Ope(models.Model):
             ('can_import','peut importer des fichiers'),
             ('can_export','peut exporter des fichiers'),
         )
-        
+
     def non_meres():
         return Ope.objects.filter(mere=None)
     non_meres=staticmethod(non_meres)

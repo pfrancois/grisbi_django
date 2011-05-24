@@ -30,7 +30,7 @@ class Format:
             s = s.strftime('%d/%m/%Y')
             result = []
             tab = s.split("/")
-            for partie in tab:
+            for partie in tab:#transform 01/01/2010 en 1/1/2010
                 if partie[0] == '0':
                     partie = partie[1:]
                 result.append(partie)
@@ -210,9 +210,9 @@ def _export():
             xml_element.set('No', str(ty.id))
             xml_element.set('Nom', ty.nom)
             xml_element.set('Signe', Format.type(liste_type_moyen, ty.type))
-            xml_element.set('Affiche_entree', Format.bool(ty.affiche_numero))
-            xml_element.set('Numerotation_auto', Format.bool(ty.num_auto))
-            xml_element.set('No_en_cours', str(ty.num_en_cours))
+            xml_element.set('Affiche_entree', "0")#NOT IN BDD
+            xml_element.set('Numerotation_auto', "0")#NOT IN BDD
+            xml_element.set('No_en_cours', "0")#NOT IN BDD
         xml_opes = et.SubElement(xml_compte, "Detail_des_operations")
         ##operations
         for ope in Ope.objects.filter(compte=co.id).order_by('id'):
