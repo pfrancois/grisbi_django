@@ -38,6 +38,9 @@ class Titre(models.Model):
         return "%s (%s)" % (self.nom, self.isin)
     def last_cours(self):
         return self.cours_set.latest()
+    def devise():
+        return Titre.objects.filter(type='DEV')
+    devise=staticmethod(devise)
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)

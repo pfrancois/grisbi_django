@@ -9,6 +9,7 @@ if __name__ == "__main__":
     setup_environ(settings)
 
 import logging
+from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -43,18 +44,33 @@ import time
 import pprint
 
 def toto():
-    tabl_correspondance_banque={}
-    xml_tree = et.parse('20040701.gsb')
+    tabl_correspondance_ib={}
+    xml_tree = et.parse("%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
     root = xml_tree.getroot()
-    connection.cursor().execute("delete from %s;"%'banque')
-    nb = 0
-    for xml_element in xml_tree.find('Banques/Detail_des_banques'):
-        nb += 1
-        element,created=Banque.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
-        tabl_correspondance_banque[xml_element.get('No')]=element.id
-    return tabl_correspondance_banque
+    connection.cursor().execute("delete from %s;"%'ib')
+    nb_ib=0
+    nb_nx=0
+    for xml_element in xml_tree.find('//Detail_des_imputations'):
+        logger.debug("ib %s"%xml_element.get('No'))
+        nb_ib += 1
+        query={'nom':"%s:"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        element,created=Ib.objects.get_or_create(nom=query['nom'],defaults=query)
+        tabl_correspondance_ib[xml_element.get('No')]={'0':element.id}
+        if created:
+            nb_nx += 1
+            logger.debug('ib %s cree au numero %s'%(int(xml_element.get('No')),element.id))
+        for xml_sous in xml_element:
+            logger.debug("ib %s: sib %s"%(xml_element.get('No'),xml_sous.get('No')))
+            nb_ib += 1
+            query={'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            element,created=Ib.objects.get_or_create(nom=query['nom'],defaults=query)
+            tabl_correspondance_ib[xml_element.get('No')][xml_sous.get('No')]=element.id
+            if created:
+                logger.debug('sib %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
+    logger.debug(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
+    return tabl_correspondance_ib
 
 if __name__ == "__main__":
     t=toto()
-#    pprint.pprint(creation(),indent=4)
+#    logger.debug(creation(),indent=4)
     print t

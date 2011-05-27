@@ -28,19 +28,21 @@ class importtest(TestCase):
 
     def test_tiers_count(self):
         self.assertEqual(Tiers.objects.count(), 5)
-        self.assertEqual(6, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertEqual(5, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
 
     def test_tiers_is_titre(self):
-        self.assertEquals(Tiers.objects.get(id=6).is_titre, True)
+        self.assertEquals(Tiers.objects.get(id=5).is_titre, True)
 
     def test_titre_normal(self):
         obj = Titre.objects.get(id=1)
         self.assertEquals(obj.nom, u'SG')
         self.assertEquals(obj.isin, u'FR0000130809')
-        self.assertEquals(obj.tiers.id, 6)
+        self.assertEquals(obj.tiers.id, 5)
         self.assertEquals(obj.type, u'ACT')
+        
     def test_get_titre_normal(self):
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom,u'SG')
+        
     def test_titre_devise(self):
         obj = Titre.objects.get(id=2)
         self.assertEquals(obj.nom, u'Euro')
@@ -82,6 +84,7 @@ class importtest(TestCase):
         obj = Cat.objects.get(id=1)
         self.assertEqual(obj.nom, u'Revenus divers:')
         self.assertEqual(obj.type, 'r')
+        
     def test_cat2(self):
         obj = Cat.objects.get(id=3)
         self.assertEqual(obj.nom, u'Alimentation:Bar')
@@ -104,23 +107,22 @@ class importtest(TestCase):
         self.assertEqual(Ib.objects.count(), 6)
         self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'], 6)
 
-
     def test_exercice(self):
-        obj = Exercice.objects.get(id=5)
+        obj = Exercice.objects.get(id=1)
         self.assertEqual(obj.date_debut, datetime.date(day=1, month=1, year=2010))
         self.assertEqual(obj.date_fin, datetime.date(day=31, month=12, year=2010))
         self.assertEqual(obj.nom, u'2010')
         self.assertEqual(Exercice.objects.count(), 2)
-        self.assertEqual(Exercice.objects.all().aggregate(max=models.Max('id'))['max'], 6)
+        self.assertEqual(Exercice.objects.all().aggregate(max=models.Max('id'))['max'], 2)
 
     def test_compte_properties_cloture(self):
-        self.assertEqual(Compte.objects.get(id=1).cloture, True)
+        self.assertEqual(Compte.objects.get(id=2).cloture, True)
 
     def test_compte_properties_devise_particuliere(self):
-        self.assertEqual(Compte.objects.get(id=3).devise.isin, 'ZAR')
+        self.assertEqual(Compte.objects.get(id=4).devise.isin, 'ZAR')
 
     def test_compte_properties(self):
-        obj = Compte.objects.get(id=0)
+        obj = Compte.objects.get(id=1)
         self.assertEqual(obj.nom, u'compte bancaire ouvert')
         self.assertEqual(obj.titulaire, '')
         self.assertEqual(obj.type, 'b')
@@ -138,36 +140,25 @@ class importtest(TestCase):
         self.assertEqual(obj.moyen_credit_defaut.nom, u'Depot')
 
     def test_compte_solde(self):
-        self.assertEqual(Compte.objects.get(id=0).solde(), decimal.Decimal('-100.92'))
+        self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('-100.92'))
 
     def test_compte_solde_devise(self):
-        self.assertEqual(Compte.objects.get(id=3).solde(), decimal.Decimal('246.0'))
-        self.assertEqual(Compte.objects.get(id=3).solde(devise_generale=True), decimal.Decimal('24.6'))
+        self.assertEqual(Compte.objects.get(id=4).solde(), decimal.Decimal('246.0'))
+        self.assertEqual(Compte.objects.get(id=4).solde(devise_generale=True), decimal.Decimal('24.6'))
 
     def test_compte_global(self):
         self.assertEqual(Compte.objects.count(), 7)
-        self.assertEqual(6, Compte.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertEqual(7, Compte.objects.all().aggregate(max=models.Max('id'))['max'])
 
     def test_moyen(self):
         obj = Moyen.objects.get(id=1)
         self.assertEqual(obj.nom, u'Virement')
         self.assertEqual(obj.type, 'v')
-        self.assertEqual(obj.affiche_numero, True)
-        self.assertEqual(obj.num_auto, False)
-        self.assertEqual(obj.num_en_cours, 0)
-
-    def test_moyen_avec_numero(self):
-        obj = Moyen.objects.get(id=5)
-        self.assertEqual(obj.nom, u'Chèque')
-        self.assertEqual(obj.type, 'd')
-        self.assertEqual(obj.affiche_numero, True)
-        self.assertEqual(obj.num_auto, True)
-        self.assertEqual(obj.num_en_cours, 12345)
 
     def test_rapp(self):
         obj = Rapp.objects.get(id=1)
         self.assertEquals(obj.nom, 'CBO1')
-        self.assertEquals(obj.compte(), 0)
+        self.assertEquals(obj.compte(), 1)
         self.assertEquals(obj.date, datetime.date(2010, 5, 31))
         self.assertEquals(obj.solde(), 10)
         self.assertEquals(obj.ope_set.all().count(), 1)
@@ -179,42 +170,44 @@ class importtest(TestCase):
 
     def test_nb_ech(self):
         self.assertEqual(Echeance.objects.all().count(), 5)
-        self.assertEqual(Echeance.objects.all().aggregate(max=models.Max('id'))['max'], 6)
+        self.assertEqual(Echeance.objects.all().aggregate(max=models.Max('id'))['max'], 5)
+        
     def test_ech_automatique(self):
-        obj = Echeance.objects.get(id=3)
+        obj = Echeance.objects.get(id=2)
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
-        self.assertEquals(obj.compte.id, 0)
+        self.assertEquals(obj.compte.id, 1)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.notes, u"automatique")
         self.assertEquals(obj.inscription_automatique, True)
-        self.assertEquals(obj.periodicite[0],'m')
+        self.assertEquals(obj.periodicite,'m')
 
     def test_ech_virement(self):
-        obj= Echeance.objects.get(id=6)
-        self.assertEquals(obj.compte_virement.id, 3)
-        self.assertEquals(obj.moyen_virement.id, 1)
+        obj= Echeance.objects.get(id=5)
+        self.assertEquals(obj.compte_virement.id, 4)
+        self.assertEquals(obj.moyen_virement.id, 2)
 
     def test_ech_period_perso(self):
         obj = Echeance.objects.get(id=4)
         self.assertEquals(obj.periodicite[0],'p')
         self.assertEquals(obj.periode_perso[0],'m')
         self.assertEquals(obj.intervalle,1)
+        
     def test_ech_date_limite(self):
-        obj = Echeance.objects.get(id=5)
+        obj = Echeance.objects.get(id=4)
         self.assertEquals(obj.date_limite, datetime.date(2013, 1, 1))
 
     def test_ech_standart(self):
-        obj = Echeance.objects.get(id=2)
+        obj = Echeance.objects.get(id=1)
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
-        self.assertEquals(obj.compte.id, 0)
+        self.assertEquals(obj.compte.id, 1)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
-        self.assertEquals(obj.devise.grisbi_id, 1)
-        self.assertEquals(obj.tiers.id, 4)
+        self.assertEquals(obj.devise.id, 2)
+        self.assertEquals(obj.tiers.id, 3)
         self.assertEquals(obj.cat.id, 24)
         self.assertEquals(obj.ib, None)
         self.assertEquals(obj.moyen_virement, None)
         self.assertEquals(obj.compte_virement, None)
-        self.assertEquals(obj.exercice.id, 5)
+        self.assertEquals(obj.exercice.id, 1)
         self.assertEquals(obj.notes, u"echeance")
         self.assertEquals(obj.inscription_automatique, False)
         self.assertEquals(obj.periodicite[0],'u')
@@ -229,11 +222,11 @@ class importtest(TestCase):
 
     def test_nb_ope(self):
         self.assertEqual(Ope.objects.all().count(), 13)
-        self.assertEqual(Ope.objects.all().aggregate(max=models.Max('id'))['max'], 14)
+        self.assertEqual(Ope.objects.all().aggregate(max=models.Max('id'))['max'], 13)
 
     def test_ope(self):
         obj = Ope.objects.get(id=1)
-        self.assertEquals(obj.compte.id, 0)
+        self.assertEquals(obj.compte.id, 1)
         self.assertEquals(obj.date, datetime.date(2010, 05, 28))
         self.assertEquals(obj.date_val, None)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
@@ -244,28 +237,34 @@ class importtest(TestCase):
         self.assertEquals(obj.num_cheque, "12345")
         self.assertEquals(obj.pointe, False)
         self.assertEquals(obj.rapp, None)
-        self.assertEquals(obj.exercice.id, 5)
+        self.assertEquals(obj.exercice.id, 1)
         self.assertEquals(obj.ib.id, 3)
         self.assertEquals(obj.jumelle, None)
         self.assertEquals(obj.mere, None)
+        
     def test_ope_date_valeur(self):
         self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
+        
     def test_ope_devise(self):
-        self.assertEquals(Ope.objects.get(id=8).compte.devise.grisbi_id,2)
+        self.assertEquals(Ope.objects.get(id=8).compte.devise.id,2)
+        
     def test_ope_virement_etranger(self):
-        self.assertEquals(Ope.objects.get(id=12).montant,decimal.Decimal('-7.92'))
-        self.assertEquals(Ope.objects.get(id=12).notes, u'virement en zar')
-        self.assertEquals(Ope.objects.get(id=12).jumelle.compte.devise.grisbi_id, 2)
+        self.assertEquals(Ope.objects.get(id=8).montant,decimal.Decimal('-7.92'))
+        self.assertEquals(Ope.objects.get(id=13).montant,decimal.Decimal('123'))
+        self.assertEquals(Ope.objects.get(id=13).notes, u'virement en zar')
+        self.assertEquals(Ope.objects.get(id=13).compte.devise.isin, 'ZAR')
+        self.assertEquals(Ope.objects.get(id=13).jumelle.compte.devise.isin, 'EUR')
+        self.assertEquals(Ope.objects.get(id=13).jumelle.id, 8)
+        self.assertEquals(Ope.objects.get(id=13).cat, None)
+        
     def test_ope_ib_none(self):
         self.assertEquals(Ope.objects.get(id=11).ib, None)
-    def test_ope_virement_ope_jumelle(self):
-        self.assertEquals(Ope.objects.get(id=9).jumelle, Ope.objects.get(id=10))
-        self.assertEquals(Ope.objects.get(id=10).jumelle, Ope.objects.get(id=9))
-        self.assertEquals(Ope.objects.get(id=10).cat, None)
-        self.assertEquals(Ope.objects.get(id=9).moyen, None)
+                
     def test_ope_pointee(self):
         self.assertEquals(Ope.objects.get(id=6).pointe, True)
+        
     def test_ope_auto(self):
-        self.assertEquals(Ope.objects.get(id=13).automatique, True)
+        self.assertEquals(Ope.objects.get(id=9).automatique, True)
+        
     def test_ope_pc(self):
-        self.assertEquals(Ope.objects.get(id=14).piece_comptable, "1")
+        self.assertEquals(Ope.objects.get(id=1).piece_comptable, "1")

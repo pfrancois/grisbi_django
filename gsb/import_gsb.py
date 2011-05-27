@@ -20,7 +20,7 @@ liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
-liste_type_titre = Titre.typestitres
+liste_type_titre = [e[0] for e in Titre.typestitres]
 logger=logging.getLogger('gsb.import')
 try:
     from lxml import etree as et
@@ -104,9 +104,9 @@ def import_gsb(nomfich,efface_table=True):
                         sous.isin = "XX%s"%nb_sous
                     else:
                         sous.isin = s[0]
-                    try:
-                        sous.type = liste_type_titre[s[2]]
-                    except KeyError:
+                    if s[2] in liste_type_titre:
+                        sous.type = s[2]
+                    else:
                         sous.type = 'XXX'
                 sous.tiers = element
                 sous.save()
@@ -120,7 +120,7 @@ def import_gsb(nomfich,efface_table=True):
         nb_cat += 1
         query={'nom':"%s:"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
         element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
-        tabl_correspondance_cat[xml_element.get('No')]={0:element.id}
+        tabl_correspondance_cat[xml_element.get('No')]={'0':element.id}
         if created:
             nb_nx += 1
             logger.debug('cat %s cree au numero %s'%(int(xml_element.get('No')),element.id))
@@ -129,11 +129,10 @@ def import_gsb(nomfich,efface_table=True):
             nb_cat += 1
             query={'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
             element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
-            tabl_correspondance_cat[xml_element.get('No')][int(xml_sous.get('No'))]=element.id
+            tabl_correspondance_cat[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('scat %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
     logger.debug(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
-
     #imputations
     nb_ib=0
     nb_nx=0
@@ -141,8 +140,8 @@ def import_gsb(nomfich,efface_table=True):
         logger.debug("ib %s"%xml_element.get('No'))
         nb_ib += 1
         query={'nom':"%s:"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
-        element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
-        tabl_correspondance_ib[xml_element.get('No')]={0:element.id}
+        element,created=Ib.objects.get_or_create(nom=query['nom'],defaults=query)
+        tabl_correspondance_ib[xml_element.get('No')]={'0':element.id}
         if created:
             nb_nx += 1
             logger.debug('ib %s cree au numero %s'%(int(xml_element.get('No')),element.id))
@@ -150,8 +149,8 @@ def import_gsb(nomfich,efface_table=True):
             logger.debug("ib %s: sib %s"%(xml_element.get('No'),xml_sous.get('No')))
             nb_ib += 1
             query={'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
-            element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
-            tabl_correspondance_ib[xml_element.get('No')][int(xml_sous.get('No'))]=element.id
+            element,created=Ib.objects.get_or_create(nom=query['nom'],defaults=query)
+            tabl_correspondance_ib[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('sib %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
     logger.debug(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
@@ -210,9 +209,9 @@ def import_gsb(nomfich,efface_table=True):
         nb += 1
         logger.debug("exo %s"%xml_element.get('No'))
         element,created= Exercice.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'nom':xml_element.get('Nom'),'date_debut':datefr2datesql(xml_element.get('Date_debut')), 'date_fin':datefr2datesql(xml_element.get('Date_fin'))})
-    tabl_correspondance_exo[xml_element.get('No')]=element.id
-    if created:
-        nb_nx+=1
+        tabl_correspondance_exo[xml_element.get('No')]=element.id
+        if created:
+            nb_nx+=1
     logger.debug(u'%s exercices dont %s nouveaux'%(nb,nb_nx))
 
     #gestion Des rapp
@@ -444,8 +443,10 @@ def import_gsb(nomfich,efface_table=True):
     logger.debug(u'fini')
 
 if __name__ == "__main__":
-    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+#    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    import_gsb(nomfich,efface_table=False)
+    logger.setLevel(10)#change le niveau de debug
+    import_gsb(nomfich,efface_table=True)
     logger.info(u'fichier %s importe'%nomfich)
     #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)
