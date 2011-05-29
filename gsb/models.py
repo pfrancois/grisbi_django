@@ -2,6 +2,7 @@
 
 from django.db import models
 import datetime
+import decimal
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=40,unique=True)
@@ -28,7 +29,7 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length=40,unique=True)
     isin = models.CharField(max_length=60, unique=True)
-    tiers = models.ForeignKey(Tiers,null=True,blank=True)
+    tiers = models.OneToOneField(Tiers,null=True,blank=True)
     type = models.CharField(max_length=60, choices=typestitres)
     class Meta:
         db_table = u'titre'
@@ -117,8 +118,8 @@ class Compte(models.Model):
     typescpt = (
     ('b', u'bancaire'),
     ('e', u'espece'),
-    ('a', u'actif'),
-    ('p', u'passif')
+    ('p', u'passif'),
+    ('a', u'actif')
     )
     nom = models.CharField(max_length=40,unique=True)
     titulaire = models.CharField(max_length=120, blank=True, default='')
@@ -153,6 +154,112 @@ class Compte(models.Model):
         else:
             return solde
 
+class Compte_titre(Compte):
+    titres = models.ManyToManyField(Titre,through='titres_detenus')
+    class Meta:
+        db_table = 'cpt_titre'
+    def solde(self, devise_generale=False):
+        pass
+    def achat(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0'):
+        if isinstance(titre,Titre):
+            #ajout de l'operation dans le compte_espece ratache
+            self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
+                                notes="achat %s@%S"%(nombre,prix),
+                                moyen=None,
+                                automatique=True
+                                )
+            if decimal.Decimal(str(frais)):
+                self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(frais))*-1,
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                notes="frais achat %s"%(nombre,prix),
+                                moyen=None,
+                                automatique=True
+                                )
+            #gestion des cours
+            if not titre.cours_set.filter(date=date):
+                titre.cours_set.create(date=date,valeur=prix)
+            #ajout des titres dans portefeuille
+            try:
+                titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
+                titre_detenu.nombre=titre_detenu.nombre+decimal.Decimal(str(nombre))
+                titre_detenu.save()
+            except Titre.DoesNotExist:
+                titre_detenu=titres_detenus.objects.create(titre=titre,compte=self,nombre=nombre)
+        else:
+            raise Exception('attention ceci n\'est pas un titre')
+    
+    def vente(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0'):
+        if isinstance(titre,Titre):
+            #ajout des titres dans portefeuille
+            titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
+            titre_detenu.nombre=titre_detenu.nombre-decimal.Decimal(str(nombre))
+            titre_detenu.save()
+
+            #ajout de l'operation dans le compte_espece ratache
+            self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
+                                notes="vente %s@%S"%(nombre,prix),
+                                moyen=None,
+                                automatique=True
+                                )
+            if decimal.Decimal(str(frais)):
+                self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(frais))*-1,
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                notes="frais vente %s"%(nombre,prix),
+                                moyen=None,
+                                automatique=True
+                                )
+            #gestion des cours
+            if not titre.cours_set.filter(date=date):
+                titre.cours_set.create(date=date,valeur=prix)
+        else:
+            raise Exception('attention ceci n\'est pas un titre')
+        
+    def revenu(self,titre,montant=1,date=datetime.date.today,frais='0.0'):
+        if isinstance(titre,Titre):
+            #ajout des titres dans portefeuille
+            titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
+            titre_detenu.save()
+
+            #ajout de l'operation dans le compte_espece ratache
+            self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(montant)),
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
+                                notes="revenu",
+                                moyen=None,
+                                automatique=True
+                                )
+            if decimal.Decimal(str(frais)):
+                self.ope_set.create(date=date,
+                                montant=decimal.Decimal(str(frais))*-1,
+                                tiers=titre.tiers,
+                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                notes="frais revenu %s"%(nombre,prix),
+                                moyen=None,
+                                automatique=True
+                                )
+            #gestion des cours
+            if not titre.cours_set.filter(date=date):
+                titre.cours_set.create(date=date,valeur=prix)
+        else:
+            raise Exception('attention ceci n\'est pas un titre')
+
+class titres_detenus(models.Model):
+    titre=models.ForeignKey(Titre)
+    compte=models.ForeignKey(Compte_titre)
+    nombre=models.PositiveIntegerField()
+    class Meta:
+        db_table = 'titres_detenus'
 
 class Moyen(models.Model):
     typesdep = (
@@ -180,7 +287,6 @@ class Rapp(models.Model):
         verbose_name = u"rapprochement"
         ordering = ['nom']
         get_latest_by= 'date'
-
 
     def __unicode__(self):
         return self.nom

@@ -61,10 +61,10 @@ def import_gsb(nomfich,efface_table=True):
     tabl_correspondance_ope={}
     tabl_correspondance_devise={}
     if efface_table:
-        for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte',  'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
+        for table in ('titres_detenus','generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte','cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
             connection.cursor().execute("delete from %s;"%table)
-            logger.debug(u'table %s effacée'%table)
-    logger.debug(u"debut du chargement")
+#            logger.debug(u'table %s effacée'%table)
+    logger.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
@@ -73,19 +73,26 @@ def import_gsb(nomfich,efface_table=True):
     if xml_element != '0.5.0':
         logger.critical("le format n'est pas reconnu")
         raise Import_exception, "le format n'est pas reconnu"
-        #import des tiers
     nb = 0
     nb_sous = 0
     nb_nx=0
+    percent=1
+    #------------ TIERS et titres -------------------
+    nb_tiers_final=len(xml_tree.find('//Detail_des_tiers'))
     for xml_element in xml_tree.find('//Detail_des_tiers'):
-        logger.debug("tiers %s"%xml_element.get('No'))
+        affiche=False
+        if nb==int(nb_tiers_final*int("%s0"%percent)/100):
+            affiche=True
+            logger.info("tiers %s soit %% %s"%(xml_element.get('No'),"%s0"%percent))
+            percent += 1
         nb += 1
         query={'nom':xml_element.get('Nom'),'notes':xml_element.get('Informations')}
         element,created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'),defaults=query)
         tabl_correspondance_tiers[xml_element.get('No')]=element.id
         if created:
             nb_nx += 1
-            logger.debug('tiers %s cree au numero %s'%(int(xml_element.get('No')),element.id))
+            if affiche:
+                logger.debug('tiers %s cree au numero %s'%(int(xml_element.get('No')),element.id))
             if element.nom[:6] == "titre_":
                 nb_sous += 1
                 element.is_titre = True
@@ -95,13 +102,13 @@ def import_gsb(nomfich,efface_table=True):
                 sous = Titre(nom=element.nom[7:])
                 if not s[1]:
                     if s[0] == '':
-                        sous.isin = "XX%s"%nb_sous
+                        sous.isin = "XX%sN%s"%(datetime.date.today().strftime('%d%m%Y'),nb_sous)
                     else:
                         sous.isin = s[0]
                     sous.type = "XXX"
                 else:
                     if s[0] == '':
-                        sous.isin = "XX%s"%nb_sous
+                        sous.isin = "XX%sN%s"%(datetime.date.today().strftime('%d%m%Y'),nb_sous)
                     else:
                         sous.isin = s[0]
                     if s[2] in liste_type_titre:
@@ -110,9 +117,9 @@ def import_gsb(nomfich,efface_table=True):
                         sous.type = 'XXX'
                 sous.tiers = element
                 sous.save()
-                logger.debug(u'titre cree %s:%s'%(sous.nom,sous.isin))
-    logger.debug(u'%s tierset %s titres dont %s nx'%(nb, nb_sous,nb_nx))
-    #import des categories et des sous categories
+                logger.debug(u'titre cree %s isin (%s) as %s'%(sous.nom,sous.isin,sous.type))
+    logger.info(u'%s tiers et %s titres dont %s nx'%(nb, nb_sous,nb_nx))
+    #-------------------------categories et des sous categories-----------------------
     nb_cat = 0
     nb_nx = 0
     for xml_element in xml_tree.find('//Detail_des_categories'):
@@ -132,8 +139,9 @@ def import_gsb(nomfich,efface_table=True):
             tabl_correspondance_cat[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('scat %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
-    logger.debug(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
-    #imputations
+    logger.info(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
+    
+    #------------------------------imputations----------------------------------
     nb_ib=0
     nb_nx=0
     for xml_element in xml_tree.find('//Detail_des_imputations'):
@@ -153,9 +161,9 @@ def import_gsb(nomfich,efface_table=True):
             tabl_correspondance_ib[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('sib %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
-    logger.debug(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
+    logger.info(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
 
-    #gestion des devises:
+    #------------------------------devises---------------------------
     nb = 0
     nb_nx = 0
     for xml_element in xml_tree.find('//Detail_des_devises'):
@@ -171,18 +179,18 @@ def import_gsb(nomfich,efface_table=True):
         else:
             element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
-    logger.debug(u'%s devises dont %s nouvelles'%(nb,nb_nx))
+    logger.info(u'%s devises dont %s nouvelles'%(nb,nb_nx))
 
-    #gestion des banques:
+    #------------------------------banques------------------------------
     nb = 0
     for xml_element in xml_tree.find('Banques/Detail_des_banques'):
         nb += 1
         logger.debug("banque %s"%xml_element.get('No'))
         element,created=Banque.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
         tabl_correspondance_banque[xml_element.get('No')]=element.id
-    logger.debug(u'%s banques'%nb)
+    logger.info(u'%s banques'%nb)
 
-    #gestion des generalites
+    #------------------------------generalites#------------------------------
     xml_element = xml_tree.find('Generalites')
     if not xml_element.find('Titre').text:
         titre_fichier=""
@@ -200,9 +208,9 @@ def import_gsb(nomfich,efface_table=True):
     })
     if element.devise_generale != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
         raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
-    logger.debug(u'generalites ok')
+    logger.info(u'generalites ok')
 
-    #gestion des exercices:
+    #------------------------------exercices#------------------------------
     nb = 0
     nb_nx=0
     for xml_element in xml_tree.find('Exercices/Detail_des_exercices'):
@@ -212,9 +220,9 @@ def import_gsb(nomfich,efface_table=True):
         tabl_correspondance_exo[xml_element.get('No')]=element.id
         if created:
             nb_nx+=1
-    logger.debug(u'%s exercices dont %s nouveaux'%(nb,nb_nx))
+    logger.info(u'%s exercices dont %s nouveaux'%(nb,nb_nx))
 
-    #gestion Des rapp
+    #------------------------------rapp#------------------------------
     nb = 0
     nb_nx=0
     for xml_element in xml_tree.find('Rapprochements/Detail_des_rapprochements'):
@@ -224,25 +232,34 @@ def import_gsb(nomfich,efface_table=True):
         if created:
            nb_nx+=1
         tabl_correspondance_rapp[xml_element.get('No')]=element.id
-    logger.debug(u'%s rapprochements dont %s nouveaux '%(nb,nb_nx))
+    logger.info(u'%s rapprochements dont %s nouveaux '%(nb,nb_nx))
 
-    #gestion des comptes
+    #------------------------------comptes#------------------------------
     nb = 0
     nb_tot_moyen = 0
     nb_nx=0
     for xml_element in xml_tree.findall('//Compte'):
         nb += 1
         nb_moyen = 0
-        logger.debug("cpt %s"%int(xml_element.find('Details/No_de_compte').text))
-        element,created= Compte.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
+        type = liste_type_compte[int(xml_element.find('Details/Type_de_compte').text)][0]
+        if type in ('a',):
+            logger.debug("cpt_titre %s"%(xml_element.find('Details/Nom').text))
+            element,created= Compte_titre.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
             'nom':xml_element.find('Details/Nom').text,
             'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
             'cloture':bool(int(xml_element.find('Details/Compte_cloture').text)),
         })
+        else:
+            logger.debug("cpt %s"%(xml_element.find('Details/Nom').text))
+            element,created= Compte.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
+            'nom':xml_element.find('Details/Nom').text,
+            'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
+            'cloture':bool(int(xml_element.find('Details/Compte_cloture').text)),
+        })
+        
         tabl_correspondance_compte[xml_element.find('Details/No_de_compte').text]=element.id
         if created:
             nb_nx += 1
-    #        element = Compte(id=(int(xml_element.find('Details/No_de_compte').text)))
             if xml_element.find('Details/Titulaire').text is None:
                 element.titulaire = ''
             else:
@@ -273,7 +290,6 @@ def import_gsb(nomfich,efface_table=True):
             else:
                 element.notes = ''
             element.save()
-
         #---------------MOYENS---------------------
         nb_nx_moyens=0
         tabl_correspondance_moyen[xml_element.find('Details/No_de_compte').text]={}
@@ -297,15 +313,21 @@ def import_gsb(nomfich,efface_table=True):
         except (KeyError, TypeError):
             element.moyen_debit_defaut_id = None
         element.save()
-    logger.debug(u'%s comptes dont %s nouveaux'%(nb,nb_nx))
+    logger.info(u'%s comptes dont %s nouveaux'%(nb,nb_nx))
     nb_tot_ope=0
-    #--------------OPERATIONS-----------------------
+    
+    #------------------------------OPERATIONS-----------------------
     nb_nx_ope=0
     list_ope=xml_tree.findall('//Operation')
     nb_ope_final=len(list_ope)
+    percent=1
     for xml_sous in list_ope:
         nb_tot_ope += 1
-        logger.debug("ope %s, ope n %s sur %s"%(xml_sous.get('No'),nb_tot_ope,nb_ope_final))
+        affiche=False
+        if nb_tot_ope==int(nb_ope_final*int("%s0"%percent)/100):
+            logger.info("ope %s, ope %s sur %s soit %s%%"%(xml_sous.get('No'),nb_tot_ope,nb_ope_final,"%s0"%percent))
+            affiche=True
+            percent +=1
         cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_sous.find('../../Details/No_de_compte').text])
         sous = Ope(compte = cpt,
                    date = datefr2datesql(xml_sous.get('D')),
@@ -314,7 +336,8 @@ def import_gsb(nomfich,efface_table=True):
         )#on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         sous.save()
         tabl_correspondance_ope[xml_sous.get('No')]=sous.id
-        logger.debug('ope %s cree id %s'%(xml_sous.get('No'),sous.id))
+        if affiche:
+            logger.debug('ope %s cree id %s'%(xml_sous.get('No'),sous.id))
         #gestion des devises
         if tabl_correspondance_devise[xml_sous.get('De')] != sous.compte.devise_id:
             if int(xml_sous.get('Rdc')):
@@ -368,9 +391,14 @@ def import_gsb(nomfich,efface_table=True):
             sous.exercice = None
         sous.save()
     nb_tot_ope=0
+    percent=1
     for xml_sous in list_ope:
         nb_tot_ope +=1
-        logger.debug("2*ope %s, ope n %s sur %s"%(xml_sous.get('No'),nb_tot_ope,nb_ope_final))
+        affiche=False
+        if nb_tot_ope==int(nb_ope_final*int("%s0"%percent)/100):
+            logger.info("2*ope %s, ope %s sur %s soit %s%%"%(xml_sous.get('No'),nb_tot_ope,nb_ope_final,"%s0"%percent))
+            affiche=True
+            percent +=1
         #gestion des virements
         if int(xml_sous.get('Ro')):
             logger.debug('virement vers %s'%xml_sous.get('Ro'))
@@ -385,10 +413,10 @@ def import_gsb(nomfich,efface_table=True):
             sous.mere_id = tabl_correspondance_ope[xml_sous.get('Va')]
             sous.save()
 
-    logger.debug(u"%s operations" % nb_tot_ope)
+    logger.info(u"%s operations" % nb_tot_ope)
 
 
-    #gestion des echeances
+    #------------------------------echeances#------------------------------
     nb = 0
     for xml_element in xml_tree.find('Echeances/Detail_des_echeances'):
         nb += 1
@@ -438,15 +466,14 @@ def import_gsb(nomfich,efface_table=True):
             element.periode_perso=liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
-    logger.debug(u"%s échéances" % nb)
-    logger.debug(u'{!s}'.format(time.clock()))
-    logger.debug(u'fini')
+    logger.info(u"%s échéances" % nb)
+    logger.info(u'{!s}'.format(time.clock()))
+    logger.info(u'fini')
 
 if __name__ == "__main__":
 #    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    logger.setLevel(10)#change le niveau de debug
+    logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich,efface_table=True)
     logger.info(u'fichier %s importe'%nomfich)
-    #import_gsb("%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__))), 1)
