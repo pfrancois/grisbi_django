@@ -63,6 +63,7 @@ def import_gsb(nomfich,efface_table=True):
     if efface_table:
         for table in ('titres_detenus','generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte','cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
             connection.cursor().execute("delete from %s;"%table)
+            transaction.commit_unless_managed()
 #            logger.debug(u'table %s effacée'%table)
     logger.info(u"debut du chargement")
     time.clock()
