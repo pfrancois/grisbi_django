@@ -210,7 +210,7 @@ class Compte(models.Model):
         return nb_change
 
 class Compte_titre(Compte):
-    titres_detenus = models.ManyToManyField(Titre,through='titres_detenus')
+    titres_detenus = models.ManyToManyField(Titre,through='Titres_detenus')
     class Meta:
         db_table = 'cpt_titre'
     @transaction.commit_on_success
@@ -331,8 +331,8 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def reaffecte(new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
-        nb_change+=Histo_op_titres.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change+=Titre_detenus.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Histo_op_titres.objects.select_related().filter(compte=self).update(compte=new)
+        nb_change+=Titre_detenus.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
@@ -341,7 +341,7 @@ class Compte_titre(Compte):
 
 class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)
-    compte=models.ForeignKey(Compte_titre)
+    compte=models.ForeignKey(Compte_titre, related_name='compte_set',)
     nombre=models.PositiveIntegerField()
     date=models.DateField(default=datetime.date.today)
     class Meta:
