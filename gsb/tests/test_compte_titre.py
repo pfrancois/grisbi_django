@@ -12,12 +12,12 @@ import decimal
 from django.conf import settings
 
 class compte_titretest(TestCase):
-    def setUp(self):
-        import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
-        Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
-    def test_tiers_properties(self):
-        obj = Tiers.objects.get(id=1)
+    def compte_titre_test(self):
+        devise=Titre(nom='euro',isin='EUR',type='DEV',tiers=None)
+        devise.save()
+        Cours( valeur=decimal.Decimal('1.00'), isin=devise, date=datetime.date(day=1, month=1, year=2010)).save()
+        c = Compte_titre(nom='test',devise=devise, type='a')
         self.assertEqual(obj.nom, u'premier')
         self.assertEqual(obj.notes, u'')
         self.assertEqual(obj.is_titre, False)

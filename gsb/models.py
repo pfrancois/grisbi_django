@@ -3,6 +3,10 @@
 from django.db import models
 import datetime
 import decimal
+from django.db import transaction
+from django.db.models import F
+
+
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=40,unique=True)
@@ -17,7 +21,14 @@ class Tiers(models.Model):
 
     def __unicode__(self):
         return self.nom
-
+    
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
+        nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
+        nb_tiers_change+=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
+        return nb_tiers_change
+    
 class Titre(models.Model):
     typestitres = (
     ('ACT', u'action'),
@@ -29,8 +40,8 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length=40,unique=True)
     isin = models.CharField(max_length=60, unique=True)
-    tiers = models.OneToOneField(Tiers,null=True,blank=True)
-    type = models.CharField(max_length=60, choices=typestitres)
+    tiers = models.OneToOneField(Tiers,null=True,blank=True,default=None)
+    type = models.CharField(max_length=60, choices=typestitres,default='ZZZ')
     class Meta:
         db_table = u'titre'
         ordering = ['nom']
@@ -42,6 +53,20 @@ class Titre(models.Model):
     def devise():
         return Titre.objects.filter(type='DEV')
     devise=staticmethod(devise)
+    
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Compte.objects.select_related().filter(devise=self).update(devise=new)
+        nb_change+=Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Histo_ope_titres.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Echeance.objects.select_related().filter(devise=self).update(devise=new)
+        nb_change+=Ope.objects.select_related().filter(devise=self).update(devise=new)
+        nb_change+=Tiers.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Generalite.objects.select_related().filter(devise=self).update(devise=new)
+        self.delete()
+        return nb_change
+
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
@@ -53,7 +78,6 @@ class Cours(models.Model):
         unique_together = ("isin", "date")
         ordering = ['date']
         get_latest_by= 'date'
-
 
     def __unicode__(self):
         return u"%s le %s : %s" % (self.isin, self.date, self.valeur)
@@ -71,6 +95,12 @@ class Banque(models.Model):
     def __unicode__(self):
         return self.nom
 
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Compte.objects.select_related().filter(banque=self).update(banque=new)
+        self.delete()
+        return nb_change
+
 
 class Cat(models.Model):
     typesdep = (
@@ -87,6 +117,12 @@ class Cat(models.Model):
 
     def __unicode__(self):
         return self.nom
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Echeance.objects.select_related().filter(cat=self).update(cat=new)
+        nb_change+=Ope.objects.select_related().filter(cat=self).update(cat=new)
+        self.delete()
+        return nb_change
 
 
 class Ib(models.Model):
@@ -100,6 +136,12 @@ class Ib(models.Model):
 
     def __unicode__(self):
         return self.nom
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Echeance.objects.select_related().filter(ib=self).update(ib=new)
+        nb_change+=Ope.objects.select_related().filter(ib=self).update(ib=new)
+        self.delete()
+        return nb_change
 
 class Exercice(models.Model):
     date_debut = models.DateField(default=datetime.date.today)
@@ -112,6 +154,12 @@ class Exercice(models.Model):
 
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Echeance.objects.select_related().filter(exercice=self).update(exercice=new)
+        nb_change+=Ope.objects.select_related().filter(exercice=self).update(exercice=new)
+        self.delete()
+        return nb_change
 
 
 class Compte(models.Model):
@@ -153,14 +201,20 @@ class Compte(models.Model):
             return solde
         else:
             return solde
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
+        nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
+        nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
+        self.delete()
+        return nb_change
 
 class Compte_titre(Compte):
-    titres = models.ManyToManyField(Titre,through='titres_detenus')
+    titres_detenus = models.ManyToManyField(Titre,through='titres_detenus')
     class Meta:
         db_table = 'cpt_titre'
-    def solde(self, devise_generale=False):
-        pass
-    def achat(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0'):
+    @transaction.commit_on_success
+    def achat(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0',virement_de=None):
         if isinstance(titre,Titre):
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
@@ -184,22 +238,31 @@ class Compte_titre(Compte):
             if not titre.cours_set.filter(date=date):
                 titre.cours_set.create(date=date,valeur=prix)
             #ajout des titres dans portefeuille
-            try:
-                titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
+            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin)
+            if titre_detenu:
+                titre_detenu=titre_detenu[0]
                 titre_detenu.nombre=titre_detenu.nombre+decimal.Decimal(str(nombre))
                 titre_detenu.save()
-            except Titre.DoesNotExist:
-                titre_detenu=titres_detenus.objects.create(titre=titre,compte=self,nombre=nombre)
+            else:
+                self.titres_detenus_set.create(titre=titre,nombre=decimal.Decimal(str(nombre)))
+            Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=titre_detenu.date)
         else:
             raise Exception('attention ceci n\'est pas un titre')
-    
-    def vente(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0'):
+            
+    @transaction.commit_on_success
+    def vente(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0',virement_vers=None):
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
-            titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
-            titre_detenu.nombre=titre_detenu.nombre-decimal.Decimal(str(nombre))
-            titre_detenu.save()
-
+            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin)
+            if titre_detenu:
+                titre_detenu=titre_detenu[0]
+                titre_detenu.nombre=titre_detenu.nombre-decimal.Decimal(str(nombre))
+                titre_detenu.save()
+                Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=titre_detenu.date)
+            else:
+                raise Titre.doesNotExist('titre pas en portefeuille')
+            Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte)
+            
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
@@ -223,13 +286,12 @@ class Compte_titre(Compte):
                 titre.cours_set.create(date=date,valeur=prix)
         else:
             raise Exception('attention ceci n\'est pas un titre')
-        
-    def revenu(self,titre,montant=1,date=datetime.date.today,frais='0.0'):
+            
+    @transaction.commit_on_success
+    def revenu(self,titre,montant=1,date=datetime.date.today,frais='0.0',virement_vers=None):
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
-            titre_detenu=self.titres_detenus_set.get(titres__isin=titre.isin)
-            titre_detenu.save()
-
+            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin).latest('date')
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(montant)),
@@ -253,13 +315,45 @@ class Compte_titre(Compte):
                 titre.cours_set.create(date=date,valeur=prix)
         else:
             raise Exception('attention ceci n\'est pas un titre')
+            
+    @transaction.commit_on_success
+    def solde(self, devise_generale=False):
+        req = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None).aggregate(solde=models.Sum('montant'))
+        if req['solde'] is None:
+            solde = 0 + self.solde_init
+        else:
+            solde = req['solde'] + self.solde_init
+        if devise_generale:
+            solde = solde / self.devise.last_cours().valeur
+        titres = self.titres_detenus_set.all()
+        return solde
 
-class titres_detenus(models.Model):
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
+        nb_change+=Histo_op_titres.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Titre_detenus.objects.select_related().filter(titre=self).update(titre=new)
+        nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
+        nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
+        self.delete()
+        return nb_change
+    
+
+class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)
     compte=models.ForeignKey(Compte_titre)
     nombre=models.PositiveIntegerField()
+    date=models.DateField(default=datetime.date.today)
     class Meta:
         db_table = 'titres_detenus'
+
+class Histo_ope_titres(models.Model):
+    titre=models.ForeignKey(Titre)
+    compte=models.ForeignKey(Compte_titre)
+    nombre=models.PositiveIntegerField()
+    date=models.DateField(default=datetime.date.today)
+    class Meta:
+        db_table = 'histo_titres_detenus'
 
 class Moyen(models.Model):
     typesdep = (
@@ -277,6 +371,15 @@ class Moyen(models.Model):
 
     def __unicode__(self):
         return self.nom
+    @transaction.commit_on_success
+    def reaffecte(new):
+        nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
+        nb_change+=Compte.objects.select_related().filter(moyen_debit_defaut=self).update(moyen_debit_defaut=new)
+        nb_change+=Echeance.objects.select_related().filter(moyen=self).update(moyen=new)
+        nb_change+=Echeance.objects.select_related().filter(moyen_virement=self).update(moyen_virement=new)
+        nb_change+=Ope.objects.select_related().filter(moyen=self).update(moyen=new)
+        self.delete()
+        return nb_change
 
 
 class Rapp(models.Model):
@@ -307,6 +410,10 @@ class Rapp(models.Model):
             return solde
         else:
             return solde
+    def reaffecte(new):
+        nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
+        self.delete()
+        return nb_change
 
 class Echeance(models.Model):
     typesperiod = (
