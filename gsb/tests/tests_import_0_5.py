@@ -13,10 +13,7 @@ from django.conf import settings
 
 class importtest(TestCase):
     def setUp(self):
-        settings.LOGGING={
-    'version': 1,
-    'disable_existing_loggers': True
-    }
+        logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
         import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
         Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
