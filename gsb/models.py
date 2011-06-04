@@ -214,14 +214,17 @@ class Compte_titre(Compte):
     class Meta:
         db_table = 'cpt_titre'
     @transaction.commit_on_success
-    def achat(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0',virement_de=None):
+    def achat(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_de=None):
+        cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
+        cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
+        print date
         if isinstance(titre,Titre):
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
-                                notes="achat %s@%S"%(nombre,prix),
+                                cat=cat_ost,
+                                notes="achat %s@%s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
                                 )
@@ -229,7 +232,7 @@ class Compte_titre(Compte):
                 self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                cat=cat_frais,
                                 notes="frais achat %s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
@@ -238,7 +241,7 @@ class Compte_titre(Compte):
             if not titre.cours_set.filter(date=date):
                 titre.cours_set.create(date=date,valeur=prix)
             #ajout des titres dans portefeuille
-            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin)
+            titre_detenu=titres_detenus.objects.filter(titres__isin=titre.isin,compte=self)
             if titre_detenu:
                 titre_detenu=titre_detenu[0]
                 titre_detenu.nombre=titre_detenu.nombre+decimal.Decimal(str(nombre))
@@ -250,7 +253,10 @@ class Compte_titre(Compte):
             raise Exception('attention ceci n\'est pas un titre')
             
     @transaction.commit_on_success
-    def vente(self,titre,nombre,prix=1,date=datetime.date.today,frais='0.0',virement_vers=None):
+    def vente(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
+        cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
+        cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
+
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
             titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin)
@@ -262,13 +268,12 @@ class Compte_titre(Compte):
             else:
                 raise Titre.doesNotExist('titre pas en portefeuille')
             Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte)
-            
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
-                                notes="vente %s@%S"%(nombre,prix),
+                                cat=cat_ost,
+                                notes="vente %s@%s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
                                 )
@@ -276,7 +281,7 @@ class Compte_titre(Compte):
                 self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                cat=cat_frais,
                                 notes="frais vente %s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
@@ -288,7 +293,10 @@ class Compte_titre(Compte):
             raise Exception('attention ceci n\'est pas un titre')
             
     @transaction.commit_on_success
-    def revenu(self,titre,montant=1,date=datetime.date.today,frais='0.0',virement_vers=None):
+    def revenu(self,titre,montant=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
+        cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
+        cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
+
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
             titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin).latest('date')
@@ -296,7 +304,7 @@ class Compte_titre(Compte):
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(montant)),
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'}),
+                                cat=cat_ost,
                                 notes="revenu",
                                 moyen=None,
                                 automatique=True
@@ -305,7 +313,7 @@ class Compte_titre(Compte):
                 self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
-                                Cat=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'}),
+                                cat=cat_frais,
                                 notes="frais revenu %s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
@@ -341,7 +349,7 @@ class Compte_titre(Compte):
 
 class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)
-    compte=models.ForeignKey(Compte_titre, related_name='compte_set',)
+    compte=models.ForeignKey(Compte_titre, related_name='titres_detenus_set',)
     nombre=models.PositiveIntegerField()
     date=models.DateField(default=datetime.date.today)
     class Meta:

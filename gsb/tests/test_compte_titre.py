@@ -13,15 +13,19 @@ from django.conf import settings
 
 class compte_titretest(TestCase):
     def setUp(self):
-        devise=Titre(nom='euro',isin='EUR',type='DEV',tiers=None)
-        devise.save()
-        tiers_SG=Tiers.objects.create(nom="SG", notes="123456789@ACT",is_titre=True)
-        titre_SG=Titre.objects.create(nom="SG", isin="123456789", tiers=tiers_sg, type='ACT')
-        Cours( valeur=decimal.Decimal('10.00'), isin=titre_SG, date=datetime.date(day=1, month=1, year=2010)).save()
-        Cours( valeur=decimal.Decimal('1.00'), isin=devise, date=datetime.date(day=1, month=1, year=2010)).save()
-        Generalite(devise_generale=devise).save()
+        self.devise=Titre(nom='euro',isin='EUR',type='DEV',tiers=None)
+        self.devise.save()
+        self.tiers_sg=Tiers.objects.create(nom="SG", notes="123456789@ACT",is_titre=True)
+        self.titre_sg=Titre.objects.create(nom="SG", isin="123456789", tiers=self.tiers_sg, type='ACT')
+        Cours( valeur=decimal.Decimal('10.00'), isin=self.titre_sg, date=datetime.date(day=1, month=1, year=2010)).save()
+        Cours( valeur=decimal.Decimal('1.00'), isin=self.devise, date=datetime.date(day=1, month=1, year=2010)).save()
+        Generalite(devise_generale=self.devise).save()
 
-    def compte_titre_test(self):
+    def test_1(self):
+        devise=self.devise
+        titre_sg=self.titre_sg
         c = Compte_titre(nom='test',devise=devise, type='a')
         c.save()
-        self.assertEqual(obj.nom, u'test')
+        self.assertEqual(c.nom, u'test')
+        c.achat(titre=titre_sg,nombre=20)
+        self.assertEqual

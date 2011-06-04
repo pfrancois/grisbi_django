@@ -43,14 +43,10 @@ import time
 import pprint
 
 def toto():
-    p=1
-    for i in range(30):
-        if i==int(100*int("%s0"%p)/100):
-            print "ok",p,i
-            p=p+1
-        else:
-            print p,i
-
+    c=Compte_titre.objects.get(nom='test')
+    titre_sg=Titre.objects.get(nom='SG')
+    c.achat(titre=titre_sg,nombre=20)
+    
 if __name__ == "__main__":
     settings
     t=toto()
