@@ -15,7 +15,7 @@ urlpatterns = patterns('',
 # les vues generales
 urlpatterns += patterns('gsb',
                         (r'^$', 'views.index'),
-#                        (r'^test$', 'test.test'),
+                        (r'^test$', 'test.test'),
                         )
 #les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
