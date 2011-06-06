@@ -15,7 +15,7 @@ class compte_titretest(TestCase):
     def setUp(self):
         self.devise=Titre(nom='euro',isin='EUR',type='DEV',tiers=None)
         self.devise.save()
-        self.tiers_sg=Tiers.objects.create(nom="SG", notes="123456789@ACT",is_titre=True)
+        self.tiers_sg=Tiers.objects.create(nom="titre_ SG", notes="123456789@ACT",is_titre=True)
         self.titre_sg=Titre.objects.create(nom="SG", isin="123456789", tiers=self.tiers_sg, type='ACT')
         Cours( valeur=decimal.Decimal('10.00'), isin=self.titre_sg, date=datetime.date(day=1, month=1, year=2010)).save()
         Cours( valeur=decimal.Decimal('1.00'), isin=self.devise, date=datetime.date(day=1, month=1, year=2010)).save()

@@ -472,8 +472,8 @@ def import_gsb(nomfich,efface_table=True):
     logger.info(u'fini')
 
 if __name__ == "__main__":
-#    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
-    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+#    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich,efface_table=True)

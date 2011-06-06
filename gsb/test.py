@@ -41,14 +41,17 @@ except ImportError:
 from django.db import connection
 import time
 import pprint
+from django.db import models
 
 def toto():
-    c=Compte_titre.objects.get(nom='test')
-    titre_sg=Titre.objects.get(nom='SG')
-    c.achat(titre=titre_sg,nombre=20)
-    
+    devise=Titre.objects.get_or_create(nom="Euro",defaults={'nom':'Euro','isin':'EUR','type':'DEV','tiers':None})[0]
+    Generalite.objects.get_or_create(id=1,defaults={'devise_generale':devise})[0]
+    c=Compte_titre.objects.get_or_create(nom='test',defaults={'nom':'test','devise':devise, 'type':'a'})[0]
+    tiers_sg=Tiers.objects.get_or_create(nom="titre_ test",defaults={'nom':"titre_ test", 'notes':"123456789@ACT",'is_titre':True})[0]
+    titre_sg=Titre.objects.get_or_create(nom='test',defaults={'nom':"test", 'isin':"123456789", 'tiers':tiers_sg, 'type':'ACT'})[0]
+    req = Ope.objects.filter(compte__id__exact=c.id, mere__exact=None).aggregate(solde=models.Sum('montant'))['solde']
+    for titre in c.titres_detenus_set.all():
+        print titre.valeur()
 if __name__ == "__main__":
-    settings
-    t=toto()
-#    logger.debug(creation(),indent=4)
-    print t
+    toto()
+    print Titres_detenus.objects.get(titre=Titre.objects.get(nom='test'),compte=Compte_titre.objects.get(nom='test')).nombre
