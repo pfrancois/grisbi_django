@@ -63,7 +63,8 @@ def cpt_detail(request, cpt_id):
                     'titre': c.nom,
                     'solde': c.solde(),
                     'date_limite':date_limite,
-                    }
+                }
+
             )
         )
     )

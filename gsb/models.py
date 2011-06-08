@@ -465,7 +465,7 @@ class Echeance(models.Model):
 
 
 class Generalite(models.Model):
-    titre = models.CharField(max_length=120, blank=True, default="grisbi")
+    titre = models.CharField(max_length=120, blank=True, default="isbi")
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
@@ -480,7 +480,15 @@ class Generalite(models.Model):
     def __unicode__(self):
         return u"%s" % (self.id,)
     def gen():
-        return Generalite.objects.get(id=1)
+        if Generalite.objects.filter(id=1).exists():
+            return Generalite.objects.get(id=1)
+        else:
+            if Titre.devise().exists():
+                dev=Titre.devise()[0]
+            else:
+                dev,created=Titre.objects.get_or_create(isin='EUR',defaults={'nom':'euro','isin':'EUR','type':'DEV','tiers':None})
+            Generalite.objects.create(id=1,devise_generale=dev)
+            return Generalite.objects.get(id=1)
     gen=staticmethod(gen)
 
 class Ope(models.Model):
