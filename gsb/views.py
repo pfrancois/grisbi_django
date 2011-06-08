@@ -17,35 +17,15 @@ def index(request):
     if Generalite.gen().affiche_clot:
         bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
         pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
-        total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e')).aggregate(solde=models.Sum('montant'))['solde']
-        total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p')).aggregate(solde=models.Sum('montant'))['solde']
     else:
         bq = Compte.objects.filter(type__in=('b', 'e'),cloture=False).select_related()
         pl = Compte.objects.filter(type__in=('a', 'p'),cloture=False).select_related()
-        total_bq = Ope.objects.filter(mere__exact=None,compte__type__in=('b','e'),compte__cloture=False).aggregate(solde=models.Sum('montant'))['solde']
-        total_pla = Ope.objects.filter(mere__exact=None,compte__type__in=('a','p'),compte__cloture=False).aggregate(solde=models.Sum('montant'))['solde']
-    solde_init_bq=bq.aggregate(init=models.Sum('solde_init'))['init']
-    if total_bq:
-        if solde_init_bq:
-            total_bq=total_bq+solde_init_bq
-        else:
-            total_bq=total_bq
-    else:
-        if solde_init_bq:
-            total_bq=solde_init_bq
-        else:
-            total_bq=decimal.Decimal('0')
-    solde_init_pla=pl.aggregate(init=models.Sum('solde_init'))['init']
-    if total_pla:
-        if solde_init_pla:
-            total_pla=total_pla+solde_init_pla
-        else:
-            total_pla=total_pla
-    else:
-        if solde_init_pla:
-            total_pla=solde_init_pla
-        else:
-            total_pla=decimal.Decimal('0')
+    total_bq=decimal.Decimal('0')
+    total_pla=decimal.Decimal('0')
+    for c in bq:
+        total_bq=total_bq+c.solde(devise_generale=True)
+    for p in pl:
+        total_pla=total_pla+p.solde(devise_generale=True)
     nb_clos = len(Compte.objects.filter(cloture=True))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
@@ -61,7 +41,7 @@ def index(request):
 
 
 def cpt_detail(request, cpt_id):
-    c = get_object_or_404(Compte, pk=cpt_id)
+    c = get_object_or_404(Compte_titre, pk=cpt_id)
     if c.type == 'a':
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     if c.type == 'p':
