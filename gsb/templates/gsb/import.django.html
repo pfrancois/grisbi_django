@@ -8,4 +8,5 @@
         {% csrf_token %}
         <p><input type="submit" value="Importer"></p>
     </form>
+    <p><a href="{% url gsb.views.index %}">retour liste comptes</a></p>
 {% endblock content %}

@@ -2,8 +2,6 @@
 from mysite.gsb.models import *
 from django.contrib import admin
 
-
-
 class Cat_admin(admin.TabularInline):
     model = Cat
     extra = 3
@@ -14,9 +12,6 @@ class Ib_admin(admin.TabularInline):
     extra = 3
 
 
-
-
-
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
             (None, {'fields': ('nom', 'type', 'devise', 'cloture')}),
@@ -24,7 +19,7 @@ class Compte_admin(admin.ModelAdmin):
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
             ]
-
+    list_display=('nom','solde')
 
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
@@ -42,6 +37,12 @@ class cours_admin(admin.ModelAdmin):
 class moyen_admin(admin.ModelAdmin):
     fields = ['type','nom']
 
+class Histo_ope_titres_admin(admin.ModelAdmin):
+    readonly_fields=('titre','compte','nombre','date')
+    
+class Compte_titre_admin(admin.ModelAdmin):
+    list_display=('nom','solde')
+
 admin.site.register(Tiers)
 admin.site.register(Cat)
 admin.site.register(Compte, Compte_admin)
@@ -55,3 +56,6 @@ admin.site.register(Rapp)
 admin.site.register(Moyen)
 admin.site.register(Echeance)
 admin.site.register(Generalite)
+admin.site.register(Compte_titre,Compte_titre_admin)
+admin.site.register(Titres_detenus)
+admin.site.register(Histo_ope_titres,Histo_ope_titres_admin)

@@ -21,14 +21,14 @@ class Tiers(models.Model):
 
     def __unicode__(self):
         return self.nom
-    
+
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
         return nb_tiers_change
-    
+
 class Titre(models.Model):
     typestitres = (
     ('ACT', u'action'),
@@ -53,7 +53,7 @@ class Titre(models.Model):
     def devise():
         return Titre.objects.filter(type='DEV')
     devise=staticmethod(devise)
-    
+
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
@@ -247,7 +247,7 @@ class Compte_titre(Compte):
             Histo_ope_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=date)
         else:
             raise Exception('attention ceci n\'est pas un titre')
-            
+
     @transaction.commit_on_success
     def vente(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
@@ -284,7 +284,7 @@ class Compte_titre(Compte):
                 titre.cours_set.create(date=date,valeur=prix)
         else:
             raise Exception('attention ceci n\'est pas un titre')
-            
+
     @transaction.commit_on_success
     def revenu(self,titre,montant=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
@@ -316,7 +316,7 @@ class Compte_titre(Compte):
                 titre.cours_set.create(date=date,valeur=prix)
         else:
             raise Exception('attention ceci n\'est pas un titre')
-            
+
     @transaction.commit_on_success
     def solde(self, devise_generale=False):
         req = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None).aggregate(solde=models.Sum('montant'))
@@ -339,7 +339,7 @@ class Compte_titre(Compte):
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
-    
+
 
 class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)
@@ -348,6 +348,9 @@ class Titres_detenus(models.Model):
     date=models.DateField(default=datetime.date.today)
     class Meta:
         db_table = 'titres_detenus'
+        verbose_name_plural = u'titres détenus'
+        verbose_name = u'titres_detenus'
+        ordering = ['compte']
     def __unicode__(self):
         return"%s %s dans %s"%(self.nombre,self.titre.nom,self.compte)
     def valeur(self):
@@ -360,7 +363,9 @@ class Histo_ope_titres(models.Model):
     date=models.DateField()
     class Meta:
         db_table = 'histo_titres_detenus'
-
+        verbose_name_plural = u'Titres détenus (historique)'
+        verbose_name = u'Histo_ope_titres'
+        ordering = ['compte']
 class Moyen(models.Model):
     typesdep = (
     ('v', u'virement'),
