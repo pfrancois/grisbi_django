@@ -4,7 +4,7 @@ from django.db import models
 import datetime
 import decimal
 from django.db import transaction
-from django.db.models import F
+from django.db import models
 
 
 
@@ -23,7 +23,7 @@ class Tiers(models.Model):
         return self.nom
     
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
@@ -55,7 +55,7 @@ class Titre(models.Model):
     devise=staticmethod(devise)
     
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Compte.objects.select_related().filter(devise=self).update(devise=new)
         nb_change+=Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
@@ -96,7 +96,7 @@ class Banque(models.Model):
         return self.nom
 
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Compte.objects.select_related().filter(banque=self).update(banque=new)
         self.delete()
         return nb_change
@@ -118,7 +118,7 @@ class Cat(models.Model):
     def __unicode__(self):
         return self.nom
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(cat=self).update(cat=new)
         nb_change+=Ope.objects.select_related().filter(cat=self).update(cat=new)
         self.delete()
@@ -137,7 +137,7 @@ class Ib(models.Model):
     def __unicode__(self):
         return self.nom
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(ib=self).update(ib=new)
         nb_change+=Ope.objects.select_related().filter(ib=self).update(ib=new)
         self.delete()
@@ -155,7 +155,7 @@ class Exercice(models.Model):
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(exercice=self).update(exercice=new)
         nb_change+=Ope.objects.select_related().filter(exercice=self).update(exercice=new)
         self.delete()
@@ -202,7 +202,7 @@ class Compte(models.Model):
         else:
             return solde
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
@@ -217,7 +217,6 @@ class Compte_titre(Compte):
     def achat(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_de=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
-        print date
         if isinstance(titre,Titre):
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
@@ -238,17 +237,14 @@ class Compte_titre(Compte):
                                 automatique=True
                                 )
             #gestion des cours
-            if not titre.cours_set.filter(date=date):
+            if not titre.cours_set.filter(date=date).exists():
                 titre.cours_set.create(date=date,valeur=prix)
             #ajout des titres dans portefeuille
-            titre_detenu=titres_detenus.objects.filter(titres__isin=titre.isin,compte=self)
-            if titre_detenu:
-                titre_detenu=titre_detenu[0]
+            titre_detenu,created=Titres_detenus.objects.get_or_create(titre=titre,compte=self,defaults={'titre':titre,'compte':self,'nombre':decimal.Decimal(str(nombre))})
+            if not created:
                 titre_detenu.nombre=titre_detenu.nombre+decimal.Decimal(str(nombre))
                 titre_detenu.save()
-            else:
-                self.titres_detenus_set.create(titre=titre,nombre=decimal.Decimal(str(nombre)))
-            Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=titre_detenu.date)
+            Histo_ope_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=date)
         else:
             raise Exception('attention ceci n\'est pas un titre')
             
@@ -256,18 +252,15 @@ class Compte_titre(Compte):
     def vente(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
-
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
-            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin)
-            if titre_detenu:
-                titre_detenu=titre_detenu[0]
+            try:
+                titre_detenu=Titres_detenus.objects.get(titre=titre,compte=self)
                 titre_detenu.nombre=titre_detenu.nombre-decimal.Decimal(str(nombre))
                 titre_detenu.save()
-                Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=titre_detenu.date)
-            else:
+            except Titres_detenus.DoesNotExist:
                 raise Titre.doesNotExist('titre pas en portefeuille')
-            Histo_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte)
+            Histo_ope_titres.objects.create(titre=titre_detenu.titre,nombre=titre_detenu.nombre,compte=titre_detenu.compte,date=date)
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
@@ -287,7 +280,7 @@ class Compte_titre(Compte):
                                 automatique=True
                                 )
             #gestion des cours
-            if not titre.cours_set.filter(date=date):
+            if not titre.cours_set.filter(date=date).exists():
                 titre.cours_set.create(date=date,valeur=prix)
         else:
             raise Exception('attention ceci n\'est pas un titre')
@@ -330,14 +323,15 @@ class Compte_titre(Compte):
         if req['solde'] is None:
             solde = 0 + self.solde_init
         else:
-            solde = req['solde'] + self.solde_init
+            solde = decimal.Decimal(str(req['solde'])) + decimal.Decimal(str(self.solde_init))
+        for titre in self.titres_detenus_set.all():
+            solde=solde+titre.valeur()
         if devise_generale:
             solde = solde / self.devise.last_cours().valeur
-        titres = self.titres_detenus_set.all()
         return solde
 
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Histo_op_titres.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Titre_detenus.objects.select_related().filter(compte=self).update(compte=new)
@@ -354,12 +348,16 @@ class Titres_detenus(models.Model):
     date=models.DateField(default=datetime.date.today)
     class Meta:
         db_table = 'titres_detenus'
+    def __unicode__(self):
+        return"%s %s dans %s"%(self.nombre,self.titre.nom,self.compte)
+    def valeur(self):
+        return self.nombre*self.titre.objects.get(isin=self.isin).cours_set.latest().valeur
 
 class Histo_ope_titres(models.Model):
     titre=models.ForeignKey(Titre)
     compte=models.ForeignKey(Compte_titre)
     nombre=models.PositiveIntegerField()
-    date=models.DateField(default=datetime.date.today)
+    date=models.DateField()
     class Meta:
         db_table = 'histo_titres_detenus'
 
@@ -380,7 +378,7 @@ class Moyen(models.Model):
     def __unicode__(self):
         return self.nom
     @transaction.commit_on_success
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
         nb_change+=Compte.objects.select_related().filter(moyen_debit_defaut=self).update(moyen_debit_defaut=new)
         nb_change+=Echeance.objects.select_related().filter(moyen=self).update(moyen=new)
@@ -418,7 +416,7 @@ class Rapp(models.Model):
             return solde
         else:
             return solde
-    def reaffecte(new):
+    def reaffecte(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
         self.delete()
         return nb_change
@@ -467,7 +465,7 @@ class Echeance(models.Model):
 
 
 class Generalite(models.Model):
-    titre = models.CharField(max_length=120, blank=True, default="grisbi")
+    titre = models.CharField(max_length=120, blank=True, default="isbi")
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
@@ -482,7 +480,15 @@ class Generalite(models.Model):
     def __unicode__(self):
         return u"%s" % (self.id,)
     def gen():
-        return Generalite.objects.get(id=1)
+        if Generalite.objects.filter(id=1).exists():
+            return Generalite.objects.get(id=1)
+        else:
+            if Titre.devise().exists():
+                dev=Titre.devise()[0]
+            else:
+                dev,created=Titre.objects.get_or_create(isin='EUR',defaults={'nom':'euro','isin':'EUR','type':'DEV','tiers':None})
+            Generalite.objects.create(id=1,devise_generale=dev)
+            return Generalite.objects.get(id=1)
     gen=staticmethod(gen)
 
 class Ope(models.Model):

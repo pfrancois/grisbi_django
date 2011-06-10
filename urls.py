@@ -35,7 +35,6 @@ urlpatterns += patterns('gsb.views',
 urlpatterns += patterns('gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
-
                         )
 
 
