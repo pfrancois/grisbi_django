@@ -3,7 +3,6 @@ from django.conf.urls.defaults import patterns, include
 from django.contrib import admin
 admin.autodiscover()
 
-
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
                        (r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -28,7 +27,6 @@ urlpatterns += patterns('gsb',
                         )
 #les vues relatives aux operations
 urlpatterns += patterns('gsb.views',
-
                         (r'^ope/(?P<ope_id>\d+)/$', 'ope_detail'),
                         )
 #les vues relatives aux comptes
@@ -36,5 +34,3 @@ urlpatterns += patterns('gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
                         )
-
-

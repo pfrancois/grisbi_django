@@ -105,7 +105,7 @@ class Banque(models.Model):
 class Cat(models.Model):
     typesdep = (
     ('r', u'recette'),
-    ('d', u'depense'),
+    ('d', u'dépense'),
     ('v', u'virement')
     )
     nom = models.CharField(max_length=60,unique=True)
