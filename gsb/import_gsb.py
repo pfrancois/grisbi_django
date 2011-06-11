@@ -176,9 +176,9 @@ def import_gsb(nomfich,efface_table=True):
         if created:
             nb_nx += 1
         if fr2decimal(xml_element.get('Change')) != decimal.Decimal('0'):
-            element.cours_set.get_or_create(isin=element.isin,date=datefr2datesql(xml_element.get('Date_dernier_change')),defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')),'valeur':fr2decimal(xml_element.get('Change'))})
+            element.cours_set.get_or_create(titre=element.isin,date=datefr2datesql(xml_element.get('Date_dernier_change')),defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')),'valeur':fr2decimal(xml_element.get('Change'))})
         else:
-            element.cours_set.get_or_create(isin=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
+            element.cours_set.get_or_create(titre=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
     logger.info(u'%s devises dont %s nouvelles'%(nb,nb_nx))
 
@@ -472,8 +472,8 @@ def import_gsb(nomfich,efface_table=True):
     logger.info(u'fini')
 
 if __name__ == "__main__":
-    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
-#    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+#    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich,efface_table=True)

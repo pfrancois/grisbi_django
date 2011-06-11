@@ -118,7 +118,7 @@
       </Details>
       <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="Carte de cr&#xE9;dit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+        <Type No="3" Nom="Carte de credit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="4" Nom="Pr&#xE9;l&#xE8;vement" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="0"/>
         <Type No="8" Nom="Nouveau mode de r&#xE9;glement" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
@@ -201,8 +201,8 @@
       </Details>
       <Detail_de_Types>
         <Type No="1" Nom="Virement" Signe="0" Affiche_entree="1" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="D&#xE9;p&#xF4;t" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="Carte de cr&#xE9;dit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+        <Type No="2" Nom="Depot" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+        <Type No="3" Nom="Carte de credit" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="4" Nom="Pr&#xE9;l&#xE8;vement" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="0"/>
       </Detail_de_Types>

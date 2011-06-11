@@ -2,14 +2,15 @@
 from mysite.gsb.models import *
 from django.contrib import admin
 
-class Cat_admin(admin.TabularInline):
-    model = Cat
-    extra = 3
+class Cat_admin(admin.ModelAdmin):
+    list_editable=('nom',)
+    list_display=('id','nom','type')
+    list_display_links=('id',)
 
-
-class Ib_admin(admin.TabularInline):
-    model = Ib
-    extra = 3
+class Ib_admin(admin.ModelAdmin):
+    list_editable=('nom',)
+    list_display=('id','nom','type')
+    list_display_links=('id',)
 
 
 class Compte_admin(admin.ModelAdmin):
@@ -21,6 +22,7 @@ class Compte_admin(admin.ModelAdmin):
             ]
     list_display=('nom','solde','ouvert')
 
+
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
             (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen','cat')}),
@@ -28,17 +30,19 @@ class Ope_admin(admin.ModelAdmin):
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             (u'mère et jumelles', {'fields': ('jumelle', 'mere'), 'classes': ['collapse']}),
             ]
-    date_hierarchy = 'date'
     ordering =('date',)
+    list_display=('id','compte', 'date', 'montant', 'tiers', 'moyen','cat')
+    list_filter=('compte','date','pointe','rapp')
 
-class cours_admin(admin.TabularInline):
-    model= Cours
-    fields = ['isin', 'date', 'valeur']
-    date_hierarchy = 'date'
+
+class cours_admin(admin.ModelAdmin):
+    list_display=('date','titre','valeur')
+    list_editable=('valeur',)
+    list_filter=('date','titre')
 
 class Titre_admin(admin.ModelAdmin):
-    inlines = [cours_admin,]
-    list_display=('nom',)
+    list_display=('nom','isin','last_cours')
+    list_filter=('type',)
 
 class moyen_admin(admin.ModelAdmin):
     fields = ['type','nom']
@@ -49,17 +53,28 @@ class Histo_ope_titres_admin(admin.ModelAdmin):
 class Compte_titre_admin(admin.ModelAdmin):
     list_display=('nom','solde')
 
-admin.site.register(Tiers)
-admin.site.register(Cat)
+class Tiers_admin(admin.ModelAdmin):
+    list_editable=('nom','notes')
+    list_display=('id','nom','notes')
+    list_display_links=('id',)
+
+class ech_admin(admin.ModelAdmin):
+    list_display=('id','compte', 'date', 'montant', 'tiers', 'moyen','cat')
+    list_filter=('compte','date')
+    list_editable=('date',)
+
+admin.site.register(Tiers,Tiers_admin)
+admin.site.register(Cat,Cat_admin)
 admin.site.register(Compte, Compte_admin)
 admin.site.register(Ope, Ope_admin)
 admin.site.register(Titre, Titre_admin)
 admin.site.register(Banque)
-admin.site.register(Ib)
+admin.site.register(Cours,cours_admin)
+admin.site.register(Ib,Ib_admin)
 admin.site.register(Exercice)
 admin.site.register(Rapp)
 admin.site.register(Moyen)
-admin.site.register(Echeance)
+admin.site.register(Echeance,ech_admin)
 admin.site.register(Generalite)
 admin.site.register(Compte_titre,Compte_titre_admin)
 admin.site.register(Titres_detenus)

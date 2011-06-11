@@ -15,7 +15,7 @@ class importtest(TestCase):
     def setUp(self):
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
         import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
-        Cours( valeur=decimal.Decimal('10.00'), isin=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
+        Cours( valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)
@@ -46,6 +46,7 @@ class importtest(TestCase):
         self.assertEquals(obj.isin, u'EUR')
         self.assertEquals(obj.tiers, None)
         self.assertEquals(obj.type, u'DEV')
+
     def test_get_titre_devise(self):
         self.assertEquals(Titre.objects.get(isin=u'ZAR').nom,u'Rand')
 
@@ -55,13 +56,13 @@ class importtest(TestCase):
     def test_cours_sg(self):
         obj = Titre.objects.get(isin=u'FR0000130809').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
-        self.assertEquals(obj.isin, Titre.objects.get(id=1))
+        self.assertEquals(obj.titre, Titre.objects.get(id=1))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
     def test_cours_zar(self):
         obj = Titre.objects.get(isin=u'ZAR').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
         self.assertEquals(obj.valeur, decimal.Decimal('10'))
-        self.assertEquals(obj.isin, Titre.objects.get(id=3))
+        self.assertEquals(obj.titre, Titre.objects.get(id=3))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
     def test_banques_properties(self):

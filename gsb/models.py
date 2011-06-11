@@ -70,17 +70,17 @@ class Titre(models.Model):
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
-    isin = models.ForeignKey(Titre, to_field="isin", unique_for_date="date")
+    titre = models.ForeignKey(Titre, unique_for_date="date")
     date = models.DateField(default=datetime.date.today)
     class Meta:
         db_table = 'cours'
         verbose_name_plural = u'cours'
-        unique_together = ("isin", "date")
+        unique_together = ("titre", "date")
         ordering = ['date']
         get_latest_by= 'date'
 
     def __unicode__(self):
-        return u"%s le %s : %s" % (self.isin, self.date, self.valeur)
+        return u"le %(date)s, 1 %(titre)s : %(valeur)s" % {'titre':self.titre.nom, 'date':self.date, 'valeur':self.valeur}
 
 
 class Banque(models.Model):
@@ -446,12 +446,12 @@ class Echeance(models.Model):
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
     devise = models.ForeignKey(Titre, default=None)
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,verbose_name=u"catégorie")
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,verbose_name=u"imputation")
     notes = models.TextField(blank=True, default="")
     inscription_automatique = models.BooleanField(default=False)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
@@ -461,7 +461,7 @@ class Echeance(models.Model):
     class Meta:
         db_table = 'echeance'
         verbose_name = u"échéance"
-        verbose_name_plural = u"Echéances"
+        verbose_name_plural = u"echéances"
         ordering = ['date']
         get_latest_by= 'date'
 
