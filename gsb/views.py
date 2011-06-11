@@ -41,7 +41,7 @@ def index(request):
 
 
 def cpt_detail(request, cpt_id):
-    c = get_object_or_404(Compte_titre, pk=cpt_id)
+    c = get_object_or_404(Compte, pk=cpt_id)
     if c.type == 'a':
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     if c.type == 'p':
@@ -71,7 +71,7 @@ def cpt_detail(request, cpt_id):
 
 
 def cpt_titre_detail(request, cpt_id):
-    c = get_object_or_404(Compte, pk=cpt_id)
+    c = get_object_or_404(Compte_titre, pk=cpt_id)
     if c.type == 'b':
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     if c.type == 'e':
