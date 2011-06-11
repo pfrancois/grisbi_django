@@ -65,7 +65,7 @@ def import_gsb(nomfich,efface_table=True):
             connection.cursor().execute("delete from %s;"%table)
             transaction.commit_unless_managed()
 #            logger.debug(u'table %s effacée'%table)
-    logger.info(u"debut du chargement")
+    logger.warning(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
@@ -119,7 +119,7 @@ def import_gsb(nomfich,efface_table=True):
                 sous.tiers = element
                 sous.save()
                 logger.debug(u'titre cree %s isin (%s) as %s'%(sous.nom,sous.isin,sous.type))
-    logger.info(u'%s tiers et %s titres dont %s nx'%(nb, nb_sous,nb_nx))
+    logger.warning(u'%s tiers et %s titres dont %s nx'%(nb, nb_sous,nb_nx))
     #-------------------------categories et des sous categories-----------------------
     nb_cat = 0
     nb_nx = 0
@@ -140,7 +140,7 @@ def import_gsb(nomfich,efface_table=True):
             tabl_correspondance_cat[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('scat %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
-    logger.info(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
+    logger.warning(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
 
     #------------------------------imputations----------------------------------
     nb_ib=0
@@ -162,7 +162,7 @@ def import_gsb(nomfich,efface_table=True):
             tabl_correspondance_ib[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
                 logger.debug('sib %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
-    logger.info(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
+    logger.warning(u"%s imputations dont %s nouveaux"%(nb_ib,nb_nx))
 
     #------------------------------devises---------------------------
     nb = 0
@@ -180,7 +180,7 @@ def import_gsb(nomfich,efface_table=True):
         else:
             element.cours_set.get_or_create(titre=element.isin,date=datetime.datetime.today(),defaults={'date':datetime.datetime.today(),'valeur':fr2decimal('1')})
         element.save()
-    logger.info(u'%s devises dont %s nouvelles'%(nb,nb_nx))
+    logger.warning(u'%s devises dont %s nouvelles'%(nb,nb_nx))
 
     #------------------------------banques------------------------------
     nb = 0
@@ -189,7 +189,7 @@ def import_gsb(nomfich,efface_table=True):
         logger.debug("banque %s"%xml_element.get('No'))
         element,created=Banque.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
         tabl_correspondance_banque[xml_element.get('No')]=element.id
-    logger.info(u'%s banques'%nb)
+    logger.warning(u'%s banques'%nb)
 
     #------------------------------generalites#------------------------------
     xml_element = xml_tree.find('Generalites')
@@ -209,7 +209,7 @@ def import_gsb(nomfich,efface_table=True):
     })
     if element.devise_generale != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
         raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
-    logger.info(u'generalites ok')
+    logger.warning(u'generalites ok')
 
     #------------------------------exercices#------------------------------
     nb = 0
@@ -221,7 +221,7 @@ def import_gsb(nomfich,efface_table=True):
         tabl_correspondance_exo[xml_element.get('No')]=element.id
         if created:
             nb_nx+=1
-    logger.info(u'%s exercices dont %s nouveaux'%(nb,nb_nx))
+    logger.warning(u'%s exercices dont %s nouveaux'%(nb,nb_nx))
 
     #------------------------------rapp#------------------------------
     nb = 0
@@ -233,7 +233,7 @@ def import_gsb(nomfich,efface_table=True):
         if created:
            nb_nx+=1
         tabl_correspondance_rapp[xml_element.get('No')]=element.id
-    logger.info(u'%s rapprochements dont %s nouveaux '%(nb,nb_nx))
+    logger.warning(u'%s rapprochements dont %s nouveaux '%(nb,nb_nx))
 
     #------------------------------comptes#------------------------------
     nb = 0
@@ -314,7 +314,7 @@ def import_gsb(nomfich,efface_table=True):
         except (KeyError, TypeError):
             element.moyen_debit_defaut_id = None
         element.save()
-    logger.info(u'%s comptes dont %s nouveaux'%(nb,nb_nx))
+    logger.warning(u'%s comptes dont %s nouveaux'%(nb,nb_nx))
     nb_tot_ope=0
 
     #------------------------------OPERATIONS-----------------------
@@ -414,7 +414,7 @@ def import_gsb(nomfich,efface_table=True):
             sous.mere_id = tabl_correspondance_ope[xml_sous.get('Va')]
             sous.save()
 
-    logger.info(u"%s operations" % nb_tot_ope)
+    logger.warning(u"%s operations" % nb_tot_ope)
 
 
     #------------------------------echeances#------------------------------
@@ -467,9 +467,9 @@ def import_gsb(nomfich,efface_table=True):
             element.periode_perso=liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
         element.date_limite=datefr2datesql(xml_element.get('Date_limite'))
         element.save()
-    logger.info(u"%s échéances" % nb)
-    logger.info(u'{!s}'.format(time.clock()))
-    logger.info(u'fini')
+    logger.warning(u"%s échéances" % nb)
+    logger.warning(u'{!s}'.format(time.clock()))
+    logger.warning(u'fini')
 
 if __name__ == "__main__":
 #    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))

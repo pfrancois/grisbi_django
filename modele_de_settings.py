@@ -1,4 +1,4 @@
-# -*- coding: utf-8 
+# -*- coding: utf-8
 import os
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -6,7 +6,7 @@ DEFAULT_CHARSET = 'utf-8'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DEBUG_TOOLBAR = False
-DJANGO_EXTENSION = False
+DJANGO_EXTENSION = True
 #TEMPLATE_STRING_IF_INVALID="INVALID"
 
 #DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
@@ -188,7 +188,7 @@ LOGGING = {
             'format': '[%(levelname)s] %(asctime)s - %(name)s - %(message)s'
         },
         'verbose': {
-            'format': '[%(levelname)s] %(asctime)s - %(name)s - M:%(module)s, P:%(process)d, T:%(thread)d, %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
+            'format': '[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
         },
     },
     'handlers': {
@@ -207,7 +207,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'log-file': {
-            'level': 'INFO',
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
@@ -258,4 +258,3 @@ LOGGING = {
         }
     }
 }
-

@@ -7,6 +7,10 @@ class ImportForm(forms.Form):
     version = forms.ChoiceField((
     ('gsb_0_5_0', 'format grisbi version 0.5.x'),
     ))
+    replace = forms.ChoiceField((
+    ('remplacement', 'remplacement des données par le fichier'),
+    ('fusion','fusion des données avec le fichier')
+    ))
 
 class OperationForm(forms.ModelForm):
     error_css_class = 'error'

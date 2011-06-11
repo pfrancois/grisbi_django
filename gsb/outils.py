@@ -27,9 +27,24 @@ def import_file(request):
                 destination.write(chunk)
             destination.close()
             logger.debug("enregitrement fichier ok")
-            mysite.gsb.import_gsb.import_gsb(nomfich,info)
-            logger.debug("import ok")
-            return HttpResponseRedirect(reverse('gsb.views.index'))
+            ok=False
+            if form.cleaned_data['replace']=='remplacement':
+                logger.warning(u"remplacement data par fichier %s format %s %s"%(nomfich,form.cleaned_data['version'],info))
+                if form.cleaned_data['version']=='gsb_0_5_0':
+                    mysite.gsb.import_gsb.import_gsb(nomfich,True)
+                    ok=True
+            else:
+                logger.warning("fusion data par fichier %s format %s %s"%(nomfich,form.cleaned_data['version'],info))
+                if form.cleaned_data['version']=='gsb_0_5_0':
+                    mysite.gsb.import_gsb.import_gsb(nomfich,False)
+                    ok=True
+            if ok:
+               return HttpResponseRedirect(reverse('gsb.views.index'))
+            else:
+                return render_to_response('gsb/import.django.html',
+                              {'form': form,
+                               'titre':"importation d'un fichier"},
+                              context_instance=RequestContext(request))
     else:
         form = gsb_forms.ImportForm()
     return render_to_response('gsb/import.django.html',
