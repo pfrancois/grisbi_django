@@ -3,7 +3,7 @@
 {% load gsb_extras %}
 {% block content %}
     <table width="100%" id="boutons" class="table">
-        {% if not compte.cloture %}
+        {% if compte.ouvert %}
             <tr>
                 <td width="50%" class="boutton"><a href="{# TODO #}">Nouvelle Op.</a></td>
                 <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>

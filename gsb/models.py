@@ -180,7 +180,7 @@ class Compte(models.Model):
     solde_init = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
     solde_mini_voulu = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
     solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
-    cloture = models.BooleanField(default=False)
+    ouvert= models.BooleanField(default=True)
     notes = models.TextField(blank=True, default='')
     moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set", default=None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set", default=None)

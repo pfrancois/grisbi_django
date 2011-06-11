@@ -18,15 +18,15 @@ def index(request):
         bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
         pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
     else:
-        bq = Compte.objects.filter(type__in=('b', 'e'),cloture=False).select_related()
-        pl = Compte.objects.filter(type__in=('a', 'p'),cloture=False).select_related()
+        bq = Compte.objects.filter(type__in=('b', 'e'),ouvert=True).select_related()
+        pl = Compte.objects.filter(type__in=('a', 'p'),ouvert=True).select_related()
     total_bq=decimal.Decimal('0')
     total_pla=decimal.Decimal('0')
     for c in bq:
         total_bq=total_bq+c.solde(devise_generale=True)
     for p in pl:
         total_pla=total_pla+p.solde(devise_generale=True)
-    nb_clos = len(Compte.objects.filter(cloture=True))
+    nb_clos = len(Compte.objects.filter(ouvert=False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
         'liste_cpt_bq': bq,
@@ -130,5 +130,3 @@ def ope_detail(request, ope_id):
                 'cats':cats},
             context_instance=RequestContext(request)
             )
-
-

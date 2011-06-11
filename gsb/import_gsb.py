@@ -141,7 +141,7 @@ def import_gsb(nomfich,efface_table=True):
             if created:
                 logger.debug('scat %s:%s cree au numero %s'%(int(xml_element.get('No')),int(xml_sous.get('No')),element.id))
     logger.info(u"%s catégories dont %s nouveaux"%(nb_cat,nb_nx))
-    
+
     #------------------------------imputations----------------------------------
     nb_ib=0
     nb_nx=0
@@ -248,16 +248,16 @@ def import_gsb(nomfich,efface_table=True):
             element,created= Compte_titre.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
             'nom':xml_element.find('Details/Nom').text,
             'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
-            'cloture':bool(int(xml_element.find('Details/Compte_cloture').text)),
+            'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
         })
         else:
             logger.debug("cpt %s"%(xml_element.find('Details/Nom').text))
             element,created= Compte.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
             'nom':xml_element.find('Details/Nom').text,
             'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
-            'cloture':bool(int(xml_element.find('Details/Compte_cloture').text)),
+            'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
         })
-        
+
         tabl_correspondance_compte[xml_element.find('Details/No_de_compte').text]=element.id
         if created:
             nb_nx += 1
@@ -316,7 +316,7 @@ def import_gsb(nomfich,efface_table=True):
         element.save()
     logger.info(u'%s comptes dont %s nouveaux'%(nb,nb_nx))
     nb_tot_ope=0
-    
+
     #------------------------------OPERATIONS-----------------------
     nb_nx_ope=0
     list_ope=xml_tree.findall('//Operation')

@@ -14,12 +14,12 @@ class Ib_admin(admin.TabularInline):
 
 class Compte_admin(admin.ModelAdmin):
     fieldsets = [
-            (None, {'fields': ('nom', 'type', 'devise', 'cloture')}),
+            (None, {'fields': ('nom', 'type', 'devise', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
             ]
-    list_display=('nom','solde')
+    list_display=('nom','solde','ouvert')
 
 class Ope_admin(admin.ModelAdmin):
     fieldsets = [
@@ -31,15 +31,21 @@ class Ope_admin(admin.ModelAdmin):
     date_hierarchy = 'date'
     ordering =('date',)
 
-class cours_admin(admin.ModelAdmin):
+class cours_admin(admin.TabularInline):
+    model= Cours
     fields = ['isin', 'date', 'valeur']
+    date_hierarchy = 'date'
+
+class Titre_admin(admin.ModelAdmin):
+    inlines = [cours_admin,]
+    list_display=('nom',)
 
 class moyen_admin(admin.ModelAdmin):
     fields = ['type','nom']
 
 class Histo_ope_titres_admin(admin.ModelAdmin):
     readonly_fields=('titre','compte','nombre','date')
-    
+
 class Compte_titre_admin(admin.ModelAdmin):
     list_display=('nom','solde')
 
@@ -47,8 +53,7 @@ admin.site.register(Tiers)
 admin.site.register(Cat)
 admin.site.register(Compte, Compte_admin)
 admin.site.register(Ope, Ope_admin)
-admin.site.register(Titre)
-admin.site.register(Cours, cours_admin)
+admin.site.register(Titre, Titre_admin)
 admin.site.register(Banque)
 admin.site.register(Ib)
 admin.site.register(Exercice)

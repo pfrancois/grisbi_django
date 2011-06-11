@@ -189,7 +189,7 @@ def _export():
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = Format.float(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
-        et.SubElement(xml_detail, "Compte_cloture").text = Format.bool(co.cloture)
+        et.SubElement(xml_detail, "Compte_cloture").text = not Format.bool(co.open)#attention, on gere les comptes ouverts et non les comptes clotures
         et.SubElement(xml_detail, "Affichage_r").text = "1" #NOT IN BDD
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3" #NOT IN BDD
         et.SubElement(xml_detail, "Commentaires").text = co.notes
