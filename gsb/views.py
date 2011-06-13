@@ -44,8 +44,6 @@ def cpt_detail(request, cpt_id):
     c = get_object_or_404(Compte, pk=cpt_id)
     if c.type == 'a':
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
-    if c.type == 'p':
-        return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     t = loader.get_template('gsb/cpt_detail.django.html')
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
     q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
@@ -73,8 +71,10 @@ def cpt_detail(request, cpt_id):
 def cpt_titre_detail(request, cpt_id):
     c = get_object_or_404(Compte_titre, pk=cpt_id)
     if c.type == 'b':
-        return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
+        return HttpResponseRedirect(reverse('gsb.views.index'))
     if c.type == 'e':
+        return HttpResponseRedirect(reverse('gsb.views.index'))
+    if c.type == 'p':
         return HttpResponseRedirect(reverse('gsb.views.index'))
     titre_sans_sum = Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
     titres = []

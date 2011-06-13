@@ -320,15 +320,7 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def solde(self, devise_generale=False):
-        req = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None).aggregate(solde=models.Sum('montant'))
-        if req['solde'] is None:
-            solde = 0 + self.solde_init
-        else:
-            solde = decimal.Decimal(str(req['solde'])) + decimal.Decimal(str(self.solde_init))
-        for titre in self.titres_detenus_set.all():
-            solde=solde+titre.valeur()
-        if devise_generale:
-            solde = solde / self.devise.last_cours().valeur
+        solde=super(Compte_titre,self).solde()
         return solde
 
     @transaction.commit_on_success
