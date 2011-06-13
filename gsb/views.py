@@ -123,7 +123,7 @@ def ope_detail(request, pk):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
             return render(request,'gsb/ope.django.html',
-            {   'titre':u'édition opération',
+            {   'titre':u'édition opération %s'%ope.id,
                 'form':form,
                 'gen':gen,
                 'ope':ope,
@@ -132,7 +132,7 @@ def ope_detail(request, pk):
     else:
         form = gsb_forms.OperationForm(instance=ope)
         return render(request,'gsb/ope.django.html',
-            {   'titre':u'édition opération',
+            {   'titre':u'édition opération %s'%ope.id,
                 'form':form,
                 'gen':gen,
                 'ope':ope,
