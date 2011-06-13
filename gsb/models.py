@@ -197,8 +197,8 @@ class Compte(models.Model):
         else:
             solde = req['solde'] + self.solde_init
         if devise_generale:
-
-            solde = solde / self.devise.last_cours().valeur
+            if self.devise.isin != settings.DEVISE_GENERALE:
+                solde = solde / self.devise.last_cours().valeur
             return solde
         else:
             return solde
