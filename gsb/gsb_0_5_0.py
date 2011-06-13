@@ -122,9 +122,9 @@ def _export():
     et.SubElement(xml_generalites, "Utilise_IB").text = Format.bool(q.utilise_ib)
     et.SubElement(xml_generalites, "Utilise_PC").text = Format.bool(q.utilise_pc)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
-    et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.devise_generale_id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.devise_generale_id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.devise_generale_id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.dev_g().id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.dev_g().id)
+    et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.dev_g().id)
     et.SubElement(xml_generalites, "Type_affichage_des_echeances").text = "3"#NOT IN BDD
     et.SubElement(xml_generalites, "Affichage_echeances_perso_nb_libre").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Type_affichage_perso_echeances").text = "0"#NOT IN BDD
@@ -237,7 +237,7 @@ def _export():
             xml_element.set('Rdc','0') #NOT IN BDD
             if ope.jumelle:
                 devise_jumelle=Ope.objects.get(id=ope.id).jumelle.compte.devise
-                if co.devise != devise_jumelle and devise_jumelle != Generalite.gen().devise_generale:
+                if co.devise != devise_jumelle and devise_jumelle != Generalite.dev_g():
                     xml_element.set('M', Format.float(ope.montant*devise_jumelle.cours_set.get(date=ope.date).valeur))
                     xml_element.set('De', str(devise_jumelle.id ))
                     xml_element.set('Rdc','1')
@@ -450,7 +450,7 @@ def _export():
         xml_sub.set('Nom', c.nom)
         xml_sub.set('Code', c.isin)
         xml_sub.set('IsoCode', c.isin)
-        if c == Generalite.gen().devise_generale:
+        if c == Generalite.dev_g():
             xml_sub.set('Passage_euro', "0")#NOT IN BDD
             xml_sub.set('Date_dernier_change', "")
             xml_sub.set('Rapport_entre_devises', "0")#NOT IN BDD

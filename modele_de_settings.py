@@ -18,7 +18,7 @@ ADMINS = (
 #config gsb
 NB_JOURS_AFF = 100
 TITRE = "20040701_django.gsb"
-
+DEVISE_GENERALE='EUR'
 
 
 ##################

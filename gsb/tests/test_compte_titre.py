@@ -19,7 +19,6 @@ class compte_titretest(TestCase):
         self.titre_sg=Titre.objects.create(nom="SG", isin="123456789", tiers=self.tiers_sg, type='ACT')
         Cours( valeur=decimal.Decimal('10.00'), titre=self.titre_sg, date=datetime.date(day=1, month=1, year=2010)).save()
         Cours( valeur=decimal.Decimal('1.00'), titre=self.devise, date=datetime.date(day=1, month=1, year=2010)).save()
-        Generalite(devise_generale=self.devise).save()
 
     def test_1(self):
         devise=self.devise

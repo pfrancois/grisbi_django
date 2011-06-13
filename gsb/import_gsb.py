@@ -64,8 +64,7 @@ def import_gsb(nomfich,efface_table=True):
         for table in ('titres_detenus','generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte','cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
             connection.cursor().execute("delete from %s;"%table)
             transaction.commit_unless_managed()
-#            logger.debug(u'table %s effacée'%table)
-    logger.warning(u"debut du chargement")
+    logger.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
     root = xml_tree.getroot()
@@ -171,7 +170,7 @@ def import_gsb(nomfich,efface_table=True):
         nb += 1
         logger.debug("devise %s"%xml_element.get('No'))
         query = {'nom':xml_element.get('Nom'), 'isin':xml_element.get('IsoCode'), 'tiers':None, 'type':'DEV'}
-        element,created=Titre.objects.get_or_create(type='DEV',nom=xml_element.get('Nom'),defaults=query)
+        element,created=Titre.objects.get_or_create(type='DEV',isin=xml_element.get('IsoCode'),defaults=query)
         tabl_correspondance_devise[xml_element.get('No')]=element.id
         if created:
             nb_nx += 1
@@ -204,10 +203,9 @@ def import_gsb(nomfich,efface_table=True):
         'titre':titre_fichier,
         'utilise_exercices':bool(int(xml_element.find('Utilise_exercices').text)),
         'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
-        'utilise_pc':bool(int(xml_element.find('Utilise_PC').text)),
-        'devise_generale':Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text])
+        'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
     })
-    if element.devise_generale != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
+    if Generalite.dev_g() != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
         raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
     logger.warning(u'generalites ok')
 

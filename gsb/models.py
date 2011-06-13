@@ -5,7 +5,7 @@ import datetime
 import decimal
 from django.db import transaction
 from django.db import models
-
+from django.conf import settings
 
 
 class Tiers(models.Model):
@@ -197,6 +197,7 @@ class Compte(models.Model):
         else:
             solde = req['solde'] + self.solde_init
         if devise_generale:
+
             solde = solde / self.devise.last_cours().valeur
             return solde
         else:
@@ -474,7 +475,6 @@ class Generalite(models.Model):
     utilise_exercices = models.BooleanField(default=True)
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
-    devise_generale = models.ForeignKey(Titre)
     affiche_clot = models.BooleanField(default=True)
     class Meta:
         db_table = 'generalite'
@@ -485,16 +485,17 @@ class Generalite(models.Model):
     def __unicode__(self):
         return u"%s" % (self.id,)
     def gen():
-        if Generalite.objects.filter(id=1).exists():
-            return Generalite.objects.get(id=1)
-        else:
-            if Titre.devise().exists():
-                dev=Titre.devise()[0]
-            else:
-                dev,created=Titre.objects.get_or_create(isin='EUR',defaults={'nom':'euro','isin':'EUR','type':'DEV','tiers':None})
-            Generalite.objects.create(id=1,devise_generale=dev)
-            return Generalite.objects.get(id=1)
+        try:
+            gen_1=Generalite.objects.get(id=1)
+        except Generalite.DoesNotExist:
+            Generalite.objects.create(id=1)
+            gen_1=Generalite.objects.get(id=1)
+        return gen_1
     gen=staticmethod(gen)
+    def dev_g():
+        dev,created=Titre.objects.get_or_create(isin=settings.DEVISE_GENERALE,defaults={'nom':settings.DEVISE_GENERALE,'isin':settings.DEVISE_GENERALE,'type':'DEV','tiers':None})
+        return dev
+    dev_g=staticmethod(dev_g)
 
 class Ope(models.Model):
     compte = models.ForeignKey(Compte)
