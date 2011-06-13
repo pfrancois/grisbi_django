@@ -15,10 +15,13 @@ class ImportForm(forms.Form):
 class OperationForm(forms.ModelForm):
     error_css_class = 'error'
     required_css_class = 'required'
+    cat=forms.ModelChoiceField(Cat.objects.all().order_by('type'),empty_label=None)
+    mere=forms.ModelChoiceField(Ope.objects.filter(mere__isnull=False).order_by('-date'))
     class Meta:
         model=Ope
     def __init__(self, *args, **kwargs):
         super (OperationForm,self).__init__(*args, **kwargs)
+
 
 class GeneraliteForm(forms.ModelForm):
     error_css_class = 'error'
