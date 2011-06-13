@@ -125,16 +125,16 @@ def import_gsb(nomfich,efface_table=True):
     for xml_element in xml_tree.find('//Detail_des_categories'):
         logger.debug("cat %s"%xml_element.get('No'))
         nb_cat += 1
-        query={'nom':"%s:"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        query={'nom':"%s :"%(xml_element.get('Nom'),),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
         element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
         tabl_correspondance_cat[xml_element.get('No')]={'0':element.id}
         if created:
             nb_nx += 1
             logger.debug('cat %s cree au numero %s'%(int(xml_element.get('No')),element.id))
         for xml_sous in xml_element:
-            logger.debug("cat %s: scat %s"%(xml_element.get('No'),xml_sous.get('No')))
+            logger.debug("cat %s : scat %s"%(xml_element.get('No'),xml_sous.get('No')))
             nb_cat += 1
-            query={'nom':"%s:%s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            query={'nom':"%s : %s"%(xml_element.get('Nom'),xml_sous.get('Nom')),'type':liste_type_cat[int(xml_element.get('Type'))][0]}
             element,created=Cat.objects.get_or_create(nom=query['nom'],defaults=query)
             tabl_correspondance_cat[xml_element.get('No')][xml_sous.get('No')]=element.id
             if created:
