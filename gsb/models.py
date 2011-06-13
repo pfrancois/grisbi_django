@@ -6,7 +6,7 @@ import decimal
 from django.db import transaction
 from django.db import models
 from django.conf import settings
-
+from django.core.urlresolvers import reverse
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=40,unique=True)
@@ -524,3 +524,6 @@ class Ope(models.Model):
     non_meres=staticmethod(non_meres)
     def __unicode__(self):
         return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,self.compte.devise.isin)
+    @models.permalink
+    def get_absolute_url(self):
+        return ('gsb_opedetail',(),{'pk':str(self.id)})
