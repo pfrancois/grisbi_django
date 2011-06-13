@@ -4,7 +4,7 @@ from django.template import RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -119,14 +119,24 @@ def ope_detail(request, ope_id):
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
-            form.save()
+            t=form.save()
+            logger.warning(form.cleaned_data)
+            logger.warning(t)
             return HttpResponseRedirect(reverse('gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
-            return  render_to_response('gsb/test.django.html',
+            return render(request,'gsb/ope.django.html',
             {   'titre':u'édition opération',
                 'form':form,
                 'gen':gen,
                 'ope':ope,
-                'cats':cats},
-            context_instance=RequestContext(request)
+                'cats':cats}
+            )
+    else:
+        form = gsb_forms.OperationForm(instance=ope)
+        return render(request,'gsb/ope.django.html',
+            {   'titre':u'édition opération',
+                'form':form,
+                'gen':gen,
+                'ope':ope,
+                'cats':cats}
             )

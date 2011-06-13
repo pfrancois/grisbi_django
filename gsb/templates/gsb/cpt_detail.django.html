@@ -28,11 +28,11 @@
         {% block ope %}
             {% for ope in list_ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-                    <td class="opDate"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.date}}</a> </td>
-                    <td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.tiers.nom|default:"aucun tiers" }}</a>            </td>
-                    <td class="opTier"><a href="{% url gsb.views.ope_detail ope.pk %}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a> </td>
-                    <td class="opCredit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-                    <td class="opDebit"><a href="{% url gsb.views.ope_detail ope.pk %}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a><td>
+                    <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date}}</a> </td>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.tiers.nom|default:"aucun tiers" }}</a>            </td>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a> </td>
+                    <td class="opCredit"><a href="{{ ope.get_absolute_url  }}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+                    <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a><td>
                 </tr>
                 {% empty %}
                 <tr class="item">

@@ -1,0 +1,9 @@
+{% extends "generic.django.html" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% block content %}
+<form action="" method="post">
+{{ form.as_p }}
+<input type="submit" />
+{% csrf_token %}
+</form>
+{% endblock content %}

@@ -43,10 +43,8 @@ import time
 import pprint
 
 def toto():
-    c=Compte_titre.objects.get(nom='test')
-    titre_sg=Titre.objects.get(nom='SG')
-    c.achat(titre=titre_sg,nombre=20)
-    
+    return Ope.objects.get(id=1).get_absolute_url()
+
 if __name__ == "__main__":
     settings
     t=toto()
