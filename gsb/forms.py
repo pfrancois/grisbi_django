@@ -17,10 +17,6 @@ class OperationForm(forms.ModelForm):
     required_css_class = 'required'
     class Meta:
         model=Ope
-        widgets = {
-            'date': widgets.DateInput_perso,
-            'date_val':widgets.DateInput_perso,
-        }
     def __init__(self, *args, **kwargs):
         super (OperationForm,self).__init__(*args, **kwargs)
 

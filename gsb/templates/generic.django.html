@@ -5,6 +5,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <meta http-equiv="CACHE-CONTROL" content="NO-CACHE"/>
     <meta http-equiv="PRAGMA" content="NO-CACHE"/>
+    <meta name="robots" content="NONE,NOARCHIVE" />
     <meta http-equiv="EXPIRES" content="0"/>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/common.css"/>{% block css %}{% endblock css %}
     {% block js %}{% endblock js %}
@@ -23,6 +24,13 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
 </head>
 <body {% block body_js %}{% endblock body_js %}>
 {% block titre %}<h1>{{ titre }}</h1>{% endblock %}
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock messages %}
 {% block result %}
     {% for resultat in resultats %}
         <div class='{{ resultat.css }}'>{{ resultat.texte }}</div>
