@@ -1,9 +1,30 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/operation.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/calendar.css"/>
+{% endblock css %}
+{% block js %}
+    <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/basiccalendar.js"></script>
+    <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/operation.js"></script>
+    <SCRIPT LANGUAGE="JavaScript">
+<!-- Idea by:  Nic Wolfe -->
+<!-- This script and many more are available free online at -->
+<!-- The JavaScript Source!! http://javascript.internet.com -->
+
+<!-- Begin
+function popUp(URL) {
+day = new Date();
+id = day.getTime();
+eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=1,menubar=0,resizable=0,width=740,height=512,left = 300 ,top = 256');");
+}
+// End -->
+</script>
+{% endblock js %}
 {% block content %}
 <form id='form1' action="" method="post">
     {% csrf_token %}
-    {{ form.id }}
+    <fieldset class="operationMainTable">
     <table>
         {% if form.compte.errors %}
         <tr><td>{{ form.compte.errors }}</td></tr>
@@ -26,15 +47,12 @@
         {% if form.tiers.errors %}
         <tr><td>{{ form.tiers.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }}</td>
+        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }} <img src="{{ STATIC_URL }}img/tooltag-add.gif"  onClick="javascript:popUp('{% url gsb_tiers_create %}')"></td>
         </tr>
-        {% comment %}
-        TODO mettre un plus comme dans l'admin
-        {% endcomment %}
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {{ ope.compte.devise.isin}}</td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% if ope %}{{ ope.compte.devise.isin}}{% else %}{% if cpt %}{{ cpt.devise.isin }}{% else %} {{ dev }} {% endif %} {% endif %}</td>
         {% comment %}
             TODO rajouter fonction calculatrice
             TODO ajax et js pour changer la monnaie si changement de compte
@@ -66,18 +84,26 @@
         {% if form.ib.errors %}
         <tr><td>{{ form.ib.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}</td></tr>
-        {# attention on ne met pas jumelle car les virements sont gérés autrement #}
-        {% if form.mere.errors %}
-        <tr><td>{{ form.mere.errors }}</td></tr>
-        {% endif %}
-        <tr><th><div style='display:none'>{{ form.mere.label_tag }}</div></th><td><div style='display:none'>{{ form.mere }}</div></td></tr>
+        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}
+                <div style='display:none'>{{ form.mere }}
+        {{ form.jumelle }}</div></td></tr>
         {% if form.piece_comptable.errors %}
         <tr><td>{{ form.piece_comptable.errors }}</td></tr>
         {% endif %}
         <tr><th>{{ form.piece_comptable.label_tag }}</th><td>{{ form.piece_comptable}}</td></tr>
     </table>
+    </fieldset>
 </form>
  {% load gsb_extras %}
- {% bouton_form 'form1' 'gsb.views.cpt_detail' ope.compte_id %}
+ {% if ope %}
+    {% bouton_form 'form1' 'gsb.views.cpt_detail' ope.compte_id %}
+ {% else %}
+    {% if cpt %}
+        {% bouton_form 'form1' 'gsb.views.cpt_detail' cpt.id %}
+    {% else %}
+        {% bouton_form 'form1' 'gsb.views.index' %}
+    {% endif %}
+ {% endif %}
+ {# div pour le choix de la date #}
+<div class="editDate" id="editDateId"></div>
 {% endblock content %}

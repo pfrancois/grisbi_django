@@ -42,12 +42,14 @@ urlpatterns += patterns('mysite.gsb',
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail',name='gsb_opedetail'),
                         #url(r'^ope/(?P<pk>\d+)/$', Opeupdateview.as_view(),name='gsb_opedetail'),
+                        url(r'^ope/new$','ope_new',name="gsb_ope_new")
                         )
 
 #les vues relatives aux comptes
 urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
+                        url(r'^cpt/(?P<cpt>\d+)/new$','ope_new',name="gsb_cpt_ope_new")
                         )
 #les vues relatives aux tiers
 urlpatterns += patterns('mysite.gsb.views',

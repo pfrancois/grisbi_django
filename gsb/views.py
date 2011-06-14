@@ -123,7 +123,8 @@ def ope_detail(request, pk):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
             return render(request,'gsb/ope.django.html',
-            {   'titre':u'édition opération %s'%ope.id,
+            {   'titre_long':u'modification opération %s'%ope.id,
+               'titre':u'modification',
                 'form':form,
                 'gen':gen,
                 'ope':ope,
@@ -132,9 +133,43 @@ def ope_detail(request, pk):
     else:
         form = gsb_forms.OperationForm(instance=ope)
         return render(request,'gsb/ope.django.html',
-            {   'titre':u'édition opération %s'%ope.id,
+            {   'titre':u'modification',
+               'titre_long':u'modification opération %s'%ope.id,
                 'form':form,
                 'gen':gen,
                 'ope':ope,
                 'cats':cats}
+            )
+
+@login_required
+def ope_new(request,cpt=None):
+    if cpt:
+        cpt = get_object_or_404(Compte, pk=cpt)
+    cats=Cat.objects.all().order_by('type')
+    gen=Generalite.gen()
+    logger=logging.getLogger('gsb')
+    if request.method == 'POST':
+        form = gsb_forms.OperationForm(request.POST)
+        if form.is_valid():
+            ope=form.save()
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+        else:
+            return render(request,'gsb/ope.django.html',
+            {   'titre':u'création',
+                'titre_long':u'création opération %s',
+                'form':form,
+                'gen':gen.dev_g().isin,
+                'cats':cats,
+                'cpt':cpt}
+            )
+    else:
+        form = gsb_forms.OperationForm()
+        return render(request,'gsb/ope.django.html',
+            {   'titre':u'création',
+                'titre_long':u'création opération',
+                'form':form,
+                'gen':gen.dev_g().isin,
+                'cats':cats,
+                'cpt':cpt}
+
             )

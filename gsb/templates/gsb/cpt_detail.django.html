@@ -5,7 +5,7 @@
     <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
             <tr>
-                <td width="50%" class="boutton"><a href="{# TODO #}">Nouvelle Op.</a></td>
+                <td width="50%" class="boutton"><a href="{% url gsb_cpt_ope_new compte.id %}">Nouvelle Op.</a></td>
                 <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
             </tr>
             <tr>
