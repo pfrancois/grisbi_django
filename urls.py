@@ -35,11 +35,11 @@ urlpatterns += patterns('mysite.gsb',
 #les vues relatives aux outils
 urlpatterns += patterns('mysite.gsb.outils',
                         (r'^options$', 'options_index'),
-                        (r'^import$', 'import_file'),
-                        (r'^modif_gen$', 'modif_gen'),
+                        (r'^options/import$', 'import_file'),
+                        (r'^options/modif_gen$', 'modif_gen'),
                         )
 urlpatterns += patterns('mysite.gsb',
-                        (r'^xml$', 'gsb_0_5_0.export'),
+                        (r'^options/xml$', 'gsb_0_5_0.export'),
                         )
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
