@@ -23,7 +23,7 @@ j7HK8QSqCTSglPmw9gSjKiPwqLx8/JVAlo6s5+t8XGJxm315IAImvV4RjpFhdjJHLmDi5JPd7dSYW+Lc
     <title>{{ titre }}</title>
 </head>
 <body {% block body_js %}{% endblock body_js %}>
-{% block titre %}<h1>{{ titre }}</h1>{% endblock %}
+{% block titre %}<h1>{% if titre_long %} {{ titre_long }} {% else %} {{ titre }} {% endif %}</h1>{% endblock %}
     {% block messages %}
         {% if messages %}
         <ul class="messagelist">{% for message in messages %}
