@@ -7,17 +7,13 @@ from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
 from django.core.urlresolvers import reverse
 
-class Opeupdateview(UpdateView):
-    model=Ope
-    context_object_name = "ope"
-    template_name = 'gsb/ope.django.html'
+class tierscreateview(CreateView):
+    model=Tiers
+    context_object_name = "tiers"
+    template_name = 'gsb/tiers.django.html'
     def get_success_url(self):
-        return reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':self.object.compte_id})
-    def get_context_data(self, **kwargs):
-        context = super(Opeupdateview, self).get_context_data(**kwargs)
-        context['cats']=Cat.objects.all().order_by('type')
-        context['gen']=Generalite.gen()
-        return context
+        return reverse('gsb_close')
+
 
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
@@ -31,6 +27,7 @@ urlpatterns = patterns('',
 urlpatterns += patterns('mysite.gsb',
                         (r'^$', 'views.index'),
                         (r'^test$', 'test.test'),
+                        url(r'^close/', TemplateView.as_view(template_name="close.django.html"),name="gsb_close"),
                         )
 #les vues relatives aux outils
 urlpatterns += patterns('mysite.gsb.outils',
@@ -52,3 +49,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
                         )
+#les vues relatives aux tiers
+urlpatterns += patterns('mysite.gsb.views',
+                        url(r'^tiers/new/$', tierscreateview.as_view(),name='gsb_tiers_create'),
+)
