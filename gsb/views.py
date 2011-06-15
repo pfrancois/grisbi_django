@@ -156,7 +156,7 @@ def ope_new(request,cpt=None):
         else:
             return render(request,'gsb/ope.django.html',
             {   'titre':u'création',
-                'titre_long':u'création opération %s',
+                'titre_long':u'création opération',
                 'form':form,
                 'gen':gen.dev_g().isin,
                 'cats':cats,
