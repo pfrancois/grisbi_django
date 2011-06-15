@@ -6,7 +6,6 @@
 {% endblock css %}
 {% block js %}
     <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/basiccalendar.js"></script>
-    <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/operation.js"></script>
     <SCRIPT LANGUAGE="JavaScript">
 <!-- Idea by:  Nic Wolfe -->
 <!-- This script and many more are available free online at -->
@@ -33,7 +32,8 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
         {% if form.date.errors %}
         <tr><td>{{ form.date.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.date.label_tag }}</th><td>{{ form.date }}</td>
+        <tr><th>{{ form.date.label_tag }}</th><td>{{ form.date }}<a href="javascript:editDate('id_date','%d/%m/%Y');" style="display:inline"><img src="{{ STATIC_URL }}img/calendar.png" alt="calendrier" /></a></td>
+
         {% comment %}
             TODO mettre comme dans admin le bouton aujourd'hui
             TODO mettre comme dans admin le calendrier
@@ -105,5 +105,5 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
     {% endif %}
  {% endif %}
  {# div pour le choix de la date #}
-<div class="editDate" id="editDateId"></div>
+<div class="editDate ope_date_ope" id="editDateId"></div>
 {% endblock content %}

@@ -47,6 +47,9 @@ legend {
 	display: none;
 }
 
-#ope_date_ope {
-	width: auto;
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border-width: 0;
+	empty-cells: show
 }
