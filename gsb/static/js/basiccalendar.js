@@ -232,7 +232,7 @@ function editDate(fieldId,format) {
         posy = findPosY(currentEditField);
         editorOriginalValue = currentEditField.value;
         window.scroll(0, posy);
-        myDate =strptime(editorOriginalValue,format)
+        myDate = strptime(editorOriginalValue,format)
         curyear = myDate.getFullYear * 1;
         curmonth = myDate.getMonth * 1;
         curday = myDate.getDay * 1;
@@ -261,4 +261,10 @@ function calendarSelectDate(day, month, year) {
     }
     currentEditField.value = "" + day + "/" + month +  "/" + year;
     closeCurrentEditor();
+}
+
+function aujourdhui(id){
+    var todaydate = new Date();
+    currentEditField = document.getElementById(fieldId);
+    currentEditField.value = "" + (todaydate.getDay()*1) + "/" + (todaydate.getMonth()*1) +  "/" + (todaydate.getFullYear()*1);
 }

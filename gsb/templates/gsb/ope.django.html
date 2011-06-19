@@ -1,12 +1,15 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block css %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/operation.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/calendar.css"/>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 {% endblock css %}
 {% block js %}
-    <script type="text/javascript" language="JavaScript1.2" src="{{ STATIC_URL }}js/basiccalendar.js"></script>
-    <SCRIPT LANGUAGE="JavaScript">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script LANGUAGE="JavaScript">
+  $(document).ready(function() {
+    $("#id_date").datepicker();
+  });
 <!-- Idea by:  Nic Wolfe -->
 <!-- This script and many more are available free online at -->
 <!-- The JavaScript Source!! http://javascript.internet.com -->
@@ -28,15 +31,14 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
         {% if form.compte.errors %}
         <tr><td>{{ form.compte.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.compte.label_tag }}</th><td>{{ form.compte }}</td></tr>
+        <tr><th>{{ form.compte.label_tag }}(*)</th><td>{{ form.compte }}</td></tr>
         {% if form.date.errors %}
         <tr><td>{{ form.date.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.date.label_tag }}</th><td>{{ form.date }}<a href="javascript:editDate('id_date','%d/%m/%Y');" style="display:inline"><img src="{{ STATIC_URL }}img/calendar.png" alt="calendrier" /></a></td>
+        <tr><th>{{ form.date.label_tag }}(*)</th><td>{{ form.date }}</td>
 
         {% comment %}
             TODO mettre comme dans admin le bouton aujourd'hui
-            TODO mettre comme dans admin le calendrier
         {% endcomment %}
         </tr>
         {% if form.date_val.errors %}

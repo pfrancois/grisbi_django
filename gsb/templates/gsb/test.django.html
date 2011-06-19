@@ -1,82 +1,19 @@
-{% extends "generic.django.html" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% block content %}
-<form id='form1' action="{% url gsb.views.ope_detail ope.id %}" method="post">
-    <table>
-        <tr><td>{% csrf_token %}</td></tr>
-        {% if form.compte.errors %}
-        <tr><td>{{ form.compte.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.compte.label_tag }}</th><td>{{ form.compte }}</td></tr>
-        {% if form.date.errors %}
-        <tr><td>{{ form.date.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.date.label_tag }}</th><td>{{ form.date }}</td>
-        {% comment %}
-            TODO mettre comme dans admin le bouton aujourd'hui
-            TODO mettre comme dans admin le calendrier
-        {% endcomment %}
-        </tr>
-        {% if form.date_val.errors %}
-        <tr><td>{{ form.date_val.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.date_val.label_tag }}</th><td>{{ form.date_val }}</td>
-        </tr>
-        {% if form.tiers.errors %}
-        <tr><td>{{ form.tiers.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }}</td>
-        </tr>
-        {% comment %}
-        TODO mettre un plus comme dans l'admin
-        {% endcomment %}
-        {% if form.montant.errors %}
-        <tr><td>{{ form.montant.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {{ ope.compte.devise.isin}}</td>
-        {% comment %}
-            TODO rajouter fonction calculatrice
-            TODO ajax et js pour changer la monnaie si changement de compte
-        {% endcomment %}
-        {% if form.cat.errors %}
-        <tr><td>{{ form.cat.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.cat.label_tag }}</th><td>{{ form.cat }}</td></tr>
-        {% if form.notes.errors %}
-        <tr><td>{{ form.notes.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.notes.label_tag }}</th><td>{{ form.notes }}</td></tr>
-        {% if form.moyen.errors %}
-        <tr><td>{{ form.moyen.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.moyen.label_tag }}</th><td>{{ form.moyen }}</td></tr>
-        {% if form.pointe.errors %}
-        <tr><td>{{ form.pointe.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.pointe.label_tag }}</th><td>{{ form.pointe }}</td></tr>
-        {% if form.rapp.errors %}
-        <tr><td>{{ form.rapp.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.rapp.label_tag }}</th><td>{{ form.rapp }}</td></tr>
-        {% if form.exercice.errors %}
-        <tr><td>{{ form.exercice.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.exercice.label_tag }}</th><td>{{ form.exercice }}</td></tr>
-        {% if form.ib.errors %}
-        <tr><td>{{ form.ib.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}</td></tr>
-        {# attention on ne met pas jumelle car les virements sont gérés autrement #}
-        {% if form.mere.errors %}
-        <tr><td>{{ form.mere.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.mere.label_tag }}</th><td>{{ form.mere }}</td></tr>
-        {% if form.piece_comptable.errors %}
-        <tr><td>{{ form.piece_comptable.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.piece_comptable.label_tag }}</th><td>{{ form.piece_comptable}}</td></tr>
-    </table>
-</form>
- {% load gsb_extras %}
- {% bouton_form 'form1' 'gsb.views.ope_detail' ope.id %}
-{% endblock content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+  <script>
+  $(document).ready(function() {
+    $("#datepicker").datepicker($.datepicker.regional['fr']);
+  });
+  </script>
+</head>
+<body style="font-size:62.5%;">
+
+<div type="text" id="datepicker"></div>
+
+</body>
+</html>
