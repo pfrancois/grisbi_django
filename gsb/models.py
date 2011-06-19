@@ -484,7 +484,6 @@ class Generalite(models.Model):
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
 
-
     def __unicode__(self):
         return u"%s" % (self.id,)
     def gen():
@@ -496,7 +495,11 @@ class Generalite(models.Model):
         return gen_1
     gen=staticmethod(gen)
     def dev_g():
-        dev,created=Titre.objects.get_or_create(isin=settings.DEVISE_GENERALE,defaults={'nom':settings.DEVISE_GENERALE,'isin':settings.DEVISE_GENERALE,'type':'DEV','tiers':None})
+        if settings.UTIDEV:
+            dev,created=Titre.objects.get_or_create(isin=settings.DEVISE_GENERALE,defaults={'nom':settings.DEVISE_GENERALE,'isin':settings.DEVISE_GENERALE,'type':'DEV','tiers':None})
+            dev=dev.isin
+        else:
+            dev=settings.DEVISE_GENERALE
         return dev
     dev_g=staticmethod(dev_g)
 

@@ -122,9 +122,14 @@ def _export():
     et.SubElement(xml_generalites, "Utilise_IB").text = Format.bool(q.utilise_ib)
     et.SubElement(xml_generalites, "Utilise_PC").text = Format.bool(q.utilise_pc)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
-    et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.dev_g().id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.dev_g().id)
-    et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.dev_g().id)
+    if settings.UTIDEV:
+        et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = str(q.dev_g().id)
+        et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = str(q.dev_g().id)
+        et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = str(q.dev_g().id)
+    else:
+        et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = "1"
+        et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = "1"
+        et.SubElement(xml_generalites, "Numero_devise_totaux_ib").text = "1"
     et.SubElement(xml_generalites, "Type_affichage_des_echeances").text = "3"#NOT IN BDD
     et.SubElement(xml_generalites, "Affichage_echeances_perso_nb_libre").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Type_affichage_perso_echeances").text = "0"#NOT IN BDD
@@ -236,17 +241,18 @@ def _export():
             xml_element.set('De', str(co.devise_id ))
             xml_element.set('Rdc','0') #NOT IN BDD
             if ope.jumelle:
-                devise_jumelle=Ope.objects.get(id=ope.id).jumelle.compte.devise
-                if co.devise != devise_jumelle and devise_jumelle != Generalite.dev_g():
-                    xml_element.set('M', Format.float(ope.montant*devise_jumelle.cours_set.get(date=ope.date).valeur))
-                    xml_element.set('De', str(devise_jumelle.id ))
-                    xml_element.set('Rdc','1')
-                    xml_element.set('Tc', Format.float(devise_jumelle.cours_set.get(date=ope.date).valeur))
+                if settings.UTIDEV:
+                    devise_jumelle=Ope.objects.get(id=ope.id).jumelle.compte.devise
+                    if co.devise != devise_jumelle and devise_jumelle != Generalite.dev_g():
+                        xml_element.set('M', Format.float(ope.montant*devise_jumelle.cours_set.get(date=ope.date).valeur))
+                        xml_element.set('De', str(devise_jumelle.id ))
+                        xml_element.set('Rdc','1')
+                        xml_element.set('Tc', Format.float(devise_jumelle.cours_set.get(date=ope.date).valeur))
+                    else:
+                        xml_element.set('Tc', Format.float(0))
                 else:
                     xml_element.set('Tc', Format.float(0))
-            else:
-                xml_element.set('Tc', Format.float(0))
-            xml_element.set('Fc', Format.float(0)) #NOT IN BDD mais inutile
+            xml_element.set('Fc', Format.float(0)) #NOT IN BDD mais inutile selon moi
             if ope.tiers:
                 xml_element.set('T', str(ope.tiers.id ))
             else:
@@ -441,32 +447,48 @@ def _export():
     ##devises##
     xml_devises = et.SubElement(xml_root, "Devises")
     xml_generalite = et.SubElement(xml_devises, "Generalites")
-    et.SubElement(xml_generalite, "Nb_devises").text = str(Titre.objects.filter(type='DEV').count())
-    et.SubElement(xml_generalite, "No_derniere_devise").text = Format.max(Titre.objects.filter(type='DEV'),champ = 'id')
-    xml_detail = et.SubElement(xml_devises, 'Detail_des_devises')
-    for c in Titre.objects.filter(type='DEV').order_by('id'):
+    if settings.UTIDEV:
+        et.SubElement(xml_generalite, "Nb_devises").text = str(Titre.objects.filter(type='DEV').count())
+        et.SubElement(xml_generalite, "No_derniere_devise").text = Format.max(Titre.objects.filter(type='DEV'),champ = 'id')
+        xml_detail = et.SubElement(xml_devises, 'Detail_des_devises')
+        for c in Titre.objects.filter(type='DEV').order_by('id'):
+            xml_sub = et.SubElement(xml_detail, 'Devise')
+            xml_sub.set('No', str(c.id ))
+            xml_sub.set('Nom', c.nom)
+            xml_sub.set('Code', c.isin)
+            xml_sub.set('IsoCode', c.isin)
+            if c == Generalite.dev_g():
+                xml_sub.set('Passage_euro', "0")#NOT IN BDD
+                xml_sub.set('Date_dernier_change', "")
+                xml_sub.set('Rapport_entre_devises', "0")#NOT IN BDD
+                xml_sub.set('Devise_en_rapport', '0')#NOT IN BDD
+                xml_sub.set('Change', Format.float(0))
+            else:
+                xml_sub.set('Passage_euro', "0")#NOT IN BDD
+                xml_sub.set('Date_dernier_change', Format.date(c.last_cours().date))
+                xml_sub.set('Rapport_entre_devises', "1")#NOT IN BDD
+                xml_sub.set('Devise_en_rapport', '1')#NOT IN BDD
+                xml_sub.set('Change', Format.float(c.last_cours().valeur))
+    else:
+        et.SubElement(xml_generalite, "Nb_devises").text = "1"
+        et.SubElement(xml_generalite, "No_derniere_devise").text = '1'
+        xml_detail = et.SubElement(xml_devises, 'Detail_des_devises')
         xml_sub = et.SubElement(xml_detail, 'Devise')
-        xml_sub.set('No', str(c.id ))
-        xml_sub.set('Nom', c.nom)
-        xml_sub.set('Code', c.isin)
-        xml_sub.set('IsoCode', c.isin)
-        if c == Generalite.dev_g():
-            xml_sub.set('Passage_euro', "0")#NOT IN BDD
-            xml_sub.set('Date_dernier_change', "")
-            xml_sub.set('Rapport_entre_devises', "0")#NOT IN BDD
-            xml_sub.set('Devise_en_rapport', '0')#NOT IN BDD
-            xml_sub.set('Change', Format.float(0))
-        else:
-            xml_sub.set('Passage_euro', "0")#NOT IN BDD
-            xml_sub.set('Date_dernier_change', Format.date(c.last_cours().date))
-            xml_sub.set('Rapport_entre_devises', "1")#NOT IN BDD
-            xml_sub.set('Devise_en_rapport', '1')#NOT IN BDD
-            xml_sub.set('Change', Format.float(c.last_cours().valeur))
+        xml_sub.set('No', str(0))
+        xml_sub.set('Nom', settings.DEVISE_GENERALE)
+        xml_sub.set('Code', settings.DEVISE_GENERALE)
+        xml_sub.set('IsoCode', settings.DEVISE_GENERALE)
+        xml_sub.set('Passage_euro', "0")#NOT IN BDD
+        xml_sub.set('Date_dernier_change', "")
+        xml_sub.set('Rapport_entre_devises', "0")#NOT IN BDD
+        xml_sub.set('Devise_en_rapport', '0')#NOT IN BDD
+        xml_sub.set('Change', Format.float(0))
+        
+    #raison pour lesquelles il y a des attributs non modifiables
+    #isocode est par construction egale à code
+    #Passage_euro: plus besoin
+    #Rapport_entre_devises plus besoin
 
-        #raison pour lesquelles il y a des attributs non modifiables
-        #isocode est par construction egale à code
-        #Passage_euro: plus besoin
-        #Rapport_entre_devises plus besoin
     ##BANQUES##
     xml_banques = et.SubElement(xml_root, "Banques")
     xml_generalite = et.SubElement(xml_banques, "Generalites")

@@ -13,6 +13,8 @@ register = template.Library()
 
 @register.filter()
 def cur(value, symbol="&#8364;"):
+    if symbol=='EUR':
+        symbol="&#8364;"
     pos_inf = 1e200 * 1e200
     neg_inf = -1e200 * 1e200
     nan = (1e200 * 1e200) / (1e200 * 1e200)

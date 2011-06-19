@@ -77,6 +77,25 @@ def import_gsb(nomfich,efface_table=True):
     nb_sous = 0
     nb_nx=0
     percent=1
+        #------------------------------generalites#------------------------------
+    xml_element = xml_tree.find('Generalites')
+    if not xml_element.find('Titre').text:
+        titre_fichier=""
+    else:
+        titre_fichier=xml_element.find('Titre').text
+
+    element,created = Generalite.objects.get_or_create(
+        id=1,
+        defaults={
+        'titre':titre_fichier,
+        'utilise_exercices':bool(int(xml_element.find('Utilise_exercices').text)),
+        'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
+        'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
+    })
+    if Generalite.dev_g() != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
+        if settings.DEVISE_GENERALE != Generalite.dev_g():
+            raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
+    logger.warning(u'generalites ok')
     #------------ TIERS et titres -------------------
     nb_tiers_final=len(xml_tree.find('//Detail_des_tiers'))
     for xml_element in xml_tree.find('//Detail_des_tiers'):
@@ -189,25 +208,6 @@ def import_gsb(nomfich,efface_table=True):
         element,created=Banque.objects.get_or_create(nom=xml_element.get('Nom'),defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
         tabl_correspondance_banque[xml_element.get('No')]=element.id
     logger.warning(u'%s banques'%nb)
-
-    #------------------------------generalites#------------------------------
-    xml_element = xml_tree.find('Generalites')
-    if not xml_element.find('Titre').text:
-        titre_fichier=""
-    else:
-        titre_fichier=xml_element.find('Titre').text
-
-    element,created = Generalite.objects.get_or_create(
-        id=1,
-        defaults={
-        'titre':titre_fichier,
-        'utilise_exercices':bool(int(xml_element.find('Utilise_exercices').text)),
-        'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
-        'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
-    })
-    if Generalite.dev_g() != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
-        raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
-    logger.warning(u'generalites ok')
 
     #------------------------------exercices#------------------------------
     nb = 0
@@ -470,8 +470,8 @@ def import_gsb(nomfich,efface_table=True):
     logger.warning(u'fini')
 
 if __name__ == "__main__":
-#    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
-    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich="%s/20040701.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    #~ nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich,efface_table=True)

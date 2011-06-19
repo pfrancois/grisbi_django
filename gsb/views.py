@@ -15,17 +15,21 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     t = loader.get_template('gsb/index.django.html')
     if Generalite.gen().affiche_clot:
-        bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
-        pl = Compte.objects.filter(type__in=('t', 'p')).select_related()
+        bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related()
+        pl = Compte.objects.filter(type__in=('t',)).select_related()
     else:
-        bq = Compte.objects.filter(type__in=('b', 'e'),ouvert=True).select_related()
-        pl = Compte.objects.filter(type__in=('t', 'p'),ouvert=True).select_related()
+        bq = Compte.objects.filter(type__in=('b', 'e', 'p'),ouvert=True).select_related()
+        pl = Compte.objects.filter(type__in=('t',),ouvert=True).select_related()
     total_bq=decimal.Decimal('0')
     total_pla=decimal.Decimal('0')
-    for c in bq:
-        total_bq=total_bq+c.solde(devise_generale=True)
-    for p in pl:
-        total_pla=total_pla+p.solde(devise_generale=True)
+    if settings.UTIDEV:
+        for c in bq:
+            total_bq=total_bq+c.solde(devise_generale=True)
+        for p in pl:
+            total_pla=total_pla+p.solde(devise_generale=True)
+    else:
+        total_bq=0
+        total_pla=0
     nb_clos = len(Compte.objects.filter(ouvert=False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
@@ -35,7 +39,7 @@ def index(request):
         'total_pla': total_pla,
         'total': total_bq + total_pla,
         'nb_clos': nb_clos,
-
+        'dev':settings.DEVISE_GENERALE
         })
     return HttpResponse(t.render(c))
 
@@ -49,6 +53,10 @@ def cpt_detail(request, cpt_id):
     q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
     nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
     nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
+    if settings.UTIDEV:
+        dev=c.devise.isin
+    else:
+        dev=settings.DEVISE_GENERALE
     return HttpResponse(
         t.render(
             RequestContext(
@@ -61,6 +69,7 @@ def cpt_detail(request, cpt_id):
                     'titre': c.nom,
                     'solde': c.solde(),
                     'date_limite':date_limite,
+                    'dev':dev
                 }
 
             )
@@ -81,6 +90,10 @@ def cpt_titre_detail(request, cpt_id):
         total_titres = total_titres + mise + pmv
         titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'mise': mise, 'pmv': pmv, 'total': mise + pmv})
     especes = c.solde() - total_titres
+    if settings.UTIDEV:
+        dev=c.devise.isin
+    else:
+        dev=settings.DEVISE_GENERALE
     template = loader.get_template('gsb/cpt_placement.django.html')
     return HttpResponse(
         template.render(
@@ -97,14 +110,6 @@ def cpt_titre_detail(request, cpt_id):
         )
     )
 
-def ope_creation(request, cpt_id=0):
-    cpt = get_object_or_404(Compte, pk=cpt_id)
-    devise = cpt.devise
-    ope = Ope(compte=cpt, date=datetime.date.today(), montant=0, devise=devise, tiers=None, cat=None, Notes=None, moyen=None, numcheque="", )
-    pass
-
-def virement_creation(request, cpt_id):
-    pass
 
 @login_required
 def ope_detail(request, pk):
@@ -154,7 +159,7 @@ def ope_new(request,cpt=None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'gen':gen.dev_g().isin,
+                'gen':gen.dev_g(),
                 'cats':cats,
                 'cpt':cpt}
             )
@@ -164,7 +169,7 @@ def ope_new(request,cpt=None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'gen':gen.dev_g().isin,
+                'gen':gen.dev_g(),
                 'cats':cats,
                 'cpt':cpt}
 

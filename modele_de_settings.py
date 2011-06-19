@@ -19,7 +19,8 @@ ADMINS = (
 NB_JOURS_AFF = 100
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE='EUR'
-
+#utilisation des devises (ralenti le bouzin avec des requetes nombreuse)
+UTIDEV=False
 
 ##################
 
