@@ -23,7 +23,7 @@ class compte_titretest(TestCase):
     def test_1(self):
         devise=self.devise
         titre_sg=self.titre_sg
-        c = Compte_titre(nom='test',devise=devise, type='a')
+        c = Compte_titre(nom='test',devise=devise, type='t')
         c.save()
         self.assertEqual(c.nom, u'test')
         c.achat(titre=titre_sg,nombre=20)

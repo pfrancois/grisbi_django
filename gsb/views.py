@@ -16,10 +16,10 @@ def index(request):
     t = loader.get_template('gsb/index.django.html')
     if Generalite.gen().affiche_clot:
         bq = Compte.objects.filter(type__in=('b', 'e')).select_related()
-        pl = Compte.objects.filter(type__in=('a', 'p')).select_related()
+        pl = Compte.objects.filter(type__in=('t', 'p')).select_related()
     else:
         bq = Compte.objects.filter(type__in=('b', 'e'),ouvert=True).select_related()
-        pl = Compte.objects.filter(type__in=('a', 'p'),ouvert=True).select_related()
+        pl = Compte.objects.filter(type__in=('t', 'p'),ouvert=True).select_related()
     total_bq=decimal.Decimal('0')
     total_pla=decimal.Decimal('0')
     for c in bq:
@@ -42,7 +42,7 @@ def index(request):
 
 def cpt_detail(request, cpt_id):
     c = get_object_or_404(Compte, pk=cpt_id)
-    if c.type == 'a':
+    if c.type in ('t',):
         return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
     t = loader.get_template('gsb/cpt_detail.django.html')
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
@@ -70,11 +70,7 @@ def cpt_detail(request, cpt_id):
 
 def cpt_titre_detail(request, cpt_id):
     c = get_object_or_404(Compte_titre, pk=cpt_id)
-    if c.type == 'b':
-        return HttpResponseRedirect(reverse('gsb.views.index'))
-    if c.type == 'e':
-        return HttpResponseRedirect(reverse('gsb.views.index'))
-    if c.type == 'p':
+    if c.type not in ('t'):
         return HttpResponseRedirect(reverse('gsb.views.index'))
     titre_sans_sum = Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
     titres = []

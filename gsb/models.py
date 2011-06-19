@@ -167,7 +167,7 @@ class Compte(models.Model):
     ('b', u'bancaire'),
     ('e', u'espece'),
     ('p', u'passif'),
-    ('a', u'actif')
+    ('t', u'titre')
     )
     nom = models.CharField(max_length=40,unique=True)
     titulaire = models.CharField(max_length=120, blank=True, default='')
@@ -209,6 +209,12 @@ class Compte(models.Model):
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
+    @models.permalink
+    def get_absolute_url(self):
+        if self.type == 't':
+            return ('cpt_titre_detail',(),{'pk':str(self.id)})
+        else:
+            return ('cpt_detail',(),{'pk':str(self.id)})
 
 class Compte_titre(Compte):
     titres_detenus = models.ManyToManyField(Titre,through='Titres_detenus')
@@ -332,7 +338,12 @@ class Compte_titre(Compte):
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
-
+    @models.permalink
+    def get_absolute_url(self):
+        if self.type == 't':
+            return ('cpt_titre_detail',(),{'pk':str(self.id)})
+        else:
+            return ('cpt_detail',(),{'pk':str(self.id)})
 
 class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)

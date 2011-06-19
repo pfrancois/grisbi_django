@@ -241,7 +241,7 @@ def import_gsb(nomfich,efface_table=True):
         nb += 1
         nb_moyen = 0
         type = liste_type_compte[int(xml_element.find('Details/Type_de_compte').text)][0]
-        if type in ('a',):
+        if type in ('t',):
             logger.debug("cpt_titre %s"%(xml_element.find('Details/Nom').text))
             element,created= Compte_titre.objects.get_or_create(nom=xml_element.find('Details/Nom').text,defaults={
             'nom':xml_element.find('Details/Nom').text,
