@@ -41,7 +41,6 @@ urlpatterns += patterns('mysite.gsb',
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail',name='gsb_opedetail'),
-                        #url(r'^ope/(?P<pk>\d+)/$', Opeupdateview.as_view(),name='gsb_opedetail'),
                         url(r'^ope/new$','ope_new',name="gsb_ope_new")
                         )
 
