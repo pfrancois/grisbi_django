@@ -28,8 +28,8 @@ def index(request):
         for p in pl:
             total_pla=total_pla+p.solde(devise_generale=True)
     else:
-        total_bq=0
-        total_pla=0
+        total_bq=Ope.objects.filter(mere__exact=None,compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+        total_pla=Ope.objects.filter(mere__exact=None,compte__type__in=('t')).aggregate(solde=models.Sum('montant'))['solde']
     nb_clos = len(Compte.objects.filter(ouvert=False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
