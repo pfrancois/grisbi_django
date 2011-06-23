@@ -92,9 +92,11 @@ def import_gsb(nomfich,efface_table=True):
         'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
         'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
     })
-    if Generalite.dev_g() != Titre.objects.get(type=u'DEV',id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]):
-        if settings.DEVISE_GENERALE != Generalite.dev_g():
-            raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
+    if settings.UTIDEV:
+        id=tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]
+        if Generalite.dev_g() != Titre.objects.get(type=u'DEV',id=id):
+            if settings.DEVISE_GENERALE != Generalite.dev_g():
+                raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
     logger.warning(u'generalites ok')
     #------------ TIERS et titres -------------------
     nb_tiers_final=len(xml_tree.find('//Detail_des_tiers'))

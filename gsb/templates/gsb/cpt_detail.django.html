@@ -39,11 +39,9 @@
                     <td colspan="5">
                         aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
                         {% if nbfiltre > 1 %}
-                            {{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au
-                            del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+                            {{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
                         {% else %} {% if nbfiltre == 1 %}
-                            1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la
-                            limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+                            1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
                         {% endif %}{% endif %}
                     </td>
                 </tr>

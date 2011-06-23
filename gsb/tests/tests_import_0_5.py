@@ -82,13 +82,14 @@ class importtest(TestCase):
 
     def test_cat(self):
         obj = Cat.objects.get(id=1)
-        self.assertEqual(obj.nom, u'Revenus divers:')
+        self.assertEqual(obj.nom, u'Revenus divers :')
         self.assertEqual(obj.type, 'r')
 
     def test_cat2(self):
         obj = Cat.objects.get(id=3)
-        self.assertEqual(obj.nom, u'Alimentation:Bar')
+        self.assertEqual(obj.nom, u'Alimentation : Bar')
         self.assertEqual(obj.type, 'd')
+
     def test_cat_global(self):
         self.assertEqual(Cat.objects.count(), 27)
         self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'], 27)
