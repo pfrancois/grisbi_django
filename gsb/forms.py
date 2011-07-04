@@ -2,6 +2,10 @@
 from django import forms
 from mysite.gsb.models import *
 from mysite.gsb import widgets
+class BaseForm(forms.Form):
+    error_css_class = 'error'
+    required_css_class = 'required'
+
 class ImportForm(forms.Form):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
@@ -12,16 +16,16 @@ class ImportForm(forms.Form):
     ('fusion','fusion des données avec le fichier')
     ))
 
-class OperationForm(forms.ModelForm):
-    error_css_class = 'error'
-    required_css_class = 'required'
+class OperationForm(BaseForm):
     cat=forms.ModelChoiceField(Cat.objects.all().order_by('type'),empty_label=None)
     mere=forms.ModelChoiceField(Ope.objects.filter(mere__isnull=False).order_by('-date'))
     class Meta:
         model=Ope
-    def __init__(self, *args, **kwargs):
-        super (OperationForm,self).__init__(*args, **kwargs)
 
+class VirementForm(BaseForm):
+    cat=forms.ModelChoiceField(Cat.objects.none())
+    class Meta:
+        model=Ope
 
 class GeneraliteForm(forms.ModelForm):
     error_css_class = 'error'
