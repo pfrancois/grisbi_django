@@ -158,6 +158,7 @@ INSTALLED_APPS = (
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'django.contrib.formtools',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
