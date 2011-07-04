@@ -2,7 +2,8 @@
 from django import forms
 from mysite.gsb.models import *
 from mysite.gsb import widgets
-class BaseForm(forms.Form):
+
+class BaseForm(forms.ModelForm):
     error_css_class = 'error'
     required_css_class = 'required'
 
@@ -17,8 +18,9 @@ class ImportForm(forms.Form):
     ))
 
 class OperationForm(BaseForm):
-    cat=forms.ModelChoiceField(Cat.objects.all().order_by('type'),empty_label=None)
-    mere=forms.ModelChoiceField(Ope.objects.filter(mere__isnull=False).order_by('-date'))
+    compte=forms.ModelChoiceField(Compte.objects.all(),empty_label=None)
+    cat=forms.ModelChoiceField(Cat.objects.all().order_by('type'),required=False)
+    mere=forms.ModelChoiceField(Ope.objects.filter(mere__isnull=False).order_by('-date'),required=False)
     class Meta:
         model=Ope
 

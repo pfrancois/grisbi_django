@@ -7,14 +7,6 @@ from mysite.gsb.models import *
 import mysite.gsb.forms as gsb_forms
 from django.core.urlresolvers import reverse
 
-class tierscreateview(CreateView):
-    model=Tiers
-    context_object_name = "tiers"
-    template_name = 'gsb/tiers.django.html'
-    def get_success_url(self):
-        return reverse('gsb_close')
-
-
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
                        (r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -50,7 +42,18 @@ urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
                         url(r'^cpt/(?P<cpt>\d+)/new$','ope_new',name="gsb_cpt_ope_new")
                         )
+
 #les vues relatives aux tiers
+class tierscreateview(CreateView):
+    model=Tiers
+    context_object_name = "tiers"
+    template_name = 'gsb/tiers.django.html'
+    def get_success_url(self):
+        return reverse('gsb_close')
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^tiers/new/$', tierscreateview.as_view(),name='gsb_tiers_create'),
+)
+from mysite.gsb.form_tester import SomeModelFormPreview
+urlpatterns += patterns('mysite.gsb.views',
+                        (r'^testform/$', SomeModelFormPreview(gsb_forms.OperationForm)),
 )
