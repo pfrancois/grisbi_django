@@ -54,6 +54,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^tiers/new/$', tierscreateview.as_view(),name='gsb_tiers_create'),
 )
 from mysite.gsb.form_tester import SomeModelFormPreview
+
 urlpatterns += patterns('mysite.gsb.views',
                         (r'^testform/$', SomeModelFormPreview(gsb_forms.OperationForm)),
 )

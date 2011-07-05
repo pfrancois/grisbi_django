@@ -18,9 +18,9 @@ class ImportForm(forms.Form):
 class BaseForm(forms.ModelForm):
     error_css_class = 'error'
     required_css_class = 'required'
+
 from django.core.exceptions import ValidationError
-def pointe_et_rapproche(value):
-    pass
+
 class OperationForm(BaseForm):
     compte=forms.ModelChoiceField(Compte.objects.all(),empty_label=None)
     cat=forms.ModelChoiceField(Cat.objects.all().order_by('type'),required=False)
@@ -28,21 +28,22 @@ class OperationForm(BaseForm):
     date=forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d%m%y','%d%m%Y'),initial=datetime.date.today)
     pointe=forms.BooleanField(required=False)
     #TODO mettre le moyen de depense par defaut
-    mere=forms.ModelChoiceField(Ope.objects.filter(mere__isnull=False).order_by('-date'),required=False)
     class Meta:
         model=Ope
+        exclude=('mere','jumelle')
     def clean(self):
         #super(BaseForm,self).clean()
         #verification qu'il n'y ni poitee ni rapprochee
         pointe=self.cleaned_data['pointe']
-        rap=self.cleaned_data['rapp']
-        if pointe and rap:
+        rapp=self.cleaned_data['rapp']
+        if pointe and rapp:
             msg=u"cette operation ne peut pas etre a la fois pointée et rapprochée"
             self._errors['pointe']=self.error_class([msg])
             self._errors['rapp']=self.error_class([msg])
             del self.cleaned_data['pointe']
             del self.cleaned_data['rapp']
         return self.cleaned_data
+
 
 class VirementForm(BaseForm):
     cat=forms.ModelChoiceField(Cat.objects.none())

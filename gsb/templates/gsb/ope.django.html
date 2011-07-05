@@ -1,28 +1,5 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
-{% block css %}
-<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-{% endblock css %}
-{% block js %}
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-    <script LANGUAGE="JavaScript">
-  $(document).ready(function() {
-    $("#id_date").datepicker();
-  });
-<!-- Idea by:  Nic Wolfe -->
-<!-- This script and many more are available free online at -->
-<!-- The JavaScript Source!! http://javascript.internet.com -->
-
-<!-- Begin
-function popUp(URL) {
-day = new Date();
-id = day.getTime();
-eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=1,menubar=0,resizable=0,width=740,height=512,left = 300 ,top = 256');");
-}
-// End -->
-</script>
-{% endblock js %}
 {% block content %}
 <form id='form1' action="" method="post">
     {% csrf_token %}
@@ -36,7 +13,6 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
         <tr><td>{{ form.date.errors }}</td></tr>
         {% endif %}
         <tr><th>{{ form.date.label_tag }}(*)</th><td>{{ form.date }}</td>
-
         {% comment %}
             TODO mettre comme dans admin le bouton aujourd'hui
         {% endcomment %}
@@ -54,7 +30,7 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% if ope %}{{ ope.compte.devise.isin}}{% else %}{% if cpt %}{{ cpt.devise.isin }}{% else %} {{ dev }} {% endif %} {% endif %}</td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {{ dev }} </td>
         {% comment %}
             TODO rajouter fonction calculatrice
             TODO ajax et js pour changer la monnaie si changement de compte
@@ -87,8 +63,6 @@ eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,lo
         <tr><td>{{ form.ib.errors }}</td></tr>
         {% endif %}
         <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}
-                <div style='display:none'>{{ form.mere }}
-        {{ form.jumelle }}</div></td></tr>
         {% if form.piece_comptable.errors %}
         <tr><td>{{ form.piece_comptable.errors }}</td></tr>
         {% endif %}

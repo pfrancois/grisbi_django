@@ -110,10 +110,12 @@ def cpt_titre_detail(request, cpt_id):
         )
     )
 
-
+from django.db import connection
 @login_required
 def ope_detail(request, pk):
     ope = get_object_or_404(Ope, pk=pk)
+    gen=Generalite.gen().dev_g()
+    logger=logging.getLogger('gsb')
     if ope.jumelle is not None: #c'est un virement
         #TODO message
         #TODO redirection
@@ -121,9 +123,6 @@ def ope_detail(request, pk):
     if ope.filles_set.all().count()>0: #c'est une ope mere
         #TODO message
         HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
-    cats=Cat.objects.all().order_by('type')
-    gen=Generalite.gen()
-    logger=logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
@@ -134,20 +133,19 @@ def ope_detail(request, pk):
             {   'titre_long':u'modification opération %s'%ope.id,
                'titre':u'modification',
                 'form':form,
-                'gen':gen,
-                'ope':ope,
-                'cats':cats}
+                'dev':gen,
+                'ope':ope}
             )
     else:
         form = gsb_forms.OperationForm(instance=ope)
-        return render(request,'gsb/ope.django.html',
+        t=render(request,'gsb/ope.django.html',
             {   'titre':u'modification',
                'titre_long':u'modification opération %s'%ope.id,
                 'form':form,
-                'gen':gen,
-                'ope':ope,
-                'cats':cats}
+                'dev':gen,
+                'ope':ope,}
             )
+        return t
 
 @login_required
 def ope_new(request,cpt=None):
@@ -157,7 +155,10 @@ def ope_new(request,cpt=None):
     gen=Generalite.gen()
     logger=logging.getLogger('gsb')
     if request.method == 'POST':
-        form = gsb_forms.OperationForm(request.POST)
+        if cpt:
+            form = gsb_forms.OperationForm(request.POST,initial={'moyen':cpt.moyen_credit_defaut})
+        else:
+            form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
             ope=form.save()
             #TODO message
@@ -168,7 +169,7 @@ def ope_new(request,cpt=None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'gen':gen.dev_g(),
+                'dev':gen.dev_g(),
                 'cats':cats,
                 'cpt':cpt}
             )
@@ -178,7 +179,7 @@ def ope_new(request,cpt=None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'gen':gen.dev_g(),
+                'dev':gen.dev_g(),
                 'cats':cats,
                 'cpt':cpt}
 
@@ -214,13 +215,14 @@ def vir_detail(request, pk):
             )
     else:
         form = gsb_forms.VirementForm(instance=ope)
-        return render(request,'gsb/vir.django.html',
+        t=render(request,'gsb/vir.django.html',
             {   'titre':u'modification',
                'titre_long':u'modification virement %s'%ope.id,
                 'form':form,
                 'gen':gen,
                 'ope':ope}
             )
+        return t
 
 @login_required
 def vir_new(request, pk=None):

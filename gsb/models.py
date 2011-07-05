@@ -537,7 +537,10 @@ class Ope(models.Model):
         return Ope.objects.filter(mere=None)
     non_meres=staticmethod(non_meres)
     def __unicode__(self):
-        return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,self.compte.devise.isin)
+        if settings.UTIDEV:
+            return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,self.compte.devise.isin)
+        else:
+            return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,settings.DEVISE_GENERALE)
     @models.permalink
     def get_absolute_url(self):
         return ('gsb_opedetail',(),{'pk':str(self.id)})
