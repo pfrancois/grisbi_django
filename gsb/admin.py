@@ -28,7 +28,6 @@ class Ope_admin(admin.ModelAdmin):
             (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen','cat')}),
             (u'informations diverses', {'fields': ('date_val', 'num_cheque', 'notes', 'exercice','ib'), 'classes': ['collapse']}),
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
-            (u'mère et jumelles', {'fields': ('jumelle', 'mere'), 'classes': ['collapse']}),
             ]
     ordering =('date',)
     list_display=('id','compte', 'date', 'montant', 'tiers', 'moyen','cat')

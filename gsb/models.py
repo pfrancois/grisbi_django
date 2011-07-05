@@ -517,8 +517,8 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None)
-    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None)
+    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None,editable=False)
+    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None,editable=False)
     automatique = models.BooleanField(default=False)
     piece_comptable = models.CharField(max_length=120, blank=True, default='')
 
