@@ -27,7 +27,7 @@ class OperationForm(BaseForm):
     montant=forms.DecimalField(localize=True,initial='0')
     date=forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d%m%y','%d%m%Y'),initial=datetime.date.today)
     pointe=forms.BooleanField(required=False)
-    #TODO mettre le moyen de depense par defaut
+    moyen=forms.ModelChoiceField(Moyen.objects.all(),required=False)
     class Meta:
         model=Ope
         exclude=('mere','jumelle')
