@@ -543,4 +543,4 @@ class Ope(models.Model):
             return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,settings.DEVISE_GENERALE)
     @models.permalink
     def get_absolute_url(self):
-        return ('gsb_opedetail',(),{'pk':str(self.id)})
+        return ('gsb_ope_detail',(),{'pk':str(self.id)})
