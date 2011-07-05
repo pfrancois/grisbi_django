@@ -161,7 +161,7 @@ def ope_new(request,cpt=None):
         if form.is_valid():
             ope=form.save()
             #TODO message
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'request':request,'cpt_id':ope.compte_id}))
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
             #TODO message
             return render(request,'gsb/ope.django.html',
