@@ -113,12 +113,10 @@ def ope_detail(request, pk):
     logger=logging.getLogger('gsb')
     if ope.jumelle is not None: #c'est un virement
         if request.method == 'POST':
-            #TODO forms a faire
             form = gsb_forms.VirementForm(request.POST)
             if form.is_valid():
                 #TODO definir le nom en fonction des comptes
                 #TODO gestion des devises ou des non devises
-                ope=form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
             else:
                 #TODO template a faire
@@ -131,14 +129,13 @@ def ope_detail(request, pk):
                 )
         else:
             form = gsb_forms.VirementForm(instance=ope)
-            t=render(request,'gsb/vir.django.html',
+            return render(request,'gsb/vir.django.html',
                 {   'titre':u'modification',
                    'titre_long':u'modification virement %s'%ope.id,
                     'form':form,
                     'dev':dev,
                     'ope':ope}
                 )
-            return t
     else:#sinon c'est une operation normale
         if ope.filles_set.all().count()>0: #c'est une ope mere
             #TODO message
@@ -212,12 +209,10 @@ def vir_new(request, cpt_id=None):
     dev=Generalite.dev_g()
     logger=logging.getLogger('gsb')
     if request.method == 'POST':
-        #TODO forms a faire
         form = gsb_forms.VirementForm(request.POST)
         if form.is_valid():
             #TODO definir le nom en fonction des comptes
             #TODO gestion des devises ou des non devises
-            ope=form.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
             #TODO template a faire
@@ -230,7 +225,7 @@ def vir_new(request, cpt_id=None):
             )
     else:
         if cpt_id:
-            form = gsb_forms.VirementForm(initial={'moyen':cpt.moyen_debit_defaut})
+            form = gsb_forms.VirementForm(initial={'moyen_origine':cpt.moyen_debit_defaut})
         else:
             form = gsb_forms.VirementForm()
         return render(request,'gsb/vir.django.html',

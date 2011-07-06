@@ -60,5 +60,5 @@ urlpatterns += patterns('mysite.gsb.views',
 from mysite.gsb.form_tester import SomeModelFormPreview
 
 urlpatterns += patterns('mysite.gsb.views',
-                        (r'^testform/$', SomeModelFormPreview(gsb_forms.OperationForm)),
+                        (r'^testform/$', SomeModelFormPreview(gsb_forms.VirementForm)),
 )
