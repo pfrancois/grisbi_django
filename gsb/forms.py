@@ -30,7 +30,7 @@ class OperationForm(BaseForm):
         model=Ope
         exclude=('mere','jumelle')
     def clean(self):
-        #super(BaseForm,self).clean()
+        super(OperationForm,self).clean()
         #verification qu'il n'y ni poitee ni rapprochee
         pointe=self.cleaned_data['pointe']
         rapp=self.cleaned_data['rapp']
@@ -59,7 +59,7 @@ class VirementForm(forms.Form):
     rapp_destination=forms.ModelChoiceField(Rapp.objects.all(),required=False)
     piece_comptable=forms.CharField(required=False)
     def clean(self):
-        #super(BaseForm,self).clean()
+        super(VirementForm,self).clean()
         #verification qu'il n'y ni poitee ni rapprochee
         pointe=self.cleaned_data['pointe']
         rapp=self.cleaned_data['rapp']
@@ -70,6 +70,13 @@ class VirementForm(forms.Form):
             del self.cleaned_data['pointe']
             del self.cleaned_data['rapp']
         return self.cleaned_data
+    def save(self):
+        #recuperation du tiers
+        tiers,created=Tiers.objects.get_or_create(nom="%s => %s"%(self.cleaned_data['compte_origine'].nom,self.cleaned_data['compte_destination'].nom))
+        #verif si elle existe donc on jumelle
+        #creation de la premiere operation
+
+        #creation de la seconde operation
 
 class GeneraliteForm(BaseForm):
     class Meta:
