@@ -9,7 +9,7 @@
                 <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
             </tr>
             <tr>
-            <td width="100%" class="boutton" colspan="2"><a href="{# TODO #}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
+            <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
         {% else %}
             <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
         {% endif %}

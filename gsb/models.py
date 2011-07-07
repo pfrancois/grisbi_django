@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=40,unique=True)
@@ -50,9 +51,9 @@ class Titre(models.Model):
         return "%s (%s)" % (self.nom, self.isin)
     def last_cours(self):
         return self.cours_set.latest()
+    @staticmethod
     def devise():
         return Titre.objects.filter(type='DEV')
-    devise=staticmethod(devise)
 
     @transaction.commit_on_success
     def reaffecte(self,new):
@@ -370,6 +371,7 @@ class Histo_ope_titres(models.Model):
         verbose_name_plural = u'Titres détenus (historique)'
         verbose_name = u'Histo_ope_titres'
         ordering = ['compte']
+
 class Moyen(models.Model):
     typesdep = (
     ('v', u'virement'),
@@ -386,6 +388,7 @@ class Moyen(models.Model):
 
     def __unicode__(self):
         return self.nom
+
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
@@ -425,6 +428,7 @@ class Rapp(models.Model):
             return solde
         else:
             return solde
+
     def reaffecte(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
         self.delete()
@@ -486,6 +490,8 @@ class Generalite(models.Model):
 
     def __unicode__(self):
         return u"%s" % (self.id,)
+
+    @staticmethod
     def gen():
         try:
             gen_1=Generalite.objects.get(id=1)
@@ -493,7 +499,8 @@ class Generalite(models.Model):
             Generalite.objects.create(id=1)
             gen_1=Generalite.objects.get(id=1)
         return gen_1
-    gen=staticmethod(gen)
+
+    @staticmethod
     def dev_g():
         if settings.UTIDEV:
             dev,created=Titre.objects.get_or_create(isin=settings.DEVISE_GENERALE,defaults={'nom':settings.DEVISE_GENERALE,'isin':settings.DEVISE_GENERALE,'type':'DEV','tiers':None})
@@ -501,7 +508,6 @@ class Generalite(models.Model):
         else:
             dev=settings.DEVISE_GENERALE
         return dev
-    dev_g=staticmethod(dev_g)
 
 class Ope(models.Model):
     compte = models.ForeignKey(Compte)
@@ -533,14 +539,21 @@ class Ope(models.Model):
             ('can_export','peut exporter des fichiers'),
         )
 
+    @staticmethod
     def non_meres():
         return Ope.objects.filter(mere=None)
-    non_meres=staticmethod(non_meres)
+
     def __unicode__(self):
         if settings.UTIDEV:
             return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,self.compte.devise.isin)
         else:
             return u"(%s) le %s : %s %s" % (self.id,self.date,self.montant,settings.DEVISE_GENERALE)
+
     @models.permalink
     def get_absolute_url(self):
         return ('gsb_ope_detail',(),{'pk':str(self.id)})
+    def clean(self):
+        super(Ope,self).clean()
+        #verification qu'il n'y ni poitee ni rapprochee
+        if self.pointe is not None and self.rapp is not None:
+             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
