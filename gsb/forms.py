@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 from django import forms
 from mysite.gsb.models import *
+from mysite.gsb.shortcuts import *
 from mysite.gsb import widgets
 import datetime
 import decimal
@@ -29,18 +30,7 @@ class OperationForm(BaseForm):
     class Meta:
         model=Ope
         exclude=('mere','jumelle')
-    def clean(self):
-        super(OperationForm,self).clean()
-        #verification qu'il n'y ni poitee ni rapprochee
-        pointe=self.cleaned_data['pointe']
-        rapp=self.cleaned_data['rapp']
-        if pointe and rapp:
-            msg=u"cette operation ne peut pas etre a la fois pointée et rapprochée"
-            self._errors['pointe']=self.error_class([msg])
-            self._errors['rapp']=self.error_class([msg])
-            del self.cleaned_data['pointe']
-            del self.cleaned_data['rapp']
-        return self.cleaned_data
+
 
 
 class VirementForm(forms.Form):
@@ -59,24 +49,25 @@ class VirementForm(forms.Form):
     rapp_destination=forms.ModelChoiceField(Rapp.objects.all(),required=False)
     piece_comptable=forms.CharField(required=False)
     def clean(self):
-        super(VirementForm,self).clean()
-        #verification qu'il n'y ni poitee ni rapprochee
-        pointe=self.cleaned_data['pointe']
-        rapp=self.cleaned_data['rapp']
-        if pointe and rapp:
-            msg=u"cette operation ne peut pas etre a la fois pointée et rapprochée"
-            self._errors['pointe']=self.error_class([msg])
-            self._errors['rapp']=self.error_class([msg])
-            del self.cleaned_data['pointe']
-            del self.cleaned_data['rapp']
-        return self.cleaned_data
+        data=self.cleaned_data
+        if data.get("compte_origine") == data.get("compte_origine"):
+            msg="pas possible de faire un virement vers le meme compte"
+            self._errors['compte_origine']=self.error_class([msg])
+            self._errors['compte_destination']=self.error_class([msg])
+            del data['compte_origine']
+            del data['compte_destination']
+        return data
     def save(self):
-        #recuperation du tiers
-        tiers,created=Tiers.objects.get_or_create(nom="%s => %s"%(self.cleaned_data['compte_origine'].nom,self.cleaned_data['compte_destination'].nom))
-        #verif si elle existe donc on jumelle
-        #creation de la premiere operation
-
-        #creation de la seconde operation
+        v=Virement()
+        v.create(self.cleaned_data['compte_origine'],self.cleaned_data['compte_destination'],self.cleaned_data['montant'],self.cleaned_data['date'],self.cleaned_data['notes'])
+        v.origine.moyen=self.cleaned_data['moyen_origine']
+        v.dest.moyen=self.cleaned_data['moyen_destination']
+        v.orgine.pointe=self.cleaned_data['pointe_origine']
+        v.dest.pointe=self.cleaned_data['pointe_destination']
+        v.orgine.rapp=self.cleaned_data['rapp_origine']
+        v.dest.rapp=self.cleaned_data['rapp_destination']
+        v.save()
+        return v.origine
 
 class GeneraliteForm(BaseForm):
     class Meta:
