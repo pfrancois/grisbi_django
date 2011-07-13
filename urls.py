@@ -40,8 +40,8 @@ urlpatterns += patterns('mysite.gsb.views',
 urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
-                        url(r'^cpt/(?P<cpt_id>\d+)/new$','ope_new',name="gsb_cpt_ope_new"),
-                        url(r'^cpt/(?P<cpt_id>\d+)/new_vir$','vir_new',name="gsb_cpt_vir_new"),
+                        url(r'^compte/(?P<cpt_id>\d+)/new$','ope_new',name="gsb_cpt_ope_new"),
+                        url(r'^compte/(?P<cpt_id>\d+)/vir/new$','vir_new',name="gsb_cpt_vir_new"),
                         )
 
 #les vues relatives aux tiers

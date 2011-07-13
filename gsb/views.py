@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from mysite.gsb.models import *
+from mysite.gsb.shortcuts import *
 import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
@@ -115,11 +116,8 @@ def ope_detail(request, pk):
         if request.method == 'POST':
             form = gsb_forms.VirementForm(request.POST)
             if form.is_valid():
-                #TODO definir le nom en fonction des comptes
-                #TODO gestion des devises ou des non devises
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
             else:
-                #TODO template a faire
                 return render(request,'gsb/vir.django.html',
                 {   'titre_long':u'modification virement interne %s'%ope.id,
                    'titre':u'modification',
@@ -128,7 +126,8 @@ def ope_detail(request, pk):
                     'ope':ope}
                 )
         else:
-            form = gsb_forms.VirementForm(instance=ope)
+            #initialisation form
+            form = gsb_forms.VirementForm(Virement(ope).init_form())
             return render(request,'gsb/vir.django.html',
                 {   'titre':u'modification',
                    'titre_long':u'modification virement interne %s'%ope.id,

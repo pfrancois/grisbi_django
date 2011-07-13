@@ -6,14 +6,15 @@ import decimal
 class Ex_jumelle_neant(Exception): pass
 
 class Virement(object):
-    def __init(self,ope_id=None):
+    def __init__(self,ope=None):
         if ope:
-            self.origine=Ope.objects.get(id=ope_id)
-            self.destination=self.origine.jumelle
-            if not isintance(self.destination,Ope):
+            self.origine=ope
+            self.dest=self.origine.jumelle
+            if not isinstance(self.dest,Ope):
                 raise Ex_jumelle_neant(self.origine.id)
+            self._init=True
         else:
-            pass
+            self._init=False
     def setdate(self,date):
         self.origine.date=date
         self.dest.date=date
@@ -49,16 +50,19 @@ class Virement(object):
         return self.origine.pointe
     pointe=property(getpointe,setpointe)
 
+    def setrapp(self,r):
+        self.origine.rapp=r
+        self.dest.rapp=r
+    def getrapp(self):
+        return self.origin
+
     def save(self):
+        nom_tiers="%s => %s" %(self.origine.compte.nom, self.dest.compte.nom)
+        t,created=Tiers.objects.get_or_create(nom=nom_tiers,defaults={'nom':nom_tiers})
+        self.origine.tiers=t
+        self.origine.tiers=t
         self.origine.save()
         self.dest.save()
-
-    def setrapp(self,p):
-        self.origine.rapp=p
-        self.dest.rapp=p
-    def getrapp(self):
-        return self.origine.rapp
-    rapp=property(getrapp,setrapp)
 
     def create(self,compte_origine, compte_dest, montant, date, notes=""):
         self.origine=Ope()
@@ -79,3 +83,34 @@ class Virement(object):
         self.origine.delete()
         self.dest.delete()
 
+    def init_form(self):
+        """renvoit les donnnés afin d'intialiser virementform"""
+        if self._init:
+            t={'compte_origine':self.origine.compte.id,
+               'compte_destination':self.dest.compte.id,
+               'montant':self.montant,
+               'date':self.date,
+               'notes':self.notes,
+               'pointe':self.pointe,
+               'piece_comptable_compte_origine':self.origine.piece_comptable,
+               'piece_comptable_compte_destination':self.dest.piece_comptable}
+            if self.origine.moyen:
+                t['moyen_origine']=self.origine.moyen.id
+            else:
+                t['moyen_origine']=None
+            if self.dest.moyen:
+                t['moyen_destination']=self.dest.moyen.id
+            else:
+                t['moyen_destination']=None
+            if self.origine.rapp:
+                t['rapp_origine']=self.origine.rapp.id
+            else:
+                t['rapp_origine']=None
+            if self.dest.rapp:
+                t['rapp_destination']=self.dest.rapp.id
+            else:
+                t['rapp_destination']=None
+
+        else:
+            raise Exception('attention, on ne peut intialiser un form que si virement est bound')
+        return t

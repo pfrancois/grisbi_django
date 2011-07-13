@@ -31,8 +31,6 @@ class OperationForm(BaseForm):
         model=Ope
         exclude=('mere','jumelle')
 
-
-
 class VirementForm(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
@@ -43,11 +41,11 @@ class VirementForm(forms.Form):
     montant=forms.DecimalField(localize=True,initial='0')
     date=forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y','%d%m%y','%d%m%Y'),initial=datetime.date.today)
     notes=forms.CharField(widget=forms.Textarea,required=False)
-    pointe_origine=forms.BooleanField(required=False)
-    rapp_origine=forms.ModelChoiceField(Rapp.objects.all(),required=False)
-    pointe_destination=forms.BooleanField(required=False)
-    rapp_destination=forms.ModelChoiceField(Rapp.objects.all(),required=False)
-    piece_comptable=forms.CharField(required=False)
+    pointe=forms.BooleanField(required=False)
+    rapp_origine=forms.CharField(widget=forms.HiddenInput,required=False)
+    rapp_destination=forms.CharField(widget=forms.HiddenInput,required=False)
+    piece_comptable_compte_origine=forms.CharField(required=False)
+    piece_comptable_compte_destination=forms.CharField(required=False)
     def clean(self):
         data=self.cleaned_data
         if data.get("compte_origine") == data.get("compte_destination"):
@@ -62,10 +60,11 @@ class VirementForm(forms.Form):
         v.create(self.cleaned_data['compte_origine'],self.cleaned_data['compte_destination'],self.cleaned_data['montant'],self.cleaned_data['date'],self.cleaned_data['notes'])
         v.origine.moyen=self.cleaned_data['moyen_origine']
         v.dest.moyen=self.cleaned_data['moyen_destination']
-        v.origine.pointe=self.cleaned_data['pointe_origine']
-        v.dest.pointe=self.cleaned_data['pointe_destination']
-        v.origine.rapp=self.cleaned_data['rapp_origine']
-        v.dest.rapp=self.cleaned_data['rapp_destination']
+        v.pointe=self.cleaned_data['pointe']
+        v.origine.rapp=Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
+        v.dest.rapp=Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
+        v.origine.piece_comptable=self.cleaned_data['piece_comptable_compte_origine']
+        v.dest.piece_comptable=self.cleaned_data['piece_comptable_compte_destination']
         v.save()
         return v.origine
 
