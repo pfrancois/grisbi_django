@@ -47,66 +47,63 @@ def index(request):
 
 def cpt_detail(request, cpt_id):
     c = get_object_or_404(Compte, pk=cpt_id)
-    if c.type in ('t',):
-        return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
-    t = loader.get_template('gsb/cpt_detail.django.html')
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
-    q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
-    nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
-    nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
-    dev=Generalite.dev_g()
-    return HttpResponse(
-        t.render(
-            RequestContext(
-                request,
-                {
-                    'compte': c,
-                    'list_ope': q,
-                    'nbrapp': nb_ope_rapp,
-                    'nbvielles': nb_ope_vielles,
-                    'titre': c.nom,
-                    'solde': c.solde(),
-                    'date_limite':date_limite,
-                    'dev':dev,
-                }
-
+    if c.type in ('t',):
+        c = get_object_or_404(Compte_titre, pk=cpt_id)
+        titre=True
+    else:
+        titre=False
+    t = loader.get_template('gsb/cpt_detail.django.html')
+    if not titre:
+        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
+        nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+        nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
+        dev=Generalite.dev_g()
+        return HttpResponse(
+            t.render(
+                RequestContext(
+                    request,
+                    {
+                        'compte': c,
+                        'list_ope': q,
+                        'nbrapp': nb_ope_rapp,
+                        'nbvielles': nb_ope_vielles,
+                        'titre': c.nom,
+                        'solde': c.solde(),
+                        'date_limite':date_limite,
+                        'dev':dev,
+                    }
+                )
             )
         )
-    )
-
-
-def cpt_titre_detail(request, cpt_id):
-    c = get_object_or_404(Compte_titre, pk=cpt_id)
-    if c.type not in ('t'):
-        return HttpResponseRedirect(reverse('gsb.views.index'))
-    titre_sans_sum = Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
-    titres = []
-    total_titres = 0
-    for t in titre_sans_sum:
-        mise = t.ope_set.filter(mere=None,).exclude(cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
-        pmv = t.ope_set.filter(mere=None,cat__nom='plus values latentes').aggregate(sum=models.Sum('montant'))['sum']
-        total_titres = total_titres + mise + pmv
-        titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'mise': mise, 'pmv': pmv, 'total': mise + pmv})
-    especes = c.solde() - total_titres
-    dev=Generalite.dev_g()
-    template = loader.get_template('gsb/cpt_placement.django.html')
-    return HttpResponse(
-        template.render(
-            RequestContext(
-                request,
-                {
-                    'compte': c,
-                    'titre': c.nom,
-                    'solde': c.solde(),
-                    'titres': titres,
-                    'especes': especes,
-                    'dev':dev,
-                }
+    else:
+        #recupere la liste des titres qui sont utilise dans ce compte
+        titre_sans_sum = Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
+        titres = []
+        total_titres = 0
+        for t in titre_sans_sum:
+            invest = t.ope_set.filter(mere=None,).aggregate(sum=models.Sum('montant'))['sum']
+            total_titres = total_titres + mise + pmv
+            titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': pmv, 'total': mise + invest})
+        especes = c.solde() - total_titres
+        dev=Generalite.dev_g()
+        template = loader.get_template('gsb/cpt_placement.django.html')
+        return HttpResponse(
+            template.render(
+                RequestContext(
+                    request,
+                    {
+                        'compte': c,
+                        'titre': c.nom,
+                        'solde': c.solde(),
+                        'titres': titres,
+                        'especes': especes,
+                        'dev':dev,
+                    }
+                )
             )
         )
-    )
 
-from django.db import connection
 @login_required
 def ope_detail(request, pk):
     ope = get_object_or_404(Ope, pk=pk)

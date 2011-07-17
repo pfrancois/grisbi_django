@@ -41,7 +41,7 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length=40,unique=True)
     isin = models.CharField(max_length=60, unique=True)
-    tiers = models.OneToOneField(Tiers,null=True,blank=True,default=None)
+    tiers = models.OneToOneField(Tiers)
     type = models.CharField(max_length=60, choices=typestitres,default='ZZZ')
     class Meta:
         db_table = u'titre'
@@ -212,9 +212,6 @@ class Compte(models.Model):
         return nb_change
     @models.permalink
     def get_absolute_url(self):
-        if self.type == 't':
-            return ('cpt_titre_detail',(),{'pk':str(self.id)})
-        else:
             return ('cpt_detail',(),{'pk':str(self.id)})
 
 class Compte_titre(Compte):
@@ -227,6 +224,7 @@ class Compte_titre(Compte):
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
         if isinstance(titre,Titre):
             #ajout de l'operation dans le compte_espece ratache
+            
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
                                 tiers=titre.tiers,
@@ -297,7 +295,6 @@ class Compte_titre(Compte):
     def revenu(self,titre,montant=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
-
         if isinstance(titre,Titre):
             #ajout des titres dans portefeuille
             titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin).latest('date')
@@ -327,8 +324,8 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def solde(self, devise_generale=False):
-        solde=super(Compte_titre,self).solde()
-        return solde
+        solde_espece=super(Compte_titre,self).solde()
+        return solde_espece
 
     @transaction.commit_on_success
     def reaffecte(self,new):
@@ -341,9 +338,6 @@ class Compte_titre(Compte):
         return nb_change
     @models.permalink
     def get_absolute_url(self):
-        if self.type == 't':
-            return ('cpt_titre_detail',(),{'pk':str(self.id)})
-        else:
             return ('cpt_detail',(),{'pk':str(self.id)})
 
 class Titres_detenus(models.Model):

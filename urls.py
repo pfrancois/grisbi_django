@@ -24,7 +24,7 @@ urlpatterns += patterns('mysite.gsb',
 urlpatterns += patterns('mysite.gsb.outils',
                         (r'^options$', 'options_index'),
                         (r'^options/import$', 'import_file'),
-                        (r'^options/modif_gen$', 'modif_gen'),
+                        url(r'^options/modif_gen$', 'modif_gen',name='modification__preference_generalite'),
                         )
 urlpatterns += patterns('mysite.gsb',
                         (r'^options/xml$', 'gsb_0_5_0.export'),
@@ -39,7 +39,6 @@ urlpatterns += patterns('mysite.gsb.views',
 #les vues relatives aux comptes
 urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
-                        (r'^compte_titre/(?P<cpt_id>\d+)/$', 'cpt_titre_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/new$','ope_new',name="gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$','vir_new',name="gsb_cpt_vir_new"),
                         )

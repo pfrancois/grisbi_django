@@ -54,8 +54,9 @@ class Compte_titre_admin(admin.ModelAdmin):
 
 class Tiers_admin(admin.ModelAdmin):
     list_editable=('nom','notes')
-    list_display=('id','nom','notes')
+    list_display=('id','nom','notes','is_titre')
     list_display_links=('id',)
+    list_filter=('is_titre',)
 
 class ech_admin(admin.ModelAdmin):
     list_display=('id','compte', 'date', 'montant', 'tiers', 'moyen','cat')

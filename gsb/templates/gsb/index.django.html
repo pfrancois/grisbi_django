@@ -25,8 +25,8 @@
         {% for cpt in liste_cpt_pl %}
             <tr class="item padding">
                 <td class="cptLabel">
-                <a href="{% url gsb.views.cpt_titre_detail cpt.id %}">{{ cpt.nom }} {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
-                <td class="cptSolde"><a href="{% url gsb.views.cpt_titre_detail cpt.id %}">{{ cpt.solde|cur:dev }}</a></td>
+                <a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.nom }} {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
+                <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur:dev }}</a></td>
             </tr>
         {% empty %}
             <tr class="item padding">
