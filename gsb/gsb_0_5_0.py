@@ -465,10 +465,10 @@ def _export():
                 xml_sub.set('Change', Format.float(0))
             else:
                 xml_sub.set('Passage_euro', "0")#NOT IN BDD
-                xml_sub.set('Date_dernier_change', Format.date(c.last_cours().date))
+                xml_sub.set('Date_dernier_change', Format.date(c.last_cours.date))
                 xml_sub.set('Rapport_entre_devises', "1")#NOT IN BDD
                 xml_sub.set('Devise_en_rapport', '1')#NOT IN BDD
-                xml_sub.set('Change', Format.float(c.last_cours().valeur))
+                xml_sub.set('Change', Format.float(c.last_cours.valeur))
     else:
         et.SubElement(xml_generalite, "Nb_devises").text = "1"
         et.SubElement(xml_generalite, "No_derniere_devise").text = '1'
@@ -483,7 +483,7 @@ def _export():
         xml_sub.set('Rapport_entre_devises', "0")#NOT IN BDD
         xml_sub.set('Devise_en_rapport', '0')#NOT IN BDD
         xml_sub.set('Change', Format.float(0))
-        
+
     #raison pour lesquelles il y a des attributs non modifiables
     #isocode est par construction egale à code
     #Passage_euro: plus besoin

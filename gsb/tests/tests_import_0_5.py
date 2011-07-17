@@ -159,7 +159,7 @@ class importtest(TestCase):
     def test_rapp(self):
         obj = Rapp.objects.get(id=1)
         self.assertEquals(obj.nom, 'CBO1')
-        self.assertEquals(obj.compte(), 1)
+        self.assertEquals(obj.compte, 1)
         self.assertEquals(obj.date, datetime.date(2010, 5, 31))
         self.assertEquals(obj.solde(), 10)
         self.assertEquals(obj.ope_set.all().count(), 1)

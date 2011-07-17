@@ -85,7 +85,7 @@ def cpt_detail(request, cpt_id):
             invest = t.ope_set.filter(mere=None,).aggregate(sum=models.Sum('montant'))['sum']
             total_titres = total_titres + mise + pmv
             titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': pmv, 'total': mise + invest})
-        especes = c.solde() - total_titres
+        especes = c.solde - total_titres
         dev=Generalite.dev_g()
         template = loader.get_template('gsb/cpt_placement.django.html')
         return HttpResponse(
@@ -211,12 +211,9 @@ def vir_new(request, cpt_id=None):
     if request.method == 'POST':
         form = gsb_forms.VirementForm(request.POST)
         if form.is_valid():
-            #TODO definir le nom en fonction des comptes
-            #TODO gestion des devises ou des non devises
             ope=form.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
         else:
-            #TODO template a faire
             return render(request,'gsb/vir.django.html',
             {   'titre_long':u'création virement interne ',
                'titre':u'Création',

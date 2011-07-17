@@ -8,6 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+import logging
 
 class Tiers(models.Model):
     nom = models.CharField(max_length=40,unique=True)
@@ -26,8 +27,8 @@ class Tiers(models.Model):
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
+        nb_tiers_change=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
-        nb_tiers_change+=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
         return nb_tiers_change
 
 class Titre(models.Model):
@@ -41,7 +42,7 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length=40,unique=True)
     isin = models.CharField(max_length=60, unique=True)
-    tiers = models.OneToOneField(Tiers)
+    tiers = models.OneToOneField(Tiers,null=True, blank=True,editable=False)
     type = models.CharField(max_length=60, choices=typestitres,default='ZZZ')
     class Meta:
         db_table = u'titre'
@@ -49,25 +50,38 @@ class Titre(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.nom, self.isin)
+    @property
     def last_cours(self):
         return self.cours_set.latest()
     @staticmethod
-    def devise():
+    def devises():
         return Titre.objects.filter(type='DEV')
 
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Compte.objects.select_related().filter(devise=self).update(devise=new)
+        nb_change+=Tiers.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Histo_ope_titres.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Echeance.objects.select_related().filter(devise=self).update(devise=new)
         nb_change+=Ope.objects.select_related().filter(devise=self).update(devise=new)
-        nb_change+=Tiers.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Generalite.objects.select_related().filter(devise=self).update(devise=new)
         self.delete()
         return nb_change
 
+    def save(self, *args, **kwargs):
+        if (not self.tiers) and (self.type!='DEV'):
+            logger=logging.getLogger('gsb')
+
+            tiers,created=Tiers.objects.get_or_create(nom='titre_ %s'%self.nom,defaults={"nom":'titre_ %s'%self.nom})
+            if created:
+                tiers.is_titre=True
+                tiers.notes="%s@%s" % (self.isin, self.type)#on met les notes qui vont bien
+                tiers.save()
+            self.tiers=tiers
+            logger.warning(self.tiers)
+        super(Titre, self).save(*args, **kwargs)
 
 class Cours(models.Model):
     valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
@@ -91,7 +105,6 @@ class Banque(models.Model):
     class Meta:
         db_table = 'banque'
         ordering = ['nom']
-
 
     def __unicode__(self):
         return self.nom
@@ -199,10 +212,11 @@ class Compte(models.Model):
             solde = req['solde'] + self.solde_init
         if devise_generale:
             if self.devise.isin != settings.DEVISE_GENERALE:
-                solde = solde / self.devise.last_cours().valeur
+                solde = solde / self.devise.last_cours.valeur
             return solde
         else:
             return solde
+
     @transaction.commit_on_success
     def reaffecte(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
@@ -210,6 +224,7 @@ class Compte(models.Model):
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
+
     @models.permalink
     def get_absolute_url(self):
             return ('cpt_detail',(),{'pk':str(self.id)})
@@ -224,7 +239,7 @@ class Compte_titre(Compte):
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
         if isinstance(titre,Titre):
             #ajout de l'operation dans le compte_espece ratache
-            
+
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
                                 tiers=titre.tiers,
@@ -322,7 +337,6 @@ class Compte_titre(Compte):
         else:
             raise Exception('attention ceci n\'est pas un titre')
 
-    @transaction.commit_on_success
     def solde(self, devise_generale=False):
         solde_espece=super(Compte_titre,self).solde()
         return solde_espece
@@ -352,8 +366,9 @@ class Titres_detenus(models.Model):
         ordering = ['compte']
     def __unicode__(self):
         return"%s %s dans %s"%(self.nombre,self.titre.nom,self.compte)
+    @property
     def valeur(self):
-        return self.nombre*self.titre.objects.get(isin=self.isin).cours_set.latest().valeur
+        return self.nombre*self.titre.objects.get(isin=self.isin).last_cours.valeur
 
 class Histo_ope_titres(models.Model):
     titre=models.ForeignKey(Titre)
@@ -405,12 +420,13 @@ class Rapp(models.Model):
 
     def __unicode__(self):
         return self.nom
-
+    @property
     def compte(self):#petit raccourci mais normalement, c'est bon. on prend le compte de la premiere ope
         if self.ope_set.all():
             return self.ope_set.all()[0].compte.id
         else:
             raise TypeError
+
     def solde(self, devise_generale=False):
         req = self.ope_set.aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
@@ -418,7 +434,7 @@ class Rapp(models.Model):
         else:
             solde = req['solde']
         if devise_generale:
-            solde = solde / self.compte().devise.last_cours().valeur
+            solde = solde / self.compte.devise.last_cours.valeur
             return solde
         else:
             return solde
@@ -446,7 +462,7 @@ class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    devise = models.ForeignKey(Titre, default=None)
+    devise = models.ForeignKey(Titre, default=None,related_name='devise_set')
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,verbose_name=u"catégorie")
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
