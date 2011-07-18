@@ -3,17 +3,20 @@ from mysite.gsb.models import *
 from django.contrib import admin
 
 class Cat_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     list_editable=('nom',)
     list_display=('id','nom','type')
     list_display_links=('id',)
 
 class Ib_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     list_editable=('nom',)
     list_display=('id','nom','type')
     list_display_links=('id',)
 
 
 class Compte_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     fieldsets = [
             (None, {'fields': ('nom', 'type', 'devise', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
@@ -24,6 +27,7 @@ class Compte_admin(admin.ModelAdmin):
 
 
 class Ope_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     fieldsets = [
             (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen','cat')}),
             (u'informations diverses', {'fields': ('date_val', 'num_cheque', 'notes', 'exercice','ib'), 'classes': ['collapse']}),
@@ -40,19 +44,23 @@ class cours_admin(admin.ModelAdmin):
     list_filter=('date','titre')
 
 class Titre_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     list_display=('nom','isin','last_cours')
     list_filter=('type',)
 
 class moyen_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     fields = ['type','nom']
 
 class Histo_ope_titres_admin(admin.ModelAdmin):
     readonly_fields=('titre','compte','nombre','date')
 
 class Compte_titre_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     list_display=('nom','solde')
 
 class Tiers_admin(admin.ModelAdmin):
+    #TODO 2 action pour fusionnner
     list_editable=('nom','notes')
     list_display=('id','nom','notes','is_titre')
     list_display_links=('id',)

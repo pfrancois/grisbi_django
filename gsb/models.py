@@ -8,6 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+from mysite.gsb.shortcuts import *
 import logging
 
 class Tiers(models.Model):
@@ -51,19 +52,22 @@ class Titre(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.nom, self.isin)
     @property
-    def last_cours_valeur(self):
+    def last_cours(self):
+        """renvoie le dernier cours"""
         return self.cours_set.latest().valeur
     @property
     def last_cours_date(self):
+        """renvoie la date du dernier cours"""
         return self.cours_set.latest().date
 
     @staticmethod
     def devises():
+        """liste des devises"""
         return Titre.objects.filter(type='DEV')
 
     @transaction.commit_on_success
     def fusionne(self,new):
-
+        """fusionnne ce titre avec le titre new"""
         nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Tiers.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
@@ -217,7 +221,7 @@ class Compte(models.Model):
             solde = req['solde'] + self.solde_init
         if devise_generale:
             if self.devise.isin != settings.DEVISE_GENERALE:
-                solde = solde / self.devise.last_cours.valeur
+                solde = solde / self.devise.last_cours
             return solde
         else:
             return solde
@@ -233,6 +237,10 @@ class Compte(models.Model):
     @models.permalink
     def get_absolute_url(self):
             return ('cpt_detail',(),{'pk':str(self.id)})
+
+    def save(self, *args, **kwargs):
+        if self.type=='t':
+            raise gsb_exc("il faut creer un compte titre")
 
 class Compte_titre(Compte):
     titres_detenus = models.ManyToManyField(Titre,through='Titres_detenus')
@@ -355,9 +363,16 @@ class Compte_titre(Compte):
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
+
     @models.permalink
     def get_absolute_url(self):
             return ('cpt_detail',(),{'pk':str(self.id)})
+
+    def save(self, *args, **kwargs):
+        if self.type!='t':
+            self.type='t'
+        super(Compte_titre, self).save(*args, **kwargs)
+
 
 class Titres_detenus(models.Model):
     titre=models.ForeignKey(Titre)
@@ -373,7 +388,7 @@ class Titres_detenus(models.Model):
         return"%s %s dans %s"%(self.nombre,self.titre.nom,self.compte)
     @property
     def valeur(self):
-        return self.nombre*self.titre.objects.get(isin=self.isin).last_cours.valeur
+        return self.nombre*self.titre.objects.get(isin=self.isin).last_cours
 
 class Histo_ope_titres(models.Model):
     titre=models.ForeignKey(Titre)
@@ -387,13 +402,8 @@ class Histo_ope_titres(models.Model):
         ordering = ['compte']
 
 class Moyen(models.Model):
-    typesdep = (
-    ('v', u'virement'),
-    ('d', u'depense'),
-    ('r', u'recette'),
-    )
     nom = models.CharField(max_length=20,unique=True)
-    type = models.CharField(max_length=1, choices=typesdep,default='d')
+    type = models.CharField(max_length=1, choices=Cat.typesdep,default='d')
     class Meta:
         db_table = 'moyen'
         verbose_name = u"moyen de paiment"
@@ -439,7 +449,7 @@ class Rapp(models.Model):
         else:
             solde = req['solde']
         if devise_generale:
-            solde = solde / self.compte.devise.last_cours.valeur
+            solde = solde / self.compte.devise.last_cours
             return solde
         else:
             return solde
@@ -467,7 +477,7 @@ class Echeance(models.Model):
     date = models.DateField(default=datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    devise = models.ForeignKey(Titre, default=None,related_name='devise_set')
+    devise = models.ForeignKey(Titre, related_name='devise_set')
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,verbose_name=u"catégorie")
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
@@ -490,7 +500,18 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         return u"%s" % (self.id,)
-
+    def save(self, *args, **kwargs):
+        if not self.moyen:
+            if self.compte.moyen_credit_defaut and self.montant >= 0:
+                self.moyen=self.compte.moyen_credit_defaut
+            if self.compte.moyen_debit_defaut and self.montant <= 0:
+                self.moyen=self.compte.moyen_debit_defaut
+        if not self.moyen_virement and self.compte_virement:
+            if self.compte_virement.moyen_credit_defaut and self.montant <= 0:
+                self.moyen_virement=self.compte_virement.moyen_credit_defaut
+            if self.compte_virement.moyen_debit_defaut and self.montant >= 0:
+                self.moyen_virement=self.compte_virement.moyen_debit_defaut
+        super(Echeance, self).save(*args, **kwargs)
 
 class Generalite(models.Model):
     titre = models.CharField(max_length=120, blank=True, default="isbi")
@@ -572,3 +593,14 @@ class Ope(models.Model):
         #verification qu'il n'y ni poitee ni rapprochee
         if self.pointe is not None and self.rapp is not None:
              raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
+
+    def save(self, *args, **kwargs):
+        if not self.moyen:
+            if self.compte.moyen_credit_defaut and self.montant >= 0:
+                self.moyen=self.compte.moyen_credit_defaut
+            if self.compte.moyen_debit_defaut and self.montant <= 0:
+                self.moyen=self.compte.moyen_debit_defaut
+        super(Ope, self).save(*args, **kwargs)
+
+class gsb_exc(Exception):
+    pass
