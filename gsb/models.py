@@ -25,7 +25,7 @@ class Tiers(models.Model):
         return self.nom
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
@@ -51,36 +51,41 @@ class Titre(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.nom, self.isin)
     @property
-    def last_cours(self):
-        return self.cours_set.latest()
+    def last_cours_valeur(self):
+        return self.cours_set.latest().valeur
+    @property
+    def last_cours_date(self):
+        return self.cours_set.latest().date
+
     @staticmethod
     def devises():
         return Titre.objects.filter(type='DEV')
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
+
         nb_change=Cours.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change+=Compte.objects.select_related().filter(devise=self).update(devise=new)
         nb_change+=Tiers.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
         nb_change+=Histo_ope_titres.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change+=Echeance.objects.select_related().filter(devise=self).update(devise=new)
-        nb_change+=Ope.objects.select_related().filter(devise=self).update(devise=new)
-        nb_change+=Generalite.objects.select_related().filter(devise=self).update(devise=new)
+        if self.type=='DEV':#gestion specifique des devises
+            nb_change+=Compte.objects.select_related().filter(devise=self).update(devise=new)
+            nb_change+=Echeance.objects.select_related().filter(devise=self).update(devise=new)
+            nb_change+=Ope.objects.select_related().filter(devise=self).update(devise=new)
+            nb_change+=Generalite.objects.select_related().filter(devise=self).update(devise=new)
+        #on doit aussi reaffecter le tiers associe
+        self.tiers.fusionne(new.tiers)
         self.delete()
         return nb_change
 
     def save(self, *args, **kwargs):
         if (not self.tiers) and (self.type!='DEV'):
-            logger=logging.getLogger('gsb')
-
             tiers,created=Tiers.objects.get_or_create(nom='titre_ %s'%self.nom,defaults={"nom":'titre_ %s'%self.nom})
             if created:
                 tiers.is_titre=True
                 tiers.notes="%s@%s" % (self.isin, self.type)#on met les notes qui vont bien
                 tiers.save()
             self.tiers=tiers
-            logger.warning(self.tiers)
         super(Titre, self).save(*args, **kwargs)
 
 class Cours(models.Model):
@@ -110,7 +115,7 @@ class Banque(models.Model):
         return self.nom
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Compte.objects.select_related().filter(banque=self).update(banque=new)
         self.delete()
         return nb_change
@@ -132,7 +137,7 @@ class Cat(models.Model):
     def __unicode__(self):
         return self.nom
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(cat=self).update(cat=new)
         nb_change+=Ope.objects.select_related().filter(cat=self).update(cat=new)
         self.delete()
@@ -151,7 +156,7 @@ class Ib(models.Model):
     def __unicode__(self):
         return self.nom
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(ib=self).update(ib=new)
         nb_change+=Ope.objects.select_related().filter(ib=self).update(ib=new)
         self.delete()
@@ -169,7 +174,7 @@ class Exercice(models.Model):
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(exercice=self).update(exercice=new)
         nb_change+=Ope.objects.select_related().filter(exercice=self).update(exercice=new)
         self.delete()
@@ -218,7 +223,7 @@ class Compte(models.Model):
             return solde
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
@@ -342,7 +347,7 @@ class Compte_titre(Compte):
         return solde_espece
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Histo_op_titres.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Titre_detenus.objects.select_related().filter(compte=self).update(compte=new)
@@ -399,7 +404,7 @@ class Moyen(models.Model):
         return self.nom
 
     @transaction.commit_on_success
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
         nb_change+=Compte.objects.select_related().filter(moyen_debit_defaut=self).update(moyen_debit_defaut=new)
         nb_change+=Echeance.objects.select_related().filter(moyen=self).update(moyen=new)
@@ -439,7 +444,7 @@ class Rapp(models.Model):
         else:
             return solde
 
-    def reaffecte(self,new):
+    def fusionne(self,new):
         nb_change=Compte.objects.select_related().filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
         self.delete()
         return nb_change
