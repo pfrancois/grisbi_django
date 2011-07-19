@@ -6,9 +6,8 @@ test en rapport avec les titres
 from django.test import TestCase
 from mysite.gsb.import_gsb import *
 import decimal
-from django.conf import settings
 
-class titre_test(TestCase):
+class test_titre(TestCase):
     def setUp(self):
         self.tiers1=Tiers.objects.create(nom='tiers1')
         self.tiers2=Tiers.objects.create(nom='tiers2')
@@ -39,15 +38,15 @@ class compte_titretest(TestCase):
         self.tiers2=Tiers.objects.create(nom='tiers2')
         self.titre1=Titre.objects.create(nom="t1", isin="1", type='ACT')
         self.titre2=Titre.objects.create(nom="t2", isin="2", type='ACT')
+        self.devise1=Titre.objects.create(nom='euro',isin='EUR',type='DEV')
 
     def test_1(self):
-        devise=self.devise
-        titre_sg=self.titre_sg
+        devise=self.devise1
+        titre_sg=self.titre1
         c = Compte_titre(nom='test',devise=devise, type='t')
         c.save()
         self.assertEqual(c.nom, u'test')
         c.achat(titre=titre_sg,nombre=20)
-        self.assertEqual
 
 class reaffacte_test(TestCase):
     def setUp(self):
@@ -79,5 +78,5 @@ class reaffacte_test(TestCase):
         self.rapp2=Rapp.objects.create(nom='r2')
         self.ech1=Echeance.objects.create(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,compte_virement=self.compte3,notes='1')
         self.ech2=Echeance.objects.create(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,compte_virement=self.compte3,notes='2')
-        self.ope1=Ope.objects.createcreate(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,notes='1')
-        self.ope2=Ope.objects.createcreate(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,notes='2')
+        self.ope1=Ope.objects.create(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,notes='1')
+        self.ope2=Ope.objects.create(compte=self.compte1,montant='10',devise=self.devise1,tiers=self.tiers1,cat=self.cat1,notes='2')

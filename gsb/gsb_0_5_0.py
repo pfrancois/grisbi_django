@@ -65,8 +65,8 @@ class Format:
 
     type = staticmethod(type)
 
-    def max(object, defaut='0', champ='id'):
-        q = object.aggregate(id=Max(champ))['id']
+    def max(o, defaut='0', champ='id'):
+        q = o.aggregate(id=Max(champ))['id']
         if q is None:
             return defaut
         else:

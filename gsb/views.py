@@ -83,8 +83,8 @@ def cpt_detail(request, cpt_id):
         total_titres = 0
         for t in titre_sans_sum:
             invest = t.ope_set.filter(mere=None,).aggregate(sum=models.Sum('montant'))['sum']
-            total_titres = total_titres + mise + pmv
-            titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': pmv, 'total': mise + invest})
+            total=0
+            titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': pmv, 'total': total})
         especes = c.solde - total_titres
         dev=Generalite.dev_g()
         template = loader.get_template('gsb/cpt_placement.django.html')

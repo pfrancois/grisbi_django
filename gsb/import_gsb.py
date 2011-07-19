@@ -16,7 +16,7 @@ import decimal
 import logging
 
 liste_type_cat = Cat.typesdep
-liste_type_moyen = Moyen.typesdep
+liste_type_moyen = Cat.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso

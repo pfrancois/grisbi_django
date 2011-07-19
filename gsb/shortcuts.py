@@ -4,6 +4,7 @@ import datetime
 import decimal
 
 class Ex_jumelle_neant(Exception): pass
+class gsb_exc(Exception): pass
 
 class Virement(object):
     def __init__(self,ope=None):
@@ -54,7 +55,7 @@ class Virement(object):
         self.origine.rapp=r
         self.dest.rapp=r
     def getrapp(self):
-        return self.origin
+        return self.origine
 
     def save(self):
         nom_tiers="%s => %s" %(self.origine.compte.nom, self.dest.compte.nom)

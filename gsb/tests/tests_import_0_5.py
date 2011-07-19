@@ -99,7 +99,7 @@ class importtest(TestCase):
         self.assertEqual(obj.nom, u'imputation_credit:')
         self.assertEqual(obj.type, 'r')
 
-    def test_ib(self):
+    def test_ib2(self):
         obj = Ib.objects.get(id=3)
         self.assertEqual(obj.nom, u'imputation_debit:sous_imputation')
         self.assertEqual(obj.type, 'd')

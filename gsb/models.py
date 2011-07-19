@@ -4,9 +4,8 @@ from django.db import models
 import datetime
 import decimal
 from django.db import transaction
-from django.db import models
 from django.conf import settings
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from mysite.gsb.shortcuts import *
 import logging
@@ -28,7 +27,7 @@ class Tiers(models.Model):
     @transaction.commit_on_success
     def fusionne(self,new):
         nb_tiers_change=Echeance.objects.select_related().filter(tiers=self).update(tiers=new)
-        nb_tiers_change=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
+        nb_tiers_change+=Titre.objects.select_related().filter(tiers=self).update(tiers=new)
         nb_tiers_change+=Ope.objects.select_related().filter(tiers=self).update(tiers=new)
         return nb_tiers_change
 
@@ -236,7 +235,7 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-            return ('cpt_detail',(),{'pk':str(self.id)})
+        return ('cpt_detail',(),{'pk':str(self.id)})
 
     def save(self, *args, **kwargs):
         if self.type=='t':
@@ -266,7 +265,7 @@ class Compte_titre(Compte):
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
                                 cat=cat_frais,
-                                notes="frais achat %s"%(nombre,prix),
+                                notes="frais achat %s@%s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
                                 )
@@ -287,7 +286,7 @@ class Compte_titre(Compte):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
         if isinstance(titre,Titre):
-            #ajout des titres dans portefeuille
+            #extraction des titres dans portefeuille
             try:
                 titre_detenu=Titres_detenus.objects.get(titre=titre,compte=self)
                 titre_detenu.nombre=titre_detenu.nombre-decimal.Decimal(str(nombre))
@@ -309,7 +308,7 @@ class Compte_titre(Compte):
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
                                 cat=cat_frais,
-                                notes="frais vente %s"%(nombre,prix),
+                                notes="frais vente %s@s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
                                 )
@@ -320,15 +319,18 @@ class Compte_titre(Compte):
             raise Exception('attention ceci n\'est pas un titre')
 
     @transaction.commit_on_success
-    def revenu(self,titre,montant=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
+    def revenu(self,titre,nombre,prix=1,date=datetime.date.today(),frais='0.0',virement_vers=None):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
         if isinstance(titre,Titre):
-            #ajout des titres dans portefeuille
-            titre_detenu=self.titres_detenus_set.filter(titres__isin=titre.isin).latest('date')
+            #extraction des titres dans portefeuille
+            try:
+                Titres_detenus.objects.get(titre=titre,compte=self)
+            except Titres_detenus.DoesNotExist:
+                raise Titre.doesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(montant)),
+                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
                                 tiers=titre.tiers,
                                 cat=cat_ost,
                                 notes="revenu",
@@ -340,7 +342,7 @@ class Compte_titre(Compte):
                                 montant=decimal.Decimal(str(frais))*-1,
                                 tiers=titre.tiers,
                                 cat=cat_frais,
-                                notes="frais revenu %s"%(nombre,prix),
+                                notes="frais revenu %s@%s"%(nombre,prix),
                                 moyen=None,
                                 automatique=True
                                 )
@@ -366,7 +368,7 @@ class Compte_titre(Compte):
 
     @models.permalink
     def get_absolute_url(self):
-            return ('cpt_detail',(),{'pk':str(self.id)})
+        return ('cpt_detail',(),{'pk':str(self.id)})
 
     def save(self, *args, **kwargs):
         if self.type!='t':
@@ -592,7 +594,7 @@ class Ope(models.Model):
         super(Ope,self).clean()
         #verification qu'il n'y ni poitee ni rapprochee
         if self.pointe is not None and self.rapp is not None:
-             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
+            raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
 
     def save(self, *args, **kwargs):
         if not self.moyen:
@@ -602,5 +604,4 @@ class Ope(models.Model):
                 self.moyen=self.compte.moyen_debit_defaut
         super(Ope, self).save(*args, **kwargs)
 
-class gsb_exc(Exception):
-    pass
+
