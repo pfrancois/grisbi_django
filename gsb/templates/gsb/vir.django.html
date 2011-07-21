@@ -4,19 +4,20 @@
 <form id='form1' action="" method="post">
     {% csrf_token %}
     <fieldset class="operationMainTable">
-    <table>{{ form }}</table>
+        <table>
+            {{ form }}
+        </table>
     </fieldset>
 </form>
- {% load gsb_extras %}
- {% if ope %}
-    {% bouton_form 'form1' 'gsb.views.cpt_detail' ope.compte_id %}
- {% else %}
-    {% if cpt %}
-        {% bouton_form 'form1' 'gsb.views.cpt_detail' cpt.id %}
-    {% else %}
-        {% bouton_form 'form1' 'gsb.views.index' %}
-    {% endif %}
- {% endif %}
- {# div pour le choix de la date #}
-<div class="editDate ope_date_ope" id="editDateId"></div>
-{% endblock content %}
+{% load gsb_extras %}
+{% if ope %}
+{% bouton_form 'form1' 'gsb.views.cpt_detail' ope.compte_id %}
+{% else %}
+{% if cpt %}
+{% bouton_form 'form1' 'gsb.views.cpt_detail' cpt.id %}
+{% else %}
+{% bouton_form 'form1' 'gsb.views.index' %}
+{% endif %}
+{% endif %}
+{# div pour le choix de la date #} <div class="editDate ope_date_ope" id="editDateId"></div>
+{% endblock content %} 

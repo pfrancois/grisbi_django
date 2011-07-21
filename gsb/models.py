@@ -238,8 +238,11 @@ class Compte(models.Model):
         return ('cpt_detail',(),{'pk':str(self.id)})
 
     def save(self, *args, **kwargs):
-        if self.type=='t':
+        if self.type=='t' and not isinstance(self,Compte_titre):
             raise gsb_exc("il faut creer un compte titre")
+        else:
+            super(Compte, self).save(*args, **kwargs)
+            
 
 class Compte_titre(Compte):
     titres_detenus = models.ManyToManyField(Titre,through='Titres_detenus')
@@ -250,15 +253,15 @@ class Compte_titre(Compte):
         cat_ost,created=Cat.objects.get_or_create(nom=u"operation sur titre:",defaults={'nom':u'operation sur titre:'})
         cat_frais,created=cat_ost,created=Cat.objects.get_or_create(nom=u"frais bancaires:",defaults={'nom':u'frais bancaires:'})
         if isinstance(titre,Titre):
-            #ajout de l'operation dans le compte_espece ratache
-
-            self.ope_set.create(date=date,
+            #ajout de l'operation dans le compte_espece rattache
+            Ope.objects.create(date=date,
                                 montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
                                 tiers=titre.tiers,
                                 cat=cat_ost,
                                 notes="achat %s@%s"%(nombre,prix),
                                 moyen=None,
-                                automatique=True
+                                automatique=True,
+                                compte=self,
                                 )
             if decimal.Decimal(str(frais)):
                 self.ope_set.create(date=date,
@@ -373,7 +376,7 @@ class Compte_titre(Compte):
     def save(self, *args, **kwargs):
         if self.type!='t':
             self.type='t'
-        super(Compte_titre, self).save(*args, **kwargs)
+        super(Compte, self).save(*args, **kwargs)
 
 
 class Titres_detenus(models.Model):
@@ -404,8 +407,15 @@ class Histo_ope_titres(models.Model):
         ordering = ['compte']
 
 class Moyen(models.Model):
+
+    #TODO reflechir a supprimer ca
+    typesdep = (
+    ('v', u'virement'),
+    ('d', u'depense'),
+    ('r', u'recette'),
+    )
     nom = models.CharField(max_length=20,unique=True)
-    type = models.CharField(max_length=1, choices=Cat.typesdep,default='d')
+    type = models.CharField(max_length=1, choices=typesdep,default='d')
     class Meta:
         db_table = 'moyen'
         verbose_name = u"moyen de paiment"

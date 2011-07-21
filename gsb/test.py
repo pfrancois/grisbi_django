@@ -16,10 +16,10 @@ from mysite.gsb.models import *
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-logger=logging.getLogger('gsb.test')
+logger = logging.getLogger('gsb.test')
 
 def test(request):
-    logger=logging.getLogger('gsb.test')
+    logger = logging.getLogger('gsb.test')
     logger.debug('test')
     logger.info(3)
     logger.critical('attention ce est un test critique')
@@ -47,6 +47,6 @@ def toto():
 
 if __name__ == "__main__":
     settings
-    t=toto()
+    t = toto()
 #    logger.debug(creation(),indent=4)
     print t

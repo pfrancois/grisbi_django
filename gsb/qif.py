@@ -28,7 +28,7 @@ class QifItem:
     
     def __repr__(self):
         titles = ','.join(self.order)
-        tmpstring = ','.join( [str(self.__dict__[field]) for field in self.order] )
+        tmpstring = ','.join([str(self.__dict__[field]) for field in self.order])
         tmpstring = tmpstring.replace('None', '')
         return titles + "," + tmpstring
 
@@ -36,7 +36,7 @@ class QifItem:
         """
         Returns the data of this QIF without a header row
         """
-        tmpstring = ','.join( [str(self.__dict__[field]) for field in self.order] )
+        tmpstring = ','.join([str(self.__dict__[field]) for field in self.order])
         tmpstring = tmpstring.replace('None', '')
         return tmpstring
     

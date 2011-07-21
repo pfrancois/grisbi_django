@@ -19,18 +19,18 @@ def index(request):
         bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related()
         pl = Compte.objects.filter(type__in=('t',)).select_related()
     else:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p'),ouvert=True).select_related()
-        pl = Compte.objects.filter(type__in=('t',),ouvert=True).select_related()
-    total_bq=decimal.Decimal('0')
-    total_pla=decimal.Decimal('0')
+        bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related()
+        pl = Compte.objects.filter(type__in=('t',), ouvert=True).select_related()
+    total_bq = decimal.Decimal('0')
+    total_pla = decimal.Decimal('0')
     if settings.UTIDEV:
         for c in bq:
-            total_bq=total_bq+c.solde(devise_generale=True)
+            total_bq = total_bq + c.solde(devise_generale=True)
         for p in pl:
-            total_pla=total_pla+p.solde(devise_generale=True)
+            total_pla = total_pla + p.solde(devise_generale=True)
     else:
-        total_bq=Ope.objects.filter(mere__exact=None,compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
-        total_pla=Ope.objects.filter(mere__exact=None,compte__type__in=('t')).aggregate(solde=models.Sum('montant'))['solde']
+        total_bq = Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+        total_pla = Ope.objects.filter(mere__exact=None, compte__type__in=('t')).aggregate(solde=models.Sum('montant'))['solde']
     nb_clos = len(Compte.objects.filter(ouvert=False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
@@ -50,15 +50,15 @@ def cpt_detail(request, cpt_id):
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
     if c.type in ('t',):
         c = get_object_or_404(Compte_titre, pk=cpt_id)
-        titre=True
+        titre = True
     else:
-        titre=False
+        titre = False
     t = loader.get_template('gsb/cpt_detail.django.html')
     if not titre:
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
         nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
         nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
-        dev=Generalite.dev_g()
+        dev = Generalite.dev_g()
         return HttpResponse(
             t.render(
                 RequestContext(
@@ -83,10 +83,10 @@ def cpt_detail(request, cpt_id):
         total_titres = 0
         for t in titre_sans_sum:
             invest = t.ope_set.filter(mere=None,).aggregate(sum=models.Sum('montant'))['sum']
-            total=0
+            total = 0
             titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': pmv, 'total': total})
         especes = c.solde - total_titres
-        dev=Generalite.dev_g()
+        dev = Generalite.dev_g()
         template = loader.get_template('gsb/cpt_placement.django.html')
         return HttpResponse(
             template.render(
@@ -107,16 +107,16 @@ def cpt_detail(request, cpt_id):
 @login_required
 def ope_detail(request, pk):
     ope = get_object_or_404(Ope, pk=pk)
-    dev=Generalite.dev_g()
-    logger=logging.getLogger('gsb')
+    dev = Generalite.dev_g()
+    logger = logging.getLogger('gsb')
     if ope.jumelle is not None: #c'est un virement
         if request.method == 'POST':
             form = gsb_forms.VirementForm(request.POST)
             if form.is_valid():
-                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
             else:
-                return render(request,'gsb/vir.django.html',
-                {   'titre_long':u'modification virement interne %s'%ope.id,
+                return render(request, 'gsb/vir.django.html',
+                {   'titre_long':u'modification virement interne %s' % ope.id,
                    'titre':u'modification',
                     'form':form,
                     'dev':dev,
@@ -125,25 +125,25 @@ def ope_detail(request, pk):
         else:
             #initialisation form
             form = gsb_forms.VirementForm(Virement(ope).init_form())
-            return render(request,'gsb/vir.django.html',
+            return render(request, 'gsb/vir.django.html',
                 {   'titre':u'modification',
-                   'titre_long':u'modification virement interne %s'%ope.id,
+                   'titre_long':u'modification virement interne %s' % ope.id,
                     'form':form,
                     'dev':dev,
                     'ope':ope}
                 )
     else:#sinon c'est une operation normale
-        if ope.filles_set.all().count()>0: #c'est une ope mere
+        if ope.filles_set.all().count() > 0: #c'est une ope mere
             #TODO message
-            HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+            HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         if request.method == 'POST':
             form = gsb_forms.OperationForm(request.POST)
             if form.is_valid():
-                ope=form.save()
-                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+                ope = form.save()
+                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
             else:
-                return render(request,'gsb/ope.django.html',
-                {   'titre_long':u'modification opération %s'%ope.id,
+                return render(request, 'gsb/ope.django.html',
+                {   'titre_long':u'modification opération %s' % ope.id,
                    'titre':u'modification',
                     'form':form,
                     'dev':dev,
@@ -151,33 +151,33 @@ def ope_detail(request, pk):
                 )
         else:
             form = gsb_forms.OperationForm(instance=ope)
-            t=render(request,'gsb/ope.django.html',
+            t = render(request, 'gsb/ope.django.html',
                 {   'titre':u'modification',
-                   'titre_long':u'modification opération %s'%ope.id,
+                   'titre_long':u'modification opération %s' % ope.id,
                     'form':form,
                     'dev':dev,
-                    'ope':ope,}
+                    'ope':ope, }
                 )
             return t
 
 @login_required
-def ope_new(request,cpt_id=None):
+def ope_new(request, cpt_id=None):
     if cpt_id:
         cpt = get_object_or_404(Compte, pk=cpt_id)
     else:
         cpt = None
-    cats=Cat.objects.all().order_by('type')
-    dev=Generalite.dev_g()
-    logger=logging.getLogger('gsb')
+    cats = Cat.objects.all().order_by('type')
+    dev = Generalite.dev_g()
+    logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
-            ope=form.save()
+            ope = form.save()
             #TODO message
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         else:
             #TODO message
-            return render(request,'gsb/ope.django.html',
+            return render(request, 'gsb/ope.django.html',
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
@@ -191,7 +191,7 @@ def ope_new(request,cpt_id=None):
         else:
             form = gsb_forms.OperationForm()
 
-        return render(request,'gsb/ope.django.html',
+        return render(request, 'gsb/ope.django.html',
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
@@ -206,15 +206,15 @@ def vir_new(request, cpt_id=None):
         cpt = get_object_or_404(Compte, pk=cpt_id)
     else:
         cpt = None
-    dev=Generalite.dev_g()
-    logger=logging.getLogger('gsb')
+    dev = Generalite.dev_g()
+    logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(request.POST)
         if form.is_valid():
-            ope=form.save()
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail',kwargs={'cpt_id':ope.compte_id}))
+            ope = form.save()
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         else:
-            return render(request,'gsb/vir.django.html',
+            return render(request, 'gsb/vir.django.html',
             {   'titre_long':u'création virement interne ',
                'titre':u'Création',
                 'form':form,
@@ -226,7 +226,7 @@ def vir_new(request, cpt_id=None):
             form = gsb_forms.VirementForm(initial={'moyen_origine':cpt.moyen_debit_defaut})
         else:
             form = gsb_forms.VirementForm()
-        return render(request,'gsb/vir.django.html',
+        return render(request, 'gsb/vir.django.html',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
                 'form':form,

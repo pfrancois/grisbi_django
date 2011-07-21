@@ -1,52 +1,52 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-    {% load gsb_extras %}
-    <table width="100%" id="boutons">
-        {% if compte.ouvert %}
-            <tr>
-                <td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
-            </tr>
-        {% else %}
-            <tr>
-                <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste
-                    comptes</a></td>
-            </tr>
-        {% endif %}
-    </table>
-    <br/>
-    <table width="100%" id="main">
-        <thead>
+{% load gsb_extras %}
+<table width="100%" id="boutons">
+    {% if compte.ouvert %}
+    <tr>
+        <td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste
+        comptes</a></td>
+    </tr>
+    {% endif %}
+</table>
+<br/>
+<table width="100%" id="main">
+    <thead>
         <tr>
             <th>placement</th>
             <th align="right">montant plac&eacute;</th>
             <th>+/- values</th>
             <th>total</th>
         </tr>
-        </thead>
-        {% for titre in titres %}
-            <tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
-                <td class="opTier">{{ titre.nom }} ( {{ titre.type }} )</td>
-                <td class="opDebit">{{ titre.mise|cur }}</td>
-                <td class="opCredit">{{ titre.pmv|cur }}</td>
-                <td class="opDebit">{{ titre.total|cur }}</td>
-            </tr>
-        {% empty %}
-            <tr class="item">
-                <td colspan="5">
-                    aucun placement.<br/>
-                </td>
-            </tr>
-        {% endfor %}
-        <tr class="item hover">
-            <td class="opTier">compte espèce</td>
-            <td class="opDebit">{{ especes|cur }}</td>
-            <td class="opCredit">{{ especes|cur }}</td>
-            <td class="opDebit">&nbsp;</td>
-        </tr>
-        <tr class="footerbar">
-            <td colspan="3" class="cptLabel">Solde global</td>
-            <td colspan="2" class="cptSolde">{{ compte.solde }}</td>
-        </tr>
-    </table>
-{% endblock content %}
+    </thead>
+    {% for titre in titres %}
+    <tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
+        <td class="opTier">{{ titre.nom }} ( {{ titre.type }} )</td>
+        <td class="opDebit">{{ titre.mise|cur }}</td>
+        <td class="opCredit">{{ titre.pmv|cur }}</td>
+        <td class="opDebit">{{ titre.total|cur }}</td>
+    </tr>
+    {% empty %}
+    <tr class="item">
+        <td colspan="5"> aucun placement.
+        <br/>
+        </td>
+    </tr>
+    {% endfor %}
+    <tr class="item hover">
+        <td class="opTier">compte espèce</td>
+        <td class="opDebit">{{ especes|cur }}</td>
+        <td class="opCredit">{{ especes|cur }}</td>
+        <td class="opDebit">&nbsp;</td>
+    </tr>
+    <tr class="footerbar">
+        <td colspan="3" class="cptLabel">Solde global</td>
+        <td colspan="2" class="cptSolde">{{ compte.solde }}</td>
+    </tr>
+</table>
+{% endblock content %} 

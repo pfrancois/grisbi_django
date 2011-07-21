@@ -18,9 +18,9 @@ ADMINS = (
 #config gsb
 NB_JOURS_AFF = 100
 TITRE = "20040701_django.gsb"
-DEVISE_GENERALE='EUR'
+DEVISE_GENERALE = 'EUR'
 #utilisation des devises (ralenti le bouzin avec des requetes nombreuse)
-UTIDEV=False
+UTIDEV = False
 
 ##################
 
@@ -38,8 +38,8 @@ DATABASES = {
         'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
-LOGIN_URL="/login"
-LOGIN_REDIRECT_URL="/"
+LOGIN_URL = "/login"
+LOGIN_REDIRECT_URL = "/"
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -113,13 +113,13 @@ STATICFILES_FINDERS = (
 try:
     from secret_key import *
 except ImportError:
-    SETTINGS_DIR=os.path.abspath(os.path.dirname(__file__))
-    nomfich=os.path.join(SETTINGS_DIR, 'secret_key.py')
+    SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
+    nomfich = os.path.join(SETTINGS_DIR, 'secret_key.py')
     from random import choice
-    secret=''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-    fichier=open(nomfich,'w')
+    secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
+    fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
-    fichier.write("SECRET_KEY=%s"%secret)
+    fichier.write("SECRET_KEY=%s" % secret)
     from secret_key import *
 
 # List of callables that know how to import templates from various sources.
@@ -213,7 +213,7 @@ LOGGING = {
             'formatter': 'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
-            'filename': os.path.join(PROJECT_PATH, 'log','gsb_log.log'),
+            'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
             'mode': 'a', #append+create
         },
         #~ 'timed-log-file': {

@@ -4,11 +4,11 @@
 <form id='form1' action="" method="post">
     {% csrf_token %}
     <fieldset class="operationMainTable">
-    <table>
-        {{ form.as_table }}
-    </table>
+        <table>
+            {{ form.as_table }}
+        </table>
     </fieldset>
 </form>
- {% load gsb_extras %}
- {% bouton_form 'form1' 'gsb_close' %}
-{% endblock content %}
+{% load gsb_extras %}
+{% bouton_form 'form1' 'gsb_close' %}
+{% endblock content %} 

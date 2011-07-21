@@ -14,8 +14,8 @@ from django.conf import settings
 class importtest(TestCase):
     def setUp(self):
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
-        import_gsb("%s/../test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__))))
-        Cours( valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
+        import_gsb("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+        Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
 
 
@@ -40,7 +40,7 @@ class importtest(TestCase):
         self.assertEquals(obj.type, u'ACT')
 
     def test_get_titre_normal(self):
-        self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom,u'SG')
+        self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom, u'SG')
 
     def test_titre_devise(self):
         obj = Titre.objects.get(id=2)
@@ -50,7 +50,7 @@ class importtest(TestCase):
         self.assertEquals(obj.type, u'DEV')
 
     def test_get_titre_devise(self):
-        self.assertEquals(Titre.objects.get(isin=u'ZAR').nom,u'Rand')
+        self.assertEquals(Titre.objects.get(isin=u'ZAR').nom, u'Rand')
 
     def test_titre_count(self):
         self.assertEqual(Titre.objects.count(), 3)
@@ -180,18 +180,18 @@ class importtest(TestCase):
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.notes, u"automatique")
         self.assertEquals(obj.inscription_automatique, True)
-        self.assertEquals(obj.periodicite,'m')
+        self.assertEquals(obj.periodicite, 'm')
 
     def test_ech_virement(self):
-        obj= Echeance.objects.get(id=5)
+        obj = Echeance.objects.get(id=5)
         self.assertEquals(obj.compte_virement.id, 4)
         self.assertEquals(obj.moyen_virement.id, 2)
 
     def test_ech_period_perso(self):
         obj = Echeance.objects.get(id=4)
-        self.assertEquals(obj.periodicite[0],'p')
-        self.assertEquals(obj.periode_perso[0],'m')
-        self.assertEquals(obj.intervalle,1)
+        self.assertEquals(obj.periodicite[0], 'p')
+        self.assertEquals(obj.periode_perso[0], 'm')
+        self.assertEquals(obj.intervalle, 1)
 
     def test_ech_date_limite(self):
         obj = Echeance.objects.get(id=4)
@@ -211,7 +211,7 @@ class importtest(TestCase):
         self.assertEquals(obj.exercice.id, 1)
         self.assertEquals(obj.notes, u"echeance")
         self.assertEquals(obj.inscription_automatique, False)
-        self.assertEquals(obj.periodicite[0],'u')
+        self.assertEquals(obj.periodicite[0], 'u')
 
     def test_generalites(self):
         obj = Generalite.gen()
@@ -247,11 +247,11 @@ class importtest(TestCase):
         self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
 
     def test_ope_devise(self):
-        self.assertEquals(Ope.objects.get(id=8).compte.devise.id,2)
+        self.assertEquals(Ope.objects.get(id=8).compte.devise.id, 2)
 
     def test_ope_virement_etranger(self):
-        self.assertEquals(Ope.objects.get(id=8).montant,decimal.Decimal('-7.92'))
-        self.assertEquals(Ope.objects.get(id=13).montant,decimal.Decimal('123'))
+        self.assertEquals(Ope.objects.get(id=8).montant, decimal.Decimal('-7.92'))
+        self.assertEquals(Ope.objects.get(id=13).montant, decimal.Decimal('123'))
         self.assertEquals(Ope.objects.get(id=13).notes, u'virement en zar')
         self.assertEquals(Ope.objects.get(id=13).compte.devise.isin, 'ZAR')
         self.assertEquals(Ope.objects.get(id=13).jumelle.compte.devise.isin, 'EUR')

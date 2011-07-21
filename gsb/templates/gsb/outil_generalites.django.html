@@ -4,7 +4,9 @@
 {% block content %}
 <form id='form1' action="{% url gsb.outils.modif_gen %}" method="post">
     <table>
-        <tr><td>{% csrf_token %}</td></tr>
+        <tr>
+            <td>{% csrf_token %}</td>
+        </tr>
         {{ form }}
     </table>
 </form>
