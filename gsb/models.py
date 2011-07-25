@@ -362,8 +362,8 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def fusionne(self,new):
         nb_change=Echeance.objects.select_related().filter(compte=self).update(compte=new)
-        nb_change+=Histo_op_titres.objects.select_related().filter(compte=self).update(compte=new)
-        nb_change+=Titre_detenus.objects.select_related().filter(compte=self).update(compte=new)
+        nb_change+=Histo_ope_titres.objects.select_related().filter(compte=self).update(compte=new)
+        nb_change+=Titres_detenus.objects.select_related().filter(compte=self).update(compte=new)
         nb_change+=Echeance.objects.select_related().filter(compte_virement=self).update(compte_virement=new)
         nb_change+=Ope.objects.select_related().filter(compte=self).update(compte=new)
         self.delete()

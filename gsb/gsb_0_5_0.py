@@ -12,7 +12,7 @@ from mysite.gsb.models import *
 from django.http import HttpResponse
 from django.db.models import Max
 #from django.core.exceptions import ObjectDoesNotExist
-#import decimal
+import decimal
 from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -95,7 +95,7 @@ def _export():
             else:
                 list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
         except ValueError:
-             list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
+            list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
     #creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
@@ -106,7 +106,7 @@ def _export():
             else:
                 list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type}, 'sib':None}
         except ValueError:
-             list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type}, 'sib':None}
+            list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type}, 'sib':None}
     #####generalites###
     xml_root = et.Element("Grisbi")
     q = Generalite.objects.all()[0]
@@ -309,9 +309,9 @@ def _export():
             xml_element.set('Ro', str(num_jumelle))
             xml_element.set('Rc', str(num_cpt_jumelle))
             if ope.mere is None:
-                 xml_element.set('Va', "0")
+                xml_element.set('Va', "0")
             else:
-                 xml_element.set('Va', str(ope.mere.id))
+                xml_element.set('Va', str(ope.mere.id))
             #raison pour lesquelles il y a des attributs non modifiables
             #Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
 ###Echeances###

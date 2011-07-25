@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-15 -*-
 import codecs, csv, cStringIO
-
+from mysite.gsb.models import *
 
 class UTF8Recoder:
     """
@@ -82,23 +82,22 @@ def export_csv(filename):
     csv.writerow(
         u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
             ';'))
-    opes = g.ope.get_all_by_date()
+    opes = Ope.objects.all().order('date')
     i = 0
     for ope in opes:
         i = i + 1
         ligne = []
-        ligne.append(ope['num'])
-        ligne.append(g.compte.get_text(ope['num_compte']))
+        ligne.append(ope.id)
+        ligne.append(ope.compte.nom)
         ligne.append(ope['date_ope'].strftime('%d/%m/%Y'))
-        m = str(ope['montant'])
-        ligne.append(grisbi.int2float(m))
+        ligne.append(ope.montant)
         if ope['rappro'] == None:
             ligne.append(1)
         else:
             ligne.append(ope['rappro'])
         ligne.append(ope['pointe'])
-        ligne.append(g.moyen.get_text(ope['num_moyen'], ope['num_compte']))
-        ligne.append('/'.join((g.cat.get_text(ope['num_cat']), g.scat.get_text(ope['scat'], ope['num_cat']))))
+        ligne.append(ope.moyen.nom, ope.compte.nom)
+        ligne.append('/'.join(ope.cat.nom))
         ligne.append(ope['tiers'])
         ligne.append(ope['note'])
         if ope['num_ib'] == -1:

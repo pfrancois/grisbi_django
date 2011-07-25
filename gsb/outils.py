@@ -39,7 +39,7 @@ def import_file(request):
                     mysite.gsb.import_gsb.import_gsb(nomfich, False)
                     ok = True
             if ok:
-               return HttpResponseRedirect(reverse('gsb.views.index'))
+                return HttpResponseRedirect(reverse('gsb.views.index'))
             else:
                 return render_to_response('gsb/import.django.html',
                               {'form': form,
@@ -70,7 +70,7 @@ def modif_gen(request):
             g.save()
             return HttpResponseRedirect(reverse('gsb.outils.options_index'))
         else:
-           return  render_to_response('gsb/outil_generalites.django.html',
+            return  render_to_response('gsb/outil_generalites.django.html',
             {   'titre':u'modification de certaines options',
                 'form':form},
             context_instance=RequestContext(request)

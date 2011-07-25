@@ -231,7 +231,7 @@ def import_gsb(nomfich, efface_table=True):
         logger.debug("rapp %s" % xml_element.get('No'))
         element, created = Rapp.objects.get_or_create(nom=xml_element.get('Nom'), defaults={'nom':xml_element.get('Nom')})
         if created:
-           nb_nx += 1
+            nb_nx += 1
         tabl_correspondance_rapp[xml_element.get('No')] = element.id
     logger.warning(u'%s rapprochements dont %s nouveaux ' % (nb, nb_nx))
 
