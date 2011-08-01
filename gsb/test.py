@@ -11,11 +11,11 @@ if __name__ == "__main__":
 import logging
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from mysite.gsb.models import *
-from django.utils import formats
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP #@UnusedImport
+from mysite.gsb.models import * #@UnusedWildImport
+from django.utils import formats#@UnusedImport
+from django.utils.encoding import force_unicode #@UnusedImport
+from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
 
 def test(request):

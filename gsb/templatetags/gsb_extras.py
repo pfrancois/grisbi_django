@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from django import template
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation#, ROUND_HALF_UP
 
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
-import logging
+#import logging
 
 register = template.Library()
 

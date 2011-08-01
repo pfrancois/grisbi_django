@@ -5,15 +5,18 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import *
-from mysite.gsb.shortcuts import *
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Tiers, Virement, Cat
+import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
-import logging
+import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 
 def index(request):
+    """
+    view index
+    """
     t = loader.get_template('gsb/index.django.html')
     if Generalite.gen().affiche_clot:
         bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related()
@@ -46,6 +49,11 @@ def index(request):
 
 
 def cpt_detail(request, cpt_id):
+    '''
+    view qui affiche la liste des operation de ce compte
+    @param request:
+    @param cpt_id: id du compte demande
+    '''
     c = get_object_or_404(Compte, pk=cpt_id)
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
     if c.type in ('t',):
@@ -106,9 +114,14 @@ def cpt_detail(request, cpt_id):
 
 @login_required
 def ope_detail(request, pk):
+    '''
+    view, une seule operation
+    @param request:
+    @param pk:
+    '''
     ope = get_object_or_404(Ope, pk=pk)
     dev = Generalite.dev_g()
-    logger = logging.getLogger('gsb')
+    #logger = logging.getLogger('gsb')
     if ope.jumelle is not None: #c'est un virement
         if request.method == 'POST':
             form = gsb_forms.VirementForm(request.POST)
@@ -168,7 +181,7 @@ def ope_new(request, cpt_id=None):
         cpt = None
     cats = Cat.objects.all().order_by('type')
     dev = Generalite.dev_g()
-    logger = logging.getLogger('gsb')
+    #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
@@ -207,7 +220,7 @@ def vir_new(request, cpt_id=None):
     else:
         cpt = None
     dev = Generalite.dev_g()
-    logger = logging.getLogger('gsb')
+    #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(request.POST)
         if form.is_valid():

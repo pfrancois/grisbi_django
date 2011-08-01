@@ -1,10 +1,9 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import *
-from mysite.gsb.shortcuts import *
-from mysite.gsb import widgets
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Rapp, Generalite 
+#from mysite.gsb import widgets
 import datetime
-import decimal
+#import decimal
 
 class ImportForm(forms.Form):
     nom_du_fichier = forms.FileField()

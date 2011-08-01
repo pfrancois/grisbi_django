@@ -8,12 +8,14 @@ if __name__ == "__main__":
     from mysite import settings
     setup_environ(settings)
 
-from mysite.gsb.models import *
+from mysite.gsb.models import Generalite, Compte, Ope,  Tiers,  Cat, Moyen, Echeance, Ib, Titre, Banque, Exercice, Rapp
+# Compte_titre, Virement,
 from django.http import HttpResponse
 from django.db.models import Max
 #from django.core.exceptions import ObjectDoesNotExist
-import decimal
-from django.conf import settings
+#import decimal
+import datetime
+from django.conf import settings #@Reimport
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 try:
@@ -86,7 +88,6 @@ def _export():
     logger = logging.getLogger('gsb.export')
     #creation des id pour cat et sact
     list_cats = {}
-    nb_cat = 0
     for cat_en_cours in Cat.objects.all().order_by('id'):
         try:
             cat_nom, scat_nom = cat_en_cours.nom.split(":")
@@ -542,7 +543,7 @@ def _export():
     xml_etats = et.SubElement(xml_root, "Etats")
     xml_generalite = et.SubElement(xml_etats, "Generalites")
     et.SubElement(xml_generalite, "No_dernier_etat").text = "0"
-    detail = et.SubElement(xml_etats, 'Detail_des_etats')
+    et.SubElement(xml_etats, 'Detail_des_etats')
     #final
     xml = et.tostring(xml_root, method="xml", xml_declaration=True, pretty_print=True)
     avant = ['&#232', '&#233', '&#234', '&#244']
