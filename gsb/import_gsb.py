@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 if __name__ == "__main__":
     from django.core.management import setup_environ
-    import sys, os
-
+    import sys, os.path
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
     from mysite import settings
-
     setup_environ(settings)
 
-from django.db import connection
-from django.core.exceptions import ObjectDoesNotExist
-from mysite.gsb.models import *
-import os, time
+from django.db import connection, transaction
+
+from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque,  Ib, Exercice, Rapp, Moyen, Echeance, Generalite,  Compte, Compte_titre
+import datetime
+import time
 import decimal
 import logging
+from django.conf import settings #@Reimport
 
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -62,12 +62,12 @@ def import_gsb(nomfich, efface_table=True):
     tabl_correspondance_devise = {}
     if efface_table:
         for table in ('titres_detenus', 'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
-            connection.cursor().execute("delete from %s;" % table)
+            connection.cursor().execute("delete from %s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
     time.clock()
     xml_tree = et.parse(nomfich)
-    root = xml_tree.getroot()
+    xml_tree.getroot()
     #verification du format
     xml_element = str(xml_tree.find('Generalites/Version_fichier').text)
     if xml_element != '0.5.0':
@@ -318,7 +318,6 @@ def import_gsb(nomfich, efface_table=True):
     nb_tot_ope = 0
 
     #------------------------------OPERATIONS-----------------------
-    nb_nx_ope = 0
     list_ope = xml_tree.findall('//Operation')
     nb_ope_final = len(list_ope)
     percent = 1
@@ -473,7 +472,7 @@ def import_gsb(nomfich, efface_table=True):
 
 if __name__ == "__main__":
     nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    #~ nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    #nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich, efface_table=True)

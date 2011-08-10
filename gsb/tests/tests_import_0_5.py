@@ -7,15 +7,19 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase
-from mysite.gsb.import_gsb import *
-import decimal
-from django.conf import settings
+import mysite.gsb.models as models_gsb
+from mysite.gsb.import_gsb import * #@UnusedWildImport
+import decimal, datetime #@Reimport
+import django.db.models.Max as Max
+import os.path #@Reimport
+
+
 
 class importtest(TestCase):
     def setUp(self):
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         import_gsb("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
+        models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
 
 
@@ -27,7 +31,7 @@ class importtest(TestCase):
 
     def test_tiers_count(self):
         self.assertEqual(Tiers.objects.count(), 5)
-        self.assertEqual(5, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertEqual(5, Tiers.objects.all().aggregate(max=Max('id'))['max'])
 
     def test_tiers_is_titre(self):
         self.assertEquals(Tiers.objects.get(id=5).is_titre, True)
@@ -78,7 +82,7 @@ class importtest(TestCase):
 
     def test_bq_count(self):
         self.assertEqual(Banque.objects.count(), 2)
-        self.assertEqual(2, Banque.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertEqual(2, Banque.objects.all().aggregate(max=Max('id'))['max'])
 
     def test_cat(self):
         obj = Cat.objects.get(id=1)
@@ -92,7 +96,7 @@ class importtest(TestCase):
 
     def test_cat_global(self):
         self.assertEqual(Cat.objects.count(), 27)
-        self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'], 27)
+        self.assertEqual(Cat.objects.all().aggregate(max=Max('id'))['max'], 27)
 
     def test_ib(self):
         obj = Ib.objects.get(id=1)
@@ -106,7 +110,7 @@ class importtest(TestCase):
 
     def test_ib_global(self):
         self.assertEqual(Ib.objects.count(), 6)
-        self.assertEqual(Ib.objects.all().aggregate(max=models.Max('id'))['max'], 6)
+        self.assertEqual(Ib.objects.all().aggregate(max=Max('id'))['max'], 6)
 
     def test_exercice(self):
         obj = Exercice.objects.get(id=1)
@@ -114,7 +118,7 @@ class importtest(TestCase):
         self.assertEqual(obj.date_fin, datetime.date(day=31, month=12, year=2010))
         self.assertEqual(obj.nom, u'2010')
         self.assertEqual(Exercice.objects.count(), 2)
-        self.assertEqual(Exercice.objects.all().aggregate(max=models.Max('id'))['max'], 2)
+        self.assertEqual(Exercice.objects.all().aggregate(max=Max('id'))['max'], 2)
 
     def test_compte_properties_cloture(self):
         self.assertEqual(Compte.objects.get(id=2).ouvert, False)
@@ -149,7 +153,7 @@ class importtest(TestCase):
 
     def test_compte_global(self):
         self.assertEqual(Compte.objects.count(), 7)
-        self.assertEqual(7, Compte.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertEqual(7, Compte.objects.all().aggregate(max=Max('id'))['max'])
 
     def test_moyen(self):
         obj = Moyen.objects.get(id=1)
@@ -167,11 +171,11 @@ class importtest(TestCase):
 
     def test_nb_rapp(self):
         self.assertEqual(Rapp.objects.all().count(), 1)
-        self.assertEqual(Rapp.objects.all().aggregate(max=models.Max('id'))['max'], 1)
+        self.assertEqual(Rapp.objects.all().aggregate(max=Max('id'))['max'], 1)
 
     def test_nb_ech(self):
         self.assertEqual(Echeance.objects.all().count(), 5)
-        self.assertEqual(Echeance.objects.all().aggregate(max=models.Max('id'))['max'], 5)
+        self.assertEqual(Echeance.objects.all().aggregate(max=Max('id'))['max'], 5)
 
     def test_ech_automatique(self):
         obj = Echeance.objects.get(id=2)
@@ -223,7 +227,7 @@ class importtest(TestCase):
 
     def test_nb_ope(self):
         self.assertEqual(Ope.objects.all().count(), 13)
-        self.assertEqual(Ope.objects.all().aggregate(max=models.Max('id'))['max'], 13)
+        self.assertEqual(Ope.objects.all().aggregate(max=Max('id'))['max'], 13)
 
     def test_ope(self):
         obj = Ope.objects.get(id=1)
