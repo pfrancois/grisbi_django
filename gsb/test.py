@@ -37,10 +37,10 @@ liste_type_period_perso = Echeance.typesperiodperso
 try:
     from lxml import etree as et
 except ImportError:
-    from xml.etree import cElementTree as et
-from django.db import connection
-import time
-import pprint
+    from xml.etree import cElementTree as et #@UnusedImport
+from django.db import connection #@UnusedImport
+import time #@UnusedImport
+import pprint #@UnusedImport
 
 def toto():
     return Ope.objects.get(id=1).get_absolute_url()

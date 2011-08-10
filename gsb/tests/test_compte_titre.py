@@ -4,8 +4,8 @@ test en rapport avec les titres
 """
     
 from django.test import TestCase
-from mysite.gsb.models import *
-import decimal
+from mysite.gsb.models import * #@UnusedWildImport
+#import decimal
 
 class test_titre(TestCase):
     def setUp(self):

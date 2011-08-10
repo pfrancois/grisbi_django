@@ -55,17 +55,17 @@ class VirementForm(forms.Form):
             del data['compte_destination']
         return data
     def save(self):
-        v = Virement()
-        v.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
-        v.origine.moyen = self.cleaned_data['moyen_origine']
-        v.dest.moyen = self.cleaned_data['moyen_destination']
-        v.pointe = self.cleaned_data['pointe']
-        v.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
-        v.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
-        v.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
-        v.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
-        v.save()
-        return v.origine
+        virement_objet = Virement()
+        virement_objet.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
+        virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
+        virement_objet.dest.moyen = self.cleaned_data['moyen_destination']
+        virement_objet.pointe = self.cleaned_data['pointe']
+        virement_objet.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
+        virement_objet.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
+        virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
+        virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
+        virement_objet.save()
+        return virement_objet.origine
 
 class GeneraliteForm(BaseForm):
     class Meta:

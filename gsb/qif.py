@@ -46,7 +46,7 @@ def parseQif(infile):
     infile should be open file-like object (supporting readline() ).
     """
 
-    inItem = False
+    inItem = False #@UnusedVariable
 
     items = []
     curItem = QifItem()

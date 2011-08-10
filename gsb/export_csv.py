@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-15 -*-
 import codecs, csv, cStringIO
-from mysite.gsb.models import *
+from mysite.gsb.models import * #@UnusedWildImport
 
 class UTF8Recoder:
     """
