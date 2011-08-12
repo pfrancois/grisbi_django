@@ -30,15 +30,17 @@ class Tiers(models.Model):
         verbose_name_plural = u'tiers'
         ordering = ['nom']
 
-
     def __unicode__(self):
         return self.nom
 
-    @transaction.commit_on_success
+#    @transaction.commit_on_success
     def fusionne(self, new):
+        if type(new) != type(self):
+            raise Gsb_exc("pas le bon type")
         nb_tiers_change = Echeance.objects.select_related().filter(tiers = self).update(tiers = new)
         nb_tiers_change += Titre.objects.select_related().filter(tiers = self).update(tiers = new)
         nb_tiers_change += Ope.objects.select_related().filter(tiers = self).update(tiers = new)
+        self.delete()
         return nb_tiers_change
 
 class Titre(models.Model):
@@ -71,7 +73,9 @@ class Titre(models.Model):
         return self.cours_set.latest().valeur
     @property
     def last_cours_date(self):
-        """renvoie la date du dernier cours"""
+        """renvoie la date du dernier cours
+        property
+        """
         return self.cours_set.latest().date
 
     @staticmethod
@@ -82,17 +86,18 @@ class Titre(models.Model):
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new"""
-        nb_change = Cours.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change += Tiers.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change += Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
-        nb_change += Histo_ope_titres.objects.select_related().filter(titre=self).update(titre=new)
+        if type(new) != type(self):
+            raise Gsb_exc("pas le bon type")
+        Cours.objects.select_related().filter(titre=self).delete()
+        nb_change = 0
         if self.type == 'DEV':#gestion specifique des devises
             nb_change += Compte.objects.select_related().filter(devise=self).update(devise=new)
             nb_change += Echeance.objects.select_related().filter(devise=self).update(devise=new)
-            nb_change += Ope.objects.select_related().filter(devise=self).update(devise=new)
-            nb_change += Generalite.objects.select_related().filter(devise=self).update(devise=new)
+        else:
+            nb_change += Titres_detenus.objects.select_related().filter(titre=self).update(titre=new)
+            nb_change += Histo_ope_titres.objects.select_related().filter(titre=self).update(titre=new)
+            self.tiers.fusionne(new.tiers)
         #on doit aussi reaffecter le tiers associe
-        self.tiers.fusionne(new.tiers)
         self.delete()
         return nb_change
 
@@ -244,9 +249,9 @@ class Compte(models.Model):
     def solde(self, devise_generale=False):
         req = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None).aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
-            solde = 0 + self.solde_init
+            solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
         else:
-            solde = req['solde'] + self.solde_init
+            solde = decimal.Decimal(req['solde']) + decimal.Decimal(self.solde_init)
         if devise_generale:
             if self.devise.isin != settings.DEVISE_GENERALE:
                 solde = solde / self.devise.last_cours
@@ -264,7 +269,7 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('cpt_detail', (), {'pk':str(self.id)})
+        return ('mysite.gsb.views.cpt_detail', (), {'cpt_id':str(self.id)})
 
     def save(self, *args, **kwargs):
         if self.type == 't' and not isinstance(self, Compte_titre):
@@ -390,7 +395,10 @@ class Compte_titre(Compte):
 
     def solde(self, devise_generale=False):
         solde_espece = super(Compte_titre, self).solde(devise_generale)
-        return solde_espece
+        solde_titre=0
+        for titre in self.titres_detenus_set.all():
+            solde_titre += titre.valeur
+        return solde_espece + solde_titre
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -427,13 +435,13 @@ class Titres_detenus(models.Model):
         return"%s %s dans %s" % (self.nombre, self.titre.nom, self.compte)
     @property
     def valeur(self):
-        return self.nombre*self.titre.objects.get(isin=self.isin).last_cours
+        return self.nombre*self.titre.last_cours
 
 class Histo_ope_titres(models.Model):
     """historiques des ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte_titre)
-    nombre = models.PositiveIntegerField()
+    nombre = models.IntegerField()
     date = models.DateField()
     class Meta:
         db_table = 'histo_titres_detenus'
@@ -506,6 +514,8 @@ class Rapp(models.Model):
             return solde
 
     def fusionne(self, new):
+        if type(new) != type(self):
+            raise Gsb_exc("pas le bon type")
         nb_change = Compte.objects.select_related().filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
         self.delete()
         return nb_change

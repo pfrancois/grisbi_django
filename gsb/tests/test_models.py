@@ -1,44 +1,130 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
 """
 test models
 """
 from django.test import TestCase
-from mysite.gsb.models import * #@UnusedWildImport
+from mysite.gsb.models import Generalite, Compte, Ope,  Tiers,  Cat, Moyen, Echeance, Ib, Titre, Banque, Exercice, Rapp
+from mysite.gsb.models import Cours, Compte_titre
+import datetime
 import decimal #@Reimport
 
-class fusion(TestCase):
+msg=None
+class test_models(TestCase):
+    fixtures=['test.json']
     def test_reaffect_tiers(self):
-        self.tiers1.fusionne(self.tiers2)
-        
+        Tiers.objects.get(nom="tiers1").fusionne(Tiers.objects.get(nom="tiers2"))
+        self.assertEqual(Tiers.objects.count(), 3)
+        self.assertEqual(Ope.objects.get(id=1).tiers.nom,"tiers2")
+        self.assertEqual(Echeance.objects.get(id=1).tiers.nom,"tiers2")
+    def test_last_cours_et_date(self):
+        self.assertEquals(Titre.objects.get(nom="t1").last_cours,10)
+        self.assertEqual(Titre.objects.get(nom="t1").last_cours_date, datetime.date(day=1, month=1, year=2010) )
+    def test_titres_devise(self):
+        self.assertEqual(Titre.devises().count(), 2)
+    def test_creation_devise(self):
+        self.assertEqual(Titre.objects.get(nom="euro").tiers, None)
+    def test_creation_titre(self):
+        tiers = Titre.objects.get(nom="t1").tiers
+        self.assertNotEqual(tiers, None)
+        self.assertEqual(tiers.nom, 'titre_ t1')
+        self.assertEqual(tiers.notes, "1@ACT")
+        self.assertEqual(tiers.is_titre, True)
+    def test_titre_fusionne(self):
+        Titre.objects.get(nom="t1").fusionne(Titre.objects.get(nom="t2"))
+        self.assertEqual(Titre.objects.count(), 3)
+        self.assertEqual(Tiers.objects.count(), 3)#verifie que la fusion des tiers sous jacent
+        self.assertEqual(Cours.objects.get(id=1).titre.nom,"t2")
+        #TODO gerer la fusion des tiers sous jacents
+        #TODO titre detenus non verifies
+        #self.assertEqual(Tiers.objects.get(id=1).titre.nom,"t2")
+    def test_devise_fusionne(self):
+        Titre.objects.get(nom="dollar").fusionne(Titre.objects.get(nom="euro"))
+        self.assertEqual(Titre.objects.count(), 3)
+        self.assertEqual(Tiers.objects.count(), 4)
+        self.assertEqual(Compte.objects.get(id=3).devise.nom,"euro")
+        self.assertEqual(Echeance.objects.get(id=2).devise.nom,"euro")
+    def test_titre_save_perso(self):
+        Titre.objects.create(nom="t3", isin="4", type='ACT')
+        self.assertEqual(Tiers.objects.count(), 5)
+        self.assertEqual(Tiers.objects.filter(is_titre=True).count(), 3)
+        self.assertEqual(Tiers.objects.get(nom="titre_ t3").nom, "titre_ t3")
+    def test_banque_fusionne(self):
+        pass
+    def test_cat_fusionne(self):
+        pass
+    def test_ib_fusionne(self):
+        pass
+    def test_exo_fusionne(self):
+        pass
+    def test_solde_compte_normal(self):
+        self.assertEqual(Compte.objects.get(id=1).solde(),decimal.Decimal('20'))
+    def test_abolute_url_compte(self):
+        self.assertEqual(Compte.objects.get(id=1).get_absolute_url(),'/compte/1/')
+    def test_cpt_fusionne(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_achat(self):
+        c=Compte_titre.objects.get(id=4)
+        self.assertEqual(c.nom, u'cpt_titre1')
+        #achat de base avec tout par defaut
+        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20)
+        t=c.titres_detenus_set.all()
+        self.assertEqual(t[0].valeur, decimal.Decimal('20'))
+        self.assertEqual(t.count(),1)
+        self.assertEqual(t[0].nombre,decimal.Decimal('20'))
+        self.assertEqual(Titre.objects.get(nom="t1").last_cours, decimal.Decimal('1'))
+        self.assertEqual(c.solde(),0)
 
-    def setUp(self):
-        self.tiers1 = Tiers.objects.create(nom='tiers1')
-        self.tiers2 = Tiers.objects.create(nom='tiers2')
-        self.titre1 = Titre.objects.create(nom="t1", isin="1", type='ACT')
-        self.titre2 = Titre.objects.create(nom="t2", isin="2", type='ACT')
-        self.devise1 = Titre.objects.create(nom='euro', isin='EUR', type='DEV')
-        self.devise2 = Titre.objects.create(nom='devise2', isin='USD', type='DEV')
-        Cours(valeur=decimal.Decimal('10.00'), titre=self.titre1, date=datetime.date(day=1, month=1, year=2010)).save()
-        Cours(valeur=decimal.Decimal('1.00'), titre=self.devise1, date=datetime.date(day=1, month=1, year=2010)).save()
-        self.banque1 = Banque.objects.create(cib="10001", nom="banque1")
-        self.banque2 = Banque.objects.create(cib="10001", nom="banque2")
-        self.cat1 = Cat.objects.create(type='r', nom='cat1')
-        self.cat2 = Cat.objects.create(type='r', nom='cat2')
-        self.ib1 = Ib.objects.create(type='r', nom="ib1")
-        self.ib2 = Ib.objects.create(type='r', nom="ib2")
-        self.exercice1 = Exercice.objects.create(nom="exo1", date_debut=datetime.date(day=1, month=1, year=2010), date_fin=datetime.date(day=31, month=12, year=2010))
-        self.exercice1 = Exercice.objects.create(nom="exo2", date_debut=datetime.date(day=1, month=1, year=2011), date_fin=datetime.date(day=31, month=12, year=2011))
-        self.moyen1 = Moyen.objects.create(nom='moyen1', type="d")
-        self.moyen2 = Moyen.objects.create(nom='moyen2', type="d")
-        self.moyen3 = Moyen.objects.create(nom='moyen3', type="r")
-        self.compte1 = Compte.objects.create(nom='cpt1', type='b', devise=self.devise1, banque=self.banque1, solde_init='0', moyen_credit_defaut=self.moyen3, moyen_debit_defaut=self.moyen1)
-        self.compte2 = Compte.objects.create(nom='cpt2', type='b', devise=self.devise1, banque=self.banque1, solde_init='0', moyen_credit_defaut=self.moyen3, moyen_debit_defaut=self.moyen1)
-        self.compte3 = Compte.objects.create(nom='cpt3', type='b', devise=self.devise1, banque=self.banque1, solde_init='0', moyen_credit_defaut=self.moyen3, moyen_debit_defaut=self.moyen1)
-        self.compte_titre1 = Compte_titre.objects.create(nom='cpt4', type='t', devise=self.devise1, banque=self.banque1, solde_init='0', moyen_credit_defaut=self.moyen3, moyen_debit_defaut=self.moyen1)
-        self.compte_titre2 = Compte_titre.objects.create(nom='cpt5', type='t', devise=self.devise1, banque=self.banque1, solde_init='0', moyen_credit_defaut=self.moyen3, moyen_debit_defaut=self.moyen1)
-        self.rapp1 = Rapp.objects.create(nom='r1')
-        self.rapp2 = Rapp.objects.create(nom='r2')
-        self.ech1 = Echeance.objects.create(compte=self.compte1, montant='10', devise=self.devise1, tiers=self.tiers1, cat=self.cat1, compte_virement=self.compte3, notes='1')
-        self.ech2 = Echeance.objects.create(compte=self.compte1, montant='10', devise=self.devise1, tiers=self.tiers1, cat=self.cat1, compte_virement=self.compte3, notes='2')
-        self.ope2 = Ope.objects.create(compte=self.compte1, montant='10', tiers=self.tiers1, cat=self.cat1, notes='2')
-        self.ope1 = Ope.objects.create(compte=self.compte1, montant='10', tiers=self.tiers1, cat=self.cat1, notes='2')
+    def test_cpt_titre_achat_complet(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_achat_virement(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_vente(self):
+        c=c=Compte_titre.objects.get(id=4)
+        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20)
+        c.vente(Titre.objects.get(nom="t1"),10)
+        self.assertEqual(c.solde(),0)
+
+    def test_cpt_titre_vente_complet(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_vente_virement(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_revenu(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_revenu_complet(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_revenu_virement(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_solde(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_fusion(self):
+        self.assertEqual(0,0)
+    def test_cpt_titre_absolute_url(self):
+        self.assertEqual(0,0)
+    def titre_detenu_valeur(self):
+        self.assertEqual(0,0)
+    def moyen_fusionne(self):
+        self.assertEqual(0,0)
+    def rapp_compte(self):
+        self.assertEqual(0,0)
+    def rapp_solde(self):
+        self.assertEqual(0,0)
+    def rapp_fusionne(self):
+        self.assertEqual(0,0)
+    def echeance_save(self):
+        self.assertEqual(0,0)
+    def generalite_gen(self):
+        self.assertEqual(0,0)
+    def generalite_dev_g(self):
+        self.assertEqual(0,0)
+    def ope_absolute_url(self):
+        self.assertEqual(0,0)
+    def ope_save(self):
+        self.assertEqual(0,0)
+    def virement_verif_property(self):
+        self.assertEqual(0,0)
+    def virement_create(self):
+        self.assertEqual(0,0)
+    def virement_delete(self):
+        self.assertEqual(0,0)
+    def virement_init_form(self):
+        self.assertEqual(0,0)        

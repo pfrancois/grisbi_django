@@ -42,11 +42,9 @@ from django.db import connection #@UnusedImport
 import time #@UnusedImport
 import pprint #@UnusedImport
 
-def toto():
-    return Ope.objects.get(id=1).get_absolute_url()
 
 if __name__ == "__main__":
-    settings
-    t = toto()
-#    logger.debug(creation(),indent=4)
-    print t
+    t1=Titre.objects.all()[2].tiers
+    t2=Titre.objects.all()[3].tiers
+
+    t1.fusionne(t2)
