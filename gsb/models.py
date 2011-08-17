@@ -15,6 +15,24 @@ class Ex_jumelle_neant(Exception):
 
 
 #import logging
+#definition d'un moneyfield
+class CurField(models.DecimalField):
+    """
+    un champ decimal mais defini pour les monnaies
+    """
+
+    description = "A Monetary value"
+
+
+    def __init__(self, verbose_name=None, name=None, 
+                 max_digits=15, decimal_places=3,
+                 default=0.000, **kwargs):
+        super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
+
+
+    def get_internal_type(self):
+        return "DecimalField"
+
 
 class Tiers(models.Model):
     """
@@ -104,7 +122,7 @@ class Titre(models.Model):
 
 class Cours(models.Model):
     """cours des titres"""
-    valeur = models.DecimalField(max_digits=15, decimal_places=3, default=1.000)
+    valeur = CurField(default=1.000)
     titre = models.ForeignKey(Titre, unique_for_date="date")
     date = models.DateField(default=datetime.date.today)
     class Meta:
@@ -223,13 +241,14 @@ class Compte(models.Model):
     guichet = models.CharField(max_length=15, blank=True, default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
     num_compte = models.CharField(max_length=60, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
-    solde_init = models.DecimalField(max_digits=15, decimal_places=3, default=0.000)
-    solde_mini_voulu = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
-    solde_mini_autorise = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True, default=0.000)
+    solde_init = CurField()
+    solde_mini_voulu = CurField(null=True, blank=True)
+    solde_mini_autorise = CurField(null=True, blank=True)
     ouvert = models.BooleanField(default=True)
     notes = models.TextField(blank=True, default='')
     moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set", default=None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set", default=None)
+
     class Meta:
         db_table = 'compte'
 
@@ -524,7 +543,7 @@ class Echeance(models.Model):
 
     date = models.DateField(default = datetime.date.today)
     compte = models.ForeignKey(Compte)
-    montant = models.DecimalField(max_digits = 15, decimal_places = 3, default = 0.000)
+    montant = CurField()
     tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"catégorie")
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
@@ -593,7 +612,7 @@ class Ope(models.Model):
     compte = models.ForeignKey(Compte)
     date = models.DateField(default = datetime.date.today)
     date_val = models.DateField(null = True, blank = True, default = None)
-    montant = models.DecimalField(max_digits = 15, decimal_places = 3, default = 0.000)
+    montant = CurField()
     tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.SET_NULL, default = None)
     cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.SET_NULL, default = None)
     notes = models.TextField(blank = True)
@@ -756,22 +775,4 @@ class Virement(object):
         return tab
 
 
-"""
-class MoneyField(models.DecimalField):
 
-
-    description = "A Monetary value"
-
-
-    def __init__(self, verbose_name=None, name=None, 
-                 max_digits=None, decimal_places=None,
-                 default=None, default_currency=None, **kwargs):
-        if isinstance(default, Money):
-            self.default_currency = default.currency
-        self.default_currency = default_currency
-        super(MoneyField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
-
-
-    def get_internal_type(self):
-        return "DecimalField"
-"""

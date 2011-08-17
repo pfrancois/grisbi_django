@@ -125,7 +125,6 @@ class Titre_admin(admin.ModelAdmin):
     def fusionne_b_dans_a(self, request, queryset):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
-
     list_display = ('nom', 'isin', 'last_cours')
     list_filter = ('type',)
 
