@@ -1,5 +1,6 @@
 {% extends "generic.django.html" %}
 {% comment %} coding: utf-8 {% endcomment %}
+{% load gsb_extras %}
 {% block content %}
 <form id='form1' action="" method="post">
     {% csrf_token %}
@@ -30,7 +31,7 @@
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {{ dev }} </td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant|cur }} </td>
         {% comment %}
             TODO rajouter fonction calculatrice
             TODO ajax et js pour changer la monnaie si changement de compte

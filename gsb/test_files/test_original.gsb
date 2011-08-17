@@ -80,7 +80,7 @@
         <Operation No="5" Id="" D="31/5/2010" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="6" Sc="1" Ov="0" N="rapprochee" Ty="2" Ct="" P="2" A="0" R="1" E="5" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="6" Id="" D="31/5/2010" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="6" Sc="1" Ov="0" N="pointee" Ty="2" Ct="" P="1" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
         <Operation No="10" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="0" Sc="0" Ov="0" N="virement" Ty="1" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="2" Ibg="" Ro="9" Rc="2" Va="0"/>
-        <Operation No="12" Id="" D="31/5/2009" Db="0/0/0" M="-123,0000000" De="2" Rdc="1" Tc="25,0000000" Fc="3,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="1" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="11" Rc="3" Va="0"/>
+        <Operation No="12" Id="" D="31/5/2009" Db="0/0/0" M="-123,0000000" De="1" Rdc="1" Tc="25,0000000" Fc="0,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="1" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="11" Rc="3" Va="0"/>
         <Operation No="13" Id="" D="31/5/2010" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="6" Sc="1" Ov="0" N="echance automatique" Ty="2" Ct="" P="0" A="1" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
       </Detail_des_operations>
     </Compte>
@@ -175,7 +175,7 @@
         <Titulaire></Titulaire>
         <Type_de_compte>0</Type_de_compte>
         <Nb_operations>2</Nb_operations>
-        <Devise>2</Devise>
+        <Devise>1</Devise>
         <Banque>0</Banque>
         <Guichet></Guichet>
         <No_compte_banque></No_compte_banque>
@@ -207,8 +207,8 @@
         <Type No="5" Nom="Ch&#xE8;que" Signe="1" Affiche_entree="1" Numerotation_auto="1" No_en_cours="0"/>
       </Detail_de_Types>
       <Detail_des_operations>
-        <Operation No="8" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="2" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="5" Sc="0" Ov="0" N="recette en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="11" Id="" D="31/5/2009" Db="0/0/0" M="123,0000000" De="2" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="12" Rc="0" Va="0"/>
+        <Operation No="8" Id="" D="31/5/2010" Db="0/0/0" M="123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="5" Sc="0" Ov="0" N="recette en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+        <Operation No="11" Id="" D="31/5/2009" Db="0/0/0" M="123,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="0" Sc="0" Ov="0" N="virement en zar" Ty="2" Ct="" P="0" A="0" R="0" E="5" I="0" Si="0" Pc="" Ibg="" Ro="12" Rc="0" Va="0"/>
       </Detail_des_operations>
     </Compte>
     <Compte>
@@ -403,12 +403,11 @@
   </Imputations>
   <Devises>
     <Generalites>
-      <Nb_devises>2</Nb_devises>
-      <No_derniere_devise>2</No_derniere_devise>
+      <Nb_devises>1</Nb_devises>
+      <No_derniere_devise>1</No_derniere_devise>
     </Generalites>
     <Detail_des_devises>
       <Devise No="1" Nom="Euro" Code="&#x20AC;" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0" Devise_en_rapport="0" Change="0,000000"/>
-      <Devise No="2" Nom="Rand" Code="" IsoCode="ZAR" Passage_euro="0" Date_dernier_change="1/1/2010" Rapport_entre_devises="1" Devise_en_rapport="1" Change="10,000000"/>
     </Detail_des_devises>
   </Devises>
   <Banques>

@@ -36,26 +36,6 @@
         }
     },
     {
-        "pk": 4,
-        "model": "gsb.titre",
-        "fields": {
-            "nom": "dollar",
-            "tiers": null,
-            "type": "DEV",
-            "isin": "USD"
-        }
-    },
-    {
-        "pk": 3,
-        "model": "gsb.titre",
-        "fields": {
-            "nom": "euro",
-            "tiers": null,
-            "type": "DEV",
-            "isin": "EUR"
-        }
-    },
-    {
         "pk": 1,
         "model": "gsb.titre",
         "fields": {
@@ -76,29 +56,11 @@
         }
     },
     {
-        "pk": 1,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2010-01-01",
-            "titre": 1,
-            "valeur": "10"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2010-01-01",
-            "titre": 2,
-            "valeur": "10"
-        }
-    },
-    {
         "pk": 3,
         "model": "gsb.cours",
         "fields": {
             "date": "2010-01-01",
-            "titre": 3,
+            "titre": 1,
             "valeur": "1"
         }
     },
@@ -107,17 +69,8 @@
         "model": "gsb.cours",
         "fields": {
             "date": "2010-01-01",
-            "titre": 4,
+            "titre": 2,
             "valeur": "1"
-        }
-    },
-    {
-        "pk": 4,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2010-01-01",
-            "titre": 4,
-            "valeur": "2"
         }
     },
     {
@@ -228,7 +181,6 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "devise": 3,
             "type": "b",
             "notes": "",
             "num_compte": "",
@@ -249,7 +201,6 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "devise": 3,
             "type": "b",
             "notes": "",
             "num_compte": "",
@@ -270,7 +221,6 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "devise": 4,
             "type": "b",
             "notes": "",
             "num_compte": "",
@@ -291,7 +241,6 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "devise": 3,
             "type": "t",
             "notes": "",
             "num_compte": "",
@@ -312,7 +261,6 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "devise": 3,
             "type": "t",
             "notes": "",
             "num_compte": "",
@@ -385,7 +333,6 @@
             "periode_perso": "",
             "inscription_automatique": false,
             "montant": "10",
-            "devise": 3,
             "notes": "1",
             "exercice": null,
             "cat": 1,
@@ -408,7 +355,6 @@
             "periode_perso": "",
             "inscription_automatique": false,
             "montant": "10",
-            "devise": 4,
             "notes": "2",
             "exercice": null,
             "cat": 1,

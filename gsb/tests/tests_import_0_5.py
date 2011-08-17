@@ -46,29 +46,13 @@ class importtest(TestCase):
     def test_get_titre_normal(self):
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom, u'SG')
 
-    def test_titre_devise(self):
-        obj = Titre.objects.get(id=2)
-        self.assertEquals(obj.nom, u'Euro')
-        self.assertEquals(obj.isin, u'EUR')
-        self.assertEquals(obj.tiers, None)
-        self.assertEquals(obj.type, u'DEV')
-
-    def test_get_titre_devise(self):
-        self.assertEquals(Titre.objects.get(isin=u'ZAR').nom, u'Rand')
-
     def test_titre_count(self):
-        self.assertEqual(Titre.objects.count(), 3)
+        self.assertEqual(Titre.objects.count(), 1)
 
     def test_cours_sg(self):
         obj = Titre.objects.get(isin=u'FR0000130809').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
         self.assertEquals(obj.titre, Titre.objects.get(id=1))
-        self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
-
-    def test_cours_zar(self):
-        obj = Titre.objects.get(isin=u'ZAR').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
-        self.assertEquals(obj.valeur, decimal.Decimal('10'))
-        self.assertEquals(obj.titre, Titre.objects.get(id=3))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
 
     def test_banques_properties(self):
@@ -123,15 +107,11 @@ class importtest(TestCase):
     def test_compte_properties_cloture(self):
         self.assertEqual(Compte.objects.get(id=2).ouvert, False)
 
-    def test_compte_properties_devise_particuliere(self):
-        self.assertEqual(Compte.objects.get(id=4).devise.isin, 'ZAR')
-
     def test_compte_properties(self):
         obj = Compte.objects.get(id=1)
         self.assertEqual(obj.nom, u'compte bancaire ouvert')
         self.assertEqual(obj.titulaire, '')
         self.assertEqual(obj.type, 'b')
-        self.assertIsInstance(obj.devise, Titre)
         self.assertIsInstance(obj.banque, Banque)
         self.assertEqual(obj.guichet, u'12345')
         self.assertEqual(obj.num_compte, u'12345766b76')
@@ -145,11 +125,7 @@ class importtest(TestCase):
         self.assertEqual(obj.moyen_credit_defaut.nom, u'Depot')
 
     def test_compte_solde(self):
-        self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('-100.92'))
-
-    def test_compte_solde_devise(self):
-        self.assertEqual(Compte.objects.get(id=4).solde(), decimal.Decimal('246.0'))
-        self.assertEqual(Compte.objects.get(id=4).solde(devise_generale=True), decimal.Decimal('24.6'))
+        self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('-216'))
 
     def test_compte_global(self):
         self.assertEqual(Compte.objects.count(), 7)
@@ -206,7 +182,6 @@ class importtest(TestCase):
         self.assertEquals(obj.date, datetime.date(2012, 12, 31))
         self.assertEquals(obj.compte.id, 1)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
-        self.assertEquals(obj.devise.id, 2)
         self.assertEquals(obj.tiers.id, 3)
         self.assertEquals(obj.cat.id, 24)
         self.assertEquals(obj.ib, None)
@@ -249,18 +224,6 @@ class importtest(TestCase):
 
     def test_ope_date_valeur(self):
         self.assertEquals(Ope.objects.get(id=2).date_val, datetime.date(2010, 05, 31))
-
-    def test_ope_devise(self):
-        self.assertEquals(Ope.objects.get(id=8).compte.devise.id, 2)
-
-    def test_ope_virement_etranger(self):
-        self.assertEquals(Ope.objects.get(id=8).montant, decimal.Decimal('-7.92'))
-        self.assertEquals(Ope.objects.get(id=13).montant, decimal.Decimal('123'))
-        self.assertEquals(Ope.objects.get(id=13).notes, u'virement en zar')
-        self.assertEquals(Ope.objects.get(id=13).compte.devise.isin, 'ZAR')
-        self.assertEquals(Ope.objects.get(id=13).jumelle.compte.devise.isin, 'EUR')
-        self.assertEquals(Ope.objects.get(id=13).jumelle.id, 8)
-        self.assertEquals(Ope.objects.get(id=13).cat, None)
 
     def test_ope_ib_none(self):
         self.assertEquals(Ope.objects.get(id=11).ib, None)

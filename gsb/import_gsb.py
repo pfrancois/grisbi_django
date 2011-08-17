@@ -73,9 +73,7 @@ def import_gsb(nomfich, efface_table=True):
     if xml_element != '0.5.0':
         logger.critical("le format n'est pas reconnu")
         raise Import_exception, "le format n'est pas reconnu"
-    nb = 0
     nb_sous = 0
-    nb_nx = 0
     percent = 1
         #------------------------------generalites#------------------------------
     xml_element = xml_tree.find('Generalites')
@@ -92,12 +90,12 @@ def import_gsb(nomfich, efface_table=True):
         'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
         'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
     })
-    if settings.UTIDEV:
-        id = tabl_correspondance_devise[xml_element.find('Numero_devise_totaux_ib').text]
-        if Generalite.dev_g() != Titre.objects.get(type=u'DEV', id=id):
-            if settings.DEVISE_GENERALE != Generalite.dev_g():
-                raise Exception("attention ce ne sera pas possible d'importer car la devise principale n'est pas la meme")
     logger.warning(u'generalites ok')
+    #------------------------------devises---------------------------
+    nb = 0
+    nb_nx = 0
+    if len(xml_tree.find('//Detail_des_devises'))>1:
+        raise Exception("attention ce ne sera pas possible d'importer car il y a plusieurs devises")
     #------------ TIERS et titres -------------------
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
     for xml_element in xml_tree.find('//Detail_des_tiers'):
@@ -184,23 +182,6 @@ def import_gsb(nomfich, efface_table=True):
                 logger.debug('sib %s:%s cree au numero %s' % (int(xml_element.get('No')), int(xml_sous.get('No')), element.id))
     logger.warning(u"%s imputations dont %s nouveaux" % (nb_ib, nb_nx))
 
-    #------------------------------devises---------------------------
-    nb = 0
-    nb_nx = 0
-    for xml_element in xml_tree.find('//Detail_des_devises'):
-        nb += 1
-        logger.debug("devise %s" % xml_element.get('No'))
-        query = {'nom':xml_element.get('Nom'), 'isin':xml_element.get('IsoCode'), 'tiers':None, 'type':'DEV'}
-        element, created = Titre.objects.get_or_create(type='DEV', isin=xml_element.get('IsoCode'), defaults=query)
-        tabl_correspondance_devise[xml_element.get('No')] = element.id
-        if created:
-            nb_nx += 1
-        if fr2decimal(xml_element.get('Change')) != decimal.Decimal('0'):
-            element.cours_set.get_or_create(titre=element.isin, date=datefr2datesql(xml_element.get('Date_dernier_change')), defaults={'date':datefr2datesql(xml_element.get('Date_dernier_change')), 'valeur':fr2decimal(xml_element.get('Change'))})
-        else:
-            element.cours_set.get_or_create(titre=element.isin, date=datetime.datetime.today(), defaults={'date':datetime.datetime.today(), 'valeur':fr2decimal('1')})
-        element.save()
-    logger.warning(u'%s devises dont %s nouvelles' % (nb, nb_nx))
 
     #------------------------------banques------------------------------
     nb = 0
@@ -247,14 +228,12 @@ def import_gsb(nomfich, efface_table=True):
             logger.debug("cpt_titre %s" % (xml_element.find('Details/Nom').text))
             element, created = Compte_titre.objects.get_or_create(nom=xml_element.find('Details/Nom').text, defaults={
             'nom':xml_element.find('Details/Nom').text,
-            'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
             'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
         })
         else:
             logger.debug("cpt %s" % (xml_element.find('Details/Nom').text))
             element, created = Compte.objects.get_or_create(nom=xml_element.find('Details/Nom').text, defaults={
             'nom':xml_element.find('Details/Nom').text,
-            'devise':Titre.objects.get(id=tabl_correspondance_devise[xml_element.find('Details/Devise').text]),
             'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
         })
 
@@ -338,14 +317,6 @@ def import_gsb(nomfich, efface_table=True):
         tabl_correspondance_ope[xml_sous.get('No')] = sous.id
         if affiche:
             logger.debug('ope %s cree id %s' % (xml_sous.get('No'), sous.id))
-        #gestion des devises
-        if tabl_correspondance_devise[xml_sous.get('De')] != sous.compte.devise_id:
-            if int(xml_sous.get('Rdc')):
-                sous.montant = fr2decimal(xml_sous.get('M')) / fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
-                Titre.objects.get(type=u'DEV', id=tabl_correspondance_devise[xml_sous.get('De')]).cours_set.get_or_create(date=sous.date, defaults={'valeur':fr2decimal(xml_sous.get('Tc'))})
-            else:
-                sous.montant = fr2decimal(xml_sous.get('M')) * fr2decimal(xml_sous.get('Tc')) - fr2decimal(xml_sous.get('Fc'))
-                Titre.objects.get(type=u'DEV', id=tabl_correspondance_devise[xml_sous.get('De')]).cours_set.get_or_create(date=sous.date, defaults={'valeur':1 / fr2decimal(xml_sous.get('Tc'))})
         #numero du moyen de paiment
         sous.num_cheque = xml_sous.get('Ct')
         #statut de pointage
@@ -425,7 +396,6 @@ def import_gsb(nomfich, efface_table=True):
             date=datefr2datesql(xml_element.get('Date')),
             montant=fr2decimal(xml_element.get('Montant')),
             compte_id=tabl_correspondance_compte[xml_element.get('Compte')],
-            devise_id=tabl_correspondance_devise[xml_element.get('Devise')]
         )
         element.save()
         tabl_correspondance_ech[xml_element.get('No')] = element.id

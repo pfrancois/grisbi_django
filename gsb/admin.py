@@ -65,7 +65,7 @@ class Compte_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second compte dans le premier"
     fieldsets = [
-            (None, {'fields': ('nom', 'type', 'devise', 'ouvert')}),
+            (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
@@ -89,7 +89,7 @@ class Compte_titre_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du premier compte_titre dans le premier"
     fieldsets = [
-            (None, {'fields': ('nom', 'type', 'devise', 'ouvert')}),
+            (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),

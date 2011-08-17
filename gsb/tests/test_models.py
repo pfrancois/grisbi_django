@@ -19,10 +19,6 @@ class test_models(TestCase):
     def test_last_cours_et_date(self):
         self.assertEquals(Titre.objects.get(nom="t1").last_cours,10)
         self.assertEqual(Titre.objects.get(nom="t1").last_cours_date, datetime.date(day=1, month=1, year=2010) )
-    def test_titres_devise(self):
-        self.assertEqual(Titre.devises().count(), 2)
-    def test_creation_devise(self):
-        self.assertEqual(Titre.objects.get(nom="euro").tiers, None)
     def test_creation_titre(self):
         tiers = Titre.objects.get(nom="t1").tiers
         self.assertNotEqual(tiers, None)
@@ -37,12 +33,6 @@ class test_models(TestCase):
         #TODO gerer la fusion des tiers sous jacents
         #TODO titre detenus non verifies
         #self.assertEqual(Tiers.objects.get(id=1).titre.nom,"t2")
-    def test_devise_fusionne(self):
-        Titre.objects.get(nom="dollar").fusionne(Titre.objects.get(nom="euro"))
-        self.assertEqual(Titre.objects.count(), 3)
-        self.assertEqual(Tiers.objects.count(), 4)
-        self.assertEqual(Compte.objects.get(id=3).devise.nom,"euro")
-        self.assertEqual(Echeance.objects.get(id=2).devise.nom,"euro")
     def test_titre_save_perso(self):
         Titre.objects.create(nom="t3", isin="4", type='ACT')
         self.assertEqual(Tiers.objects.count(), 5)
@@ -79,7 +69,7 @@ class test_models(TestCase):
     def test_cpt_titre_achat_virement(self):
         self.assertEqual(0,0)
     def test_cpt_titre_vente(self):
-        c=c=Compte_titre.objects.get(id=4)
+        c=Compte_titre.objects.get(id=4)
         c.achat(titre=Titre.objects.get(nom="t1"), nombre=20)
         c.vente(Titre.objects.get(nom="t1"),10)
         self.assertEqual(c.solde(),0)
@@ -115,7 +105,7 @@ class test_models(TestCase):
     def generalite_gen(self):
         self.assertEqual(0,0)
     def generalite_dev_g(self):
-        self.assertEqual(0,0)
+        self.assertEqual(Generalite.dev_g(),'EUR')
     def ope_absolute_url(self):
         self.assertEqual(0,0)
     def ope_save(self):

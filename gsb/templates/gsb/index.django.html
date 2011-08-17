@@ -7,7 +7,7 @@
     {% for cpt in liste_cpt_bq %}
     <tr class="item padding">
         <td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.nom }} {% if not cpt.ouvert  %}(clotur&eacute;){% endif %}</a></td>
-        <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur:dev }}</a></td>
+        <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur }}</a></td>
     </tr>
     {% empty %}
     <tr class="item padding">
@@ -16,7 +16,7 @@
     {% endfor %}
     <tr class="entete">
         <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
-        <td class="cptSolde">{{ total_bq|cur:dev }}</td>
+        <td class="cptSolde">{{ total_bq|cur }}</td>
     </tr>
 </table>
 <h2>Comptes titres</h2>
@@ -24,7 +24,7 @@
     {% for cpt in liste_cpt_pl %}
     <tr class="item padding">
         <td class="cptLabel"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.nom }} {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
-        <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur:dev }}</a></td>
+        <td class="cptSolde"><a href="{% url gsb.views.cpt_detail cpt.id %}">{{ cpt.solde|cur }}</a></td>
     </tr>
     {% empty %}
     <tr class="item padding">
@@ -33,13 +33,13 @@
     {% endfor %}
     <tr class="entete">
         <td class="cptLabel">Solde des comptes titre</td>
-        <td class="cptSolde">{{ total_pla|cur:dev }}</td>
+        <td class="cptSolde">{{ total_pla|cur }}</td>
     </tr>
 </table>
 <table id="total" class="table">
     <tr class="footerbar">
         <td class="cptLabel">Solde global</td>
-        <td class="cptSolde">{{ total|cur:dev }}</td>
+        <td class="cptSolde">{{ total|cur }}</td>
     </tr>
 </table>
 {% if nb_clos > 0 %}
