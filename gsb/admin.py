@@ -128,8 +128,6 @@ class Titre_admin(admin.ModelAdmin):
 
     list_display = ('nom', 'isin', 'last_cours')
     list_filter = ('type',)
-    def has_add_permission(self, request): #@UnusedVariable
-        return False
 
 class Moyen_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les moyens de paiements"""
