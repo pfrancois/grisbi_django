@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Rapp, Generalite 
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite 
 #from mysite.gsb import widgets
 import datetime
 #import decimal
@@ -56,8 +56,13 @@ class VirementForm(forms.Form):
         return data
     def __init__(self,ope=None, *args, **kwargs):
         self.ope=ope
-        super(VirementForm,self).__init__( *args, **kwargs)
+        if ope:
+            v=Virement(ope)
+            super(VirementForm,self).__init__( initial=v.init_form(), *args, **kwargs)
+        else:
+            super(VirementForm,self).__init__( *args, **kwargs)
     def save(self):
+        print "sa"
         virement_objet = Virement(ope=self.ope)
         virement_objet.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']

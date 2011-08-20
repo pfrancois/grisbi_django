@@ -118,6 +118,8 @@ def ope_detail(request, pk):
         if request.method == 'POST':#creation du virement
             form = gsb_forms.VirementForm(data=request.POST,ope=ope)
             if form.is_valid():
+                print "ok"
+                form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
             else:
                 return render(request, 'gsb/vir.django.html',
@@ -128,7 +130,7 @@ def ope_detail(request, pk):
                 )
         else:#modification du virement
             #initialisation form
-            form = gsb_forms.VirementForm(Virement(ope).init_form())
+            form = gsb_forms.VirementForm(ope=ope)
             return render(request, 'gsb/vir.django.html',
                 {   'titre':u'modification',
                    'titre_long':u'modification virement interne %s' % ope.id,
@@ -137,7 +139,7 @@ def ope_detail(request, pk):
                 )
     #______ope normale----------
     else:#sinon c'est une operation normale
-        if ope.filles_set.all().count() > 0: #c'est une ope mere
+        if ope.filles_set.all().count() > 0 or ope.jumelle.filles_set.count > 0: #c'est une ope mere
             #TODO message
             HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         if request.method == 'POST':
@@ -207,7 +209,7 @@ def vir_new(request, cpt_id=None):
         cpt = None
     #logger = logging.getLogger('gsb')
     if request.method == 'POST':
-        form = gsb_forms.VirementForm(request.POST)
+        form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
@@ -219,10 +221,7 @@ def vir_new(request, cpt_id=None):
                 'cpt':cpt}
             )
     else:
-        if cpt_id:
-            form = gsb_forms.VirementForm(initial={'moyen_origine':cpt.moyen_debit_defaut})
-        else:
-            form = gsb_forms.VirementForm()
+        form = gsb_forms.VirementForm()
         return render(request, 'gsb/vir.django.html',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
