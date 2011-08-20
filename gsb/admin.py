@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Histo_ope_titres, Compte, Titres_detenus
+from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Ope_titre, Compte
 from django.contrib import admin
 from django.contrib import messages
 
@@ -73,11 +73,6 @@ class Compte_admin(admin.ModelAdmin):
     list_display = ('nom', 'solde', 'type', 'ouvert')
     list_filter = ('type', 'banque', 'ouvert')
 
-class Titre_detenus_inline(admin.TabularInline):
-    """inline pour les titres detenus"""
-    model = Titres_detenus #@UndefinedVariable
-    readonly_fields = ('titre', 'nombre', 'date')
-    extra = 1
 
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
@@ -96,7 +91,6 @@ class Compte_titre_admin(admin.ModelAdmin):
             ]
     list_display = ('nom', 'solde')
     list_filter = ('type', 'banque', 'ouvert')
-    inlines = (Titre_detenus_inline,)
 
 class Ope_admin(admin.ModelAdmin):
     """classe de gestion de l'amdmin pour les opes"""
@@ -140,9 +134,8 @@ class Moyen_admin(admin.ModelAdmin):
     list_filter = ('type',)
     fields = ['type', 'nom']
 
-class Histo_ope_titres_admin(admin.ModelAdmin):
-    """classe de gestion de l'admin pour l'historique des operations sur titres (compta matiere)"""
-    readonly_fields = ('titre', 'compte', 'nombre', 'date')
+class Ope_titre_admin(admin.ModelAdmin):
+    """classe de gestion de l'admin pour des operations sur titres (compta matiere)"""
     list_filter = ('titre', 'compte', 'date')
 
 
@@ -217,4 +210,4 @@ admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Generalite, Gen_admin)
 admin.site.register(Compte_titre, Compte_titre_admin)
-admin.site.register(Histo_ope_titres, Histo_ope_titres_admin)
+admin.site.register(Ope_titre, Ope_titre_admin)

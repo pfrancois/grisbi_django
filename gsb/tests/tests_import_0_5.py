@@ -125,7 +125,7 @@ class importtest(TestCase):
         self.assertEqual(obj.moyen_credit_defaut.nom, u'Depot')
 
     def test_compte_solde(self):
-        self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('-216'))
+        self.assertEqual(Compte.objects.get(id=1).solde, decimal.Decimal('-216'))
 
     def test_compte_global(self):
         self.assertEqual(Compte.objects.count(), 7)
@@ -141,7 +141,7 @@ class importtest(TestCase):
         self.assertEquals(obj.nom, 'CBO1')
         self.assertEquals(obj.compte, 1)
         self.assertEquals(obj.date, datetime.date(2010, 5, 31))
-        self.assertEquals(obj.solde(), 10)
+        self.assertEquals(obj.solde, 10)
         self.assertEquals(obj.ope_set.all().count(), 1)
         self.assertEquals(obj.ope_set.all()[0], Ope.objects.get(id=5))
 

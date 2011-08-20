@@ -25,9 +25,11 @@ def index(request):
         bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related()
         pl = Compte_titre.objects.filter(ouvert=True).select_related()
     total_bq = Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+    if total_bq == None:
+        total_bq = decimal.Decimal('0')
     total_pla = decimal.Decimal('0')
     for p in pl:
-        total_pla = total_pla + p.solde()
+        total_pla = total_pla + p.solde
     nb_clos = len(Compte.objects.filter(ouvert=False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
@@ -69,7 +71,7 @@ def cpt_detail(request, cpt_id):
                         'nbrapp': nb_ope_rapp,
                         'nbvielles': nb_ope_vielles,
                         'titre': c.nom,
-                        'solde': c.solde(),
+                        'solde': c.solde,
                         'date_limite':date_limite,
                     }
                 )
@@ -94,7 +96,7 @@ def cpt_detail(request, cpt_id):
                     {
                         'compte': c,
                         'titre': c.nom,
-                        'solde': c.solde(),
+                        'solde': c.solde,
                         'titres': titres,
                         'especes': especes,
                     }
@@ -111,9 +113,10 @@ def ope_detail(request, pk):
     '''
     ope = get_object_or_404(Ope, pk=pk)
     #logger = logging.getLogger('gsb')
-    if ope.jumelle is not None: #c'est un virement
+    if ope.jumelle is not None: 
+        #------un virement--------------
         if request.method == 'POST':#creation du virement
-            form = gsb_forms.VirementForm(request.POST)
+            form = gsb_forms.VirementForm(data=request.POST,ope=ope)
             if form.is_valid():
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
             else:
@@ -132,12 +135,13 @@ def ope_detail(request, pk):
                     'form':form,
                     'ope':ope}
                 )
+    #______ope normale----------
     else:#sinon c'est une operation normale
         if ope.filles_set.all().count() > 0: #c'est une ope mere
             #TODO message
             HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         if request.method == 'POST':
-            form = gsb_forms.OperationForm(request.POST)
+            form = gsb_forms.OperationForm(request.POST,instance=ope)
             if form.is_valid():
                 ope = form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))

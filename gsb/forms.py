@@ -41,8 +41,8 @@ class VirementForm(forms.Form):
     date = forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial=datetime.date.today)
     notes = forms.CharField(widget=forms.Textarea, required=False)
     pointe = forms.BooleanField(required=False)
-    rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
-    rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
+    #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
+    #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
     piece_comptable_compte_origine = forms.CharField(required=False)
     piece_comptable_compte_destination = forms.CharField(required=False)
     def clean(self):
@@ -54,14 +54,17 @@ class VirementForm(forms.Form):
             del data['compte_origine']
             del data['compte_destination']
         return data
+    def __init__(self,ope=None, *args, **kwargs):
+        self.ope=ope
+        super(VirementForm,self).__init__( *args, **kwargs)
     def save(self):
-        virement_objet = Virement()
+        virement_objet = Virement(ope=self.ope)
         virement_objet.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
         virement_objet.dest.moyen = self.cleaned_data['moyen_destination']
         virement_objet.pointe = self.cleaned_data['pointe']
-        virement_objet.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
-        virement_objet.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
+        #virement_objet.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
+        #virement_objet.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
         virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
         virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()

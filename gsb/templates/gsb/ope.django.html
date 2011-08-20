@@ -6,6 +6,7 @@
     {% csrf_token %}
     <fieldset class="operationMainTable">
     <table>
+        {{form.pk}}
         {% if form.compte.errors %}
         <tr><td>{{ form.compte.errors }}</td></tr>
         {% endif %}
@@ -26,12 +27,12 @@
         {% if form.tiers.errors %}
         <tr><td>{{ form.tiers.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }} <img src="{{ STATIC_URL }}img/tooltag-add.gif"  onClick="javascript:popUp('{% url gsb_tiers_create %}')"></td>
+        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }} </td>
         </tr>
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant|cur }} </td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% dev %}</td>
         {% comment %}
             TODO rajouter fonction calculatrice
             TODO ajax et js pour changer la monnaie si changement de compte

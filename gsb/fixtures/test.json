@@ -74,6 +74,15 @@
         }
     },
     {
+        "pk": 2,
+        "model": "gsb.cours",
+        "fields": {
+            "date": "2009-12-31",
+            "titre": 1,
+            "valeur": "10"
+        }
+    },
+    {
         "pk": 1,
         "model": "gsb.banque",
         "fields": {
@@ -181,7 +190,7 @@
             "cle_compte": 0,
             "solde_mini_voulu": "0",
             "banque": 1,
-            "type": "b",
+            "type": "e",
             "notes": "",
             "num_compte": "",
             "solde_init": "0",
@@ -220,7 +229,7 @@
             "nom": "cpt3",
             "cle_compte": 0,
             "solde_mini_voulu": "0",
-            "banque": 1,
+            "banque": 2,
             "type": "b",
             "notes": "",
             "num_compte": "",
@@ -271,6 +280,26 @@
             "moyen_credit_defaut": 3,
             "guichet": "",
             "ouvert": true
+        }
+    },
+    {
+        "pk": 6,
+        "model": "gsb.compte",
+        "fields": {
+            "nom": "cpt_ferme",
+            "cle_compte": 0,
+            "solde_mini_voulu": "0",
+            "banque": 1,
+            "type": "b",
+            "notes": "compte clos",
+            "num_compte": "",
+            "solde_init": "0",
+            "solde_mini_autorise": "0",
+            "moyen_debit_defaut": 1,
+            "titulaire": "",
+            "moyen_credit_defaut": 3,
+            "guichet": "",
+            "ouvert": false
         }
     },
     {
@@ -356,8 +385,75 @@
             "inscription_automatique": false,
             "montant": "10",
             "notes": "2",
-            "exercice": null,
+            "exercice": 1,
             "cat": 1,
+            "date_limite": null,
+            "intervalle": 0,
+            "date": "2011-08-11",
+            "moyen": 3,
+            "compte": 1,
+            "ib": 1,
+            "periodicite": "u"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "gsb.echeance",
+        "fields": {
+            "compte_virement": 1,
+            "moyen_virement": 2,
+            "tiers": 2,
+            "periode_perso": "",
+            "inscription_automatique": false,
+            "montant": "10",
+            "notes": "pour la fusion",
+            "exercice": 2,
+            "cat": 2,
+            "date_limite": null,
+            "intervalle": 0,
+            "date": "2011-08-11",
+            "moyen": 2,
+            "compte": 2,
+            "ib": 2,
+            "periodicite": "u"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "gsb.echeance",
+        "fields": {
+            "compte_virement": 3,
+            "moyen_virement": 1,
+            "tiers": 1,
+            "periode_perso": "",
+            "inscription_automatique": true,
+            "montant": "10",
+            "notes": "inscription automatique",
+            "exercice": null,
+            "cat": null,
+            "date_limite": null,
+            "intervalle": 0,
+            "date": "2021-08-11",
+            "moyen": 3,
+            "compte": 1,
+            "ib": null,
+            "periodicite": "u"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "gsb.echeance",
+        "fields": {
+            "compte_virement": 3,
+            "moyen_virement": 1,
+            "tiers": 1,
+            "periode_perso": "",
+            "inscription_automatique": false,
+            "montant": "10",
+            "notes": "",
+            "exercice": null,
+            "exercice": null,
+            "cat": null,
             "date_limite": null,
             "intervalle": 0,
             "date": "2011-08-11",
@@ -367,7 +463,7 @@
             "periodicite": "u"
         }
     },
-    {
+     {
         "pk": 1,
         "model": "gsb.ope",
         "fields": {

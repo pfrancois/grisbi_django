@@ -7,7 +7,7 @@ from django.db import transaction #@UnusedImport
 from django.conf import settings #@UnusedImport
 #from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError #@UnusedImport
-
+from django.utils.encoding import force_unicode
 class Gsb_exc(Exception):
     pass
 class Ex_jumelle_neant(Exception):
@@ -24,10 +24,10 @@ class CurField(models.DecimalField):
     description = "A Monetary value"
 
 
-    def __init__(self, verbose_name=None, name=None, 
-                 max_digits=15, decimal_places=3,
-                 default=0.000, **kwargs):
-        super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
+    def __init__(self, verbose_name = None, name = None,
+                 max_digits = 15, decimal_places = 3,
+                 default = 0.000, **kwargs):
+        super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default = default, **kwargs)
 
 
     def get_internal_type(self):
@@ -54,10 +54,8 @@ class Tiers(models.Model):
 #    @transaction.commit_on_success
     def fusionne(self, new):
         if type(new) != type(self):
-            raise Gsb_exc("pas le bon type")
+            raise TypeError("pas la meme classe d'objet")
         nb_tiers_change = Echeance.objects.filter(tiers = self).update(tiers = new)
-        if self.is_titre:
-            nb_tiers_change += Titre.objects.filter(tiers = self).update(tiers = new)
         nb_tiers_change += Ope.objects.filter(tiers = self).update(tiers = new)
         self.delete()
         return nb_tiers_change
@@ -100,11 +98,10 @@ class Titre(models.Model):
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new"""
         if type(new) != type(self):
-            raise Gsb_exc("pas le bon type")
-        Cours.objects.filter(titre=self).delete()
+            raise TypeError("pas la meme classe d'objet")
+        Cours.objects.filter(titre = self).delete()#on efface les cours mais ce n'est pas optimal
         nb_change = 0
-        nb_change += Titres_detenus.objects.filter(titre=self).update(titre=new)
-        nb_change += Histo_ope_titres.objects.filter(titre=self).update(titre=new)
+        nb_change += Ope_titre.objects.filter(titre = self).update(titre = new)
         #on doit aussi reaffecter le tiers associe
         self.tiers.fusionne(new.tiers)
         self.delete()
@@ -112,19 +109,14 @@ class Titre(models.Model):
 
     def save(self, *args, **kwargs):
         if (not self.tiers):
-            tiers, created = Tiers.objects.get_or_create(nom = 'titre_ %s'%self.nom, defaults = {"nom":'titre_ %s'%self.nom})
-            if created:
-                tiers.is_titre = True
-                tiers.notes = "%s@%s" % (self.isin, self.type)#on met les notes qui vont bien
-                tiers.save()
-            self.tiers = tiers
+            self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
         super(Titre, self).save(*args, **kwargs)
 
 class Cours(models.Model):
     """cours des titres"""
-    valeur = CurField(default=1.000)
-    titre = models.ForeignKey(Titre, unique_for_date="date")
-    date = models.DateField(default=datetime.date.today)
+    valeur = CurField(default = 1.000)
+    titre = models.ForeignKey(Titre, unique_for_date = "date")
+    date = models.DateField(default = datetime.date.today)
     class Meta:
         db_table = 'cours'
         verbose_name_plural = u'cours'
@@ -138,9 +130,9 @@ class Cours(models.Model):
 
 class Banque(models.Model):
     """banques"""
-    cib = models.CharField(max_length=15, blank=True)
-    nom = models.CharField(max_length=40, unique=True)
-    notes = models.TextField(blank=True)
+    cib = models.CharField(max_length = 15, blank = True)
+    nom = models.CharField(max_length = 40, unique = True)
+    notes = models.TextField(blank = True)
     class Meta:
         db_table = 'banque'
         ordering = ['nom']
@@ -150,7 +142,7 @@ class Banque(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Compte.objects.filter(banque=self).update(banque=new)
+        nb_change = Compte.objects.filter(banque = self).update(banque = new)
         self.delete()
         return nb_change
 
@@ -163,8 +155,8 @@ class Cat(models.Model):
     ('d', u'dépense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length=60, unique=True)
-    type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name="type de la catégorie")
+    nom = models.CharField(max_length = 60, unique = True)
+    type = models.CharField(max_length = 1, choices = typesdep, default = 'd', verbose_name = "type de la catégorie")
     class Meta:
         db_table = 'cat'
         verbose_name = u"catégorie"
@@ -174,8 +166,10 @@ class Cat(models.Model):
         return self.nom
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Echeance.objects.filter(cat=self).update(cat=new)
-        nb_change += Ope.objects.filter(cat=self).update(cat=new)
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
+        nb_change = Echeance.objects.filter(cat = self).update(cat = new)
+        nb_change += Ope.objects.filter(cat = self).update(cat = new)
         self.delete()
         return nb_change
 
@@ -183,8 +177,8 @@ class Cat(models.Model):
 class Ib(models.Model):
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
-    nom = models.CharField(max_length=60, unique=True)
-    type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
+    nom = models.CharField(max_length = 60, unique = True)
+    type = models.CharField(max_length = 1, choices = Cat.typesdep, default = u'd')
     class Meta:
         db_table = 'ib'
         verbose_name = u"imputation budgétaire"
@@ -195,8 +189,10 @@ class Ib(models.Model):
         return self.nom
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Echeance.objects.filter(ib=self).update(ib=new)
-        nb_change += Ope.objects.filter(ib=self).update(ib=new)
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
+        nb_change = Echeance.objects.filter(ib = self).update(ib = new)
+        nb_change += Ope.objects.filter(ib = self).update(ib = new)
         self.delete()
         return nb_change
 
@@ -204,9 +200,9 @@ class Exercice(models.Model):
     """listes des exercices des comptes
     attention, il ne faut confondre exercice et rapp. les exercices sont les meme pour tous les comptes alors q'un rapp est pour un seul compte
     """
-    date_debut = models.DateField(default=datetime.date.today)
-    date_fin = models.DateField(null=True, blank=True)
-    nom = models.CharField(max_length=40, unique=True)
+    date_debut = models.DateField(default = datetime.date.today)
+    date_fin = models.DateField(null = True, blank = True)
+    nom = models.CharField(max_length = 40, unique = True)
     class Meta:
         db_table = 'exercice'
         ordering = ['date_debut']
@@ -217,8 +213,10 @@ class Exercice(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Echeance.objects.filter(exercice=self).update(exercice=new)
-        nb_change += Ope.objects.filter(exercice=self).update(exercice=new)
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
+        nb_change = Echeance.objects.filter(exercice = self).update(exercice = new)
+        nb_change += Ope.objects.filter(exercice = self).update(exercice = new)
         self.delete()
         return nb_change
 
@@ -234,29 +232,29 @@ class Compte(models.Model):
     ('p', u'passif'),
     ('t', u'titre')
     )
-    nom = models.CharField(max_length=40, unique=True)
-    titulaire = models.CharField(max_length=120, blank=True, default='')
-    type = models.CharField(max_length=24, choices=typescpt, default='b')
-    banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    guichet = models.CharField(max_length=15, blank=True, default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
-    num_compte = models.CharField(max_length=60, blank=True, default='')
-    cle_compte = models.IntegerField(null=True, blank=True, default=0)
+    nom = models.CharField(max_length = 40, unique = True)
+    titulaire = models.CharField(max_length = 120, blank = True, default = '')
+    type = models.CharField(max_length = 24, choices = typescpt, default = 'b')
+    banque = models.ForeignKey(Banque, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    guichet = models.CharField(max_length = 15, blank = True, default = '')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
+    num_compte = models.CharField(max_length = 60, blank = True, default = '')
+    cle_compte = models.IntegerField(null = True, blank = True, default = 0)
     solde_init = CurField()
-    solde_mini_voulu = CurField(null=True, blank=True)
-    solde_mini_autorise = CurField(null=True, blank=True)
-    ouvert = models.BooleanField(default=True)
-    notes = models.TextField(blank=True, default='')
-    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_credit_set", default=None)
-    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="moyen_debit_set", default=None)
+    solde_mini_voulu = CurField(null = True, blank = True)
+    solde_mini_autorise = CurField(null = True, blank = True)
+    ouvert = models.BooleanField(default = True)
+    notes = models.TextField(blank = True, default = '')
+    moyen_credit_defaut = models.ForeignKey('Moyen', null = True, blank = True, on_delete = models.SET_NULL, related_name = "moyen_credit_set", default = None)
+    moyen_debit_defaut = models.ForeignKey('Moyen', null = True, blank = True, on_delete = models.SET_NULL, related_name = "moyen_debit_set", default = None)
 
     class Meta:
         db_table = 'compte'
 
     def __unicode__(self):
         return self.nom
-
+    @property
     def solde(self):
-        req = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None).aggregate(solde=models.Sum('montant'))
+        req = Ope.objects.filter(compte__id__exact = self.id, mere__exact = None).aggregate(solde = models.Sum('montant'))
         if req['solde'] is None:
             solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
         else:
@@ -265,9 +263,13 @@ class Compte(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Echeance.objects.filter(compte=self).update(compte=new)
-        nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
-        nb_change += Ope.objects.filter(compte=self).update(compte=new)
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
+        if new.type != self.type:
+            raise Gsb_exc("attention ce ne sont pas deux compte de meme type")
+        nb_change = Echeance.objects.filter(compte = self).update(compte = new)
+        nb_change += Echeance.objects.filter(compte_virement = self).update(compte_virement = new)
+        nb_change += Ope.objects.filter(compte = self).update(compte = new)
         self.delete()
         return nb_change
 
@@ -289,130 +291,130 @@ class Compte_titre(Compte):
     comptes titres
     compte de classe "t" avec des fonctions en plus. une compta matiere
     """
-    titres_detenus = models.ManyToManyField(Titre, through='Titres_detenus')
     class Meta:
         db_table = 'cpt_titre'
     @transaction.commit_on_success
-    def achat(self, titre, nombre, prix=1, date=datetime.date.today(), frais='0.0', virement_de=None): 
-        cat_ost, created = Cat.objects.get_or_create(nom=u"operation sur titre:", defaults={'nom':u'operation sur titre:'}) #@UnusedVariable
-        cat_frais, created = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})
+    def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None): 
+        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0] #@UnusedVariable
+        cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #ajout de l'operation dans le compte_espece rattache
-            Ope.objects.create(date=date,
-                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre))*-1,
-                                tiers=titre.tiers,
-                                cat=cat_ost,
-                                notes="achat %s@%s"%(nombre, prix),
-                                moyen=None,
-                                automatique=True,
-                                compte=self,
+            Ope.objects.create(date = date,
+                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
+                                tiers = titre.tiers,
+                                cat = cat_ost,
+                                notes = "achat %s@%s" % (nombre, prix),
+                                moyen = None,
+                                automatique = True,
+                                compte = self,
                                 )
-            if decimal.Decimal(str(frais)):
-                self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(frais))*-1,
-                                tiers=titre.tiers,
-                                cat=cat_frais,
-                                notes="frais achat %s@%s"%(nombre, prix),
-                                moyen=None,
-                                automatique=True
+            if decimal.Decimal(force_unicode(frais)):
+                self.ope_set.create(date = date,
+                                montant = decimal.Decimal(force_unicode(frais)) * -1,
+                                tiers = titre.tiers,
+                                cat = cat_frais,
+                                notes = "frais achat %s@%s" % (nombre, prix),
+                                moyen = None,
+                                automatique = True
                                 )
             #gestion des cours
-            if not titre.cours_set.filter(date=date).exists():
-                titre.cours_set.create(date=date, valeur=prix)#TODO getorcreate
+            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
             #ajout des titres dans portefeuille
-            titre_detenu, created = Titres_detenus.objects.get_or_create(titre=titre, compte=self, defaults={'titre':titre, 'compte':self, 'nombre':decimal.Decimal(str(nombre))})
-            if not created:
-                titre_detenu.nombre = titre_detenu.nombre+decimal.Decimal(str(nombre))
-                titre_detenu.save()
-            Histo_ope_titres.objects.create(titre=titre_detenu.titre, nombre=titre_detenu.nombre, compte=titre_detenu.compte, date=date)
+            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)), date = date, cours = prix)
+            #virement
+            if virement_de:
+                vir = Virement()
+                vir.create(virement_de, self, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
+                
         else:
-            raise Exception('attention ceci n\'est pas un titre')
+            raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def vente(self, titre, nombre, prix=1, date=datetime.date.today(), frais='0.0', virement_vers=None):
-        cat_ost = Cat.objects.get_or_create(nom=u"operation sur titre:", defaults={'nom':u'operation sur titre:'})[0]
-        cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
+    def vente(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
+        cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            try:
-                titre_detenu = Titres_detenus.objects.get(titre=titre, compte=self)
-                titre_detenu.nombre = titre_detenu.nombre-decimal.Decimal(str(nombre))
-                titre_detenu.save()
-            except Titres_detenus.DoesNotExist:
+            nb_titre_avant = Ope_titre.nb(titre = titre, compte = self)
+            if not nb_titre_avant:
                 raise Titre.doesNotExist('titre pas en portefeuille')
-            Histo_ope_titres.objects.create(titre=titre_detenu.titre, nombre=titre_detenu.nombre, compte=titre_detenu.compte, date=date)
+            #compta matiere
+            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix)                
             #ajout de l'operation dans le compte_espece ratache
-            self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
-                                tiers=titre.tiers,
-                                cat=cat_ost,
-                                notes="vente %s@%s"%(nombre, prix),
-                                moyen=None,
-                                automatique=True
+            self.ope_set.create(date = date,
+                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
+                                tiers = titre.tiers,
+                                cat = cat_ost,
+                                notes = "vente %s@%s" % (nombre, prix),
+                                moyen = None,
+                                automatique = True
                                 )
-            if decimal.Decimal(str(frais)):
-                self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(frais))*-1,
-                                tiers=titre.tiers,
-                                cat=cat_frais,
-                                notes="frais vente %s@%s"%(nombre, prix),
-                                moyen=None,
-                                automatique=True
+            if decimal.Decimal(force_unicode(frais)):
+                self.ope_set.create(date = date,
+                                montant = decimal.Decimal(force_unicode(frais)) * -1,
+                                tiers = titre.tiers,
+                                cat = cat_frais,
+                                notes = "frais vente %s@%s" % (nombre, prix),
+                                moyen = None,
+                                automatique = True
                                 )
             #gestion des cours
-            if not titre.cours_set.filter(date=date).exists():
-                titre.cours_set.create(date=date, valeur=prix)#TODO get_or_create
+            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
+            if virement_vers:
+                vir = Virement()
+                vir.create(self, virement_vers, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
+
         else:
-            raise Exception('attention ceci n\'est pas un titre')
+            raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def revenu(self, titre, nombre, prix=1, date=datetime.date.today(), frais='0.0', virement_vers=None):
-        cat_ost = Cat.objects.get_or_create(nom=u"operation sur titre:", defaults={'nom':u'operation sur titre:'})[0]
-        cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
+    def revenu(self, titre, montant = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
+        cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            try:
-                Titres_detenus.objects.get(titre=titre, compte=self)
-            except Titres_detenus.DoesNotExist:
+            if not Ope_titre.nb(titre = titre, compte = self):
                 raise Titre.doesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
-            self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(prix))*decimal.Decimal(str(nombre)),
-                                tiers=titre.tiers,
-                                cat=cat_ost,
-                                notes="revenu",
-                                moyen=None,
-                                automatique=True
+            self.ope_set.create(date = date,
+                                montant = decimal.Decimal(force_unicode(montant)),
+                                tiers = titre.tiers,
+                                cat = cat_ost,
+                                notes = "revenu",
+                                moyen = None,
+                                automatique = True
                                 )
-            if decimal.Decimal(str(frais)):
-                self.ope_set.create(date=date,
-                                montant=decimal.Decimal(str(frais))*-1,
-                                tiers=titre.tiers,
-                                cat=cat_frais,
-                                notes="frais revenu %s@%s"%(nombre, prix),
-                                moyen=None,
-                                automatique=True
+            if decimal.Decimal(force_unicode(frais)):
+                self.ope_set.create(date = date,
+                                montant = decimal.Decimal(force_unicode(frais)) * -1,
+                                tiers = titre.tiers,
+                                cat = cat_frais,
+                                notes = "frais revenu %s@%s" % (montant),
+                                moyen = None,
+                                automatique = True
                                 )
-            #gestion des cours
-            if not titre.cours_set.filter(date=date):
-                titre.cours_set.create(date=date, valeur=prix)
-        else:
-            raise Exception('attention ceci n\'est pas un titre')
+            if virement_vers:
+                vir = Virement()
+                vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)), date)
 
+        else:
+            raise TypeError("pas un titre")
+    @property
     def solde(self):
-        solde_espece = super(Compte_titre, self).solde()
-        solde_titre=0
-        for titre in self.titres_detenus_set.all():
-            solde_titre += titre.valeur
+        solde_espece = super(Compte_titre, self).solde
+        solde_titre = 0
+        #for titre in self.titres_detenus_set.all():
+        #    solde_titre += titre.valeur
         return solde_espece + solde_titre
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        nb_change = Echeance.objects.filter(compte=self).update(compte=new)
-        nb_change += Histo_ope_titres.objects.filter(compte=self).update(compte=new)
-        nb_change += Titres_detenus.objects.filter(compte=self).update(compte=new)
-        nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
-        nb_change += Ope.objects.filter(compte=self).update(compte=new)
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
+        nb_change = Echeance.objects.filter(compte = self).update(compte = new)
+        nb_change += Ope_titre.objects.filter(compte = self).update(compte = new)
+        nb_change += Echeance.objects.filter(compte_virement = self).update(compte_virement = new)
+        nb_change += Ope.objects.filter(compte = self).update(compte = new)
         self.delete()
         return nb_change
 
@@ -426,34 +428,33 @@ class Compte_titre(Compte):
         super(Compte_titre, self).save(*args, **kwargs)
 
 
-class Titres_detenus(models.Model):
-    """table intermediaire pour la relation M2M comptes titres/ titre"""
-    titre = models.ForeignKey(Titre)
-    compte = models.ForeignKey(Compte_titre, related_name='titres_detenus_set', )
-    nombre = models.PositiveIntegerField()
-    date = models.DateField(default=datetime.date.today)
-    class Meta:
-        db_table = 'titres_detenus'
-        verbose_name_plural = u'titres détenus'
-        verbose_name = u'titres_detenus'
-        ordering = ['compte']
-    def __unicode__(self):
-        return"%s %s dans %s" % (self.nombre, self.titre.nom, self.compte)
-    @property
-    def valeur(self):
-        return self.nombre*self.titre.last_cours
-
-class Histo_ope_titres(models.Model):
-    """historiques des ope titre en compta matiere"""
+class Ope_titre(models.Model):
+    """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte_titre)
     nombre = models.IntegerField()
     date = models.DateField()
+    cours = CurField(default = 1)
+    valeur = CurField()
     class Meta:
-        db_table = 'histo_titres_detenus'
-        verbose_name_plural = u'Titres détenus (historique)'
-        verbose_name = u'Histo_ope_titres'
+        db_table = 'ope_titre'
+        verbose_name_plural = u'Opérations titres(compta_matiere)'
+        verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['compte']
+    def save(self, *args, **kwargs):
+        self.valeur = self.nombre * self.cours
+        super(Ope_titre, self).save(*args, **kwargs)
+    @staticmethod
+    def nb(compte, titre):
+        if not isinstance(titre, Titre):
+            raise TypeError("pas un titre")
+        if not isinstance(compte, Compte_titre):
+            raise TypeError("pas un compte titre")
+        nombre = Ope_titre.objects.filter(compte = compte, titre = titre).aggregate(nombre = models.Sum('nombre'))['nombre']
+        if not nombre:
+            return 0
+        else:
+            return nombre
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -479,6 +480,8 @@ class Moyen(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
         nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
         nb_change += Compte.objects.filter(moyen_debit_defaut = self).update(moyen_debit_defaut = new)
         nb_change += Echeance.objects.filter(moyen = self).update(moyen = new)
@@ -506,7 +509,7 @@ class Rapp(models.Model):
             return self.ope_set.all()[0].compte.id
         else:
             raise TypeError
-
+    @property
     def solde(self):
         req = self.ope_set.aggregate(solde = models.Sum('montant'))
         if req['solde'] is None:
@@ -517,7 +520,7 @@ class Rapp(models.Model):
 
     def fusionne(self, new):
         if type(new) != type(self):
-            raise Gsb_exc("pas le bon type")
+            raise TypeError("pas la meme classe d'objet")
         nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
         self.delete()
         return nb_change
@@ -544,19 +547,19 @@ class Echeance(models.Model):
     date = models.DateField(default = datetime.date.today)
     compte = models.ForeignKey(Compte)
     montant = CurField()
-    tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.SET_NULL, default=None)
-    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"catégorie")
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set', default=None)
-    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='moyen_virement_set')
-    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"imputation")
-    notes = models.TextField(blank=True, default="")
-    inscription_automatique = models.BooleanField(default=False)
-    periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
-    intervalle = models.IntegerField(default=0)
-    periode_perso = models.CharField(max_length=1, choices=typesperiodperso, blank=True, default="")
-    date_limite = models.DateField(null=True, blank=True, default=None)
+    tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.SET_NULL, default = None, verbose_name = u"catégorie")
+    compte_virement = models.ForeignKey(Compte, null = True, blank = True, related_name = 'compte_virement_set', default = None)
+    moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    moyen_virement = models.ForeignKey(Moyen, null = True, blank = True, related_name = 'moyen_virement_set')
+    exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.SET_NULL, default = None, verbose_name = u"imputation")
+    notes = models.TextField(blank = True, default = "")
+    inscription_automatique = models.BooleanField(default = False)
+    periodicite = models.CharField(max_length = 1, choices = typesperiod, default = "u")
+    intervalle = models.IntegerField(default = 0)
+    periode_perso = models.CharField(max_length = 1, choices = typesperiodperso, blank = True, default = "")
+    date_limite = models.DateField(null = True, blank = True, default = None)
     class Meta:
         db_table = 'echeance'
         verbose_name = u"échéance"
@@ -565,7 +568,7 @@ class Echeance(models.Model):
         get_latest_by = 'date'
 
     def __unicode__(self):
-        return u"%s" % (self.id, )
+        return u"%s" % (self.id,)
     def save(self, *args, **kwargs):
         if not self.moyen:
             if self.compte.moyen_credit_defaut and self.montant >= 0:
@@ -581,25 +584,25 @@ class Echeance(models.Model):
 
 class Generalite(models.Model):
     """config dans le fichier"""
-    titre = models.CharField(max_length=120, blank=True, default="isbi")
-    utilise_exercices = models.BooleanField(default=True)
-    utilise_ib = models.BooleanField(default=True)
-    utilise_pc = models.BooleanField(default=False)
-    affiche_clot = models.BooleanField(default=True)
+    titre = models.CharField(max_length = 120, blank = True, default = "isbi")
+    utilise_exercices = models.BooleanField(default = True)
+    utilise_ib = models.BooleanField(default = True)
+    utilise_pc = models.BooleanField(default = False)
+    affiche_clot = models.BooleanField(default = True)
     class Meta:
         db_table = 'generalite'
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
 
     def __unicode__(self):
-        return u"%s" % (self.id, )
+        return u"%s" % (self.id,)
 
     @staticmethod
     def gen():
         try:
-            gen_1 = Generalite.objects.get(id=1)
+            gen_1 = Generalite.objects.get(id = 1)
         except Generalite.DoesNotExist:
-            Generalite.objects.create(id=1)
+            Generalite.objects.create(id = 1)
             gen_1 = Generalite.objects.get(id = 1)
         return gen_1
 
@@ -643,7 +646,7 @@ class Ope(models.Model):
         return Ope.objects.filter(mere = None)
 
     def __unicode__(self):
-            return u"(%s) le %s : %s %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE)
+        return u"(%s) le %s : %s %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE)
 
     @models.permalink
     def get_absolute_url(self):
@@ -664,9 +667,11 @@ class Ope(models.Model):
 
 
 class Virement(object):
-    """raccourci pou creer un virement entre deux comptes"""
-    def __init__(self, ope=None):
+    """raccourci pour creer un virement entre deux comptes"""
+    def __init__(self, ope = None):
         if ope:
+            if type(ope)!=type(Ope()):
+                raise TypeError('pas ope')
             self.origine = ope
             self.dest = self.origine.jumelle
             if not isinstance(self.dest, Ope):
@@ -689,19 +694,17 @@ class Virement(object):
     date_val = property(getdate_val, setdate_val)
 
     def setmontant(self, montant):
-        self.origine.montant = montant
+        self.origine.montant = montant * -1
         self.dest.montant = montant
     def getmontant(self):
-        return self.origine.montant
+        return self.dest.montant
     montant = property(getmontant, setmontant)
-
     def setnotes(self, notes):
         self.origine.notes = notes
         self.dest.notes = notes
     def getnotes(self):
         return self.origine.notes
     notes = property(getnotes, setnotes)
-
     def setpointe(self, pointe):
         self.origine.pointe = pointe
         self.dest.pointe = pointe
@@ -709,32 +712,44 @@ class Virement(object):
         return self.origine.pointe
     pointe = property(getpointe, setpointe)
 
-    def setrapp(self, rapp):
-        self.origine.rapp = rapp
-        self.dest.rapp = rapp
-    def getrapp(self):
-        return self.origine
-
+        
     def save(self):
-        nom_tiers = "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
-        tier = Tiers.objects.get_or_create(nom=nom_tiers, defaults={'nom':nom_tiers})[0]
-        self.origine.tiers = tier
-        self.origine.tiers = tier
-        self.origine.save()
-        self.dest.save()
-
-    def create(self, compte_origine, compte_dest, montant, date, notes=""):
-        self.origine = Ope()
-        self.dest = Ope()
-        self.origine.compte = compte_origine
-        self.dest.compte = compte_dest
-        self.montant = montant
-        self.date = date
-        self.notes = notes
-        self.save()
-        self.origine.jumelle = self.dest
-        self.dest.jumelle = self.origine
-        self.save()
+        if self._init:
+            nom_tiers = "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
+            tier = Tiers.objects.get_or_create(nom = nom_tiers, defaults = {'nom':nom_tiers})[0]
+            self.origine.tiers = tier
+            self.dest.tiers = tier
+            self.origine.save()
+            self.dest.save()
+        else:
+            raise Gsb_exc('pas initialise')
+        
+    @staticmethod
+    def create( compte_origine, compte_dest, montant, date=None, notes = ""):
+        '''
+        cree un nouveau virement
+        '''
+        if not isinstance(compte_origine,Compte):
+            raise TypeError('pas ope')
+        if not isinstance(compte_dest,Compte):
+            raise TypeError('pas ope')
+        vir=Virement()
+        vir.origine = Ope()
+        vir.dest = Ope()
+        vir.origine.compte = compte_origine
+        vir.dest.compte = compte_dest
+        vir.montant = montant
+        if date:
+            vir.date = date
+        else:
+            vir.date = datetime.date.today()
+        vir.notes = notes
+        vir._init = True
+        vir.save()
+        vir.origine.jumelle = vir.dest
+        vir.dest.jumelle = vir.origine
+        vir.save()
+        return vir
 
     def delete(self):
         self.origine.jumelle = None
@@ -761,18 +776,10 @@ class Virement(object):
                 tab['moyen_destination'] = self.dest.moyen.id
             else:
                 tab['moyen_destination'] = None
-            if self.origine.rapp:
-                tab['rapp_origine'] = self.origine.rapp.id
-            else:
-                tab['rapp_origine'] = None
-            if self.dest.rapp:
-                tab['rapp_destination'] = self.dest.rapp.id
-            else:
-                tab['rapp_destination'] = None
-
         else:
             raise Exception('attention, on ne peut intialiser un form que si virement est bound')
         return tab
 
-
+    def __unicode__(self):
+        return "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
 
