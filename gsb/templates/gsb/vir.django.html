@@ -10,14 +10,33 @@
     </fieldset>
 </form>
 {% load gsb_extras %}
-{% if ope %}
-{% bouton_form 'form1' 'gsb.views.cpt_detail' ope.compte_id %}
+<table style=" width: 100%;">
+    <tr>{% if ope %}
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+    </tr>
+    </table>
+<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+    {% csrf_token %}
+</form>
+<table style=" width: 100%;">
+<tr>
+        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
+</tr>
+</table>
 {% else %}
-{% if cpt %}
-{% bouton_form 'form1' 'gsb.views.cpt_detail' cpt.id %}
-{% else %}
-{% bouton_form 'form1' 'gsb.views.index' %}
+    {% if cpt %}
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+    </tr>
+    {% else %}
+    else
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url 'gsb.views.cpt_detail' cpt.id %}">Annuler</a></td>
+    </tr>
+    {% endif %}
 {% endif %}
-{% endif %}
+
+
 {# div pour le choix de la date #} <div class="editDate ope_date_ope" id="editDateId"></div>
 {% endblock content %} 

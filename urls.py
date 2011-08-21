@@ -2,7 +2,7 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView,DeleteView
 from mysite.gsb.models import Tiers
 import mysite.gsb.forms as gsb_forms
 from django.core.urlresolvers import reverse
@@ -31,7 +31,9 @@ urlpatterns += patterns('mysite.gsb',
                         )
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
+                        url(r'^ope/(?P<pk>\d+)/delete','ope_delete', name='gsb_ope_delete'),
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name='gsb_ope_detail'),
+                        
                         url(r'^ope/new$', 'ope_new', name="gsb_ope_new"),
                         url(r'^vir/new$', 'vir_new', name="gsb_vir_new"),
                         )

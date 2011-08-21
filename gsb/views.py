@@ -139,7 +139,7 @@ def ope_detail(request, pk):
                 )
     #______ope normale----------
     else:#sinon c'est une operation normale
-        if ope.filles_set.all().count() > 0 or ope.jumelle.filles_set.count > 0: #c'est une ope mere
+        if ope.filles_set.all().count() > 0 : #c'est une ope mere
             #TODO message
             HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         if request.method == 'POST':
@@ -228,3 +228,14 @@ def vir_new(request, cpt_id=None):
                 'form':form,
                 'cpt':cpt}
             )
+
+@login_required
+def ope_delete(request, pk):
+    ope = get_object_or_404(Ope, pk=pk)
+    if request.method == 'POST':
+        if ope.jumelle:
+            ope.jumelle.delete()
+        ope.delete()
+    else:
+        return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs={'pk':ope.id}))
+    return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))

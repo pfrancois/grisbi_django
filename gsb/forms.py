@@ -63,8 +63,7 @@ class VirementForm(forms.Form):
             super(VirementForm,self).__init__( *args, **kwargs)
     def save(self):
         print "sa"
-        virement_objet = Virement(ope=self.ope)
-        virement_objet.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
+        virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
         virement_objet.dest.moyen = self.cleaned_data['moyen_destination']
         virement_objet.pointe = self.cleaned_data['pointe']
