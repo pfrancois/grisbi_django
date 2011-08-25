@@ -11,7 +11,7 @@ urlpatterns = patterns('',
                        # Common stuff... files, admin...
                        (r'^admin/doc/', include('django.contrib.admindocs.urls')),
                        (r'^admin/', include(admin.site.urls)),
-                       (r'^login$', 'django.contrib.auth.views.login', { 'template_name': 'login.django.html' }),
+                       (r'^login$', 'django.contrib.auth.views.login', { 'template_name': 'login.djhtm' }),
                        (r'^logout$', 'django.contrib.auth.views.logout', {'next_page':'/'}),
                        )
 
@@ -49,12 +49,12 @@ urlpatterns += patterns('mysite.gsb.views',
 class tierscreateview(CreateView):
     model = Tiers
     context_object_name = "tiers"
-    template_name = 'gsb/tiers.django.html'
+    template_name = 'gsb/tiers.djhtm'
     def get_success_url(self):
         return reverse('gsb_close')
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^tiers/new/$', tierscreateview.as_view(), name='gsb_tiers_create'),
-                        url(r'^close/', TemplateView.as_view(template_name="close.django.html"), name="gsb_close"),
+                        url(r'^close/', TemplateView.as_view(template_name="close.djhtm"), name="gsb_close"),
 )
 
 #form tester

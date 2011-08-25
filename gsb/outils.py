@@ -41,19 +41,19 @@ def import_file(request):
             if ok:
                 return HttpResponseRedirect(reverse('gsb.views.index'))
             else:
-                return render_to_response('gsb/import.django.html',
+                return render_to_response('gsb/import.djhtm',
                               {'form': form,
                                'titre':"importation d'un fichier"},
                               context_instance=RequestContext(request))
     else:
         form = gsb_forms.ImportForm()
-    return render_to_response('gsb/import.django.html',
+    return render_to_response('gsb/import.djhtm',
                               {'form': form,
                                'titre':"importation d'un fichier"},
                               context_instance=RequestContext(request))
 
 def options_index(request):
-    return render_to_response('gsb/options.django.html', context_instance=RequestContext(request))
+    return render_to_response('gsb/options.djhtm', context_instance=RequestContext(request))
 
 @login_required
 def modif_gen(request):
@@ -70,14 +70,14 @@ def modif_gen(request):
             g.save()
             return HttpResponseRedirect(reverse('gsb.outils.options_index'))
         else:
-            return  render_to_response('gsb/outil_generalites.django.html',
+            return  render_to_response('gsb/outil_generalites.djhtm',
             {   'titre':u'modification de certaines options',
                 'form':form},
             context_instance=RequestContext(request)
         )
     else:
         form = gsb_forms.GeneraliteForm(instance=Generalite.gen())
-        return  render_to_response('gsb/outil_generalites.django.html',
+        return  render_to_response('gsb/outil_generalites.djhtm',
             {   'titre':u'modification de certaines options',
                 'form':form},
             context_instance=RequestContext(request)

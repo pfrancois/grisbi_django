@@ -24,7 +24,7 @@ def test(request):
     logger.info(3)
     logger.critical('attention ce est un test critique')
 
-    return render_to_response('gsb/test.django.html',
+    return render_to_response('gsb/test.djhtm',
                                             {'titre':"TEST",
                                                 'test':'test'},
                                             context_instance=RequestContext(request))

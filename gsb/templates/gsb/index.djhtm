@@ -1,4 +1,4 @@
-{% extends "generic.django.html" %}
+{% extends "generic.djhtm" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block titre %}<h1 class="survol"><a href="{% url gsb.outils.options_index %}">Comptes</a></h1>{% endblock titre %}
