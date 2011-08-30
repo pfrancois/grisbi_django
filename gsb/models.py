@@ -25,9 +25,7 @@ class CurField(models.DecimalField):
     description = "A Monetary value"
 
 
-    def __init__(self, verbose_name = None, name = None,
-                 max_digits = 15, decimal_places = 3,
-                 default = 0.000, **kwargs):
+    def __init__(self, verbose_name = None, name = None, max_digits = 15, decimal_places = 3, default = 0.000, **kwargs):
         super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default = default, **kwargs)
 
 
@@ -38,6 +36,7 @@ class CurField(models.DecimalField):
 class Tiers(models.Model):
     """
     un tiers, c'est a dire une personne ou un titre
+    pour les titres, c'est remplis dans le champ note avec TYPE@ISIN
     """
 
     nom = models.CharField(max_length = 40, unique = True)
@@ -61,6 +60,8 @@ class Tiers(models.Model):
         nb_tiers_change += Ope.objects.filter(tiers = self).update(tiers = new)
         self.delete() 
         return nb_tiers_change
+    
+
 
 class Titre(models.Model):
     """
@@ -121,6 +122,8 @@ class Titre(models.Model):
         self.alters_data=True   
         if (not self.tiers):
             self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
+        if self.tiers.notes != "%s@%s" % (self.isin, self.type):
+            self.tiers.notes="%s@%s" % (self.isin, self.type)
         super(Titre, self).save(*args, **kwargs)
 
 class Cours(models.Model):
@@ -490,6 +493,7 @@ class Ope_titre(models.Model):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
             raise TypeError("pas un compte titre")
+        
         valeur  = Ope_titre.objects.filter(compte = compte, titre = titre).aggregate(valeur = models.Sum('valeur'))['valeur']
         if not valeur:
             return 0

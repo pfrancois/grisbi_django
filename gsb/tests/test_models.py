@@ -75,7 +75,7 @@ class test_models(TestCase):
         c=Compte_titre.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
         c.achat(titre=Titre.objects.get(nom="t1"), nombre=20,prix=10,date='2011-01-01',frais=2.51,virement_de=Compte.objects.get(id=1))
-        c.vente(titre=Titre.objects.get(nom="t1"), nombre=10, prix = 20, date ='2011-06-31', frais=3, virement_vers=Compte.objects.get(id=1))
+        c.vente(titre=Titre.objects.get(nom="t1"), nombre=10, prix = 20, date ='2011-06-30', frais=3, virement_vers=Compte.objects.get(id=1))
         self.assertEqual(Ope_titre.initial(compte=c,titre=Titre.objects.get(id=1)), decimal.Decimal('200'))
         self.assertEqual(Ope_titre.nb(compte=c,titre=Titre.objects.get(id=1)),10)
         self.assertEqual(c.titre.all().count(),1)

@@ -61,7 +61,7 @@ def import_gsb(nomfich, efface_table=True):
     tabl_correspondance_ope = {}
     tabl_correspondance_devise = {}
     if efface_table:
-        for table in ('titres_detenus', 'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers'):
+        for table in ( 'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from %s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
@@ -100,31 +100,30 @@ def import_gsb(nomfich, efface_table=True):
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
     for xml_element in xml_tree.find('//Detail_des_tiers'):
         affiche = False
-        if nb == int(nb_tiers_final * int("%s0" % percent) / 100):
+        if nb == int(nb_tiers_final * int("%s0" % percent) / 100):#logging
             affiche = True
             logger.info("tiers %s soit %% %s" % (xml_element.get('No'), "%s0" % percent))
             percent += 1
         nb += 1
         query = {'nom':xml_element.get('Nom'), 'notes':xml_element.get('Informations')}
-        element, created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'), defaults=query)
-        tabl_correspondance_tiers[xml_element.get('No')] = element.id
-        if created:
-            nb_nx += 1
-            if affiche:
-                logger.debug('tiers %s cree au numero %s' % (int(xml_element.get('No')), element.id))
-            if element.nom[:6] == "titre_":
+        if xml_element.get('Nom')[:6] != 'titre_':
+            element, created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'), defaults=query)
+        else:
+            #test puis creation du titre (et donc du tiers automatiquement)
+            try:
+                Tiers.objects.get(nom=xml_element.get('Nom'))
+            except:
                 nb_sous += 1
-                element.is_titre = True
-                element.save()
                 s = unicode(xml_element.get('Informations'))
+                nom = unicode(xml_element.get('Nom'))
                 s = s.partition('@')#on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
-                sous = Titre(nom=element.nom[7:])
+                sous = Titre(nom=nom[7:])
                 if not s[1]:
                     if s[0] == '':
-                        sous.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_sous)
+                        sous.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_sous)
                     else:
                         sous.isin = s[0]
-                    sous.type = "XXX"
+                    sous.type = "ZZZ"
                 else:
                     if s[0] == '':
                         sous.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_sous)
@@ -133,10 +132,21 @@ def import_gsb(nomfich, efface_table=True):
                     if s[2] in liste_type_titre:
                         sous.type = s[2]
                     else:
-                        sous.type = 'XXX'
-                sous.tiers = element
+                        sous.type = 'ZZZ'
+                element, created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'), defaults=query)
+                sous.tiers=element
                 sous.save()
+                element.notes="%s@%s" % (sous.isin, sous.type)
+                element.is_titre = True
+                element.save()
                 logger.debug(u'titre cree %s isin (%s) as %s' % (sous.nom, sous.isin, sous.type))
+        tabl_correspondance_tiers[xml_element.get('No')] = element.id
+        if created:
+            nb_nx += 1
+            if affiche:
+                logger.debug('tiers %s cree au numero %s' % (int(xml_element.get('No')), element.id))
+            
+
     logger.warning(u'%s tiers et %s titres dont %s nx' % (nb, nb_sous, nb_nx))
     #-------------------------categories et des sous categories-----------------------
     nb_cat = 0
@@ -441,8 +451,8 @@ def import_gsb(nomfich, efface_table=True):
     logger.warning(u'fini')
 
 if __name__ == "__main__":
-    nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    #nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    #nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
+    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich, efface_table=True)
