@@ -14,6 +14,7 @@ class Ex_jumelle_neant(Exception):
     pass
 
 
+
 #import logging
 #definition d'un moneyfield
 class CurField(models.DecimalField):
@@ -51,13 +52,14 @@ class Tiers(models.Model):
     def __unicode__(self):
         return self.nom
 
-#    @transaction.commit_on_success
+    @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_tiers_change = Echeance.objects.filter(tiers = self).update(tiers = new)
         nb_tiers_change += Ope.objects.filter(tiers = self).update(tiers = new)
-        self.delete()
+        self.delete() 
         return nb_tiers_change
 
 class Titre(models.Model):
@@ -97,9 +99,17 @@ class Titre(models.Model):
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new"""
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
-        Cours.objects.filter(titre = self).delete()#on efface les cours mais ce n'est pas optimal
+        if self.type != new.type:
+            raise TypeError("pas le meme type de titre")
+        for cours in Cours.objects.filter(titre=self):
+            try:
+                if new.cours_set.get(date=cours.date).valeur != cours.valeur:
+                    raise Gsb_exc('attention les titre %s et %s ne peuvent etre fusionne car pas les meme histo de cours')
+            except Cours.DoesNotExist:
+                new.cours_set.create(date=cours.date,valeur=cours.valeur)
         nb_change = 0
         nb_change += Ope_titre.objects.filter(titre = self).update(titre = new)
         #on doit aussi reaffecter le tiers associe
@@ -108,6 +118,7 @@ class Titre(models.Model):
         return nb_change
 
     def save(self, *args, **kwargs):
+        self.alters_data=True   
         if (not self.tiers):
             self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
         super(Titre, self).save(*args, **kwargs)
@@ -142,6 +153,7 @@ class Banque(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         nb_change = Compte.objects.filter(banque = self).update(banque = new)
         self.delete()
         return nb_change
@@ -166,8 +178,11 @@ class Cat(models.Model):
         return self.nom
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
+        if self.type != new.type:
+            raise TypeError("pas le meme type de titre")
         nb_change = Echeance.objects.filter(cat = self).update(cat = new)
         nb_change += Ope.objects.filter(cat = self).update(cat = new)
         self.delete()
@@ -189,8 +204,12 @@ class Ib(models.Model):
         return self.nom
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
+        if self.type != new.type:
+            raise TypeError("pas le meme type de titre")
+
         nb_change = Echeance.objects.filter(ib = self).update(ib = new)
         nb_change += Ope.objects.filter(ib = self).update(ib = new)
         self.delete()
@@ -213,6 +232,7 @@ class Exercice(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_change = Echeance.objects.filter(exercice = self).update(exercice = new)
@@ -249,6 +269,7 @@ class Compte(models.Model):
 
     class Meta:
         db_table = 'compte'
+        ordering = ['nom']
 
     def __unicode__(self):
         return self.nom
@@ -263,6 +284,7 @@ class Compte(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         if new.type != self.type:
@@ -280,6 +302,7 @@ class Compte(models.Model):
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'
         """
+        self.alters_data=True
         if self.type == 't' and not isinstance(self, Compte_titre):
             raise Gsb_exc("il faut creer un compte titre")
         else:
@@ -291,10 +314,12 @@ class Compte_titre(Compte):
     comptes titres
     compte de classe "t" avec des fonctions en plus. une compta matiere
     """
+    titre=models.ManyToManyField('titre',through="Ope_titre")
     class Meta:
         db_table = 'cpt_titre'
     @transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None): 
+        self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0] #@UnusedVariable
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
@@ -331,6 +356,7 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def vente(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
@@ -369,6 +395,7 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def revenu(self, titre, montant = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
@@ -403,12 +430,13 @@ class Compte_titre(Compte):
     def solde(self):
         solde_espece = super(Compte_titre, self).solde
         solde_titre = 0
-        #for titre in self.titres_detenus_set.all():
-        #    solde_titre += titre.valeur
+        for titre in self.titre.all():
+            solde_titre += solde_titre + Ope_titre.nb(self, titre) * titre.last_cours
         return solde_espece + solde_titre
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_change = Echeance.objects.filter(compte = self).update(compte = new)
@@ -423,6 +451,7 @@ class Compte_titre(Compte):
         return ('cpt_detail', (), {'pk':str(self.id)})
 
     def save(self, *args, **kwargs):
+        self.alters_data=True
         if self.type != 't':
             self.type = 't'
         super(Compte_titre, self).save(*args, **kwargs)
@@ -435,7 +464,7 @@ class Ope_titre(models.Model):
     nombre = models.IntegerField()
     date = models.DateField()
     cours = CurField(default = 1)
-    valeur = CurField()
+    valeur = CurField(default = 0)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
@@ -455,6 +484,18 @@ class Ope_titre(models.Model):
             return 0
         else:
             return nombre
+    @staticmethod
+    def initial(compte,titre):
+        if not isinstance(titre, Titre):
+            raise TypeError("pas un titre")
+        if not isinstance(compte, Compte_titre):
+            raise TypeError("pas un compte titre")
+        valeur  = Ope_titre.objects.filter(compte = compte, titre = titre).aggregate(valeur = models.Sum('valeur'))['valeur']
+        if not valeur:
+            return 0
+        else:
+            return valeur
+        
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -480,6 +521,7 @@ class Moyen(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
@@ -519,6 +561,7 @@ class Rapp(models.Model):
         return solde
 
     def fusionne(self, new):
+        self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
@@ -570,6 +613,7 @@ class Echeance(models.Model):
     def __unicode__(self):
         return u"%s" % (self.id,)
     def save(self, *args, **kwargs):
+        self.alters_data=True
         if not self.moyen:
             if self.compte.moyen_credit_defaut and self.montant >= 0:
                 self.moyen = self.compte.moyen_credit_defaut
@@ -652,12 +696,14 @@ class Ope(models.Model):
     def get_absolute_url(self):
         return ('gsb_ope_detail', (), {'pk':str(self.id)})
     def clean(self):
+        self.alters_data=True
         super(Ope, self).clean()
         #verification qu'il n'y ni poitee ni rapprochee
         if self.pointe is not None and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
 
     def save(self, *args, **kwargs):
+        self.alters_data=True
         if not self.moyen:
             if self.compte.moyen_credit_defaut and self.montant >= 0:
                 self.moyen = self.compte.moyen_credit_defaut

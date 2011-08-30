@@ -43,6 +43,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         (r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),
+                        
                         )
 
 #les vues relatives aux tiers

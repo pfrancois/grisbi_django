@@ -76,6 +76,12 @@ class VirementForm(forms.Form):
         virement_objet.save()
         return virement_objet.origine
 
+class ope_titre_form(forms.form):
+    error_css_class = 'error'
+    required_css_class = 'required'
+    compte_titre=forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
+    compte_espece=forms.ModelChoiceField(Compte_titre.objects.filter(type__in=('b','e','p')), empty_label=None)
+    
 class GeneraliteForm(BaseForm):
     class Meta:
         model = Generalite

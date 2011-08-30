@@ -5,8 +5,6 @@ from decimal import Decimal, InvalidOperation
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-from django.template.loader import render_to_string
-from django.utils.encoding import iri_to_uri
 #from django.utils.http import urlquote
 from django.conf import settings
 #import logging

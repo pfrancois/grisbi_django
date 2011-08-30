@@ -14,13 +14,16 @@ def fusion(classe, request, queryset, sens='ab'):
     if type(a) != type(b):
         classe.message_user(request, u"attention vous devez selectionner deux item du meme type")
         return
-    if sens == 'ab':
-        message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, a, b)
-        a.fusionne(b)
-    else:
-        message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, b, a)
-        b.fusionne(a)
-    classe.message_user(request, message)
+    try:
+        if sens == 'ab':
+            message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, a, b)
+            a.fusionne(b)
+        else:
+            message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, b, a)
+            b.fusionne(a)
+        classe.message_user(request, message)
+    except:
+        classe.message_user(request, u"probleme")
 
 class Cat_admin(admin.ModelAdmin):
     """classe admin pour les categories"""
@@ -57,7 +60,7 @@ class Ib_admin(admin.ModelAdmin):
 
 class Compte_admin(admin.ModelAdmin):
     """admin pour les comptes normaux"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
     fusionne_a_dans_b.short_description = u"fusion du premier compte dans le second"
@@ -68,15 +71,18 @@ class Compte_admin(admin.ModelAdmin):
             (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
+            (u'moyens par défaut', {'fields': ('moyen_debit_defaut','moyen_credit_defaut' ), 'classes': ['collapse']}),
             ]
     list_display = ('nom', 'solde', 'type', 'ouvert')
     list_filter = ('type', 'banque', 'ouvert')
 
+class Ope_titre_inline(admin.TabularInline):
+    model=Ope_titre
+    extra=1
 
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
     fusionne_a_dans_b.short_description = u"fusion du premier compte_titre dans le second"
@@ -87,8 +93,9 @@ class Compte_titre_admin(admin.ModelAdmin):
             (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_credit_defaut', 'moyen_debit_defaut'), 'classes': ['collapse']}),
+            (u'moyens par défaut', {'fields': ('moyen_debit_defaut','moyen_credit_defaut' ), 'classes': ['collapse']})
             ]
+    inlines = (Ope_titre_inline,)
     list_display = ('nom', 'solde')
     list_filter = ('type', 'banque', 'ouvert')
 
@@ -121,6 +128,7 @@ class Titre_admin(admin.ModelAdmin):
     fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
     list_display = ('nom', 'isin', 'last_cours')
     list_filter = ('type',)
+    inlines = (Ope_titre_inline,)
 
 class Moyen_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les moyens de paiements"""
@@ -133,10 +141,6 @@ class Moyen_admin(admin.ModelAdmin):
     fusionne_b_dans_a.short_description = u"fusion du second moyen dans le premier"
     list_filter = ('type',)
     fields = ['type', 'nom']
-
-class Ope_titre_admin(admin.ModelAdmin):
-    """classe de gestion de l'admin pour des operations sur titres (compta matiere)"""
-    list_filter = ('titre', 'compte', 'date')
 
 
 class Tiers_admin(admin.ModelAdmin):
@@ -210,4 +214,3 @@ admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Generalite, Gen_admin)
 admin.site.register(Compte_titre, Compte_titre_admin)
-admin.site.register(Ope_titre, Ope_titre_admin)
