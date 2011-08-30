@@ -6,6 +6,7 @@ from django.views.generic import CreateView, TemplateView,DeleteView
 from mysite.gsb.models import Tiers
 import mysite.gsb.forms as gsb_forms
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
@@ -59,8 +60,7 @@ urlpatterns += patterns('mysite.gsb.views',
 )
 
 #form tester
-from mysite.gsb.form_tester import SomeModelFormPreview
-
-urlpatterns += patterns('mysite.gsb.views',
-                        (r'^testform/$', SomeModelFormPreview(gsb_forms.VirementForm)),
-)
+if settings.DEBUG:
+    from mysite.gsb.form_tester import SomeModelFormPreview
+    urlpatterns += patterns('mysite.gsb.views',
+                        (r'^testform/$', SomeModelFormPreview(gsb_forms.ope_titre_form)),)

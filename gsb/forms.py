@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite 
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre
 #from mysite.gsb import widgets
 import datetime
 #import decimal
@@ -76,7 +76,7 @@ class VirementForm(forms.Form):
         virement_objet.save()
         return virement_objet.origine
 
-class ope_titre_form(forms.form):
+class ope_titre_form(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
     compte_titre=forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
