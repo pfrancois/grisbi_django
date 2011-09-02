@@ -48,56 +48,32 @@ class test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde,decimal.Decimal('20'))
     def test_compte_abolute_url(self):
         self.assertEqual(Compte.objects.get(id=1).get_absolute_url(),'/compte/1/')
-    def test_cpt_titre_achat(self):
+    def test_ope_titre_achat_sans_virement(self):
         c=Compte_titre.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
-        #achat de base avec tout par defaut
-        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20)
-        t=c.titre.all()
-        self.assertEqual(Ope_titre.initial(compte=c,titre=Titre.objects.get(id=1)), decimal.Decimal('20'))
-        self.assertEqual(Ope_titre.nb(compte=c,titre=Titre.objects.get(id=1)),20)
-        self.assertEqual(t.count(),1)
-        self.assertEqual(Titre.objects.get(nom="t1").last_cours, decimal.Decimal('1'))
-        self.assertEqual(t[0].last_cours,1)
+        t=Titre.objects.get(nom="t1")
+        self.assertEqual(Ope_titre.investi(c,t),0)
+        c.achat(titre=t, nombre=20,date='2011-01-01')
+        self.assertEqual(Ope_titre.investi(c,t),20)
+        tall=c.titre.all().distinct()
+        self.assertEqual(tall.count(),1)
+        self.assertEqual(tall[0].last_cours,1)
         self.assertEqual(c.solde,0)
+        t.cours_set.create(date='2011-02-01',valeur=2)
+        self.assertEqual(c.solde,20)
+        c.vente(titre=t, nombre=10, prix = 3, date ='2011-06-30')
+        self.assertEqual(c.solde,40)
+        c.achat(titre=t, nombre=20,prix=2,date='2011-01-01')
+        self.assertEqual(c.solde,60)
     def test_cpt_titre_achat_complet(self):
         c=Compte_titre.objects.get(id=4)
-        self.assertEqual(c.nom, u'cpt_titre1')
-        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20,prix=10,date='2011-01-01',frais=2.51,virement_de=Compte.objects.get(id=1))
-        t=c.titre.all()
-        self.assertEqual(Ope_titre.initial(compte=c,titre=Titre.objects.get(id=1)), decimal.Decimal('200'))
-        self.assertEqual(Ope_titre.nb(compte=c,titre=Titre.objects.get(id=1)),20)
-        self.assertEqual(t.count(),1)
-        self.assertEqual(Titre.objects.get(nom="t1").last_cours, decimal.Decimal('10'))
-        self.assertEqual(t[0].last_cours,10)
-        self.assertEqual(c.solde,200)
-    def test_cpt_titre_achat_complet(self):
-        c=Compte_titre.objects.get(id=4)
-        self.assertEqual(c.nom, u'cpt_titre1')
-        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20,prix=10,date='2011-01-01',virement_de=Compte.objects.get(id=1))
-        c.vente(titre=Titre.objects.get(nom="t1"), nombre=10, prix = 10, date ='2011-06-30', virement_vers=Compte.objects.get(id=1))
-        self.assertEqual(Ope_titre.initial(compte=c,titre=Titre.objects.get(id=1)), 100)
-        self.assertEqual(Ope_titre.nb(compte=c,titre=Titre.objects.get(id=1)),10)
-        self.assertEqual(c.titre.all().distinct().count(),1)
-        self.assertEqual(Titre.objects.get(nom="t1").last_cours, 10)
-        self.assertEqual(c.titre.all()[0].last_cours,10)
-        self.assertEqual(c.solde,100)
-    def test_cpt_titre_vente(self):
-        c=Compte_titre.objects.get(nom='cpt_titre1')
-        c.achat(titre=Titre.objects.get(nom="t1"), nombre=20)
-        c.vente(Titre.objects.get(nom="t1"),10)
-        #self.assertEqual(c.solde,0) #TODO
-
-#    def test_cpt_titre_vente_complet(self):
-#    def test_cpt_titre_vente_virement(self):
-#    def test_cpt_titre_revenu(self):
-#    def test_cpt_titre_revenu_complet(self):
-#    def test_cpt_titre_revenu_virement(self):
-    def test_cpt_titre_solde(self):
-        c=Compte_titre.objects.get(nom='cpt_titre1')
-        self.assertEqual(c.solde,0)
-#    def test_cpt_titre_absolute_url(self):
-#    def test_titre_detenu_valeur(self):
+        t=Titre.objects.get(nom="t1")
+        c.achat(titre=t, nombre=20,date='2011-01-01',virement_de=Compte.objects.get(id=1))
+        self.assertEqual(Ope_titre.investi(c,t),20)
+        self.assertEqual(c.solde,20)
+        t.cours_set.create(date='2011-02-01',valeur=2)
+        c.vente(t,10,3,'2011-06-30',virement_vers=Compte.objects.get(id=1))
+        self.assertEqual(c.solde,30)
     def test_moyen_fusionne(self):
         Moyen.objects.get(id=2).fusionne(Moyen.objects.get(id=1))
 #    def test_rapp_compte(self):

@@ -125,6 +125,33 @@ class Titre(models.Model):
         if self.tiers.notes != "%s@%s" % (self.isin, self.type):
             self.tiers.notes="%s@%s" % (self.isin, self.type)
         super(Titre, self).save(*args, **kwargs)
+    def investi(self,compte):
+        """renvoie le montant investi"""
+        if compte:
+            return Ope_titre.investi(compte,self)
+        else:
+            valeur = Ope.objects.filter(tiers = titre.tiers).aggregate(invest = models.Sum('montant'))['invest']
+        if not valeur:
+            return 0
+        else:
+            return valeur*-1
+    def nb(self,compte):
+        """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee"""
+        if compte:
+            return Ope_titre.nb(compte,self)
+        else:
+            nombre = Ope_titre.objects.filter(titre = self).aggregate(nombre = models.Sum('nombre'))['nombre']
+            if not nombre:
+                return 0
+            else:
+                return nombre
+    def encours(self, compte):
+        """renvoie l'encour detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donnée"""
+        if compte:
+            return Ope_titre.nb(compte, self) * self.last_cours
+        else:
+            return self.nb()*self.last_cours
+        
 
 class Cours(models.Model):
     """cours des titres"""
@@ -278,6 +305,7 @@ class Compte(models.Model):
         return self.nom
     @property
     def solde(self):
+        """renvoie le solde du compte"""
         req = Ope.objects.filter(compte__id__exact = self.id, mere__exact = None).aggregate(solde = models.Sum('montant'))
         if req['solde'] is None:
             solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
@@ -287,6 +315,9 @@ class Compte(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        """fusionnne deux compte, verifie avant que c'est le meme type
+        @param Compte
+        """
         self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -322,6 +353,14 @@ class Compte_titre(Compte):
         db_table = 'cpt_titre'
     @transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None): 
+        """fonction pour achat de titre:
+        @param Titre
+        @param int
+        @param decimal
+        @param date
+        @param decimal
+        @param Compte
+        """
         self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0] #@UnusedVariable
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
@@ -359,6 +398,15 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def vente(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        """fonction pour vente de titre:
+        @param Titre
+        @param int
+        @param decimal
+        @param date
+        @param decimal
+        @param Compte
+        """
+
         self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
@@ -398,6 +446,13 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def revenu(self, titre, montant = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
+        """fonction pour ost de titre:
+        @param Titre
+        @param decimal
+        @param date
+        @param decimal
+        @param Compte
+        """
         self.alters_data=True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
@@ -431,14 +486,18 @@ class Compte_titre(Compte):
             raise TypeError("pas un titre")
     @property
     def solde(self):
+        """renvoie le solde"""
         solde_espece = super(Compte_titre, self).solde
         solde_titre = 0
-        for titre in self.titre.all():
-            solde_titre += solde_titre + Ope_titre.nb(self, titre) * titre.last_cours
+        for titre in self.titre.all().distinct():
+            solde_titre += solde_titre + titre.encours(self)
         return solde_espece + solde_titre
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        """fusionnne deux compte_titre
+        @param Compte_titre
+        """
         self.alters_data=True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -454,6 +513,7 @@ class Compte_titre(Compte):
         return ('cpt_detail', (), {'pk':str(self.id)})
 
     def save(self, *args, **kwargs):
+        """verifie qu'on a pas changé le type de compte"""
         self.alters_data=True
         if self.type != 't':
             self.type = 't'
@@ -467,17 +527,18 @@ class Ope_titre(models.Model):
     nombre = models.IntegerField()
     date = models.DateField()
     cours = CurField(default = 1)
-    valeur = CurField(default = 0)
+    invest = CurField(default = 0)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['compte']
     def save(self, *args, **kwargs):
-        self.valeur = self.nombre * self.cours
+        self.invest = self.nombre * self.cours
         super(Ope_titre, self).save(*args, **kwargs)
     @staticmethod
     def nb(compte, titre):
+        """renvoie le nombre de titre T detenus dans un compte C"""
         if not isinstance(titre, Titre):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
@@ -488,17 +549,18 @@ class Ope_titre(models.Model):
         else:
             return nombre
     @staticmethod
-    def initial(compte,titre):
+    def investi(compte,titre):
+        """"prend en compte l'ensemble des depenses (achart et frais) et des revenus(vente et revenus annexes)"""
         if not isinstance(titre, Titre):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
             raise TypeError("pas un compte titre")
         
-        valeur  = Ope_titre.objects.filter(compte = compte, titre = titre).aggregate(valeur = models.Sum('valeur'))['valeur']
+        valeur = Ope.objects.filter(compte = compte, tiers = titre.tiers).aggregate(invest = models.Sum('montant'))['invest']
         if not valeur:
             return 0
         else:
-            return valeur
+            return valeur*-1
         
 
 class Moyen(models.Model):
@@ -779,11 +841,11 @@ class Virement(object):
         '''
         cree un nouveau virement
         '''
-        if not isinstance(compte_origine,Compte):
+        if not isinstance(compte_origine, Compte):
             raise TypeError('pas ope')
-        if not isinstance(compte_dest,Compte):
+        if not isinstance(compte_dest, Compte):
             raise TypeError('pas ope')
-        vir=Virement()
+        vir = Virement()
         vir.origine = Ope()
         vir.dest = Ope()
         vir.origine.compte = compte_origine

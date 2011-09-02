@@ -1,2 +1,2 @@
-manage.py sqlreset gsb |manage.py dbshell
+manage.py reset gsb
 manage.py loaddata test

@@ -44,7 +44,8 @@ import pprint #@UnusedImport
 
 
 if __name__ == "__main__":
-    t1=Titre.objects.all()[2].tiers
-    t2=Titre.objects.all()[3].tiers
-
-    t1.fusionne(t2)
+    c=Compte_titre.objects.get(id=4)
+    t=Titre.objects.get(nom="t1")
+    c.achat(titre=t, nombre=20,date='2011-01-01')
+    t.cours_set.create(date='2011-02-01',valeur=2)
+    c.vente(titre=t, nombre=10, prix = 3, date ='2011-06-30')
