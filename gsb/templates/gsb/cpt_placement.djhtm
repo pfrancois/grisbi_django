@@ -39,14 +39,14 @@
     </tr>
     {% endfor %}
     <tr class="item hover">
-        <td class="opTier">compte espèce</td>
+        <td class="opTier">compte esp&egrave;ce</td>
+        <td class="opDebit"></td>
+        <td class="opCredit">&nbsp;</td>
         <td class="opDebit">{{ especes|cur }}</td>
-        <td class="opCredit">{{ especes|cur }}</td>
-        <td class="opDebit">&nbsp;</td>
     </tr>
     <tr class="footerbar">
         <td colspan="3" class="cptLabel">Solde global</td>
-        <td colspan="2" class="cptSolde">{{ compte.solde }}</td>
+        <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
     </tr>
 </table>
 {% endblock content %} 

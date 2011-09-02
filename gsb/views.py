@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Tiers, Virement, Cat
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Tiers, Virement, Cat,Ope_titre
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -79,15 +79,14 @@ def cpt_detail(request, cpt_id):
         )
     else:
         #recupere la liste des titres qui sont utilise dans ce compte
-        titre_sans_sum = Tiers.objects.filter(is_titre=True).filter(ope__compte=cpt_id).distinct()
+        titre_sans_sum = c.titre.all().distinct()
         titres = []
         total_titres = 0
         for t in titre_sans_sum:
-            invest = t.ope_set.filter(mere=None,).aggregate(sum=models.Sum('montant'))['sum']
-            print invest
-            total = 0
-            titres.append({'nom': t.nom[7:], 'type': t.titre_set.get().get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total})
-        especes = c.solde - total_titres
+            invest = t.investi(c)
+            total=t.encours(c)
+            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total})
+        especes = super(Compte_titre, c).solde
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
             template.render(
