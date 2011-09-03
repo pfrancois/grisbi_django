@@ -13,7 +13,7 @@ register = template.Library()
 
 
 @register.filter()
-def cur(value,symbol=None):
+def cur(value, symbol = None):
     '''
     affiche le montant evc son symbole monetaire et comme il faut pour les virgules 
     @param symbol: symbole monetaire
@@ -54,7 +54,7 @@ def centimes(value):
 centimes.is_safe = True
 
 @register.simple_tag()
-def dev(symbol=None):
+def dev(symbol = None):
     if symbol == None:
         symbol = settings.DEVISE_GENERALE  
     if symbol == 'EUR':

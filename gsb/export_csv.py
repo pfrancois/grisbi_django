@@ -23,9 +23,9 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect = csv.excel, encoding = "utf-8", **kwds):
         f = UTF8Recoder(f, encoding)
-        self.reader = csv.reader(f, dialect=dialect, **kwds)
+        self.reader = csv.reader(f, dialect = dialect, **kwds)
 
     def next(self):
         row = self.reader.next()
@@ -41,10 +41,10 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect = csv.excel, encoding = "utf-8", **kwds):
         # Redirect output to a queue
         self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.writer = csv.writer(self.queue, dialect = dialect, **kwds)
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
 
@@ -78,7 +78,7 @@ class excel_csv(csv.Dialect):
 def export_csv(filename):
     csv.register_dialect("excel_csv", excel_csv)
     f = open(filename, "wb")
-    csv = UnicodeWriter(f, encoding='iso-8859-15', dialect=excel_csv)
+    csv = UnicodeWriter(f, encoding = 'iso-8859-15', dialect = excel_csv)
     csv.writerow(
         u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
             ';'))

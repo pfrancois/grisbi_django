@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth.decorators import permission_required
 
 if __name__ == "__main__":
     from django.core.management import setup_environ
@@ -21,7 +20,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 def _export():
     #output backup
-    cmd = settings.MYSQLDUMP_BIN+' --opt --compact --skip-add-locks -u %s -p%s %s | gzip -c' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
+    cmd = settings.MYSQLDUMP_BIN + ' --opt --compact --skip-add-locks -u %s -p%s %s | gzip -c' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
     stdin, stdout = os.popen2(cmd)
     stdin.close()
     return stdout
@@ -31,8 +30,8 @@ def export_database(request): #@UnusedVariable
     '''
     view pour export en sql 
     '''
-    response = HttpResponse(_export(), mimetype="application/octet-stream")
-    response['Content-Disposition'] = 'attachment; filename=%s' % date.today().__str__()+'_db.sql.bz2'
+    response = HttpResponse(_export(), mimetype = "application/octet-stream")
+    response['Content-Disposition'] = 'attachment; filename=%s' % date.today().__str__() + '_db.sql.bz2'
     return response
             
 if __name__ == "__main__":

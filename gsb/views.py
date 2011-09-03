@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Tiers, Virement, Cat,Ope_titre
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Cat
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -19,18 +19,18 @@ def index(request):
     """
     t = loader.get_template('gsb/index.djhtm')
     if Generalite.gen().affiche_clot:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related()
+        bq = Compte.objects.filter(type__in = ('b', 'e', 'p')).select_related()
         pl = Compte_titre.objects.all().select_related()
     else:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related()
-        pl = Compte_titre.objects.filter(ouvert=True).select_related()
-    total_bq = Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+        bq = Compte.objects.filter(type__in = ('b', 'e', 'p'), ouvert = True).select_related()
+        pl = Compte_titre.objects.filter(ouvert = True).select_related()
+    total_bq = Ope.objects.filter(mere__exact = None, compte__type__in = ('b', 'e', 'p')).aggregate(solde = models.Sum('montant'))['solde']
     if total_bq == None:
         total_bq = decimal.Decimal('0')
     total_pla = decimal.Decimal('0')
     for p in pl:
         total_pla = total_pla + p.solde
-    nb_clos = len(Compte.objects.filter(ouvert=False))
+    nb_clos = len(Compte.objects.filter(ouvert = False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
         'liste_cpt_bq': bq,
@@ -42,25 +42,25 @@ def index(request):
         })
     return HttpResponse(t.render(c))
 
-@login_required
+
 def cpt_detail(request, cpt_id):
     '''
     view qui affiche la liste des operation de ce compte
     @param request:
     @param cpt_id: id du compte demande
     '''
-    c = get_object_or_404(Compte, pk=cpt_id)
-    date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
+    c = get_object_or_404(Compte, pk = cpt_id)
+    date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
     if c.type in ('t',):
-        c = get_object_or_404(Compte_titre, pk=cpt_id)
+        c = get_object_or_404(Compte_titre, pk = cpt_id)
         titre = True
     else:
         titre = False
     t = loader.get_template('gsb/cpt_detail.djhtm')
     if not titre:
-        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(rapp__isnull=True)
-        nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
-        nb_ope_rapp = Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count()
+        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
+        nb_ope_vielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
+        nb_ope_rapp = Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count()
         return HttpResponse(
             t.render(
                 RequestContext(
@@ -81,10 +81,9 @@ def cpt_detail(request, cpt_id):
         #recupere la liste des titres qui sont utilise dans ce compte
         titre_sans_sum = c.titre.all().distinct()
         titres = []
-        total_titres = 0
         for t in titre_sans_sum:
             invest = t.investi(c)
-            total=t.encours(c)
+            total = t.encours(c)
             titres.append({'nom': t.nom, 'type': t.get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total})
         especes = super(Compte_titre, c).solde
         template = loader.get_template('gsb/cpt_placement.djhtm')
@@ -110,16 +109,16 @@ def ope_detail(request, pk):
     @param request:
     @param pk: id de l'ope
     '''
-    ope = get_object_or_404(Ope, pk=pk)
+    ope = get_object_or_404(Ope, pk = pk)
     #logger = logging.getLogger('gsb')
     if ope.jumelle is not None: 
         #------un virement--------------
         if request.method == 'POST':#creation du virement
-            form = gsb_forms.VirementForm(data=request.POST,ope=ope)
+            form = gsb_forms.VirementForm(data = request.POST, ope = ope)
             if form.is_valid():
                 print "ok"
                 form.save()
-                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
+                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
             else:
                 return render(request, 'gsb/vir.djhtm',
                 {   'titre_long':u'modification virement interne %s' % ope.id,
@@ -129,7 +128,7 @@ def ope_detail(request, pk):
                 )
         else:#modification du virement
             #initialisation form
-            form = gsb_forms.VirementForm(ope=ope)
+            form = gsb_forms.VirementForm(ope = ope)
             return render(request, 'gsb/vir.djhtm',
                 {   'titre':u'modification',
                    'titre_long':u'modification virement interne %s' % ope.id,
@@ -140,12 +139,12 @@ def ope_detail(request, pk):
     else:#sinon c'est une operation normale
         if ope.filles_set.all().count() > 0 : #c'est une ope mere
             #TODO message
-            HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
+            HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         if request.method == 'POST':
-            form = gsb_forms.OperationForm(request.POST,instance=ope)
+            form = gsb_forms.OperationForm(request.POST, instance = ope)
             if form.is_valid():
                 ope = form.save()
-                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
+                return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
             else:
                 return render(request, 'gsb/ope.djhtm',
                 {   'titre_long':u'modification opération %s' % ope.id,
@@ -154,7 +153,7 @@ def ope_detail(request, pk):
                     'ope':ope}
                 )
         else:
-            form = gsb_forms.OperationForm(instance=ope)
+            form = gsb_forms.OperationForm(instance = ope)
             t = render(request, 'gsb/ope.djhtm',
                 {   'titre':u'modification',
                    'titre_long':u'modification opération %s' % ope.id,
@@ -164,9 +163,9 @@ def ope_detail(request, pk):
             return t
 
 @login_required
-def ope_new(request, cpt_id=None):
+def ope_new(request, cpt_id = None):
     if cpt_id:
-        cpt = get_object_or_404(Compte, pk=cpt_id)
+        cpt = get_object_or_404(Compte, pk = cpt_id)
     else:
         cpt = None
     cats = Cat.objects.all().order_by('type')
@@ -176,7 +175,7 @@ def ope_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             #TODO message
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         else:
             #TODO message
             return render(request, 'gsb/ope.djhtm',
@@ -188,7 +187,7 @@ def ope_new(request, cpt_id=None):
             )
     else:
         if cpt_id:
-            form = gsb_forms.OperationForm(initial={'moyen':cpt.moyen_debit_defaut})
+            form = gsb_forms.OperationForm(initial = {'moyen':cpt.moyen_debit_defaut})
         else:
             form = gsb_forms.OperationForm()
 
@@ -201,17 +200,17 @@ def ope_new(request, cpt_id=None):
             )
 
 @login_required
-def vir_new(request, cpt_id=None):
+def vir_new(request, cpt_id = None):
     if cpt_id:
-        cpt = get_object_or_404(Compte, pk=cpt_id)
+        cpt = get_object_or_404(Compte, pk = cpt_id)
     else:
         cpt = None
     #logger = logging.getLogger('gsb')
     if request.method == 'POST':
-        form = gsb_forms.VirementForm(data=request.POST)
+        form = gsb_forms.VirementForm(data = request.POST)
         if form.is_valid():
             ope = form.save()
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         else:
             return render(request, 'gsb/vir.djhtm',
             {   'titre_long':u'création virement interne ',
@@ -230,12 +229,11 @@ def vir_new(request, cpt_id=None):
 
 @login_required
 def ope_delete(request, pk):
-    ope = get_object_or_404(Ope, pk=pk)
+    ope = get_object_or_404(Ope, pk = pk)
     if request.method == 'POST':
         if ope.jumelle:
             ope.jumelle.delete()
         ope.delete()
     else:
-        return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs={'pk':ope.id}))
-    return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
-    
+        return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
+    return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))

@@ -3,7 +3,7 @@ from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercic
 from django.contrib import admin
 from django.contrib import messages
 
-def fusion(classe, request, queryset, sens='ab'):
+def fusion(classe, request, queryset, sens = 'ab'):
     """fonction générique de fusion entre 2 objets"""
     nom_module = queryset[0]._meta.module_name
     if queryset.count() != 2:
@@ -71,14 +71,14 @@ class Compte_admin(admin.ModelAdmin):
             (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_debit_defaut','moyen_credit_defaut' ), 'classes': ['collapse']}),
+            (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']}),
             ]
     list_display = ('nom', 'solde', 'type', 'ouvert')
     list_filter = ('type', 'banque', 'ouvert')
 
 class Ope_titre_inline(admin.TabularInline):
-    model=Ope_titre
-    extra=1
+    model = Ope_titre
+    extra = 1
 
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
@@ -93,7 +93,7 @@ class Compte_titre_admin(admin.ModelAdmin):
             (None, {'fields': ('nom', 'type', 'ouvert')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_debit_defaut','moyen_credit_defaut' ), 'classes': ['collapse']})
+            (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']})
             ]
     inlines = (Ope_titre_inline,)
     list_display = ('nom', 'solde')

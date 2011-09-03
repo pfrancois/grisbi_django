@@ -8,7 +8,7 @@ if __name__ == "__main__":
     from mysite import settings
     setup_environ(settings)
 
-from mysite.gsb.models import Generalite, Compte, Ope,  Tiers,  Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp
+from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp
 # Compte_titre, Virement,
 from django.http import HttpResponse
 #from django.core.exceptions import ObjectDoesNotExist
@@ -90,7 +90,7 @@ def _export():
     #####comptes###
     xml_comptes = et.SubElement(xml_root, "Comptes")
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
-    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
+    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat = True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0) #NOT IN BDD
     logger.debug("gen ok")
     variable = 0
@@ -104,7 +104,7 @@ def _export():
         et.SubElement(xml_detail, "No_de_compte").text = str(co.id)
         et.SubElement(xml_detail, "Titulaire").text = ''#NOT IN BDD
         et.SubElement(xml_detail, "Type_de_compte").text = fmt.type(liste_type_compte, co.type)
-        et.SubElement(xml_detail, "Nb_operations").text = str(Ope.objects.filter(compte=co.id).count())
+        et.SubElement(xml_detail, "Nb_operations").text = str(Ope.objects.filter(compte = co.id).count())
         et.SubElement(xml_detail, "Devise").text = "1"
         if co.banque is None:
             et.SubElement(xml_detail, "Banque").text = str(0)
@@ -129,9 +129,9 @@ def _export():
         et.SubElement(xml_detail, "Solde_mini_autorise").text = fmt.float(co.solde_mini_autorise)
         et.SubElement(xml_detail, "Solde_courant").text = fmt.float(co.solde)
         try:
-            et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(Ope.objects.filter(compte=co, rapp__isnull=False).latest().rapp.date)
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(Ope.objects.filter(compte=co, rapp__isnull=False).latest().rapp.solde)
-            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte=co, rapp__isnull=False).latest().rapp.id)
+            et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(Ope.objects.filter(compte = co, rapp__isnull = False).latest().rapp.date)
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(Ope.objects.filter(compte = co, rapp__isnull = False).latest().rapp.solde)
+            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte = co, rapp__isnull = False).latest().rapp.id)
         except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(0)
@@ -166,7 +166,7 @@ def _export():
             xml_element.set('No_en_cours', "0")#NOT IN BDD
         xml_opes = et.SubElement(xml_compte, "Detail_des_operations")
         ##operations
-        for ope in Ope.objects.filter(compte=co.id).order_by('id'):
+        for ope in Ope.objects.filter(compte = co.id).order_by('id'):
             logger.debug('ope %s' % ope.id)
             xml_element = et.SubElement(xml_opes, 'Operation')
             #numero de l'operation
@@ -254,7 +254,7 @@ def _export():
     et.SubElement(xml_generalite, "No_derniere_echeance").text = fmt.max(Echeance.objects)
     xml_echeances = et.SubElement(xml_echeances_root, 'Detail_des_echeances')
     for ech in Echeance.objects.all().order_by('id'):
-        xml_element = et.SubElement(xml_echeances, 'Echeance', No=str(ech.id))
+        xml_element = et.SubElement(xml_echeances, 'Echeance', No = str(ech.id))
         xml_element.set('Date', fmt.date(ech.date))
         xml_element.set('Compte', str(ech.compte.id))
         xml_element.set('Montant', fmt.float(ech.montant))
@@ -307,7 +307,7 @@ def _export():
             xml_element.set('Periodicite', fmt.type(liste_type_period, ech.periodicite))
         xml_element.set('Intervalle_periodicite', str(ech.intervalle))
         xml_element.set('Periodicite_personnalisee', str(fmt.type(liste_type_period_perso, ech.periode_perso)))
-        xml_element.set('Date_limite', fmt.date(ech.date_limite, defaut=''))
+        xml_element.set('Date_limite', fmt.date(ech.date_limite, defaut = ''))
         xml_element.set('Ech_ventilee', '0')
         xml_element.set('No_ech_associee', '0')
     ###Tiers###
@@ -453,7 +453,7 @@ def _export():
     et.SubElement(xml_generalite, "No_dernier_etat").text = "0"
     et.SubElement(xml_etats, 'Detail_des_etats')
     #final
-    xml = et.tostring(xml_root, method="xml", xml_declaration=True, pretty_print=True)
+    xml = et.tostring(xml_root, method = "xml", xml_declaration = True, pretty_print = True)
     avant = ['&#232', '&#233', '&#234', '&#244']
     apres = ['&#xE8', '&#xE9', '&#xEA', '&#xF4']
     for car in avant:
@@ -467,7 +467,7 @@ def export(request):
     if nb_compte:
         xml_django = _export()
         #h=HttpResponse(xml,mimetype="application/xml")
-        reponse = HttpResponse(xml_django, mimetype="application/x-grisbi-gsb")
+        reponse = HttpResponse(xml_django, mimetype = "application/x-grisbi-gsb")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s" % settings.TITRE
         return reponse
@@ -477,7 +477,7 @@ def export(request):
                 'titre':'import gsb',
                 'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
             },
-            context_instance=RequestContext(request)
+            context_instance = RequestContext(request)
         )
 
 if __name__ == "__main__":

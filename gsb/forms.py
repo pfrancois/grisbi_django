@@ -20,12 +20,12 @@ class BaseForm(forms.ModelForm):
     required_css_class = 'required'
 
 class OperationForm(BaseForm):
-    compte = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type'), required=False)
-    montant = forms.DecimalField(localize=True, initial='0')
-    date = forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial=datetime.date.today)
+    compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type'), required = False)
+    montant = forms.DecimalField(localize = True, initial = '0')
+    date = forms.DateField(input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today)
     #pointe=forms.BooleanField(required=False)
-    moyen = forms.ModelChoiceField(Moyen.objects.all(), required=False)
+    moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     class Meta:
         model = Ope
         exclude = ('mere', 'jumelle')
@@ -33,18 +33,18 @@ class OperationForm(BaseForm):
 class VirementForm(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
-    compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
-    moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required=False)
-    compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
-    moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required=False)
-    montant = forms.DecimalField(localize=True, initial='0')
-    date = forms.DateField(input_formats=('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial=datetime.date.today)
-    notes = forms.CharField(widget=forms.Textarea, required=False)
-    pointe = forms.BooleanField(required=False)
+    compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
+    moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
+    compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
+    moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
+    montant = forms.DecimalField(localize = True, initial = '0')
+    date = forms.DateField(input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today)
+    notes = forms.CharField(widget = forms.Textarea, required = False)
+    pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
     #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
-    piece_comptable_compte_origine = forms.CharField(required=False)
-    piece_comptable_compte_destination = forms.CharField(required=False)
+    piece_comptable_compte_origine = forms.CharField(required = False)
+    piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
         data = self.cleaned_data
         if data.get("compte_origine") == data.get("compte_destination"):
@@ -54,13 +54,13 @@ class VirementForm(forms.Form):
             del data['compte_origine']
             del data['compte_destination']
         return data
-    def __init__(self,ope=None, *args, **kwargs):
-        self.ope=ope
+    def __init__(self, ope = None, *args, **kwargs):
+        self.ope = ope
         if ope:
-            v=Virement(ope)
-            super(VirementForm,self).__init__( initial=v.init_form(), *args, **kwargs)
+            v = Virement(ope)
+            super(VirementForm, self).__init__(initial = v.init_form(), *args, **kwargs)
         else:
-            super(VirementForm,self).__init__( *args, **kwargs)
+            super(VirementForm, self).__init__(*args, **kwargs)
     def save(self):
         if self.ope == None:
             virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
@@ -79,8 +79,8 @@ class VirementForm(forms.Form):
 class ope_titre_form(forms.Form):
     error_css_class = 'error'
     required_css_class = 'required'
-    compte_titre=forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
-    compte_espece=forms.ModelChoiceField(Compte_titre.objects.filter(type__in=('b','e','p')), empty_label=None)
+    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
+    compte_espece = forms.ModelChoiceField(Compte_titre.objects.filter(type__in = ('b', 'e', 'p')), empty_label = None)
     
 class GeneraliteForm(BaseForm):
     class Meta:

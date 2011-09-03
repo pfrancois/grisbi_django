@@ -5,7 +5,7 @@ from models import Gsb_exc
 
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
-    def date(self, s, defaut="0/0/0"):
+    def date(self, s, defaut = "0/0/0"):
         '''
         fonction qui transforme un object date en une chaine AA/MM/JJJJ 
         @param s:objet datetime
@@ -24,9 +24,9 @@ class Format:
                     result.append(partie)
                 return "/".join(result)
             else:
-                raise Gsb_exc('attention ce ne peut pas etre qu\'un objet date' )
+                raise Gsb_exc('attention ce ne peut pas etre qu\'un objet date')
 
-    def bool(self, s, defaut='0'):
+    def bool(self, s, defaut = '0'):
         '''format un bool en 0 ou 1 avec gestion des null
         @param s:objet bool
         @param defaut: format a transformer, par defaut c'est 0
@@ -45,7 +45,7 @@ class Format:
         s = "%10.7f" % s
         return s.replace('.', ',').strip()
 
-    def type(self, liste, s, defaut='0'):
+    def type(self, liste, s, defaut = '0'):
         '''convertit un indice d'une liste par une string
         @param liste: liste a utiliser
         @param s: string comprenand le truc a chercher dans la liste
@@ -57,14 +57,14 @@ class Format:
             s = defaut
         return s
 
-    def max(self, o, defaut='0', champ='id'):
+    def max(self, o, defaut = '0', champ = 'id'):
         '''recupere le max d'un queryset'''
-        q = o.aggregate(id=Max(champ))[champ]
+        q = o.aggregate(id = Max(champ))[champ]
         if q is None:
             return defaut
         else:
             return str(q)
-    def str(self, o, defaut='0'):
+    def str(self, o, defaut = '0'):
         '''renvoie id d'un objet avec la gestion des null'''
         if o:
             return str(o.id)
