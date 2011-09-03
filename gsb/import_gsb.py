@@ -5,15 +5,17 @@ if __name__ == "__main__":
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
     from mysite import settings
     setup_environ(settings)
+    
 
 from django.db import connection, transaction
 
-from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque,  Ib, Exercice, Rapp, Moyen, Echeance, Generalite,  Compte, Compte_titre
+from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte, Compte_titre, Ope_titre
 import datetime
 import time
 import decimal
 import logging
 from django.conf import settings #@Reimport
+import django.utils.encoding as dj_encoding
 
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -59,9 +61,8 @@ def import_gsb(nomfich, efface_table=True):
     tabl_correspondance_rapp = {}
     tabl_correspondance_ech = {}
     tabl_correspondance_ope = {}
-    tabl_correspondance_devise = {}
     if efface_table:
-        for table in ( 'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers', 'Ope_titre'):
+        for table in ('generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from %s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
@@ -69,147 +70,147 @@ def import_gsb(nomfich, efface_table=True):
     xml_tree = et.parse(nomfich)
     xml_tree.getroot()
     #verification du format
-    xml_element = str(xml_tree.find('Generalites/Version_fichier').text)
-    if xml_element != '0.5.0':
+    xml_generalite = str(xml_tree.find('Generalites/Version_fichier').text)
+    if xml_generalite != '0.5.0':
         logger.critical("le format n'est pas reconnu")
         raise Import_exception, "le format n'est pas reconnu"
-    nb_sous = 0
     percent = 1
         #------------------------------generalites#------------------------------
-    xml_element = xml_tree.find('Generalites')
-    if not xml_element.find('Titre').text:
+    xml_generalite = xml_tree.find('Generalites')
+    if not xml_generalite.find('Titre').text:
         titre_fichier = ""
     else:
-        titre_fichier = xml_element.find('Titre').text
+        titre_fichier = xml_generalite.find('Titre').text
 
     element, created = Generalite.objects.get_or_create(
         id=1,
         defaults={
         'titre':titre_fichier,
-        'utilise_exercices':bool(int(xml_element.find('Utilise_exercices').text)),
-        'utilise_ib':bool(int(xml_element.find('Utilise_IB').text)),
-        'utilise_pc':bool(int(xml_element.find('Utilise_PC').text))
+        'utilise_exercices':bool(int(xml_generalite.find('Utilise_exercices').text)),
+        'utilise_ib':bool(int(xml_generalite.find('Utilise_IB').text)),
+        'utilise_pc':bool(int(xml_generalite.find('Utilise_PC').text))
     })
     logger.warning(u'generalites ok')
     #------------------------------devises---------------------------
     nb = 0
     nb_nx = 0
-    if len(xml_tree.find('//Detail_des_devises'))>1:
+    nb_titre = 0
+    if len(xml_tree.find('//Detail_des_devises')) > 1:
         raise Exception("attention ce ne sera pas possible d'importer car il y a plusieurs devises")
     #------------ TIERS et titres -------------------
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
-    for xml_element in xml_tree.find('//Detail_des_tiers'):
+    for xml_tiers in xml_tree.find('//Detail_des_tiers'):
         affiche = False
         if nb == int(nb_tiers_final * int("%s0" % percent) / 100):#logging
             affiche = True
-            logger.info("tiers %s soit %% %s" % (xml_element.get('No'), "%s0" % percent))
+            logger.info("tiers %s soit %% %s" % (xml_tiers.get('No'), "%s0" % percent))
             percent += 1
         nb += 1
-        query = {'nom':xml_element.get('Nom'), 'notes':xml_element.get('Informations')}
-        if xml_element.get('Nom')[:6] != 'titre_':
-            element, created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'), defaults=query)
+        query = {'nom':xml_tiers.get('Nom'), 'notes':xml_tiers.get('Informations')}
+        if xml_tiers.get('Nom')[:6] != 'titre_':
+            element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
         else:
             #test puis creation du titre (et donc du tiers automatiquement)
             try:
-                Tiers.objects.get(nom=xml_element.get('Nom'))
+                Tiers.objects.get(nom=xml_tiers.get('Nom'))
             except:
-                nb_sous += 1
-                s = unicode(xml_element.get('Informations'))
-                nom = unicode(xml_element.get('Nom'))
+                nb_titre += 1
+                s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
+                nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
                 s = s.partition('@')#on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
-                sous = Titre(nom=nom[7:])
+                titre = Titre(nom=nom[7:])
                 if not s[1]:
                     if s[0] == '':
-                        sous.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_sous)
+                        titre.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
                     else:
-                        sous.isin = s[0]
-                    sous.type = "ZZZ"
+                        titre.isin = s[0]
+                    titre.type = "ZZZ"
                 else:
                     if s[0] == '':
-                        sous.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_sous)
+                        titre.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
                     else:
-                        sous.isin = s[0]
+                        titre.isin = s[0]
                     if s[2] in liste_type_titre:
-                        sous.type = s[2]
+                        titre.type = s[2]
                     else:
-                        sous.type = 'ZZZ'
-                element, created = Tiers.objects.get_or_create(nom=xml_element.get('Nom'), defaults=query)
-                sous.tiers=element
-                sous.save()
-                element.notes="%s@%s" % (sous.isin, sous.type)
+                        titre.type = 'ZZZ'
+                element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
+                titre.tiers = element
+                titre.save()
+                element.notes = "%s@%s" % (titre.isin, titre.type)
                 element.is_titre = True
                 element.save()
-                logger.debug(u'titre cree %s isin (%s) as %s' % (sous.nom, sous.isin, sous.type))
-        tabl_correspondance_tiers[xml_element.get('No')] = element.id
+                logger.debug(u'titre cree %s isin (%s) as %s' % (titre.nom, titre.isin, titre.type))
+        tabl_correspondance_tiers[xml_tiers.get('No')] = element.id
         if created:
             nb_nx += 1
             if affiche:
-                logger.debug('tiers %s cree au numero %s' % (int(xml_element.get('No')), element.id))
-            
+                logger.debug('tiers %s cree au numero %s' % (int(xml_tiers.get('No')), element.id))
 
-    logger.warning(u'%s tiers et %s titres dont %s nx' % (nb, nb_sous, nb_nx))
+
+    logger.warning(u'%s tiers et %s titres dont %s nx' % (nb, nb_titre, nb_nx))
     #-------------------------categories et des sous categories-----------------------
     nb_cat = 0
     nb_nx = 0
-    for xml_element in xml_tree.find('//Detail_des_categories'):
-        logger.debug("cat %s" % xml_element.get('No'))
+    for xml_cat in xml_tree.find('//Detail_des_categories'):
+        logger.debug("cat %s" % xml_cat.get('No'))
         nb_cat += 1
-        query = {'nom':"%s :" % (xml_element.get('Nom'),), 'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        query = {'nom':"%s :" % (xml_cat.get('Nom'),), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
-        tabl_correspondance_cat[xml_element.get('No')] = {'0':element.id}
+        tabl_correspondance_cat[xml_cat.get('No')] = {'0':element.id}
         if created:
             nb_nx += 1
-            logger.debug('cat %s cree au numero %s' % (int(xml_element.get('No')), element.id))
-        for xml_sous in xml_element:
-            logger.debug("cat %s : scat %s" % (xml_element.get('No'), xml_sous.get('No')))
+            logger.debug('cat %s cree au numero %s' % (int(xml_cat.get('No')), element.id))
+        for xml_scat in xml_cat:
+            logger.debug("cat %s : scat %s" % (xml_cat.get('No'), xml_scat.get('No')))
             nb_cat += 1
-            query = {'nom':"%s : %s" % (xml_element.get('Nom'), xml_sous.get('Nom')), 'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            query = {'nom':"%s : %s" % (xml_cat.get('Nom'), xml_scat.get('Nom')), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
             element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
-            tabl_correspondance_cat[xml_element.get('No')][xml_sous.get('No')] = element.id
+            tabl_correspondance_cat[xml_cat.get('No')][xml_scat.get('No')] = element.id
             if created:
-                logger.debug('scat %s:%s cree au numero %s' % (int(xml_element.get('No')), int(xml_sous.get('No')), element.id))
+                logger.debug('scat %s:%s cree au numero %s' % (int(xml_cat.get('No')), int(xml_scat.get('No')), element.id))
     logger.warning(u"%s catégories dont %s nouveaux" % (nb_cat, nb_nx))
 
     #------------------------------imputations----------------------------------
     nb_ib = 0
     nb_nx = 0
-    for xml_element in xml_tree.find('//Detail_des_imputations'):
-        logger.debug("ib %s" % xml_element.get('No'))
+    for xml_ib in xml_tree.find('//Detail_des_imputations'):
+        logger.debug("ib %s" % xml_ib.get('No'))
         nb_ib += 1
-        query = {'nom':"%s:" % (xml_element.get('Nom'),), 'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+        query = {'nom':"%s:" % (xml_ib.get('Nom'),), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
-        tabl_correspondance_ib[xml_element.get('No')] = {'0':element.id}
+        tabl_correspondance_ib[xml_ib.get('No')] = {'0':element.id}
         if created:
             nb_nx += 1
-            logger.debug('ib %s cree au numero %s' % (int(xml_element.get('No')), element.id))
-        for xml_sous in xml_element:
-            logger.debug("ib %s: sib %s" % (xml_element.get('No'), xml_sous.get('No')))
+            logger.debug('ib %s cree au numero %s' % (int(xml_ib.get('No')), element.id))
+        for xml_sib in xml_ib:
+            logger.debug("ib %s: sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
             nb_ib += 1
-            query = {'nom':"%s:%s" % (xml_element.get('Nom'), xml_sous.get('Nom')), 'type':liste_type_cat[int(xml_element.get('Type'))][0]}
+            query = {'nom':"%s:%s" % (xml_ib.get('Nom'), xml_sib.get('Nom')), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
             element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
-            tabl_correspondance_ib[xml_element.get('No')][xml_sous.get('No')] = element.id
+            tabl_correspondance_ib[xml_ib.get('No')][xml_sib.get('No')] = element.id
             if created:
-                logger.debug('sib %s:%s cree au numero %s' % (int(xml_element.get('No')), int(xml_sous.get('No')), element.id))
+                logger.debug('sib %s:%s cree au numero %s' % (int(xml_ib.get('No')), int(xml_sib.get('No')), element.id))
     logger.warning(u"%s imputations dont %s nouveaux" % (nb_ib, nb_nx))
 
 
     #------------------------------banques------------------------------
-    nb = 0
-    for xml_element in xml_tree.find('Banques/Detail_des_banques'):
-        nb += 1
-        logger.debug("banque %s" % xml_element.get('No'))
-        element, created = Banque.objects.get_or_create(nom=xml_element.get('Nom'), defaults={'cib':xml_element.get('Code'), 'notes':xml_element.get('Remarques')})
-        tabl_correspondance_banque[xml_element.get('No')] = element.id
-    logger.warning(u'%s banques' % nb)
+    nb_bq = 0
+    for xml_bq in xml_tree.find('Banques/Detail_des_banques'):
+        nb_bq += 1
+        logger.debug("banque %s" % xml_bq.get('No'))
+        element, created = Banque.objects.get_or_create(nom=xml_bq.get('Nom'), defaults={'cib':xml_bq.get('Code'), 'notes':xml_bq.get('Remarques')})
+        tabl_correspondance_banque[xml_bq.get('No')] = element.id
+    logger.warning(u'%s banques' % nb_bq)
 
     #------------------------------exercices#------------------------------
     nb = 0
     nb_nx = 0
-    for xml_element in xml_tree.find('Exercices/Detail_des_exercices'):
+    for xml_exercice in xml_tree.find('Exercices/Detail_des_exercices'):
         nb += 1
-        logger.debug("exo %s" % xml_element.get('No'))
-        element, created = Exercice.objects.get_or_create(nom=xml_element.get('Nom'), defaults={'nom':xml_element.get('Nom'), 'date_debut':datefr2datesql(xml_element.get('Date_debut')), 'date_fin':datefr2datesql(xml_element.get('Date_fin'))})
-        tabl_correspondance_exo[xml_element.get('No')] = element.id
+        logger.debug("exo %s" % xml_exercice.get('No'))
+        element, created = Exercice.objects.get_or_create(nom=xml_exercice.get('Nom'), defaults={'nom':xml_exercice.get('Nom'), 'date_debut':datefr2datesql(xml_exercice.get('Date_debut')), 'date_fin':datefr2datesql(xml_exercice.get('Date_fin'))})
+        tabl_correspondance_exo[xml_exercice.get('No')] = element.id
         if created:
             nb_nx += 1
     logger.warning(u'%s exercices dont %s nouveaux' % (nb, nb_nx))
@@ -217,89 +218,89 @@ def import_gsb(nomfich, efface_table=True):
     #------------------------------rapp#------------------------------
     nb = 0
     nb_nx = 0
-    for xml_element in xml_tree.find('Rapprochements/Detail_des_rapprochements'):
+    for xml_rapp in xml_tree.find('Rapprochements/Detail_des_rapprochements'):
         nb += 1
-        logger.debug("rapp %s" % xml_element.get('No'))
-        element, created = Rapp.objects.get_or_create(nom=xml_element.get('Nom'), defaults={'nom':xml_element.get('Nom')})
+        logger.debug("rapp %s" % xml_rapp.get('No'))
+        element, created = Rapp.objects.get_or_create(nom=xml_rapp.get('Nom'), defaults={'nom':xml_rapp.get('Nom')})
         if created:
             nb_nx += 1
-        tabl_correspondance_rapp[xml_element.get('No')] = element.id
+        tabl_correspondance_rapp[xml_rapp.get('No')] = element.id
     logger.warning(u'%s rapprochements dont %s nouveaux ' % (nb, nb_nx))
 
     #------------------------------comptes#------------------------------
     nb = 0
     nb_tot_moyen = 0
     nb_nx = 0
-    for xml_element in xml_tree.findall('//Compte'):
+    for xml_cpt in xml_tree.findall('//Compte'):
         nb += 1
         nb_moyen = 0
-        type = liste_type_compte[int(xml_element.find('Details/Type_de_compte').text)][0]
+        type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type in ('t',):
-            logger.debug("cpt_titre %s" % (xml_element.find('Details/Nom').text))
-            element, created = Compte_titre.objects.get_or_create(nom=xml_element.find('Details/Nom').text, defaults={
-            'nom':xml_element.find('Details/Nom').text,
-            'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
+            logger.debug("cpt_titre %s" % (xml_cpt.find('Details/Nom').text))
+            element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
+            'nom':xml_cpt.find('Details/Nom').text,
+            'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
         })
         else:
-            logger.debug("cpt %s" % (xml_element.find('Details/Nom').text))
-            element, created = Compte.objects.get_or_create(nom=xml_element.find('Details/Nom').text, defaults={
-            'nom':xml_element.find('Details/Nom').text,
-            'ouvert':not bool(int(xml_element.find('Details/Compte_cloture').text)),
+            logger.debug("cpt %s" % (xml_cpt.find('Details/Nom').text))
+            element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
+            'nom':xml_cpt.find('Details/Nom').text,
+            'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
         })
 
-        tabl_correspondance_compte[xml_element.find('Details/No_de_compte').text] = element.id
+        tabl_correspondance_compte[xml_cpt.find('Details/No_de_compte').text] = element.id
         if created:
             nb_nx += 1
-            if xml_element.find('Details/Titulaire').text is None:
+            if xml_cpt.find('Details/Titulaire').text is None:
                 element.titulaire = ''
             else:
-                element.titulaire = xml_element.find('Details/Titulaire').text
-            element.type = liste_type_compte[int(xml_element.find('Details/Type_de_compte').text)][0]
-            if xml_element.find('Details/Banque') is None or int(xml_element.find('Details/Banque').text) == 0:
+                element.titulaire = xml_cpt.find('Details/Titulaire').text
+            element.type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
+            if xml_cpt.find('Details/Banque') is None or int(xml_cpt.find('Details/Banque').text) == 0:
                 element.banque = None
             else:
-                element.banque_id = tabl_correspondance_banque[xml_element.find('Details/Banque').text]
-            if xml_element.find('Details/Guichet').text is None:
+                element.banque_id = tabl_correspondance_banque[xml_cpt.find('Details/Banque').text]
+            if xml_cpt.find('Details/Guichet').text is None:
                 element.guichet = ''
             else:
-                element.guichet = xml_element.find('Details/Guichet').text
-            if xml_element.find('Details/No_compte_banque').text is not None:
-                element.num_compte = xml_element.find('Details/No_compte_banque').text
+                element.guichet = xml_cpt.find('Details/Guichet').text
+            if xml_cpt.find('Details/No_compte_banque').text is not None:
+                element.num_compte = xml_cpt.find('Details/No_compte_banque').text
             else:
                 element.num_compte = ''
-            if xml_element.find('Details/Cle_du_compte').text is not None:
-                element.cle_compte = int(xml_element.find('Details/Cle_du_compte').text)
+            if xml_cpt.find('Details/Cle_du_compte').text is not None:
+                element.cle_compte = int(xml_cpt.find('Details/Cle_du_compte').text)
             else:
                 element.cle_compte = None
-            element.solde_init = fr2decimal(xml_element.find('Details/Solde_initial').text)
-            element.solde_mini_voulu = fr2decimal(xml_element.find('Details/Solde_mini_voulu').text)
-            element.solde_mini_autorise = fr2decimal(xml_element.find('Details/Solde_mini_autorise').text)
-            element.solde_mini_autorise = fr2decimal(xml_element.find('Details/Solde_mini_autorise').text)
-            if xml_element.find('Details/Commentaires').text is not None:
-                element.notes = xml_element.find('Details/Commentaires').text
+            element.solde_init = fr2decimal(xml_cpt.find('Details/Solde_initial').text)
+            element.solde_mini_voulu = fr2decimal(xml_cpt.find('Details/Solde_mini_voulu').text)
+            element.solde_mini_autorise = fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
+            element.solde_mini_autorise = fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
+            if xml_cpt.find('Details/Commentaires').text is not None:
+                element.notes = xml_cpt.find('Details/Commentaires').text
             else:
                 element.notes = ''
             element.save()
         #---------------MOYENS---------------------
         nb_nx_moyens = 0
-        tabl_correspondance_moyen[xml_element.find('Details/No_de_compte').text] = {}
-        for xml_sous in xml_element.find('Detail_de_Types'):
+        tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text] = {}
+        for xml_moyen in xml_cpt.find('Detail_de_Types'):
             nb_tot_moyen += 1
             nb_moyen += 1
-            logger.debug("moyen %s" % xml_sous.get('No'))
-            moyen, created = Moyen.objects.get_or_create(nom=xml_sous.get('Nom'),
-                                                        defaults={'nom':xml_sous.get('Nom'),
-                                                                    'type':liste_type_moyen[int(xml_sous.get('Signe'))][0], }
+            logger.debug("moyen %s" % xml_moyen.get('No'))
+            moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
+                                                        defaults={'nom':xml_moyen.get('Nom'),
+                                                                    'type':liste_type_moyen[int(xml_moyen.get('Signe'))][0], }
             )
             if created:
                 nb_nx_moyens += 1
-            tabl_correspondance_moyen[xml_element.find('Details/No_de_compte').text][xml_sous.get('No')] = moyen.id
+            tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_moyen.get('No')] = moyen.id
         try:
-            element.moyen_credit_defaut_id = tabl_correspondance_moyen[xml_element.find('Details/No_de_compte').text][xml_element.find('Details/Type_defaut_credit').text]
+            element.moyen_credit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_cpt.find('Details/Type_defaut_credit').text]
         except (KeyError, TypeError):
             element.moyen_credit_defaut_id = None
         try:
-            element.moyen_debit_defaut_id = tabl_correspondance_moyen[xml_element.find('Details/No_de_compte').text][xml_element.find('Details/Type_defaut_debit').text]
+            element.moyen_debit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_cpt.find('Details/Type_defaut_debit').text]
         except (KeyError, TypeError):
             element.moyen_debit_defaut_id = None
         element.save()
@@ -310,141 +311,158 @@ def import_gsb(nomfich, efface_table=True):
     list_ope = xml_tree.findall('//Operation')
     nb_ope_final = len(list_ope)
     percent = 1
-    for xml_sous in list_ope:
+    for xml_ope in list_ope:
+        try:
+            ope_tiers = Tiers.objects.get(id=tabl_correspondance_tiers[xml_ope.get('T')])
+        except KeyError:
+            ope_tiers = None
+        ope_montant = fr2decimal(xml_ope.get('M'))
+        ope_date = datefr2datesql(xml_ope.get('D'))
+        ope_date_val = datefr2datesql(xml_ope.get('Db'))
+        ope_cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_ope.find('../../Details/No_de_compte').text])
+        if ope_tiers and ope_tiers.is_titre:
+            #compta matiere et cours en meme tps
+            ope_cpt_titre=Compte_titre.objects.get(id=ope_cpt.id)
+            ope_notes=dj_encoding.smart_unicode(xml_ope.get('N'))
+            s = ope_notes.partition('@')
+            if s[1]:#TODO gestion des csl
+                ope_nb = decimal.Decimal(str(s[0]))
+                ope_cours = decimal.Decimal(str(s[2]))
+                Ope_titre.objects.create(titre=ope_tiers.titre, compte=ope_cpt_titre, nombre=ope_nb  , date=ope_date, cours=ope_cours)
+                titre.cours_set.get_or_create(date=ope_date, defaults={'date':ope_date, 'valeur':ope_cours})
+        #on cree de toute facon l'operation
         nb_tot_ope += 1
         affiche = False
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
-            logger.info("ope %s, ope %s sur %s soit %s%%" % (xml_sous.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
+            logger.info("ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
             affiche = True
             percent += 1
-        cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_sous.find('../../Details/No_de_compte').text])
-        sous = Ope(compte=cpt,
-                   date=datefr2datesql(xml_sous.get('D')),
-                   date_val=datefr2datesql(xml_sous.get('Db')), #date de valeur
-                   montant=fr2decimal(xml_sous.get('M')), #montant
+
+        ope = Ope(compte=ope_cpt,
+                   date=ope_date,
+                   date_val=ope_date_val, #date de valeur
+                   montant=ope_montant, #montant
         )#on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
-        sous.save()
-        tabl_correspondance_ope[xml_sous.get('No')] = sous.id
+        ope.save()
+        tabl_correspondance_ope[xml_ope.get('No')] = ope.id
         if affiche:
-            logger.debug('ope %s cree id %s' % (xml_sous.get('No'), sous.id))
+            logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
         #numero du moyen de paiment
-        sous.num_cheque = xml_sous.get('Ct')
+        ope.num_cheque = xml_ope.get('Ct')
         #statut de pointage
-        if int(xml_sous.get('P')) == 1:
-            sous.pointe = True
-        if int(xml_sous.get('A')) == 1:
-            sous.automatique = True
+        if int(xml_ope.get('P')) == 1:
+            ope.pointe = True
+        if int(xml_ope.get('A')) == 1:
+            ope.automatique = True
+        #gestion des tiers
+        ope.tiers_id = ope_tiers
         try:
-            sous.tiers_id = tabl_correspondance_tiers[xml_sous.get('T')]
-        except KeyError:
-            sous.tiers = None
-        try:
-            if xml_sous.get('C') and (int(xml_sous.get('C'))):
-                sous.cat_id = tabl_correspondance_cat[xml_sous.get('C')][xml_sous.get('Sc')]
+            if xml_ope.get('C') and (int(xml_ope.get('C'))):
+                ope.cat_id = tabl_correspondance_cat[xml_ope.get('C')][xml_ope.get('Sc')]
             else:
-                sous.cat = None
+                ope.cat = None
         except KeyError:
-            sous.cat = None
+            ope.cat = None
         try:
-            if xml_sous.get('I') and int(xml_sous.get('I')):
-                sous.ib_id = tabl_correspondance_ib[xml_sous.get('I')][xml_sous.get('Si')]
+            if xml_ope.get('I') and int(xml_ope.get('I')):
+                ope.ib_id = tabl_correspondance_ib[xml_ope.get('I')][xml_ope.get('Si')]
             else:
-                sous.ib = None
+                ope.ib = None
         except KeyError:
-            sous.ib = None
+            ope.ib = None
         try:#moyen de paiment
-            sous.moyen_id = tabl_correspondance_moyen[str(sous.compte_id)][xml_sous.get('Ty')]
+            ope.moyen_id = tabl_correspondance_moyen[str(ope.compte_id)][xml_ope.get('Ty')]
         except KeyError:
-            sous.moyen = None
+            ope.moyen = None
         try: #gestion des rapprochements
-            sous.rapp_id = tabl_correspondance_rapp[xml_sous.get('R')]
-            if datetime.datetime.combine(sous.rapp.date, datetime.time()) > datetime.datetime.strptime(sous.date, "%Y-%m-%d"):
-                sous.rapp.date = sous.date
-                sous.rapp.save()
+            ope.rapp_id = tabl_correspondance_rapp[xml_ope.get('R')]
+            if datetime.datetime.combine(ope.rapp.date, datetime.time()) > datetime.datetime.strptime(ope.date, "%Y-%m-%d"):
+                ope.rapp.date = ope.date
+                ope.rapp.save()
         except KeyError:
-            sous.tapp = None
-        sous.notes = xml_sous.get('N')
-        sous.piece_comptable = xml_sous.get('Pc')
+            ope.tapp = None
+        ope.notes = xml_ope.get('N')
+        ope.piece_comptable = xml_ope.get('Pc')
         #exercices
         try:
-            sous.exercice_id = tabl_correspondance_exo[xml_sous.get('E')]
+            ope.exercice_id = tabl_correspondance_exo[xml_ope.get('E')]
         except KeyError:
-            sous.exercice = None
-        sous.save()
+            ope.exercice = None
+        ope.save()
     nb_tot_ope = 0
     percent = 1
-    for xml_sous in list_ope:
+    for xml_ope in list_ope:
         nb_tot_ope += 1
         affiche = False
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
-            logger.info("2*ope %s, ope %s sur %s soit %s%%" % (xml_sous.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
+            logger.info("2*ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
             affiche = True
             percent += 1
         #gestion des virements
-        if int(xml_sous.get('Ro')):
-            logger.debug('virement vers %s' % xml_sous.get('Ro'))
-            sous = Ope.objects.get(id=tabl_correspondance_ope[xml_sous.get('No')])
-            sous.jumelle_id = tabl_correspondance_ope[xml_sous.get('Ro')]
-            sous.save()
+        if int(xml_ope.get('Ro')):
+            logger.debug('virement vers %s' % xml_ope.get('Ro'))
+            ope = Ope.objects.get(id=tabl_correspondance_ope[xml_ope.get('No')])
+            ope.jumelle_id = tabl_correspondance_ope[xml_ope.get('Ro')]
+            ope.save()
         #gestion des ventilations
-        #bool(int(xml_sous.get('Ov'))) pas besoin car on regarde avec des requetes sql
-        if int(xml_sous.get('Va')):
-            logger.debug('ventilation de %s' % tabl_correspondance_ope[xml_sous.get('Va')])
-            sous = Ope.objects.get(id=tabl_correspondance_ope[xml_sous.get('No')])
-            sous.mere_id = tabl_correspondance_ope[xml_sous.get('Va')]
-            sous.save()
+        #bool(int(xml_ope.get('Ov'))) pas besoin car on regarde avec des requetes sql
+        if int(xml_ope.get('Va')):
+            logger.debug('ventilation de %s' % tabl_correspondance_ope[xml_ope.get('Va')])
+            ope = Ope.objects.get(id=tabl_correspondance_ope[xml_ope.get('No')])
+            ope.mere_id = tabl_correspondance_ope[xml_ope.get('Va')]
+            ope.save()
 
     logger.warning(u"%s operations" % nb_tot_ope)
 
 
     #------------------------------echeances#------------------------------
     nb = 0
-    for xml_element in xml_tree.find('Echeances/Detail_des_echeances'):
+    for xml_ech in xml_tree.find('Echeances/Detail_des_echeances'):
         nb += 1
-        logger.debug("echeance %s" % xml_element.get('No'))
+        logger.debug("echeance %s" % xml_ech.get('No'))
         element = Echeance(
-            date=datefr2datesql(xml_element.get('Date')),
-            montant=fr2decimal(xml_element.get('Montant')),
-            compte_id=tabl_correspondance_compte[xml_element.get('Compte')],
+            date=datefr2datesql(xml_ech.get('Date')),
+            montant=fr2decimal(xml_ech.get('Montant')),
+            compte_id=tabl_correspondance_compte[xml_ech.get('Compte')],
         )
         element.save()
-        tabl_correspondance_ech[xml_element.get('No')] = element.id
+        tabl_correspondance_ech[xml_ech.get('No')] = element.id
         try:
-            element.tiers_id = tabl_correspondance_tiers[xml_element.get('Tiers')]
+            element.tiers_id = tabl_correspondance_tiers[xml_ech.get('Tiers')]
         except KeyError:
             element.tiers = None
-        element.inscription_automatique = bool(int(xml_element.get('Automatique')))
+        element.inscription_automatique = bool(int(xml_ech.get('Automatique')))
         try:
-            element.moyen_id = tabl_correspondance_moyen[xml_element.get('Compte')][xml_element.get('Type')]
+            element.moyen_id = tabl_correspondance_moyen[xml_ech.get('Compte')][xml_ech.get('Type')]
         except KeyError:
             element.moyen = None
         try:
-            element.exercice_id = tabl_correspondance_exo[xml_element.get('Exercice')]
+            element.exercice_id = tabl_correspondance_exo[xml_ech.get('Exercice')]
         except KeyError:
             element.moyen = None
-        element.notes = xml_element.get('Notes')
+        element.notes = xml_ech.get('Notes')
         try:
-            element.cat_id = tabl_correspondance_cat[xml_element.get('Categorie')][xml_element.get('Sous-categorie')]
+            element.cat_id = tabl_correspondance_cat[xml_ech.get('Categorie')][xml_ech.get('Sous-categorie')]
         except KeyError:
             element.cat = None
         try:
-            element.ib_id = tabl_correspondance_ib[xml_element.get('Imputation')][xml_element.get('Sous-imputation')]
+            element.ib_id = tabl_correspondance_ib[xml_ech.get('Imputation')][xml_ech.get('Sous-imputation')]
         except KeyError:
             element.ib = None
-        if xml_element.get('Virement_compte') != xml_element.get('Compte'):
-            element.compte_virement_id = tabl_correspondance_compte[xml_element.get('Virement_compte')]
+        if xml_ech.get('Virement_compte') != xml_ech.get('Compte'):
+            element.compte_virement_id = tabl_correspondance_compte[xml_ech.get('Virement_compte')]
             try:
-                element.moyen_virement_id = tabl_correspondance_compte[xml_element.get('Type_contre_ope')]
+                element.moyen_virement_id = tabl_correspondance_compte[xml_ech.get('Type_contre_ope')]
             except KeyError:
                 element.moyen_virement = None
         else :
             element.compte_virement = None
             element.moyen_virement = None
-        element.periodicite = liste_type_period[int(xml_element.get('Periodicite'))][0]
+        element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
         if element.periodicite == 'p':
-            element.intervalle = int(xml_element.get('Intervalle_periodicite'))
-            element.periode_perso = liste_type_period_perso[int(xml_element.get('Periodicite_personnalisee'))][0]
-        element.date_limite = datefr2datesql(xml_element.get('Date_limite'))
+            element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
+            element.periode_perso = liste_type_period_perso[int(xml_ech.get('Periodicite_personnalisee'))][0]
+        element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
     logger.warning(u"%s échéances" % nb)
     logger.warning(u'{!s}'.format(time.clock()))
@@ -452,8 +470,8 @@ def import_gsb(nomfich, efface_table=True):
 
 if __name__ == "__main__":
     #nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    nomfich="%s/test_files/test_original.gsb"%(os.path.dirname(os.path.abspath(__file__)))
+    nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
+    logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich, efface_table=True)
     logger.info(u'fichier %s importe' % nomfich)
