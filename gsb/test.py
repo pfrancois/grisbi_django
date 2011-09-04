@@ -44,8 +44,18 @@ import pprint #@UnusedImport
 
 
 if __name__ == "__main__":
-    c = Compte_titre.objects.get(id = 4)
-    t = Titre.objects.get(nom = "t1")
-    c.achat(titre = t, nombre = 20, date = '2011-01-01')
-    t.cours_set.create(date = '2011-02-01', valeur = 2)
-    c.vente(titre = t, nombre = 10, prix = 3, date = '2011-06-30')
+    nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
+    #nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
+    nomfich = os.path.normpath(nomfich)
+    logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
+    xml_tree = et.parse(nomfich)
+    xml_tree.getroot()
+    list_ope = xml_tree.findall('//Operation')
+    nb_ope_final = len(list_ope)
+    percent = 1
+    for xml_ope in list_ope:
+        if xml_ope.get('N'):
+            print smart_unicode(xml_ope.get('N'))
+            print xml_ope.get('N')
+
+

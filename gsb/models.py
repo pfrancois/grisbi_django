@@ -135,7 +135,7 @@ class Titre(models.Model):
             return 0
         else:
             return valeur * -1
-    def nb(self, compte):
+    def nb(self, compte = None):
         """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee"""
         if compte:
             return Ope_titre.nb(compte, self)
@@ -145,8 +145,8 @@ class Titre(models.Model):
                 return 0
             else:
                 return nombre
-    def encours(self, compte):
-        """renvoie l'encour detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donnée"""
+    def encours(self, compte = None):
+        """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
         if compte:
             return Ope_titre.nb(compte, self) * self.last_cours
         else:
@@ -583,7 +583,8 @@ class Moyen(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return self.nom
+        
+        return "%s (%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
     def fusionne(self, new):
