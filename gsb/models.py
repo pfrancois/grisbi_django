@@ -40,7 +40,7 @@ class Tiers(models.Model):
     """
 
     nom = models.CharField(max_length = 40, unique = True)
-    notes = models.TextField(blank = True)
+    notes = models.CharField(max_length = 40, blank = True)
     is_titre = models.BooleanField(default = False)
 
     class Meta:
@@ -81,7 +81,7 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length = 40, unique = True)
     isin = models.CharField(max_length = 60, unique = True)
-    tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False)
+    tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False, on_delete=models.SET_NULL)
     type = models.CharField(max_length = 60, choices = typestitres, default = 'ZZZ')
     class Meta:
         db_table = u'titre'
@@ -292,7 +292,7 @@ class Compte(models.Model):
     titulaire = models.CharField(max_length = 120, blank = True, default = '')
     type = models.CharField(max_length = 24, choices = typescpt, default = 'b')
     banque = models.ForeignKey(Banque, null = True, blank = True, on_delete = models.SET_NULL, default = None)
-    guichet = models.CharField(max_length = 15, blank = True, default = '')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il ny ait que des chiffres
+    guichet = models.CharField(max_length = 15, blank = True, default = '')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length = 60, blank = True, default = '')
     cle_compte = models.IntegerField(null = True, blank = True, default = 0)
     solde_init = CurField()
@@ -533,7 +533,7 @@ class Ope_titre(models.Model):
     nombre = models.IntegerField()
     date = models.DateField()
     cours = CurField(default = 1)
-    invest = CurField(default = 0)
+    invest = CurField(default = 0,editable=False)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
@@ -771,8 +771,8 @@ class Ope(models.Model):
     def clean(self):
         self.alters_data = True
         super(Ope, self).clean()
-        #verification qu'il n'y ni poitee ni rapprochee
-        if self.pointe is not None and self.rapp is not None:
+        #verification qu'il n'y ni pointe ni rapprochee
+        if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
 
     def save(self, *args, **kwargs):

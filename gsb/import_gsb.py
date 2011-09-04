@@ -5,7 +5,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
     from mysite import settings
     setup_environ(settings)
-    
+
 
 from django.db import connection, transaction
 
@@ -330,7 +330,7 @@ def import_gsb(nomfich, efface_table = True):
                 ope_nb = decimal.Decimal(str(s[0]))
                 ope_cours = decimal.Decimal(str(s[2]))
                 Ope_titre.objects.create(titre = ope_tiers.titre, compte = ope_cpt_titre, nombre = ope_nb  , date = ope_date, cours = ope_cours)
-                titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
+                ope_tiers.titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
         #on cree de toute facon l'operation
         nb_tot_ope += 1
         affiche = False

@@ -317,9 +317,12 @@ def import_gsb(nomfich, efface_table = True):
             s = ope_notes.partition('@')
             if s[1]:#TODO gestion des csl
                 ope_nb = decimal.Decimal(str(s[0]))
-                ope_cours = decimal.Decimal(str(s[2]))
+                if str(s[2]):
+                    ope_cours = decimal.Decimal(str(s[2]))
+                else:
+                    ope_cours = 1
                 Ope_titre.objects.create(titre = ope_tiers.titre, compte = ope_cpt_titre, nombre = ope_nb, date = ope_date, cours = ope_cours)
-                titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
+                ope_tiers.titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
         #on cree de toute facon l'operation
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
