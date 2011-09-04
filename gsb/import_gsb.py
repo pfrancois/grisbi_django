@@ -5,7 +5,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
     from mysite import settings
     setup_environ(settings)
-    
+
 
 from django.db import connection, transaction
 
@@ -153,7 +153,6 @@ def import_gsb(nomfich, efface_table = True):
     nb_cat = 0
     nb_nx = 0
     for xml_cat in xml_tree.find('//Detail_des_categories'):
-        logger.debug("cat %s" % xml_cat.get('No'))
         nb_cat += 1
         query = {'nom':"%s :" % (xml_cat.get('Nom'),), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom = query['nom'], defaults = query)
@@ -162,7 +161,6 @@ def import_gsb(nomfich, efface_table = True):
             nb_nx += 1
             logger.debug('cat %s cree au numero %s' % (int(xml_cat.get('No')), element.id))
         for xml_scat in xml_cat:
-            logger.debug("cat %s : scat %s" % (xml_cat.get('No'), xml_scat.get('No')))
             nb_cat += 1
             query = {'nom':"%s : %s" % (xml_cat.get('Nom'), xml_scat.get('Nom')), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
             element, created = Cat.objects.get_or_create(nom = query['nom'], defaults = query)
@@ -176,7 +174,6 @@ def import_gsb(nomfich, efface_table = True):
     nb_ib = 0
     nb_nx = 0
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
-        logger.debug("ib %s" % xml_ib.get('No'))
         nb_ib += 1
         query = {'nom':"%s:" % (xml_ib.get('Nom'),), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom = query['nom'], defaults = query)
@@ -222,7 +219,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_rapp in xml_tree.find('Rapprochements/Detail_des_rapprochements'):
         nb += 1
         logger.debug("rapp %s" % xml_rapp.get('No'))
-        element, created = Rapp.objects.get_or_create(nom = xml_rapp.get('Nom'), defaults = {'nom':xml_rapp.get('Nom')})
+        element, created = Rapp.objects.get_or_create(nom = dj_encoding.smart_unicode(xml_rapp.get('Nom')), defaults = {'nom':xml_rapp.get('Nom')})
         if created:
             nb_nx += 1
         tabl_correspondance_rapp[xml_rapp.get('No')] = element.id
@@ -313,6 +310,7 @@ def import_gsb(nomfich, efface_table = True):
     nb_ope_final = len(list_ope)
     percent = 1
     for xml_ope in list_ope:
+        logger.debug(u'opération %s' % xml_ope.get('No'))
         try:
             ope_tiers = Tiers.objects.get(id = tabl_correspondance_tiers[xml_ope.get('T')])
         except KeyError:
@@ -321,7 +319,7 @@ def import_gsb(nomfich, efface_table = True):
         ope_date = datefr2datesql(xml_ope.get('D'))
         ope_date_val = datefr2datesql(xml_ope.get('Db'))
         ope_cpt = Compte.objects.get(id = tabl_correspondance_compte[xml_ope.find('../../Details/No_de_compte').text])
-        if ope_tiers and ope_tiers.is_titre:
+        if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't' :
             #compta matiere et cours en meme tps
             ope_cpt_titre = Compte_titre.objects.get(id = ope_cpt.id)
             ope_notes = dj_encoding.smart_unicode(xml_ope.get('N'))
@@ -333,7 +331,6 @@ def import_gsb(nomfich, efface_table = True):
                 titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
         #on cree de toute facon l'operation
         nb_tot_ope += 1
-        affiche = False
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info("ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
             affiche = True
@@ -346,8 +343,7 @@ def import_gsb(nomfich, efface_table = True):
         )#on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         ope.save()
         tabl_correspondance_ope[xml_ope.get('No')] = ope.id
-        if affiche:
-            logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
+        logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
         #numero du moyen de paiment
         ope.num_cheque = xml_ope.get('Ct')
         #statut de pointage
@@ -356,9 +352,10 @@ def import_gsb(nomfich, efface_table = True):
         if int(xml_ope.get('A')) == 1:
             ope.automatique = True
         #gestion des tiers
-        ope.tiers_id = ope_tiers
+        if ope_tiers:
+            ope.tiers_id = ope_tiers
         try:
-            if xml_ope.get('C') and (int(xml_ope.get('C'))):
+            if xml_ope.get('C') and int(xml_ope.get('C')):
                 ope.cat_id = tabl_correspondance_cat[xml_ope.get('C')][xml_ope.get('Sc')]
             else:
                 ope.cat = None
@@ -377,11 +374,12 @@ def import_gsb(nomfich, efface_table = True):
             ope.moyen = None
         try: #gestion des rapprochements
             ope.rapp_id = tabl_correspondance_rapp[xml_ope.get('R')]
+            #gestion de la date du rapprochement
             if datetime.datetime.combine(ope.rapp.date, datetime.time()) > datetime.datetime.strptime(ope.date, "%Y-%m-%d"):
                 ope.rapp.date = ope.date
                 ope.rapp.save()
         except KeyError:
-            ope.tapp = None
+            ope.rapp = None
         ope.notes = xml_ope.get('N')
         ope.piece_comptable = xml_ope.get('Pc')
         #exercices
