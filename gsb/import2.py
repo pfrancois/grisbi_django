@@ -5,7 +5,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
     from mysite import settings
     setup_environ(settings)
-    
+
 
 from django.db import connection, transaction
 
@@ -364,7 +364,7 @@ def import_gsb(nomfich, efface_table = True):
             ope.moyen = None
         try: #gestion des rapprochements
             if int(xml_ope.get('R')):
-                ope.rapp_id = int(xml_ope.get('R')) 
+                ope.rapp_id = int(xml_ope.get('R'))
                 #gestion de la date du rapprochement
                 if datetime.datetime.combine(ope.rapp.date, datetime.time()) > datetime.datetime.strptime(ope.date, "%Y-%m-%d"):
                     ope.rapp.date = ope.date
@@ -461,6 +461,6 @@ if __name__ == "__main__":
     nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     #nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    logger.setLevel(10)#change le niveau de log (10 = debug, 20=info)
+    logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich, efface_table = True)
     logger.info(u'fichier %s importe' % nomfich)
