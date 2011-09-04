@@ -53,14 +53,17 @@ class Tiers(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        """fusionnne tiers vers new tiers
+        @param new: tiers
+        """
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
         nb_tiers_change = Echeance.objects.filter(tiers = self).update(tiers = new)
         nb_tiers_change += Ope.objects.filter(tiers = self).update(tiers = new)
-        self.delete() 
+        self.delete()
         return nb_tiers_change
-    
+
 
 
 class Titre(models.Model):
@@ -92,9 +95,7 @@ class Titre(models.Model):
         return self.cours_set.latest().valeur
     @property
     def last_cours_date(self):
-        """renvoie la date du dernier cours
-        property
-        """
+        """renvoie la date du dernier cours"""
         return self.cours_set.latest().date
 
     @transaction.commit_on_success
@@ -119,14 +120,17 @@ class Titre(models.Model):
         return nb_change
 
     def save(self, *args, **kwargs):
-        self.alters_data = True   
+        self.alters_data = True
         if (not self.tiers):
             self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
         if self.tiers.notes != "%s@%s" % (self.isin, self.type):
             self.tiers.notes = "%s@%s" % (self.isin, self.type)
         super(Titre, self).save(*args, **kwargs)
-    def investi(self, compte):
-        """renvoie le montant investi"""
+
+    def investi(self, compte=None):
+        """renvoie le montant investi
+        @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
+        """
         if compte:
             return Ope_titre.investi(compte, self)
         else:
@@ -135,6 +139,7 @@ class Titre(models.Model):
             return 0
         else:
             return valeur * -1
+
     def nb(self, compte = None):
         """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee"""
         if compte:
@@ -145,13 +150,14 @@ class Titre(models.Model):
                 return 0
             else:
                 return nombre
+
     def encours(self, compte = None):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
         if compte:
             return Ope_titre.nb(compte, self) * self.last_cours
         else:
             return self.nb() * self.last_cours
-        
+
 
 class Cours(models.Model):
     """cours des titres"""
@@ -352,7 +358,7 @@ class Compte_titre(Compte):
     class Meta:
         db_table = 'cpt_titre'
     @transaction.commit_on_success
-    def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None): 
+    def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None):
         """fonction pour achat de titre:
         @param Titre
         @param int
@@ -362,7 +368,7 @@ class Compte_titre(Compte):
         @param Compte
         """
         self.alters_data = True
-        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0] #@UnusedVariable
+        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #ajout de l'operation dans le compte_espece rattache
@@ -392,7 +398,7 @@ class Compte_titre(Compte):
             if virement_de:
                 vir = Virement()
                 vir.create(virement_de, self, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
-                
+
         else:
             raise TypeError("pas un titre")
 
@@ -416,7 +422,7 @@ class Compte_titre(Compte):
             if not nb_titre_avant:
                 raise Titre.doesNotExist('titre pas en portefeuille')
             #compta matiere
-            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix)                
+            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix)
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
@@ -555,13 +561,13 @@ class Ope_titre(models.Model):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
             raise TypeError("pas un compte titre")
-        
+
         valeur = Ope.objects.filter(compte = compte, tiers = titre.tiers).aggregate(invest = models.Sum('montant'))['invest']
         if not valeur:
             return 0
         else:
             return valeur * -1
-        
+
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -583,7 +589,7 @@ class Moyen(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        
+
         return "%s (%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
@@ -825,7 +831,7 @@ class Virement(object):
         return self.origine.pointe
     pointe = property(getpointe, setpointe)
 
-        
+
     def save(self):
         if self._init:
             nom_tiers = "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
@@ -836,7 +842,7 @@ class Virement(object):
             self.dest.save()
         else:
             raise Gsb_exc('pas initialise')
-        
+
     @staticmethod
     def create(compte_origine, compte_dest, montant, date = None, notes = ""):
         '''
