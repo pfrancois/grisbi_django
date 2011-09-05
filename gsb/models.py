@@ -79,10 +79,10 @@ class Titre(models.Model):
     ('OBL', u'obligation'),
     ('ZZZ', u'autre')
     )
-    nom = models.CharField(max_length = 40, unique = True)
-    isin = models.CharField(max_length = 60, unique = True)
+    nom = models.CharField(max_length = 20, unique = True)
+    isin = models.CharField(max_length = 12, unique = True)
     tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False, on_delete=models.SET_NULL)
-    type = models.CharField(max_length = 60, choices = typestitres, default = 'ZZZ')
+    type = models.CharField(max_length = 3, choices = typestitres, default = 'ZZZ')
     class Meta:
         db_table = u'titre'
         ordering = ['nom']
@@ -177,8 +177,8 @@ class Cours(models.Model):
 
 class Banque(models.Model):
     """banques"""
-    cib = models.CharField(max_length = 15, blank = True)
-    nom = models.CharField(max_length = 40, unique = True)
+    cib = models.CharField(max_length = 5, blank = True)
+    nom = models.CharField(max_length = 20, unique = True)
     notes = models.TextField(blank = True)
     class Meta:
         db_table = 'banque'
@@ -203,7 +203,7 @@ class Cat(models.Model):
     ('d', u'dépense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length = 60, unique = True)
+    nom = models.CharField(max_length = 20, unique = True)
     type = models.CharField(max_length = 1, choices = typesdep, default = 'd', verbose_name = "type de la catégorie")
     class Meta:
         db_table = 'cat'
@@ -228,7 +228,7 @@ class Cat(models.Model):
 class Ib(models.Model):
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
-    nom = models.CharField(max_length = 60, unique = True)
+    nom = models.CharField(max_length = 20, unique = True)
     type = models.CharField(max_length = 1, choices = Cat.typesdep, default = u'd')
     class Meta:
         db_table = 'ib'
@@ -257,7 +257,7 @@ class Exercice(models.Model):
     """
     date_debut = models.DateField(default = datetime.date.today)
     date_fin = models.DateField(null = True, blank = True)
-    nom = models.CharField(max_length = 40, unique = True)
+    nom = models.CharField(max_length = 20, unique = True)
     class Meta:
         db_table = 'exercice'
         ordering = ['date_debut']
@@ -288,12 +288,12 @@ class Compte(models.Model):
     ('p', u'passif'),
     ('t', u'titre')
     )
-    nom = models.CharField(max_length = 40, unique = True)
-    titulaire = models.CharField(max_length = 120, blank = True, default = '')
-    type = models.CharField(max_length = 24, choices = typescpt, default = 'b')
+    nom = models.CharField(max_length = 20, unique = True)
+    titulaire = models.CharField(max_length = 40, blank = True, default = '')
+    type = models.CharField(max_length = 1, choices = typescpt, default = 'b')
     banque = models.ForeignKey(Banque, null = True, blank = True, on_delete = models.SET_NULL, default = None)
     guichet = models.CharField(max_length = 15, blank = True, default = '')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
-    num_compte = models.CharField(max_length = 60, blank = True, default = '')
+    num_compte = models.CharField(max_length = 20, blank = True, default = '')
     cle_compte = models.IntegerField(null = True, blank = True, default = 0)
     solde_init = CurField()
     solde_mini_voulu = CurField(null = True, blank = True)
@@ -701,7 +701,7 @@ class Echeance(models.Model):
 
 class Generalite(models.Model):
     """config dans le fichier"""
-    titre = models.CharField(max_length = 120, blank = True, default = "isbi")
+    titre = models.CharField(max_length = 40, blank = True, default = "isbi")
     utilise_exercices = models.BooleanField(default = True)
     utilise_ib = models.BooleanField(default = True)
     utilise_pc = models.BooleanField(default = False)
@@ -726,6 +726,13 @@ class Generalite(models.Model):
     @staticmethod
     def dev_g():
         return settings.DEVISE_GENERALE
+    @staticmethod
+    def last_id(classe):
+        """renvoie le dernier  id de la classe demandée"""
+        try:
+            return classe.objects.latest('id').id
+        except classe.DoesNotExist:
+            return 0
 
 class Ope(models.Model):
     """operation"""
@@ -733,19 +740,19 @@ class Ope(models.Model):
     date = models.DateField(default = datetime.date.today)
     date_val = models.DateField(null = True, blank = True, default = None)
     montant = CurField()
-    tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.SET_NULL, default = None)
-    cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.PROTECT, default = None)
     notes = models.TextField(blank = True)
-    moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.SET_NULL, default = None)
-    num_cheque = models.CharField(max_length = 120, blank = True, default = '')
+    moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    num_cheque = models.CharField(max_length = 20, blank = True, default = '')
     pointe = models.BooleanField(default = False)
-    rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.SET_NULL, default = None)
-    exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.SET_NULL, default = None)
-    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.SET_NULL, default = None)
+    rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None)
     jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False)
     mere = models.ForeignKey('self', null = True, blank = True, related_name = 'filles_set', default = None, editable = False)
     automatique = models.BooleanField(default = False)
-    piece_comptable = models.CharField(max_length = 120, blank = True, default = '')
+    piece_comptable = models.CharField(max_length = 20, blank = True, default = '')
 
     class Meta:
         db_table = 'ope'
