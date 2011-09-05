@@ -23,7 +23,7 @@ liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
 liste_type_period_perso = Echeance.typesperiodperso
 liste_type_titre = [e[0] for e in Titre.typestitres]
-logger = logging.getLogger('gsb.import')
+logger = logging.getLogger('gsb.import2')
 try:
     from lxml import etree as et
 except ImportError:
@@ -311,7 +311,6 @@ def import_gsb(nomfich, efface_table = True):
         ope_cpt = Compte.objects.get(id = int(xml_ope.find('../../Details/No_de_compte').text))
         if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't' :
             #compta matiere et cours en meme tps
-            print ope_cpt.id
             ope_cpt_titre = Compte_titre.objects.get(id = ope_cpt.id)
             ope_notes = dj_encoding.smart_unicode(xml_ope.get('N'))
             s = ope_notes.partition('@')
@@ -330,13 +329,13 @@ def import_gsb(nomfich, efface_table = True):
             affiche = True
             percent += 1
 
-        ope = Ope(compte = ope_cpt,
+        ope = Ope(id = int(xml_ope.get('No')),
+                  compte = ope_cpt,
                    date = ope_date,
                    date_val = ope_date_val, #date de valeur
                    montant = ope_montant, #montant
         )#on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         ope.save()
-        logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
         #numero du moyen de paiment
         ope.num_cheque = xml_ope.get('Ct')
         #statut de pointage
@@ -347,6 +346,7 @@ def import_gsb(nomfich, efface_table = True):
         #gestion des tiers
         if ope_tiers:
             ope.tiers_id = ope_tiers
+        #gestion des categories
         try:
             if xml_ope.get('C') and int(xml_ope.get('C')):
                 ope.cat_id = tabl_correspondance_cat[xml_ope.get('C')][xml_ope.get('Sc')]
@@ -378,7 +378,10 @@ def import_gsb(nomfich, efface_table = True):
         ope.piece_comptable = xml_ope.get('Pc')
         #exercices
         try:
-            ope.exercice_id = int(xml_ope.get('E'))
+            if int(xml_ope.get('E')):
+                ope.exercice_id = int(xml_ope.get('E'))
+            else:
+                ope.exercice_id = None
         except TypeError:
             ope.exercice = None
         ope.save()
@@ -464,6 +467,6 @@ if __name__ == "__main__":
     nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     #nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    logger.setLevel(20)#change le niveau de log (10 = debug, 20=info)
+    logger.setLevel(10)#change le niveau de log (10 = debug, 20=info)
     import_gsb(nomfich, efface_table = True)
     logger.info(u'fichier %s importe' % nomfich)
