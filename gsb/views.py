@@ -229,7 +229,7 @@ def ope_new(request, cpt_id = None):
             )
     else:
         if cpt_id:
-            form = gsb_forms.OperationForm(initial = {'moyen':cpt.moyen_debit_defaut})
+            form = gsb_forms.OperationForm(initial = {'compte':cpt,'moyen':cpt.moyen_debit_defaut})
         else:
             form = gsb_forms.OperationForm()
 
@@ -261,7 +261,7 @@ def vir_new(request, cpt_id = None):
                 'cpt':cpt}
             )
     else:
-        form = gsb_forms.VirementForm()
+        form = gsb_forms.VirementForm(initial={'compte_destination':cpt})
         return render(request, 'gsb/vir.djhtm',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
