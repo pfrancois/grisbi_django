@@ -75,7 +75,7 @@ def cpt_titre_espece(request,cpt_id,date_limite=False):
                     {
                         'compte': c,
                         'list_ope': q,
-                        'titre': "%s: Esp&eacute;ces"%c.nom,
+                        'titre': "%s: Especes"%c.nom,
                         'solde': super(Compte_titre, c).solde,
                         'date_limite':date_limite,
                     }
