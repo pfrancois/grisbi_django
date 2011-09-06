@@ -203,12 +203,12 @@ class Cat(models.Model):
     ('d', u'dépense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     type = models.CharField(max_length = 1, choices = typesdep, default = 'd', verbose_name = "type de la catégorie")
     class Meta:
         db_table = 'cat'
         verbose_name = u"catégorie"
-        ordering = ['nom']
+        ordering = ['type','nom']
 
     def __unicode__(self):
         return self.nom
@@ -224,17 +224,16 @@ class Cat(models.Model):
         self.delete()
         return nb_change
 
-
 class Ib(models.Model):
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     type = models.CharField(max_length = 1, choices = Cat.typesdep, default = u'd')
     class Meta:
         db_table = 'ib'
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
-        ordering = ['nom']
+        ordering = ['type','nom']
 
     def __unicode__(self):
         return self.nom

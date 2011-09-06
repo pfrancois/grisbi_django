@@ -29,6 +29,11 @@ class OperationForm(BaseForm):
     class Meta:
         model = Ope
         exclude = ('mere', 'jumelle')
+    def clean(self):
+        super(OperationForm, self).clean()        
+        if self.cleaned_data['cat'].type==u'd':
+            self.cleaned_data['montant']=self.cleaned_data['montant']*-1
+        return self.cleaned_data
 
 class VirementForm(forms.Form):
     error_css_class = 'error'
@@ -46,6 +51,7 @@ class VirementForm(forms.Form):
     piece_comptable_compte_origine = forms.CharField(required = False)
     piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
+        super(VirementForm, self).clean()
         data = self.cleaned_data
         if data.get("compte_origine") == data.get("compte_destination"):
             msg = "pas possible de faire un virement vers le meme compte"
