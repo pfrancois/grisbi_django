@@ -39,7 +39,7 @@
     </tr>
     {% endfor %}
     <tr class="item hover">
-        <td class="opTier">compte esp&egrave;ce</td>
+        <td class="opTier"><a href="{% url gsb_cpt_titre_espece compte.id %}">compte esp&egrave;ce</a></td>
         <td class="opDebit"></td>
         <td class="opCredit">&nbsp;</td>
         <td class="opDebit">{{ especes|cur }}</td>

@@ -42,6 +42,48 @@ def index(request):
         })
     return HttpResponse(t.render(c))
 
+def cpt_titre_espece(request,cpt_id,date_limite=False):
+    '''view qui affiche la liste des operations especes d'un compte titre'''
+    c = get_object_or_404(Compte_titre, pk = cpt_id)
+    if date_limite:
+        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
+    else:
+        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date')
+    template = loader.get_template('gsb/cpt_detail.djhtm')
+    if date_limite:
+        return HttpResponse(
+            template.render(
+                RequestContext(
+                    request,
+                    {
+                        'compte': c,
+                        'list_ope': q,
+                        'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
+                        'nbvielles': Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count(),
+                        'titre': "%s: Esp&eacute;ces"%c.nom,
+                        'solde': super(Compte_titre, c).solde,
+                        'date_limite':date_limite,
+                    }
+                )
+            )
+        )
+    else:
+        return HttpResponse(
+            template.render(
+                RequestContext(
+                    request,
+                    {
+                        'compte': c,
+                        'list_ope': q,
+                        'titre': "%s: Esp&eacute;ces"%c.nom,
+                        'solde': super(Compte_titre, c).solde,
+                        'date_limite':date_limite,
+                    }
+                )
+            )
+        )
+        
+    
 
 def cpt_detail(request, cpt_id):
     '''
@@ -56,13 +98,13 @@ def cpt_detail(request, cpt_id):
         titre = True
     else:
         titre = False
-    t = loader.get_template('gsb/cpt_detail.djhtm')
     if not titre:
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
         nb_ope_vielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
         nb_ope_rapp = Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count()
+        template = loader.get_template('gsb/cpt_detail.djhtm')
         return HttpResponse(
-            t.render(
+            template.render(
                 RequestContext(
                     request,
                     {

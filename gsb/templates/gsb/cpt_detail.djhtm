@@ -2,6 +2,7 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
+    {% block bouton_haut %}
     <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
             <tr>
@@ -14,6 +15,7 @@
             <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
         {% endif %}
     </table>
+    {% endblock bouton_haut %}
     <br/>
     <table id="main"class="table">
         <thead class="entete">
@@ -38,11 +40,17 @@
                 <tr class="item">
                     <td colspan="5">
                         aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
-                        {% if nbfiltre > 1 %}
-                            {{ nbfiltre }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
-                        {% else %} {% if nbfiltre == 1 %}
+                        {% if nbvielles > 1 %}
+                            {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
+                        {% else %} {% if nbvielles == 1 %}
                             1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ NB_JOURS_AFF }} jours maximum.<br/>
                         {% endif %}{% endif %}
+                            {% if nbrapp == 1 %}
+                            note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
+                        {% endif %}
+                        {% if nbrapp > 1 %}
+                           note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
@@ -53,18 +61,20 @@
         </tr>
     </table>
     <p>
-    {% if nbrapp == 1 %}
-        note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
+    {% if ope %}
+        {% if nbrapp == 1 %}
+            note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
+        {% endif %}
+        {% if nbrapp > 1 %}
+           note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
+        {% endif %}
+        {% if nbvielles > 1 %}
+            note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
+        {% endif %}
+        {% if nbvielles == 1 %}
+            note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br/>
+        {% endif %}
+        seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
     {% endif %}
-    {% if nbrapp > 1 %}
-       note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
-    {% endif %}
-    {% if nbvielles > 1 %}
-        note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
-    {% endif %}
-    {% if nbvielles == 1 %}
-        note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br/>
-    {% endif %}
-    seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
     </p>
 {% endblock content %}

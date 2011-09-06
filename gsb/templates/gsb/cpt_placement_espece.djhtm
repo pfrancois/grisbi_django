@@ -1,0 +1,19 @@
+{% extends "cpt_detail.djhtm" %}
+{% comment %} coding: utf-8 {% endcomment %}
+{% load gsb_extras %}
+{% block content %}
+    {% block bouton_haut %}
+    <table width="100%" id="boutons" class="table">
+        {% if compte.ouvert %}
+            <tr>
+                <td width="50%" class="boutton"><a href="{% url gsb_cpt_ope_new compte.id %}">Nouvelle Op.</a></td>
+                <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+            </tr>
+            <tr>
+            <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom }} </a></td></tr>
+        {% else %}
+            <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td></tr>
+        {% endif %}
+    </table>
+    {% endblock bouton_haut %}
+{% endblock content %}
