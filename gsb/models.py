@@ -8,12 +8,12 @@ from django.conf import settings #@UnusedImport
 #from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError #@UnusedImport
 from django.utils.encoding import force_unicode
+
 class Gsb_exc(Exception):
     pass
+
 class Ex_jumelle_neant(Exception):
     pass
-
-
 
 #import logging
 #definition d'un moneyfield
@@ -81,7 +81,7 @@ class Titre(models.Model):
     )
     nom = models.CharField(max_length = 20, unique = True)
     isin = models.CharField(max_length = 12, unique = True)
-    tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False, on_delete=models.SET_NULL)
+    tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False, on_delete = models.SET_NULL)
     type = models.CharField(max_length = 3, choices = typestitres, default = 'ZZZ')
     class Meta:
         db_table = u'titre'
@@ -127,7 +127,7 @@ class Titre(models.Model):
             self.tiers.notes = "%s@%s" % (self.isin, self.type)
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte=None):
+    def investi(self, compte = None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         """
@@ -208,7 +208,7 @@ class Cat(models.Model):
     class Meta:
         db_table = 'cat'
         verbose_name = u"catégorie"
-        ordering = ['type','nom']
+        ordering = ['type', 'nom']
 
     def __unicode__(self):
         return self.nom
@@ -233,7 +233,7 @@ class Ib(models.Model):
         db_table = 'ib'
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
-        ordering = ['type','nom']
+        ordering = ['type', 'nom']
 
     def __unicode__(self):
         return self.nom
@@ -532,7 +532,7 @@ class Ope_titre(models.Model):
     nombre = models.IntegerField()
     date = models.DateField()
     cours = CurField(default = 1)
-    invest = CurField(default = 0,editable=False)
+    invest = CurField(default = 0, editable = False)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'

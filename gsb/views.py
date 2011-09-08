@@ -42,7 +42,7 @@ def index(request):
         })
     return HttpResponse(t.render(c))
 
-def cpt_titre_espece(request,cpt_id,date_limite=False):
+def cpt_titre_espece(request, cpt_id, date_limite = False):
     '''view qui affiche la liste des operations especes d'un compte titre'''
     c = get_object_or_404(Compte_titre, pk = cpt_id)
     if date_limite:
@@ -60,7 +60,7 @@ def cpt_titre_espece(request,cpt_id,date_limite=False):
                         'list_ope': q,
                         'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
                         'nbvielles': Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count(),
-                        'titre': "%s: Esp&eacute;ces"%c.nom,
+                        'titre': "%s: Esp&eacute;ces" % c.nom,
                         'solde': super(Compte_titre, c).solde,
                         'date_limite':date_limite,
                     }
@@ -75,7 +75,7 @@ def cpt_titre_espece(request,cpt_id,date_limite=False):
                     {
                         'compte': c,
                         'list_ope': q,
-                        'titre': "%s: Especes"%c.nom,
+                        'titre': "%s: Especes" % c.nom,
                         'solde': super(Compte_titre, c).solde,
                         'date_limite':date_limite,
                     }
@@ -155,8 +155,8 @@ def ope_detail(request, pk):
     #logger = logging.getLogger('gsb')
     if ope.jumelle is not None: 
         #------un virement--------------
-        if ope.montant>0:
-            ope=ope.jumelle
+        if ope.montant > 0:
+            ope = ope.jumelle
         if request.method == 'POST':#creation du virement
             form = gsb_forms.VirementForm(data = request.POST, ope = ope)
             if form.is_valid():
@@ -231,7 +231,7 @@ def ope_new(request, cpt_id = None):
             )
     else:
         if cpt_id:
-            form = gsb_forms.OperationForm(initial = {'compte':cpt,'moyen':cpt.moyen_debit_defaut})
+            form = gsb_forms.OperationForm(initial = {'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
         else:
             form = gsb_forms.OperationForm()
 
@@ -263,7 +263,7 @@ def vir_new(request, cpt_id = None):
                 'cpt':cpt}
             )
     else:
-        form = gsb_forms.VirementForm(initial={'compte_destination':cpt,'moyen_origine':Moyen.objects.filter(type='v')[0],'moyen_destination':Moyen.objects.filter(type='v')[0]})
+        form = gsb_forms.VirementForm(initial = {'compte_destination':cpt, 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
         return render(request, 'gsb/vir.djhtm',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
@@ -281,3 +281,4 @@ def ope_delete(request, pk):
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
+
