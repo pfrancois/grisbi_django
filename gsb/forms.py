@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours
 #from mysite.gsb import widgets
 import datetime
 #import decimal
@@ -31,8 +31,8 @@ class OperationForm(BaseForm):
         exclude = ('mere', 'jumelle')
     def clean(self):
         super(OperationForm, self).clean()        
-        if self.cleaned_data['cat'].type==u'd':
-            self.cleaned_data['montant']=self.cleaned_data['montant']*-1
+        if self.cleaned_data['cat'].type == u'd' and self.cleaned_data['montant'] > 0:
+            self.cleaned_data['montant'] = self.cleaned_data['montant']* -1
         return self.cleaned_data
 
 class VirementForm(forms.Form):
@@ -94,3 +94,6 @@ class GeneraliteForm(BaseForm):
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
     def __init__(self, *args, **kwargs):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
+
+from django.forms.models import modelformset_factory
+Maj_cours_set = modelformset_factory(Cours)
