@@ -7,6 +7,7 @@ from mysite.gsb.models import Tiers
 import mysite.gsb.forms as gsb_forms
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.generic import RedirectView
 
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
@@ -30,6 +31,9 @@ urlpatterns += patterns('mysite.gsb.outils',
 urlpatterns += patterns('mysite.gsb',
                         (r'^options/xml$', 'gsb_0_5_0.export'),
                         )
+urlpatterns += patterns('',
+                        (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),
+                        ) 
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/delete', 'ope_delete', name = 'gsb_ope_delete'),
@@ -64,4 +68,4 @@ urlpatterns += patterns('mysite.gsb.views',
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
     urlpatterns += patterns('mysite.gsb.views',
-                        (r'^testform/$', SomeModelFormPreview(gsb_forms.ope_titre_form)),)
+                        (r'^testform/$', SomeModelFormPreview(gsb_forms.Maj_cours_set)),)
