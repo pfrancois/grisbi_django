@@ -8,7 +8,7 @@ if __name__ == "__main__":
     from mysite import settings
     setup_environ(settings)
 
-from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp
+from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre
 # Compte_titre, Virement,
 from django.http import HttpResponse
 #from django.core.exceptions import ObjectDoesNotExist
@@ -136,7 +136,7 @@ def _export():
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
-        et.SubElement(xml_detail, "Compte_cloture").text = not fmt.bool(co.open)#attention, on gere les comptes ouverts et non les comptes clotures
+        et.SubElement(xml_detail, "Compte_cloture").text = fmt.bool(not co.ouvert)#attention, on gere les comptes ouverts et non les comptes clotures
         et.SubElement(xml_detail, "Affichage_r").text = "1" #NOT IN BDD
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3" #NOT IN BDD
         et.SubElement(xml_detail, "Commentaires").text = co.notes
@@ -182,8 +182,7 @@ def _export():
             xml_element.set('M', fmt.float(ope.montant))
             xml_element.set('De', str(1))
             xml_element.set('Rdc', '0') #NOT IN BDD
-            if ope.jumelle:
-                    xml_element.set('Tc', fmt.float(0))
+            xml_element.set('Tc', fmt.float(0)) #comme pas de devise pas besoin
             xml_element.set('Fc', fmt.float(0)) #NOT IN BDD mais inutile selon moi
             if ope.tiers:
                 xml_element.set('T', str(ope.tiers.id))
@@ -321,7 +320,10 @@ def _export():
         xml_sub.set("No", str(tier.id))
         xml_sub.set("Nom", tier.nom)
         if tier.is_titre:##integration des donnees sur les titres afin de garder une consistence
-            xml_sub.set("Informations", "%s@%s" % (tier.titre_set.all().get().isin, tier.titre_set.all().get().type))
+            try:
+                xml_sub.set("Informations", "%s@%s" % (tier.titre.isin, tier.titre.type))
+            except Titre.DoesNotExist:
+                xml_sub.set("Informations", "%s@%s" % ("00000", "XXX"))
         else:
             xml_sub.set("Informations", tier.notes)
         xml_sub.set("Liaison", "0")
@@ -383,7 +385,7 @@ def _export():
     et.SubElement(xml_generalite, "No_derniere_devise").text = '1'
     xml_detail = et.SubElement(xml_devises, 'Detail_des_devises')
     xml_sub = et.SubElement(xml_detail, 'Devise')
-    xml_sub.set('No', str(0))
+    xml_sub.set('No', str(1))
     xml_sub.set('Nom', settings.DEVISE_GENERALE)
     xml_sub.set('Code', settings.DEVISE_GENERALE)
     xml_sub.set('IsoCode', settings.DEVISE_GENERALE)
