@@ -741,7 +741,7 @@ class Ope(models.Model):
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.PROTECT, default = None)
     cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.PROTECT, default = None)
-    notes = models.TextField(blank = True)
+    notes = models.CharField(max_length = 60, blank = True)
     moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.PROTECT, default = None)
     num_cheque = models.CharField(max_length = 20, blank = True, default = '')
     pointe = models.BooleanField(default = False)
