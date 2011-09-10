@@ -104,6 +104,8 @@ class GeneraliteForm(forms.ModelForm):
 class MajCoursform(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
-    Titre = forms.ModelChoiceField(Titre.objects.all())
-    Date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
-    Cours = forms.DecimalField(min_value = 0)
+    titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
+    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
+    cours = forms.DecimalField(min_value = 0, label = "Cours")
+    def save(self):
+        self.cleaned_data['titre'].cours_set.create(valeur = self.cleaned_data['cours'], date = self.cleaned_data['date'])

@@ -162,7 +162,7 @@ class Titre(models.Model):
 class Cours(models.Model):
     """cours des titres"""
     valeur = CurField(default = 1.000)
-    titre = models.ForeignKey(Titre, unique_for_date = "date")
+    titre = models.ForeignKey(Titre)
     date = models.DateField(default = datetime.date.today)
     class Meta:
         db_table = 'cours'

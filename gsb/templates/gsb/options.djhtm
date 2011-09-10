@@ -7,8 +7,6 @@
 <br/>
 <a href="{% url gsb.outils.modif_gen %}" class="progress"> modifications des options</a>
 <br/>
-<a href="/testform" class="progress"> test des form</a>
-<br/>
 <a href="" class="error"> exporter l'ensemble des comptes en csv </a>
 <br/>
 <a href="" class="error"> effacer les tiers vides </a>

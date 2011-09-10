@@ -12,7 +12,6 @@ from django.db import models
 import decimal
 import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
-from django.forms.models import modelformset_factory
 
 def index(request):
     """
@@ -281,3 +280,13 @@ def ope_delete(request, pk):
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
 
+def maj_cours(request, pk):
+    titre = get_object_or_404(Titre, pk = pk)
+    if request.method == 'POST':
+        form = gsb_forms.MajCoursform(request.POST)
+        print 'toto'
+        if form.is_valid():
+            form.save()
+    else:
+        form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
+    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form, })

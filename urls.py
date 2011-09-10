@@ -33,6 +33,7 @@ urlpatterns += patterns('mysite.gsb',
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),
+                        (r'^options/maj_cours/(?P<pk>\d+)$', 'mysite.gsb.views.maj_cours')
                         ) 
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
@@ -67,5 +68,4 @@ urlpatterns += patterns('mysite.gsb.views',
 #form tester
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
-    urlpatterns += patterns('mysite.gsb.views',
-                        (r'^testform/$', SomeModelFormPreview(gsb_forms.Maj_cours_set)),)
+    urlpatterns += patterns('mysite.gsb.views', (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),)
