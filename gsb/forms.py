@@ -6,7 +6,12 @@ import datetime
 #import decimal
 
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
+error_css_class = 'error'
+required_css_class = 'required'
+
 class ImportForm(forms.Form):
+    error_css_class = error_css_class
+    required_css_class = required_css_class
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
     ('gsb_0_5_0', 'format grisbi version 0.5.x'),
@@ -16,11 +21,9 @@ class ImportForm(forms.Form):
     ('fusion', 'fusion des données avec le fichier')
     ))
 
-class BaseForm(forms.ModelForm):
-    error_css_class = 'error'
-    required_css_class = 'required'
-
-class OperationForm(BaseForm):
+class OperationForm(forms.ModelForm):
+    error_css_class = error_css_class
+    required_css_class = required_css_class
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
@@ -37,8 +40,8 @@ class OperationForm(BaseForm):
         return self.cleaned_data
 
 class VirementForm(forms.Form):
-    error_css_class = 'error'
-    required_css_class = 'required'
+    error_css_class = error_css_class
+    required_css_class = required_css_class
     compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
@@ -84,14 +87,23 @@ class VirementForm(forms.Form):
         return virement_objet.origine
 
 class ope_titre_form(forms.Form):
-    error_css_class = 'error'
-    required_css_class = 'required'
+    error_css_class = error_css_class
+    required_css_class = required_css_class
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte_titre.objects.filter(type__in = ('b', 'e', 'p')), empty_label = None)
     
-class GeneraliteForm(BaseForm):
+class GeneraliteForm(forms.ModelForm):
+    error_css_class = error_css_class
+    required_css_class = required_css_class
     class Meta:
         model = Generalite
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
     def __init__(self, *args, **kwargs):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
+        
+class MajCoursform(forms.Form):
+    error_css_class = error_css_class
+    required_css_class = required_css_class
+    Titre = forms.ModelChoiceField(Titre.objects.all())
+    Date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
+    Cours = forms.DecimalField(min_value = 0)
