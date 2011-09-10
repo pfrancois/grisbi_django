@@ -68,7 +68,7 @@ def modif_gen(request):
             g.utilise_pc = form.cleaned_data['utilise_pc']
             g.affiche_clot = form.cleaned_data['affiche_clot']
             g.save()
-            return HttpResponseRedirect(reverse('gsb.outils.options_index'))
+            return HttpResponseRedirect(reverse('mysite.gsb.outils.options_index'))
         else:
             return  render_to_response('gsb/outil_generalites.djhtm',
             {   'titre':u'modification de certaines options',
