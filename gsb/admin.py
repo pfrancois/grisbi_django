@@ -79,7 +79,7 @@ class Compte_admin(admin.ModelAdmin):
 class Ope_titre_inline(admin.TabularInline):
     model = Ope_titre
     extra = 1
-    readonly_fields=('invest',)
+    readonly_fields = ('invest',)
 
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
@@ -103,11 +103,11 @@ class Compte_titre_admin(admin.ModelAdmin):
 class Ope_admin(admin.ModelAdmin):
     """classe de gestion de l'amdmin pour les opes"""
     fieldsets = [
-            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat','jumelle','mere')}),
+            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'jumelle', 'mere')}),
             (u'informations diverses', {'fields': ('date_val', 'num_cheque', 'notes', 'exercice', 'ib'), 'classes': ['collapse']}),
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             ]
-    readonly_fields=('jumelle','mere')
+    readonly_fields = ('jumelle', 'mere')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
     list_filter = ('compte', 'date', 'pointe', 'rapp')
@@ -118,6 +118,7 @@ class Cours_admin(admin.ModelAdmin):
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
     list_filter = ('date', 'titre')
+    ordering = ('-date',)
 
 class Titre_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les titres"""
@@ -129,7 +130,7 @@ class Titre_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
     list_display = ('nom', 'isin', 'last_cours')
-    readonly_fields=('tiers',)
+    readonly_fields = ('tiers',)
     list_filter = ('type',)
     inlines = (Ope_titre_inline,)
 
