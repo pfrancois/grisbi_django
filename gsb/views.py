@@ -230,11 +230,9 @@ def ope_new(request, cpt_id = None):
                 'cpt':cpt}
             )
     else:
-        if cpt_id:
-            form = gsb_forms.OperationForm(initial = {'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
-        else:
-            form = gsb_forms.OperationForm()
-
+        if not cpt_id:
+            cpt = get_object_or_404(Compte, pk = settings.ID_CPT_M)
+        form = gsb_forms.OperationForm(initial = {'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
         return render(request, 'gsb/ope.djhtm',
             {   'titre':u'création',
                 'titre_long':u'création opération',
@@ -263,7 +261,7 @@ def vir_new(request, cpt_id = None):
                 'cpt':cpt}
             )
     else:
-        form = gsb_forms.VirementForm(initial = {'compte_destination':cpt, 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
+        form = gsb_forms.VirementForm(initial = {'compte_destination':get_object_or_404(Compte, pk = settings.ID_CPT_M), 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'compte_destination':cpt, 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
         return render(request, 'gsb/vir.djhtm',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
