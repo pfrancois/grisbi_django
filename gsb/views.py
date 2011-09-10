@@ -282,3 +282,4 @@ def ope_delete(request, pk):
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
 
+
