@@ -1,10 +1,11 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre
 #from mysite.gsb import widgets
 import datetime
 #import decimal
 
+input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 class ImportForm(forms.Form):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
@@ -23,7 +24,7 @@ class OperationForm(BaseForm):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
-    date = forms.DateField(input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today)
+    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
     #pointe=forms.BooleanField(required=False)
     moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     class Meta:
@@ -43,7 +44,7 @@ class VirementForm(forms.Form):
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
-    date = forms.DateField(input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today)
+    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
@@ -94,6 +95,3 @@ class GeneraliteForm(BaseForm):
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
     def __init__(self, *args, **kwargs):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
-
-from django.forms.models import modelformset_factory
-Maj_cours_set = modelformset_factory(Cours)

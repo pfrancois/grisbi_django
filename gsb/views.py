@@ -5,13 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Cat, Moyen
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Cat, Moyen, Titre
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
 import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
+from django.forms.models import modelformset_factory
 
 def index(request):
     """
@@ -246,7 +247,7 @@ def vir_new(request, cpt_id = None):
     if cpt_id:
         cpt = get_object_or_404(Compte, pk = cpt_id)
     else:
-        cpt = None
+        cpt = get_object_or_404(Compte, pk = settings.ID_CPT_M)
     #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(data = request.POST)
@@ -258,15 +259,15 @@ def vir_new(request, cpt_id = None):
             {   'titre_long':u'création virement interne ',
                'titre':u'Création',
                 'form':form,
-                'cpt':cpt}
+                'cpt_id':cpt_id}
             )
     else:
-        form = gsb_forms.VirementForm(initial = {'compte_destination':get_object_or_404(Compte, pk = settings.ID_CPT_M), 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'compte_destination':cpt, 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
+        form = gsb_forms.VirementForm(initial = {'compte_origine':get_object_or_404(Compte, pk = settings.ID_CPT_M), 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'compte_destination':cpt, 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
         return render(request, 'gsb/vir.djhtm',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
                 'form':form,
-                'cpt':cpt}
+                'cpt_id':cpt_id}
             )
 
 @login_required
@@ -279,5 +280,4 @@ def ope_delete(request, pk):
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
-
 
