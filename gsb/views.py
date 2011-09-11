@@ -10,7 +10,7 @@ import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
-import logging #@UnusedImport
+#import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 
 def index(request):
@@ -280,6 +280,7 @@ def ope_delete(request, pk):
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
 
+@login_required
 def maj_cours(request, pk):
     titre = get_object_or_404(Titre, pk = pk)
     if request.method == 'POST':

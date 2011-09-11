@@ -50,7 +50,7 @@ class Import_exception(Exception):
     pass
 
 
-def import_gsb(nomfich, efface_table = True):
+def import_gsb_050(nomfich, efface_table = True):
     tabl_correspondance_moyen = {}
     tabl_correspondance_compte = {}
     tabl_correspondance_tiers = {}
@@ -472,5 +472,5 @@ if __name__ == "__main__":
     nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
-    import_gsb(nomfich, efface_table = True)
+    import_gsb_050(nomfich, efface_table = True)
     logger.info(u'fichier %s importe' % nomfich)

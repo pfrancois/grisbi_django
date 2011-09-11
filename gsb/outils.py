@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def import_file(request):
-    import mysite.gsb.import_gsb
+    import mysite.gsb.import_gsb_050
     logger = logging.getLogger('gsb.import')
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)
@@ -31,7 +31,7 @@ def import_file(request):
             if form.cleaned_data['replace'] == 'remplacement':
                 logger.warning(u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
                 if form.cleaned_data['version'] == 'gsb_0_5_0':
-                    mysite.gsb.import_gsb.import_gsb(nomfich, True)
+                    mysite.gsb.import_gsb.import_gsb_050(nomfich, True)
                     ok = True
             else:
                 logger.warning("fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
