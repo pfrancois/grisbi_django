@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-import datetime 
-import decimal 
-from django.db import transaction 
-from django.conf import settings 
+import datetime
+import decimal
+from django.db import transaction
+from django.conf import settings
 #from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError 
+from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
 
 class Gsb_exc(Exception):
@@ -529,10 +529,10 @@ class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte_titre)
-    nombre = models.IntegerField()
+    nombre = CurField(default = 0, max_digits = 15, decimal_places = 5)
     date = models.DateField()
-    cours = CurField(default = 1)
-    invest = CurField(default = 0, editable = False)
+    cours = CurField(default = 1, max_digits = 15, decimal_places = 5)
+    invest = CurField(default = 0, editable = False, max_digits = 15, decimal_places = 5)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
