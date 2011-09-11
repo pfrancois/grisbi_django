@@ -29,7 +29,8 @@ urlpatterns += patterns('mysite.gsb.outils',
                         url(r'^options/modif_gen$', 'modif_gen', name = 'modification_preference_generalite'),
                         )
 urlpatterns += patterns('mysite.gsb',
-                        url(r'^options/xml$', 'export_gsb_0_5_0.export', name = 'export_gsb_050'),
+                        url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name = 'export_gsb_050'),
+                        url(r'^options/csv$', 'export_csv.export', name = 'export_csv'),
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),

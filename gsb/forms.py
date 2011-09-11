@@ -16,7 +16,7 @@ required_css_class = 'required'
 
 class dateinputgsb(forms.DateInput):
     class Media:
-        js = (settings.STATIC_URL + "js/basiccalendar.js",)
+        js = ("js/basiccalendar.js",)
         css = {'all':('css/calendar.css',)}
 
     def __init__(self, attrs = {}, format = None): #@UnusedVariable
@@ -144,3 +144,4 @@ class MajCoursform(forms.Form):
             titre.cours_set.create(valeur = self.cleaned_data['cours'], date = date)
         else:
             titre.cours_set.get(date = date).valeur = self.cleaned_data['cours']
+

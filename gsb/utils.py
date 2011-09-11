@@ -41,7 +41,7 @@ class Format:
                 return str(int(bool(s)))
 
     def float(self, s):
-        ''' convertit un float en string 10.7'''
+        ''' convertit un float en string 10,7'''
         s = "%10.7f" % s
         return s.replace('.', ',').strip()
 
@@ -64,8 +64,10 @@ class Format:
             return defaut
         else:
             return str(q)
-    def str(self, o, defaut = '0'):
-        '''renvoie id d'un objet avec la gestion des null'''
+    def str(self, o, defaut = '0',membre='id'):
+        '''renvoie id d'un objet avec la gestion des null
+        @param defaut: la reponse si neant
+        @param membre: l'attribut a demander si pas neant'''
         if o:
             return str(o.id)
         else:

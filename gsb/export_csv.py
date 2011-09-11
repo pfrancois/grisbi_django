@@ -1,6 +1,20 @@
-# -*- coding: iso-8859-15 -*-
+# -*- coding: utf-8 -*-
+if __name__ == "__main__":
+    from django.core.management import setup_environ
+    import sys, os
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
+    from mysite import settings
+    setup_environ(settings)
+
 import codecs, csv, cStringIO
-from mysite.gsb.models import * #@UnusedWildImport
+from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre
+from mysite.gsb.utils import Format
+import logging
+from django.conf import settings
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.http import HttpResponse
+import logging
 
 class UTF8Recoder:
     """
@@ -75,52 +89,66 @@ class excel_csv(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-def export_csv(filename):
+def _export():
+    logger = logging.getLogger('gsb.export')
     csv.register_dialect("excel_csv", excel_csv)
-    f = open(filename, "wb")
-    csv = UnicodeWriter(f, encoding = 'iso-8859-15', dialect = excel_csv)
-    csv.writerow(
-        u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id li�;op vent M;num op vent M;mois'.split(
+    f = cStringIO.StringIO()
+    fmt = Format()
+    csv_file = UnicodeWriter(f, encoding = 'iso-8859-15', dialect = excel_csv)
+    csv_file.writerow(
+        u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
             ';'))
-    opes = Ope.objects.all().order('date')
+    opes = Ope.objects.all().order_by('date').select_related()
     i = 0
+    total=float(opes.count())
     for ope in opes:
         i = i + 1
         ligne = []
         ligne.append(ope.id)
         ligne.append(ope.compte.nom)
-        ligne.append(ope['date_ope'].strftime('%d/%m/%Y'))
-        ligne.append(ope.montant)
-        if ope['rappro'] == None:
+        ligne.append(fmt.date(ope.date))
+        ligne.append(fmt.float(ope.montant))
+        if ope.rapp == None:
+            ligne.append(0)
+        else:
             ligne.append(1)
+        ligne.append(fmt.bool(ope.pointe))
+        ligne.append(fmt.str(ope.moyen,'','nom'))
+        ligne.append(fmt.str(ope.cat,"","nom"))
+        ligne.append(ope.tiers)
+        ligne.append(ope.notes)
+        if ope.ib:
+            ligne.append(ope.ib.nom)
         else:
-            ligne.append(ope['rappro'])
-        ligne.append(ope['pointe'])
-        ligne.append(ope.moyen.nom, ope.compte.nom)
-        ligne.append('/'.join(ope.cat.nom))
-        ligne.append(ope['tiers'])
-        ligne.append(ope['note'])
-        if ope['num_ib'] == -1:
             ligne.append('')
-        else:
-            ligne.append(ope['num_ib'])
-        ligne.append(ope['numero_cheque'])
-        if ope['num_jumelle'] == -1:
-            ligne.append(0)
-        else:
-            ligne.append(ope['num_jumelle'])
-        ligne.append(ope['ovm'])
-        if ope['num_mere'] == -1:
-            ligne.append(0)
-        else:
-            ligne.append(ope['num_mere'])
-        d = ope['date_ope']
-        d = d.strftime('%Y_%m')
-        ligne.append(d)
-        csv.writerow(ligne)
-        if (i // 100.0) == (i / 100.0):
-            print "ligne %s" % ope['num']
-        f.close()
+        ligne.append(ope)
+        ligne.append(fmt.str(ope.jumelle, ''))
+        ligne.append(fmt.bool(ope.mere, ''))
+        ligne.append(fmt.str(ope.mere, ''))
+        ligne.append(ope.date.strftime('%Y_%m'))
+        csv_file.writerow(ligne)
+        if i%50==0:
+            print("ligne %s %s%%" % (ope.id,i/total*100))
+    return f
 
-if __name__ == 'main':
-    export_csv('toto.csv')
+def export(request):
+    nb_compte = Compte.objects.count()
+    if nb_compte:
+        django = _export()
+        #h=HttpResponse(xml,mimetype="application/xml")
+        reponse = HttpResponse(django, mimetype = "text/csv")
+        reponse["Cache-Control"] = "no-cache, must-revalidate"
+        reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE
+        return reponse
+    else:
+        return render_to_response('generic.djhtm',
+                        {'titre':'import csv',
+            'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
+            },
+        context_instance = RequestContext(request)
+        )
+
+if __name__ == '__main__':
+    a = _export()
+        #f = open('test.csv',"w")
+    print a.read()
