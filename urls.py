@@ -26,10 +26,10 @@ urlpatterns += patterns('mysite.gsb',
 urlpatterns += patterns('mysite.gsb.outils',
                         (r'^options$', 'options_index'),
                         (r'^options/import$', 'import_file'),
-                        url(r'^options/modif_gen$', 'modif_gen', name = 'modification__preference_generalite'),
+                        url(r'^options/modif_gen$', 'modif_gen', name = 'modification_preference_generalite'),
                         )
 urlpatterns += patterns('mysite.gsb',
-                        (r'^options/xml$', 'gsb_0_5_0.export'),
+                        url(r'^options/xml$', 'export_gsb_0_5_0.export', name = 'export_gsb_050'),
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),
