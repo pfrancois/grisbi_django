@@ -1,17 +1,21 @@
 {% extends "generic.djhtm" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
+{% load url from future %}
 {% block content %}
+<div class="editDate" id="editDateId"></div>
 <form method="post" action="" id="form1">
 {% csrf_token %}
 <table>
 {{form}}
 </table>
 </form>
+{# div pour le choix de la date #}
+
 <table style=" width: 100%;" summary="bouton">
 <tr>
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.outils.options_index %}">Annuler</a></td>
+        <td width="50%" class="boutton"><a href="{% url 'gsb.outils.options_index' %}">Annuler</a></td>
 </tr>
 </table>
 {% endblock content %}

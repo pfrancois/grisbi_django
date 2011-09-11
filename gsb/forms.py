@@ -2,13 +2,43 @@
 from django import forms
 from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre
 #from mysite.gsb import widgets
+from django.conf import settings
 import datetime
 #import decimal
+from django.utils.encoding import force_unicode
+from django.utils.safestring import mark_safe
+from django.forms.util import flatatt
+
 
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 error_css_class = 'error'
 required_css_class = 'required'
 
+class dateinputgsb(forms.DateInput):
+    class Media:
+        js = (settings.STATIC_URL + "js/basiccalendar.js",)
+        css = {'all':('css/calendar.css',)}
+
+    def __init__(self, attrs = {}, format = None): #@UnusedVariable
+        super(dateinputgsb, self).__init__(attrs = {'class': 'vDateField', 'size': '10'}, format = format)
+    def render(self, name, value, attrs = None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type = self.input_type, name = name)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_unicode(self._format_value(value))
+            
+            auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
+            hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
+            cal = '<a href="javascript:editDate(\'%s\');"" title="calendrier"><img src="%s"></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+        return mark_safe(u'<input%s /><span>|%s|%s|%s</span>' % (flatatt(final_attrs), hier, auj, cal))
+
+class datefieldgsb(forms.DateField):
+    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), *args, **kwargs):
+        super(datefieldgsb, self).__init__(input_formats = input_formats, initial = datetime.date.today, widget = dateinputgsb, *args, **kwargs)
+
+    
 class ImportForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -27,7 +57,7 @@ class OperationForm(forms.ModelForm):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
-    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
+    date = datefieldgsb()
     #pointe=forms.BooleanField(required=False)
     moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     class Meta:
@@ -47,7 +77,7 @@ class VirementForm(forms.Form):
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
-    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
+    date = datefieldgsb()
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
@@ -105,7 +135,12 @@ class MajCoursform(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
-    date = forms.DateField(input_formats = input_format_date, initial = datetime.date.today)
+    date = datefieldgsb()
     cours = forms.DecimalField(min_value = 0, label = "Cours")
     def save(self):
-        self.cleaned_data['titre'].cours_set.create(valeur = self.cleaned_data['cours'], date = self.cleaned_data['date'])
+        titre = self.cleaned_data['titre']
+        date = self.cleaned_data['date']
+        if not Cours.objects.filter(titre = titre, date = date).exists():
+            titre.cours_set.create(valeur = self.cleaned_data['cours'], date = date)
+        else:
+            titre.cours_set.get(date = date).valeur = self.cleaned_data['cours']
