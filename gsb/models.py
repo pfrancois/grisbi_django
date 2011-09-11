@@ -40,7 +40,7 @@ class Tiers(models.Model):
     """
 
     nom = models.CharField(max_length = 40, unique = True)
-    notes = models.CharField(max_length = 40, blank = True)
+    notes = models.TextField(default = '')
     is_titre = models.BooleanField(default = False)
 
     class Meta:
@@ -179,7 +179,7 @@ class Banque(models.Model):
     """banques"""
     cib = models.CharField(max_length = 5, blank = True)
     nom = models.CharField(max_length = 20, unique = True)
-    notes = models.TextField(blank = True)
+    notes = models.TextField(default = '')
     class Meta:
         db_table = 'banque'
         ordering = ['nom']
@@ -298,7 +298,7 @@ class Compte(models.Model):
     solde_mini_voulu = CurField(null = True, blank = True)
     solde_mini_autorise = CurField(null = True, blank = True)
     ouvert = models.BooleanField(default = True)
-    notes = models.TextField(blank = True, default = '')
+    notes = models.TextField(default = '')
     moyen_credit_defaut = models.ForeignKey('Moyen', null = True, blank = True, on_delete = models.SET_NULL, related_name = "moyen_credit_set", default = None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null = True, blank = True, on_delete = models.SET_NULL, related_name = "moyen_debit_set", default = None)
 
@@ -669,7 +669,7 @@ class Echeance(models.Model):
     moyen_virement = models.ForeignKey(Moyen, null = True, blank = True, related_name = 'moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.SET_NULL, default = None)
     ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.SET_NULL, default = None, verbose_name = u"imputation")
-    notes = models.TextField(blank = True, default = "")
+    notes = models.TextField(default = '')
     inscription_automatique = models.BooleanField(default = False)
     periodicite = models.CharField(max_length = 1, choices = typesperiod, default = "u")
     intervalle = models.IntegerField(default = 0)
@@ -741,7 +741,7 @@ class Ope(models.Model):
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.PROTECT, default = None)
     cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.PROTECT, default = None)
-    notes = models.CharField(max_length = 60, blank = True)
+    notes = models.TextField(default = '')
     moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.PROTECT, default = None)
     num_cheque = models.CharField(max_length = 20, blank = True, default = '')
     pointe = models.BooleanField(default = False)

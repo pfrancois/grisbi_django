@@ -2,6 +2,7 @@
 from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Ope_titre, Compte
 from django.contrib import admin
 from django.contrib import messages
+from django.db import models
 
 def fusion(classe, request, queryset, sens = 'ab'):
     """fonction générique de fusion entre 2 objets"""
@@ -113,6 +114,7 @@ class Ope_admin(admin.ModelAdmin):
     list_filter = ('compte', 'date', 'pointe', 'rapp')
     search_fields = ['tiers__nom']
 
+
 class Cours_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
@@ -133,7 +135,9 @@ class Titre_admin(admin.ModelAdmin):
     readonly_fields = ('tiers',)
     list_filter = ('type',)
     inlines = (Ope_titre_inline,)
-
+    formfield_overrides = {
+        models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
+    }
 class Moyen_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
