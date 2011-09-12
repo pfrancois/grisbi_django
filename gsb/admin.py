@@ -201,7 +201,7 @@ class Gen_admin(admin.ModelAdmin):
     pass
 
 class Ope_titre_admin(admin.ModelAdmin):
-    list_display = ('id', 'date', 'compte', 'titre',  'nombre', 'cours','invest')
+    list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
     readonly_fields = ('invest',)
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
@@ -220,4 +220,4 @@ admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Generalite, Gen_admin)
 admin.site.register(Compte_titre, Compte_titre_admin)
-admin.site.register(Ope_titre,Ope_titre_admin)
+admin.site.register(Ope_titre, Ope_titre_admin)

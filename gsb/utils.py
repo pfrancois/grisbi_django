@@ -64,7 +64,7 @@ class Format:
             return defaut
         else:
             return str(q)
-    def str(self, o, defaut = '0',membre='id'):
+    def str(self, o, defaut = '0', membre = 'id'):
         '''renvoie id d'un objet avec la gestion des null
         @param defaut: la reponse si neant
         @param membre: l'attribut a demander si pas neant'''
