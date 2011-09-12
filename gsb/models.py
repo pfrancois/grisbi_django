@@ -495,7 +495,7 @@ class Compte_titre(Compte):
         solde_espece = super(Compte_titre, self).solde
         solde_titre = 0
         for titre in self.titre.all().distinct():
-            solde_titre += solde_titre + titre.encours(self)
+            solde_titre = solde_titre + titre.encours(self)
         return solde_espece + solde_titre
 
     @transaction.commit_on_success
