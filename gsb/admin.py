@@ -77,11 +77,6 @@ class Compte_admin(admin.ModelAdmin):
     list_display = ('nom', 'solde', 'type', 'ouvert')
     list_filter = ('type', 'banque', 'ouvert')
 
-class Ope_titre_inline(admin.TabularInline):
-    model = Ope_titre
-    extra = 1
-    readonly_fields = ('invest',)
-
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
     #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
@@ -97,7 +92,7 @@ class Compte_titre_admin(admin.ModelAdmin):
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']})
             ]
-    inlines = (Ope_titre_inline,)
+
     list_display = ('nom', 'solde')
     list_filter = ('type', 'banque', 'ouvert')
 
@@ -134,7 +129,6 @@ class Titre_admin(admin.ModelAdmin):
     list_display = ('nom', 'isin', 'last_cours')
     readonly_fields = ('tiers',)
     list_filter = ('type',)
-    inlines = (Ope_titre_inline,)
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
@@ -169,7 +163,6 @@ class Ech_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
     list_filter = ('compte', 'date')
-    list_editable = ('date',)
 
 class Banque_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les banques"""
@@ -207,6 +200,12 @@ class Gen_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les preferences"""
     pass
 
+class Ope_titre_admin(admin.ModelAdmin):
+    list_display = ('id', 'date', 'compte', 'titre',  'nombre', 'cours','invest')
+    readonly_fields = ('invest',)
+    list_display_links = ('id',)
+    list_filter = ('date', 'compte', 'titre',)
+
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)
 admin.site.register(Compte, Compte_admin)
@@ -221,3 +220,4 @@ admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Generalite, Gen_admin)
 admin.site.register(Compte_titre, Compte_titre_admin)
+admin.site.register(Ope_titre,Ope_titre_admin)
