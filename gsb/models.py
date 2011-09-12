@@ -79,7 +79,7 @@ class Titre(models.Model):
     ('OBL', u'obligation'),
     ('ZZZ', u'autre')
     )
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     isin = models.CharField(max_length = 12, unique = True)
     tiers = models.OneToOneField(Tiers, null = True, blank = True, editable = False, on_delete = models.SET_NULL)
     type = models.CharField(max_length = 3, choices = typestitres, default = 'ZZZ')
@@ -178,7 +178,7 @@ class Cours(models.Model):
 class Banque(models.Model):
     """banques"""
     cib = models.CharField(max_length = 5, blank = True)
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     notes =  models.TextField( blank = True, default = '')
     class Meta:
         db_table = 'banque'
@@ -203,7 +203,7 @@ class Cat(models.Model):
     ('d', u'dépense'),
     ('v', u'virement')
     )
-    nom = models.CharField(max_length = 40, unique = True)
+    nom = models.CharField(max_length = 50, unique = True)
     type = models.CharField(max_length = 1, choices = typesdep, default = 'd', verbose_name = "type de la catégorie")
     class Meta:
         db_table = 'cat'
@@ -256,7 +256,7 @@ class Exercice(models.Model):
     """
     date_debut = models.DateField(default = datetime.date.today)
     date_fin = models.DateField(null = True, blank = True)
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     class Meta:
         db_table = 'exercice'
         ordering = ['date_debut']
@@ -287,7 +287,7 @@ class Compte(models.Model):
     ('p', u'passif'),
     ('t', u'titre')
     )
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     titulaire = models.CharField(max_length = 40, blank = True, default = '')
     type = models.CharField(max_length = 1, choices = typescpt, default = 'b')
     banque = models.ForeignKey(Banque, null = True, blank = True, on_delete = models.SET_NULL, default = None)
@@ -579,7 +579,7 @@ class Moyen(models.Model):
     ('d', u'depense'),
     ('r', u'recette'),
     )
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     type = models.CharField(max_length = 1, choices = typesdep, default = 'd')
     class Meta:
         db_table = 'moyen'
@@ -607,7 +607,7 @@ class Moyen(models.Model):
 
 class Rapp(models.Model):
     """rapprochement d'un compte"""
-    nom = models.CharField(max_length = 20, unique = True)
+    nom = models.CharField(max_length = 40, unique = True)
     date = models.DateField(null = True, blank = True, default = datetime.date.today)
     class Meta:
         db_table = 'rapp'

@@ -12,11 +12,12 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def import_file(request):
-    import mysite.gsb.import_gsb_050
+    import mysite.gsb.import_gsb
     logger = logging.getLogger('gsb.import')
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)
         if form.is_valid():
+            # on recupere les info pour le nom
             try:
                 info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%Y-%b-%d a %H-%M-%S"))
             except KeyError:
@@ -26,6 +27,7 @@ def import_file(request):
             for chunk in request.FILES['nom_du_fichier'].chunks():
                 destination.write(chunk)
             destination.close()
+            #renomage ok
             logger.debug("enregitrement fichier ok")
             ok = False
             if form.cleaned_data['replace'] == 'remplacement':
@@ -36,7 +38,7 @@ def import_file(request):
             else:
                 logger.warning("fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
                 if form.cleaned_data['version'] == 'gsb_0_5_0':
-                    mysite.gsb.import_gsb.import_gsb(nomfich, False)
+                    mysite.gsb.import_gsb.import_gsb_050(nomfich, False)
                     ok = True
             if ok:
                 return HttpResponseRedirect(reverse('gsb.views.index'))
