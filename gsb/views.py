@@ -46,10 +46,12 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
     '''view qui affiche la liste des operations especes d'un compte titre'''
     c = get_object_or_404(Compte_titre, pk = cpt_id)
     if date_limite:
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
     else:
+        date_limite = datetime.datetime.fromtimestamp(0).date()
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date')
-    template = loader.get_template('gsb/cpt_detail.djhtm')
+    template = loader.get_template('gsb/cpt_placement_espece.djhtm')
     if date_limite:
         return HttpResponse(
             template.render(
@@ -60,7 +62,7 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
                         'list_ope': q,
                         'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
                         'nbvielles': Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count(),
-                        'titre': "%s: Esp&eacute;ces" % c.nom,
+                        'titre': "%s: Especes" % c.nom,
                         'solde': super(Compte_titre, c).solde,
                         'date_limite':date_limite,
                     }
@@ -78,12 +80,14 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
                         'titre': "%s: Especes" % c.nom,
                         'solde': super(Compte_titre, c).solde,
                         'date_limite':date_limite,
+                        'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
+                        'nbvielles': 0,
                     }
                 )
             )
         )
-        
-    
+
+
 
 def cpt_detail(request, cpt_id):
     '''
@@ -153,7 +157,7 @@ def ope_detail(request, pk):
     '''
     ope = get_object_or_404(Ope, pk = pk)
     #logger = logging.getLogger('gsb')
-    if ope.jumelle is not None: 
+    if ope.jumelle is not None:
         #------un virement--------------
         if ope.montant > 0:
             ope = ope.jumelle

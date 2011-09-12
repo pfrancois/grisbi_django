@@ -61,7 +61,6 @@
         </tr>
     </table>
     <p>
-    {% if ope %}
         {% if nbrapp == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
         {% endif %}
@@ -75,6 +74,5 @@
             note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br/>
         {% endif %}
         seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
-    {% endif %}
     </p>
 {% endblock content %}
