@@ -55,7 +55,7 @@ class OperationForm(forms.ModelForm):
     error_css_class = error_css_class
     required_css_class = required_css_class
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type').order_by('nom'), required = False)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type','nom'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
     date = datefieldgsb()
     #pointe=forms.BooleanField(required=False)
