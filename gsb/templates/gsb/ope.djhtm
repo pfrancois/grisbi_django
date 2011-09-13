@@ -2,6 +2,37 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
+{% load gsb_extras %}
+<table style=" width: 100%;" summary="boutons">
+{% if ope %}
+    <tr>
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+    </tr>
+    </table>
+<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+    {% csrf_token %}
+</form>
+<table style=" width: 100%;" summary="bouton effacer">
+<tr>
+        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+</tr>
+</table>
+
+{% else %}
+    <tr>
+    {% if cpt %}
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+    {% else %}
+    else
+        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url 'gsb.views.index' %}">Annuler</a></td>
+    {% endif %}
+    </tr>
+</table>
+{% endif %}
+
 <form id='form1' action="" method="post">
     {% csrf_token %}
     <fieldset class="operationMainTable">
@@ -15,14 +46,6 @@
         <tr><td>{{ form.date.errors }}</td></tr>
         {% endif %}
         <tr><th>{{ form.date.label_tag }}(*)</th><td>{{ form.date }}</td>
-        {% comment %}
-            TODO mettre comme dans admin le bouton aujourd'hui
-        {% endcomment %}
-        </tr>
-        {% if form.date_val.errors %}
-        <tr><td>{{ form.date_val.errors }}</td></tr>
-        {% endif %}
-        <tr><th>{{ form.date_val.label_tag }}</th><td>{{ form.date_val }}</td>
         </tr>
         {% if form.tiers.errors %}
         <tr><td>{{ form.tiers.errors }}</td></tr>
@@ -57,6 +80,10 @@
         <tr><td>{{ form.rapp.errors }}</td></tr>
         {% endif %}
         <tr><th>{{ form.rapp.label_tag }}</th><td>{{ form.rapp }}</td></tr>
+        {% if form.date_val.errors %}
+        <tr><td>{{ form.date_val.errors }}</td></tr>
+        {% endif %}
+        <tr><th>{{ form.date_val.label_tag }}</th><td>{{ form.date_val }}</td></tr>
         {% if form.exercice.errors %}
         <tr><td>{{ form.exercice.errors }}</td></tr>
         {% endif %}
@@ -72,8 +99,6 @@
     </table>
     </fieldset>
 </form>
- {% load gsb_extras %}
-{% load gsb_extras %}
 <table style=" width: 100%;" summary="boutons">
 {% if ope %}
     <tr>

@@ -31,12 +31,13 @@ class dateinputgsb(forms.DateInput):
             
             auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
             hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
-            cal = '<a href="javascript:editDate(\'%s\');"" title="calendrier"><img src="%s"></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+            cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s"></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+            print (hier)
         return mark_safe(u'<input%s /><span>|%s|%s|%s</span>' % (flatatt(final_attrs), hier, auj, cal))
 
 class datefieldgsb(forms.DateField):
-    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), *args, **kwargs):
-        super(datefieldgsb, self).__init__(input_formats = input_formats, initial = datetime.date.today, widget = dateinputgsb, *args, **kwargs)
+    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):  
+        super(datefieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = dateinputgsb, *args, **kwargs)
 
     
 class ImportForm(forms.Form):
@@ -55,7 +56,7 @@ class OperationForm(forms.ModelForm):
     error_css_class = error_css_class
     required_css_class = required_css_class
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type','nom'), required = False)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
     date = datefieldgsb()
     #pointe=forms.BooleanField(required=False)

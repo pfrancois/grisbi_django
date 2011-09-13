@@ -100,7 +100,7 @@ def _export():
             ';'))
     opes = Ope.objects.all().order_by('date').select_related()
     i = 0
-    total=float(opes.count())
+    total = float(opes.count())
     for ope in opes:
         i = i + 1
         ligne = []
@@ -113,8 +113,8 @@ def _export():
         else:
             ligne.append(1)
         ligne.append(fmt.bool(ope.pointe))
-        ligne.append(fmt.str(ope.moyen,'','nom'))
-        ligne.append(fmt.str(ope.cat,"","nom"))
+        ligne.append(fmt.str(ope.moyen, '', 'nom'))
+        ligne.append(fmt.str(ope.cat, "", "nom"))
         ligne.append(ope.tiers)
         ligne.append(ope.notes)
         if ope.ib:
@@ -127,8 +127,8 @@ def _export():
         ligne.append(fmt.str(ope.mere, ''))
         ligne.append(ope.date.strftime('%Y_%m'))
         csv_file.writerow(ligne)
-        if i%50==0:
-            print("ligne %s %s%%" % (ope.id,i/total*100))
+        if i % 50 == 0:
+            print("ligne %s %s%%" % (ope.id, i / total * 100))
     return f
 
 def export(request):
