@@ -216,7 +216,6 @@ def ope_new(request, cpt_id = None):
         cpt = get_object_or_404(Compte, pk = cpt_id)
     else:
         cpt = None
-    cats = Cat.objects.all().order_by('type')
     #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
@@ -230,7 +229,6 @@ def ope_new(request, cpt_id = None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'cats':cats,
                 'cpt':cpt}
             )
     else:
@@ -241,7 +239,6 @@ def ope_new(request, cpt_id = None):
             {   'titre':u'création',
                 'titre_long':u'création opération',
                 'form':form,
-                'cats':cats,
                 'cpt':cpt}
             )
 
