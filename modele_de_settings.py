@@ -19,7 +19,7 @@ ADMINS = (
 NB_JOURS_AFF = 100
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
-ID_CPT_M = 0
+ID_CPT_M = 1
 
 ##################
 
