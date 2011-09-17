@@ -26,7 +26,7 @@
     </thead>
     {% for titre in titres %}
     <tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
-        <td class="opTier">{{ titre.nom }} ( {{ titre.type }} )</td>
+        <td class="opTier"><a href="{% url maj_cours titre.id %}">{{ titre.nom }} ( {{ titre.type }} )</a></td>
         <td class="opDebit">{{ titre.mise|cur }}</td>
         <td class="opCredit">{{ titre.pmv|cur }}</td>
         <td class="opDebit">{{ titre.total|cur }}</td>

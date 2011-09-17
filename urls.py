@@ -20,8 +20,8 @@ urlpatterns = patterns('',
 # les vues generales
 urlpatterns += patterns('mysite.gsb',
                         (r'^$', 'views.index'),
-                        (r'^test$', 'test.test')
                         )
+
 #les vues relatives aux outils
 urlpatterns += patterns('mysite.gsb.outils',
                         (r'^options$', 'options_index'),
@@ -34,13 +34,13 @@ urlpatterns += patterns('mysite.gsb',
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),
-                        (r'^options/maj_cours/(?P<pk>\d+)$', 'mysite.gsb.views.maj_cours')
-                        ) 
+                        url(r'^maj_cours/(?P<pk>\d+)$', 'mysite.gsb.views.maj_cours', name = 'maj_cours')
+                        )
+ 
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/delete', 'ope_delete', name = 'gsb_ope_delete'),
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name = 'gsb_ope_detail'),
-                        
                         url(r'^ope/new$', 'ope_new', name = "gsb_ope_new"),
                         url(r'^vir/new$', 'vir_new', name = "gsb_vir_new"),
                         )
@@ -51,7 +51,6 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name = "gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name = "gsb_cpt_vir_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/especes', 'cpt_titre_espece', name = "gsb_cpt_titre_espece"),
-                        
                         )
 
 #les vues relatives aux tiers
@@ -69,4 +68,7 @@ urlpatterns += patterns('mysite.gsb.views',
 #form tester
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
-    urlpatterns += patterns('mysite.gsb.views', (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),)
+    urlpatterns += patterns('mysite.gsb',
+                            (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
+                            (r'^test$', 'test.test'),
+                            )

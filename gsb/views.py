@@ -130,7 +130,7 @@ def cpt_detail(request, cpt_id):
         for t in titre_sans_sum:
             invest = t.investi(c)
             total = t.encours(c)
-            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total})
+            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total, 'id':t.id})
         especes = super(Compte_titre, c).solde
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
