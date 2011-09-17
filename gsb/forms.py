@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers
 #from mysite.gsb import widgets
 from django.conf import settings
 import datetime
@@ -32,7 +32,6 @@ class dateinputgsb(forms.DateInput):
             auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
             hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
             cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s"></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
-            print (hier)
         return mark_safe(u'<input%s /><span>|%s|%s|%s</span>' % (flatatt(final_attrs), hier, auj, cal))
 
 class datefieldgsb(forms.DateField):
@@ -55,6 +54,7 @@ class ImportForm(forms.Form):
 class OperationForm(forms.ModelForm):
     error_css_class = error_css_class
     required_css_class = required_css_class
+    tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
@@ -66,7 +66,7 @@ class OperationForm(forms.ModelForm):
         exclude = ('mere', 'jumelle')
     def clean(self):
         super(OperationForm, self).clean()        
-        if self.cleaned_data['cat'].type == u'd' and self.cleaned_data['montant'] > 0:
+        if self.cleaned_data['moyen'].type == u'd' and self.cleaned_data['montant'] > 0:
             self.cleaned_data['montant'] = self.cleaned_data['montant']* -1
         return self.cleaned_data
 
