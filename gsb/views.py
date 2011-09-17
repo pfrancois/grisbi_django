@@ -164,7 +164,6 @@ def ope_detail(request, pk):
         if request.method == 'POST':#creation du virement
             form = gsb_forms.VirementForm(data = request.POST, ope = ope)
             if form.is_valid():
-                print "ok"
                 form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.jumelle.compte_id}))
             else:
@@ -286,7 +285,6 @@ def maj_cours(request, pk):
     titre = get_object_or_404(Titre, pk = pk)
     if request.method == 'POST':
         form = gsb_forms.MajCoursform(request.POST)
-        print 'toto'
         if form.is_valid():
             form.save()
     else:
