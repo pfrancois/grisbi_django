@@ -301,7 +301,7 @@ def titre_detail_cpt(request,titre_id,cpt_id,date_limite=True):
         )
     )
 
-def ope_titre_detail(request,id):
+def ope_titre_detail(request,pk):
     '''
     view, une seule operation
     @param request:
@@ -309,12 +309,12 @@ def ope_titre_detail(request,id):
     '''
     ope = get_object_or_404(Ope_titre, pk = pk)
     if request.method == 'POST':
-        form = gsb_forms.ope_titreForm(request.POST)
+        form = gsb_forms.Ope_titreForm(request.POST)
         if form.is_valid():
             
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
-        form = gsb_forms.ope_titreForm(instance = ope)
+        form = gsb_forms.Ope_titreForm()
     return render(request, 'gsb/ope_titre_detail.djhtm',
             {   'titre_long':u'opération sur titre %s' % ope.id,
                'titre':u'modification',

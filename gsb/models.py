@@ -567,8 +567,8 @@ class Ope_titre(models.Model):
         else:
             return valeur * -1
     @models.permalink
-    def get_absolute_url(self):#TODO a changer 
-        return ('gsb_ope_detail', (), {'pk':str(self.id)})
+    def get_absolute_url(self):
+        return ('ope_titre_detail', (), {'pk':str(self.id)})
 
 class Moyen(models.Model):
     """moyen de paiements
