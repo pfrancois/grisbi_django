@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers, Ope_titre
 #from mysite.gsb import widgets
 from django.conf import settings
 import datetime
@@ -32,7 +32,7 @@ class dateinputgsb(forms.DateInput):
             auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
             hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
             cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s"></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
-        return mark_safe(u'<input%s /><span>|%s|%s|%s</span>' % (flatatt(final_attrs), hier, auj, cal))
+        return mark_safe(u'<input%s /><span>|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
 
 class datefieldgsb(forms.DateField):
     def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):  
@@ -120,8 +120,13 @@ class VirementForm(forms.Form):
 class ope_titre_form(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
+    date = datefieldgsb()
+    titre=forms.ModelChoiceField(Titre.objects.all())    
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
-    compte_espece = forms.ModelChoiceField(Compte_titre.objects.filter(type__in = ('b', 'e', 'p')), empty_label = None)
+    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required=False)
+    nombre = forms.DecimalField(localize = True, initial = '0')
+    cours = forms.DecimalField(localize = True, initial = '0')
+    achat=forms.BooleanField(widget=forms.HiddenInput(),initial=True)    
     
 class GeneraliteForm(forms.ModelForm):
     error_css_class = error_css_class
@@ -138,11 +143,4 @@ class MajCoursform(forms.Form):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = datefieldgsb()
     cours = forms.DecimalField(min_value = 0, label = "Cours")
-    def save(self):
-        titre = self.cleaned_data['titre']
-        date = self.cleaned_data['date']
-        if not Cours.objects.filter(titre = titre, date = date).exists():
-            titre.cours_set.create(valeur = self.cleaned_data['cours'], date = date)
-        else:
-            titre.cours_set.get(date = date).valeur = self.cleaned_data['cours']
 

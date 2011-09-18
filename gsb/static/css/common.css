@@ -110,17 +110,22 @@ h2 {
 .opCredit {
 	white-space: nowrap;
 	padding: 0 0.6em 0 0.1em;
+	text-align: right;
 }
 
 .opDebit {
 	white-space: nowrap;
 	padding: 0 0.6em 0 0.3em;
+	text-align: left;
 }
-
-.opDate {
-	/*width: 70px;*/
+.opCenter {
 	white-space: nowrap;
+	padding: 0 0.6em 0 0.1em;
 	text-align: center;
+}
+.opDate {
+	white-space: nowrap;
+	text-align: right;
 }
 
 .opTier {
@@ -137,6 +142,7 @@ h2 {
 	font-weight: bold;
 	padding-top: 0.4em;
 	padding-bottom: 0.6em;
+	text-align: center;
 }
 
 .footerbar td {
@@ -251,3 +257,4 @@ div.system-message p.system-message-title {
     font-size: 12px;
     padding: 5px 0 0 12px;
 }
+

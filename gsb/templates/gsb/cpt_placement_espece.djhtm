@@ -15,3 +15,19 @@
     {% endif %}
 </table>
 {% endblock bouton_haut %}
+{%block titre_col_ope %}
+<td class="opDate">Date</td>
+<td class="opTier">Tiers</td>
+<td class="opTier">Catégorie</td>
+<td class="opDebit">Crédit</td>
+<td class="opDebit">Débit</td>
+{% endblock titre_col_ope %}
+{% block ope %}
+    <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
+        <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date}}</a> </td>
+        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</a></td>
+        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a></td>
+        <td class="opCredit"><a href="{{ ope.get_absolute_url  }}">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+        <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a><td>
+    </tr>
+{% endblock ope %}

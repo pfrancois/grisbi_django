@@ -4,14 +4,11 @@
 {% load gsb_extras %}
 <table width="100%" id="boutons">
     {% if compte.ouvert %}
-    <tr>
-        <td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td>
-    </tr>
+    <tr><td width="50%" class="boutton"><a href="">achat</a></td>
+    <td width="50%" class="boutton"><a href="">vente</a></td></tr>
+    <tr><td width="100%" colspan="2" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
     {% else %}
-    <tr>
-        <td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste
-        comptes</a></td>
-    </tr>
+    <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
     {% endif %}
 </table>
 <br/>
@@ -26,8 +23,8 @@
     </thead>
     {% for titre in titres %}
     <tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
-        <td class="opTier"><a href="{% url maj_cours titre.id %}">{{ titre.nom }} ( {{ titre.type }} )</a></td>
-        <td class="opDebit">{{ titre.mise|cur }}</td>
+        <td class="opTier"><a href="{% url gsb_cpt_titre_detail compte.id titre.id %}">{{ titre.nom }} ( {{ titre.type }} )</a> | <a href="{% url maj_cours titre.id %}">MAJ cours</a> </td>
+        <td class="opDebit">{{ titre.invest|cur }}</td>
         <td class="opCredit">{{ titre.pmv|cur }}</td>
         <td class="opDebit">{{ titre.total|cur }}</td>
     </tr>

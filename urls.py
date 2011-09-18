@@ -43,6 +43,8 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name = 'gsb_ope_detail'),
                         url(r'^ope/new$', 'ope_new', name = "gsb_ope_new"),
                         url(r'^vir/new$', 'vir_new', name = "gsb_vir_new"),
+                        url(r'^ope_titre/(?P<pk>\d+)/','ope_titre_detail',name='ope_titre_detail'),
+                        url(r'^ope_titre/(?P<pk>\d+)/delete', 'ope_titre_delete', name = 'ope_titre_delete'),
                         )
 
 #les vues relatives aux comptes
@@ -51,6 +53,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name = "gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name = "gsb_cpt_vir_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/especes', 'cpt_titre_espece', name = "gsb_cpt_titre_espece"),
+                        url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)', 'titre_detail_cpt', name = "gsb_cpt_titre_detail"),
                         )
 
 #les vues relatives aux tiers
@@ -69,6 +72,6 @@ urlpatterns += patterns('mysite.gsb.views',
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
     urlpatterns += patterns('mysite.gsb',
-                            (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
+                            (r'^testform/$', SomeModelFormPreview(gsb_forms.ope_titre_form)),
                             (r'^test$', 'test.test'),
                             )

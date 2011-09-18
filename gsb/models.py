@@ -555,7 +555,7 @@ class Ope_titre(models.Model):
             return nombre
     @staticmethod
     def investi(compte, titre):
-        """"prend en compte l'ensemble des depenses (achart et frais) et des revenus(vente et revenus annexes)"""
+        """"prend en compte l'ensemble des depenses (achat et frais) et des revenus(vente et revenus annexes)"""
         if not isinstance(titre, Titre):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
@@ -566,7 +566,9 @@ class Ope_titre(models.Model):
             return 0
         else:
             return valeur * -1
-
+    @models.permalink
+    def get_absolute_url(self):#TODO a changer 
+        return ('gsb_ope_detail', (), {'pk':str(self.id)})
 
 class Moyen(models.Model):
     """moyen de paiements

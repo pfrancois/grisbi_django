@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -43,49 +43,35 @@ def index(request):
     return HttpResponse(t.render(c))
 
 def cpt_titre_espece(request, cpt_id, date_limite = False):
-    '''view qui affiche la liste des operations especes d'un compte titre'''
+    '''view qui affiche la liste des operations especes d'un compte titre cpt_id
+    si date_limite, utilise la date limite sinon affiche toute les ope espece'''
     c = get_object_or_404(Compte_titre, pk = cpt_id)
     if date_limite:
         date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
+        nbvielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
     else:
         date_limite = datetime.datetime.fromtimestamp(0).date()
+        nbvielles = 0
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date')
     template = loader.get_template('gsb/cpt_placement_espece.djhtm')
-    if date_limite:
-        return HttpResponse(
-            template.render(
-                RequestContext(
-                    request,
-                    {
-                        'compte': c,
-                        'list_ope': q,
-                        'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
-                        'nbvielles': Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count(),
-                        'titre': "%s: Especes" % c.nom,
-                        'solde': super(Compte_titre, c).solde,
-                        'date_limite':date_limite,
-                    }
-                )
+    return HttpResponse(
+        template.render(
+            RequestContext(
+                request,
+                {
+                    'compte': c,
+                    'list_ope': q,
+                    'titre': "%s: Especes" % c.nom,
+                    'solde': super(Compte_titre, c).solde,
+                    'date_limite':date_limite,
+                    'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
+                    'nbvielles': nbvielles,
+                }
             )
         )
-    else:
-        return HttpResponse(
-            template.render(
-                RequestContext(
-                    request,
-                    {
-                        'compte': c,
-                        'list_ope': q,
-                        'titre': "%s: Especes" % c.nom,
-                        'solde': super(Compte_titre, c).solde,
-                        'date_limite':date_limite,
-                        'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
-                        'nbvielles': 0,
-                    }
-                )
-            )
-        )
+    )
+
 
 
 
@@ -166,19 +152,11 @@ def ope_detail(request, pk):
             if form.is_valid():
                 form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.jumelle.compte_id}))
-            else:
-                return render(request, 'gsb/vir.djhtm',
+        else:
+            form = gsb_forms.VirementForm(ope = ope)
+        return render(request, 'gsb/vir.djhtm',
                 {   'titre_long':u'modification virement interne %s' % ope.id,
                    'titre':u'modification',
-                    'form':form,
-                    'ope':ope}
-                )
-        else:#modification du virement
-            #initialisation form
-            form = gsb_forms.VirementForm(ope = ope)
-            return render(request, 'gsb/vir.djhtm',
-                {   'titre':u'modification',
-                   'titre_long':u'modification virement interne %s' % ope.id,
                     'form':form,
                     'ope':ope}
                 )
@@ -192,22 +170,14 @@ def ope_detail(request, pk):
             if form.is_valid():
                 ope = form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
-            else:
-                return render(request, 'gsb/ope.djhtm',
+        else:
+            form = gsb_forms.OperationForm(instance = ope)
+        return render(request, 'gsb/ope.djhtm',
                 {   'titre_long':u'modification opération %s' % ope.id,
                    'titre':u'modification',
                     'form':form,
                     'ope':ope}
                 )
-        else:
-            form = gsb_forms.OperationForm(instance = ope)
-            t = render(request, 'gsb/ope.djhtm',
-                {   'titre':u'modification',
-                   'titre_long':u'modification opération %s' % ope.id,
-                    'form':form,
-                    'ope':ope, }
-                )
-            return t
 
 @login_required
 def ope_new(request, cpt_id = None):
@@ -286,7 +256,76 @@ def maj_cours(request, pk):
     if request.method == 'POST':
         form = gsb_forms.MajCoursform(request.POST)
         if form.is_valid():
-            form.save()
+            titre = form.cleaned_data['titre']
+            date = form.cleaned_data['date']
+            if not Cours.objects.filter(titre = titre, date = date).exists():
+                titre.cours_set.create(valeur = form.cleaned_data['cours'], date = date)
+            else:
+                titre.cours_set.get(date = date).valeur = form.cleaned_data['cours']
+            cpt_id=Ope_titre.objects.filter(titre_id=5).latest('date').compte_id
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))            
     else:
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
-    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form, })
+    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form})
+
+@login_required
+def titre_detail_cpt(request,titre_id,cpt_id,date_limite=True):
+    '''view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
+    si date_limite, utilise la date limite sinon affiche toute les ope '''
+    titre = get_object_or_404(Titre, pk = titre_id)
+    cpt = get_object_or_404(Compte, pk = cpt_id)
+    if date_limite:
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
+        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(titre=titre)
+        nbvielles=Ope_titre.objects.filter(compte__pk = cpt_id).filter(date__lte = date_limite).count()
+    else:
+        date_limite = datetime.datetime.fromtimestamp(0).date()
+        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(titre=titre)
+        nbvielles = 0
+    template = loader.get_template('gsb/cpt_placement_titre.djhtm')
+    return HttpResponse(
+        template.render(
+            RequestContext(
+                request,
+                {
+                    'compte': cpt,
+                    'list_ope': q,
+                    'titre': "%s: %s" % (cpt.nom,titre.nom),
+                    'solde': cpt.solde,
+                    'date_limite':date_limite,
+                    'nbrapp': 0,
+                    'nbvielles': nbvielles,
+                    'tit':titre
+                }
+            )
+        )
+    )
+
+def ope_titre_detail(request,id):
+    '''
+    view, une seule operation
+    @param request:
+    @param pk: id de l'ope
+    '''
+    ope = get_object_or_404(Ope_titre, pk = pk)
+    if request.method == 'POST':
+        form = gsb_forms.ope_titreForm(request.POST)
+        if form.is_valid():
+            
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
+    else:
+        form = gsb_forms.ope_titreForm(instance = ope)
+    return render(request, 'gsb/ope_titre_detail.djhtm',
+            {   'titre_long':u'opération sur titre %s' % ope.id,
+               'titre':u'modification',
+                'form':form,
+                'ope':ope}
+            )
+@login_required
+def ope_titre_delete(request, pk):#TODO
+    ope = get_object_or_404(Ope_titre, pk = pk)
+    if request.method == 'POST':
+        pass
+    else:
+        return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
+    return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
