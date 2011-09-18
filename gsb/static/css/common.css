@@ -137,13 +137,7 @@ h2 {
 .survol:hover {
 	background-color: #706666;
 }
-.entete td{
-	background-color: #990000;
-	font-weight: bold;
-	padding-top: 0.4em;
-	padding-bottom: 0.6em;
-	text-align: center;
-}
+
 
 .footerbar td {
 	background-color: #990000;
@@ -158,10 +152,12 @@ h2 {
 }
 
 th {
-	background-color: #706666;
-	text-align: left;
+	background-color: #990000;
+	font-weight: bold;
+	padding-top: 0.4em;
+	padding-bottom: 0.6em;
+	text-align: center;
 }
-
 .required{
     background: #009900;
 }

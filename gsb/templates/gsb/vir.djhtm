@@ -3,31 +3,26 @@
 {% block content %}
 {% load gsb_extras %}
 <table style=" width: 100%;">
-    <tr>{% if ope %}
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
-    </tr>
+{% if ope %}
+    <tr><td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td></tr>
     </table>
-<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
-    {% csrf_token %}
-</form>
-<table style=" width: 100%;">
-<tr>
-        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
-</tr>
-</table>
+<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">{% csrf_token %}</form>
+<table style=" width: 100%;" summary="bouton effacer"><tr>
+        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td></tr></table>
 {% else %}
-    {% if cpt_id %}
+    <tr>
+    {% if cpt %}
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt_id %}">Annuler</a></td>
-    </tr>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
     {% else %}
-    else
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
         <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
-    </tr>
     {% endif %}
+    </tr>
+</table>
 {% endif %}
+
 <form id='form1' action="" method="post">
     {% csrf_token %}
     <fieldset class="operationMainTable">
@@ -36,33 +31,32 @@
         </table>
     </fieldset>
 </form>
-<table style=" width: 100%;">
-    <tr>{% if ope %}
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+{% if ope %}
+    <table style=" width: 100%;" summary="boutons">
+        <tr>
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+        </tr>
+        </table>
+    <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+        {% csrf_token %}
+    </form>
+    <table style=" width: 100%;" summary="bouton effacer">
+    <tr>
+            <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
     </tr>
     </table>
-<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
-    {% csrf_token %}
-</form>
-<table style=" width: 100%;">
-<tr>
-        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
-</tr>
-</table>
 {% else %}
-    {% if cpt_id %}
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt_id %}">Annuler</a></td>
-    </tr>
-    {% else %}
-    else
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
-    </tr>
-    {% endif %}
+    <table style=" width: 100%;" summary="boutons">
+        <tr>
+        {% if cpt %}
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+        {% else %}
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
+        {% endif %}
+        </tr>
+    </table>
 {% endif %}
-
-
-{# div pour le choix de la date #} <div class="editDate ope_date_ope" id="editDateId"></div>
 {% endblock content %} 

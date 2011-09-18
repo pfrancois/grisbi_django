@@ -17,9 +17,8 @@
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
         <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
     {% else %}
-    else
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url 'gsb.views.index' %}">Annuler</a></td>
+        <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
     {% endif %}
     </tr>
 </table>
@@ -47,10 +46,9 @@
         {% if form.montant.errors %}
         <tr><td>{{ form.montant.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% dev %}</td>
+        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% dev %}</td></tr>
         {% comment %}
             TODO rajouter fonction calculatrice
-            TODO ajax et js pour changer la monnaie si changement de compte
         {% endcomment %}
         {% if form.cat.errors %}
         <tr><td>{{ form.cat.errors }}</td></tr>
@@ -83,7 +81,7 @@
         {% if form.ib.errors %}
         <tr><td>{{ form.ib.errors }}</td></tr>
         {% endif %}
-        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}
+        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}</td></tr>
         {% if form.piece_comptable.errors %}
         <tr><td>{{ form.piece_comptable.errors }}</td></tr>
         {% endif %}
@@ -91,36 +89,31 @@
     </table>
     </fieldset>
 </form>
-<table style=" width: 100%;" summary="boutons">
 {% if ope %}
+    <table style=" width: 100%;" summary="boutons">
+        <tr>
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+        </tr>
+        </table>
+    <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+        {% csrf_token %}
+    </form>
+    <table style=" width: 100%;" summary="bouton effacer">
     <tr>
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+            <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
     </tr>
     </table>
-<form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
-    {% csrf_token %}
-</form>
-<table style=" width: 100%;" summary="bouton effacer">
-<tr>
-        <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
-</tr>
-</table>
-
 {% else %}
-    <tr>
-    {% if cpt %}
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
-    {% else %}
-    else
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url 'gsb.views.index' %}">Annuler</a></td>
-    {% endif %}
-    </tr>
-</table>
-{% endif %}
-
- {# div pour le choix de la date #}
-<div class="editDate ope_date_ope" id="editDateId"></div>
-{% endblock content %}
+    <table style=" width: 100%;" summary="boutons">
+        <tr>
+        {% if cpt %}
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+        {% else %}
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
+        {% endif %}
+        </tr>
+    </table>
+{% endif %}{% endblock content %}

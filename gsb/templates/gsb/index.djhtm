@@ -14,7 +14,7 @@
         <td class="cptLabel" colspan="2"> aucun compte  esp&egrave;ce ou bancaire</td>
     </tr>
     {% endfor %}
-    <tr class="entete">
+    <tr class="footerbar">
         <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
         <td class="cptSolde">{{ total_bq|cur }}</td>
     </tr>

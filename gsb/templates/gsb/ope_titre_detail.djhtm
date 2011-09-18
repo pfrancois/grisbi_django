@@ -3,13 +3,14 @@
 {% load gsb_extras %}
 {% load url from future %}
 {% block content %}
+<div class="editDate" id="editDateId"></div>
 <form method="post" action="" id="form1">
 {% csrf_token %}
 <table>
 {{form}}
 </table>
 </form>
-
+{# div pour le choix de la date #}
 
 <table style=" width: 100%;" summary="bouton">
 <tr>

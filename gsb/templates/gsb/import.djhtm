@@ -7,7 +7,7 @@
     </table>
     {% csrf_token %}
     <p>
-        <input type="submit" value="Importer">
+        <input type="submit" value="Importer"/>
     </p>
 </form>
 <p>
