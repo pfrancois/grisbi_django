@@ -66,7 +66,7 @@ class OperationForm(forms.ModelForm):
         model = Ope
         exclude = ('mere', 'jumelle')
     def clean(self):
-        super(OperationForm, self).clean()        
+        super(OperationForm, self).clean()
         if self.cleaned_data['moyen'].type == u'd' and self.cleaned_data['montant'] > 0:
             self.cleaned_data['montant'] = self.cleaned_data['montant']* -1
         return self.cleaned_data

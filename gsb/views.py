@@ -262,25 +262,25 @@ def maj_cours(request, pk):
                 titre.cours_set.create(valeur = form.cleaned_data['cours'], date = date)
             else:
                 titre.cours_set.get(date = date).valeur = form.cleaned_data['cours']
-            cpt_id=Ope_titre.objects.filter(titre_id=5).latest('date').compte_id
+            cpt_id = Ope_titre.objects.filter(titre_id = 5).latest('date').compte_id
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))            
     else:
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
     return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form})
 
 @login_required
-def titre_detail_cpt(request,titre_id,cpt_id,date_limite=True):
+def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
     '''view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si date_limite, utilise la date limite sinon affiche toute les ope '''
     titre = get_object_or_404(Titre, pk = titre_id)
     cpt = get_object_or_404(Compte, pk = cpt_id)
     if date_limite:
         date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
-        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(titre=titre)
-        nbvielles=Ope_titre.objects.filter(compte__pk = cpt_id).filter(date__lte = date_limite).count()
+        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(titre = titre)
+        nbvielles = Ope_titre.objects.filter(compte__pk = cpt_id).filter(date__lte = date_limite).count()
     else:
         date_limite = datetime.datetime.fromtimestamp(0).date()
-        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(titre=titre)
+        q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(titre = titre)
         nbvielles = 0
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
     return HttpResponse(
@@ -290,7 +290,7 @@ def titre_detail_cpt(request,titre_id,cpt_id,date_limite=True):
                 {
                     'compte': cpt,
                     'list_ope': q,
-                    'titre': "%s: %s" % (cpt.nom,titre.nom),
+                    'titre': "%s: %s" % (cpt.nom, titre.nom),
                     'solde': cpt.solde,
                     'date_limite':date_limite,
                     'nbrapp': 0,
@@ -301,7 +301,7 @@ def titre_detail_cpt(request,titre_id,cpt_id,date_limite=True):
         )
     )
 
-def ope_titre_detail(request,pk):
+def ope_titre_detail(request, pk):
     '''
     view, une seule operation
     @param request:
