@@ -58,6 +58,7 @@ class OperationForm(forms.ModelForm):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
+    notes = forms.CharField(widget = forms.TextInput, required = False)
     date = datefieldgsb()
     #pointe=forms.BooleanField(required=False)
     moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
@@ -121,12 +122,12 @@ class Ope_titreForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = datefieldgsb()
-    titre=forms.ModelChoiceField(Titre.objects.all())    
+    titre = forms.ModelChoiceField(Titre.objects.all())
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
-    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required=False)
+    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = forms.DecimalField(localize = True, initial = '0')
-    achat=forms.BooleanField(widget=forms.HiddenInput(),initial=True) 
+    achat = forms.BooleanField(widget = forms.HiddenInput(), initial = True)
     #nom_nouveau_titre=forms.CharField(required=False)
     
 class GeneraliteForm(forms.ModelForm):
