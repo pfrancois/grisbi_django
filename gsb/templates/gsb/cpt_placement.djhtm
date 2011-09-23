@@ -16,6 +16,8 @@
     <thead>
         <tr>
             <th>placement</th>
+            <th> nb </th>
+            <th>dernier cours</th>
             <th align="right">montant plac&eacute;</th>
             <th>+/- values</th>
             <th>total</th>
@@ -24,6 +26,8 @@
     {% for titre in titres %}
     <tr class="item hover{% if titre.pmv < 0 %} creditElement{% endif %}{% if titre.pmv > 0 %} debitElement{% endif %}">
         <td class="opTier"><a href="{% url gsb_cpt_titre_detail compte.id titre.id %}">{{ titre.nom }} ( {{ titre.type }} )</a> | <a href="{% url maj_cours titre.id %}">MAJ cours</a> </td>
+        <td> {{ titre.nb|floatformat:2 }}</td>
+        <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>
         <td class="opDebit">{{ titre.invest|cur }}</td>
         <td class="opCredit">{{ titre.pmv|cur }}</td>
         <td class="opDebit">{{ titre.total|cur }}</td>
@@ -36,9 +40,7 @@
     </tr>
     {% endfor %}
     <tr class="item hover">
-        <td class="opTier"><a href="{% url gsb_cpt_titre_espece compte.id %}">compte esp&egrave;ce</a></td>
-        <td class="opDebit"></td>
-        <td class="opCredit">&nbsp;</td>
+        <td class="opTier" colspan="5"><a href="{% url gsb_cpt_titre_espece compte.id %}">compte esp&egrave;ce</a></td>
         <td class="opDebit">{{ especes|cur }}</td>
     </tr>
     <tr class="footerbar">

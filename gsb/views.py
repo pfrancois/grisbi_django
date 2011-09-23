@@ -116,7 +116,7 @@ def cpt_detail(request, cpt_id):
         for t in titre_sans_sum:
             invest = t.investi(c)
             total = t.encours(c)
-            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'invest': invest, 'pmv': total - invest, 'total': total, 'id':t.id})
+            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'nb':t.nb(c), 'invest': invest, 'pmv': total - invest, 'total': total, 'id':t.id, 't':t})
         especes = super(Compte_titre, c).solde
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
@@ -128,7 +128,7 @@ def cpt_detail(request, cpt_id):
                         'titre': c.nom,
                         'solde': c.solde,
                         'titres': titres,
-                        'especes': especes,
+                        'especes': especes
                     }
                 )
             )
@@ -301,6 +301,7 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
         )
     )
 
+@login_required
 def ope_titre_detail(request, pk):
     '''
     view, une seule operation
@@ -311,16 +312,16 @@ def ope_titre_detail(request, pk):
     if request.method == 'POST':
         form = gsb_forms.Ope_titreForm(request.POST)
         if form.is_valid():
-            
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
-        form = gsb_forms.Ope_titreForm()
+        form = gsb_forms.Ope_titreForm(instance = ope)
     return render(request, 'gsb/ope_titre_detail.djhtm',
             {   'titre_long':u'opération sur titre %s' % ope.id,
                'titre':u'modification',
                 'form':form,
                 'ope':ope}
             )
+
 @login_required
 def ope_titre_delete(request, pk):#TODO
     ope = get_object_or_404(Ope_titre, pk = pk)

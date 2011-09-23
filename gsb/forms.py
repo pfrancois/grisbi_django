@@ -60,6 +60,7 @@ class OperationForm(forms.ModelForm):
     montant = forms.DecimalField(localize = True, initial = '0')
     notes = forms.CharField(widget = forms.TextInput, required = False)
     date = datefieldgsb()
+    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'))
     #pointe=forms.BooleanField(required=False)
     moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     class Meta:
@@ -118,7 +119,7 @@ class VirementForm(forms.Form):
         virement_objet.save()
         return virement_objet.origine
 
-class Ope_titreForm(forms.Form):
+class Ope_titre_shortForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = datefieldgsb()
@@ -128,8 +129,31 @@ class Ope_titreForm(forms.Form):
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = forms.DecimalField(localize = True, initial = '0')
     achat = forms.BooleanField(widget = forms.HiddenInput(), initial = True)
-    #nom_nouveau_titre=forms.CharField(required=False)
-    
+    #nom_nouveau_titre = forms.CharField(required = False)
+
+class Ope_titreForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(Ope_titreForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.id:
+            self.fields['titre'].widget.attrs['disabled'] = True
+            self.fields['compte'].widget.attrs['disabled'] = True
+            
+    def clean_titre(self):
+        return self.instance.titre
+    def clean_compte(self):
+        return self.instance.compte
+
+    titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
+    compte = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
+    nombre = forms.DecimalField(localize = True, initial = '0')
+    cours = forms.DecimalField(localize = True, initial = '0')
+    date = datefieldgsb()
+    error_css_class = error_css_class
+    required_css_class = required_css_class
+    class Meta:
+        model = Ope_titre
+        
 class GeneraliteForm(forms.ModelForm):
     error_css_class = error_css_class
     required_css_class = required_css_class

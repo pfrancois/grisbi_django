@@ -202,9 +202,10 @@ class Gen_admin(admin.ModelAdmin):
 
 class Ope_titre_admin(admin.ModelAdmin):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
-    readonly_fields = ('invest',)
+    readonly_fields = ('invest', 'ope')
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
+
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)

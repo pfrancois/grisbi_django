@@ -4,9 +4,7 @@
 {% block bouton_haut %}<table width="100%" id="boutons" class="table">
     {% if compte.ouvert %}
         <tr>
-            <td width="30%" class="boutton"><a href="">achat</a></td>
-            <td width="30%" class="boutton"><a href="">vente</a></td>
-            <td width="40%" class="boutton"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+            <td class="boutton"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
         </tr>
     {% else %}
         <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td></tr>

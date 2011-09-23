@@ -371,7 +371,7 @@ class Compte_titre(Compte):
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #ajout de l'operation dans le compte_espece rattache
-            Ope.objects.create(date = date,
+            ope = Ope.objects.create(date = date,
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_ost,
@@ -392,7 +392,7 @@ class Compte_titre(Compte):
             #gestion des cours
             titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
             #ajout des titres dans portefeuille
-            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)), date = date, cours = prix)
+            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)), date = date, cours = prix, ope = ope)
             #virement
             if virement_de:
                 vir = Virement()
@@ -420,10 +420,8 @@ class Compte_titre(Compte):
             nb_titre_avant = Ope_titre.nb(titre = titre, compte = self)
             if not nb_titre_avant:
                 raise Titre.doesNotExist('titre pas en portefeuille')
-            #compta matiere
-            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix)
             #ajout de l'operation dans le compte_espece ratache
-            self.ope_set.create(date = date,
+            ope = self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
                                 tiers = titre.tiers,
                                 cat = cat_ost,
@@ -431,6 +429,8 @@ class Compte_titre(Compte):
                                 moyen = None,
                                 automatique = True
                                 )
+            #compta matiere
+            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix, ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
@@ -445,7 +445,6 @@ class Compte_titre(Compte):
             if virement_vers:
                 vir = Virement()
                 vir.create(self, virement_vers, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
-
         else:
             raise TypeError("pas un titre")
 
@@ -528,11 +527,12 @@ class Compte_titre(Compte):
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
-    compte = models.ForeignKey(Compte_titre)
+    compte = models.ForeignKey(Compte_titre, verbose_name = u"compte titre")
     nombre = CurField(default = 0, max_digits = 15, decimal_places = 5)
     date = models.DateField()
     cours = CurField(default = 1, max_digits = 15, decimal_places = 5)
     invest = CurField(default = 0, editable = False, max_digits = 15, decimal_places = 5)
+    ope = models.OneToOneField('Ope', editable = False, null = True)
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
