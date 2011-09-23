@@ -17,31 +17,19 @@ from django.utils import formats#@UnusedImport
 from django.utils.encoding import smart_unicode #@UnusedImport
 from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
+from annoying.functions import get_config
+
 
 def test(request):
     logger = logging.getLogger('gsb.test')
     logger.debug('test')
     logger.info(3)
     logger.critical('attention ce est un test critique')
-
+    print get_config('ADMIN_EMAIL', 'default@email.com')
     return render_to_response('gsb/test.djhtm',
                                             {'titre':"TEST",
                                                 'test':'test'},
                                             context_instance = RequestContext(request))
-
-liste_type_cat = Cat.typesdep
-liste_type_moyen = Moyen.typesdep
-liste_type_compte = Compte.typescpt
-liste_type_period = Echeance.typesperiod
-liste_type_period_perso = Echeance.typesperiodperso
-try:
-    from lxml import etree as et
-except ImportError:
-    from xml.etree import cElementTree as et #@UnusedImport
-from django.db import connection #@UnusedImport
-import time #@UnusedImport
-import pprint #@UnusedImport
-
 
 if __name__ == "__main__":
     nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))

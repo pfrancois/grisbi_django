@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+  <title>
+  offline / django-annoying / wiki / Home — Bitbucket
+</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+    <link rel="stylesheet" href="doc_fichiers/bundle.css">
+  <link rel="search" type="application/opensearchdescription+xml" href="https://bitbucket.org/opensearch.xml" title="Bitbucket">
+  <link type="text/plain" rel="author" href="https://bitbucket.org/humans.txt">
+
+
+
+    <script src="doc_fichiers/bundle.js"></script>
+
+
+
+  <script>
+    jQuery(function ($) {
+      $('#wiki table:not(.highlighttable)').addClass('wikitable');
+    });
+  </script>
+
+
+  <link href="https://bitbucket.org/offline/django-annoying/rss" rel="alternate nofollow" type="application/rss+xml" title="RSS feed for django-annoying">
+
+<script async="true" src="doc_fichiers/ga.js"></script></head>
+
+<body class="non-webkit">
+  <script type="text/javascript">
+    if (!RegExp(" AppleWebKit/").test(navigator.userAgent)) {
+    $('body').addClass('non-webkit');
+    }
+  </script>
+  <!--[if IE 8]>
+  <script>jQuery(document.body).addClass('ie8')</script>
+  <![endif]-->
+  <!--[if IE 9]>
+  <script>jQuery(document.body).addClass('ie9')</script>
+  <![endif]-->
+
+  <div id="wrapper">
+
+
+
+  <div id="header-wrap">
+    <div id="header">
+    <ul id="global-nav">
+      <li><a class="home" href="http://www.atlassian.com/">Atlassian Home</a></li>
+      <li><a class="docs" href="http://confluence.atlassian.com/display/BITBUCKET">Documentation</a></li>
+      <li><a class="support" href="https://bitbucket.org/support">Support</a></li>
+      <li><a class="blog" href="http://blog.bitbucket.org/">Blog</a></li>
+      <li><a class="forums" href="http://groups.google.com/group/bitbucket-users">Forums</a></li>
+    </ul>
+    <a href="https://bitbucket.org/" id="logo">Bitbucket by Atlassian</a>
+
+    <div id="main-nav" class="clearfix">
+
+      <ul class="clearfix">
+        <li><a href="https://bitbucket.org/features">Features</a></li>
+        <li><a href="https://bitbucket.org/plans">Pricing &amp; signup</a></li>
+        <li><a href="https://bitbucket.org/explore">Explore Bitbucket</a></li>
+        <li><a href="https://bitbucket.org/account/signin/?next=/offline/django-annoying/wiki/Home">Log in</a></li>
+
+
+<li class="search-box">
+
+    <form action="/repo/all">
+      <input results="5" autosave="bitbucket-explore-search" name="name" id="searchbox" placeholder="Find a project" type="search">
+
+  </form>
+</li>
+
+      </ul>
+
+    </div>
+    </div>
+  </div>
+
+    <div id="header-messages">
+
+
+
+
+
+
+
+
+
+   </div>
+
+
+
+    <div id="content">
+      <div id="unnamed">
+
+
+
+
+
+
+
+
+
+  <script>
+    jQuery(function ($) {
+        var cookie = $.cookie,
+            cookieOptions, date,
+            $content = $('#content'),
+            $pane = $('#what-is-bitbucket'),
+            $hide = $pane.find('[href="#hide"]').css('display', 'block').hide();
+
+        date = new Date();
+        date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+        cookieOptions = { path: '/', expires: date };
+
+        if (cookie('toggle_status') == 'hide') $content.addClass('repo-desc-hidden');
+
+        $('#toggle-repo-content').click(function (event) {
+            event.preventDefault();
+            $content.toggleClass('repo-desc-hidden');
+            cookie('toggle_status', cookie('toggle_status') == 'show' ? 'hide' : 'show', cookieOptions);
+        });
+
+        if (!cookie('hide_intro_message')) $pane.show();
+
+        $hide.click(function (event) {
+            event.preventDefault();
+            cookie('hide_intro_message', true, cookieOptions);
+            $pane.slideUp('slow');
+        });
+
+        $pane.hover(
+            function () { $hide.fadeIn('fast'); },
+            function () { $hide.fadeOut('fast'); });
+
+      (function () {
+        // Update "recently-viewed-repos" cookie for
+        // the "repositories" drop-down.
+        var
+          id = BB.repo.id,
+          cookieName = 'recently-viewed-repos_' + BB.user.id,
+          rvr = cookie(cookieName),
+          ids = rvr? rvr.split(','): [],
+          idx = _.indexOf(ids, '' + id);
+
+        // Remove `id` from `ids` if present.
+        if (~idx) ids.splice(idx, 1);
+
+        cookie(
+          cookieName,
+          // Insert `id` as the first item, then call
+          // `join` on the resulting array to produce
+          // something like "114694,27542,89002,84570".
+          [id].concat(ids.slice(0, 4)).join(),
+          {path: '/', expires: 1e6} // "never" expires
+        );
+      }());
+    });
+  </script>
+
+
+
+
+
+
+
+
+    <div style="display: block;" id="what-is-bitbucket" class="new-to-bitbucket">
+      <h2>offline <span id="slogan">is sharing code with you</span></h2>
+      <img src="doc_fichiers/148494akywt_avatar.png" alt="" class="avatar">
+      <p>Bitbucket is a code hosting site. Unlimited public and private repositories. Free for small teams.</p>
+      <div class="primary-action-link signup"><a href="https://bitbucket.org/account/signup/?utm_source=internal&amp;utm_medium=banner&amp;utm_campaign=what_is_bitbucket">Try Bitbucket free</a></div>
+      <a style="display: none;" href="#hide" title="Don't show this again">Don't show this again</a>
+    </div>
+
+
+
+<p class="clone-wiki">hg clone https://bitbucket.org/offline/django-annoying/wiki</p>
+
+<ul id="wiki-nav-links">
+  <li class="home"><a href="https://bitbucket.org/offline/django-annoying/wiki/Home">Home</a></li>
+  <li class="history"><a href="https://bitbucket.org/offline/django-annoying/wiki/history/Home">History</a></li>
+  <li class="markup"><a href="http://www.wikicreole.org/wiki/Creole1.0">Wiki markup</a></li>
+</ul>
+
+<form id="wiki-new-page-form">
+  <label for="wiki-new-page">Page name:</label>
+  <input id="wiki-new-page" type="text">
+  <input id="wiki-new-page-button" value="Create" class="primary-button" type="submit">
+</form>
+
+
+  <div id="wiki">
+    <h2 id="!description">Description</h2>
+<p>This is django application that try to eliminate annoying things in Django framework.</p>
+<h3 id="!features">Features</h3>
+<ul><li>render_to decorator - reduce typing in django views.
+</li><li>signals decorator - allow use signals as decorators.
+</li><li>ajax_request decorator - returns JsonResponse with dict as content.
+</li><li>autostrip decorator - strip form text fields before validation
+</li><li>get_object_or_None function - similar to get_object_or_404, but returns None if object not found.
+</li><li>get_config function - get settings from django.conf if exists, return default value otherwise.
+</li><li>AutoOneToOne field - creates related object on first call if it doesnt exists yet.
+</li><li>JSONField - Field that store python object as json and reterives it back as python object.
+</li><li>HttpResponseReload - reload and stay on same page from where request was made.
+</li><li>StaticServer middleware - instead of configuring urls.py, just
+add this middleware and it will serve your static files when you in
+debug mode
+</li></ul>
+<h3 id="!installation-instruction">Installation instruction</h3>
+<ul><li>Copy annoying directory to your django project or put in on PYTHONPATH
+</li><li>Also you can run sudo python setup.py install or sudo easy_install django-annoying
+</li></ul>
+<h2 id="!examples">Examples</h2>
+<h3 id="!render_to-decorator">render_to decorator</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.decorators</span> <span class="kn">import</span> <span class="n">render_to</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="c"># 1. Template name in decorator parameters</span>
+<a name="cl-4"></a>
+<a name="cl-5"></a><span class="nd">@render_to</span><span class="p">(</span><span class="s">'template.html'</span><span class="p">)</span>
+<a name="cl-6"></a><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<a name="cl-7"></a>    <span class="n">bar</span> <span class="o">=</span> <span class="n">Bar</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a name="cl-8"></a>    <span class="k">return</span> <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="n">bar</span><span class="p">}</span>
+<a name="cl-9"></a>
+<a name="cl-10"></a><span class="c"># equals to </span>
+<a name="cl-11"></a><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<a name="cl-12"></a>    <span class="n">bar</span> <span class="o">=</span> <span class="n">Bar</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a name="cl-13"></a>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">'template.html'</span><span class="p">,</span>
+<a name="cl-14"></a>                                                  <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="n">bar</span><span class="p">},</span>
+<a name="cl-15"></a>                                                   <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+<a name="cl-16"></a>
+<a name="cl-17"></a>
+<a name="cl-18"></a><span class="c"># 2. Template name as TEMPLATE item value in return dictionary</span>
+<a name="cl-19"></a>
+<a name="cl-20"></a><span class="nd">@render_to</span><span class="p">()</span>
+<a name="cl-21"></a><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+<a name="cl-22"></a>    <span class="n">template_name</span> <span class="o">=</span> <span class="s">'</span><span class="si">%s</span><span class="s">.html'</span> <span class="o">%</span> <span class="n">category</span>
+<a name="cl-23"></a>    <span class="k">return</span> <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="n">bar</span><span class="p">,</span> <span class="s">'TEMPLATE'</span><span class="p">:</span> <span class="n">template_name</span><span class="p">}</span>
+<a name="cl-24"></a>
+<a name="cl-25"></a><span class="c">#equals to                                        </span>
+<a name="cl-26"></a><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">category</span><span class="p">):</span>
+<a name="cl-27"></a>    <span class="n">template_name</span> <span class="o">=</span> <span class="s">'</span><span class="si">%s</span><span class="s">.html'</span> <span class="o">%</span> <span class="n">category</span>
+<a name="cl-28"></a>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span>
+<a name="cl-29"></a>                                                  <span class="p">{</span><span class="s">'bar'</span><span class="p">:</span> <span class="n">bar</span><span class="p">},</span>
+<a name="cl-30"></a>                                                  <span class="n">context_instance</span><span class="o">=</span><span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">))</span>
+</pre></div>
+
+<h3 id="!signals-decorator">signals decorator</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.decorators</span> <span class="kn">import</span> <span class="n">signals</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="c"># connect to registered signal</span>
+<a name="cl-4"></a><span class="nd">@signals.post_save</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">YourModel</span><span class="p">)</span>
+<a name="cl-5"></a><span class="k">def</span> <span class="nf">sighandler</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a name="cl-6"></a>    <span class="k">pass</span>
+<a name="cl-7"></a>
+<a name="cl-8"></a><span class="c"># connect to any signal</span>
+<a name="cl-9"></a><span class="n">signals</span><span class="o">.</span><span class="n">register_signal</span><span class="p">(</span><span class="n">siginstance</span><span class="p">,</span> <span class="n">signame</span><span class="p">)</span> <span class="c"># and then as in example above</span>
+<a name="cl-10"></a>
+<a name="cl-11"></a><span class="c">#or </span>
+<a name="cl-12"></a>
+<a name="cl-13"></a><span class="nd">@signals</span><span class="p">(</span><span class="n">siginstance</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">YourModel</span><span class="p">)</span>
+<a name="cl-14"></a><span class="k">def</span> <span class="nf">sighandler</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a name="cl-15"></a>    <span class="k">pass</span>
+<a name="cl-16"></a>
+<a name="cl-17"></a><span class="c">#In any case defined function will remain as is, without any changes.</span>
+</pre></div>
+
+<h3 id="!ajax_request-decorator">ajax_request decorator</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.decorators</span> <span class="kn">import</span> <span class="n">ajax_request</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="nd">@ajax_request</span>
+<a name="cl-4"></a><span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<a name="cl-5"></a>    <span class="n">news</span> <span class="o">=</span> <span class="n">News</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a name="cl-6"></a>    <span class="n">news_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">title</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">news</span><span class="p">]</span>
+<a name="cl-7"></a>    <span class="k">return</span> <span class="p">{</span><span class="s">'news_titles'</span><span class="p">:</span> <span class="n">news_titles</span><span class="p">}</span>
+</pre></div>
+
+<h3 id="!autostrip-decorator">autostrip decorator</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.decorators</span> <span class="kn">import</span> <span class="n">autostrip</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="k">class</span> <span class="nc">PersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<a name="cl-4"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a name="cl-5"></a>    <span class="n">email</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">()</span>
+<a name="cl-6"></a>
+<a name="cl-7"></a><span class="n">PersonForm</span> <span class="o">=</span> <span class="n">autostrip</span><span class="p">(</span><span class="n">PersonForm</span><span class="p">)</span>
+<a name="cl-8"></a>
+<a name="cl-9"></a><span class="c">#or in python &gt;= 2.6</span>
+<a name="cl-10"></a>
+<a name="cl-11"></a><span class="nd">@autostrip</span>
+<a name="cl-12"></a><span class="k">class</span> <span class="nc">PersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<a name="cl-13"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a name="cl-14"></a>    <span class="n">email</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">()</span>
+</pre></div>
+
+<h3 id="!get_object_or_none-function">get_object_or_None function</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.functions</span> <span class="kn">import</span> <span class="n">get_object_or_None</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+<a name="cl-4"></a>    <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_None</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+<a name="cl-5"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="p">:</span>
+<a name="cl-6"></a>        <span class="o">...</span>
+</pre></div>
+
+<h3 id="!autoonetoonefield">AutoOneToOneField</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.fields</span> <span class="kn">import</span> <span class="n">AutoOneToOneField</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a>
+<a name="cl-4"></a><span class="k">class</span> <span class="nc">MyProfile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<a name="cl-5"></a>    <span class="n">user</span> <span class="o">=</span> <span class="n">AutoOneToOneField</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<a name="cl-6"></a>    <span class="n">home_page</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<a name="cl-7"></a>    <span class="n">icq</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+<h3 id="!jsonfield">JSONField</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.fields</span> <span class="kn">import</span> <span class="n">JSONField</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a>
+<a name="cl-4"></a><span class="c">#model</span>
+<a name="cl-5"></a><span class="k">class</span> <span class="nc">Page</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<a name="cl-6"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<a name="cl-7"></a>
+<a name="cl-8"></a>
+<a name="cl-9"></a>
+<a name="cl-10"></a><span class="c"># view or another place..</span>
+<a name="cl-11"></a><span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a name="cl-12"></a><span class="n">page</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s">'title'</span><span class="p">:</span> <span class="s">'test'</span><span class="p">,</span> <span class="s">'type'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<a name="cl-13"></a><span class="n">page</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+
+<h3 id="!get_config-function">get_config function</h3>
+<div class="highlight"><pre><a name="cl-1"></a><span class="kn">from</span> <span class="nn">annoying.functions</span> <span class="kn">import</span> <span class="n">get_config</span>
+<a name="cl-2"></a>
+<a name="cl-3"></a><span class="n">ADMIN_EMAIL</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="s">'ADMIN_EMAIL'</span><span class="p">,</span> <span class="s">'default@email.com'</span><span class="p">)</span>
+</pre></div>
+
+<h3 id="!staticserver-middleware">StaticServer middleware</h3>
+<p>Add this middleware as first item in MIDDLEWARE_CLASSES</p>
+<p>example:</p>
+<div class="highlight"><pre><a name="cl-1"></a><span class="n">MIDDLEWARE_CLASSES</span> <span class="o">=</span> <span class="p">(</span>
+<a name="cl-2"></a>    <span class="s">'annoying.middlewares.StaticServe'</span><span class="p">,</span>
+<a name="cl-3"></a>    <span class="s">'django.middleware.common.CommonMiddleware'</span><span class="p">,</span>
+<a name="cl-4"></a>    <span class="s">'django.contrib.sessions.middleware.SessionMiddleware'</span><span class="p">,</span>
+<a name="cl-5"></a>    <span class="s">'django.middleware.doc.XViewMiddleware'</span><span class="p">,</span>
+<a name="cl-6"></a>    <span class="s">'django.contrib.auth.middleware.AuthenticationMiddleware'</span><span class="p">,</span>
+<a name="cl-7"></a><span class="p">)</span>
+</pre></div>
+
+<p>It will serve static files in debug mode. Also it helps when you
+debug one of you middlewares by responding to static requests before
+they get to debuged middleware and will save you from typing 100 times
+"continue" in debuger. </p>
+<p>Used on <a href="http://pyplanet.org/">python</a> community portal.</p>
+
+
+
+      <p class="revision-date">This revision is from 2010-10-31 09:07</p>
+
+  </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div id="footer">
+    <ul id="footer-nav">
+      <li>Copyright © 2011 <a href="http://atlassian.com/">Atlassian</a></li>
+      <li><a href="http://www.atlassian.com/hosted/terms.jsp">Terms of Service</a></li>
+      <li><a href="http://www.atlassian.com/about/privacy.jsp">Privacy</a></li>
+      <li><a href="https://bitbucket.org/site/master/issues/new">Report a Bug to Bitbucket</a></li>
+      <li><a href="http://confluence.atlassian.com/x/IYBGDQ">API</a></li>
+      <li><a href="http://status.bitbucket.org/">Server Status</a></li>
+    </ul>
+    <ul id="social-nav">
+      <li class="blog"><a href="http://blog.bitbucket.org/">Bitbucket Blog</a></li>
+      <li class="twitter"><a href="http://www.twitter.com/bitbucket">Twitter</a></li>
+    </ul>
+    <h5>We run</h5>
+    <ul id="technologies">
+      <li><a href="http://www.djangoproject.com/">Django 1.3.0</a></li>
+      <li><a href="https://bitbucket.org/jespern/django-piston/">Piston 0.3dev</a></li>
+      <li><a href="http://www.selenic.com/mercurial/">Hg 1.9.2</a></li>
+      <li><a href="http://www.python.org/">Python 2.7.2</a></li>
+      <li>r12496:06a7bf636af1 | bitbucket01</li>
+    </ul>
+  </div>
+</html>
