@@ -118,7 +118,7 @@ class VirementForm(forms.Form):
         virement_objet.save()
         return virement_objet.origine
 
-class Ope_titre_shortForm(forms.Form):
+class Ope_titre_addForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = datefieldgsb()
@@ -126,8 +126,7 @@ class Ope_titre_shortForm(forms.Form):
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = forms.DecimalField(localize = True, initial = '0')
-    achat = forms.BooleanField(widget = forms.HiddenInput(), initial = True)
+    cours = forms.DecimalField(localize = True, initial = '1')
     #nom_nouveau_titre = forms.CharField(required = False)
 
 class Ope_titreForm(forms.ModelForm):

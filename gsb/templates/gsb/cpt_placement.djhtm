@@ -4,8 +4,8 @@
 {% load gsb_extras %}
 <table width="100%" id="boutons">
     {% if compte.ouvert %}
-    <tr><td width="50%" class="boutton"><a href="">achat</a></td>
-    <td width="50%" class="boutton"><a href="">vente</a></td></tr>
+    <tr><td width="50%" class="boutton"><a href="{% url cpt_titre_achat compte.id %}">achat</a></td>
+    <td width="50%" class="boutton"><a href="{% url cpt_titre_vente compte.id %}">vente</a></td></tr>
     <tr><td width="100%" colspan="2" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
     {% else %}
     <tr><td width="100%" class="boutton" colspan="2"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
