@@ -2,7 +2,6 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
-{% load gsb_extras %}
 <table style=" width: 100%;" summary="boutons">
 {% if ope %}
     <tr><td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>

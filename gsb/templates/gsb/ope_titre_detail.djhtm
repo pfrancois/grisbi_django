@@ -15,4 +15,12 @@
         <td width="50%" class="boutton"><a href="{% url 'gsb.views.index' %}">Annuler</a></td>
 </tr>
 </table>
+    <form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
+        {% csrf_token %}
+    </form>
+    <table style=" width: 100%;" summary="bouton effacer">
+    <tr>
+            <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+    </tr>
+    </table>
 {% endblock content %}

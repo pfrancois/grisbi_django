@@ -430,7 +430,11 @@ class Compte_titre(Compte):
                                 automatique = True
                                 )
             #compta matiere
-            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)) * -1, date = date, cours = prix, ope = ope)
+            Ope_titre.objects.create(titre = titre,
+                                      compte = self,
+                                      nombre = decimal.Decimal(force_unicode(nombre)) * -1,
+                                      date = date, cours = prix,
+                                      ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
@@ -444,7 +448,10 @@ class Compte_titre(Compte):
             titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
             if virement_vers:
                 vir = Virement()
-                vir.create(self, virement_vers, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
+                vir.create(self,
+                            virement_vers,
+                            decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
+                            date)
         else:
             raise TypeError("pas un titre")
 
@@ -532,7 +539,7 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default = 1, max_digits = 15, decimal_places = 5)
     invest = CurField(default = 0, editable = False, max_digits = 15, decimal_places = 5)
-    ope = models.OneToOneField('Ope', editable = False, null = True)
+    ope = models.OneToOneField('Ope', editable = False, null = True)#null=true car j'ai des operations sans lien
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'

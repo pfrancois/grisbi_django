@@ -326,7 +326,10 @@ def ope_titre_detail(request, pk):
 def ope_titre_delete(request, pk):#TODO
     ope = get_object_or_404(Ope_titre, pk = pk)
     if request.method == 'POST':
-        pass
+        cpt_id = ope.compte_id
+        ope.ope.delete()
+        ope.delete()
+        return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
-    return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
+    

@@ -43,7 +43,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name = 'gsb_ope_detail'),
                         url(r'^ope/new$', 'ope_new', name = "gsb_ope_new"),
                         url(r'^vir/new$', 'vir_new', name = "gsb_vir_new"),
-                        url(r'^ope_titre/(?P<pk>\d+)/', 'ope_titre_detail', name = 'ope_titre_detail'),
+                        url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name = 'ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete', 'ope_titre_delete', name = 'ope_titre_delete'),
                         )
 
@@ -55,6 +55,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/especes', 'cpt_titre_espece', name = "gsb_cpt_titre_espece"),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)', 'titre_detail_cpt', name = "gsb_cpt_titre_detail"),
                         )
+
 
 #les vues relatives aux tiers
 class tierscreateview(CreateView):
