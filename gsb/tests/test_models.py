@@ -73,6 +73,7 @@ class test_models(TestCase):
         self.assertEqual(c.solde, 20)
         t.cours_set.create(date = '2011-02-01', valeur = 2)
         c.vente(t, 10, 3, '2011-06-30', virement_vers = Compte.objects.get(id = 1))
+        self.assertEqual(Ope_titre.investi(c, t), -10)
         self.assertEqual(c.solde, 30)
     def test_moyen_fusionne(self):
         Moyen.objects.get(id = 2).fusionne(Moyen.objects.get(id = 1))

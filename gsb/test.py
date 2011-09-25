@@ -4,6 +4,7 @@ if __name__ == "__main__":
     import sys, os
 
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
     from mysite import settings
 
     setup_environ(settings)
@@ -32,18 +33,12 @@ def test(request):
                                             context_instance = RequestContext(request))
 
 if __name__ == "__main__":
-    nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    #nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    nomfich = os.path.normpath(nomfich)
-    logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
-    xml_tree = et.parse(nomfich)
-    xml_tree.getroot()
-    list_ope = xml_tree.findall('//Operation')
-    nb_ope_final = len(list_ope)
-    percent = 1
-    for xml_ope in list_ope:
-        if xml_ope.get('N'):
-            print smart_unicode(xml_ope.get('N'))
-            print xml_ope.get('N')
+        c = Compte_titre.objects.get(id = 4)
+        t = Titre.objects.get(nom = "t1")
+        c.achat(titre = t, nombre = 20, date = '2011-01-01', virement_de = Compte.objects.get(id = 1))
+        t.cours_set.create(date = '2011-02-01', valeur = 2)
+        c.vente(t, 10, 3, '2011-06-30', virement_vers = Compte.objects.get(id = 1))
+        print Ope_titre.investi(c, t)
+
 
 

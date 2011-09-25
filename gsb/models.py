@@ -64,8 +64,6 @@ class Tiers(models.Model):
         self.delete()
         return nb_tiers_change
 
-
-
 class Titre(models.Model):
     """
     les titres englobe les actifs financiers
@@ -424,7 +422,7 @@ class Compte_titre(Compte):
                 raise Titre.doesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             ope = self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
+                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre))* -1,
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "%s@%s" % (nombre, prix),
@@ -434,12 +432,12 @@ class Compte_titre(Compte):
             #compta matiere
             Ope_titre.objects.create(titre = titre,
                                       compte = self,
-                                      nombre = decimal.Decimal(force_unicode(nombre)) * -1,
+                                      nombre = decimal.Decimal(force_unicode(nombre))* -1,
                                       date = date, cours = prix,
                                       ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(frais)) * -1,
+                                montant = decimal.Decimal(force_unicode(frais))* -1,
                                 tiers = titre.tiers,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),
@@ -533,6 +531,13 @@ class Compte_titre(Compte):
             self.type = 't'
         super(Compte_titre, self).save(*args, **kwargs)
 
+    def solde_espece(self):
+        return super(Compte_titre, self).solde
+    def solde_titre(self):
+        solde_titre = 0
+        for titre in self.titre.all().distinct():
+            solde_titre = solde_titre + titre.encours(self)
+        return solde_titre
 
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
