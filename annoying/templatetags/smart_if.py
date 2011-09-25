@@ -7,7 +7,7 @@ __author__ = "SmileyChris"
 #==============================================================================
 
 class BaseCalc(object):
-    def __init__(self, var1, var2=None, negate=False):
+    def __init__(self, var1, var2 = None, negate = False):
         self.var1 = var1
         self.var2 = var2
         self.negate = negate
@@ -98,10 +98,10 @@ class IfParser(object):
         while not self.at_end():
             op, negate = self.get_operator()
             var2 = self.get_bool_var()
-            var1 = op(var1, var2, negate=negate)
+            var1 = op(var1, var2, negate = negate)
         return var1
 
-    def get_token(self, eof_message=None, lookahead=False):
+    def get_token(self, eof_message = None, lookahead = False):
         negate = True
         token = None
         pos = self.pos
@@ -133,22 +133,22 @@ class IfParser(object):
         """
         var = self.get_var()
         if not self.at_end():
-            op_token = self.get_token(lookahead=True)[0]
+            op_token = self.get_token(lookahead = True)[0]
             if isinstance(op_token, basestring) and (op_token not in
                                                      BOOL_OPERATORS):
                 op, negate = self.get_operator()
-                return op(var, self.get_var(), negate=negate)
+                return op(var, self.get_var(), negate = negate)
         return var
 
     def get_var(self):
         token, negate = self.get_token('Reached end of statement, still '
                                        'expecting a variable.')
         if isinstance(token, basestring) and token in OPERATORS:
-            raise self.error_class('Expected variable, got operator (%s).' %
+            raise self.error_class('Expected variable, got operator (%s).' % 
                                    token)
         var = self.create_var(token)
         if negate:
-            return Or(var, negate=True)
+            return Or(var, negate = True)
         return var
 
     def get_operator(self):
@@ -180,7 +180,7 @@ class TemplateIfParser(IfParser):
 
 
 class SmartIfNode(template.Node):
-    def __init__(self, var, nodelist_true, nodelist_false=None):
+    def __init__(self, var, nodelist_true, nodelist_false = None):
         self.nodelist_true, self.nodelist_false = nodelist_true, nodelist_false
         self.var = var
 

@@ -6,7 +6,7 @@ from django.db.models.fields.related import SingleRelatedObjectDescriptor
 
 
 class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
-    def __get__(self, instance, instance_type=None):
+    def __get__(self, instance, instance_type = None):
         try:
             return super(AutoSingleRelatedObjectDescriptor, self).__get__(instance, instance_type)
         except self.related.model.DoesNotExist:
@@ -64,6 +64,6 @@ class JSONField(models.TextField):
         if value == "":
             return None
         if isinstance(value, dict):
-            value = json.dumps(value, cls=DjangoJSONEncoder)
+            value = json.dumps(value, cls = DjangoJSONEncoder)
         return super(JSONField, self).get_db_prep_save(value, *args, **kwargs)
 

@@ -11,8 +11,8 @@ __all__ = ['render_to', 'signals', 'ajax_request', 'autostrip']
 try:
     from functools import wraps
 except ImportError: 
-    def wraps(wrapped, assigned=('__module__', '__name__', '__doc__'),
-              updated=('__dict__',)):
+    def wraps(wrapped, assigned = ('__module__', '__name__', '__doc__'),
+              updated = ('__dict__',)):
         def inner(wrapper):
             for attr in assigned:
                 setattr(wrapper, attr, getattr(wrapped, attr))
@@ -22,7 +22,7 @@ except ImportError:
         return inner
 
 
-def render_to(template=None, mimetype=None):
+def render_to(template = None, mimetype = None):
     """
     Decorator for Django views that sends returned dict to render_to_response 
     function.
@@ -76,7 +76,7 @@ def render_to(template=None, mimetype=None):
                 return output
             tmpl = output.pop('TEMPLATE', template)
             return render_to_response(tmpl, output, \
-                        context_instance=RequestContext(request), mimetype=mimetype)
+                        context_instance = RequestContext(request), mimetype = mimetype)
         return wrapper
     return renderer
 
@@ -143,7 +143,7 @@ class JsonResponse(HttpResponse):
     HttpResponse descendant, which return response with ``application/json`` mimetype.
     """
     def __init__(self, data):
-        super(JsonResponse, self).__init__(content=simplejson.dumps(data), mimetype='application/json')
+        super(JsonResponse, self).__init__(content = simplejson.dumps(data), mimetype = 'application/json')
 
 
 
