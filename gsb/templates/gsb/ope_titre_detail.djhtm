@@ -15,6 +15,7 @@
         <td width="50%" class="boutton"><a href="{% url 'gsb_cpt_titre_detail' ope.compte_id ope.titre_id %}">Annuler</a></td>
 </tr>
 </table>
+{% if rapp %}
     <form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
         {% csrf_token %}
     </form>
@@ -23,4 +24,5 @@
             <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
     </tr>
     </table>
+{% endif %}
 {% endblock content %}

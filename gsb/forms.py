@@ -101,7 +101,7 @@ class OperationForm(forms.ModelForm):
     required_css_class = required_css_class
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label = None)
     ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False)
     montant = CurField()
     notes = forms.CharField(widget = forms.TextInput, required = False)
@@ -109,14 +109,20 @@ class OperationForm(forms.ModelForm):
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
     pointe = forms.BooleanField(required = False)
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False)
+    nouveau_tiers = forms.CharField(required = False)
     class Meta:
         model = Ope
         exclude = ('mere', 'jumelle')
     def clean(self):
         super(OperationForm, self).clean()
-        if self.cleaned_data['moyen'].type == u'd' and self.cleaned_data['montant'] > 0:
-            self.cleaned_data['montant'] = self.cleaned_data['montant']* -1
-        return self.cleaned_data
+        data = self.cleaned_data
+        if data['tiers'] == None:
+            if not data['nouveau_tiers']:
+                self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
+                del data['nouveau_tiers']                    
+        if data['moyen'].type == u'd' and data['montant'] > 0:
+            data['montant'] = data['montant']* -1
+        return data
 
 class VirementForm(forms.Form):
     error_css_class = error_css_class
@@ -138,8 +144,8 @@ class VirementForm(forms.Form):
         data = self.cleaned_data
         if data.get("compte_origine") == data.get("compte_destination"):
             msg = "pas possible de faire un virement vers le meme compte"
-            self._errors['compte_origine'] = self.error_class([msg])
-            self._errors['compte_destination'] = self.error_class([msg])
+            self._errors['compte_origine'] = self.error_class([msg, ])
+            self._errors['compte_destination'] = self.error_class([msg, ])
             del data['compte_origine']
             del data['compte_destination']
         return data
@@ -169,12 +175,43 @@ class Ope_titre_addForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = DateFieldgsb()
-    titre = forms.ModelChoiceField(Titre.objects.all())
+    titre = forms.ModelChoiceField(Titre.objects.all(), required = False)
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
     nombre = forms.DecimalField(initial = '0')
     cours = CurField(initial = '1')
     #nom_nouveau_titre = forms.CharField(required = False)
+    def clean(self):
+        super(Ope_titre_addForm, self).clean()
+        if self.cleaned_data['nombre'] == 0:
+            self._errors['nombre'] = self.error_class([u'le nombre ne peut être nul', ])
+            del self.cleaned_data['nombre']
+        return self.cleaned_data
+class Ope_titre_add_achatForm(Ope_titre_addForm):
+    nouveau_titre = forms.CharField(required = False)
+    nouvel_isin = forms.CharField(required = False)
+    def clean(self):
+        super(Ope_titre_add_achatForm, self).clean()
+        data = self.cleaned_data
+        if data['titre'] == None:
+            if not data['nouveau_titre']:
+                self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
+                del data['nouveau_titre']                    
+        return data
+    
+class Ope_titre_add_venteForm(Ope_titre_addForm):
+    def __init__(self, *args, **kwargs):
+        super(Ope_titre_add_venteForm, self).__init__()
+        self.fields['titre'].empty_label = None
+        self.fields['titre'].required = True
+    def clean(self):
+        super(Ope_titre_add_venteForm, self).clean()
+        data = self.cleaned_data
+        if not Ope_titre.nb(titre = data['titre'], compte = data['compte_titre']):
+            msg = u"titre pas en portefeuille"
+            self._errors['titre'] = self.error_class([msg, ])
+            del data['titre']
+        return data
 
 class Ope_titreForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

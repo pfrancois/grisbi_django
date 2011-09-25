@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours, Tiers
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -135,6 +135,10 @@ def ope_detail(request, pk):
         if request.method == 'POST':
             form = gsb_forms.OperationForm(request.POST, instance = ope)
             if form.is_valid():
+                if not form.cleaned_data['tiers']:
+                    form.instance.tiers = Tiers.objects.get_or_create(nom = form.cleaned_data['nouveau_tiers'],
+                                                     defaults = {'nom':form.cleaned_data['nouveau_tiers'], }
+                                                    )[0]
                 ope = form.save()
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         else:
@@ -289,7 +293,7 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
                     'compte': cpt,
                     'list_ope': q,
                     'titre': "%s: %s" % (cpt.nom, titre.nom),
-                    'solde': cpt.solde,
+                    'solde': titre.investi(cpt),
                     'date_limite':date_limite,
                     'nbrapp': 0,
                     'nbvielles': nbvielles,
@@ -312,7 +316,8 @@ def ope_titre_detail(request, pk):
     if request.method == 'POST':
         form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
-            form.save()
+            if ope.ope.rapp == None:
+                form.save()
             if form.has_changed():
                 cours = form.cleaned_data['cours']
                 nb = form.cleaned_data['nombre']
@@ -327,7 +332,8 @@ def ope_titre_detail(request, pk):
             {   'titre_long':u'opération sur titre %s' % ope.id,
                'titre':u'modification',
                 'form':form,
-                'ope':ope}
+                'ope':ope,
+                'rapp': ope.ope.rapp == None}
             )
 
 @login_required
@@ -342,40 +348,66 @@ def ope_titre_delete(request, pk):
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
 
 @login_required
-def ope_titre_create(request, cpt_id, sens):
+def ope_titre_achat(request, cpt_id):
     cpt = get_object_or_404(Compte, pk = cpt_id)
     if request.method == 'POST':
-        form = gsb_forms.Ope_titre_addForm(request.POST)
+        form = gsb_forms.Ope_titre_add_achatForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['titre']:
+                titre = form.cleaned_data['titre']
+            else:
+                titre = Titre.objects.get_or_create(nom = form.cleaned_data['nouveau_titre'],
+                                                     defaults = {'nom':form.cleaned_data['nouveau_titre'],
+                                                                 'type':'ZZZ',
+                                                                 'isin':form.cleaned_data['nouvel_isin']
+                                                                }
+                                                    )[0]
+            compte = form.cleaned_data['compte_titre']
+            if form.cleaned_data['compte_espece']:
+                virement = form.cleaned_data['compte_espece']
+            else:
+                virement = None
+            compte.achat(titre = titre,
+                         nombre = form.cleaned_data['nombre'],
+                         prix = form.cleaned_data['cours'],
+                         date = form.cleaned_data['date'],
+                         virement_de = virement)
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt.id}))
+    else:
+        form = gsb_forms.Ope_titre_add_achatForm(initial = {'compte_titre': cpt})
+    titre = u' nouvel achat sur %s' % cpt.nom
+    return render(request, 'gsb/ope_titre_create.djhtm',
+            {   'titre_long':titre,
+               'titre':u'modification',
+                'form':form,
+                'cpt':cpt,
+                'sens':'achat'}
+            )
+
+@login_required
+def ope_titre_vente(request, cpt_id):
+    cpt = get_object_or_404(Compte, pk = cpt_id)
+    if request.method == 'POST':
+        form = gsb_forms.Ope_titre_add_venteForm(request.POST)
         if form.is_valid():
             compte = form.cleaned_data['compte_titre']
             if form.cleaned_data['compte_espece']:
                 virement = form.cleaned_data['compte_espece']
             else:
                 virement = None
-            if sens == 'achat':
-                compte.achat(titre = form.cleaned_data['titre'],
-                             nombre = form.cleaned_data['nombre'],
-                             prix = form.cleaned_data['cours'],
-                             date = form.cleaned_data['date'],
-                             virement_de = virement)
-            else:
-                compte.vente(titre = form.cleaned_data['titre'],
-                             nombre = form.cleaned_data['nombre'] * -1,
-                             prix = form.cleaned_data['cours'],
-                             date = form.cleaned_data['date'],
-                             virement_de = virement)
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':compte.id}))
+            compte.vente(titre = form.cleaned_data['titre'],
+                         nombre = form.cleaned_data['nombre'] * -1,
+                         prix = form.cleaned_data['cours'],
+                         date = form.cleaned_data['date'],
+                         virement_vers = virement)
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt.id}))
     else:
-        form = gsb_forms.Ope_titre_addForm(initial = {'compte_titre': cpt})
-    if sens == 'achat':
-        titre = u' nouvel achat sur %s' % cpt.nom
-    else:
-        titre = u' nouvelle vente sur %s' % cpt.nom
+        form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpt})
+    titre = u' nouvelle vente sur %s' % cpt.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {   'titre_long':titre,
                'titre':u'modification',
                 'form':form,
                 'cpt':cpt,
-                'sens':sens}
+                'sens':'vente'}
             )
-
