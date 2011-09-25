@@ -60,7 +60,7 @@ class ReadonlyField(forms.Field):
     def _has_changed(self, initial, data):
         return False
     
-    def bound_databound_data(self, data, initial):
+    def bound_data(self, data, initial):
         return initial
     
     def set_text(self, instance):
