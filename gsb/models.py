@@ -497,7 +497,7 @@ class Compte_titre(Compte):
 
         else:
             raise TypeError("pas un titre")
-        
+
     @property
     def solde(self):
         """renvoie le solde"""
@@ -751,17 +751,17 @@ class Ope(models.Model):
     date_val = models.DateField(null = True, blank = True, default = None)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null = True, blank = True, on_delete = models.PROTECT, default = None)
-    cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    cat = models.ForeignKey(Cat, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u"Catégorie")
     notes = models.TextField(blank = True, default = '')
     moyen = models.ForeignKey(Moyen, null = True, blank = True, on_delete = models.PROTECT, default = None)
     num_cheque = models.CharField(max_length = 20, blank = True, default = '')
     pointe = models.BooleanField(default = False)
-    rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.PROTECT, default = None)
-    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None)
+    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name =  u"projet")
     jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False)
     mere = models.ForeignKey('self', null = True, blank = True, related_name = 'filles_set', default = None, editable = False)
-    automatique = models.BooleanField(default = False)
+    automatique = models.BooleanField(default = False,help_text=u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length = 20, blank = True, default = '')
 
     class Meta:

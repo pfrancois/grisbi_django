@@ -101,14 +101,14 @@ class OperationForm(forms.ModelForm):
     required_css_class = required_css_class
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False, label = u"Catégorie")
-    ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False, label = u"projet")
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
+    ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False)
     montant = CurField()
     notes = forms.CharField(widget = forms.TextInput, required = False)
     date = DateFieldgsb()
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
-    pointe = forms.BooleanField(required = False, label = u"Opération pointée")
-    rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False, label = u'Rapprochement')
+    pointe = forms.BooleanField(required = False)
+    rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False)
     class Meta:
         model = Ope
         exclude = ('mere', 'jumelle')

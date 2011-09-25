@@ -142,7 +142,7 @@ h2 {
 .footerbar td {
 	background-color: #990000;
 	font-weight: bold;
-	padding: .7em 0;
+	padding: .7em;
 	border-top: 10px solid #333333;
 	height: 3em;
 }

@@ -14,4 +14,5 @@
         <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
         <td width="50%" class="boutton"><a href="{% url 'gsb.views.cpt_detail' cpt.id %}">Annuler</a></td>
 </tr>
+</table>
 {% endblock content %}

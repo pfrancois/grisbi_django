@@ -2,7 +2,7 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
 {% load gsb_extras %}
-<table width="100%" id="boutons">
+<table width="100%" id="boutons" class="table">
     {% if compte.ouvert %}
     <tr><td width="50%" class="boutton"><a href="{% url cpt_titre_achat compte.id %}">achat</a></td>
     <td width="50%" class="boutton"><a href="{% url cpt_titre_vente compte.id %}">vente</a></td></tr>
@@ -44,8 +44,8 @@
         <td class="opDebit">{{ especes|cur }}</td>
     </tr>
     <tr class="footerbar">
-        <td colspan="3" class="cptLabel">Solde global</td>
-        <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
+        <td colspan="5" class="cptLabel">Solde global</td>
+        <td colspan="1" class="cptSolde">{{ solde|cur }}</td>
     </tr>
 </table>
-{% endblock content %} 
+{% endblock content %}
