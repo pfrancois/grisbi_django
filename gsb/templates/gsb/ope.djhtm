@@ -27,34 +27,7 @@
     {% csrf_token %}
     <fieldset class="operationMainTable">
     <table>
-        {{ form.pk }}
-        {% if form.compte.errors %}<tr><td>{{ form.compte.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.compte.label_tag }}(*)</th><td>{{ form.compte }}</td></tr>
-        {% if form.date.errors %}<tr><td>{{ form.date.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.date.label_tag }}(*)</th><td>{{ form.date }}</td></tr>
-        {% if form.tiers.errors %}<tr><td>{{ form.tiers.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.tiers.label_tag }}</th><td>{{ form.tiers }} </td></tr>
-        {% if form.montant.errors %}<tr><td>{{ form.montant.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.montant.label_tag }}</th><td>{{ form.montant }} {% dev %}</td></tr>
-        {% comment %}TODO rajouter fonction calculatrice{% endcomment %}
-        {% if form.cat.errors %}<tr><td>{{ form.cat.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.cat.label_tag }}</th><td>{{ form.cat }}</td></tr>
-        {% if form.notes.errors %}<tr><td>{{ form.notes.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.notes.label_tag }}</th><td>{{ form.notes }}</td></tr>
-        {% if form.moyen.errors %}<tr><td>{{ form.moyen.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.moyen.label_tag }}</th><td>{{ form.moyen }}</td></tr>
-        {% if form.pointe.errors %}<tr><td>{{ form.pointe.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.pointe.label_tag }}</th><td>{{ form.pointe }}</td></tr>
-        {% if form.rapp.errors %}<tr><td>{{ form.rapp.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.rapp.label_tag }}</th><td>{{ form.rapp }}</td></tr>
-        {% if form.date_val.errors %}<tr><td>{{ form.date_val.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.date_val.label_tag }}</th><td>{{ form.date_val }}</td></tr>
-        {% if form.exercice.errors %}<tr><td>{{ form.exercice.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.exercice.label_tag }}</th><td>{{ form.exercice }}</td></tr>
-        {% if form.ib.errors %}<tr><td>{{ form.ib.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.ib.label_tag }}</th><td>{{ form.ib }}</td></tr>
-        {% if form.piece_comptable.errors %}<tr><td>{{ form.piece_comptable.errors }}</td></tr>{% endif %}
-        <tr><th>{{ form.piece_comptable.label_tag }}</th><td>{{ form.piece_comptable}}</td></tr>
+        {{ form }}
     </table>
     </fieldset>
 </form>

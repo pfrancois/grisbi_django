@@ -230,7 +230,7 @@ def maj_cours(request, pk):
             else:
                 titre.cours_set.get(date = date).valeur = form.cleaned_data['cours']
             cpt_id = Ope_titre.objects.filter(titre_id = 5).latest('date').compte_id
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))            
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
     return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form})
@@ -310,7 +310,7 @@ def ope_titre_detail(request, pk):
     '''
     ope = get_object_or_404(Ope_titre, pk = pk)
     if request.method == 'POST':
-        form = gsb_forms.Ope_titreForm(request.POST)
+        form = gsb_forms.Ope_titreForm(request.POST,instance=ope)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
@@ -336,7 +336,7 @@ def ope_titre_delete(request, pk):
 
 @login_required
 def ope_titre_create(request, cpt_id, sens):
-    cpt = get_object_or_404(Compte, pk = cpt_id)    
+    cpt = get_object_or_404(Compte, pk = cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_addForm(request.POST)
         if form.is_valid():
@@ -371,4 +371,4 @@ def ope_titre_create(request, cpt_id, sens):
                 'cpt':cpt,
                 'sens':sens}
             )
-    
+

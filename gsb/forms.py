@@ -14,13 +14,13 @@ input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 error_css_class = 'error'
 required_css_class = 'required'
 
-class dateinputgsb(forms.DateInput):
+class Dategsbwidget(forms.DateInput):
     class Media:
         js = ("js/basiccalendar.js",)
         css = {'all':('css/calendar.css',)}
 
     def __init__(self, attrs = None): #@UnusedVariable
-        super(dateinputgsb, self).__init__(attrs)
+        super(Dategsbwidget, self).__init__(attrs)
     def render(self, name, value, attrs = None):
         if value is None:
             value = ''
@@ -33,9 +33,9 @@ class dateinputgsb(forms.DateInput):
         cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
         return mark_safe(u'<input%s /><span>|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
 
-class datefieldgsb(forms.DateField):
-    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):  
-        super(datefieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = dateinputgsb, *args, **kwargs)
+class Datefieldgsb(forms.DateField):
+    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):
+        super(Datefieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = Dategsbwidget, *args, **kwargs)
 class Readonlywidget(forms.Widget):
     text = ''
     is_hidden = False
@@ -50,23 +50,35 @@ class Readonlywidget(forms.Widget):
         hidden = u'<input%s />' % flatatt(final_attrs)
         text = force_unicode(self.text)
         return mark_safe("<div>%s%s</div>" % (hidden, text))
+    def _has_changed(self, initial, data):
+        return False
 
-class ReadonlyField(forms.Field):
+class ReadonlyField(forms.FileField):
     widget = Readonlywidget
     def __init__(self, model = None, *args, **kwargs): #@UnusedVariable
         self.model = model
-        super(ReadonlyField, self).__init__(*args, **kwargs)
-            
-    def _has_changed(self, initial, data):
-        return False
-    
-    def bound_data(self, data, initial):
-        return initial
-    
-    def set_text(self, instance):
-        t = getattr(instance, self.model)
-        self.widget.text = t.__unicode__()
+        forms.Field.__init__(self, *args, **kwargs)
+    def clean(self, value, initial):
+        if self.instance and self.instance.id:
+            return getattr(self.instance, self.model)
 
+    def set_text(self, instance):
+        if instance and instance.id:
+            self.instance=instance
+            t = getattr(instance, self.model)
+            self.widget.text = t.__unicode__()
+
+class Curwidget(forms.TextInput):
+     def render(self, name, value, attrs = None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type = 'text', name = name)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_unicode(value)
+        hidden = u'<input%s />' % flatatt(final_attrs)
+        text = force_unicode("&#8364;")
+        return mark_safe("<div>%s%s</div>" % (hidden, text))
 class ImportForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -86,9 +98,9 @@ class OperationForm(forms.ModelForm):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False, label = u"Catégorie")
     ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False, label = u"projet")
-    montant = forms.DecimalField(localize = True, initial = '0')
+    montant = forms.DecimalField(localize = True, initial = '0',widget=Curwidget)
     notes = forms.CharField(widget = forms.TextInput, required = False)
-    date = datefieldgsb()
+    date = Datefieldgsb()
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
     pointe = forms.BooleanField(required = False, label = u"Opération pointée")
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False, label = u'Rapprochement')
@@ -109,7 +121,7 @@ class VirementForm(forms.Form):
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     montant = forms.DecimalField(localize = True, initial = '0')
-    date = datefieldgsb()
+    date = Datefieldgsb()
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
@@ -151,7 +163,7 @@ class VirementForm(forms.Form):
 class Ope_titre_addForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
-    date = datefieldgsb()
+    date = Datefieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all())
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
@@ -165,17 +177,17 @@ class Ope_titreForm(forms.ModelForm):
         instance = getattr(self, 'instance', None)
         self.fields['titre'].set_text(instance)
         self.fields['compte'].set_text(instance)
-            
+
     titre = ReadonlyField('titre')
     compte = ReadonlyField('compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = forms.DecimalField(localize = True, initial = '0')
-    date = datefieldgsb()
+    date = Datefieldgsb()
     error_css_class = error_css_class
     required_css_class = required_css_class
     class Meta:
         model = Ope_titre
-        
+
 class GeneraliteForm(forms.ModelForm):
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -184,11 +196,11 @@ class GeneraliteForm(forms.ModelForm):
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
     def __init__(self, *args, **kwargs):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
-        
+
 class MajCoursform(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
-    date = datefieldgsb()
+    date = Datefieldgsb()
     cours = forms.DecimalField(min_value = 0, label = "Cours")
 
