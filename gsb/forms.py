@@ -33,9 +33,9 @@ class Dategsbwidget(forms.DateInput):
         cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
         return mark_safe(u'<input%s /><span>|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
 
-class Datefieldgsb(forms.DateField):
+class DateFieldgsb(forms.DateField):
     def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):
-        super(Datefieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = Dategsbwidget, *args, **kwargs)
+        super(DateFieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = Dategsbwidget, *args, **kwargs)
 class Readonlywidget(forms.Widget):
     text = ''
     is_hidden = False
@@ -79,6 +79,11 @@ class Curwidget(forms.TextInput):
         hidden = u'<input%s />' % flatatt(final_attrs)
         text = force_unicode("&#8364;")
         return mark_safe("<div>%s%s</div>" % (hidden, text))
+
+class CurField(forms.DecimalField):
+    def __init__(self,localize = True, initial = '0',widget=Curwidget, *args, **kwargs):
+        super(CurField, self).__init__(localize = localize, initial = initial,widget=widget,*args, **kwargs)
+
 class ImportForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -98,9 +103,9 @@ class OperationForm(forms.ModelForm):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False, label = u"Catégorie")
     ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False, label = u"projet")
-    montant = forms.DecimalField(localize = True, initial = '0',widget=Curwidget)
+    montant = CurField()
     notes = forms.CharField(widget = forms.TextInput, required = False)
-    date = Datefieldgsb()
+    date = DateFieldgsb()
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
     pointe = forms.BooleanField(required = False, label = u"Opération pointée")
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False, label = u'Rapprochement')
@@ -120,8 +125,8 @@ class VirementForm(forms.Form):
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
-    montant = forms.DecimalField(localize = True, initial = '0')
-    date = Datefieldgsb()
+    montant = CurField()
+    date = DateFieldgsb()
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
@@ -163,12 +168,12 @@ class VirementForm(forms.Form):
 class Ope_titre_addForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
-    date = Datefieldgsb()
+    date = DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all())
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = forms.DecimalField(localize = True, initial = '1')
+    cours = CurField()
     #nom_nouveau_titre = forms.CharField(required = False)
 
 class Ope_titreForm(forms.ModelForm):
@@ -181,8 +186,8 @@ class Ope_titreForm(forms.ModelForm):
     titre = ReadonlyField('titre')
     compte = ReadonlyField('compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = forms.DecimalField(localize = True, initial = '0')
-    date = Datefieldgsb()
+    cours = CurField()
+    date = DateFieldgsb()
     error_css_class = error_css_class
     required_css_class = required_css_class
     class Meta:
@@ -201,6 +206,6 @@ class MajCoursform(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
-    date = Datefieldgsb()
-    cours = forms.DecimalField(min_value = 0, label = "Cours")
+    date = DateFieldgsb()
+    cours = CurField()
 
