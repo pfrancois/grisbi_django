@@ -32,7 +32,6 @@ class CurField(models.DecimalField):
     def get_internal_type(self):
         return "DecimalField"
 
-
 class Tiers(models.Model):
     """
     un tiers, c'est a dire une personne ou un titre
@@ -156,7 +155,6 @@ class Titre(models.Model):
         else:
             return self.nb() * self.last_cours
 
-
 class Cours(models.Model):
     """cours des titres"""
     valeur = CurField(default = 1.000)
@@ -171,7 +169,6 @@ class Cours(models.Model):
 
     def __unicode__(self):
         return u"le %(date)s, 1 %(titre)s : %(valeur)s" % {'titre':self.titre.nom, 'date':self.date, 'valeur':self.valeur}
-
 
 class Banque(models.Model):
     """banques"""
@@ -191,7 +188,6 @@ class Banque(models.Model):
         nb_change = Compte.objects.filter(banque = self).update(banque = new)
         self.delete()
         return nb_change
-
 
 class Cat(models.Model):
     """categories
@@ -273,7 +269,6 @@ class Exercice(models.Model):
         self.delete()
         return nb_change
 
-
 class Compte(models.Model):
     """
     comptes (normal)
@@ -344,7 +339,6 @@ class Compte(models.Model):
             raise Gsb_exc("il faut creer un compte titre")
         else:
             super(Compte, self).save(*args, **kwargs)
-
 
 class Compte_titre(Compte):
     """
@@ -422,7 +416,7 @@ class Compte_titre(Compte):
                 raise Titre.doesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             ope = self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre))* -1,
+                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "%s@%s" % (nombre, prix),
@@ -432,12 +426,12 @@ class Compte_titre(Compte):
             #compta matiere
             Ope_titre.objects.create(titre = titre,
                                       compte = self,
-                                      nombre = decimal.Decimal(force_unicode(nombre))* -1,
+                                      nombre = decimal.Decimal(force_unicode(nombre)) * -1,
                                       date = date, cours = prix,
                                       ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(frais))* -1,
+                                montant = decimal.Decimal(force_unicode(frais)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),
@@ -620,7 +614,6 @@ class Moyen(models.Model):
         self.delete()
         return nb_change
 
-
 class Rapp(models.Model):
     """rapprochement d'un compte"""
     nom = models.CharField(max_length = 40, unique = True)
@@ -763,10 +756,10 @@ class Ope(models.Model):
     pointe = models.BooleanField(default = False)
     rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.PROTECT, default = None)
-    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name =  u"projet")
+    ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u"projet")
     jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False)
     mere = models.ForeignKey('self', null = True, blank = True, related_name = 'filles_set', default = None, editable = False)
-    automatique = models.BooleanField(default = False,help_text=u'si cette operation est crée a cause d\'une echeance')
+    automatique = models.BooleanField(default = False, help_text = u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length = 20, blank = True, default = '')
 
     class Meta:

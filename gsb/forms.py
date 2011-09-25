@@ -64,12 +64,12 @@ class ReadonlyField(forms.FileField):
 
     def set_text(self, instance):
         if instance and instance.id:
-            self.instance=instance
+            self.instance = instance
             t = getattr(instance, self.model)
             self.widget.text = t.__unicode__()
 
 class Curwidget(forms.TextInput):
-     def render(self, name, value, attrs = None):
+    def render(self, name, value, attrs = None):
         if value is None:
             value = ''
         final_attrs = self.build_attrs(attrs, type = 'text', name = name)
@@ -81,8 +81,8 @@ class Curwidget(forms.TextInput):
         return mark_safe("<div>%s%s</div>" % (hidden, text))
 
 class CurField(forms.DecimalField):
-    def __init__(self,localize = True, initial = '0',widget=Curwidget, *args, **kwargs):
-        super(CurField, self).__init__(localize = localize, initial = initial,widget=widget,*args, **kwargs)
+    def __init__(self, localize = True, initial = '0', widget = Curwidget, *args, **kwargs):
+        super(CurField, self).__init__(localize = localize, initial = initial, widget = widget, *args, **kwargs)
 
 class ImportForm(forms.Form):
     error_css_class = error_css_class
@@ -172,8 +172,8 @@ class Ope_titre_addForm(forms.Form):
     titre = forms.ModelChoiceField(Titre.objects.all())
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
-    nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = CurField()
+    nombre = forms.DecimalField(initial = '0')
+    cours = CurField(initial = '1')
     #nom_nouveau_titre = forms.CharField(required = False)
 
 class Ope_titreForm(forms.ModelForm):
@@ -186,7 +186,7 @@ class Ope_titreForm(forms.ModelForm):
     titre = ReadonlyField('titre')
     compte = ReadonlyField('compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = CurField()
+    cours = CurField(initial = '0')
     date = DateFieldgsb()
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -207,5 +207,5 @@ class MajCoursform(forms.Form):
     required_css_class = required_css_class
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = DateFieldgsb()
-    cours = CurField()
+    cours = CurField(initial = '0')
 

@@ -310,9 +310,16 @@ def ope_titre_detail(request, pk):
     '''
     ope = get_object_or_404(Ope_titre, pk = pk)
     if request.method == 'POST':
-        form = gsb_forms.Ope_titreForm(request.POST,instance=ope)
+        form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
             form.save()
+            if form.has_changed():
+                cours = form.cleaned_data['cours']
+                nb = form.cleaned_data['nombre']
+                ope.ope.date = form.cleaned_data['date']
+                ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
+                ope.ope.note = "%s@%s" % (nb, cours)
+                ope.ope.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
         form = gsb_forms.Ope_titreForm(instance = ope)
