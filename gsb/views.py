@@ -42,39 +42,6 @@ def index(request):
         })
     return HttpResponse(t.render(c))
 
-def cpt_titre_espece(request, cpt_id, date_limite = False):
-    '''view qui affiche la liste des operations especes d'un compte titre cpt_id
-    si date_limite, utilise la date limite sinon affiche toute les ope espece'''
-    c = get_object_or_404(Compte_titre, pk = cpt_id)
-    if date_limite:
-        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
-        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
-        nbvielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
-    else:
-        date_limite = datetime.datetime.fromtimestamp(0).date()
-        nbvielles = 0
-        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date')
-    template = loader.get_template('gsb/cpt_placement_espece.djhtm')
-    return HttpResponse(
-        template.render(
-            RequestContext(
-                request,
-                {
-                    'compte': c,
-                    'list_ope': q,
-                    'titre': "%s: Especes" % c.nom,
-                    'solde': super(Compte_titre, c).solde,
-                    'date_limite':date_limite,
-                    'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
-                    'nbvielles': nbvielles,
-                }
-            )
-        )
-    )
-
-
-
-
 def cpt_detail(request, cpt_id):
     '''
     view qui affiche la liste des operation de ce compte
@@ -269,11 +236,42 @@ def maj_cours(request, pk):
     return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form})
 
 @login_required
+def cpt_titre_espece(request, cpt_id, date_limite = False):
+    '''view qui affiche la liste des operations especes d'un compte titre cpt_id
+    si date_limite, utilise la date limite sinon affiche toute les ope espece'''
+    c = get_object_or_404(Compte_titre, pk = cpt_id)
+    if date_limite:
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
+        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
+        nbvielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
+    else:
+        date_limite = datetime.datetime.fromtimestamp(0).date()
+        nbvielles = 0
+        q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date')
+    template = loader.get_template('gsb/cpt_placement_espece.djhtm')
+    return HttpResponse(
+        template.render(
+            RequestContext(
+                request,
+                {
+                    'compte': c,
+                    'list_ope': q,
+                    'titre': "%s: Especes" % c.nom,
+                    'solde': super(Compte_titre, c).solde,
+                    'date_limite':date_limite,
+                    'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
+                    'nbvielles': nbvielles,
+                }
+            )
+        )
+    )
+
+@login_required
 def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
     '''view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si date_limite, utilise la date limite sinon affiche toute les ope '''
-    titre = get_object_or_404(Titre, pk = titre_id)
-    cpt = get_object_or_404(Compte, pk = cpt_id)
+    titre = get_object_or_404(Titre.objects.select_related(), pk = titre_id)
+    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
         date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
         q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(titre = titre)
@@ -295,7 +293,9 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
                     'date_limite':date_limite,
                     'nbrapp': 0,
                     'nbvielles': nbvielles,
-                    'tit':titre
+                    'tit':titre,
+                    'nb_titre':titre.nb(cpt)
+#                    'nb_titre':titre.nb()
                 }
             )
         )
@@ -335,7 +335,8 @@ def ope_titre_delete(request, pk):
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
 
 @login_required
-def ope_titre_create(request, cpt_id, sens):    
+def ope_titre_create(request, cpt_id, sens):
+    cpt = get_object_or_404(Compte, pk = cpt_id)    
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_addForm(request.POST)
         if form.is_valid():
@@ -356,13 +357,13 @@ def ope_titre_create(request, cpt_id, sens):
                              prix = form.cleaned_data['cours'],
                              date = form.cleaned_data['date'],
                              virement_de = virement)
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':compte.id}))
     else:
-        cpt = get_object_or_404(Compte, pk = cpt_id)
         form = gsb_forms.Ope_titre_addForm(initial = {'compte_titre': cpt})
-        if sens == 'achat':
-            titre = u' nouvel achat sur %s' % cpt.nom
-        else:
-            titre = u' nouvelle vente sur %s' % cpt.nom
+    if sens == 'achat':
+        titre = u' nouvel achat sur %s' % cpt.nom
+    else:
+        titre = u' nouvelle vente sur %s' % cpt.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {   'titre_long':titre,
                'titre':u'modification',

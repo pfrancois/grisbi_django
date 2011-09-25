@@ -375,7 +375,7 @@ class Compte_titre(Compte):
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_ost,
-                                notes = "achat %s@%s" % (nombre, prix),
+                                notes = "%s@%s" % (nombre, prix),
                                 moyen = None,
                                 automatique = True,
                                 compte = self,
@@ -385,7 +385,7 @@ class Compte_titre(Compte):
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_frais,
-                                notes = "frais achat %s@%s" % (nombre, prix),
+                                notes = "frais %s@%s" % (nombre, prix),
                                 moyen = None,
                                 automatique = True
                                 )
@@ -413,6 +413,8 @@ class Compte_titre(Compte):
         """
 
         self.alters_data = True
+        if nombre > 0:
+            nombre = nombre * -1
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
@@ -425,7 +427,7 @@ class Compte_titre(Compte):
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
                                 tiers = titre.tiers,
                                 cat = cat_ost,
-                                notes = "vente %s@%s" % (nombre, prix),
+                                notes = "%s@%s" % (nombre, prix),
                                 moyen = None,
                                 automatique = True
                                 )
@@ -440,7 +442,7 @@ class Compte_titre(Compte):
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_frais,
-                                notes = "frais vente %s@%s" % (nombre, prix),
+                                notes = "frais %s@%s" % (nombre, prix),
                                 moyen = None,
                                 automatique = True
                                 )
@@ -485,7 +487,7 @@ class Compte_titre(Compte):
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
                                 tiers = titre.tiers,
                                 cat = cat_frais,
-                                notes = "frais revenu %s@%s" % (montant),
+                                notes = "frais revenu",
                                 moyen = None,
                                 automatique = True
                                 )
@@ -495,6 +497,7 @@ class Compte_titre(Compte):
 
         else:
             raise TypeError("pas un titre")
+        
     @property
     def solde(self):
         """renvoie le solde"""
@@ -555,7 +558,7 @@ class Ope_titre(models.Model):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
             raise TypeError("pas un compte titre")
-        nombre = Ope_titre.objects.filter(compte = compte, titre = titre).aggregate(nombre = models.Sum('nombre'))['nombre']
+        nombre = Ope_titre.objects.filter(compte__id = compte.id, titre__id = titre.id).aggregate(nombre = models.Sum('nombre'))['nombre']
         if not nombre:
             return 0
         else:
@@ -567,7 +570,6 @@ class Ope_titre(models.Model):
             raise TypeError("pas un titre")
         if not isinstance(compte, Compte_titre):
             raise TypeError("pas un compte titre")
-
         valeur = Ope.objects.filter(compte = compte, tiers = titre.tiers).aggregate(invest = models.Sum('montant'))['invest']
         if not valeur:
             return 0

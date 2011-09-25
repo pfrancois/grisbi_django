@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers, Ope_titre
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers, Ope_titre, Ib, Rapp
 #from mysite.gsb import widgets
 from django.conf import settings
 import datetime
@@ -19,8 +19,8 @@ class dateinputgsb(forms.DateInput):
         js = ("js/basiccalendar.js",)
         css = {'all':('css/calendar.css',)}
 
-    def __init__(self, attrs = {}, format = None): #@UnusedVariable
-        super(dateinputgsb, self).__init__(attrs = {'class': 'vDateField', 'size': '10'}, format = format)
+    def __init__(self, attrs = None): #@UnusedVariable
+        super(dateinputgsb, self).__init__(attrs)
     def render(self, name, value, attrs = None):
         if value is None:
             value = ''
@@ -36,8 +36,37 @@ class dateinputgsb(forms.DateInput):
 class datefieldgsb(forms.DateField):
     def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):  
         super(datefieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = dateinputgsb, *args, **kwargs)
+class Readonlywidget(forms.Widget):
+    text = ''
+    is_hidden = False
 
+    def render(self, name, value, attrs = None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type = 'hidden', name = name)
+        if value != '':
+            # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = force_unicode(value)
+        hidden = u'<input%s />' % flatatt(final_attrs)
+        text = force_unicode(self.text)
+        return mark_safe("<div>%s%s</div>" % (hidden, text))
+
+class ReadonlyField(forms.Field):
+    widget = Readonlywidget
+    def __init__(self, model = None, *args, **kwargs): #@UnusedVariable
+        self.model = model
+        super(ReadonlyField, self).__init__(*args, **kwargs)
+            
+    def _has_changed(self, initial, data):
+        return False
     
+    def bound_databound_data(self, data, initial):
+        return initial
+    
+    def set_text(self, instance):
+        t = getattr(instance, self.model)
+        self.widget.text = t.__unicode__()
+
 class ImportForm(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
@@ -55,13 +84,14 @@ class OperationForm(forms.ModelForm):
     required_css_class = required_css_class
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), required = False, label = u"Catégorie")
+    ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False, label = u"projet")
     montant = forms.DecimalField(localize = True, initial = '0')
     notes = forms.CharField(widget = forms.TextInput, required = False)
     date = datefieldgsb()
-    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'))
-    #pointe=forms.BooleanField(required=False)
-    moyen = forms.ModelChoiceField(Moyen.objects.all(), required = False)
+    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
+    pointe = forms.BooleanField(required = False, label = u"Opération pointée")
+    rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False, label = u'Rapprochement')
     class Meta:
         model = Ope
         exclude = ('mere', 'jumelle')
@@ -133,17 +163,11 @@ class Ope_titreForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
-        if instance and instance.id:
-            self.fields['titre'].widget.attrs['disabled'] = True
-            self.fields['compte'].widget.attrs['disabled'] = True
+        self.fields['titre'].set_text(instance)
+        self.fields['compte'].set_text(instance)
             
-    def clean_titre(self):
-        return self.instance.titre
-    def clean_compte(self):
-        return self.instance.compte
-
-    titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
-    compte = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
+    titre = ReadonlyField('titre')
+    compte = ReadonlyField('compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = forms.DecimalField(localize = True, initial = '0')
     date = datefieldgsb()
