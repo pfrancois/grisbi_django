@@ -59,18 +59,6 @@ urlpatterns += patterns('mysite.gsb.views',
                         )
 
 
-#les vues relatives aux tiers
-class tierscreateview(CreateView):
-    model = Tiers
-    context_object_name = "tiers"
-    template_name = 'gsb/tiers.djhtm'
-    def get_success_url(self):
-        return reverse('gsb_close')
-urlpatterns += patterns('mysite.gsb.views',
-                        url(r'^tiers/new/$', tierscreateview.as_view(), name = 'gsb_tiers_create'),
-                        url(r'^close/', TemplateView.as_view(template_name = "close.djhtm"), name = "gsb_close"),
-)
-
 #form tester
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
