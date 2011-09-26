@@ -29,22 +29,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 
-def datefr2datesql(s):
-    try:
-        t = time.strptime(str(s), "%d/%m/%Y")
-        return "{annee}-{mois}-{jour}".format(annee = t[0], mois = t[1], jour = t[2])
-    except ValueError:
-        return None
-
-
-def fr2decimal(s):
-    if s == "0,0000000":
-        return decimal.Decimal('0')
-    if s is not None:
-        return decimal.Decimal(str(s).replace(',', '.'))
-    else:
-        return None
-
+from mysite.gsb.utils import datefr2datesql,fr2decimal
 
 class Import_exception(Exception):
     pass
