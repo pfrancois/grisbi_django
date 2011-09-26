@@ -9,8 +9,6 @@ from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 
-
-input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 error_css_class = 'error'
 required_css_class = 'required'
 
