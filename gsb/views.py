@@ -328,12 +328,16 @@ def ope_titre_detail(request, pk):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
         form = gsb_forms.Ope_titreForm(instance = ope)
+    if ope.ope != None:
+        rapp=bool(ope.ope.rapp_id)
+    else:
+        rapp=None
     return render(request, 'gsb/ope_titre_detail.djhtm',
             {   'titre_long':u'opération sur titre %s' % ope.id,
                'titre':u'modification',
                 'form':form,
                 'ope':ope,
-                'rapp': ope.ope.rapp == None}
+                'rapp': rapp}
             )
 
 @login_required

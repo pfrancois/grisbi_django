@@ -37,7 +37,6 @@ class DateFieldgsb(forms.DateField):
 class Readonlywidget(forms.Widget):
     text = ''
     is_hidden = False
-
     def render(self, name, value, attrs = None):
         if value is None:
             value = ''
@@ -53,18 +52,17 @@ class Readonlywidget(forms.Widget):
 
 class ReadonlyField(forms.FileField):
     widget = Readonlywidget
-    def __init__(self, model = None, *args, **kwargs): #@UnusedVariable
+    def __init__(self, model = None,instance=None, *args, **kwargs): #@UnusedVariable
         self.model = model
         forms.Field.__init__(self, *args, **kwargs)
-    def clean(self, value, initial):
-        if self.instance and self.instance.id:
-            return getattr(self.instance, self.model)
-
-    def set_text(self, instance):
         if instance and instance.id:
             self.instance = instance
             t = getattr(instance, self.model)
             self.widget.text = t.__unicode__()
+
+    def clean(self, value, initial):
+        if self.instance and self.instance.id:
+            return getattr(self.instance, self.model)
 
 class Curwidget(forms.TextInput):
     def render(self, name, value, attrs = None):
@@ -117,7 +115,7 @@ class OperationForm(forms.ModelForm):
         if data['tiers'] == None:
             if not data['nouveau_tiers']:
                 self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
-                del data['nouveau_tiers']                    
+                del data['nouveau_tiers']
         if data['moyen'].type == u'd' and data['montant'] > 0:
             data['montant'] = data['montant']* -1
         return data
@@ -194,9 +192,9 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         if data['titre'] == None:
             if not data['nouveau_titre']:
                 self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
-                del data['nouveau_titre']                    
+                del data['nouveau_titre']
         return data
-    
+
 class Ope_titre_add_venteForm(Ope_titre_addForm):
     def __init__(self, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__()
@@ -215,11 +213,9 @@ class Ope_titreForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
-        self.fields['titre'].set_text(instance)
-        self.fields['compte'].set_text(instance)
+        self.fields['titre'] = ReadonlyField('titre',instance)
+        self.fields['compte'] = ReadonlyField('compte',instance)
 
-    titre = ReadonlyField('titre')
-    compte = ReadonlyField('compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = CurField(initial = '0')
     date = DateFieldgsb()
