@@ -10,7 +10,7 @@ if __name__ == "__main__":
     setup_environ(settings)
 
 import logging
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP #@UnusedImport
 from mysite.gsb.models import * #@UnusedWildImport
@@ -22,23 +22,13 @@ from annoying.functions import get_config
 
 
 def test(request):
-    logger = logging.getLogger('gsb.test')
-    logger.debug('test')
-    logger.info(3)
-    logger.critical('attention ce est un test critique')
-    print get_config('ADMIN_EMAIL', 'default@email.com')
-    return render_to_response('gsb/test.djhtm',
-                                            {'titre':"TEST",
-                                                'test':'test'},
-                                            context_instance = RequestContext(request))
+    from mysite.gsb.forms_perso import majPEE
+    if request.method == 'POST':
+        form = majPEE(request.POST)
+    else:
+        form = majPEE()
+    return render(request, 'gsb/achat_PEE.djhtm', {'form':form})
 
 if __name__ == "__main__":
-        c = Compte_titre.objects.get(id = 4)
-        t = Titre.objects.get(nom = "t1")
-        c.achat(titre = t, nombre = 20, date = '2011-01-01', virement_de = Compte.objects.get(id = 1))
-        t.cours_set.create(date = '2011-02-01', valeur = 2)
-        c.vente(t, 10, 3, '2011-06-30', virement_vers = Compte.objects.get(id = 1))
-        print Ope_titre.investi(c, t)
-
-
+    pass
 

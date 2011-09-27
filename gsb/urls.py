@@ -49,7 +49,8 @@ urlpatterns += patterns('mysite.gsb.views',
 #form tester
 if settings.DEBUG:
     from mysite.gsb.form_tester import SomeModelFormPreview
+    import forms_perso
     urlpatterns += patterns('mysite.gsb',
-                            (r'^testform/$', SomeModelFormPreview(gsb_forms.Ope_titre_addForm)),
+                            (r'^testform/$', SomeModelFormPreview(forms_perso.majPEE)),
                             (r'^test$', 'test.test'),
                             )
