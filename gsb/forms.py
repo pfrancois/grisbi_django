@@ -9,8 +9,13 @@ from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 
-error_css_class = 'error'
-required_css_class = 'required'
+class Baseform(forms.Form):
+    error_css_class = 'error'
+    required_css_class = 'required'
+
+class Basemodelform(forms.ModelForm):
+    error_css_class = 'error'
+    required_css_class = 'required'
 
 class Dategsbwidget(forms.DateInput):
     class Media:
@@ -80,9 +85,7 @@ class CurField(forms.DecimalField):
     def __init__(self, localize = True, initial = '0', widget = Curwidget, *args, **kwargs):
         super(CurField, self).__init__(localize = localize, initial = initial, widget = widget, *args, **kwargs)
 
-class ImportForm(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
     ('gsb_0_5_0', 'format grisbi version 0.5.x'),
@@ -92,9 +95,7 @@ class ImportForm(forms.Form):
     ('fusion', 'fusion des données avec le fichier')
     ))
 
-class OperationForm(forms.ModelForm):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class OperationForm(Basemodelform):
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label = None)
@@ -120,9 +121,7 @@ class OperationForm(forms.ModelForm):
             data['montant'] = data['montant']* -1
         return data
 
-class VirementForm(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class VirementForm(Baseform):
     compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
@@ -167,9 +166,7 @@ class VirementForm(forms.Form):
         virement_objet.save()
         return virement_objet.origine
 
-class Ope_titre_addForm(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class Ope_titre_addForm(Baseform):
     date = DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all(), required = False)
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
@@ -183,6 +180,7 @@ class Ope_titre_addForm(forms.Form):
             self._errors['nombre'] = self.error_class([u'le nombre ne peut être nul', ])
             del self.cleaned_data['nombre']
         return self.cleaned_data
+
 class Ope_titre_add_achatForm(Ope_titre_addForm):
     nouveau_titre = forms.CharField(required = False)
     nouvel_isin = forms.CharField(required = False)
@@ -209,34 +207,32 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
             del data['titre']
         return data
 
-class Ope_titreForm(forms.ModelForm):
+class Ope_titreForm(Basemodelform):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.fields['titre'] = ReadonlyField('titre',instance)
         self.fields['compte'] = ReadonlyField('compte',instance)
-
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = CurField(initial = '0')
     date = DateFieldgsb()
-    error_css_class = error_css_class
-    required_css_class = required_css_class
     class Meta:
         model = Ope_titre
 
-class GeneraliteForm(forms.ModelForm):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class GeneraliteForm(Basemodelform):
     class Meta:
         model = Generalite
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
     def __init__(self, *args, **kwargs):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
 
-class MajCoursform(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = DateFieldgsb()
     cours = CurField(initial = '0')
+
+class maj_pee(Basemodelform):
+    class Meta:
+        model = ope_titre
+
 

@@ -48,10 +48,10 @@ def cpt_detail(request, cpt_id):
     @param request:
     @param cpt_id: id du compte demande
     '''
-    c = get_object_or_404(Compte, pk = cpt_id)
+    c = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
     if c.type in ('t',):
-        c = get_object_or_404(Compte_titre, pk = cpt_id)
+        c = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
         titre = True
     else:
         titre = False
@@ -108,7 +108,7 @@ def ope_detail(request, pk):
     @param request:
     @param pk: id de l'ope
     '''
-    ope = get_object_or_404(Ope, pk = pk)
+    ope = get_object_or_404(Ope.objects.select_related(), pk = pk)
     #logger = logging.getLogger('gsb')
     if ope.jumelle is not None:
         #------un virement--------------
@@ -153,7 +153,7 @@ def ope_detail(request, pk):
 @login_required
 def ope_new(request, cpt_id = None):
     if cpt_id:
-        cpt = get_object_or_404(Compte, pk = cpt_id)
+        cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     else:
         cpt = None
     #logger = logging.getLogger('gsb')
@@ -173,7 +173,7 @@ def ope_new(request, cpt_id = None):
             )
     else:
         if not cpt_id:
-            cpt = get_object_or_404(Compte, pk = settings.ID_CPT_M)
+            cpt = get_object_or_404(Compte.objects.select_related(), pk = settings.ID_CPT_M)
         form = gsb_forms.OperationForm(initial = {'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
         return render(request, 'gsb/ope.djhtm',
             {   'titre':u'création',
@@ -185,9 +185,9 @@ def ope_new(request, cpt_id = None):
 @login_required
 def vir_new(request, cpt_id = None):
     if cpt_id:
-        cpt = get_object_or_404(Compte, pk = cpt_id)
+        cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     else:
-        cpt = get_object_or_404(Compte, pk = settings.ID_CPT_M)
+        cpt = get_object_or_404(Compte.objects.select_related(), pk = settings.ID_CPT_M)
     #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(data = request.POST)
@@ -202,7 +202,7 @@ def vir_new(request, cpt_id = None):
                 'cpt_id':cpt_id}
             )
     else:
-        form = gsb_forms.VirementForm(initial = {'compte_origine':get_object_or_404(Compte, pk = settings.ID_CPT_M), 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'compte_destination':cpt, 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
+        form = gsb_forms.VirementForm(initial = {'compte_origine':get_object_or_404(Compte.objects.select_related(), pk = settings.ID_CPT_M), 'moyen_origine':Moyen.objects.filter(type = 'v')[0], 'compte_destination':cpt, 'moyen_destination':Moyen.objects.filter(type = 'v')[0]})
         return render(request, 'gsb/vir.djhtm',
             {   'titre':u'Création',
                'titre_long':u'Création virement interne ',
@@ -212,7 +212,7 @@ def vir_new(request, cpt_id = None):
 
 @login_required
 def ope_delete(request, pk):
-    ope = get_object_or_404(Ope, pk = pk)
+    ope = get_object_or_404(Ope.objects.select_related(), pk = pk)
     if request.method == 'POST':
         if ope.jumelle:
             ope.jumelle.delete()
@@ -223,7 +223,7 @@ def ope_delete(request, pk):
 
 @login_required
 def maj_cours(request, pk):
-    titre = get_object_or_404(Titre, pk = pk)
+    titre = get_object_or_404(Titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
         form = gsb_forms.MajCoursform(request.POST)
         if form.is_valid():
@@ -243,7 +243,7 @@ def maj_cours(request, pk):
 def cpt_titre_espece(request, cpt_id, date_limite = False):
     '''view qui affiche la liste des operations especes d'un compte titre cpt_id
     si date_limite, utilise la date limite sinon affiche toute les ope espece'''
-    c = get_object_or_404(Compte_titre, pk = cpt_id)
+    c = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
         date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
@@ -312,7 +312,7 @@ def ope_titre_detail(request, pk):
     @param request:
     @param pk: id de l'ope
     '''
-    ope = get_object_or_404(Ope_titre, pk = pk)
+    ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
         form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
@@ -342,7 +342,7 @@ def ope_titre_detail(request, pk):
 
 @login_required
 def ope_titre_delete(request, pk):
-    ope = get_object_or_404(Ope_titre, pk = pk)
+    ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
         cpt_id = ope.compte_id
         ope.ope.delete()
@@ -353,7 +353,7 @@ def ope_titre_delete(request, pk):
 
 @login_required
 def ope_titre_achat(request, cpt_id):
-    cpt = get_object_or_404(Compte, pk = cpt_id)
+    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_achatForm(request.POST)
         if form.is_valid():
@@ -390,7 +390,7 @@ def ope_titre_achat(request, cpt_id):
 
 @login_required
 def ope_titre_vente(request, cpt_id):
-    cpt = get_object_or_404(Compte, pk = cpt_id)
+    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_venteForm(request.POST)
         if form.is_valid():
@@ -415,3 +415,7 @@ def ope_titre_vente(request, cpt_id):
                 'cpt':cpt,
                 'sens':'vente'}
             )
+
+from django.forms.models import modelformset_factory
+def maj_pee(request,cpt_id):
+    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
