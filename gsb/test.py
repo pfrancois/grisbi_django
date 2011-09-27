@@ -20,7 +20,6 @@ from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
 from annoying.functions import get_config
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.forms import maj_pee
 from django.forms.models import modelformset_factory
 def test(request):
     cpt_id=6

@@ -194,10 +194,12 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         return data
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self,cpt=None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__()
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
+        if cpt and isinstance(cpt,Compte_titre):
+            self.fields['titre'].queryset=cpt.liste_titre()
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data

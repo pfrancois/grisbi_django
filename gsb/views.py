@@ -353,7 +353,7 @@ def ope_titre_delete(request, pk):
 
 @login_required
 def ope_titre_achat(request, cpt_id):
-    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
+    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_achatForm(request.POST)
         if form.is_valid():
@@ -390,9 +390,9 @@ def ope_titre_achat(request, cpt_id):
 
 @login_required
 def ope_titre_vente(request, cpt_id):
-    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
+    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if request.method == 'POST':
-        form = gsb_forms.Ope_titre_add_venteForm(request.POST)
+        form = gsb_forms.Ope_titre_add_venteForm(request.POST,cpt=cpt)
         if form.is_valid():
             compte = form.cleaned_data['compte_titre']
             if form.cleaned_data['compte_espece']:
@@ -406,7 +406,7 @@ def ope_titre_vente(request, cpt_id):
                          virement_vers = virement)
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt.id}))
     else:
-        form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpt})
+        form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpt},cpt=cpt)
     titre = u' nouvelle vente sur %s' % cpt.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {   'titre_long':titre,

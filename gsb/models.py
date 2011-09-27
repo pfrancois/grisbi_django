@@ -533,6 +533,9 @@ class Compte_titre(Compte):
             solde_titre = solde_titre + titre.encours(self)
         return solde_titre
 
+    def liste_titre(self):
+        return self.titre.all().distinct()
+
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
