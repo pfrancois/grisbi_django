@@ -231,8 +231,3 @@ class MajCoursform(Baseform):
     date = DateFieldgsb()
     cours = CurField(initial = '0')
 
-class maj_pee(Basemodelform):
-    class Meta:
-        model = ope_titre
-
-

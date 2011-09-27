@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours, Tiers
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours, Tiers, Ope_titre
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -415,7 +415,3 @@ def ope_titre_vente(request, cpt_id):
                 'cpt':cpt,
                 'sens':'vente'}
             )
-
-from django.forms.models import modelformset_factory
-def maj_pee(request,cpt_id):
-    cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)

@@ -19,15 +19,18 @@ from django.utils.encoding import smart_unicode #@UnusedImport
 from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
 from annoying.functions import get_config
-
-
+from django.shortcuts import render, get_object_or_404
+from mysite.gsb.forms import maj_pee
+from django.forms.models import modelformset_factory
 def test(request):
-    from mysite.gsb.forms_perso import majPEE
+    cpt_id=6
+    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
+    formset=modelformset_factory(Ope_titre, max_num=4, extra=4)
     if request.method == 'POST':
-        form = majPEE(request.POST)
+        form = modelformset_factory(request.POST)
     else:
-        form = majPEE()
-    return render(request, 'gsb/achat_PEE.djhtm', {'form':form})
+        form = formset(queryset=Ope_titre.objects.none())
+    return render(request, 'gsb/test.djhtm', {'formset':form,'titre':'test'})
 
 if __name__ == "__main__":
     pass
