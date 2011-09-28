@@ -79,11 +79,41 @@ class Curwidget(forms.TextInput):
             final_attrs['value'] = force_unicode(value)
         hidden = u'<input%s />' % flatatt(final_attrs)
         text = force_unicode("&#8364;")
-        return mark_safe("<div>%s%s</div>" % (hidden, text))
+        return mark_safe("<span>%s%s</span>" % (hidden, text))
 
 class CurField(forms.DecimalField):
     def __init__(self, localize = True, initial = '0', widget = Curwidget, *args, **kwargs):
         super(CurField, self).__init__(localize = localize, initial = initial, widget = widget, *args, **kwargs)
+
+class Titrewidget(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = (forms.TextInput(attrs=attrs,),
+                   Curwidget(attrs=attrs,))
+        super(Titrewidget, self).__init__(widgets, attrs)
+    def decompress(self, value):
+        if value:
+            s=force_unicode(value)
+            s=s.partition('@')
+            if s[1]:#TODO gestion des csl
+                return[s[0],s[2]]
+            else:
+                return [0,0]
+        else:
+            return [0,0]
+
+
+class TitreField(forms.MultiValueField):
+    def __init__(self, *args, **kwargs):
+        fields = (
+            forms.DecimalField(initial = '0',label='nb'),
+            CurField(label='cur')
+            )
+        super(TitreField, self).__init__(fields,widget=Titrewidget(), *args, **kwargs)
+    def compress(self, data_list):
+        if data_list:
+            return "%s@%s"%(data_list[0],data_list[1])
+        else:
+            return None
 
 class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
@@ -233,3 +263,5 @@ class MajCoursform(Baseform):
     date = DateFieldgsb()
     cours = CurField(initial = '0')
 
+class test(Baseform):
+    f = TitreField()

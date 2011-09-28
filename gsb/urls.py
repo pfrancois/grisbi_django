@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import patterns, url, include
 from django.views.generic import RedirectView
 import mysite.gsb.forms as gsb_forms
 from django.conf import settings
@@ -23,7 +23,7 @@ urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url = '/static/img/favicon.ico')),
                         url(r'^maj_cours/(?P<pk>\d+)$', 'mysite.gsb.views.maj_cours', name = 'maj_cours')
                         )
- 
+
 #les vues relatives aux operations
 urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/(?P<pk>\d+)/delete', 'ope_delete', name = 'gsb_ope_delete'),
@@ -44,13 +44,20 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/achat', 'ope_titre_achat', name = "cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente', 'ope_titre_vente', name = "cpt_titre_vente"),
                         )
-
-
-#form tester
-if settings.DEBUG:
-    from mysite.gsb.form_tester import SomeModelFormPreview
+#gestion de mes trucs perso
+try:
     import forms_perso
+    urlpatterns +=patterns('',
+                        (r'^perso/', include(forms_perso))
+                        )
+    perso=True
+except ImportError:
+    perso=False
+#form tester
+if settings.DEBUG and perso:
+    from mysite.gsb.form_tester import SomeModelFormPreview
     urlpatterns += patterns('mysite.gsb',
-                            (r'^testform/$', SomeModelFormPreview(forms_perso.majPEE)),
+                            (r'^testform/$', SomeModelFormPreview(gsb_forms.test)),
                             (r'^test$', 'test.test'),
                             )
+

@@ -544,14 +544,14 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default = 1, max_digits = 15, decimal_places = 5)
     invest = CurField(default = 0, editable = False, max_digits = 15, decimal_places = 5)
-    ope = models.OneToOneField('Ope', editable = False, null = True)#null=true car j'ai des operations sans lien
+    ope = models.OneToOneField('Ope', editable = False, null = True, on_delete=models.CASCADE)#null=true car j'ai des operations sans lien
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['compte']
     def save(self, *args, **kwargs):
-        self.invest = self.nombre * self.cours
+        self.invest =decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         super(Ope_titre, self).save(*args, **kwargs)
     @staticmethod
     def nb(compte, titre):

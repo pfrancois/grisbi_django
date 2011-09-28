@@ -15,12 +15,12 @@ register = template.Library()
 @register.filter()
 def cur(value, symbol = None):
     '''
-    affiche le montant evc son symbole monetaire et comme il faut pour les virgules 
+    affiche le montant evc son symbole monetaire et comme il faut pour les virgules
     @param symbol: symbole monetaire
     @type symbol: string
     '''
     if symbol == None:
-        symbol = settings.DEVISE_GENERALE  
+        symbol = settings.DEVISE_GENERALE
     if symbol == 'EUR':
         symbol = "&#8364;"
     pos_inf = 1e200 * 1e200
@@ -39,8 +39,9 @@ def cur(value, symbol = None):
             d = Decimal(force_unicode(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             return u''
-    p = int(2)
-    return mark_safe("%s %s" % (formats.number_format(d, abs(p)), symbol))
+    if d<Decimal('0.0000001') and d>Decimal('-0.0000001'):
+        d=0
+    return mark_safe("%s %s" % (formats.number_format(d, 2), symbol))
 cur.is_safe = True
 
 @register.filter()
@@ -56,7 +57,7 @@ centimes.is_safe = True
 @register.simple_tag()
 def dev(symbol = None):
     if symbol == None:
-        symbol = settings.DEVISE_GENERALE  
+        symbol = settings.DEVISE_GENERALE
     if symbol == 'EUR':
         symbol = "&#8364;"
     return symbol
