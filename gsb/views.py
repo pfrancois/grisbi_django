@@ -13,6 +13,7 @@ import decimal
 #import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 
+@login_required
 def index(request):
     """
     view index
@@ -42,6 +43,7 @@ def index(request):
         })
     return HttpResponse(t.render(c))
 
+@login_required
 def cpt_detail(request, cpt_id):
     """
     view qui affiche la liste des operation de ce compte
