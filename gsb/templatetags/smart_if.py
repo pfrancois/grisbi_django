@@ -1,10 +1,22 @@
+'''
+A smarter {% if %} tag for django templates.
+
+While retaining current Django functionality, it also handles equality,
+greater than and less than operators. Some common case examples::
+
+    {% if articles|length >= 5 %}...{% endif %}
+    {% if "ifnotequal tag" != "beautiful" %}...{% endif %}
+'''
+import unittest
 from django import template
 
-__author__ = "SmileyChris"
 
-#==============================================================================
+register = template.Library()
+
+
+#===============================================================================
 # Calculation objects
-#==============================================================================
+#===============================================================================
 
 class BaseCalc(object):
     def __init__(self, var1, var2 = None, negate = False):
@@ -60,6 +72,112 @@ class In(BaseCalc):
         return var1 in var2
 
 
+#===============================================================================
+# Tests
+#===============================================================================
+
+class TestVar(object):
+    """
+    A basic self-resolvable object similar to a Django template variable. Used
+    to assist with tests.
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def resolve(self, context):
+        return self.value
+
+
+class SmartIfTests(unittest.TestCase):
+    def setUp(self):
+        self.true = TestVar(True)
+        self.false = TestVar(False)
+        self.high = TestVar(9000)
+        self.low = TestVar(1)
+
+    def assertCalc(self, calc, context = None):
+        """
+        Test a calculation is True, also checking the inverse "negate" case.
+        """
+        context = context or {}
+        self.assert_(calc.resolve(context))
+        calc.negate = not calc.negate
+        self.assertFalse(calc.resolve(context))
+
+    def assertCalcFalse(self, calc, context = None):
+        """
+        Test a calculation is False, also checking the inverse "negate" case.
+        """
+        context = context or {}
+        self.assertFalse(calc.resolve(context))
+        calc.negate = not calc.negate
+        self.assert_(calc.resolve(context))
+
+    def test_or(self):
+        self.assertCalc(Or(self.true))
+        self.assertCalcFalse(Or(self.false))
+        self.assertCalc(Or(self.true, self.true))
+        self.assertCalc(Or(self.true, self.false))
+        self.assertCalc(Or(self.false, self.true))
+        self.assertCalcFalse(Or(self.false, self.false))
+
+    def test_and(self):
+        self.assertCalc(And(self.true, self.true))
+        self.assertCalcFalse(And(self.true, self.false))
+        self.assertCalcFalse(And(self.false, self.true))
+        self.assertCalcFalse(And(self.false, self.false))
+
+    def test_equals(self):
+        self.assertCalc(Equals(self.low, self.low))
+        self.assertCalcFalse(Equals(self.low, self.high))
+
+    def test_greater(self):
+        self.assertCalc(Greater(self.high, self.low))
+        self.assertCalcFalse(Greater(self.low, self.low))
+        self.assertCalcFalse(Greater(self.low, self.high))
+
+    def test_greater_or_equal(self):
+        self.assertCalc(GreaterOrEqual(self.high, self.low))
+        self.assertCalc(GreaterOrEqual(self.low, self.low))
+        self.assertCalcFalse(GreaterOrEqual(self.low, self.high))
+
+    def test_in(self):
+        list_ = TestVar([1, 2, 3])
+        invalid_list = TestVar(None)
+        self.assertCalc(In(self.low, list_))
+        self.assertCalcFalse(In(self.low, invalid_list))
+
+    def test_parse_bits(self):
+        var = IfParser([True]).parse()
+        self.assert_(var.resolve({}))
+        var = IfParser([False]).parse()
+        self.assertFalse(var.resolve({}))
+
+        var = IfParser([False, 'or', True]).parse()
+        self.assert_(var.resolve({}))
+
+        var = IfParser([False, 'and', True]).parse()
+        self.assertFalse(var.resolve({}))
+
+        var = IfParser(['not', False, 'and', 'not', False]).parse()
+        self.assert_(var.resolve({}))
+
+        var = IfParser([1, '=', 1]).parse()
+        self.assert_(var.resolve({}))
+
+        var = IfParser([1, '!=', 1]).parse()
+        self.assertFalse(var.resolve({}))
+
+        var = IfParser([3, '>', 2]).parse()
+        self.assert_(var.resolve({}))
+
+        var = IfParser([1, '<', 2]).parse()
+        self.assert_(var.resolve({}))
+
+        var = IfParser([2, 'not', 'in', [2, 3]]).parse()
+        self.assertFalse(var.resolve({}))
+
+
 OPERATORS = {
     '=': (Equals, True),
     '==': (Equals, True),
@@ -72,7 +190,6 @@ OPERATORS = {
     'and': (And, True),
     'in': (In, True),
 }
-BOOL_OPERATORS = ('or', 'and')
 
 
 class IfParser(object):
@@ -94,28 +211,31 @@ class IfParser(object):
     def parse(self):
         if self.at_end():
             raise self.error_class('No variables provided.')
-        var1 = self.get_bool_var()
+        var1 = self.get_var()
         while not self.at_end():
-            op, negate = self.get_operator()
-            var2 = self.get_bool_var()
+            token = self.get_token()
+            if token == 'not':
+                if self.at_end():
+                    raise self.error_class('No variable provided after "not".')
+                token = self.get_token()
+                negate = True
+            else:
+                negate = False
+            if token not in OPERATORS:
+                raise self.error_class('%s is not a valid operator.' % token)
+            if self.at_end():
+                raise self.error_class('No variable provided after "%s"' % token)
+            op, true = OPERATORS[token]
+            if not true:
+                negate = not negate
+            var2 = self.get_var()
             var1 = op(var1, var2, negate = negate)
         return var1
 
-    def get_token(self, eof_message = None, lookahead = False):
-        negate = True
-        token = None
-        pos = self.pos
-        while token is None or token == 'not':
-            if pos >= self.len:
-                if eof_message is None:
-                    raise self.error_class()
-                raise self.error_class(eof_message)
-            token = self.tokens[pos]
-            negate = not negate
-            pos += 1
-        if not lookahead:
-            self.pos = pos
-        return token, negate
+    def get_token(self):
+        token = self.tokens[self.pos]
+        self.pos += 1
+        return token
 
     def at_end(self):
         return self.pos >= self.len
@@ -123,50 +243,19 @@ class IfParser(object):
     def create_var(self, value):
         return TestVar(value)
 
-    def get_bool_var(self):
-        """
-        Returns either a variable by itself or a non-boolean operation (such as
-        ``x == 0`` or ``x < 0``).
-
-        This is needed to keep correct precedence for boolean operations (i.e.
-        ``x or x == 0`` should be ``x or (x == 0)``, not ``(x or x) == 0``).
-        """
-        var = self.get_var()
-        if not self.at_end():
-            op_token = self.get_token(lookahead = True)[0]
-            if isinstance(op_token, basestring) and (op_token not in
-                                                     BOOL_OPERATORS):
-                op, negate = self.get_operator()
-                return op(var, self.get_var(), negate = negate)
-        return var
-
     def get_var(self):
-        token, negate = self.get_token('Reached end of statement, still '
-                                       'expecting a variable.')
-        if isinstance(token, basestring) and token in OPERATORS:
-            raise self.error_class('Expected variable, got operator (%s).' % 
-                                   token)
-        var = self.create_var(token)
-        if negate:
-            return Or(var, negate = True)
-        return var
-
-    def get_operator(self):
-        token, negate = self.get_token('Reached end of statement, still '
-                                       'expecting an operator.')
-        if not isinstance(token, basestring) or token not in OPERATORS:
-            raise self.error_class('%s is not a valid operator.' % token)
-        if self.at_end():
-            raise self.error_class('No variable provided after "%s".' % token)
-        op, true = OPERATORS[token]
-        if not true:
-            negate = not negate
-        return op, negate
+        token = self.get_token()
+        if token == 'not':
+            if self.at_end():
+                raise self.error_class('No variable provided after "not".')
+            token = self.get_token()
+            return Or(self.create_var(token), negate = True)
+        return self.create_var(token)
 
 
-#==============================================================================
+#===============================================================================
 # Actual templatetag code.
-#==============================================================================
+#===============================================================================
 
 class TemplateIfParser(IfParser):
     error_class = template.TemplateSyntaxError
@@ -211,8 +300,9 @@ class SmartIfNode(template.Node):
         return nodes
 
 
+@register.tag('if')
 def smart_if(parser, token):
-    """
+    '''
     A smarter {% if %} tag for django templates.
 
     While retaining current Django functionality, it also handles equality,
@@ -226,7 +316,7 @@ def smart_if(parser, token):
 
     All supported operators are: ``or``, ``and``, ``in``, ``=`` (or ``==``),
     ``!=``, ``>``, ``>=``, ``<`` and ``<=``.
-    """
+    '''
     bits = token.split_contents()[1:]
     var = TemplateIfParser(parser, bits).parse()
     nodelist_true = parser.parse(('else', 'endif'))
@@ -238,8 +328,6 @@ def smart_if(parser, token):
         nodelist_false = None
     return SmartIfNode(var, nodelist_true, nodelist_false)
 
-try:
-    if int(django.get_version()[-5:]) < 11806:
-        register.tag('if', smart_if)
-except ValueError:
-    pass
+
+if __name__ == '__main__':
+    unittest.main()
