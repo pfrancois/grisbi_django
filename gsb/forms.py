@@ -144,6 +144,7 @@ class OperationForm(Basemodelform):
         data = self.cleaned_data
         if data['tiers'] is None:
             if not data['nouveau_tiers']:
+                self._errors['tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'", ])
                 self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'].type == u'd' and data['montant'] > 0:
