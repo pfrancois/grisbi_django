@@ -1,7 +1,6 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers, Ope_titre, Ib, Rapp
-#from mysite.gsb import widgets
+from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp
 from django.conf import settings
 import datetime
 #import decimal
@@ -94,7 +93,7 @@ class Titrewidget(forms.MultiWidget):
         if value:
             s=force_unicode(value)
             s=s.partition('@')
-            if s[1]:#TODO gestion des csl
+            if s[1]:
                 return[s[0],s[2]]
             else:
                 return [0,0]
@@ -143,12 +142,12 @@ class OperationForm(Basemodelform):
     def clean(self):
         super(OperationForm, self).clean()
         data = self.cleaned_data
-        if data['tiers'] == None:
+        if data['tiers'] is None:
             if not data['nouveau_tiers']:
                 self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'].type == u'd' and data['montant'] > 0:
-            data['montant'] = data['montant']* -1
+            data['montant'] *= -1
         return data
 
 class VirementForm(Baseform):
@@ -160,8 +159,8 @@ class VirementForm(Baseform):
     date = DateFieldgsb()
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
-    #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
-    #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)#TODO
+    #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
+    #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
     piece_comptable_compte_origine = forms.CharField(required = False)
     piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
@@ -182,7 +181,7 @@ class VirementForm(Baseform):
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
     def save(self):
-        if self.ope == None:
+        if self.ope is None:
             virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
         else:
             virement_objet = Virement(self.ope)
@@ -206,7 +205,7 @@ class Ope_titre_addForm(Baseform):
     #nom_nouveau_titre = forms.CharField(required = False)
     def clean(self):
         super(Ope_titre_addForm, self).clean()
-        if self.cleaned_data['nombre'] == 0:
+        if not self.cleaned_data['nombre']:
             self._errors['nombre'] = self.error_class([u'le nombre ne peut être nul', ])
             del self.cleaned_data['nombre']
         return self.cleaned_data
@@ -217,15 +216,15 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
-        if data['titre'] == None:
+        if data['titre'] is None:
             if not data['nouveau_titre']:
                 self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
                 del data['nouveau_titre']
         return data
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
-    def __init__(self,cpt=None, *args, **kwargs):
-        super(Ope_titre_add_venteForm, self).__init__()
+    def __init__(self, cpt=None, *args, **kwargs):
+        super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
         if cpt and isinstance(cpt,Compte_titre):
@@ -246,7 +245,7 @@ class Ope_titreForm(Basemodelform):
         self.fields['titre'] = ReadonlyField('titre',instance)
         self.fields['compte'] = ReadonlyField('compte',instance)
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = CurField(initial = '0')
+    cours = CurField()
     date = DateFieldgsb()
     class Meta:
         model = Ope_titre
@@ -261,7 +260,7 @@ class GeneraliteForm(Basemodelform):
 class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = DateFieldgsb()
-    cours = CurField(initial = '0')
+    cours = CurField()
 
 class test(Baseform):
     f = TitreField()

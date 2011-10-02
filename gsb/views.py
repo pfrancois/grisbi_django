@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Ope_titre, Cours, Tiers, Ope_titre
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
@@ -25,9 +25,9 @@ def index(request):
         bq = Compte.objects.filter(type__in = ('b', 'e', 'p'), ouvert = True).select_related()
         pl = Compte_titre.objects.filter(ouvert = True).select_related()
     total_bq = Ope.objects.filter(mere__exact = None, compte__type__in = ('b', 'e', 'p')).aggregate(solde = models.Sum('montant'))['solde']
-    if total_bq == None:
-        total_bq = decimal.Decimal('0')
-    total_pla = decimal.Decimal('0')
+    if total_bq is None:
+        total_bq = decimal.Decimal()
+    total_pla = decimal.Decimal()
     for p in pl:
         total_pla = total_pla + p.solde
     nb_clos = len(Compte.objects.filter(ouvert = False))
@@ -43,11 +43,11 @@ def index(request):
     return HttpResponse(t.render(c))
 
 def cpt_detail(request, cpt_id):
-    '''
+    """
     view qui affiche la liste des operation de ce compte
     @param request:
     @param cpt_id: id du compte demande
-    '''
+    """
     c = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
     if c.type in ('t',):
@@ -103,11 +103,11 @@ def cpt_detail(request, cpt_id):
 
 @login_required
 def ope_detail(request, pk):
-    '''
+    """
     view, une seule operation
     @param request:
     @param pk: id de l'ope
-    '''
+    """
     ope = get_object_or_404(Ope.objects.select_related(), pk = pk)
     #logger = logging.getLogger('gsb')
     if ope.jumelle is not None:
@@ -152,6 +152,9 @@ def ope_detail(request, pk):
 
 @login_required
 def ope_new(request, cpt_id = None):
+    """
+    creation d'une nouvelle operation
+    """
     if cpt_id:
         cpt = get_object_or_404(Compte.objects.select_related(), pk = cpt_id)
     else:
@@ -160,6 +163,10 @@ def ope_new(request, cpt_id = None):
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
+            if not form.cleaned_data['tiers']:
+                form.instance.tiers = Tiers.objects.get_or_create(nom = form.cleaned_data['nouveau_tiers'],
+                                                 defaults = {'nom':form.cleaned_data['nouveau_tiers'], }
+                                                )[0]
             ope = form.save()
             #TODO message
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
@@ -241,8 +248,8 @@ def maj_cours(request, pk):
 
 @login_required
 def cpt_titre_espece(request, cpt_id, date_limite = False):
-    '''view qui affiche la liste des operations especes d'un compte titre cpt_id
-    si date_limite, utilise la date limite sinon affiche toute les ope espece'''
+    """view qui affiche la liste des operations especes d'un compte titre cpt_id
+    si date_limite, utilise la date limite sinon affiche toute les ope espece"""
     c = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
         date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
@@ -272,8 +279,8 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
 
 @login_required
 def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
-    '''view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
-    si date_limite, utilise la date limite sinon affiche toute les ope '''
+    """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
+    si date_limite, utilise la date limite sinon affiche toute les ope """
     titre = get_object_or_404(Titre.objects.select_related(), pk = titre_id)
     cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
@@ -307,16 +314,16 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
 
 @login_required
 def ope_titre_detail(request, pk):
-    '''
+    """
     view, une seule operation
     @param request:
     @param pk: id de l'ope
-    '''
+    """
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
         form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
-            if ope.ope.rapp == None:
+            if ope.ope.rapp is None:
                 form.save()
             if form.has_changed():
                 cours = form.cleaned_data['cours']
@@ -328,7 +335,7 @@ def ope_titre_detail(request, pk):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
         form = gsb_forms.Ope_titreForm(instance = ope)
-    if ope.ope != None:
+    if ope.ope is not None:
         rapp=bool(ope.ope.rapp_id)
     else:
         rapp=None

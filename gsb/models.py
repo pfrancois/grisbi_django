@@ -5,7 +5,6 @@ import datetime
 import decimal
 from django.db import transaction
 from django.conf import settings
-#from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
 
@@ -21,14 +20,9 @@ class CurField(models.DecimalField):
     """
     un champ decimal mais defini pour les monnaies
     """
-
     description = "A Monetary value"
-
-
     def __init__(self, verbose_name = None, name = None, max_digits = 15, decimal_places = 3, default = 0.000, **kwargs):
         super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default = default, **kwargs)
-
-
     def get_internal_type(self):
         return "DecimalField"
 
@@ -118,7 +112,7 @@ class Titre(models.Model):
 
     def save(self, *args, **kwargs):
         self.alters_data = True
-        if (not self.tiers):
+        if not self.tiers:
             self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
         if self.tiers.notes != "%s@%s" % (self.isin, self.type):
             self.tiers.notes = "%s@%s" % (self.isin, self.type)
@@ -314,7 +308,7 @@ class Compte(models.Model):
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne deux compte, verifie avant que c'est le meme type
-        @param Compte
+        @param new
         """
         self.alters_data = True
         if type(new) != type(self):
@@ -329,7 +323,7 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('mysite.gsb.views.cpt_detail', (), {'cpt_id':str(self.id)})
+        return 'mysite.gsb.views.cpt_detail', (), {'cpt_id':str(self.id)}
 
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'
@@ -351,12 +345,12 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None):
         """fonction pour achat de titre:
-        @param Titre
-        @param int
-        @param decimal
+        @param titre
+        @param nombre
+        @param prix
         @param date
-        @param decimal
-        @param Compte
+        @param frais
+        @param virement_de
         """
         self.alters_data = True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
@@ -396,24 +390,23 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def vente(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
         """fonction pour vente de titre:
-        @param Titre
-        @param int
-        @param decimal
+        @param titre
+        @param nombre
+        @param prix
         @param date
-        @param decimal
-        @param Compte
+        @param frais
+        @param virement_vers
         """
-
         self.alters_data = True
         if nombre > 0:
-            nombre = nombre * -1
+            nombre *= -1
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
             nb_titre_avant = Ope_titre.nb(titre = titre, compte = self)
             if not nb_titre_avant:
-                raise Titre.doesNotExist('titre pas en portefeuille')
+                raise Titre.DoesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             ope = self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
@@ -451,20 +444,14 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def revenu(self, titre, montant = 1, date = datetime.date.today(), frais = 0, virement_vers = None):
-        """fonction pour ost de titre:
-        @param Titre
-        @param decimal
-        @param date
-        @param decimal
-        @param Compte
-        """
+        """fonction pour ost de titre:"""
         self.alters_data = True
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
             if not Ope_titre.nb(titre = titre, compte = self):
-                raise Titre.doesNotExist('titre pas en portefeuille')
+                raise Titre.DoesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(montant)),
@@ -501,9 +488,7 @@ class Compte_titre(Compte):
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        """fusionnne deux compte_titre
-        @param Compte_titre
-        """
+        """fusionnne deux compte_titre"""
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -516,7 +501,7 @@ class Compte_titre(Compte):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('cpt_detail', (), {'pk':str(self.id)})
+        return 'cpt_detail', (), {'pk':str(self.id)}
 
     def save(self, *args, **kwargs):
         """verifie qu'on a pas changé le type de compte"""
@@ -540,10 +525,10 @@ class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte_titre, verbose_name = u"compte titre")
-    nombre = CurField(default = 0, max_digits = 15, decimal_places = 5)
+    nombre = CurField(default = 0,  decimal_places = 5)
     date = models.DateField()
-    cours = CurField(default = 1, max_digits = 15, decimal_places = 5)
-    invest = CurField(default = 0, editable = False, max_digits = 15, decimal_places = 5)
+    cours = CurField(default = 1, decimal_places = 5)
+    invest = CurField(default = 0, editable = False, decimal_places = 5)
     ope = models.OneToOneField('Ope', editable = False, null = True, on_delete=models.CASCADE)#null=true car j'ai des operations sans lien
     class Meta:
         db_table = 'ope_titre'
@@ -579,7 +564,7 @@ class Ope_titre(models.Model):
             return valeur * -1
     @models.permalink
     def get_absolute_url(self):
-        return ('ope_titre_detail', (), {'pk':str(self.id)})
+        return 'ope_titre_detail', (), {'pk':str(self.id)}
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -785,7 +770,7 @@ class Ope(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('gsb_ope_detail', (), {'pk':str(self.id)})
+        return 'gsb_ope_detail', (), {'pk':str(self.id)}
     def clean(self):
         self.alters_data = True
         super(Ope, self).clean()
@@ -863,9 +848,9 @@ class Virement(object):
 
     @staticmethod
     def create(compte_origine, compte_dest, montant, date = None, notes = ""):
-        '''
+        """
         cree un nouveau virement
-        '''
+        """
         if not isinstance(compte_origine, Compte):
             raise TypeError('pas ope')
         if not isinstance(compte_dest, Compte):

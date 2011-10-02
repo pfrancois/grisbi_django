@@ -1,24 +1,12 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Cours, Titre, Tiers, Ope_titre, Ib, Rapp
-#from mysite.gsb import widgets
-from django.conf import settings
-import datetime
-#import decimal
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
-from django.forms.util import flatatt
-from forms import Dategsbwidget, DateFieldgsb, Readonlywidget, ReadonlyField, CurField,Curwidget,Titrewidget,TitreField
-from django.template import RequestContext, loader
-from django.http import HttpResponse, HttpResponseRedirect
+from mysite.gsb.models import Compte_titre, Titre
+from forms import  DateFieldgsb, TitreField
+from django.http import  HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import render, get_object_or_404
-import mysite.gsb.forms as gsb_forms
-from django.db import models
+from django.shortcuts import render
 from decimal import Decimal
 from django.conf.urls.defaults import patterns, url
-from django.core.exceptions import ValidationError
-#import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 
 #-----------les urls.py

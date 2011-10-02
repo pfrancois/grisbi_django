@@ -98,7 +98,7 @@ def import_gsb_050(nomfich, efface_table = True):
             #test puis creation du titre (et donc du tiers automatiquement)
             try:
                 Tiers.objects.get(nom = xml_tiers.get('Nom'))
-            except:
+            except Tiers.DoesNotExist:
                 nb_titre += 1
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
@@ -219,13 +219,13 @@ def import_gsb_050(nomfich, efface_table = True):
         nb_moyen = 0
         type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type in ('t',):
-            logger.debug("cpt_titre %s" % (xml_cpt.find('Details/Nom').text))
+            logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte_titre.objects.get_or_create(nom = xml_cpt.find('Details/Nom').text, defaults = {
             'nom':xml_cpt.find('Details/Nom').text,
             'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
         })
         else:
-            logger.debug("cpt %s" % (xml_cpt.find('Details/Nom').text))
+            logger.debug("cpt %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom = xml_cpt.find('Details/Nom').text, defaults = {
             'nom':xml_cpt.find('Details/Nom').text,
             'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
@@ -318,9 +318,7 @@ def import_gsb_050(nomfich, efface_table = True):
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info("ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
-            affiche = True
             percent += 1
-
         ope = Ope(compte = ope_cpt,
                    date = ope_date,
                    date_val = ope_date_val, #date de valeur
@@ -377,10 +375,8 @@ def import_gsb_050(nomfich, efface_table = True):
     percent = 1
     for xml_ope in list_ope:
         nb_tot_ope += 1
-        affiche = False
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info("2*ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
-            affiche = True
             percent += 1
         #gestion des virements
         if int(xml_ope.get('Ro')):
@@ -457,5 +453,5 @@ if __name__ == "__main__":
     nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
-    import_gsb_050(nomfich, efface_table = True)
+    import_gsb_050(nomfich)
     logger.info(u'fichier %s importe' % nomfich)
