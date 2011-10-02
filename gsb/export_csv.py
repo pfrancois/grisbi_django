@@ -7,22 +7,21 @@ if __name__ == "__main__":
     setup_environ(settings)
 
 import codecs, csv, cStringIO
-from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre
+from mysite.gsb.models import Compte, Ope
 from mysite.gsb.utils import Format
 import logging
-from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
-import logging
+#from django.conf import settings
 
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
 
-    def __init__(self, f, encoding):
-        self.reader = codecs.getreader(encoding)(f)
+    def __init__(self, fich, encoding):
+        self.reader = codecs.getreader(encoding)(fich)
 
     def __iter__(self):
         return self
@@ -37,9 +36,9 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect = csv.excel, encoding = "utf-8", **kwds):
-        f = UTF8Recoder(f, encoding)
-        self.reader = csv.reader(f, dialect = dialect, **kwds)
+    def __init__(self, fich, dialect = csv.excel, encoding = "utf-8", **kwds):
+        fich = UTF8Recoder(fich, encoding)
+        self.reader = csv.reader(fich, dialect = dialect, **kwds)
 
     def next(self):
         row = self.reader.next()
@@ -55,11 +54,11 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect = csv.excel, encoding = "utf-8", **kwds):
+    def __init__(self, fich, dialect = csv.excel, encoding = "utf-8", **kwds):
         # Redirect output to a queue
         self.queue = cStringIO.StringIO()
         self.writer = csv.writer(self.queue, dialect = dialect, **kwds)
-        self.stream = f
+        self.stream = fich
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
@@ -79,7 +78,7 @@ class UnicodeWriter:
             self.writerow(row)
 
 
-class excel_csv(csv.Dialect):
+class Excel_csv(csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ';'
     quotechar = '"'
@@ -91,10 +90,10 @@ class excel_csv(csv.Dialect):
 
 def _export():
     logger = logging.getLogger('gsb.export')
-    csv.register_dialect("excel_csv", excel_csv)
-    f = cStringIO.StringIO()
+    csv.register_dialect("excel_csv", Excel_csv)
+    fich = cStringIO.StringIO()
     fmt = Format()
-    csv_file = UnicodeWriter(f, encoding = 'iso-8859-15', dialect = excel_csv)
+    csv_file = UnicodeWriter(fich, encoding = 'iso-8859-15', dialect = Excel_csv)
     csv_file.writerow(
         u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
             ';'))
@@ -128,8 +127,8 @@ def _export():
         ligne.append(ope.date.strftime('%Y_%m'))
         csv_file.writerow(ligne)
         if i % 50 == 0:
-            print("ligne %s %s%%" % (ope.id, i / total * 100))
-    return f
+            logger.log("ligne %s %s%%" % (ope.id, i / total * 100))
+    return fich
 
 def export(request):
     nb_compte = Compte.objects.count()

@@ -3,8 +3,8 @@
 test models
 """
 from django.test import TestCase
-from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Titre, Banque, Exercice, Rapp
-from mysite.gsb.models import Cours, Compte_titre, Virement, Ope_titre
+from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
+from mysite.gsb.models import Compte_titre, Virement, Ope_titre
 import datetime, time
 import decimal
 def strpdate(s):

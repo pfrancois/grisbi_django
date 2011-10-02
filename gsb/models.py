@@ -525,18 +525,18 @@ class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte_titre, verbose_name = u"compte titre")
-    nombre = CurField(default = 0,  decimal_places = 5)
+    nombre = CurField(default = 0, decimal_places = 5)
     date = models.DateField()
     cours = CurField(default = 1, decimal_places = 5)
     invest = CurField(default = 0, editable = False, decimal_places = 5)
-    ope = models.OneToOneField('Ope', editable = False, null = True, on_delete=models.CASCADE)#null=true car j'ai des operations sans lien
+    ope = models.OneToOneField('Ope', editable = False, null = True, on_delete = models.CASCADE)#null=true car j'ai des operations sans lien
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['compte']
     def save(self, *args, **kwargs):
-        self.invest =decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
+        self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         super(Ope_titre, self).save(*args, **kwargs)
     @staticmethod
     def nb(compte, titre):

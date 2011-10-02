@@ -29,19 +29,19 @@ def cur(value, symbol = None):
     special_floats = [str(pos_inf), str(neg_inf), str(nan)]
     try:
         input_val = force_unicode(value)
-        d = Decimal(input_val)
+        val_decim = Decimal(input_val)
     except UnicodeEncodeError:
         return u''
     except InvalidOperation:
         if input_val in special_floats:
             return input_val
         try:
-            d = Decimal(force_unicode(float(value)))
+            val_decim = Decimal(force_unicode(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             return u''
-    if d<Decimal('0.0000001') and d>Decimal('-0.0000001'):
-        d=0
-    return mark_safe("%s %s" % (formats.number_format(d, 2), symbol))
+    if val_decim < Decimal('0.0000001') and val_decim > Decimal('-0.0000001'):
+        val_decim = 0
+    return mark_safe("%s %s" % (formats.number_format(val_decim, 2), symbol))
 cur.is_safe = True
 
 @register.filter()

@@ -56,13 +56,13 @@ class Readonlywidget(forms.Widget):
 
 class ReadonlyField(forms.FileField):
     widget = Readonlywidget
-    def __init__(self, model = None,instance=None, *args, **kwargs): #@UnusedVariable
+    def __init__(self, model = None, instance = None, *args, **kwargs): #@UnusedVariable
         self.model = model
         forms.Field.__init__(self, *args, **kwargs)
         if instance and instance.id:
             self.instance = instance
-            t = getattr(instance, self.model)
-            self.widget.text = t.__unicode__()
+            i = getattr(instance, self.model)
+            self.widget.text = i.__unicode__()
 
     def clean(self, value, initial):
         if self.instance and self.instance.id:
@@ -85,32 +85,31 @@ class CurField(forms.DecimalField):
         super(CurField, self).__init__(localize = localize, initial = initial, widget = widget, *args, **kwargs)
 
 class Titrewidget(forms.MultiWidget):
-    def __init__(self, attrs=None):
-        widgets = (forms.TextInput(attrs=attrs,),
-                   Curwidget(attrs=attrs,))
+    def __init__(self, attrs = None):
+        widgets = (forms.TextInput(attrs = attrs,),
+                   Curwidget(attrs = attrs,))
         super(Titrewidget, self).__init__(widgets, attrs)
     def decompress(self, value):
         if value:
-            s=force_unicode(value)
-            s=s.partition('@')
-            if s[1]:
-                return[s[0],s[2]]
+            chaine = force_unicode(value).partition('@')
+            if chaine[1]:
+                return [chaine[0], chaine[2]]
             else:
-                return [0,0]
+                return [0, 0]
         else:
-            return [0,0]
+            return [0, 0]
 
 
 class TitreField(forms.MultiValueField):
     def __init__(self, *args, **kwargs):
         fields = (
-            forms.DecimalField(initial = '0',label='nb'),
-            CurField(label='cur')
+            forms.DecimalField(initial = '0', label = 'nb'),
+            CurField(label = 'cur')
             )
-        super(TitreField, self).__init__(fields,widget=Titrewidget(), *args, **kwargs)
+        super(TitreField, self).__init__(fields, widget = Titrewidget(), *args, **kwargs)
     def compress(self, data_list):
         if data_list:
-            return "%s@%s"%(data_list[0],data_list[1])
+            return "%s@%s" % (data_list[0], data_list[1])
         else:
             return None
 
@@ -148,7 +147,7 @@ class OperationForm(Basemodelform):
                 self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'].type == u'd' and data['montant'] > 0:
-            data['montant'] *= -1
+            data['montant'] = -1 * data['montant']
         return data
 
 class VirementForm(Baseform):
@@ -177,8 +176,8 @@ class VirementForm(Baseform):
     def __init__(self, ope = None, *args, **kwargs):
         self.ope = ope
         if ope:
-            v = Virement(ope)
-            super(VirementForm, self).__init__(initial = v.init_form(), *args, **kwargs)
+            vir = Virement(ope)
+            super(VirementForm, self).__init__(initial = vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
     def save(self):
@@ -224,12 +223,12 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         return data
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
-    def __init__(self, cpt=None, *args, **kwargs):
+    def __init__(self, cpt = None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
-        if cpt and isinstance(cpt,Compte_titre):
-            self.fields['titre'].queryset=cpt.liste_titre()
+        if cpt and isinstance(cpt, Compte_titre):
+            self.fields['titre'].queryset = cpt.liste_titre()
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
@@ -243,8 +242,8 @@ class Ope_titreForm(Basemodelform):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
-        self.fields['titre'] = ReadonlyField('titre',instance)
-        self.fields['compte'] = ReadonlyField('compte',instance)
+        self.fields['titre'] = ReadonlyField('titre', instance)
+        self.fields['compte'] = ReadonlyField('compte', instance)
     nombre = forms.DecimalField(localize = True, initial = '0')
     cours = CurField()
     date = DateFieldgsb()
@@ -262,6 +261,3 @@ class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = DateFieldgsb()
     cours = CurField()
-
-class test(Baseform):
-    f = TitreField()

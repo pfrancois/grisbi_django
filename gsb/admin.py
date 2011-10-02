@@ -23,7 +23,7 @@ def fusion(classe, request, queryset, sens = 'ab'):
             message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, b, a)
             b.fusionne(a)
         classe.message_user(request, message)
-    except:
+    except:#TODO mieux gerer
         classe.message_user(request, u"probleme")
 
 class Cat_admin(admin.ModelAdmin):

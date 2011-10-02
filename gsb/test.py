@@ -18,18 +18,18 @@ from django.utils import formats#@UnusedImport
 from django.utils.encoding import smart_unicode #@UnusedImport
 from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
-from annoying.functions import get_config
+from mysite.annoying.functions import get_config
 from django.shortcuts import render, get_object_or_404
 from django.forms.models import modelformset_factory
 def test(request):
-    cpt_id=6
+    cpt_id = 6
     cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
-    formset=modelformset_factory(Ope_titre, max_num=4, extra=4)
+    formset = modelformset_factory(Ope_titre, max_num = 4, extra = 4)
     if request.method == 'POST':
         form = modelformset_factory(request.POST)
     else:
-        form = formset(queryset=Ope_titre.objects.none())
-    return render(request, 'gsb/test.djhtm', {'formset':form,'titre':'test'})
+        form = formset(queryset = Ope_titre.objects.none())
+    return render(request, 'gsb/test.djhtm', {'formset':form, 'titre':'test'})
 
 if __name__ == "__main__":
     pass

@@ -46,18 +46,18 @@ urlpatterns += patterns('mysite.gsb.views',
                         )
 #gestion de mes trucs perso
 try:
-    import forms_perso
-    urlpatterns +=patterns('',
-                        (r'^perso/', include(forms_perso))
+    import mysite.gsb.forms_perso
+    urlpatterns += patterns('',
+                        (r'^perso/', include(mysite.gsb.forms_perso))
                         )
-    perso=True
+    perso = True
 except ImportError:
-    perso=False
+    perso = False
 #form tester
 if settings.DEBUG and perso:
     from mysite.gsb.form_tester import SomeModelFormPreview
     urlpatterns += patterns('mysite.gsb',
-                            (r'^testform/$', SomeModelFormPreview(gsb_forms.test)),
+                            (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
                             (r'^test$', 'test.test'),
                             )
 

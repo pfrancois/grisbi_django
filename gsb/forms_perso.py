@@ -10,8 +10,8 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib.auth.decorators import login_required
 
 #-----------les urls.py
-urlpatterns =patterns('mysite.gsb.forms_perso',
-                url(r'^pee$','view_majPEE'),
+urlpatterns = patterns('mysite.gsb.forms_perso',
+                url(r'^pee$', 'view_majpee'),
                 )
 
 #---------------les fields, widgets  et forms tres perso
@@ -27,21 +27,21 @@ class MajPEE(forms.Form):
     def __init__(self, *args, **kwargs):
         super (MajPEE, self).__init__(*args, **kwargs)
         for i in liste_opcvm:
-             self.fields[i] = TitreField()
+            self.fields[i] = TitreField()
 
 #----------les views tres perso
 @login_required
-def view_majPEE(request):
-    cpt=Compte_titre.objects.get(id=6)
+def view_majpee(request):
+    cpt = Compte_titre.objects.get(id = 6)
     if request.method == 'POST':
-        form = MajPEE(data=request.POST)
+        form = MajPEE(data = request.POST)
         if form.is_valid():
             for i in liste_opcvm:
-                s=form.cleaned_data[i].partition('@')
-                nb=Decimal(s[0])
-                cours=Decimal(s[2])
-                if nb<>'0' and nb:
-                    cpt.achat(Titre.objects.get(nom='PEE%s'%str.lower(i)), nb, cours, date = form.cleaned_data['date'])
+                tab = form.cleaned_data[i].partition('@')
+                nb = Decimal(tab[0])
+                cours = Decimal(tab[2])
+                if nb != '0' and nb:
+                    cpt.achat(Titre.objects.get(nom = 'PEE%s' % str.lower(i)), nb, cours, date = form.cleaned_data['date'])
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':6}))
     else:
         form = MajPEE()

@@ -58,38 +58,39 @@ class Format:
             s = defaut
         return s
 
-    def max(self, o, defaut = '0', champ = 'id'):
+    def max(self, query, defaut = '0', champ = 'id'):
         '''recupere le max d'un queryset'''
-        q = o.aggregate(id = Max(champ))[champ]
-        if q is None:
+        agg = query.aggregate(id = Max(champ))[champ]
+        if agg is None:
             return defaut
         else:
-            return str(q)
-    def str(self, o, defaut = '0', membre = 'id'):
+            return str(agg)
+        
+    def str(self, obj, defaut = '0', membre = 'id'):
         '''renvoie id d'un objet avec la gestion des null
+        @param obj: l'objet a interroger
         @param defaut: la reponse si neant
         @param membre: l'attribut a demander si pas neant'''
-        if o:
-            return str(o.id)
-        else:
+        try:
+            return str(getattr(obj, membre))
+        except AttributeError:
             return str(defaut)
 
-def validRIB(banque, guichet, compte, cle):
+def validrib(banque, guichet, compte, cle):
     # http://fr.wikipedia.org/wiki/ClĂŠ_RIB#V.C3.A9rifier_un_RIB_avec_une_formule_Excel
-    import string
     lettres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chiffres = "12345678912345678923456789"
     # subst letters if needed
     for char in compte:
-        if char in string.letters:
+        if char in ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']:
             achar = char.upper()
             achiffre = chiffres[lettres.find(achar)]
             compte = compte.replace(char, achiffre)
-    reste = ( 89*int(banque) + 15*int(guichet) + 3*int(compte) ) % 97
+    reste = (89 * int(banque) + 15 * int(guichet) + 3 * int(compte)) % 97
     ccle = 97 - reste
     return (ccle == int(cle))
 
-def validInsee(insee, cle):
+def validinsee(insee, cle):
     # http://fr.wikipedia.org/wiki/Numero_de_Securite_sociale#Unicit.C3.A9
     # gestion numeros corses
     insee = insee.replace('A', 0)
@@ -97,10 +98,10 @@ def validInsee(insee, cle):
     reste = int(insee) % 97
     return ((97 - reste) == int(cle))
 
-def datefr2datesql(s):
+def datefr2datesql(chaine):
     try:
-        t = time.strptime(str(s), "%d/%m/%Y")
-        return "{annee}-{mois}-{jour}".format(annee = t[0], mois = t[1], jour = t[2])
+        temps = time.strptime(str(chaine), "%d/%m/%Y")
+        return "{annee}-{mois}-{jour}".format(annee = temps[0], mois = temps[1], jour = temps[2])
     except ValueError:
         return None
 
