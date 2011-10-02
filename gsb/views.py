@@ -424,3 +424,26 @@ def ope_titre_vente(request, cpt_id):
                 'cpt':cpt,
                 'sens':'vente'}
             )
+@login_required
+def view_maj_cpt_titre(request, cpt_id):
+    cpt = Compte_titre.objects.get(id = cpt_id)
+    liste_titre = cpt.titre.all().distinct()
+    if request.method == 'POST':
+        form = gsb_forms.Majtitre(data = request.POST, titres = liste_titre)
+        if form.is_valid():
+            for titre_en_cours in liste_titre:
+                tab = form.cleaned_data[titre_en_cours.isin].partition('@')
+                nb = decimal.Decimal(tab[0])
+                cours = decimal.Decimal(tab[2])
+                if nb != '0' and nb:
+                    cpt.achat(titre_en_cours, nb, cours, date = form.cleaned_data['date'])
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
+    else:
+        form = gsb_forms.Majtitre(titres = liste_titre)
+    return render(request, 'templates_perso/achat_PEE.djhtm',
+                {   'titre_long':u'operations sur le %s' % cpt.nom,
+                   'titre':u'ope',
+                    'form':form,
+                    'titres':liste_titre,
+                    'cpt':cpt}
+                )

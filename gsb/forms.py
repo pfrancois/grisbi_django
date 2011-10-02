@@ -1,117 +1,22 @@
 # -*- coding: utf-8
 from django import forms
-from mysite.gsb.models import Compte, Cat, Moyen, Ope, Virement, Generalite, Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp
-from django.conf import settings
-import datetime
+
+from mysite.gsb.models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
+    Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
+import mysite.gsb.widgets as gsb_field 
+
+
 #import decimal
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
-from django.forms.util import flatatt
+error_css_class = 'error'
+required_css_class = 'required'
 
 class Baseform(forms.Form):
-    error_css_class = 'error'
-    required_css_class = 'required'
+    error_css_class = error_css_class
+    required_css_class = required_css_class
 
 class Basemodelform(forms.ModelForm):
-    error_css_class = 'error'
-    required_css_class = 'required'
-
-class Dategsbwidget(forms.DateInput):
-    class Media:
-        js = ("js/basiccalendar.js",)
-        css = {'all':('css/calendar.css',)}
-
-    def __init__(self, attrs = None): #@UnusedVariable
-        super(Dategsbwidget, self).__init__(attrs)
-    def render(self, name, value, attrs = None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs, type = self.input_type, name = name)
-        if value != '':
-            # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_unicode(self._format_value(value))
-        auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
-        hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
-        cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
-        return mark_safe(u'<input%s /><span>|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
-
-class DateFieldgsb(forms.DateField):
-    def __init__(self, input_formats = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y'), initial = datetime.date.today, *args, **kwargs):
-        super(DateFieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = Dategsbwidget, *args, **kwargs)
-class Readonlywidget(forms.Widget):
-    text = ''
-    is_hidden = False
-    def render(self, name, value, attrs = None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs, type = 'hidden', name = name)
-        if value != '':
-            # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_unicode(value)
-        hidden = u'<input%s />' % flatatt(final_attrs)
-        text = force_unicode(self.text)
-        return mark_safe("<div>%s%s</div>" % (hidden, text))
-    def _has_changed(self, initial, data):
-        return False
-
-class ReadonlyField(forms.FileField):
-    widget = Readonlywidget
-    def __init__(self, model = None, instance = None, *args, **kwargs): #@UnusedVariable
-        self.model = model
-        forms.Field.__init__(self, *args, **kwargs)
-        if instance and instance.id:
-            self.instance = instance
-            i = getattr(instance, self.model)
-            self.widget.text = i.__unicode__()
-
-    def clean(self, value, initial):
-        if self.instance and self.instance.id:
-            return getattr(self.instance, self.model)
-
-class Curwidget(forms.TextInput):
-    def render(self, name, value, attrs = None):
-        if value is None:
-            value = ''
-        final_attrs = self.build_attrs(attrs, type = 'text', name = name)
-        if value != '':
-            # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = force_unicode(value)
-        hidden = u'<input%s />' % flatatt(final_attrs)
-        text = force_unicode("&#8364;")
-        return mark_safe("<span>%s%s</span>" % (hidden, text))
-
-class CurField(forms.DecimalField):
-    def __init__(self, localize = True, initial = '0', widget = Curwidget, *args, **kwargs):
-        super(CurField, self).__init__(localize = localize, initial = initial, widget = widget, *args, **kwargs)
-
-class Titrewidget(forms.MultiWidget):
-    def __init__(self, attrs = None):
-        widgets = (forms.TextInput(attrs = attrs,),
-                   Curwidget(attrs = attrs,))
-        super(Titrewidget, self).__init__(widgets, attrs)
-    def decompress(self, value):
-        if value:
-            chaine = force_unicode(value).partition('@')
-            if chaine[1]:
-                return [chaine[0], chaine[2]]
-            else:
-                return [0, 0]
-        else:
-            return [0, 0]
-
-
-class TitreField(forms.MultiValueField):
-    def __init__(self, *args, **kwargs):
-        fields = (
-            forms.DecimalField(initial = '0', label = 'nb'),
-            CurField(label = 'cur')
-            )
-        super(TitreField, self).__init__(fields, widget = Titrewidget(), *args, **kwargs)
-    def compress(self, data_list):
-        if data_list:
-            return "%s@%s" % (data_list[0], data_list[1])
-        else:
-            return None
+    error_css_class = error_css_class
+    required_css_class = required_css_class
 
 class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
@@ -128,9 +33,9 @@ class OperationForm(Basemodelform):
     compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label = None)
     ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False)
-    montant = CurField()
+    montant = gsb_field.CurField()
     notes = forms.CharField(widget = forms.TextInput, required = False)
-    date = DateFieldgsb()
+    date = gsb_field.DateFieldgsb()
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
     pointe = forms.BooleanField(required = False)
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False)
@@ -155,8 +60,8 @@ class VirementForm(Baseform):
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
-    montant = CurField()
-    date = DateFieldgsb()
+    montant = gsb_field.CurField()
+    date = gsb_field.DateFieldgsb()
     notes = forms.CharField(widget = forms.Textarea, required = False)
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
@@ -196,12 +101,12 @@ class VirementForm(Baseform):
         return virement_objet.origine
 
 class Ope_titre_addForm(Baseform):
-    date = DateFieldgsb()
+    date = gsb_field.DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all(), required = False)
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
     nombre = forms.DecimalField(initial = '0')
-    cours = CurField(initial = '1')
+    cours = gsb_field.CurField(initial = '1')
     #nom_nouveau_titre = forms.CharField(required = False)
     def clean(self):
         super(Ope_titre_addForm, self).clean()
@@ -242,11 +147,11 @@ class Ope_titreForm(Basemodelform):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
-        self.fields['titre'] = ReadonlyField('titre', instance)
-        self.fields['compte'] = ReadonlyField('compte', instance)
+        self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
+        self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
     nombre = forms.DecimalField(localize = True, initial = '0')
-    cours = CurField()
-    date = DateFieldgsb()
+    cours = gsb_field.CurField()
+    date = gsb_field.DateFieldgsb()
     class Meta:
         model = Ope_titre
 
@@ -259,5 +164,15 @@ class GeneraliteForm(Basemodelform):
 
 class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
-    date = DateFieldgsb()
-    cours = CurField()
+    date = gsb_field.DateFieldgsb()
+    cours = gsb_field.CurField()
+
+
+class Majtitre(forms.Form):
+    error_css_class = error_css_class
+    required_css_class = required_css_class
+    date = gsb_field.DateFieldgsb()
+    def __init__(self, titres, *args, **kwargs):
+        super (Majtitre, self).__init__(*args, **kwargs)
+        for titre in titres:
+            self.fields[titre.isin] = gsb_field.TitreField(label = titre.nom)
