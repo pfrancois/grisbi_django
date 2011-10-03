@@ -246,7 +246,14 @@ def maj_cours(request, pk):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
-    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form})
+    if titre.compte_titre_set.all().distinct().count()==1:
+        url="gsb.views.cpt_detail"
+        cpt=titre.compte_titre_set.all().distinct()[0].id
+    else:
+        url="gsb.views.index"
+        cpt=None
+    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form,"url":url,
+                                                   "cpt":cpt})
 
 @login_required
 def cpt_titre_espece(request, cpt_id, date_limite = False):
@@ -424,6 +431,7 @@ def ope_titre_vente(request, cpt_id):
                 'cpt':cpt,
                 'sens':'vente'}
             )
+
 @login_required
 def view_maj_cpt_titre(request, cpt_id):
     cpt = Compte_titre.objects.get(id = cpt_id)
@@ -440,7 +448,7 @@ def view_maj_cpt_titre(request, cpt_id):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.Majtitre(titres = liste_titre)
-    return render(request, 'templates_perso/achat_PEE.djhtm',
+    return render(request, 'gsb/maj_cpt_titre.djhtm',
                 {   'titre_long':u'operations sur le %s' % cpt.nom,
                    'titre':u'ope',
                     'form':form,
