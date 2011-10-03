@@ -165,7 +165,7 @@ class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = gsb_field.DateFieldgsb()
     cours = gsb_field.CurField()
-
+    #todo readonlyfield pour le compte
 
 class Majtitre(forms.Form):
     error_css_class = error_css_class

@@ -79,7 +79,7 @@ class ReadonlyField(forms.FileField):
         forms.Field.__init__(self, *args, **kwargs)
         if instance and instance.id:
             self.instance = instance
-            self.initial = getattr(instance, self.model)
+            self.initial = getattr(instance, self.attr)
             self.widget.text = self.initial.__unicode__()
         else:
             self.instance = None
