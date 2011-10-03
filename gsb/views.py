@@ -248,12 +248,12 @@ def maj_cours(request, pk):
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
     if titre.compte_titre_set.all().distinct().count()==1:
         url="gsb.views.cpt_detail"
-        cpt=titre.compte_titre_set.all().distinct()[0].id
+        cpt_id=titre.compte_titre_set.all().distinct()[0].id
     else:
         url="gsb.views.index"
-        cpt=None
+        cpt_id=None
     return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom , "form": form,"url":url,
-                                                   "cpt":cpt})
+                                                   "cpt":cpt_id})
 
 @login_required
 def cpt_titre_espece(request, cpt_id, date_limite = False):
@@ -406,9 +406,9 @@ def ope_titre_achat(request, cpt_id):
 
 @login_required
 def ope_titre_vente(request, cpt_id):
-    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
+    cpte = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if request.method == 'POST':
-        form = gsb_forms.Ope_titre_add_venteForm(request.POST, cpt = cpt)
+        form = gsb_forms.Ope_titre_add_venteForm(data=request.POST, cpt = cpte)
         if form.is_valid():
             compte = form.cleaned_data['compte_titre']
             if form.cleaned_data['compte_espece']:
@@ -420,9 +420,9 @@ def ope_titre_vente(request, cpt_id):
                          prix = form.cleaned_data['cours'],
                          date = form.cleaned_data['date'],
                          virement_vers = virement)
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt.id}))
+            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpte.id}))
     else:
-        form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpt}, cpt = cpt)
+        form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpte}, cpt = cpte)
     titre = u' nouvelle vente sur %s' % cpt.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {   'titre_long':titre,
