@@ -5,13 +5,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre
+from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat
 import datetime
 import mysite.gsb.forms as gsb_forms
 from django.db import models
 import decimal
 #import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
+from django.utils.encoding import smart_unicode
 
 @login_required
 def index(request):
@@ -54,9 +55,11 @@ def cpt_detail(request, cpt_id):
     date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
     if c.type in ('t',):
         c = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF_TITRE)
         titre = True
     else:
         titre = False
+    print date_limite,titre
     if not titre:
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
         nb_ope_vielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
@@ -74,6 +77,7 @@ def cpt_detail(request, cpt_id):
                         'titre': c.nom,
                         'solde': c.solde,
                         'date_limite':date_limite,
+                        'nb_j':settings.NB_JOURS_AFF
                     }
                 )
             )
@@ -97,7 +101,9 @@ def cpt_detail(request, cpt_id):
                         'titre': c.nom,
                         'solde': c.solde,
                         'titres': titres,
-                        'especes': especes
+                        'especes': especes,
+                        'date_limite':date_limite,
+                        'nb_j':settings.NB_JOURS_AFF_TITRE
                     }
                 )
             )
@@ -261,7 +267,7 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
     si date_limite, utilise la date limite sinon affiche toute les ope espece"""
     c = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
-        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF_TITRE)
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
         nbvielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
     else:
@@ -281,6 +287,7 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
                     'date_limite':date_limite,
                     'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
                     'nbvielles': nbvielles,
+                    'nb_j':settings.NB_JOURS_AFF_TITRE
                 }
             )
         )
@@ -293,7 +300,7 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
     titre = get_object_or_404(Titre.objects.select_related(), pk = titre_id)
     cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
     if date_limite:
-        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF)
+        date_limite = datetime.date.today() - datetime.timedelta(days = settings.NB_JOURS_AFF_TITRE)
         q = Ope_titre.objects.filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(titre = titre)
         nbvielles = Ope_titre.objects.filter(compte__pk = cpt_id).filter(date__lte = date_limite).count()
     else:
@@ -314,7 +321,8 @@ def titre_detail_cpt(request, titre_id, cpt_id, date_limite = True):
                     'nbrapp': 0,
                     'nbvielles': nbvielles,
                     'tit':titre,
-                    'nb_titre':titre.nb(cpt)
+                    'nb_titre':titre.nb(cpt),
+                    'nb_j':settings.NB_JOURS_AFF_TITRE
 #                    'nb_titre':titre.nb()
                 }
             )
@@ -332,15 +340,28 @@ def ope_titre_detail(request, pk):
     if request.method == 'POST':
         form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
-            if ope.ope.rapp is None:
+            if ope.ope is None:
+                ope.ope=Ope.objects.create(date = form.cleaned_data['date'],
+                                                montant = decimal.Decimal(smart_unicode(form.cleaned_data['cours'])) * decimal.Decimal(smart_unicode(form.cleaned_data['nombre'])) * -1,
+                                                tiers = ope.titre.tiers,
+                                                cat = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0],
+                                                notes = "%s@%s" % (form.cleaned_data['nombre'], form.cleaned_data['cours']),
+                                                moyen = None,
+                                                automatique = True,
+                                                compte = ope.compte,
+                                                )
+                creation = True
+            else :
+                creation = False 
+            if form.has_changed() and ope.ope.rapp is None:
                 form.save()
-            if form.has_changed():
-                cours = form.cleaned_data['cours']
-                nb = form.cleaned_data['nombre']
-                ope.ope.date = form.cleaned_data['date']
-                ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
-                ope.ope.note = "%s@%s" % (nb, cours)
-                ope.ope.save()
+                if not creation:
+                    cours = form.cleaned_data['cours']
+                    nb = form.cleaned_data['nombre']
+                    ope.ope.date = form.cleaned_data['date']
+                    ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
+                    ope.ope.note = "%s@%s" % (nb, cours)
+                    ope.ope.save()
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
         form = gsb_forms.Ope_titreForm(instance = ope)
@@ -423,12 +444,12 @@ def ope_titre_vente(request, cpt_id):
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpte.id}))
     else:
         form = gsb_forms.Ope_titre_add_venteForm(initial = {'compte_titre': cpte}, cpt = cpte)
-    titre = u' nouvelle vente sur %s' % cpt.nom
+    titre = u' nouvelle vente sur %s' % cpte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {   'titre_long':titre,
                'titre':u'modification',
                 'form':form,
-                'cpt':cpt,
+                'cpt':cpte,
                 'sens':'vente'}
             )
 
