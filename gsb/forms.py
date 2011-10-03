@@ -121,10 +121,9 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
-        if data['titre'] is None:
-            if not data['nouveau_titre']:
-                self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
-                del data['nouveau_titre']
+        if not(not(data['titre'] is None) or data['nouveau_titre']):
+            self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
+            del data['nouveau_titre']
         return data
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):

@@ -43,11 +43,11 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)', 'titre_detail_cpt', name = "gsb_cpt_titre_detail"),
                         url(r'^compte/(?P<cpt_id>\d+)/achat', 'ope_titre_achat', name = "cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente', 'ope_titre_vente', name = "cpt_titre_vente"),
-                        url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre'),
+                        url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name = "cpt_titre_maj"),
                         )
 #gestion de mes trucs perso
 try:
-    perso = not True
+    perso = not True# ya plus rien dedans
     if perso:
         import mysite.gsb.forms_perso
         urlpatterns += patterns('',
