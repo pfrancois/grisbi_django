@@ -59,7 +59,6 @@ def cpt_detail(request, cpt_id):
         titre = True
     else:
         titre = False
-    print date_limite,titre
     if not titre:
         q = Ope.non_meres().filter(compte__pk = cpt_id).order_by('-date').filter(date__gte = date_limite).filter(rapp__isnull = True)
         nb_ope_vielles = Ope.non_meres().filter(compte__pk = cpt_id).filter(date__lte = date_limite).filter(rapp__isnull = True).count()
@@ -338,6 +337,7 @@ def ope_titre_detail(request, pk):
     """
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
+        date_initial=ope.date
         form = gsb_forms.Ope_titreForm(request.POST, instance = ope)
         if form.is_valid():
             if ope.ope is None:
@@ -354,7 +354,13 @@ def ope_titre_detail(request, pk):
             else :
                 creation = False 
             if form.has_changed() and ope.ope.rapp is None:
-                form.save()
+                #on efface au besoin le cours
+                c=Cours.objects.filter(titre=ope.titre,date=date_initial)
+                if c.exists():
+                    c=c[0]
+                    if not Cours.objects.filter(titre=ope.titre,date=form.cleaned_data['date']).exists():
+                        c.date=form.cleaned_data['date']
+                    c.save()
                 if not creation:
                     cours = form.cleaned_data['cours']
                     nb = form.cleaned_data['nombre']
@@ -362,6 +368,8 @@ def ope_titre_detail(request, pk):
                     ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
                     ope.ope.note = "%s@%s" % (nb, cours)
                     ope.ope.save()
+                form.save()
+
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
     else:
         form = gsb_forms.Ope_titreForm(instance = ope)

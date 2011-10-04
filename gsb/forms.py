@@ -3,7 +3,7 @@ from django import forms
 
 from mysite.gsb.models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
     Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
-import mysite.gsb.widgets as gsb_field 
+import mysite.gsb.widgets as gsb_field
 
 
 #import decimal
