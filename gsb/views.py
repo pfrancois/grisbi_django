@@ -469,6 +469,8 @@ def view_maj_cpt_titre(request, cpt_id):
         form = gsb_forms.Majtitre(data = request.POST, titres = liste_titre)
         if form.is_valid():
             for titre_en_cours in liste_titre:
+                if form.cleaned_data[titre_en_cours.isin] is None:
+                    continue
                 tab = form.cleaned_data[titre_en_cours.isin].partition('@')
                 nb = decimal.Decimal(tab[0])
                 cours = decimal.Decimal(tab[2])

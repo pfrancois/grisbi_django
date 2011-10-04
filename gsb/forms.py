@@ -175,3 +175,4 @@ class Majtitre(forms.Form):
         super (Majtitre, self).__init__(*args, **kwargs)
         for titre in titres:
             self.fields[titre.isin] = gsb_field.TitreField(label = titre.nom)
+            self.fields[titre.isin].required=False
