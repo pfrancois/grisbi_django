@@ -475,7 +475,9 @@ def view_maj_cpt_titre(request, cpt_id):
                 if nb != '0' and nb:
                     cpt.achat(titre_en_cours, nb, cours, date = form.cleaned_data['date'])
                 else:
-                    Cours.objects.create(date=form.cleaned_data['date'],titre=titre_en_cours,valeur=cours)
+                    if not Cours.objects.filter(date=form.cleaned_data['date'],titre=titre_en_cours).exists() and \
+                       cours:
+                        Cours.objects.create(date=form.cleaned_data['date'],titre=titre_en_cours,valeur=cours)
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.Majtitre(titres = liste_titre)
