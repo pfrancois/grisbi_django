@@ -475,11 +475,17 @@ def view_maj_cpt_titre(request, cpt_id):
                 nb = decimal.Decimal(tab[0])
                 cours = decimal.Decimal(tab[2])
                 if nb != '0' and nb:
-                    cpt.achat(titre_en_cours, nb, cours, date = form.cleaned_data['date'])
+                    if form.cleaned_data['sociaux']:
+                        frais=nb*cours*decimal.Decimal(str(settings.TAUX_VERSEMENT))
+                        cpt.achat(titre_en_cours, nb, cours, date = form.cleaned_data['date'],frais=frais,
+                            cat_frais=Cat.objects.get(id=settings.ID_CAT_COTISATION),)
+                    else:
+                        cpt.achat(titre_en_cours, nb, cours, date = form.cleaned_data['date'])
                 else:
                     if not Cours.objects.filter(date=form.cleaned_data['date'],titre=titre_en_cours).exists() and \
                        cours:
                         Cours.objects.create(date=form.cleaned_data['date'],titre=titre_en_cours,valeur=cours)
+
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.Majtitre(titres = liste_titre)

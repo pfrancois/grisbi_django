@@ -22,6 +22,13 @@ TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1
 
+#taux de cotisations sociales
+#attention c'est un taux special estime
+TAUX_VERSEMENT=0.0842970850027528
+#id et cat des operation speciales
+ID_CAT_COTISATION=23
+ID_TIERS_COTISATION=727
+ID_CAT_OST=64
 ##################
 
 

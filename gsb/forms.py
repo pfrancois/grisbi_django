@@ -171,6 +171,7 @@ class Majtitre(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = gsb_field.DateFieldgsb()
+    sociaux = forms.BooleanField(label="prélèvement sociaux ?",required=False,initial=False)
     def __init__(self, titres, *args, **kwargs):
         super (Majtitre, self).__init__(*args, **kwargs)
         for titre in titres:
