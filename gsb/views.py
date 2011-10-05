@@ -89,7 +89,7 @@ def cpt_detail(request, cpt_id):
             invest = t.investi(c)
             total = t.encours(c)
             nb=t.nb(c)
-            if abs(nb)>0.01:
+            if abs(nb)>decimal.Decimal('0.01'):
                 titres.append({'nom': t.nom, 'type': t.get_type_display(), 'nb':nb, 'invest': invest,
                                'pmv': total - invest, 'total': total, 'id':t.id, 't':t})
         especes = super(Compte_titre, c).solde
