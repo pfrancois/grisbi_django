@@ -247,7 +247,7 @@ def maj_cours(request, pk):
                 titre.cours_set.create(valeur = form.cleaned_data['cours'], date = date)
             else:
                 titre.cours_set.get(date = date).valeur = form.cleaned_data['cours']
-            cpt_id = Ope_titre.objects.filter(titre_id = 5).latest('date').compte_id
+            cpt_id = Ope_titre.objects.filter(titre = titre).latest('date').compte_id
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         form = gsb_forms.MajCoursform(initial = {'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
