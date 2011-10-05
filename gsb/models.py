@@ -407,9 +407,9 @@ class Compte_titre(Compte):
         if nombre > 0:
             nombre *= -1
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
-        if not cat_frais:
+        if not cat_frais and frais:
             cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
-        if not titre_frais:
+        if not titre_frais and frais:
             titre_frais=titre.tiers
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
@@ -418,7 +418,7 @@ class Compte_titre(Compte):
                 raise Titre.DoesNotExist('titre pas en portefeuille')
             #ajout de l'operation dans le compte_espece ratache
             ope = self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
+                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "%s@%s" % (nombre, prix),
@@ -428,12 +428,12 @@ class Compte_titre(Compte):
             #compta matiere
             Ope_titre.objects.create(titre = titre,
                                       compte = self,
-                                      nombre = decimal.Decimal(force_unicode(nombre)) * -1,
+                                      nombre = decimal.Decimal(force_unicode(nombre)),
                                       date = date, cours = prix,
                                       ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(frais)) * -1,
+                                montant = decimal.Decimal(force_unicode(frais)),
                                 tiers =titre_frais,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),

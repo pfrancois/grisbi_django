@@ -88,7 +88,10 @@ def cpt_detail(request, cpt_id):
         for t in titre_sans_sum:
             invest = t.investi(c)
             total = t.encours(c)
-            titres.append({'nom': t.nom, 'type': t.get_type_display(), 'nb':t.nb(c), 'invest': invest, 'pmv': total - invest, 'total': total, 'id':t.id, 't':t})
+            nb=t.nb(c)
+            if abs(nb)>0.01:
+                titres.append({'nom': t.nom, 'type': t.get_type_display(), 'nb':nb, 'invest': invest,
+                               'pmv': total - invest, 'total': total, 'id':t.id, 't':t})
         especes = super(Compte_titre, c).solde
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
@@ -449,7 +452,7 @@ def ope_titre_vente(request, cpt_id):
             else:
                 virement = None
             compte.vente(titre = form.cleaned_data['titre'],
-                         nombre = form.cleaned_data['nombre'] * -1,
+                         nombre = form.cleaned_data['nombre'],
                          prix = form.cleaned_data['cours'],
                          date = form.cleaned_data['date'],
                          virement_vers = virement)
