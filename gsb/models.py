@@ -404,8 +404,6 @@ class Compte_titre(Compte):
         @param virement_vers
         """
         self.alters_data = True
-        if nombre > 0:
-            nombre *= -1
         cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
         if not cat_frais and frais:
             cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
@@ -422,18 +420,19 @@ class Compte_titre(Compte):
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "%s@%s" % (nombre, prix),
-                                moyen = None,
-                                automatique = True
+                                automatique = True,
+                                moyen=self.moyen_credit_defaut
                                 )
             #compta matiere
             Ope_titre.objects.create(titre = titre,
                                       compte = self,
-                                      nombre = decimal.Decimal(force_unicode(nombre)),
-                                      date = date, cours = prix,
+                                      nombre = decimal.Decimal(force_unicode(nombre))*-1,
+                                      date = date,
+                                      cours = prix,
                                       ope = ope)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(frais)),
+                                montant = decimal.Decimal(force_unicode(frais))*-1,
                                 tiers =titre_frais,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),
