@@ -3,8 +3,9 @@ from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercic
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
+import django.forms as forms
 
-def fusion(classe, request, queryset, sens = 'ab'):
+def fusion(classe, request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""
     nom_module = queryset[0]._meta.module_name
     if queryset.count() != 2:
@@ -158,6 +159,8 @@ class Tiers_admin(admin.ModelAdmin):
     list_display = ('id', 'nom', 'notes', 'is_titre')
     list_display_links = ('id',)
     list_filter = ('is_titre',)
+    search_fields =['nom']
+    formfield_overrides = {models.TextField:{'widget':forms.TextInput},}
 
 class Ech_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les écheances d'operations"""

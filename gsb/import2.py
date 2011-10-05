@@ -39,7 +39,7 @@ def datefr2datesql(s):
 
 def fr2decimal(s):
     if s == "0,0000000":
-        return decimal.Decimal('0')
+        return decimal.Decimal()
     if s is not None:
         return decimal.Decimal(str(s).replace(',', '.'))
     else:
@@ -107,7 +107,7 @@ def import_gsb(nomfich, efface_table = True):
             #test puis creation du titre (et donc du tiers automatiquement)
             try:
                 Tiers.objects.get(id = xml_tiers.get('No'))
-            except:
+            except Tiers.DoesNotExist:
                 nb_titre += 1
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
