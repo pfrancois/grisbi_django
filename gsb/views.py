@@ -390,8 +390,12 @@ def ope_titre_delete(request, pk):
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
         cpt_id = ope.compte_id
+        cours=Cours.objects.filter(date=ope.date,titre=ope.titre)
+        if cours.exists():
+            cours.delete()
         ope.ope.delete()
         ope.delete()
+
         return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
