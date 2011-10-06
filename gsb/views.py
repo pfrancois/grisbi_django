@@ -471,7 +471,10 @@ def ope_titre_vente(request, cpt_id):
 @login_required
 def view_maj_cpt_titre(request, cpt_id):
     cpt = Compte_titre.objects.get(id = cpt_id)
-    liste_titre = cpt.titre.all().distinct()
+    liste_titre_original = cpt.titre.all().distinct()
+    liste_titre=[]
+    for l in liste_titre_original:
+        liste_titre.append(l)
     if request.method == 'POST':
         form = gsb_forms.Majtitre(data = request.POST, titres = liste_titre)
         if form.is_valid():
