@@ -24,8 +24,9 @@ def fusion(classe, request, queryset, sens):
             message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (nom_module, b, a)
             b.fusionne(a)
         classe.message_user(request, message)
-    except:#TODO mieux gerer
-        classe.message_user(request, u"probleme")
+    except Exception as inst:#TODO mieux gerer
+        message=inst.__unicode__()
+        classe.message_user(request, message)
 
 class Cat_admin(admin.ModelAdmin):
     """classe admin pour les categories"""
@@ -208,7 +209,7 @@ class Ope_titre_admin(admin.ModelAdmin):
     readonly_fields = ('invest', 'ope')
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
-
+    ordering = ('-date',)
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)

@@ -21,7 +21,7 @@
     <tr class="item hover{% if ope.nombre > 0 %} creditElement{% endif %}{% if ope.nombre < 0 %} debitElement{% endif %}">
         <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date}}</a> </td>
         <td class="opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.titre.nom }}</a></td>
-        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.nombre|floatformat:2 }}</a></td>
+        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.nombre|floatformat:3 }}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{{ ope.cours|cur }}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{{ ope.invest|cur }}</a></td>
     </tr>

@@ -204,9 +204,9 @@ class Cat(models.Model):
     def fusionne(self, new):
         self.alters_data = True
         if type(new) != type(self):
-            raise TypeError("pas la meme classe d'objet")
+            raise TypeError(u"pas la même classe d'objet")
         if self.type != new.type:
-            raise TypeError("pas le meme type de titre")
+            raise TypeError(u"pas le même type de titre, %s est %s alors que %s est %s" % (self.nom,self.type,new.nom,new.type))
         nb_change = Echeance.objects.filter(cat = self).update(cat = new)
         nb_change += Ope.objects.filter(cat = self).update(cat = new)
         self.delete()
@@ -354,7 +354,7 @@ class Compte_titre(Compte):
         @param virement_de
         """
         self.alters_data = True
-        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
+        cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults = {'nom':u'operation sur titre:'})[0]
         if frais:
             if not cat_frais :
                 cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
