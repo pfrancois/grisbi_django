@@ -158,7 +158,7 @@ class Cours(models.Model):
         db_table = 'cours'
         verbose_name_plural = u'cours'
         unique_together = ("titre", "date")
-        ordering = ['date']
+        ordering = ['-date']
         get_latest_by = 'date'
 
     def __unicode__(self):
@@ -196,7 +196,7 @@ class Cat(models.Model):
     class Meta:
         db_table = 'cat'
         verbose_name = u"catégorie"
-        ordering = ['type', 'nom']
+        ordering = ['nom']
 
     def __unicode__(self):
         return self.nom
@@ -247,7 +247,7 @@ class Exercice(models.Model):
     nom = models.CharField(max_length = 40, unique = True)
     class Meta:
         db_table = 'exercice'
-        ordering = ['date_debut']
+        ordering = [-'date_debut']
         get_latest_by = 'date_debut'
 
     def __unicode__(self):
@@ -342,6 +342,7 @@ class Compte_titre(Compte):
     titre = models.ManyToManyField('titre', through = "Ope_titre")
     class Meta:
         db_table = 'cpt_titre'
+        ordering = ['nom']
     @transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None,
         cat_frais=None,tiers_frais=None):
@@ -546,7 +547,7 @@ class Ope_titre(models.Model):
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
-        ordering = ['compte']
+        ordering = ['-date']
     def save(self, *args, **kwargs):
         self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         super(Ope_titre, self).save(*args, **kwargs)
@@ -621,7 +622,7 @@ class Rapp(models.Model):
     class Meta:
         db_table = 'rapp'
         verbose_name = u"rapprochement"
-        ordering = ['nom']
+        ordering = ['-date']
         get_latest_by = 'date'
 
     def __unicode__(self):
@@ -688,7 +689,7 @@ class Echeance(models.Model):
         db_table = 'echeance'
         verbose_name = u"échéance"
         verbose_name_plural = u"echéances"
-        ordering = ['date']
+        ordering = ['-date']
         get_latest_by = 'date'
 
     def __unicode__(self):
@@ -767,7 +768,7 @@ class Ope(models.Model):
         get_latest_by = 'date'
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
-        ordering = ['date']
+        ordering = ['-date']
         permissions = (
             ('can_import', 'peut importer des fichiers'),
             ('can_export', 'peut exporter des fichiers'),
