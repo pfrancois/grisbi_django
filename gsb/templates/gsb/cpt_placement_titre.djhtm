@@ -29,7 +29,7 @@
 {% block footer %}<tr class="footerbar">
     <td>&nbsp;</td>
     <td>total</td>
-    <td class="opCenter">{{ nb_titre|floatformat:2 }}</td>
+    <td class="opCenter">{{ nb_titre|floatformat:3 }}</td>
     <td>{{ tit.last_cours|cur }}</td>
     <td>{{ solde|cur }}</td>
 </tr>{% endblock footer %}
