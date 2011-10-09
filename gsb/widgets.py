@@ -24,21 +24,21 @@ class Dategsbwidget(forms.DateInput):
         auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
         hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
         cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
-        return mark_safe(u'<input%s /><span>|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
+        return mark_safe(u'<input%s /><span id="date_shct">|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
 class DateFieldgsb(forms.DateField):
     def __init__(self, input_formats = input_format_date, initial = datetime.date.today, *args, **kwargs):
         super(DateFieldgsb, self).__init__(input_formats = input_formats, initial = initial, widget = Dategsbwidget, *args, **kwargs)
 
 class Titrewidget(forms.MultiWidget):
     def __init__(self, attrs = None):
-        widgets = (forms.TextInput(attrs = attrs,),
-                   Curwidget(attrs = attrs,))
+        widgets = (Curwidget(attrs = attrs,),
+                        forms.TextInput(attrs = attrs,))
         super(Titrewidget, self).__init__(widgets, attrs)
     def decompress(self, value):
         if value:
             chaine = force_unicode(value).partition('@')
             if chaine[1]:
-                return [chaine[0], chaine[2]]
+                return [chaine[2], chaine[0]]
             else:
                 return [0, 0]
         else:
@@ -46,13 +46,13 @@ class Titrewidget(forms.MultiWidget):
 class TitreField(forms.MultiValueField):
     def __init__(self, *args, **kwargs):
         fields = (
-            forms.DecimalField(initial = '0', label = 'nb'),
-            CurField(label = 'cur')
+            CurField(label = 'cur'),
+            forms.DecimalField(initial = '0', label = 'nb')
             )
         super(TitreField, self).__init__(fields, widget = Titrewidget(), *args, **kwargs)
     def compress(self, data_list):
         if data_list:
-            return "%s@%s" % (data_list[0], data_list[1])
+            return "%s@%s" % (data_list[1], data_list[0])
         else:
             return None
 
@@ -86,7 +86,7 @@ class ReadonlyField(forms.FileField):
 
     def clean(self, value, initial):
         return getattr(self, 'initial', value)
-        
+
 class Curwidget(forms.TextInput):
     def render(self, name, value, attrs = None):
         if value is None:

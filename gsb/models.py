@@ -247,7 +247,7 @@ class Exercice(models.Model):
     nom = models.CharField(max_length = 40, unique = True)
     class Meta:
         db_table = 'exercice'
-        ordering = [-'date_debut']
+        ordering = ['-date_debut']
         get_latest_by = 'date_debut'
 
     def __unicode__(self):

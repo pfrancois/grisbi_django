@@ -6,7 +6,7 @@
 <form method="post" action="" id="form1">
 {% csrf_token %}
 <table>
-<thead><tr><th>nom  de l'opcvm</th> <th>nombre/cours</th><th>&nbsp;</th></tr></thead>
+<thead><tr><th>nom  de l'opcvm</th> <th>cours/nombre</th><th>&nbsp;</th></tr></thead>
 {{ form }}
 
 </table>
