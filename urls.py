@@ -5,8 +5,8 @@ admin.autodiscover()
 import gsb.urls
 urlpatterns = patterns('',
                        # Common stuff... files, admin...
-                       (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-                       (r'^admin/', include(admin.site.urls)),
+                       (r'^gestion_bdd/doc/', include('django.contrib.admindocs.urls')),
+                       (r'^gestion_bdd/', include(admin.site.urls)),
                        url(r'^login$', 'django.contrib.auth.views.login', { 'template_name': 'login.djhtm' }),
                        (r'^logout$', 'django.contrib.auth.views.logout', {'next_page':'/'}),
                        #attention catch all vers gsb le mettre en dernier
