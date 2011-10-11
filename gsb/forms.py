@@ -66,8 +66,8 @@ class VirementForm(Baseform):
     pointe = forms.BooleanField(required = False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
     #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
-    piece_comptable_compte_origine = forms.CharField(required = False)
-    piece_comptable_compte_destination = forms.CharField(required = False)
+    #piece_comptable_compte_origine = forms.CharField(required = False)
+    #piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
         super(VirementForm, self).clean()
         data = self.cleaned_data
@@ -95,8 +95,8 @@ class VirementForm(Baseform):
         virement_objet.pointe = self.cleaned_data['pointe']
         #virement_objet.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
         #virement_objet.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
-        virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
-        virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
+        #virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
+        #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
         return virement_objet.origine
 

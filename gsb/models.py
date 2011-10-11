@@ -900,17 +900,15 @@ class Virement(object):
                'montant':self.montant,
                'date':self.date,
                'notes':self.notes,
-               'pointe':self.pointe,
-               'piece_comptable_compte_origine':self.origine.piece_comptable,
-               'piece_comptable_compte_destination':self.dest.piece_comptable}
+               'pointe':self.pointe}
             if self.origine.moyen:
                 tab['moyen_origine'] = self.origine.moyen.id
             else:
-                tab['moyen_origine'] = None
+                tab['moyen_origine'] = Moyen.objects.filter(type='v')[0]
             if self.dest.moyen:
                 tab['moyen_destination'] = self.dest.moyen.id
             else:
-                tab['moyen_destination'] = None
+                tab['moyen_destination'] = Moyen.objects.filter(type='v')[0]
         else:
             raise Exception('attention, on ne peut intialiser un form que si virement est bound')
         return tab
