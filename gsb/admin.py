@@ -38,8 +38,11 @@ class Cat_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion de la seconde catégorie dans la première"
 
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
+
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type')
+    list_display = ('id', 'nom', 'type','nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
@@ -54,8 +57,11 @@ class Ib_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion de la seconde IB dans la première"
 
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
+
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type')
+    list_display = ('id', 'nom', 'type','nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
@@ -76,8 +82,12 @@ class Compte_admin(admin.ModelAdmin):
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']}),
             ]
-    list_display = ('nom', 'solde', 'type', 'ouvert')
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
+
+    list_display = ('nom', 'solde', 'type', 'ouvert','nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
+
 
 class Compte_titre_admin(admin.ModelAdmin):
     """compte titre avec inline"""
@@ -94,8 +104,9 @@ class Compte_titre_admin(admin.ModelAdmin):
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
             (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']})
             ]
-
-    list_display = ('nom', 'solde')
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
+    list_display = ('nom', 'solde','nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
 class Ope_admin(admin.ModelAdmin):
@@ -145,7 +156,10 @@ class Moyen_admin(admin.ModelAdmin):
     fusionne_b_dans_a.short_description = u"fusion du second moyen dans le premier"
     list_filter = ('type',)
     fields = ['type', 'nom']
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
 
+    list_display = ('nom', 'type','nb_ope')
 
 class Tiers_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les tiers"""
@@ -157,11 +171,13 @@ class Tiers_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second tiers dans le premier"
     list_editable = ('nom', 'notes')
-    list_display = ('id', 'nom', 'notes', 'is_titre')
+    list_display = ('id', 'nom', 'notes', 'is_titre','nb_ope')
     list_display_links = ('id',)
     list_filter = ('is_titre',)
     search_fields =['nom']
     formfield_overrides = {models.TextField:{'widget':forms.TextInput},}
+    def nb_ope(self, obj):
+        return '%s'%(obj.ope_set.count())
 
 class Ech_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les écheances d'operations"""
