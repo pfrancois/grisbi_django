@@ -6,12 +6,12 @@ from django.conf import settings
 
 # les vues generales
 urlpatterns = patterns('mysite.gsb',
-                        (r'^$', 'views.index'),
+                        url(r'^$', 'views.index',name='index'),
                         )
 
 #les vues relatives aux outils
 urlpatterns += patterns('mysite.gsb.outils',
-                        (r'^options$', 'options_index'),
+                        url(r'^options$', 'options_index'),
                         (r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name = 'modification_preference_generalite'),
                         )
