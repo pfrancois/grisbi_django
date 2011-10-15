@@ -368,7 +368,7 @@ class Compte_titre(Compte):
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "%s@%s" % (nombre, prix),
-                                moyen = None,
+                                moyen = self.moyen_debit_defaut,
                                 automatique = True,
                                 compte = self,
                                 )
@@ -378,7 +378,7 @@ class Compte_titre(Compte):
                                 tiers = tiers_frais,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),
-                                moyen = None,
+                                moyen_id = settings.MD_DEBIT,
                                 automatique = True
                                 )
             #gestion des cours
@@ -437,7 +437,7 @@ class Compte_titre(Compte):
                                 tiers =titre_frais,
                                 cat = cat_frais,
                                 notes = "frais %s@%s" % (nombre, prix),
-                                moyen = None,
+                                moyen_id = settings.MD_DEBIT,
                                 automatique = True
                                 )
             #gestion des cours
@@ -471,7 +471,7 @@ class Compte_titre(Compte):
                                 tiers = titre.tiers,
                                 cat = cat_ost,
                                 notes = "revenu",
-                                moyen = None,
+                                moyen_id = settings.MD_CREDIT,
                                 automatique = True
                                 )
             if decimal.Decimal(force_unicode(frais)):
@@ -480,7 +480,7 @@ class Compte_titre(Compte):
                                 tiers = titre_frais,
                                 cat = cat_frais,
                                 notes = "frais revenu",
-                                moyen = None,
+                                moyen_id = settings.MD_DEBIT,
                                 automatique = True
                                 )
             if virement_vers:
@@ -604,15 +604,18 @@ class Moyen(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
-        self.alters_data = True
-        if type(new) != type(self):
-            raise TypeError("pas la meme classe d'objet")
-        nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
-        nb_change += Compte.objects.filter(moyen_debit_defaut = self).update(moyen_debit_defaut = new)
-        nb_change += Echeance.objects.filter(moyen = self).update(moyen = new)
-        nb_change += Echeance.objects.filter(moyen_virement = self).update(moyen_virement = new)
-        nb_change += Ope.objects.filter(moyen = self).update(moyen = new)
-        self.delete()
+        if not (self.id==settings.MD_CREDIT or self.id==settings.MD_DEBIT):
+            self.alters_data = True
+            if type(new) != type(self):
+                raise TypeError("pas la meme classe d'objet")
+            nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
+            nb_change += Compte.objects.filter(moyen_debit_defaut = self).update(moyen_debit_defaut = new)
+            nb_change += Echeance.objects.filter(moyen = self).update(moyen = new)
+            nb_change += Echeance.objects.filter(moyen_virement = self).update(moyen_virement = new)
+            nb_change += Ope.objects.filter(moyen = self).update(moyen = new)
+            self.delete()
+        else:
+            nb_change=0
         return nb_change
 
 class Rapp(models.Model):
@@ -646,7 +649,7 @@ class Rapp(models.Model):
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
-        nb_change = Compte.objects.filter(moyen_credit_defaut = self).update(moyen_credit_defaut = new)
+        nb_change = Ope.objects.filter(rapp=self).update(rapp=new)
         self.delete()
         return nb_change
 
@@ -794,10 +797,16 @@ class Ope(models.Model):
     def save(self, *args, **kwargs):
         self.alters_data = True
         if not self.moyen:
-            if self.compte.moyen_credit_defaut and self.montant >= 0:
-                self.moyen = self.compte.moyen_credit_defaut
-            if self.compte.moyen_debit_defaut and self.montant <= 0:
-                self.moyen = self.compte.moyen_debit_defaut
+            if self.montant >= 0:
+                if self.compte.moyen_credit_defaut:
+                    self.moyen = self.compte.moyen_credit_defaut
+                else:
+                    self.moyen_id=settings.MD_CREDIT
+            if  self.montant <= 0 :
+                if self.compte.moyen_debit_defaut:
+                    self.moyen = self.compte.moyen_debit_defaut
+                else:
+                    self.moyen_id=settings.MD_DEBIT
         super(Ope, self).save(*args, **kwargs)
 
 

@@ -347,11 +347,12 @@ def ope_titre_detail(request, pk):
                 ope.ope=Ope.objects.create(date = form.cleaned_data['date'],
                                                 montant = decimal.Decimal(smart_unicode(form.cleaned_data['cours'])) * decimal.Decimal(smart_unicode(form.cleaned_data['nombre'])) * -1,
                                                 tiers = ope.titre.tiers,
-                                                cat = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0],
+                                                cat = Cat.objects.get_or_create(id=settings.ID_CAT_OST,
+                                                    defaults = {'nom':u'operation sur titre:'}),
                                                 notes = "%s@%s" % (form.cleaned_data['nombre'], form.cleaned_data['cours']),
                                                 moyen = None,
                                                 automatique = True,
-                                                compte = ope.compte,
+                                                compte = ope.compte
                                                 )
                 creation = True
             else :
@@ -506,3 +507,4 @@ def view_maj_cpt_titre(request, cpt_id):
                     'titres':liste_titre,
                     'cpt':cpt}
                 )
+
