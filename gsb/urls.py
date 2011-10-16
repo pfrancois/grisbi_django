@@ -32,7 +32,6 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^vir/new$', 'vir_new', name = "gsb_vir_new"),
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name = 'ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete', 'ope_titre_delete', name = 'ope_titre_delete'),
-                        url(r'^chgt_ope_titre$', 'chgt_ope_titre'),
                         )
 
 #les vues relatives aux comptes
