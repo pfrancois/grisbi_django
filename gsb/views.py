@@ -13,7 +13,7 @@ import decimal
 #import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import smart_unicode
-
+from django.contrib import messages
 @login_required
 def index(request):
     """
@@ -127,7 +127,16 @@ def ope_detail(request, pk):
         if request.method == 'POST':#creation du virement
             form = gsb_forms.VirementForm(data = request.POST, ope = ope)
             if form.is_valid():
-                form.save()
+                if not ope.rapp and not ope.jumelle.rapp :
+                    form.save()
+                    messages.info(request,'modification du virement effectue')
+                else:
+                    if ope.rapp:
+                        compte=ope.compte
+                    else:
+                        compte=ope.jumelle.compte
+                        raise Exception
+                    messages.error(request,u"impossible de modifier car le virement coté %s est rapprochée"%compte)
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.jumelle.compte_id}))
         else:
             form = gsb_forms.VirementForm(ope = ope)
@@ -137,10 +146,10 @@ def ope_detail(request, pk):
                     'form':form,
                     'ope':ope}
                 )
-    #______ope normale----------
+    #--------ope normale----------
     else:#sinon c'est une operation normale
         if ope.filles_set.all().count() > 0 : #c'est une ope mere
-            #TODO message
+            messages.error(request,u"attention cette operation n'est pas éditable car c'est une ope mere.")
             HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         if request.method == 'POST':
             form = gsb_forms.OperationForm(request.POST, instance = ope)
@@ -149,7 +158,11 @@ def ope_detail(request, pk):
                     form.instance.tiers = Tiers.objects.get_or_create(nom = form.cleaned_data['nouveau_tiers'],
                                                      defaults = {'nom':form.cleaned_data['nouveau_tiers'], }
                                                     )[0]
-                ope = form.save()
+                if not ope.rapp:
+                    messages.info(request,u"opération modifiée")
+                    ope = form.save()
+                else:
+                    messages.error(request,u"impossible de modifier l'opération car elle est rapprochée")
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
         else:
             form = gsb_forms.OperationForm(instance = ope)
@@ -231,9 +244,19 @@ def vir_new(request, cpt_id = None):
 def ope_delete(request, pk):
     ope = get_object_or_404(Ope.objects.select_related(), pk = pk)
     if request.method == 'POST':
-        if ope.jumelle:
-            ope.jumelle.delete()
-        ope.delete()
+        if ope.rapp:
+            messages.error(request,u"impossible d'effacer une opération rapprochée")
+            return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
+        else:
+            if ope.jumelle:
+                if ope.jumelle.rapp:
+                    messages.error(request,u"impossible d'effacer une opération rapprochée")
+                    return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
+                else:
+                    ope.jumelle.delete()
+                    ope.delete()
+            else:
+                ope.delete()
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_detail', kwargs = {'pk':ope.id}))
     return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.compte_id}))
@@ -393,13 +416,15 @@ def ope_titre_detail(request, pk):
 def ope_titre_delete(request, pk):
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk = pk)
     if request.method == 'POST':
+        if ope.ope.rapp:
+            messages.error(request,u"impossible d'effacer une operation rapprochée")
+            return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))
         cpt_id = ope.compte_id
         cours=Cours.objects.filter(date=ope.date,titre=ope.titre)
         if cours.exists():
             cours.delete()
         ope.ope.delete()
         ope.delete()
-
         return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':cpt_id}))
     else:
         return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs = {'pk':ope.id}))

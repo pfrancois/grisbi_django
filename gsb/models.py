@@ -846,12 +846,14 @@ class Virement(object):
     def getmontant(self):
         return self.dest.montant
     montant = property(getmontant, setmontant)
+
     def setnotes(self, notes):
         self.origine.notes = notes
         self.dest.notes = notes
     def getnotes(self):
         return self.origine.notes
     notes = property(getnotes, setnotes)
+
     def setpointe(self, pointe):
         self.origine.pointe = pointe
         self.dest.pointe = pointe

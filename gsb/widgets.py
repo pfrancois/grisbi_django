@@ -80,12 +80,16 @@ class ReadonlyField(forms.FileField):
         if instance and instance.id:
             self.instance = instance
             self.initial = getattr(instance, self.attr)
-            self.widget.text = self.initial.__unicode__()
+            if self.initial:
+                self.widget.text = self.initial.__unicode__()
+            else:
+                self.widget.text = "aucun"
+                self.instance=None
         else:
             self.instance = None
 
     def clean(self, value, initial):
-        return getattr(self, 'initial', value)
+        return getattr(self.initial,'value',None)
 
 class Curwidget(forms.TextInput):
     def render(self, name, value, attrs = None):

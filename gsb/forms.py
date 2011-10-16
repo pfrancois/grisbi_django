@@ -85,6 +85,8 @@ class VirementForm(Baseform):
             super(VirementForm, self).__init__(initial = vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
+        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp',required=False)
+        self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp',required=False)
     def save(self):
         if self.ope is None:
             virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
@@ -93,8 +95,10 @@ class VirementForm(Baseform):
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
         virement_objet.dest.moyen = self.cleaned_data['moyen_destination']
         virement_objet.pointe = self.cleaned_data['pointe']
-        #virement_objet.origine.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_origine'])
-        #virement_objet.dest.rapp = Rapp.objects.get(id=self.cleaned_data['rapp_destination'])
+        virement_objet.origine.compte=self.cleaned_data['compte_origine']
+        virement_objet.dest.compte=self.cleaned_data['compte_destination']
+        virement_objet.montant=self.cleaned_data['montant']
+        virement_objet.notes=self.cleaned_data['notes']
         #virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
         #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
@@ -165,7 +169,7 @@ class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
     date = gsb_field.DateFieldgsb()
     cours = gsb_field.CurField()
-    #todo readonlyfield pour le compte
+
 
 class Majtitre(forms.Form):
     error_css_class = error_css_class
