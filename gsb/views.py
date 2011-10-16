@@ -135,7 +135,6 @@ def ope_detail(request, pk):
                         compte=ope.compte
                     else:
                         compte=ope.jumelle.compte
-                        raise Exception
                     messages.error(request,u"impossible de modifier car le virement coté %s est rapprochée"%compte)
                 return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs = {'cpt_id':ope.jumelle.compte_id}))
         else:
