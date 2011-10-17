@@ -393,9 +393,7 @@ class Compte_titre(Compte):
                                 moyen_id = settings.MD_DEBIT,
                                 automatique = True
                                 )
-            #gestion des cours
-            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
-            #ajout des titres dans portefeuille
+            #gestion compta matiere (et donc operation sous jacente et cours)
             Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)), date = date, cours = prix, ope = ope)
             #virement
             if virement_de:
@@ -442,8 +440,6 @@ class Compte_titre(Compte):
                                 moyen_id = settings.MD_DEBIT,
                                 automatique = True
                                 )
-            #gestion des cours
-            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':prix})
             if virement_vers:
                 vir = Virement()
                 vir.create(self,
@@ -556,6 +552,8 @@ class Ope_titre(models.Model):
                                                         compte = self.compte,
                                                         )
             super(Ope_titre, self).save(*args, **kwargs)
+            #gestion des cours
+            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':self.cours})
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
