@@ -378,7 +378,7 @@ def ope_titre_detail(request, pk):
                                                 )
                 creation = True
             else :
-                creation = False 
+                creation = False
             if form.has_changed() and ope.ope.rapp is None:
                 #on efface au besoin le cours
                 c=Cours.objects.filter(titre=ope.titre,date=date_initial)
@@ -531,5 +531,4 @@ def view_maj_cpt_titre(request, cpt_id):
                     'titres':liste_titre,
                     'cpt':cpt}
                 )
-
 
