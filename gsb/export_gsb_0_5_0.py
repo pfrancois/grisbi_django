@@ -127,10 +127,10 @@ def _export():
         et.SubElement(xml_detail, "Solde_initial").text = fmt.float(cpt.solde_init)
         et.SubElement(xml_detail, "Solde_mini_voulu").text = fmt.float(cpt.solde_mini_voulu)
         et.SubElement(xml_detail, "Solde_mini_autorise").text = fmt.float(cpt.solde_mini_autorise)
-        et.SubElement(xml_detail, "Solde_courant").text = fmt.float(cpt.solde)
+        et.SubElement(xml_detail, "Solde_courant").text = fmt.float(cpt.solde())
         try:
             et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(Ope.objects.filter(compte = cpt, rapp__isnull = False).latest().rapp.date)
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(Ope.objects.filter(compte = cpt, rapp__isnull = False).latest().rapp.solde)
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(Ope.objects.filter(compte = cpt, rapp__isnull = False).latest().rapp.solde())
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte = cpt, rapp__isnull = False).latest().rapp.id)
         except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")

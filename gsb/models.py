@@ -121,34 +121,47 @@ class Titre(models.Model):
             self.tiers.notes = "%s@%s" % (self.isin, self.type)
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte = None):
+    def investi(self, compte = None,datel=None,rapp=False):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
+        @param datel:date, renvoie sur avant la date ou tout si none
+        @param rapp: boolean, renvoie uniquement les op rapp
         """
+        query=Ope.objects.filter(tiers = self.tiers)
         if compte:
-            return Ope_titre.investi(compte, self)
-        else:
-            valeur = Ope.objects.filter(tiers = self.tiers).aggregate(invest = models.Sum('montant'))['invest']
+            query = query.filter(compte = compte)
+        if rapp:
+            query=query.filter(rapp__isnull=True)
+        if datel:
+            query =query.filter(date__lte=datel)
+        valeur = query.aggregate(invest = models.Sum('montant'))['invest']
         if not valeur:
             return 0
         else:
             return valeur * -1
 
-    def nb(self, compte = None):
-        """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee"""
+    def nb(self, compte = None,datel=None,rapp=False):
+        """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee
+                @param datel:date, renvoie sur avant la date ou tout si none
+                @param rapp: boolean, renvoie uniquement les op rapp
+                """
+        query=Ope_titre.objects.filter(titre = self)
         if compte:
-            return Ope_titre.nb(compte, self)
+            query = query.filter(compte = compte)
+        if rapp:
+            query=query.filter(rapp__isnull=True)
+        if datel:
+            query =query.filter(date__lte=datel)
+        nombre = query.aggregate(nombre = models.Sum('nombre'))['nombre']
+        if not nombre:
+            return 0
         else:
-            nombre = Ope_titre.objects.filter(titre = self).aggregate(nombre = models.Sum('nombre'))['nombre']
-            if not nombre:
-                return 0
-            else:
-                return nombre
+            return nombre
 
     def encours(self, compte = None):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
         if compte:
-            return Ope_titre.nb(compte, self) * self.last_cours
+            return self.nb(compte) * self.last_cours
         else:
             return self.nb() * self.last_cours
 
@@ -298,10 +311,17 @@ class Compte(models.Model):
 
     def __unicode__(self):
         return self.nom
-    @property
-    def solde(self):
-        """renvoie le solde du compte"""
-        req = Ope.objects.filter(compte__id__exact = self.id, mere__exact = None).aggregate(solde = models.Sum('montant'))
+    def solde(self,datel=None,rapp=False):
+        """renvoie le solde du compte
+            @param datel date date limite de calcul du solde
+            @param rapp boolean faut il prendre uniquement les operation rapproches
+        """
+        query=Ope.objects.filter(compte__id__exact = self.id, mere__exact = None)
+        if rapp:
+            query=query.filter(rapp__isnull=True)
+        if datel:
+            query=query.filter(date__lte=datel)
+        req = query.aggregate(solde = models.Sum('montant'))
         if req['solde'] is None:
             solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
         else:
@@ -493,10 +513,9 @@ class Compte_titre(Compte):
         else:
             raise TypeError("pas un titre")
 
-    @property
-    def solde(self):
+    def solde(self,datel=None,rapp=False):
         """renvoie le solde"""
-        solde_espece = super(Compte_titre, self).solde
+        solde_espece = self.solde_espece(datel,rapp)
         solde_titre = 0
         for titre in self.titre.all().distinct():
             solde_titre = solde_titre + titre.encours(self)
@@ -526,8 +545,8 @@ class Compte_titre(Compte):
             self.type = 't'
         super(Compte_titre, self).save(*args, **kwargs)
 
-    def solde_espece(self):
-        return super(Compte_titre, self).solde
+    def solde_espece(self,datel=None,rapp=False):
+        return super(Compte_titre, self).solde(datel,rapp)
     def solde_titre(self):
         solde_titre = 0
         for titre in self.titre.all().distinct():
@@ -554,33 +573,11 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         super(Ope_titre, self).save(*args, **kwargs)
-    @staticmethod
-    def nb(compte, titre):
-        """renvoie le nombre de titre T detenus dans un compte C"""
-        if not isinstance(titre, Titre):
-            raise TypeError("pas un titre")
-        if not isinstance(compte, Compte_titre):
-            raise TypeError("pas un compte titre")
-        nombre = Ope_titre.objects.filter(compte__id = compte.id, titre__id = titre.id).aggregate(nombre = models.Sum('nombre'))['nombre']
-        if not nombre:
-            return 0
-        else:
-            return nombre
-    @staticmethod
-    def investi(compte, titre):
-        """"prend en compte l'ensemble des depenses (achat et frais) et des revenus(vente et revenus annexes)"""
-        if not isinstance(titre, Titre):
-            raise TypeError("pas un titre")
-        if not isinstance(compte, Compte_titre):
-            raise TypeError("pas un compte titre")
-        valeur = Ope.objects.filter(compte = compte, tiers = titre.tiers).aggregate(invest = models.Sum('montant'))['invest']
-        if not valeur:
-            return 0
-        else:
-            return valeur * -1
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
+    def __unicode__(self):
+        return self.id
 
 class Moyen(models.Model):
     """moyen de paiements

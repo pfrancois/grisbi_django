@@ -31,7 +31,7 @@ def index(request):
         total_bq = decimal.Decimal()
     total_pla = decimal.Decimal()
     for p in pl:
-        total_pla = total_pla + p.solde
+        total_pla +=  p.solde()
     nb_clos = len(Compte.objects.filter(ouvert = False))
     c = RequestContext(request, {
         'titre': 'liste des comptes',
@@ -74,7 +74,7 @@ def cpt_detail(request, cpt_id):
                         'nbrapp': nb_ope_rapp,
                         'nbvielles': nb_ope_vielles,
                         'titre': c.nom,
-                        'solde': c.solde,
+                        'solde': c.solde(),
                         'date_limite':date_limite,
                         'nb_j':settings.NB_JOURS_AFF
                     }
@@ -92,7 +92,7 @@ def cpt_detail(request, cpt_id):
             if abs(nb)>decimal.Decimal('0.01'):
                 titres.append({'nom': t.nom, 'type': t.get_type_display(), 'nb':nb, 'invest': invest,
                                'pmv': total - invest, 'total': total, 'id':t.id, 't':t})
-        especes = super(Compte_titre, c).solde
+        especes = super(Compte_titre, c).solde()
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
             template.render(
@@ -101,7 +101,7 @@ def cpt_detail(request, cpt_id):
                     {
                         'compte': c,
                         'titre': c.nom,
-                        'solde': c.solde,
+                        'solde': c.solde(),
                         'titres': titres,
                         'especes': especes,
                         'date_limite':date_limite,
@@ -307,7 +307,7 @@ def cpt_titre_espece(request, cpt_id, date_limite = False):
                     'compte': c,
                     'list_ope': q,
                     'titre': "%s: Especes" % c.nom,
-                    'solde': super(Compte_titre, c).solde,
+                    'solde': super(Compte_titre, c).solde(),
                     'date_limite':date_limite,
                     'nbrapp': Ope.non_meres().filter(compte__pk = cpt_id).filter(rapp__isnull = False).count(),
                     'nbvielles': nbvielles,
