@@ -378,23 +378,12 @@ class Compte_titre(Compte):
         @param virement_de
         """
         self.alters_data = True
-        cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults = {'nom':u'operation sur titre:'})[0]
         if frais:
             if not cat_frais :
                 cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
             if not tiers_frais:
                 tiers_frais=titre.tiers
         if isinstance(titre, Titre):
-            #ajout de l'operation dans le compte_espece rattache
-            ope = Ope.objects.create(date = date,
-                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) * -1,
-                                tiers = titre.tiers,
-                                cat = cat_ost,
-                                notes = "%s@%s" % (nombre, prix),
-                                moyen = self.moyen_debit_defaut,
-                                automatique = True,
-                                compte = self,
-                                )
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
@@ -428,25 +417,15 @@ class Compte_titre(Compte):
         @param virement_vers
         """
         self.alters_data = True
-        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
-        if not cat_frais and frais:
+        if not cat_frais :
             cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
-        if not titre_frais and frais:
+        if not titre_frais :
             titre_frais=titre.tiers
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            nb_titre_avant = Ope_titre.nb(titre = titre, compte = self)
+            nb_titre_avant = titre.nb( compte = self)
             if not nb_titre_avant:
                 raise Titre.DoesNotExist('titre pas en portefeuille')
-            #ajout de l'operation dans le compte_espece ratache
-            ope = self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
-                                tiers = titre.tiers,
-                                cat = cat_ost,
-                                notes = "%s@%s" % (nombre, prix),
-                                automatique = True,
-                                moyen=self.moyen_credit_defaut
-                                )
             #compta matiere
             Ope_titre.objects.create(titre = titre,
                                       compte = self,
@@ -479,24 +458,14 @@ class Compte_titre(Compte):
             cat_frais=None,titre_frais=None):
         """fonction pour ost de titre:"""
         self.alters_data = True
-        cat_ost = Cat.objects.get_or_create(nom = u"operation sur titre:", defaults = {'nom':u'operation sur titre:'})[0]
-        if not cat_frais:
+        if not cat_frais :
             cat_frais = Cat.objects.get_or_create(nom = u"frais bancaires:", defaults = {'nom':u'frais bancaires:'})[0]
         if not titre_frais:
             titre_frais=titre.tiers
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            if not Ope_titre.nb(titre = titre, compte = self):
+            if not titre.nb( compte = self):
                 raise Titre.DoesNotExist('titre pas en portefeuille')
-            #ajout de l'operation dans le compte_espece ratache
-            self.ope_set.create(date = date,
-                                montant = decimal.Decimal(force_unicode(montant)),
-                                tiers = titre.tiers,
-                                cat = cat_ost,
-                                notes = "revenu",
-                                moyen_id = settings.MD_CREDIT,
-                                automatique = True
-                                )
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(frais)) * -1,
@@ -509,7 +478,6 @@ class Compte_titre(Compte):
             if virement_vers:
                 vir = Virement()
                 vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)), date)
-
         else:
             raise TypeError("pas un titre")
 
@@ -573,6 +541,21 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         super(Ope_titre, self).save(*args, **kwargs)
+        if not self.ope:
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults = {'nom':u'operation sur titre:'})[0]
+            if self.cours * self.nombre < 0:#vente
+                moyen=self.compte.moyen_credit_defaut
+            else:#achat
+                moyen=self.compte.moyen_credit_defaut
+            self.ope=Ope.objects.create(date = self.date,
+                                                        montant = self.cours * self.nombre * -1,
+                                                        tiers = self.titre.tiers,
+                                                        cat = cat_ost,
+                                                        notes = "%s@%s" % (self.nombre, self.cours),
+                                                        moyen = moyen,
+                                                        compte = self.compte,
+                                                        )
+            super(Ope_titre, self).save(*args, **kwargs)
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
