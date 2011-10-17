@@ -45,36 +45,36 @@ class test_models(TestCase):
     #def test_ib_fusionne(self):
     #def test_exo_fusionne(self):
     def test_compte_solde_normal(self):
-        self.assertEqual(Compte.objects.get(id = 1).solde, decimal.Decimal('20'))
+        self.assertEqual(Compte.objects.get(id = 1).solde(), decimal.Decimal('20'))
     def test_compte_abolute_url(self):
         self.assertEqual(Compte.objects.get(id = 1).get_absolute_url(), '/compte/1/')
     def test_ope_titre_achat_sans_virement(self):
         c = Compte_titre.objects.get(id = 4)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom = "t1")
-        self.assertEqual(Ope_titre.investi(c, t), 0)
+        self.assertEqual(t.investi(c), 0)
         c.achat(titre = t, nombre = 20, date = '2011-01-01')
         self.assertEqual(Ope_titre.investi(c, t), 20)
         tall = c.titre.all().distinct()
         self.assertEqual(tall.count(), 1)
         self.assertEqual(tall[0].last_cours, 1)
-        self.assertEqual(c.solde, 0)
+        self.assertEqual(c.solde(), 0)
         t.cours_set.create(date = '2011-02-01', valeur = 2)
-        self.assertEqual(c.solde, 20)
+        self.assertEqual(c.solde(), 20)
         c.vente(titre = t, nombre = 10, prix = 3, date = '2011-06-30')
-        self.assertEqual(c.solde, 40)
+        self.assertEqual(c.solde(), 40)
         c.achat(titre = t, nombre = 20, prix = 2, date = '2011-01-01')
-        self.assertEqual(c.solde, 60)
+        self.assertEqual(c.solde(), 60)
     def test_cpt_titre_achat_complet(self):
         c = Compte_titre.objects.get(id = 4)
         t = Titre.objects.get(nom = "t1")
         c.achat(titre = t, nombre = 20, date = '2011-01-01', virement_de = Compte.objects.get(id = 1))
-        self.assertEqual(Ope_titre.investi(c, t), 20)
-        self.assertEqual(c.solde, 20)
+        self.assertEqual(t.investi(c), 20)
+        self.assertEqual(c.solde(), 20)
         t.cours_set.create(date = '2011-02-01', valeur = 2)
         c.vente(t, 10, 3, '2011-06-30', virement_vers = Compte.objects.get(id = 1))
         self.assertEqual(Ope_titre.investi(c, t), -10)
-        self.assertEqual(c.solde, 30)
+        self.assertEqual(c.solde(), 30)
     def test_moyen_fusionne(self):
         Moyen.objects.get(id = 2).fusionne(Moyen.objects.get(id = 1))
 #    def test_rapp_compte(self):
@@ -111,7 +111,7 @@ class test_models(TestCase):
         self.assertEquals(Virement(Ope.objects.get(id = 3)).date_val, strpdate('2011-02-01'))
     def test_virement_create(self):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20)
-        self.assertEqual(Compte.objects.get(id = 1).solde, 0)
+        self.assertEqual(Compte.objects.get(id = 1).solde(), 0)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom = 'cpt1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom = 'cpt2'))
         self.assertEquals(v.origine.id, 3)
@@ -120,14 +120,14 @@ class test_models(TestCase):
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 20)
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20, '2010-01-01', 'test_notes')
-        self.assertEqual(Compte.objects.get(id = 1).solde, -20)
+        self.assertEqual(Compte.objects.get(id = 1).solde(), -20)
         self.assertEqual(v.date, '2010-01-01')
         self.assertEqual(v.notes, 'test_notes')
     def test_virement_delete(self):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20)
         v.delete()
-        self.assertEquals(Compte.objects.get(nom = 'cpt1').solde, 20)
-        self.assertEquals(Compte.objects.get(nom = 'cpt2').solde, 0)
+        self.assertEquals(Compte.objects.get(nom = 'cpt1').solde(), 20)
+        self.assertEquals(Compte.objects.get(nom = 'cpt2').solde(), 0)
     def test_virement_init_form(self):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20, '2010-01-01', 'test_notes')
         tab = {'compte_origine':1,
