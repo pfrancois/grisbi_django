@@ -38,9 +38,7 @@ def chgt_ope_titre(request):
                                             automatique = True,
                                             compte = ope.compte,
                                             )
-            cours=Cours.objects.get_or_create(titre=ope.titre,date=ope.date,defaults={'titre':ope.titre,
-                                                                                      'date':ope.date,
-                                                                                      'valeur':ope.cours})
+
             ope.ope.date = ope.date
             ope.ope.montant = ope.cours * ope.nombre * -1
             ope.ope.note = "%s@%s" % (ope.nombre, cours)
