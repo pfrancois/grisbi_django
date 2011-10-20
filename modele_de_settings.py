@@ -24,12 +24,12 @@ ID_CPT_M = 1
 
 #taux de cotisations sociales
 #attention c'est un taux special estime
-TAUX_VERSEMENT=0.0842970850027528
+__TAUX_VERSEMENT_legal=0.08*0.97
+TAUX_VERSEMENT=1/(1-__TAUX_VERSEMENT_legal)*__TAUX_VERSEMENT_legal
 #id et cat des operation speciales
 ID_CAT_COTISATION=23
 ID_TIERS_COTISATION=727
 ID_CAT_OST=64
-#moyen de op par defaut
 MD_CREDIT=6
 MD_DEBIT=7
 ##################
@@ -145,6 +145,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.transaction.TransactionMiddleware'
 )
 
 ROOT_URLCONF = 'mysite.urls'
@@ -165,6 +166,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mysite.gsb',
+    'mysite.annoying',
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs',
@@ -187,7 +189,18 @@ if DEBUG_TOOLBAR:
         'HIDE_DJANGO_SQL': True ,
         'INTERCEPT_REDIRECTS':False,
     }
+    DEBUG_TOOLBAR_PANELS = (
+        'debug_toolbar.panels.version.VersionDebugPanel',
+        'debug_toolbar.panels.timer.TimerDebugPanel',
+        'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+        'debug_toolbar.panels.headers.HeaderDebugPanel',
+        'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+        'debug_toolbar.panels.template.TemplateDebugPanel',
+        'debug_toolbar.panels.sql.SQLDebugPanel',
+        'debug_toolbar.panels.signals.SignalDebugPanel',
+        'debug_toolbar.panels.logger.LoggingPanel',
 
+    )
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
@@ -195,9 +208,6 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
    'formatters': {
-        'simple': {
-            'format': '[%(levelname)s] %(asctime)s - %(name)s - %(message)s'
-        },
         'verbose': {
             'format': '[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
         },
@@ -210,41 +220,18 @@ LOGGING = {
         'console-simple':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
             'formatter': 'verbose'
         },
         'log-file': {
             'level': 'WARNING',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
             'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-            'mode': 'a', #append+create
+           'when': 'midnight',
+           'backupCount': '30', #approx 1 month worth
         },
-        #~ 'timed-log-file': {
-            #~ 'level': 'DEBUG',
-            #~ 'class': 'logging.handlers.TimedRotatingFileHandler', # Python logging lib
-            #~ 'formatter': 'parsefriendly',
-            #~ #consider: 'filename': '/var/log/<myapp>/app.log',
-            #~ #will need perms at location below:
-            #~ 'filename': os.path.join(PROJECT_PATH, 'log','gsb_timed_log.log'),
-            #~ 'when': 'midnight',
-            #~ 'backupCount': '30', #approx 1 month worth
-        #~ },
-        #~ 'watched-log-file': {
-            #~ 'level': 'DEBUG',
-            #~ 'class': 'logging.handlers.WatchedFileHandler',
-            #~ 'formatter': 'parsefriendly',
-            #~ #consider: 'filename': '/var/log/<myapp>/app.log',
-            #~ #will need perms at location below:
-            #~ 'filename': os.path.join(PROJECT_PATH, 'log','gsb_watched_log.log'),
-            #~ 'mode': 'a', #append+create
-        #~ },
     },
     'loggers': {
         'django': {
@@ -263,7 +250,7 @@ LOGGING = {
             'propagate': False,
         },
         'gsb':{
-            'level':'WARNING',
+            'level':'INFO',
             'handlers':['console-simple', 'log-file'],
             'propagate': True,
         }
