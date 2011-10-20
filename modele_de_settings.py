@@ -166,7 +166,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mysite.gsb',
-    'mysite.annoying',
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs',

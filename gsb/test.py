@@ -18,7 +18,6 @@ from django.utils import formats#@UnusedImport
 from django.utils.encoding import smart_unicode #@UnusedImport
 from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
-from mysite.annoying.functions import get_config
 from django.shortcuts import render, get_object_or_404
 from django.forms.models import modelformset_factory
 def test(request):
