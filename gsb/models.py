@@ -21,7 +21,7 @@ class CurField(models.DecimalField):
     un champ decimal mais defini pour les monnaies
     """
     description = "A Monetary value"
-    __metaclass__ = models.SubfieldBase
+   # __metaclass__ = models.SubfieldBase # ca marche pas chez always data
     def __init__(self, verbose_name = None, name = None, max_digits = 15, decimal_places = 3, default = 0.000, **kwargs):
         super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default = default, **kwargs)
     def get_internal_type(self):
