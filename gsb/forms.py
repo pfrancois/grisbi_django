@@ -42,7 +42,11 @@ class OperationForm(Basemodelform):
     nouveau_tiers = forms.CharField(required = False)
     class Meta:
         model = Ope
-        exclude = ('mere', 'jumelle')
+        exclude = ( 'jumelle')#car sinon c'est un virement
+    def __init__(self,  *args, **kwargs):
+        super(OperationForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere',required=False)
     def clean(self):
         super(OperationForm, self).clean()
         data = self.cleaned_data
