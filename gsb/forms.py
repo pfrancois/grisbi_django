@@ -4,7 +4,7 @@ from django import forms
 from mysite.gsb.models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
     Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
 import mysite.gsb.widgets as gsb_field
-
+from django.utils.safestring import mark_safe
 
 #import decimal
 error_css_class = 'error'
@@ -89,8 +89,11 @@ class VirementForm(Baseform):
             super(VirementForm, self).__init__(initial = vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
-        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp',required=False)
-        self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp',required=False)
+        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt origine"))
+        if ope:
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt destination"))
+        else:
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt destination"))
     def save(self):
         if self.ope is None:
             virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
