@@ -147,7 +147,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
-        if not Ope_titre.nb(titre = data['titre'], compte = data['compte_titre']):
+        if not data['compte_titre'].nb(titre = data['titre']):
             msg = u"titre pas en portefeuille"
             self._errors['titre'] = self.error_class([msg, ])
             del data['titre']
