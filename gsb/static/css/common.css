@@ -60,6 +60,7 @@ h2 {
 
 .item {
 	background-color: #3A0000;
+	border-top: 1px solid #4D0000;
 }
 .item:hover {
 	background-color: #706666;
@@ -93,20 +94,15 @@ h2 {
 
 .creditElement {
 	background: #6699FF;
-	/*border: #ffffff solid;*/
-    border-top: 1px solid #ffffff;
-    border-left: 0;
-    border-right: 0;
-	/*border-width: 1px 1px 0 0;*/
-	width: 100%;
-	text-align: left;
 	padding: 0.6em 0 0.6em 0;
 }
 
-.debitElement {
-    border-top: 1px solid #4D0000;
-}
+.debitElement {}
 
+
+.rappElement{
+	color:red;
+}
 .opCredit {
 	white-space: nowrap;
 	padding: 0 0.6em 0 0.1em;
@@ -116,7 +112,7 @@ h2 {
 .opDebit {
 	white-space: nowrap;
 	padding: 0 0.6em 0 0.3em;
-	text-align: left;
+	text-align: right;
 }
 .opCenter {
 	white-space: nowrap;
