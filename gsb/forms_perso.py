@@ -14,7 +14,7 @@ from django.conf.urls.defaults import patterns, url, include
 #import relatif forms
 import mysite.gsb.forms as gsb_forms
 import mysite.gsb.widgets as gsb_field
-from django import forms as dj_forms
+from django import forms
 #models
 from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat
 from django.db import models
@@ -31,15 +31,19 @@ from django.utils.encoding import smart_unicode
 
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
-    url(r'test/(?P<pk>\d+)/$', 'test',name='g_perso_test'),
+    url(r'test/(?P<pk>\d+)/$', 'search_ope',name='g_search_ope'),
     (r'^$', 'chgt_ope_titre'))
 
 #---------------les fields, widgets  et forms tres perso
-class dateForm(gsb_forms.Baseform):
+class searchForm(gsb_forms.Baseform):
     date_max = gsb_field.DateFieldgsb()
     date_min = gsb_field.DateFieldgsb()
-    rapp=dj_forms.BooleanField(required=False,label=u"rapprochés?")
-
+    rapp=forms.BooleanField(required=False,label=u"rapprochés?")
+    tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label = None)
+    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
+    pointe = forms.BooleanField(required = False)
+    rapp_detail= forms.ModelChoiceField(Rapp.objects.all(), required = False)
 #----------les views tres perso
 def chgt_ope_titre(request):
     nb_ope=0
@@ -70,12 +74,12 @@ def chgt_ope_titre(request):
             print nb_ope
     return render(request,'generic.djhtm',{'titre':'chgt'})
 
-def test(request,pk):
+def search_opes(request,pk):
     cpt = get_object_or_404(Compte.objects.select_related(), pk = pk)
     opes=cpt.ope_set.all().order_by('-date').filter(mere__exact = None)#definition du set par defaut
     first=cpt.ope_set.order_by('date')[0].date#recuperation de la date extreme
     if request.method == 'POST':
-        form = dateForm(data = request.POST)
+        form = searchForm(data = request.POST)
         if form.is_valid():
             #comme c'est bon, on peut filter plus
             if form.cleaned_data['date_max'] != datetime.date.today():
@@ -83,7 +87,7 @@ def test(request,pk):
             if form.cleaned_data['rapp']:
                 opes=opes.filter(Q(rapp__isnull=False)|Q(jumelle__rapp__isnull=False))
     else:
-        form = dateForm(initial={'date_max':datetime.date.today(),'date_min':first})
+        form = searchForm(initial={'date_max':datetime.date.today(),'date_min':first})
     solde=opes.aggregate(solde = models.Sum('montant'))['solde']
     return render(request,'templates_perso/test.djhtm',
             {'form':form,
