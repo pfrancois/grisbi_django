@@ -553,7 +553,7 @@ class Ope_titre(models.Model):
                                                         )
             super(Ope_titre, self).save(*args, **kwargs)
             #gestion des cours
-            titre.cours_set.get_or_create(date = self.date, defaults = {'date':self.date, 'valeur':self.cours})
+            self.titre.cours_set.get_or_create(date = self.date, defaults = {'date':self.date, 'valeur':self.cours})
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
@@ -742,7 +742,7 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.PROTECT, default = None)
     ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u"projet")
-    jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False)
+    jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False,on_delete = models.PROTECT)
     mere = models.ForeignKey('self', null = True, blank = True, related_name = 'filles_set', default = None, editable = False)
     automatique = models.BooleanField(default = False, help_text = u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length = 20, blank = True, default = '')

@@ -46,7 +46,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name = "cpt_titre_maj"),
                         )
 #gestion de mes trucs perso
-perso = not True# ya plus rien dedans
+perso = True# ya plus rien dedans
 #form tester
 if settings.DEBUG and perso:
     from mysite.gsb.form_tester import SomeModelFormPreview
