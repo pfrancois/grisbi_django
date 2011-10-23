@@ -89,7 +89,7 @@ class ReadonlyField(forms.FileField):
             self.instance = None
 
     def clean(self, value, initial):
-        return getattr(self.initial,'value',None)
+        return getattr(self,'initial',None)
 
 class Curwidget(forms.TextInput):
     def render(self, name, value, attrs = None):

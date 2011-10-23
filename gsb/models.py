@@ -606,7 +606,7 @@ class Rapp(models.Model):
     class Meta:
         db_table = 'rapp'
         verbose_name = u"rapprochement"
-        ordering = ['-date']
+        ordering = ['-nom']
         get_latest_by = 'date'
 
     def __unicode__(self):
