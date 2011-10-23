@@ -553,7 +553,7 @@ class Ope_titre(models.Model):
                                                         )
             super(Ope_titre, self).save(*args, **kwargs)
             #gestion des cours
-            titre.cours_set.get_or_create(date = date, defaults = {'date':date, 'valeur':self.cours})
+            self.titre.cours_set.get_or_create(date = self.date, defaults = {'date':self.date, 'valeur':self.cours})
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
