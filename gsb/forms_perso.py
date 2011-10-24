@@ -32,7 +32,7 @@ from django.utils.encoding import smart_unicode
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
     url(r'search/(?P<pk>\d+)/$', 'search_opes',name='g_search_ope'),
-    (r'^$', 'chgt_ope_titre'))
+    (r'^ope$', 'pel'))
 
 #---------------les fields, widgets  et forms tres perso
 class SearchForm(gsb_forms.Baseform):
@@ -63,25 +63,25 @@ def chgt_ope_titre(request):
                 moyen=ope.compte.moyen_credit_defaut
             nb_ope+=1
             montant=ope.cours * ope.nombre * -1
-            ope.ope=Ope.objects.create(date = ope.date,
-                                            montant = montant,
-                                            tiers = ope.titre.tiers,
-                                            cat = Cat.objects.get_or_create(nom = u"operation sur titre:",
-                                                                        defaults = {'nom':u'operation sur titre:'})[0],
-                                            notes = "%s@%s" % (ope.nombre, ope.cours),
-                                            moyen = moyen,
-                                            automatique = True,
-                                            compte = ope.compte,
-                                            )
-
-            ope.ope.date = ope.date
-            ope.ope.montant = montant
-            ope.ope.note = "%s@%s" % (ope.nombre, ope.cours)
-            ope.ope.save()
             ope.save()
-            print nb_ope
+            print ope.ope
+    print nb_ope
     return render(request,'generic.djhtm',{'titre':'chgt'})
 
+def pel(request):
+    annee=[2005,2006,2007,2008,2009]
+    mois=range(1,13)
+    for a in annee:
+        for m in mois:
+            c=Compte_titre.objects.get(id=4)
+            if m+1!=13:
+                jour=datetime.date(a, m+1, 1) - datetime.timedelta(days=1)
+            else:
+                jour=datetime.date(a+1, 1, 1) - datetime.timedelta(days=1)
+            t=Titre.objects.get(nom='PEL')
+            c.achat(titre=t,nombre=45,date=jour)
+            print 'otot'
+    return render(request,'generic.djhtm',{'titre':'pel'})
 @login_required
 def search_opes(request,pk):
     cpt = get_object_or_404(Compte.objects.select_related(), pk = pk)

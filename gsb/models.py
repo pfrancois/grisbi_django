@@ -366,7 +366,7 @@ class Compte_titre(Compte):
     class Meta:
         db_table = 'cpt_titre'
         ordering = ['nom']
-    @transaction.commit_on_success
+    #@transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None,
         cat_frais=None,tiers_frais=None):
         """fonction pour achat de titre:
@@ -394,12 +394,15 @@ class Compte_titre(Compte):
                                 automatique = True
                                 )
             #gestion compta matiere (et donc operation sous jacente et cours)
-            Ope_titre.objects.create(titre = titre, compte = self, nombre = decimal.Decimal(force_unicode(nombre)), date = date, cours = prix, ope = ope)
+            Ope_titre.objects.create(titre = titre,
+                                    compte = self,
+                                    nombre = decimal.Decimal(force_unicode(nombre)),
+                                    date = date,
+                                    cours = prix)
             #virement
             if virement_de:
                 vir = Virement()
                 vir.create(virement_de, self, decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
-
         else:
             raise TypeError("pas un titre")
 
@@ -429,8 +432,7 @@ class Compte_titre(Compte):
                                       compte = self,
                                       nombre = decimal.Decimal(force_unicode(nombre))*-1,
                                       date = date,
-                                      cours = prix,
-                                      ope = ope)
+                                      cours = prix)
             if decimal.Decimal(force_unicode(frais)):
                 self.ope_set.create(date = date,
                                 montant = decimal.Decimal(force_unicode(frais))*-1,
