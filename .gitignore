@@ -37,3 +37,4 @@ secret_key.py
 *.kpf
 .pydevproject
 perso
+coverage

@@ -37,7 +37,7 @@ class test_models(TestCase):
     def test_banque_fusionne(self):
         Banque.objects.get(cib = '99999').fusionne(Banque.objects.get(cib = "10001"))
         self.assertEqual(Banque.objects.count(), 1)
-        self.assertEqual(Compte.objects.get(id = 3).banque.id, 1)
+        self.assertEqual(Compte.objects.get(id = 1).banque.id, 1)
     def test_cat_fusionne(self):
         Cat.objects.get(nom = "cat2").fusionne(Cat.objects.get(nom = "cat1"))
         self.assertEqual(Cat.objects.count(), 3)
@@ -54,7 +54,7 @@ class test_models(TestCase):
         t = Titre.objects.get(nom = "t1")
         self.assertEqual(t.investi(c), 0)
         c.achat(titre = t, nombre = 20, date = '2011-01-01')
-        self.assertEqual(Ope_titre.investi(c, t), 20)
+        self.assertEqual(t.investi(c), 20)
         tall = c.titre.all().distinct()
         self.assertEqual(tall.count(), 1)
         self.assertEqual(tall[0].last_cours, 1)
@@ -73,7 +73,7 @@ class test_models(TestCase):
         self.assertEqual(c.solde(), 20)
         t.cours_set.create(date = '2011-02-01', valeur = 2)
         c.vente(t, 10, 3, '2011-06-30', virement_vers = Compte.objects.get(id = 1))
-        self.assertEqual(Ope_titre.investi(c, t), -10)
+        self.assertEqual(t.investi(c), -10)
         self.assertEqual(c.solde(), 30)
     def test_moyen_fusionne(self):
         Moyen.objects.get(id = 2).fusionne(Moyen.objects.get(id = 1))
@@ -136,9 +136,7 @@ class test_models(TestCase):
                'date':"2010-01-01",
                'notes':'test_notes',
                'pointe':False,
-               'piece_comptable_compte_origine':u'',
-               'piece_comptable_compte_destination':u'',
-               'moyen_origine':2,
-               'moyen_destination':1,
+               'moyen_origine':4,
+               'moyen_destination':4
                }
         self.assertEquals(tab, v.init_form())

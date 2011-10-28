@@ -3,7 +3,7 @@ if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
 
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
+    #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
     from mysite import settings
 
@@ -31,5 +31,13 @@ def test(request):
     return render(request, 'gsb/test.djhtm', {'formset':form, 'titre':'test'})
 
 if __name__ == "__main__":
-    pass
+    c = Compte_titre.objects.get(id = 4)
+    t = Titre.objects.get(id=1)
+    v=Compte.objects.get(id = 1)
+    Ope_titre.objects.create(titre = t,
+                                    compte = c,
+                                    nombre = 20,
+                                    date = '2011-01-01',
+                                    cours = 1)
+
 

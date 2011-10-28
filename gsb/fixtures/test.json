@@ -276,22 +276,29 @@
         "pk": 2,
         "model": "gsb.moyen",
         "fields": {
-            "nom": "moyen1",
+            "nom": "moyen_dep2",
             "type": "d"
         }
     }, {
         "pk": 3,
         "model": "gsb.moyen",
         "fields": {
-            "nom": "moyen2",
+            "nom": "moyen_dep1",
             "type": "d"
         }
     }, {
         "pk": 1,
         "model": "gsb.moyen",
         "fields": {
-            "nom": "moyen3",
-            "type": "d"
+            "nom": "moyen_rec1",
+            "type": "r"
+        }
+    }, {
+        "pk": 4,
+        "model": "gsb.moyen",
+        "fields": {
+            "nom": "moyen_vir4",
+            "type": "v"
         }
     }, {
         "pk": 1,

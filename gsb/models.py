@@ -3,11 +3,12 @@
 from django.db import models
 import datetime
 import decimal
-from django.db import transaction
+from django.db import transaction,IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
-
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 class Gsb_exc(Exception):
     pass
 
@@ -530,7 +531,7 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default = 1, decimal_places = 5)
     invest = CurField(default = 0, editable = False, decimal_places = 5)
-    ope = models.OneToOneField('Ope', editable = False, null = True, on_delete = models.CASCADE)#null=true car j'ai des operations sans lien
+    ope = models.OneToOneField('Ope', editable = False, null = True)#null=true car j'ai des operations sans lien
     class Meta:
         db_table = 'ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
@@ -538,29 +539,37 @@ class Ope_titre(models.Model):
         ordering = ['-date']
     def save(self, *args, **kwargs):
         self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
-        super(Ope_titre, self).save(*args, **kwargs)
+#        super(Ope_titre, self).save(*args, **kwargs)
         if not self.ope:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults = {'nom':u'operation sur titre:'})[0]
+            #gestion des cours
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults = {'nom':u'operation sur titre :'})[0]
             if self.cours * self.nombre < 0:#vente
                 moyen=self.compte.moyen_credit_defaut
             else:#achat
                 moyen=self.compte.moyen_credit_defaut
             self.ope=Ope.objects.create(date = self.date,
-                                                        montant = self.cours * self.nombre * -1,
-                                                        tiers = self.titre.tiers,
-                                                        cat = cat_ost,
-                                                        notes = "%s@%s" % (self.nombre, self.cours),
-                                                        moyen = moyen,
-                                                        compte = self.compte,
-                                                        )
-            super(Ope_titre, self).save(*args, **kwargs)
-            #gestion des cours
+                                                    montant = self.cours * self.nombre * -1,
+                                                    tiers = self.titre.tiers,
+                                                    cat = cat_ost,
+                                                    notes = "%s@%s" % (self.nombre, self.cours),
+                                                    moyen = moyen,
+                                                    compte = self.compte,
+                                                    )
             self.titre.cours_set.get_or_create(date = self.date, defaults = {'date':self.date, 'valeur':self.cours})
+        else:
+            self.ope.date=self.date
+            self.ope.montant=self.cours * self.nombre * -1
+            self.ope.tiers=self.titre.tiers
+            self.ope.notes="%s@%s" % (self.nombre, self.cours)
+            self.ope.compte=self.compte
+            self.ope.save()
+        super(Ope_titre, self).save(*args, **kwargs)
+
     @models.permalink
     def get_absolute_url(self):
         return 'ope_titre_detail', (), {'pk':str(self.id)}
     def __unicode__(self):
-        return self.id
+        return "%s"%self.id
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -582,7 +591,6 @@ class Moyen(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-
         return "%s (%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
@@ -619,7 +627,6 @@ class Rapp(models.Model):
             return self.ope_set.all()[0].compte.id
         else:
             raise TypeError
-    @property
     def solde(self):
         req = self.ope_set.aggregate(solde = models.Sum('montant'))
         if req['solde'] is None:
@@ -728,7 +735,6 @@ class Generalite(models.Model):
             return classe.objects.latest('id').id
         except classe.DoesNotExist:
             return 0
-
 class Ope(models.Model):
     """operation"""
     compte = models.ForeignKey(Compte)
@@ -744,10 +750,11 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null = True, blank = True, on_delete = models.PROTECT, default = None)
     ib = models.ForeignKey(Ib, null = True, blank = True, on_delete = models.PROTECT, default = None, verbose_name = u"projet")
-    jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False,on_delete = models.PROTECT)
+    jumelle = models.OneToOneField('self', null = True, blank = True, related_name = 'jumelle_set', default = None, editable = False)
     mere = models.ForeignKey('self', null = True, blank = True, related_name = 'filles_set', default = None, editable = False)
     automatique = models.BooleanField(default = False, help_text = u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length = 20, blank = True, default = '')
+
 
     class Meta:
         db_table = 'ope'
@@ -791,6 +798,25 @@ class Ope(models.Model):
                 else:
                     self.moyen_id=settings.MD_DEBIT
         super(Ope, self).save(*args, **kwargs)
+
+@receiver(pre_delete,sender=Ope)
+def verif_ope_rapp(sender,**kwargs):
+    instance=kwargs['instance']
+    #on evite que cela soit une operation rapproche
+    if instance.rapp:
+        raise IntegrityError()
+    if instance.jumelle:
+        if instance.jumelle.rapp:
+            raise IntegrityError()
+    if instance.mere:
+        if instance.mere.rapp:
+            raise IntegrityError()
+@receiver(pre_delete,sender=Ope_titre)
+def verif_ope_titre(sender,**kwargs):
+    instance=kwargs['instance']
+    if instance.ope:
+        if instance.ope.rapp:
+            raise IntegrityError()
 
 
 class Virement(object):
@@ -874,6 +900,9 @@ class Virement(object):
             vir.date = datetime.date.today()
         vir.notes = notes
         vir._init = True
+        moyen=Moyen.objects.filter(type='v')[0]
+        vir.dest.moyen=moyen
+        vir.origine.moyen=moyen
         vir.save()
         vir.origine.jumelle = vir.dest
         vir.dest.jumelle = vir.origine
@@ -909,4 +938,3 @@ class Virement(object):
 
     def __unicode__(self):
         return "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
-

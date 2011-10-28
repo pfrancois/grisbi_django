@@ -4,6 +4,11 @@ from django.contrib import admin
 from django.contrib import messages
 from django.db import models
 import django.forms as forms
+from django.utils.safestring import mark_safe
+from django.core import urlresolvers
+from django.db import IntegrityError
+from django.core.exceptions import PermissionDenied
+
 
 def fusion(classe, request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""
@@ -99,10 +104,9 @@ class Compte_titre_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du premier compte_titre dans le premier"
     fieldsets = [
-            (None, {'fields': ('nom', 'type', 'ouvert')}),
+            (None, {'fields': ('nom', 'ouvert','moyen_debit_defaut', 'moyen_credit_defaut')}),
             (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
             (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']})
             ]
     def nb_ope(self, obj):
         return '%s'%(obj.ope_set.count())
@@ -110,18 +114,50 @@ class Compte_titre_admin(admin.ModelAdmin):
     list_filter = ('type', 'banque', 'ouvert')
 
 class Ope_admin(admin.ModelAdmin):
-    """classe de gestion de l'amdmin pour les opes"""
+    """classe de gestion de l'admin pour les opes"""
     fieldsets = [
-            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'jumelle', 'mere')}),
-            (u'informations diverses', {'fields': ('date_val', 'num_cheque', 'notes', 'exercice', 'ib'), 'classes': ['collapse']}),
+            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere','oper_titre')}),
+            (u'informations diverses', {'fields': ( 'notes', 'exercice', 'ib','date_val', 'num_cheque'), 'classes': ['collapse']}),
             (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
             ]
-    readonly_fields = ('jumelle', 'mere')
+    readonly_fields = ('show_jumelle', 'show_mere','oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
     list_filter = ('compte', 'date', 'pointe', 'rapp')
     search_fields = ['tiers__nom']
-
+    def show_jumelle(self, obj):
+        if obj.jumelle_id:
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
+        else:
+            return "(aucun-e)"
+    show_jumelle.short_description = "jumelle"
+    def show_mere(self, obj):
+        if obj.mere_id:
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.mere))
+        else:
+            return "(aucun-e)"
+    show_mere.short_description = "mere"
+    def oper_titre(self,obj):
+        if obj.ope_titre:
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre))
+        else:
+            return "(aucun-e)"
+    oper_titre.short_description = u"compta matiere"
+    def delete_view(self, request, object_id, extra_context=None):
+        instance= self.get_object(request, admin.util.unquote(object_id))
+        #on evite que cela soit une operation rapproche
+        if instance.rapp:
+            raise IntegrityError()
+        if instance.jumelle:
+            if instance.jumelle.rapp:
+                raise IntegrityError
+        if instance.mere:
+            if instance.mere.rapp:
+                raise IntegrityError
+        return super(Ope_admin,self).delete_view(request, object_id, extra_context)
 
 class Cours_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les  cours des titres """
@@ -145,6 +181,7 @@ class Titre_admin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
+
 class Moyen_admin(admin.ModelAdmin):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
@@ -158,7 +195,6 @@ class Moyen_admin(admin.ModelAdmin):
     fields = ['type', 'nom']
     def nb_ope(self, obj):
         return '%s'%(obj.ope_set.count())
-
     list_display = ('nom', 'type','nb_ope')
 
 class Tiers_admin(admin.ModelAdmin):
@@ -222,10 +258,16 @@ class Gen_admin(admin.ModelAdmin):
 
 class Ope_titre_admin(admin.ModelAdmin):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
-    readonly_fields = ('invest', 'ope')
+    readonly_fields = ('invest','show_ope')
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)
+    def show_ope(self, obj):
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
+        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
+    show_ope.short_description = "ope"
+
+
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)
