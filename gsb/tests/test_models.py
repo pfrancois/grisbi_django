@@ -4,14 +4,14 @@ test models
 """
 from django.test import TestCase
 from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
-from mysite.gsb.models import Compte_titre, Virement, Ope_titre
+from mysite.gsb.models import Compte_titre, Virement, Ope_titre, Ib
 import datetime, time
 import decimal
 def strpdate(s):
     return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
 class test_models(TestCase):
     fixtures = ['test.json']
-    def test_tiers_reaffect(self):
+    def test_tiers_fusionne(self):
         Tiers.objects.get(nom = "tiers1").fusionne(Tiers.objects.get(nom = "tiers2"))
         self.assertEqual(Tiers.objects.count(), 4)
         self.assertEqual(Ope.objects.get(id = 1).tiers.nom, "tiers2")
@@ -41,15 +41,18 @@ class test_models(TestCase):
     def test_cat_fusionne(self):
         Cat.objects.get(nom = "cat2").fusionne(Cat.objects.get(nom = "cat1"))
         self.assertEqual(Cat.objects.count(), 3)
-        self.assertEqual(Ope.objects.filter(cat__nom = "cat1").count(), 2)
-    #def test_ib_fusionne(self):
+        self.assertEqual(Ope.objects.filter(cat__nom = "cat1").count(), 4)
+    def test_ib_fusionne(self):
+        Ib.objects.get(nom="ib2").fusionne(Ib.objects.get(nom = "ib1"))
+        self.assertEqual(Ib.objects.count(), 3)
+        self.assertEqual(Ope.objects.filter(ib__nom = "ib1").count(), 2)
     #def test_exo_fusionne(self):
     def test_compte_solde_normal(self):
         self.assertEqual(Compte.objects.get(id = 1).solde(), decimal.Decimal('20'))
     def test_compte_abolute_url(self):
         self.assertEqual(Compte.objects.get(id = 1).get_absolute_url(), '/compte/1/')
     def test_ope_titre_achat_sans_virement(self):
-        c = Compte_titre.objects.get(id = 4)
+        c = Compte_titre.objects.get(id = 5)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom = "t1")
         self.assertEqual(t.investi(c), 0)
@@ -66,7 +69,7 @@ class test_models(TestCase):
         c.achat(titre = t, nombre = 20, prix = 2, date = '2011-01-01')
         self.assertEqual(c.solde(), 60)
     def test_cpt_titre_achat_complet(self):
-        c = Compte_titre.objects.get(id = 4)
+        c = Compte_titre.objects.get(id = 5)
         t = Titre.objects.get(nom = "t1")
         c.achat(titre = t, nombre = 20, date = '2011-01-01', virement_de = Compte.objects.get(id = 1))
         self.assertEqual(t.investi(c), 20)
@@ -96,25 +99,25 @@ class test_models(TestCase):
         self.assertEquals(o.moyen, Moyen.objects.get(id = 2))
     def test_virement_verif_property(self):
         Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20, date = '2010-01-01', notes = 'test_notes')
-        v = Virement(Ope.objects.get(id = 3))
-        self.assertEquals(v.origine.id, 3)
-        self.assertEquals(v.dest.id, 4)
+        v = Virement(Ope.objects.get(id = 5))
+        self.assertEquals(v.origine.id, 5)
+        self.assertEquals(v.dest.id, 6)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom = 'cpt1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom = 'cpt2'))
-        self.assertEquals(v.origine.id, 3)
+        self.assertEquals(v.origine.id, 5)
         self.assertEquals(v.date, strpdate('2010-01-01'))
         self.assertEquals(v.montant, v.origine.montant * -1)
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 20)
         v.date_val = '2011-02-01'
         v.save()
-        self.assertEquals(Virement(Ope.objects.get(id = 3)).date_val, strpdate('2011-02-01'))
+        self.assertEquals(Virement(Ope.objects.get(id = 5)).date_val, strpdate('2011-02-01'))
     def test_virement_create(self):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20)
         self.assertEqual(Compte.objects.get(id = 1).solde(), 0)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom = 'cpt1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom = 'cpt2'))
-        self.assertEquals(v.origine.id, 3)
+        self.assertEquals(v.origine.id, 5)
         self.assertEquals(v.date, datetime.date.today())
         self.assertEquals(v.montant, v.origine.montant * -1)
         self.assertEquals(v.montant, v.dest.montant)
@@ -127,7 +130,7 @@ class test_models(TestCase):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20)
         v.delete()
         self.assertEquals(Compte.objects.get(nom = 'cpt1').solde(), 20)
-        self.assertEquals(Compte.objects.get(nom = 'cpt2').solde(), 0)
+        self.assertEquals(Compte.objects.get(nom = 'cpt2').solde(), 10)
     def test_virement_init_form(self):
         v = Virement.create(Compte.objects.get(id = 1), Compte.objects.get(id = 2), 20, '2010-01-01', 'test_notes')
         tab = {'compte_origine':1,

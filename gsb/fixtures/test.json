@@ -280,7 +280,53 @@
             "guichet": "12345", 
             "ouvert": true
         }
-    }, 
+    }, {
+            "pk": 4,
+            "model": "gsb.compte",
+            "fields": {
+                "nom": "cpt_titre1",
+                "cle_compte": 0,
+                "solde_mini_voulu": "0",
+                "banque": 1,
+                "type": "t",
+                "notes": "",
+                "num_compte": "",
+                "solde_init": "0",
+                "solde_mini_autorise": "0",
+                "moyen_debit_defaut":3,
+                "titulaire": "",
+                "moyen_credit_defaut": 1,
+                "guichet": "",
+                "ouvert": true
+            }
+        }, {
+            "pk": 5,
+            "model": "gsb.compte",
+            "fields": {
+                "nom": "cpt_titre2",
+                "cle_compte": 0,
+                "solde_mini_voulu": "0",
+                "banque": 1,
+                "type": "t",
+                "notes": "",
+                "num_compte": "",
+                "solde_init": "0",
+                "solde_mini_autorise": "0",
+                "moyen_debit_defaut": 3,
+                "titulaire": "",
+                "moyen_credit_defaut": 1,
+                "guichet": "",
+                "ouvert": true
+            }
+        }, {
+            "pk": 4,
+            "model": "gsb.compte_titre",
+            "fields": {}
+        }, {
+            "pk": 5,
+            "model": "gsb.compte_titre",
+            "fields": {}
+        },
     {
         "pk": 3, 
         "model": "gsb.moyen", 
