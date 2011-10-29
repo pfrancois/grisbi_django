@@ -735,6 +735,11 @@ class Generalite(models.Model):
             return classe.objects.latest('id').id
         except classe.DoesNotExist:
             return 0
+    def save(self,*args,**kwargs):
+        if Generalite.objects.count()>0:
+            return
+        else:
+            super(Generalite,self).save(*args,**kwargs)
 class Ope(models.Model):
     """operation"""
     compte = models.ForeignKey(Compte)
