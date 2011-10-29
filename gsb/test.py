@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-if __name__ == "__main__":
+try:
+    from mysite import settings
+    main=False
+except ImportError:
+    main=True
     from django.core.management import setup_environ
     import sys, os
-
     #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+    s=os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
+    sys.path.append(s)
     from mysite import settings
-
     setup_environ(settings)
 
 import logging
@@ -20,6 +23,7 @@ from django.utils.safestring import mark_safe #@UnusedImport
 logger = logging.getLogger('gsb.test')
 from django.shortcuts import render, get_object_or_404
 from django.forms.models import modelformset_factory
+from mysite.gsb.utils import validrib
 def test(request):
     cpt_id = 6
     cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
@@ -30,14 +34,5 @@ def test(request):
         form = formset(queryset = Ope_titre.objects.none())
     return render(request, 'gsb/test.djhtm', {'formset':form, 'titre':'test'})
 
-if __name__ == "__main__":
-    c = Compte_titre.objects.get(id = 4)
-    t = Titre.objects.get(id=1)
-    v=Compte.objects.get(id = 1)
-    Ope_titre.objects.create(titre = t,
-                                    compte = c,
-                                    nombre = 20,
-                                    date = '2011-01-01',
-                                    cours = 1)
-
-
+if main:
+    print validrib('10001',12345,'ABCDEFGHIJK',72)
