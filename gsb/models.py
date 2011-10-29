@@ -104,7 +104,7 @@ class Titre(models.Model):
         for cours in Cours.objects.filter(titre = self):
             try:
                 if new.cours_set.get(date = cours.date).valeur != cours.valeur:
-                    raise Gsb_exc('attention les titre %s et %s ne peuvent etre fusionne car pas les meme histo de cours')
+                    raise Gsb_exc('attention les titre %s et %s ne peuvent etre fusionne car pas les meme histo de cours'%(self,new))
             except Cours.DoesNotExist:
                 new.cours_set.create(date = cours.date, valeur = cours.valeur)
         nb_change = 0

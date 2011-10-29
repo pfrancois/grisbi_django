@@ -57,8 +57,8 @@ def import_gsb_050(nomfich, efface_table = True):
     #verification du format
     xml_generalite = str(xml_tree.find('Generalites/Version_fichier').text)
     if xml_generalite != '0.5.0':
-        logger.critical("le format n'est pas reconnu")
-        raise Import_exception, "le format n'est pas reconnu"
+        #logger.critical("le format n'est pas reconnu")
+        raise Import_exception( u"le format n'est pas reconnu")
     percent = 1
         #------------------------------generalites#------------------------------
     xml_generalite = xml_tree.find('Generalites')
@@ -81,7 +81,7 @@ def import_gsb_050(nomfich, efface_table = True):
     nb_nx = 0
     nb_titre = 0
     if len(xml_tree.find('//Detail_des_devises')) > 1:
-        raise Exception("attention ce ne sera pas possible d'importer car il y a plusieurs devises")
+        raise Import_exception( u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
     #------------ TIERS et titres -------------------
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
     for xml_tiers in xml_tree.find('//Detail_des_tiers'):
