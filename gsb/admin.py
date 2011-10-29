@@ -33,7 +33,9 @@ def fusion(classe, request, queryset, sens):
         message=inst.__unicode__()
         classe.message_user(request, message)
 
-class Cat_admin(admin.ModelAdmin):
+class modeladmin_perso(admin.ModelAdmin):
+    save_on_top=True
+class Cat_admin( modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -52,8 +54,9 @@ class Cat_admin(admin.ModelAdmin):
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
 
-class Ib_admin(admin.ModelAdmin):
+class Ib_admin( modeladmin_perso):
     """admin pour les ib"""
+    save_on_top=True
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
@@ -72,7 +75,7 @@ class Ib_admin(admin.ModelAdmin):
     radio_fields = {'type':admin.VERTICAL}
 
 
-class Compte_admin(admin.ModelAdmin):
+class Compte_admin( modeladmin_perso):
     """admin pour les comptes normaux"""
     #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -81,12 +84,8 @@ class Compte_admin(admin.ModelAdmin):
     def fusionne_b_dans_a(self, request, queryset):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second compte dans le premier"
-    fieldsets = [
-            (None, {'fields': ('nom', 'type', 'ouvert')}),
-            (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
-            (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            (u'moyens par défaut', {'fields': ('moyen_debit_defaut', 'moyen_credit_defaut'), 'classes': ['collapse']}),
-            ]
+    fields=('nom', 'type', 'ouvert','banque', 'guichet', 'num_compte', 'cle_compte','solde_init', 'solde_mini_voulu',
+            'solde_mini_autorise','moyen_debit_defaut', 'moyen_credit_defaut')
     def nb_ope(self, obj):
         return '%s'%(obj.ope_set.count())
 
@@ -94,7 +93,7 @@ class Compte_admin(admin.ModelAdmin):
     list_filter = ('type', 'banque', 'ouvert')
 
 
-class Compte_titre_admin(admin.ModelAdmin):
+class Compte_titre_admin( modeladmin_perso):
     """compte titre avec inline"""
     #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -103,23 +102,17 @@ class Compte_titre_admin(admin.ModelAdmin):
     def fusionne_b_dans_a(self, request, queryset):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du premier compte_titre dans le premier"
-    fieldsets = [
-            (None, {'fields': ('nom', 'ouvert','moyen_debit_defaut', 'moyen_credit_defaut')}),
-            (u'information sur le compte', {'fields': ('banque', 'guichet', 'num_compte', 'cle_compte'), 'classes': ['collapse']}),
-            (u'soldes', {'fields': ('solde_init', 'solde_mini_voulu', 'solde_mini_autorise'), 'classes': ['collapse']}),
-            ]
+    fields = Compte_admin.fields#on prend comme ca les meme champs
+
     def nb_ope(self, obj):
         return '%s'%(obj.ope_set.count())
     list_display = ('nom', 'solde','nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-class Ope_admin(admin.ModelAdmin):
+class Ope_admin( modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fieldsets = [
-            (None, {'fields': ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere','oper_titre')}),
-            (u'informations diverses', {'fields': ( 'notes', 'exercice', 'ib','date_val', 'num_cheque'), 'classes': ['collapse']}),
-            (u'pointage', {'fields': ('pointe', 'rapp'), 'classes': ['collapse']}),
-            ]
+    fields =('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere','oper_titre',
+            'notes', 'exercice', 'ib','date_val', 'num_cheque','pointe', 'rapp')
     readonly_fields = ('show_jumelle', 'show_mere','oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
@@ -159,14 +152,14 @@ class Ope_admin(admin.ModelAdmin):
                 raise IntegrityError
         return super(Ope_admin,self).delete_view(request, object_id, extra_context)
 
-class Cours_admin(admin.ModelAdmin):
+class Cours_admin( modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
     list_filter = ('date', 'titre')
     ordering = ('-date',)
 
-class Titre_admin(admin.ModelAdmin):
+class Titre_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -182,7 +175,7 @@ class Titre_admin(admin.ModelAdmin):
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
 
-class Moyen_admin(admin.ModelAdmin):
+class Moyen_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -197,7 +190,7 @@ class Moyen_admin(admin.ModelAdmin):
         return '%s'%(obj.ope_set.count())
     list_display = ('nom', 'type','nb_ope')
 
-class Tiers_admin(admin.ModelAdmin):
+class Tiers_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -215,12 +208,12 @@ class Tiers_admin(admin.ModelAdmin):
     def nb_ope(self, obj):
         return '%s'%(obj.ope_set.count())
 
-class Ech_admin(admin.ModelAdmin):
+class Ech_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
     list_filter = ('compte', 'date')
 
-class Banque_admin(admin.ModelAdmin):
+class Banque_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -230,7 +223,7 @@ class Banque_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion de la seconde banque dans la première"
 
-class Rapp_admin(admin.ModelAdmin):
+class Rapp_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -240,7 +233,7 @@ class Rapp_admin(admin.ModelAdmin):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second rapprochement dans le premier"
 
-class Exo_admin(admin.ModelAdmin):
+class Exo_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -252,11 +245,11 @@ class Exo_admin(admin.ModelAdmin):
 
     list_filter = ('date_debut', 'date_fin')
 
-class Gen_admin(admin.ModelAdmin):
+class Gen_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les preferences"""
     pass
 
-class Ope_titre_admin(admin.ModelAdmin):
+class Ope_titre_admin(modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
     readonly_fields = ('invest','show_ope')
     list_display_links = ('id',)
