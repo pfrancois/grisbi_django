@@ -58,3 +58,5 @@ class test_utils(TestCase):
         self.assertEquals(utils.fr2decimal("1,2"),decimal.Decimal('1.2'))
         self.assertEquals(utils.fr2decimal("0,0000000"),decimal.Decimal('0'))
         self.assertEquals(utils.fr2decimal(None),decimal.Decimal('0'))
+    def test_strpdate(self):
+        self.assertEquals(utils.strpdate("2011-12-31"),datetime.date(2011,12,31))

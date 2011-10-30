@@ -125,7 +125,6 @@ def datefr2datesql(chaine):
     except ValueError:
         return None
 
-
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant de d'un nombre francais"""
     if s == "0,0000000":
@@ -134,3 +133,7 @@ def fr2decimal(s):
         return decimal.Decimal(str(s).replace(',', '.'))
     else:
         return decimal.Decimal('0')
+
+def strpdate(s):
+    """@param s: YYYY-MM-DD"""
+    return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])

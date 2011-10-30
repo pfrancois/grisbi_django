@@ -101,7 +101,7 @@ class Titre(models.Model):
             raise TypeError("pas la meme classe d'objet")
         if self.type != new.type:
             raise TypeError("pas le meme type de titre")
-        for cours in Cours.objects.filter(titre = self):
+        for cours in self.cours_set.all():
             try:
                 if new.cours_set.get(date = cours.date).valeur != cours.valeur:
                     raise Gsb_exc('attention les titre %s et %s ne peuvent etre fusionne car pas les meme histo de cours'%(self,new))
@@ -120,6 +120,7 @@ class Titre(models.Model):
             self.tiers = Tiers.objects.get_or_create(nom = 'titre_ %s' % self.nom, defaults = {"nom":'titre_ %s' % self.nom, "is_titre":True, "notes":"%s@%s" % (self.isin, self.type)})[0]
         if self.tiers.notes != "%s@%s" % (self.isin, self.type):
             self.tiers.notes = "%s@%s" % (self.isin, self.type)
+            self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
     def investi(self, compte = None,datel=None,rapp=False):
@@ -132,7 +133,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte = compte)
         if rapp:
-            query=query.filter(rapp__isnull=True)
+            query=query.filter(rapp__isnull=False)
         if datel:
             query =query.filter(date__lte=datel)
         valeur = query.aggregate(invest = models.Sum('montant'))['invest']
@@ -150,7 +151,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte = compte)
         if rapp:
-            query=query.filter(rapp__isnull=True)
+            query=query.filter(ope__rapp__isnull=False)
         if datel:
             query =query.filter(date__lte=datel)
         nombre = query.aggregate(nombre = models.Sum('nombre'))['nombre']
@@ -196,6 +197,8 @@ class Banque(models.Model):
     @transaction.commit_on_success
     def fusionne(self, new):
         self.alters_data = True
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
         nb_change = Compte.objects.filter(banque = self).update(banque = new)
         self.delete()
         return nb_change
@@ -223,7 +226,7 @@ class Cat(models.Model):
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
         if self.type != new.type:
-            raise TypeError(u"pas le même type de titre, %s est %s alors que %s est %s" % (self.nom,self.type,new.nom,new.type))
+            raise TypeError(u"pas le même type de catégorie, %s est %s alors que %s est %s" % (self.nom,self.type,new.nom,new.type))
         nb_change = Echeance.objects.filter(cat = self).update(cat = new)
         nb_change += Ope.objects.filter(cat = self).update(cat = new)
         self.delete()
@@ -249,7 +252,6 @@ class Ib(models.Model):
             raise TypeError("pas la meme classe d'objet")
         if self.type != new.type:
             raise TypeError("pas le meme type de titre")
-
         nb_change = Echeance.objects.filter(ib = self).update(ib = new)
         nb_change += Ope.objects.filter(ib = self).update(ib = new)
         self.delete()
@@ -339,10 +341,13 @@ class Compte(models.Model):
             raise TypeError("pas la meme classe d'objet")
         if new.type != self.type:
             raise Gsb_exc("attention ce ne sont pas deux compte de meme type")
-        nb_change = Echeance.objects.filter(compte = self).update(compte = new)
-        nb_change += Echeance.objects.filter(compte_virement = self).update(compte_virement = new)
-        nb_change += Ope.objects.filter(compte = self).update(compte = new)
-        self.delete()
+        if self.type=='t':
+            nb_change=Compte_titre.objects.get(id=self.id).fusionne(Compte_titre.objects.get(id=new.id))
+        else:
+            nb_change = Echeance.objects.filter(compte = self).update(compte = new)
+            nb_change += Echeance.objects.filter(compte_virement = self).update(compte_virement = new)
+            nb_change += Ope.objects.filter(compte = self).update(compte = new)
+            self.delete()
         return nb_change
 
     @models.permalink
@@ -350,11 +355,16 @@ class Compte(models.Model):
         return 'mysite.gsb.views.cpt_detail', (), {'cpt_id':str(self.id)}
 
     def save(self, *args, **kwargs):
-        """verifie qu'on ne cree pas un compte avec le type 't'
-        """
+        """verifie qu'on ne cree pas un compte avec le type 't'"""
         self.alters_data = True
         if self.type == 't' and not isinstance(self, Compte_titre):
-            raise Gsb_exc("il faut creer un compte titre")
+            Compte_titre.objects.create(nom=self.nom,titulaire=self.titulaire,type=self.type,banque=self.banque,
+                guichet=self.guichet,num_compte=self.num_compte,cle_compte=self.cle_compte,
+                solde_init=self.solde_init,solde_mini_voulu=self.solde_mini_voulu,
+                solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
+                notes=self.notes,moyen_credit_defaut=self.moyen_credit_defaut,
+                moyen_debit_defaut=self.moyen_credit_defaut
+                )
         else:
             super(Compte, self).save(*args, **kwargs)
 
@@ -367,6 +377,7 @@ class Compte_titre(Compte):
     class Meta:
         db_table = 'cpt_titre'
         ordering = ['nom']
+        verbose_name_plural ="Comptes Titre"
     #@transaction.commit_on_success
     def achat(self, titre, nombre, prix = 1, date = datetime.date.today(), frais = 0, virement_de = None,
         cat_frais=None,tiers_frais=None):
