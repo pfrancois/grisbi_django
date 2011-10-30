@@ -32,21 +32,20 @@ def fusion(classe, request, queryset, sens):
     except Exception as inst:#TODO mieux gerer
         message = inst.__unicode__()
         classe.message_user(request, message)
-
-def nb_ope(obj):
-    return '%s' % (obj.ope_set.count())
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
+    def nb_ope(self,obj):
+        return '%s' % (obj.ope_set.count())
+    def fusionne_a_dans_b(self, request, queryset):
+        fusion(self, request, queryset, 'ab')
+    fusionne_a_dans_b.short_description = u"fusion de 1 dans 2"
+    def fusionne_b_dans_a(self, request, queryset):
+        fusion(self, request, queryset, 'ba')
+    fusionne_b_dans_a.short_description = u"fusion de 2 dans 1"
+    
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion de la première catégorie dans la seconde"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion de la seconde catégorie dans la première"
-
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -55,18 +54,7 @@ class Cat_admin(Modeladmin_perso):
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
-    save_on_top = True
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion de la première IB dans la seconde"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion de la seconde IB dans la première"
-
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
-
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -77,17 +65,8 @@ class Ib_admin(Modeladmin_perso):
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier compte dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second compte dans le premier"
     fields = ('nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
             'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
-
     list_display = ('nom', 'solde', 'type', 'ouvert', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
@@ -95,16 +74,7 @@ class Compte_admin(Modeladmin_perso):
 class Compte_titre_admin(Modeladmin_perso):
     """compte titre avec inline"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier compte_titre dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du premier compte_titre dans le premier"
     fields = Compte_admin.fields#on prend comme ca les meme champs
-
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
     list_display = ('nom', 'solde', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
@@ -161,12 +131,6 @@ class Cours_admin(Modeladmin_perso):
 class Titre_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier titre dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
     list_display = ('nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
@@ -184,12 +148,6 @@ class Titre_admin(Modeladmin_perso):
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier moyen de paiment dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second moyen dans le premier"
     list_filter = ('type',)
     fields = ['type', 'nom']
     def nb_ope(self, obj):
@@ -199,12 +157,6 @@ class Moyen_admin(Modeladmin_perso):
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier tiers dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second tiers dans le premier"
     list_editable = ('nom', 'notes')
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
@@ -222,33 +174,14 @@ class Ech_admin(Modeladmin_perso):
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion de la première banque dans la seconde"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion de la seconde banque dans la première"
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier rapprochement dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second rapprochement dans le premier"
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(self, request, queryset, 'ab')
-    fusionne_a_dans_b.short_description = u"fusion du premier exercice dans le second"
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(self, request, queryset, 'ba')
-    fusionne_b_dans_a.short_description = u"fusion du second exercice dans le premier"
-
     list_filter = ('date_debut', 'date_fin')
 
 class Gen_admin(Modeladmin_perso):
