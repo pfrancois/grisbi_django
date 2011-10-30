@@ -77,7 +77,7 @@ class Ib_admin( modeladmin_perso):
 
 class Compte_admin( modeladmin_perso):
     """admin pour les comptes normaux"""
-    #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
     fusionne_a_dans_b.short_description = u"fusion du premier compte dans le second"
@@ -95,7 +95,7 @@ class Compte_admin( modeladmin_perso):
 
 class Compte_titre_admin( modeladmin_perso):
     """compte titre avec inline"""
-    #actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
     fusionne_a_dans_b.short_description = u"fusion du premier compte_titre dans le second"
@@ -169,12 +169,19 @@ class Titre_admin(modeladmin_perso):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
     list_display = ('nom', 'isin', 'type', 'last_cours')
-    readonly_fields = ('tiers',)
+    fields=('nom', 'isin', 'type','show_tiers')
+    readonly_fields = ('tiers','show_tiers')
     list_filter = ('type',)
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
-
+    def show_tiers(self, obj):
+        if obj.tiers_id:
+            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.tiers))
+        else:
+            return "(aucun-e)"
+    show_tiers.short_description = "tiers"
 class Moyen_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
