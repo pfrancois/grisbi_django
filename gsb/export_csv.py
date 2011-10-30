@@ -101,13 +101,9 @@ def _export():
     i = 0
     total = float(opes.count())
     for ope in opes:
-        i = i + 1
-        ligne = []
-        ligne.append(ope.id)
-        ligne.append(ope.compte.nom)
-        ligne.append(fmt.date(ope.date))
-        ligne.append(fmt.float(ope.montant))
-        if ope.rapp == None:
+        i +=  1
+        ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
+        if ope.rapp is None:
             ligne.append(0)
         else:
             ligne.append(1)
@@ -126,7 +122,7 @@ def _export():
         ligne.append(fmt.str(ope.mere, ''))
         ligne.append(ope.date.strftime('%Y_%m'))
         csv_file.writerow(ligne)
-        if i % 50 == 0:
+        if i % 50 :
             logger.log("ligne %s %s%%" % (ope.id, i / total * 100))
     return fich
 
@@ -148,6 +144,6 @@ def export(request):
         )
 
 if __name__ == '__main__':
-    a = _export()
+    chaine = _export()
         #f = open('test.csv',"w")
-    print a.read()
+    print chaine.read()

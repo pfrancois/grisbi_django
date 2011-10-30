@@ -7,16 +7,16 @@ import mysite.gsb.widgets as gsb_field
 from django.utils.safestring import mark_safe
 
 #import decimal
-error_css_class = 'error'
-required_css_class = 'required'
+ERROR_CSS_CLASS = 'error'
+REQUIRED_CSS_CLASS = 'required'
 
 class Baseform(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+    error_css_class = ERROR_CSS_CLASS
+    required_css_class = REQUIRED_CSS_CLASS
 
 class Basemodelform(forms.ModelForm):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+    error_css_class = ERROR_CSS_CLASS
+    required_css_class = REQUIRED_CSS_CLASS
 
 class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
@@ -178,9 +178,7 @@ class MajCoursform(Baseform):
     cours = gsb_field.CurField()
 
 
-class Majtitre(forms.Form):
-    error_css_class = error_css_class
-    required_css_class = required_css_class
+class Majtitre(Baseform):
     date = gsb_field.DateFieldgsb()
     sociaux = forms.BooleanField(label="prélèvement sociaux ?", required=False, initial=False)
     def __init__(self, titres, *args, **kwargs):

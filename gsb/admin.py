@@ -42,7 +42,7 @@ class Modeladmin_perso(admin.ModelAdmin):
     def fusionne_b_dans_a(self, request, queryset):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion de 2 dans 1"
-    
+
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']

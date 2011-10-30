@@ -9,10 +9,10 @@ import mysite.gsb.forms as gsb_forms
 import logging, os, time
 from mysite.gsb.models import Generalite
 from django.contrib.auth.decorators import login_required
+import mysite.gsb.import_gsb
 
 @login_required
 def import_file(request):
-    import mysite.gsb.import_gsb
     logger = logging.getLogger('gsb.import')
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)

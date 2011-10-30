@@ -58,11 +58,11 @@ def chgt_ope_titre(request):
         if not ope.ope:
             print ope.id
             if  ope.nombre < 0:#vente
-                moyen = ope.compte.moyen_credit_defaut
+                ope.moyen = ope.compte.moyen_credit_defaut
             else:#achat
-                moyen = ope.compte.moyen_credit_defaut
+                ope.moyen = ope.compte.moyen_credit_defaut
             nb_ope += 1
-            montant = ope.cours * ope.nombre * -1
+            ope.montant = ope.cours * ope.nombre * -1
             ope.save()
             print ope.ope
     print nb_ope
