@@ -24,14 +24,14 @@ ID_CPT_M = 1
 
 #taux de cotisations sociales
 #attention c'est un taux special estime
-__TAUX_VERSEMENT_legal=0.08*0.97
-TAUX_VERSEMENT=1/(1-__TAUX_VERSEMENT_legal)*__TAUX_VERSEMENT_legal
+__TAUX_VERSEMENT_legal = 0.08 * 0.97
+TAUX_VERSEMENT = 1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal
 #id et cat des operation speciales
-ID_CAT_COTISATION=23
-ID_TIERS_COTISATION=727
-ID_CAT_OST=64
-MD_CREDIT=6
-MD_DEBIT=7
+ID_CAT_COTISATION = 23
+ID_TIERS_COTISATION = 727
+ID_CAT_OST = 64
+MD_CREDIT = 6
+MD_DEBIT = 7
 ##################
 
 

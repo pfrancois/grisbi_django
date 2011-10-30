@@ -36,9 +36,9 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, dialect = csv.excel, encoding = "utf-8", **kwds):
+    def __init__(self, fich, dialect=csv.excel, encoding="utf-8", **kwds):
         fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.reader(fich, dialect = dialect, **kwds)
+        self.reader = csv.reader(fich, dialect=dialect, **kwds)
 
     def next(self):
         row = self.reader.next()
@@ -54,10 +54,10 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, dialect = csv.excel, encoding = "utf-8", **kwds):
+    def __init__(self, fich, dialect=csv.excel, encoding="utf-8", **kwds):
         # Redirect output to a queue
         self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect = dialect, **kwds)
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = fich
         self.encoder = codecs.getincrementalencoder(encoding)()
 
@@ -93,7 +93,7 @@ def _export():
     csv.register_dialect("excel_csv", Excel_csv)
     fich = cStringIO.StringIO()
     fmt = Format()
-    csv_file = UnicodeWriter(fich, encoding = 'iso-8859-15', dialect = Excel_csv)
+    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
     csv_file.writerow(
         u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
             ';'))
@@ -135,7 +135,7 @@ def export(request):
     if nb_compte:
         django = _export()
         #h=HttpResponse(xml,mimetype="application/xml")
-        reponse = HttpResponse(django, mimetype = "text/csv")
+        reponse = HttpResponse(django, mimetype="text/csv")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE
         return reponse
@@ -144,7 +144,7 @@ def export(request):
                         {'titre':'import csv',
             'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
             },
-        context_instance = RequestContext(request)
+        context_instance=RequestContext(request)
         )
 
 if __name__ == '__main__':

@@ -30,12 +30,12 @@ def fusion(classe, request, queryset, sens):
             b.fusionne(a)
         classe.message_user(request, message)
     except Exception as inst:#TODO mieux gerer
-        message=inst.__unicode__()
+        message = inst.__unicode__()
         classe.message_user(request, message)
 
 class modeladmin_perso(admin.ModelAdmin):
-    save_on_top=True
-class Cat_admin( modeladmin_perso):
+    save_on_top = True
+class Cat_admin(modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -46,17 +46,17 @@ class Cat_admin( modeladmin_perso):
     fusionne_b_dans_a.short_description = u"fusion de la seconde catégorie dans la première"
 
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
+        return '%s' % (obj.ope_set.count())
 
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type','nb_ope')
+    list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
 
-class Ib_admin( modeladmin_perso):
+class Ib_admin(modeladmin_perso):
     """admin pour les ib"""
-    save_on_top=True
+    save_on_top = True
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
         fusion(self, request, queryset, 'ab')
@@ -66,16 +66,16 @@ class Ib_admin( modeladmin_perso):
     fusionne_b_dans_a.short_description = u"fusion de la seconde IB dans la première"
 
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
+        return '%s' % (obj.ope_set.count())
 
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type','nb_ope')
+    list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
 
 
-class Compte_admin( modeladmin_perso):
+class Compte_admin(modeladmin_perso):
     """admin pour les comptes normaux"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -84,16 +84,16 @@ class Compte_admin( modeladmin_perso):
     def fusionne_b_dans_a(self, request, queryset):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second compte dans le premier"
-    fields=('nom', 'type', 'ouvert','banque', 'guichet', 'num_compte', 'cle_compte','solde_init', 'solde_mini_voulu',
-            'solde_mini_autorise','moyen_debit_defaut', 'moyen_credit_defaut')
+    fields = ('nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
+            'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
+        return '%s' % (obj.ope_set.count())
 
-    list_display = ('nom', 'solde', 'type', 'ouvert','nb_ope')
+    list_display = ('nom', 'solde', 'type', 'ouvert', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
 
-class Compte_titre_admin( modeladmin_perso):
+class Compte_titre_admin(modeladmin_perso):
     """compte titre avec inline"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     def fusionne_a_dans_b(self, request, queryset):
@@ -105,15 +105,15 @@ class Compte_titre_admin( modeladmin_perso):
     fields = Compte_admin.fields#on prend comme ca les meme champs
 
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
-    list_display = ('nom', 'solde','nb_ope')
+        return '%s' % (obj.ope_set.count())
+    list_display = ('nom', 'solde', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-class Ope_admin( modeladmin_perso):
+class Ope_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields =('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere','oper_titre',
-            'notes', 'exercice', 'ib','date_val', 'num_cheque','pointe', 'rapp')
-    readonly_fields = ('show_jumelle', 'show_mere','oper_titre')
+    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere', 'oper_titre',
+            'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
+    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
     list_filter = ('compte', 'date', 'pointe', 'rapp')
@@ -132,7 +132,7 @@ class Ope_admin( modeladmin_perso):
         else:
             return "(aucun-e)"
     show_mere.short_description = "mere"
-    def oper_titre(self,obj):
+    def oper_titre(self, obj):
         if obj.ope_titre:
             change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre))
@@ -140,7 +140,7 @@ class Ope_admin( modeladmin_perso):
             return "(aucun-e)"
     oper_titre.short_description = u"compta matiere"
     def delete_view(self, request, object_id, extra_context=None):
-        instance= self.get_object(request, admin.util.unquote(object_id))
+        instance = self.get_object(request, admin.util.unquote(object_id))
         #on evite que cela soit une operation rapproche
         if instance.rapp:
             raise IntegrityError()
@@ -150,9 +150,9 @@ class Ope_admin( modeladmin_perso):
         if instance.mere:
             if instance.mere.rapp:
                 raise IntegrityError
-        return super(Ope_admin,self).delete_view(request, object_id, extra_context)
+        return super(Ope_admin, self).delete_view(request, object_id, extra_context)
 
-class Cours_admin( modeladmin_perso):
+class Cours_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
@@ -169,8 +169,8 @@ class Titre_admin(modeladmin_perso):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second titre dans le premier"
     list_display = ('nom', 'isin', 'type', 'last_cours')
-    fields=('nom', 'isin', 'type','show_tiers')
-    readonly_fields = ('tiers','show_tiers')
+    fields = ('nom', 'isin', 'type', 'show_tiers')
+    readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
@@ -194,8 +194,8 @@ class Moyen_admin(modeladmin_perso):
     list_filter = ('type',)
     fields = ['type', 'nom']
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
-    list_display = ('nom', 'type','nb_ope')
+        return '%s' % (obj.ope_set.count())
+    list_display = ('nom', 'type', 'nb_ope')
 
 class Tiers_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
@@ -207,13 +207,13 @@ class Tiers_admin(modeladmin_perso):
         fusion(self, request, queryset, 'ba')
     fusionne_b_dans_a.short_description = u"fusion du second tiers dans le premier"
     list_editable = ('nom', 'notes')
-    list_display = ('id', 'nom', 'notes', 'is_titre','nb_ope')
+    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('is_titre',)
-    search_fields =['nom']
-    formfield_overrides = {models.TextField:{'widget':forms.TextInput},}
+    search_fields = ['nom']
+    formfield_overrides = {models.TextField:{'widget':forms.TextInput}, }
     def nb_ope(self, obj):
-        return '%s'%(obj.ope_set.count())
+        return '%s' % (obj.ope_set.count())
 
 class Ech_admin(modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
@@ -258,7 +258,7 @@ class Gen_admin(modeladmin_perso):
 
 class Ope_titre_admin(modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
-    readonly_fields = ('invest','show_ope')
+    readonly_fields = ('invest', 'show_ope')
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)

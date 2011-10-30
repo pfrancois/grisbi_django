@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 try:
     from mysite import settings
-    main=False
+    main = False
 except ImportError:
-    main=True
+    main = True
     from django.core.management import setup_environ
     import sys, os
     #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    s=os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
+    s = os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
     sys.path.append(s)
     from mysite import settings
     setup_environ(settings)
@@ -26,13 +26,13 @@ from django.forms.models import modelformset_factory
 from mysite.gsb.utils import validrib
 def test(request):
     cpt_id = 6
-    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk = cpt_id)
-    formset = modelformset_factory(Ope_titre, max_num = 4, extra = 4)
+    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    formset = modelformset_factory(Ope_titre, max_num=4, extra=4)
     if request.method == 'POST':
         form = modelformset_factory(request.POST)
     else:
-        form = formset(queryset = Ope_titre.objects.none())
+        form = formset(queryset=Ope_titre.objects.none())
     return render(request, 'gsb/test.djhtm', {'formset':form, 'titre':'test'})
 
 if main:
-    print validrib('10001',12345,'ABCDEFGHIJK',72)
+    print validrib('10001', 12345, 'ABCDEFGHIJK', 72)

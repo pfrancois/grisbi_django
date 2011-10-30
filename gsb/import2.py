@@ -32,7 +32,7 @@ except ImportError:
 def datefr2datesql(s):
     try:
         t = time.strptime(str(s), "%d/%m/%Y")
-        return "{annee}-{mois}-{jour}".format(annee = t[0], mois = t[1], jour = t[2])
+        return "{annee}-{mois}-{jour}".format(annee=t[0], mois=t[1], jour=t[2])
     except ValueError:
         return None
 
@@ -50,7 +50,7 @@ class Import_exception(Exception):
     pass
 
 
-def import_gsb(nomfich, efface_table = True):
+def import_gsb(nomfich, efface_table=True):
     """importe directement a partir des id sauf pour les cat et les moyens car on change la methode de comptage"""
     tabl_correspondance_moyen = {}
     tabl_correspondance_cat = {}
@@ -77,8 +77,8 @@ def import_gsb(nomfich, efface_table = True):
         titre_fichier = xml_generalite.find('Titre').text
 
     element, created = Generalite.objects.get_or_create(
-        id = 1,
-        defaults = {
+        id=1,
+        defaults={
         'titre':titre_fichier,
         'utilise_exercices':bool(int(xml_generalite.find('Utilise_exercices').text)),
         'utilise_ib':bool(int(xml_generalite.find('Utilise_IB').text)),
@@ -102,17 +102,17 @@ def import_gsb(nomfich, efface_table = True):
         nb += 1
         query = {'nom':xml_tiers.get('Nom'), 'notes':xml_tiers.get('Informations'), 'id':xml_tiers.get('No')}
         if xml_tiers.get('Nom')[:6] != 'titre_':
-            element, created = Tiers.objects.get_or_create(id = xml_tiers.get('No'), defaults = query)
+            element, created = Tiers.objects.get_or_create(id=xml_tiers.get('No'), defaults=query)
         else:
             #test puis creation du titre (et donc du tiers automatiquement)
             try:
-                Tiers.objects.get(id = xml_tiers.get('No'))
+                Tiers.objects.get(id=xml_tiers.get('No'))
             except Tiers.DoesNotExist:
                 nb_titre += 1
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
                 s = s.partition('@')#on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
-                titre = Titre(nom = nom[7:])
+                titre = Titre(nom=nom[7:])
                 if not s[1]:
                     if s[0] == '':
                         titre.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
@@ -128,7 +128,7 @@ def import_gsb(nomfich, efface_table = True):
                         titre.type = s[2]
                     else:
                         titre.type = 'ZZZ'
-                element, created = Tiers.objects.get_or_create(nom = xml_tiers.get('Nom'), defaults = query)
+                element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
                 titre.tiers = element
                 titre.save()
                 element.notes = "%s@%s" % (titre.isin, titre.type)
@@ -148,7 +148,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_cat in xml_tree.find('//Detail_des_categories'):
         nb_cat += 1
         query = {'nom':"%s :" % (xml_cat.get('Nom'),), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
-        element, created = Cat.objects.get_or_create(nom = query['nom'], defaults = query)
+        element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_cat[xml_cat.get('No')] = {'0':element.id}
         if created:
             nb_nx += 1
@@ -156,7 +156,7 @@ def import_gsb(nomfich, efface_table = True):
         for xml_scat in xml_cat:
             nb_cat += 1
             query = {'nom':"%s : %s" % (xml_cat.get('Nom'), xml_scat.get('Nom')), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
-            element, created = Cat.objects.get_or_create(nom = query['nom'], defaults = query)
+            element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_cat[xml_cat.get('No')][xml_scat.get('No')] = element.id
             if created:
                 nb_nx += 1
@@ -169,7 +169,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
         nb_ib += 1
         query = {'nom':"%s:" % (xml_ib.get('Nom'),), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
-        element, created = Ib.objects.get_or_create(nom = query['nom'], defaults = query)
+        element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_ib[xml_ib.get('No')] = {'0':element.id}
         if created:
             nb_nx += 1
@@ -178,7 +178,7 @@ def import_gsb(nomfich, efface_table = True):
             logger.debug("ib %s: sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
             nb_ib += 1
             query = {'nom':"%s:%s" % (xml_ib.get('Nom'), xml_sib.get('Nom')), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
-            element, created = Ib.objects.get_or_create(nom = query['nom'], defaults = query)
+            element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_ib[xml_ib.get('No')][xml_sib.get('No')] = element.id
             if created:
                 logger.debug('sib %s:%s cree au numero %s' % (int(xml_ib.get('No')), int(xml_sib.get('No')), element.id))
@@ -190,7 +190,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_bq in xml_tree.find('Banques/Detail_des_banques'):
         nb_bq += 1
         logger.debug("banque %s" % xml_bq.get('No'))
-        element, created = Banque.objects.get_or_create(id = xml_bq.get('No'), defaults = {'cib':xml_bq.get('Code'), 'notes':xml_bq.get('Remarques'), 'id':xml_bq.get('No')})
+        element, created = Banque.objects.get_or_create(id=xml_bq.get('No'), defaults={'cib':xml_bq.get('Code'), 'notes':xml_bq.get('Remarques'), 'id':xml_bq.get('No')})
     logger.warning(u'%s banques' % nb_bq)
 
     #------------------------------exercices#------------------------------
@@ -199,7 +199,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_exercice in xml_tree.find('Exercices/Detail_des_exercices'):
         nb += 1
         logger.debug("exo %s" % xml_exercice.get('No'))
-        element, created = Exercice.objects.get_or_create(nom = xml_exercice.get('Nom'), defaults = {'nom':xml_exercice.get('Nom'), 'date_debut':datefr2datesql(xml_exercice.get('Date_debut')), 'date_fin':datefr2datesql(xml_exercice.get('Date_fin')), 'id':xml_exercice.get('No')})
+        element, created = Exercice.objects.get_or_create(nom=xml_exercice.get('Nom'), defaults={'nom':xml_exercice.get('Nom'), 'date_debut':datefr2datesql(xml_exercice.get('Date_debut')), 'date_fin':datefr2datesql(xml_exercice.get('Date_fin')), 'id':xml_exercice.get('No')})
         if created:
             nb_nx += 1
     logger.warning(u'%s exercices dont %s nouveaux' % (nb, nb_nx))
@@ -210,7 +210,7 @@ def import_gsb(nomfich, efface_table = True):
     for xml_rapp in xml_tree.find('Rapprochements/Detail_des_rapprochements'):
         nb += 1
         logger.debug("rapp %s" % xml_rapp.get('No'))
-        element, created = Rapp.objects.get_or_create(nom = dj_encoding.smart_unicode(xml_rapp.get('Nom')), defaults = {'nom':xml_rapp.get('Nom'), 'id':xml_rapp.get('No')})
+        element, created = Rapp.objects.get_or_create(nom=dj_encoding.smart_unicode(xml_rapp.get('Nom')), defaults={'nom':xml_rapp.get('Nom'), 'id':xml_rapp.get('No')})
         if created:
             nb_nx += 1
     logger.warning(u'%s rapprochements dont %s nouveaux ' % (nb, nb_nx))
@@ -225,14 +225,14 @@ def import_gsb(nomfich, efface_table = True):
         type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type in ('t',):
             logger.debug("cpt_titre %s" % (xml_cpt.find('Details/Nom').text))
-            element, created = Compte_titre.objects.get_or_create(nom = xml_cpt.find('Details/Nom').text, defaults = {
+            element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
             'nom':xml_cpt.find('Details/Nom').text,
             'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
             'id':int(xml_cpt.find('Details/No_de_compte').text)
         })
         else:
             logger.debug("cpt %s" % (xml_cpt.find('Details/Nom').text))
-            element, created = Compte.objects.get_or_create(nom = xml_cpt.find('Details/Nom').text, defaults = {
+            element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
             'nom':xml_cpt.find('Details/Nom').text,
             'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
             'id':int(xml_cpt.find('Details/No_de_compte').text)
@@ -276,8 +276,8 @@ def import_gsb(nomfich, efface_table = True):
             nb_tot_moyen += 1
             nb_moyen += 1
             logger.debug("moyen %s" % xml_moyen.get('No'))
-            moyen, created = Moyen.objects.get_or_create(nom = xml_moyen.get('Nom'),
-                                                        defaults = {'nom':xml_moyen.get('Nom'),
+            moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
+                                                        defaults={'nom':xml_moyen.get('Nom'),
                                                                     'type':liste_type_moyen[int(xml_moyen.get('Signe'))][0], }
             )
             if created:
@@ -302,16 +302,16 @@ def import_gsb(nomfich, efface_table = True):
     for xml_ope in list_ope:
         logger.debug(u'opération %s' % xml_ope.get('No'))
         try:
-            ope_tiers = Tiers.objects.get(id = int(xml_ope.get('T')))
+            ope_tiers = Tiers.objects.get(id=int(xml_ope.get('T')))
         except KeyError:
             ope_tiers = None
         ope_montant = fr2decimal(xml_ope.get('M'))
         ope_date = datefr2datesql(xml_ope.get('D'))
         ope_date_val = datefr2datesql(xml_ope.get('Db'))
-        ope_cpt = Compte.objects.get(id = int(xml_ope.find('../../Details/No_de_compte').text))
+        ope_cpt = Compte.objects.get(id=int(xml_ope.find('../../Details/No_de_compte').text))
         if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't' :
             #compta matiere et cours en meme tps
-            ope_cpt_titre = Compte_titre.objects.get(id = ope_cpt.id)
+            ope_cpt_titre = Compte_titre.objects.get(id=ope_cpt.id)
             ope_notes = dj_encoding.smart_unicode(xml_ope.get('N'))
             s = ope_notes.partition('@')
             if s[1]:#TODO gestion des csl
@@ -320,8 +320,8 @@ def import_gsb(nomfich, efface_table = True):
                     ope_cours = decimal.Decimal(str(s[2]))
                 else:
                     ope_cours = 1
-                Ope_titre.objects.create(titre = ope_tiers.titre, compte = ope_cpt_titre, nombre = ope_nb, date = ope_date, cours = ope_cours)
-                ope_tiers.titre.cours_set.get_or_create(date = ope_date, defaults = {'date':ope_date, 'valeur':ope_cours})
+                Ope_titre.objects.create(titre=ope_tiers.titre, compte=ope_cpt_titre, nombre=ope_nb, date=ope_date, cours=ope_cours)
+                ope_tiers.titre.cours_set.get_or_create(date=ope_date, defaults={'date':ope_date, 'valeur':ope_cours})
         #on cree de toute facon l'operation
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
@@ -329,11 +329,11 @@ def import_gsb(nomfich, efface_table = True):
             affiche = True
             percent += 1
 
-        ope = Ope(id = int(xml_ope.get('No')),
-                  compte = ope_cpt,
-                   date = ope_date,
-                   date_val = ope_date_val, #date de valeur
-                   montant = ope_montant, #montant
+        ope = Ope(id=int(xml_ope.get('No')),
+                  compte=ope_cpt,
+                   date=ope_date,
+                   date_val=ope_date_val, #date de valeur
+                   montant=ope_montant, #montant
         )#on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         ope.save()
         #numero du moyen de paiment
@@ -397,14 +397,14 @@ def import_gsb(nomfich, efface_table = True):
         #gestion des virements
         if int(xml_ope.get('Ro')):
             logger.debug('virement vers %s' % xml_ope.get('Ro'))
-            ope = Ope.objects.get(id = int(xml_ope.get('No')))
+            ope = Ope.objects.get(id=int(xml_ope.get('No')))
             ope.jumelle_id = int(xml_ope.get('Ro'))
             ope.save()
         #gestion des ventilations
         #bool(int(xml_ope.get('Ov'))) pas besoin car on regarde avec des requetes sql
         if int(xml_ope.get('Va')):
             logger.debug('ventilation de %s' % xml_ope.get('Va'))
-            ope = Ope.objects.get(id = int(xml_ope.get('No')))
+            ope = Ope.objects.get(id=int(xml_ope.get('No')))
             ope.mere_id = int(xml_ope.get('Va'))
             ope.save()
 
@@ -417,9 +417,9 @@ def import_gsb(nomfich, efface_table = True):
         nb += 1
         logger.debug("echeance %s" % xml_ech.get('No'))
         element = Echeance(
-            date = datefr2datesql(xml_ech.get('Date')),
-            montant = fr2decimal(xml_ech.get('Montant')),
-            compte_id = int(xml_ech.get('Compte')),
+            date=datefr2datesql(xml_ech.get('Date')),
+            montant=fr2decimal(xml_ech.get('Montant')),
+            compte_id=int(xml_ech.get('Compte')),
         )
         element.save()
         try:
@@ -468,5 +468,5 @@ if __name__ == "__main__":
     #nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
     logger.setLevel(10)#change le niveau de log (10 = debug, 20=info)
-    import_gsb(nomfich, efface_table = True)
+    import_gsb(nomfich, efface_table=True)
     logger.info(u'fichier %s importe' % nomfich)

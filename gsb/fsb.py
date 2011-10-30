@@ -30,7 +30,7 @@ def export_database(request): #@UnusedVariable
     '''
     view pour export en sql 
     '''
-    response = HttpResponse(_export(), mimetype = "application/octet-stream")
+    response = HttpResponse(_export(), mimetype="application/octet-stream")
     response['Content-Disposition'] = 'attachment; filename=%s' % date.today().__str__() + '_db.sql.bz2'
     return response
             

@@ -19,7 +19,7 @@ register = template.Library()
 #===============================================================================
 
 class BaseCalc(object):
-    def __init__(self, var1, var2 = None, negate = False):
+    def __init__(self, var1, var2=None, negate=False):
         self.var1 = var1
         self.var2 = var2
         self.negate = negate
@@ -134,7 +134,7 @@ class IfParser(object):
             if not true:
                 negate = not negate
             var2 = self.get_var()
-            var1 = op(var1, var2, negate = negate)
+            var1 = op(var1, var2, negate=negate)
         return var1
 
     def get_token(self):
@@ -154,7 +154,7 @@ class IfParser(object):
             if self.at_end():
                 raise self.error_class('No variable provided after "not".')
             token = self.get_token()
-            return Or(self.create_var(token), negate = True)
+            return Or(self.create_var(token), negate=True)
         return self.create_var(token)
 
 
@@ -174,7 +174,7 @@ class TemplateIfParser(IfParser):
 
 
 class SmartIfNode(template.Node):
-    def __init__(self, var, nodelist_true, nodelist_false = None):
+    def __init__(self, var, nodelist_true, nodelist_false=None):
         self.nodelist_true, self.nodelist_false = nodelist_true, nodelist_false
         self.var = var
 

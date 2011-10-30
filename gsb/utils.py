@@ -6,7 +6,7 @@ from django.db.models import Max
 
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
-    def date(self, s, defaut = "0/0/0"):
+    def date(self, s, defaut="0/0/0"):
         """
         fonction qui transforme un object date en une chaine AA/MM/JJJJ
         @param s:objet datetime
@@ -27,7 +27,7 @@ class Format:
             else:
                 raise TypeError('attention ce ne peut pas etre qu\'un objet date')
 
-    def bool(self, s, defaut = '0'):
+    def bool(self, s, defaut='0'):
         """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
         @param s:objet bool
         @param defaut: format a transformer, par defaut c'est 0
@@ -39,7 +39,7 @@ class Format:
             if isinstance(s, bool):
                 return str(int(s))
             try:
-                i=int(s)
+                i = int(s)
                 if not i:
                     return '0'
                 else:
@@ -52,27 +52,27 @@ class Format:
         s = "%10.7f" % s
         return s.replace('.', ',').strip()
 
-    def type(self, liste, s, defaut = '0'):
+    def type(self, liste, s, defaut='0'):
         """convertit un indice d'une liste par une string
         @param liste: liste a utiliser
         @param s: string comprenand le truc a chercher dans la liste
         @param defaut: reponse par defaut"""
         liste = [str(b[0]) for b in liste]
         try:
-            s = str(liste.index(s)+1)
+            s = str(liste.index(s) + 1)
         except ValueError:##on en un ca par defaut
             s = defaut
         return s
 
-    def max(self, query, defaut = '0', champ = 'id'):
+    def max(self, query, defaut='0', champ='id'):
         """recupere le max d'un queryset"""
-        agg = query.aggregate(id = Max(champ))['id']
+        agg = query.aggregate(id=Max(champ))['id']
         if agg is None:
             return defaut
         else:
             return str(agg)
 
-    def str(self, obj, defaut = '0', membre = 'id'):
+    def str(self, obj, defaut='0', membre='id'):
         """renvoie id d'un objet avec la gestion des null
         @param obj: l'objet a interroger
         @param defaut: la reponse si neant
@@ -89,11 +89,11 @@ def validrib(banque, guichet, compte, cle):
     lettres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chiffres = "12345678912345678923456789"
     # subst letters if needed
-    banque=str(banque)
-    guichet=str(guichet)
-    compte=str(compte)
-    cle=str(cle)
-    if len(banque)>5 or len(guichet)>5 or len(compte)>11 or len(cle)>2:
+    banque = str(banque)
+    guichet = str(guichet)
+    compte = str(compte)
+    cle = str(cle)
+    if len(banque) > 5 or len(guichet) > 5 or len(compte) > 11 or len(cle) > 2:
         raise ValueError
     for char in compte:
         if char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ':
@@ -121,7 +121,7 @@ def datefr2datesql(chaine):
     """
     try:
         temps = time.strptime(str(chaine), "%d/%m/%Y")
-        return "{annee}-{mois}-{jour}".format(annee = temps[0], mois = temps[1], jour = temps[2])
+        return "{annee}-{mois}-{jour}".format(annee=temps[0], mois=temps[1], jour=temps[2])
     except ValueError:
         return None
 

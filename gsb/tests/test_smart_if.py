@@ -13,7 +13,7 @@ class SmartIfTests(TestCase):
         self.high = TestVar(9000)
         self.low = TestVar(1)
 
-    def assertCalc(self, calc, context = None):
+    def assertCalc(self, calc, context=None):
         """
         Test a calculation is True, also checking the inverse "negate" case.
         """
@@ -22,7 +22,7 @@ class SmartIfTests(TestCase):
         calc.negate = not calc.negate
         self.assertFalse(calc.resolve(context))
 
-    def assertCalcFalse(self, calc, context = None):
+    def assertCalcFalse(self, calc, context=None):
         """
         Test a calculation is False, also checking the inverse "negate" case.
         """

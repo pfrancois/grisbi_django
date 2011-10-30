@@ -29,24 +29,24 @@ class ImportForm(Baseform):
     ))
 
 class OperationForm(Basemodelform):
-    tiers = forms.ModelChoiceField(Tiers.objects.all(), required = False)
-    compte = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label = None)
-    ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required = False)
+    tiers = forms.ModelChoiceField(Tiers.objects.all(), required=False)
+    compte = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label=None)
+    ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required=False)
     montant = gsb_field.CurField()
-    notes = forms.CharField(widget = forms.TextInput, required = False)
+    notes = forms.CharField(widget=forms.TextInput, required=False)
     date = gsb_field.DateFieldgsb()
-    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required = False)
-    pointe = forms.BooleanField(required = False)
-    rapp = forms.ModelChoiceField(Rapp.objects.all(), required = False)
-    nouveau_tiers = forms.CharField(required = False)
+    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required=False)
+    pointe = forms.BooleanField(required=False)
+    rapp = forms.ModelChoiceField(Rapp.objects.all(), required=False)
+    nouveau_tiers = forms.CharField(required=False)
     class Meta:
         model = Ope
-        exclude = ( 'jumelle')#car sinon c'est un virement
-    def __init__(self,  *args, **kwargs):
+        exclude = ('jumelle')#car sinon c'est un virement
+    def __init__(self, *args, **kwargs):
         super(OperationForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
-        self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere',required=False)
+        self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere', required=False)
     def clean(self):
         super(OperationForm, self).clean()
         data = self.cleaned_data
@@ -60,14 +60,14 @@ class OperationForm(Basemodelform):
         return data
 
 class VirementForm(Baseform):
-    compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required = False)
-    compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label = None)
-    moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required = False)
+    compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required=False)
+    compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required=False)
     montant = gsb_field.CurField()
     date = gsb_field.DateFieldgsb()
-    notes = forms.CharField(widget = forms.Textarea, required = False)
-    pointe = forms.BooleanField(required = False)
+    notes = forms.CharField(widget=forms.Textarea, required=False)
+    pointe = forms.BooleanField(required=False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
     #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
     #piece_comptable_compte_origine = forms.CharField(required = False)
@@ -82,18 +82,18 @@ class VirementForm(Baseform):
             del data['compte_origine']
             del data['compte_destination']
         return data
-    def __init__(self, ope = None, *args, **kwargs):
+    def __init__(self, ope=None, *args, **kwargs):
         self.ope = ope
         if ope:
             vir = Virement(ope)
-            super(VirementForm, self).__init__(initial = vir.init_form(), *args, **kwargs)
+            super(VirementForm, self).__init__(initial=vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
-        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt origine"))
+        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt origine"))
         if ope:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
         else:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp',required=False,label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
     def save(self):
         if self.ope is None:
             virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
@@ -102,10 +102,10 @@ class VirementForm(Baseform):
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
         virement_objet.dest.moyen = self.cleaned_data['moyen_destination']
         virement_objet.pointe = self.cleaned_data['pointe']
-        virement_objet.origine.compte=self.cleaned_data['compte_origine']
-        virement_objet.dest.compte=self.cleaned_data['compte_destination']
-        virement_objet.montant=self.cleaned_data['montant']
-        virement_objet.notes=self.cleaned_data['notes']
+        virement_objet.origine.compte = self.cleaned_data['compte_origine']
+        virement_objet.dest.compte = self.cleaned_data['compte_destination']
+        virement_objet.montant = self.cleaned_data['montant']
+        virement_objet.notes = self.cleaned_data['notes']
         #virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
         #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
@@ -113,11 +113,11 @@ class VirementForm(Baseform):
 
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
-    titre = forms.ModelChoiceField(Titre.objects.all(), required = False)
-    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label = None)
-    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in = ('b', 'e', 'p')), required = False)
-    nombre = forms.DecimalField(initial = '0')
-    cours = gsb_field.CurField(initial = '1')
+    titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
+    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
+    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
+    nombre = forms.DecimalField(initial='0')
+    cours = gsb_field.CurField(initial='1')
     #nom_nouveau_titre = forms.CharField(required = False)
     def clean(self):
         super(Ope_titre_addForm, self).clean()
@@ -127,8 +127,8 @@ class Ope_titre_addForm(Baseform):
         return self.cleaned_data
 
 class Ope_titre_add_achatForm(Ope_titre_addForm):
-    nouveau_titre = forms.CharField(required = False)
-    nouvel_isin = forms.CharField(required = False)
+    nouveau_titre = forms.CharField(required=False)
+    nouvel_isin = forms.CharField(required=False)
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
@@ -138,7 +138,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         return data
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
-    def __init__(self, cpt = None, *args, **kwargs):
+    def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
@@ -147,7 +147,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
-        if not data['compte_titre'].nb(titre = data['titre']):
+        if not data['compte_titre'].nb(titre=data['titre']):
             msg = u"titre pas en portefeuille"
             self._errors['titre'] = self.error_class([msg, ])
             del data['titre']
@@ -159,7 +159,7 @@ class Ope_titreForm(Basemodelform):
         instance = getattr(self, 'instance', None)
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
-    nombre = forms.DecimalField(localize = True, initial = '0')
+    nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField()
     date = gsb_field.DateFieldgsb()
     class Meta:
@@ -173,7 +173,7 @@ class GeneraliteForm(Basemodelform):
         super (GeneraliteForm, self).__init__(*args, **kwargs)
 
 class MajCoursform(Baseform):
-    titre = forms.ModelChoiceField(Titre.objects.all(), empty_label = None)
+    titre = forms.ModelChoiceField(Titre.objects.all(), empty_label=None)
     date = gsb_field.DateFieldgsb()
     cours = gsb_field.CurField()
 
@@ -182,9 +182,9 @@ class Majtitre(forms.Form):
     error_css_class = error_css_class
     required_css_class = required_css_class
     date = gsb_field.DateFieldgsb()
-    sociaux = forms.BooleanField(label="prélèvement sociaux ?",required=False,initial=False)
+    sociaux = forms.BooleanField(label="prélèvement sociaux ?", required=False, initial=False)
     def __init__(self, titres, *args, **kwargs):
         super (Majtitre, self).__init__(*args, **kwargs)
         for titre in titres:
-            self.fields[titre.isin] = gsb_field.TitreField(label = titre.nom)
-            self.fields[titre.isin].required=False
+            self.fields[titre.isin] = gsb_field.TitreField(label=titre.nom)
+            self.fields[titre.isin].required = False
