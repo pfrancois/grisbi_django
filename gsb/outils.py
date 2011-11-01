@@ -22,7 +22,8 @@ def import_file(request):
                 info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%Y-%b-%d a %H-%M-%S"))
             except KeyError:
                 info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%Y-%b-%d a %H-%M-%S"))
-            nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.gsb" % (request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
+            nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.gsb" % (
+            request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
             destination = open(nomfich, 'wb+')
             for chunk in request.FILES['nom_du_fichier'].chunks():
                 destination.write(chunk)
@@ -31,12 +32,14 @@ def import_file(request):
             logger.debug("enregitrement fichier ok")
             ok = False
             if form.cleaned_data['replace'] == 'remplacement':
-                logger.warning(u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
+                logger.warning(
+                    u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
                 if form.cleaned_data['version'] == 'gsb_0_5_0':
                     mysite.gsb.import_gsb.import_gsb_050(nomfich, True)
                     ok = True
             else:
-                logger.warning("fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
+                logger.warning(
+                    "fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
                 if form.cleaned_data['version'] == 'gsb_0_5_0':
                     mysite.gsb.import_gsb.import_gsb_050(nomfich, False)
                     ok = True
@@ -44,18 +47,20 @@ def import_file(request):
                 return HttpResponseRedirect(reverse('gsb.views.index'))
             else:
                 return render_to_response('gsb/import.djhtm',
-                              {'form': form,
-                               'titre':"importation d'un fichier"},
-                              context_instance=RequestContext(request))
+                        {'form':form,
+                         'titre':"importation d'un fichier"},
+                                          context_instance=RequestContext(request))
     else:
         form = gsb_forms.ImportForm()
     return render_to_response('gsb/import.djhtm',
-                              {'form': form,
-                               'titre':"importation d'un fichier"},
+            {'form':form,
+             'titre':"importation d'un fichier"},
                               context_instance=RequestContext(request))
+
 
 def options_index(request):
     return render_to_response('gsb/options.djhtm', context_instance=RequestContext(request))
+
 
 @login_required
 def modif_gen(request):
@@ -73,14 +78,14 @@ def modif_gen(request):
             return HttpResponseRedirect(reverse('mysite.gsb.outils.options_index'))
         else:
             return  render_to_response('gsb/outil_generalites.djhtm',
-            {   'titre':u'modification de certaines options',
-                'form':form},
-            context_instance=RequestContext(request)
-        )
+                    {'titre':u'modification de certaines options',
+                     'form':form},
+                                       context_instance=RequestContext(request)
+            )
     else:
         form = gsb_forms.GeneraliteForm(instance=Generalite.gen())
         return  render_to_response('gsb/outil_generalites.djhtm',
-            {   'titre':u'modification de certaines options',
-                'form':form},
-            context_instance=RequestContext(request)
+                {'titre':u'modification de certaines options',
+                 'form':form},
+                                   context_instance=RequestContext(request)
         )

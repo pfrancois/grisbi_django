@@ -6,6 +6,7 @@ from django.db.models import Max
 
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
+
     def date(self, s, defaut="0/0/0"):
         """
         fonction qui transforme un object date en une chaine AA/MM/JJJJ
@@ -82,6 +83,7 @@ class Format:
         except AttributeError:
             return str(defaut)
 
+
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
         @return bool """
@@ -104,6 +106,7 @@ def validrib(banque, guichet, compte, cle):
     ccle = 97 - reste
     return ccle == int(cle)
 
+
 def validinsee(insee, cle):
     """fonction qui verifie la valide de la cle insee
     @return bool"""
@@ -115,6 +118,7 @@ def validinsee(insee, cle):
     reste = int(insee) % 97
     return (97 - reste) == int(cle)
 
+
 def datefr2datesql(chaine):
     """fonction qui transforme une date fr en date sql
     si la date est invalide renvoie none
@@ -125,6 +129,7 @@ def datefr2datesql(chaine):
     except ValueError:
         return None
 
+
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant de d'un nombre francais"""
     if s == "0,0000000":
@@ -133,6 +138,7 @@ def fr2decimal(s):
         return decimal.Decimal(str(s).replace(',', '.'))
     else:
         return decimal.Decimal('0')
+
 
 def strpdate(s):
     """@param s: YYYY-MM-DD"""

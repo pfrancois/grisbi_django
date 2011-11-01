@@ -2,8 +2,10 @@
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
+
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
     from mysite import settings
+
     setup_environ(settings)
 
 import codecs, csv, cStringIO
@@ -101,7 +103,7 @@ def _export():
     i = 0
     total = float(opes.count())
     for ope in opes:
-        i +=  1
+        i += 1
         ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
         if ope.rapp is None:
             ligne.append(0)
@@ -122,9 +124,10 @@ def _export():
         ligne.append(fmt.str(ope.mere, ''))
         ligne.append(ope.date.strftime('%Y_%m'))
         csv_file.writerow(ligne)
-        if i % 50 :
+        if i % 50:
             logger.log("ligne %s %s%%" % (ope.id, i / total * 100))
     return fich
+
 
 def export(request):
     nb_compte = Compte.objects.count()
@@ -137,13 +140,13 @@ def export(request):
         return reponse
     else:
         return render_to_response('generic.djhtm',
-                        {'titre':'import csv',
-            'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
+                {'titre':'import csv',
+                 'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
             },
-        context_instance=RequestContext(request)
+                                  context_instance=RequestContext(request)
         )
 
 if __name__ == '__main__':
     chaine = _export()
-        #f = open('test.csv',"w")
+    #f = open('test.csv',"w")
     print chaine.read()

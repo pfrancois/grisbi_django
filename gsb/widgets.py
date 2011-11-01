@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 from django.conf import settings
 import datetime
+
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 
 class Dategsbwidget(forms.DateInput):
@@ -14,6 +15,7 @@ class Dategsbwidget(forms.DateInput):
 
     def __init__(self, attrs=None): #@UnusedVariable
         super(Dategsbwidget, self).__init__(attrs)
+
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
@@ -23,17 +25,25 @@ class Dategsbwidget(forms.DateInput):
             final_attrs['value'] = force_unicode(self._format_value(value))
         auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
         hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
-        cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
-        return mark_safe(u'<input%s /><span id="date_shct">|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (flatatt(final_attrs), hier, auj, cal))
+        cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (
+        final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+        return mark_safe(
+            u'<input%s /><span id="date_shct">|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (
+            flatatt(final_attrs), hier, auj, cal))
+
+
 class DateFieldgsb(forms.DateField):
     def __init__(self, input_formats=input_format_date, initial=datetime.date.today, *args, **kwargs):
-        super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget, *args, **kwargs)
+        super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget, *args,
+                                           **kwargs)
+
 
 class Titrewidget(forms.MultiWidget):
     def __init__(self, attrs=None):
-        widgets = (Curwidget(attrs=attrs,),
-                        forms.TextInput(attrs=attrs,))
+        widgets = (Curwidget(attrs=attrs, ),
+                   forms.TextInput(attrs=attrs, ))
         super(Titrewidget, self).__init__(widgets, attrs)
+
     def decompress(self, value):
         if value:
             chaine = force_unicode(value).partition('@')
@@ -43,6 +53,8 @@ class Titrewidget(forms.MultiWidget):
                 return [0, 0]
         else:
             return [0, 0]
+
+
 class TitreField(forms.MultiValueField):
     def __init__(self, *args, **kwargs):
         fields = (
@@ -50,15 +62,18 @@ class TitreField(forms.MultiValueField):
             forms.DecimalField(initial='0', label='nb')
             )
         super(TitreField, self).__init__(fields, widget=Titrewidget(), *args, **kwargs)
+
     def compress(self, data_list):
         if data_list:
             return "%s@%s" % (data_list[1], data_list[0])
         else:
             return None
 
+
 class Readonlywidget(forms.Widget):
     text = ''
     is_hidden = False
+
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
@@ -69,11 +84,14 @@ class Readonlywidget(forms.Widget):
         hidden = u'<input%s />' % flatatt(final_attrs)
         text = force_unicode(self.text)
         return mark_safe("<div>%s%s</div>" % (hidden, text))
+
     def _has_changed(self, initial, data):
         return False
 
+
 class ReadonlyField(forms.FileField):
     widget = Readonlywidget
+
     def __init__(self, instance=None, attr=None, *args, **kwargs): #@UnusedVariable
         self.attr = attr
         forms.Field.__init__(self, *args, **kwargs)
@@ -91,6 +109,7 @@ class ReadonlyField(forms.FileField):
     def clean(self, value, initial):
         return getattr(self, 'initial', None)
 
+
 class Curwidget(forms.TextInput):
     def render(self, name, value, attrs=None):
         if value is None:
@@ -102,6 +121,7 @@ class Curwidget(forms.TextInput):
         hidden = u'<input%s />' % flatatt(final_attrs)
         text = force_unicode("&#8364;")
         return mark_safe("<span>%s%s</span>" % (hidden, text))
+
 
 class CurField(forms.DecimalField):
     def __init__(self, localize=True, initial='0', widget=Curwidget, *args, **kwargs):

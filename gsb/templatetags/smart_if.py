@@ -1,4 +1,4 @@
-'''
+"""
 A smarter {% if %} tag for django templates.
 
 While retaining current Django functionality, it also handles equality,
@@ -6,7 +6,7 @@ greater than and less than operators. Some common case examples::
 
     {% if articles|length >= 5 %}...{% endif %}
     {% if "ifnotequal tag" != "beautiful" %}...{% endif %}
-'''
+"""
 import unittest
 from django import template
 
@@ -77,6 +77,7 @@ class TestVar(object):
     A basic self-resolvable object similar to a Django template variable. Used
     to assist with tests.
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -84,18 +85,17 @@ class TestVar(object):
         return self.value
 
 OPERATORS = {
-    '=': (Equals, True),
-    '==': (Equals, True),
-    '!=': (Equals, False),
-    '>': (Greater, True),
-    '>=': (GreaterOrEqual, True),
-    '<=': (Greater, False),
-    '<': (GreaterOrEqual, False),
-    'or': (Or, True),
-    'and': (And, True),
-    'in': (In, True),
-}
-
+    '=':(Equals, True),
+    '==':(Equals, True),
+    '!=':(Equals, False),
+    '>':(Greater, True),
+    '>=':(GreaterOrEqual, True),
+    '<=':(Greater, False),
+    '<':(GreaterOrEqual, False),
+    'or':(Or, True),
+    'and':(And, True),
+    'in':(In, True),
+    }
 
 class IfParser(object):
     error_class = ValueError

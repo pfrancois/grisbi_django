@@ -1,5 +1,6 @@
 # -*- coding: utf-8
 import os
+
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 DEFAULT_CHARSET = 'utf-8'
@@ -38,14 +39,14 @@ MD_DEBIT = 7
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    'default':{
+        'ENGINE':'django.db.backends.sqlite3',
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
-        'USER': 'root', # Not used with sqlite3.
-        'PASSWORD': '', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        'NAME':os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
+        'USER':'root', # Not used with sqlite3.
+        'PASSWORD':'', # Not used with sqlite3.
+        'HOST':'', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT':'', # Set to empty string for default. Not used with sqlite3.
     }
 }
 LOGIN_URL = "/login"
@@ -116,8 +117,8 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-)
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    )
 
 # Make this unique, and don't share it with anybody.
 try:
@@ -126,6 +127,7 @@ except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
     nomfich = os.path.join(SETTINGS_DIR, 'secret_key.py')
     from random import choice
+
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
@@ -136,8 +138,8 @@ except ImportError:
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+    #     'django.template.loaders.eggs.Loader',
+    )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -146,17 +148,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.transaction.TransactionMiddleware'
-)
+    )
 
 ROOT_URLCONF = 'mysite.urls'
 
-
 TEMPLATE_DIRS = (
-# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-# Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_PATH, 'templates'),
-)
+    )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -170,7 +171,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.formtools',
-)
+    )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
@@ -178,16 +179,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
-)
+    )
 if DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     #pour la debug bar
     INTERNAL_IPS = ('127.0.0.1',)
     DEBUG_TOOLBAR_CONFIG = {
-        'HIDE_DJANGO_SQL': True ,
+        'HIDE_DJANGO_SQL':True,
         'INTERCEPT_REDIRECTS':False,
-    }
+        }
     DEBUG_TOOLBAR_PANELS = (
         'debug_toolbar.panels.version.VersionDebugPanel',
         'debug_toolbar.panels.timer.TimerDebugPanel',
@@ -199,59 +200,59 @@ if DEBUG_TOOLBAR:
         'debug_toolbar.panels.signals.SignalDebugPanel',
         'debug_toolbar.panels.logger.LoggingPanel',
 
-    )
+        )
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-   'formatters': {
-        'verbose': {
-            'format': '[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
+    'version':1,
+    'disable_existing_loggers':True,
+    'formatters':{
+        'verbose':{
+            'format':'[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
         },
-    },
-    'handlers': {
-        'null': {
+        },
+    'handlers':{
+        'null':{
             'level':'DEBUG',
             'class':'django.utils.log.NullHandler',
-        },
+            },
         'console-simple':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
-            'formatter': 'verbose'
+            'formatter':'verbose'
         },
-        'log-file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'formatter': 'verbose',
+        'log-file':{
+            'level':'WARNING',
+            'class':'logging.handlers.TimedRotatingFileHandler',
+            'formatter':'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
-            'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-           'when': 'midnight',
-           'backupCount': '30', #approx 1 month worth
+            'filename':os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
+            'when':'midnight',
+            'backupCount':'30', #approx 1 month worth
         },
-    },
-    'loggers': {
-        'django': {
+        },
+    'loggers':{
+        'django':{
             'level':'WARNING',
             'handlers':['console-simple', 'log-file'],
-            'propagate': True,
-        },
-        'django.request': {
-            'level': 'DEBUG',
-            'handlers': ['console-simple', 'log-file'],
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'level': 'WARNING',
-            'handlers': ['console-simple', 'log-file'],
-            'propagate': False,
-        },
+            'propagate':True,
+            },
+        'django.request':{
+            'level':'DEBUG',
+            'handlers':['console-simple', 'log-file'],
+            'propagate':False,
+            },
+        'django.db.backends':{
+            'level':'WARNING',
+            'handlers':['console-simple', 'log-file'],
+            'propagate':False,
+            },
         'gsb':{
             'level':'INFO',
             'handlers':['console-simple', 'log-file'],
-            'propagate': True,
-        }
+            'propagate':True,
+            }
     }
 }

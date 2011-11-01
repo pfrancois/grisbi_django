@@ -31,7 +31,7 @@ from django.utils.encoding import smart_unicode
 
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
-    url(r'search/(?P<pk>\d+)/$', 'search_opes', name='g_search_ope'),
+                       url(r'search/(?P<pk>\d+)/$', 'search_opes', name='g_search_ope'),
     (r'^ope$', 'pel'))
 
 #---------------les fields, widgets  et forms tres perso
@@ -44,6 +44,7 @@ class SearchForm(gsb_forms.Baseform):
     moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), required=False)
     pointe = forms.BooleanField(required=False)
     rapp_detail = forms.ModelChoiceField(Rapp.objects.all(), required=False)
+
     def __init__(self, *args, **kwargs):
         cpt_id = kwargs.pop('cpt')
         super(SearchForm, self).__init__(*args, **kwargs)
@@ -51,7 +52,8 @@ class SearchForm(gsb_forms.Baseform):
         self.fields['cat'].queryset = Cat.objects.filter(ope__compte_id=cpt_id).distinct()
         self.fields['moyen'].queryset = Moyen.objects.filter(ope__compte_id=cpt_id).distinct()
         self.fields['rapp_detail'].queryset = Rapp.objects.filter(ope__compte_id=cpt_id).distinct()
-#----------les views tres perso
+
+    #----------les views tres perso
 def chgt_ope_titre(request):
     nb_ope = 0
     for ope in Ope_titre.objects.all():
@@ -68,6 +70,7 @@ def chgt_ope_titre(request):
     print nb_ope
     return render(request, 'generic.djhtm', {'titre':'chgt'})
 
+
 def pel(request):
     annee = [2005, 2006, 2007, 2008, 2009]
     mois = range(1, 13)
@@ -82,6 +85,8 @@ def pel(request):
             c.achat(titre=t, nombre=45, date=jour)
             print 'otot'
     return render(request, 'generic.djhtm', {'titre':'pel'})
+
+
 @login_required
 def search_opes(request, pk):
     cpt = get_object_or_404(Compte.objects.select_related(), pk=pk)

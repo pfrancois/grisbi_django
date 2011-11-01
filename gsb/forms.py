@@ -2,7 +2,7 @@
 from django import forms
 
 from mysite.gsb.models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
-    Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
+                               Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
 import mysite.gsb.widgets as gsb_field
 from django.utils.safestring import mark_safe
 
@@ -14,19 +14,22 @@ class Baseform(forms.Form):
     error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
+
 class Basemodelform(forms.ModelForm):
     error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
+
 class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
-    ('gsb_0_5_0', 'format grisbi version 0.5.x'),
-    ))
+        ('gsb_0_5_0', 'format grisbi version 0.5.x'),
+        ))
     replace = forms.ChoiceField((
-    ('remplacement', 'remplacement des données par le fichier'),
-    ('fusion', 'fusion des données avec le fichier')
-    ))
+        ('remplacement', 'remplacement des données par le fichier'),
+        ('fusion', 'fusion des données avec le fichier')
+        ))
+
 
 class OperationForm(Basemodelform):
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required=False)
@@ -40,24 +43,31 @@ class OperationForm(Basemodelform):
     pointe = forms.BooleanField(required=False)
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required=False)
     nouveau_tiers = forms.CharField(required=False)
+
     class Meta:
         model = Ope
         exclude = ('jumelle')#car sinon c'est un virement
+
     def __init__(self, *args, **kwargs):
         super(OperationForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere', required=False)
+
     def clean(self):
         super(OperationForm, self).clean()
         data = self.cleaned_data
         if data['tiers'] is None:
             if not data['nouveau_tiers']:
-                self._errors['tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'", ])
-                self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
+                self._errors['tiers'] = self.error_class([
+                    "si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"
+                    , ])
+                self._errors['nouveau_tiers'] = self.error_class(
+                    ["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'] is not None and data['moyen'].type == u'd' and data['montant'] > 0:
             data['montant'] = -1 * data['montant']
         return data
+
 
 class VirementForm(Baseform):
     compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
@@ -82,6 +92,7 @@ class VirementForm(Baseform):
             del data['compte_origine']
             del data['compte_destination']
         return data
+
     def __init__(self, ope=None, *args, **kwargs):
         self.ope = ope
         if ope:
@@ -89,14 +100,21 @@ class VirementForm(Baseform):
             super(VirementForm, self).__init__(initial=vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
-        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt origine"))
+        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp', required=False,
+                                                              label=mark_safe(u"rapproché dans <br/> cpt origine"))
         if ope:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp', required=False,
+                                                                      label=mark_safe(
+                                                                          u"rapproché dans <br/> cpt destination"))
         else:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(
+                u"rapproché dans <br/> cpt destination"))
+
     def save(self):
         if self.ope is None:
-            virement_objet = Virement.create(self.cleaned_data['compte_origine'], self.cleaned_data['compte_destination'], self.cleaned_data['montant'], self.cleaned_data['date'], self.cleaned_data['notes'])
+            virement_objet = Virement.create(self.cleaned_data['compte_origine'],
+                                             self.cleaned_data['compte_destination'], self.cleaned_data['montant'],
+                                             self.cleaned_data['date'], self.cleaned_data['notes'])
         else:
             virement_objet = Virement(self.ope)
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
@@ -110,6 +128,7 @@ class VirementForm(Baseform):
         #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
         return virement_objet.origine
+
 
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
@@ -126,16 +145,20 @@ class Ope_titre_addForm(Baseform):
             del self.cleaned_data['nombre']
         return self.cleaned_data
 
+
 class Ope_titre_add_achatForm(Ope_titre_addForm):
     nouveau_titre = forms.CharField(required=False)
     nouvel_isin = forms.CharField(required=False)
+
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
         if not(not(data['titre'] is None) or data['nouveau_titre']):
-            self._errors['nouveau_titre'] = self.error_class(["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
+            self._errors['nouveau_titre'] = self.error_class(
+                ["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
             del data['nouveau_titre']
         return data
+
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
     def __init__(self, cpt=None, *args, **kwargs):
@@ -144,6 +167,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
         self.fields['titre'].required = True
         if cpt and isinstance(cpt, Compte_titre):
             self.fields['titre'].queryset = cpt.liste_titre()
+
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
@@ -153,24 +177,30 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
             del data['titre']
         return data
 
+
 class Ope_titreForm(Basemodelform):
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
+
     nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField()
     date = gsb_field.DateFieldgsb()
+
     class Meta:
         model = Ope_titre
+
 
 class GeneraliteForm(Basemodelform):
     class Meta:
         model = Generalite
         fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
+
     def __init__(self, *args, **kwargs):
-        super (GeneraliteForm, self).__init__(*args, **kwargs)
+        super(GeneraliteForm, self).__init__(*args, **kwargs)
+
 
 class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label=None)
@@ -181,8 +211,9 @@ class MajCoursform(Baseform):
 class Majtitre(Baseform):
     date = gsb_field.DateFieldgsb()
     sociaux = forms.BooleanField(label="prélèvement sociaux ?", required=False, initial=False)
+
     def __init__(self, titres, *args, **kwargs):
-        super (Majtitre, self).__init__(*args, **kwargs)
+        super(Majtitre, self).__init__(*args, **kwargs)
         for titre in titres:
             self.fields[titre.isin] = gsb_field.TitreField(label=titre.nom)
             self.fields[titre.isin].required = False

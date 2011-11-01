@@ -4,8 +4,10 @@ from django.contrib.auth.decorators import permission_required
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
+
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
     from mysite import settings
+
     setup_environ(settings)
 
 from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre
@@ -17,6 +19,7 @@ from django.http import HttpResponse
 from django.conf import settings #@Reimport
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+
 try:
     from lxml import etree as et
 except ImportError:
@@ -39,23 +42,29 @@ def _export():
         try:
             cat_nom, scat_nom = cat_en_cours.nom.split(":")
             if scat_nom:
-                list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_nom, 'type':cat_en_cours.type}, 'scat':{'id':cat_en_cours.id, 'nom':scat_nom}}
+                list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_nom, 'type':cat_en_cours.type},
+                                              'scat':{'id':cat_en_cours.id, 'nom':scat_nom}}
             else:
-                list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
+                list_cats[cat_en_cours.id] = {
+                    'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
         except ValueError:
-            list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
-    #creation des id pour cat et sact
+            list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}
+                , 'scat':None}
+        #creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
         try:
             ib_nom, sib_nom = ib_en_cours.nom.split(":")
             if sib_nom:
-                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_nom, 'type':ib_en_cours.type}, 'sib':{'id':ib_en_cours.id, 'nom':sib_nom}}
+                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_nom, 'type':ib_en_cours.type},
+                                            'sib':{'id':ib_en_cours.id, 'nom':sib_nom}}
             else:
-                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type}, 'sib':None}
+                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type},
+                                            'sib':None}
         except ValueError:
-            list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type}, 'sib':None}
-    #####generalites###
+            list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type},
+                                        'sib':None}
+        #####generalites###
     xml_root = et.Element("Grisbi")
     q_generalite = Generalite.objects.all()[0]
     xml_generalites = et.SubElement(xml_root, "Generalites")
@@ -90,7 +99,8 @@ def _export():
     #####comptes###
     xml_comptes = et.SubElement(xml_root, "Comptes")
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
-    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
+    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(
+        ["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0) #NOT IN BDD
     logger.debug("gen ok")
     nb_compte = 0
@@ -129,14 +139,18 @@ def _export():
         et.SubElement(xml_detail, "Solde_mini_autorise").text = fmt.float(cpt.solde_mini_autorise)
         et.SubElement(xml_detail, "Solde_courant").text = fmt.float(cpt.solde())
         try:
-            et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde())
-            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
+            et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(
+                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(
+                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde())
+            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(
+                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
         except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
-        et.SubElement(xml_detail, "Compte_cloture").text = fmt.bool(not cpt.ouvert)#attention, on gere les comptes ouverts et non les comptes clotures
+        et.SubElement(xml_detail, "Compte_cloture").text = fmt.bool(
+            not cpt.ouvert)#attention, on gere les comptes ouverts et non les comptes clotures
         et.SubElement(xml_detail, "Affichage_r").text = "1" #NOT IN BDD
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3" #NOT IN BDD
         et.SubElement(xml_detail, "Commentaires").text = cpt.notes
@@ -243,9 +257,9 @@ def _export():
                 xml_element.set('Va', "0")
             else:
                 xml_element.set('Va', str(ope.mere.id))
-            #raison pour lesquelles il y a des attributs non modifiables
-            #Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
-###Echeances###
+                #raison pour lesquelles il y a des attributs non modifiables
+                #Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
+            ###Echeances###
 
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")
@@ -309,7 +323,7 @@ def _export():
         xml_element.set('Date_limite', fmt.date(ech.date_limite, defaut=''))
         xml_element.set('Ech_ventilee', '0')
         xml_element.set('No_ech_associee', '0')
-    ###Tiers###
+        ###Tiers###
     xml_tiers_root = et.SubElement(xml_root, "Tiers")
     xml_generalite = et.SubElement(xml_tiers_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_tiers").text = str(Tiers.objects.count())
@@ -327,7 +341,7 @@ def _export():
         else:
             xml_sub.set("Informations", tier.notes)
         xml_sub.set("Liaison", "0")
-    ##categories##
+        ##categories##
     xml_cat_root = et.SubElement(xml_root, "Categories")
     xml_generalite = et.SubElement(xml_cat_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_categories").text = str(Cat.objects.count())
@@ -380,7 +394,7 @@ def _export():
             xml_sub = et.SubElement(xml_ibe, 'Sous-imputation')
             xml_sub.set('No', str(imp['ib']['id']))
             xml_sub.set('Nom', unicode(imp['sib']['nom']))
-    ##devises##
+        ##devises##
     xml_devises = et.SubElement(xml_root, "Devises")
     xml_generalite = et.SubElement(xml_devises, "Generalites")
     et.SubElement(xml_generalite, "Nb_devises").text = "1"
@@ -429,7 +443,7 @@ def _export():
             #Fax_correspondant: pas ds bdd
             #Tel_correspondant: pas ds bdd
             #Mail_correspondant: pas ds bdd
-    ##exercices##
+        ##exercices##
     xml_exo = et.SubElement(xml_root, "Exercices")
     xml_generalite = et.SubElement(xml_exo, "Generalites")
     et.SubElement(xml_generalite, "Nb_exercices").text = str(Exercice.objects.count())
@@ -464,6 +478,7 @@ def _export():
     xml = xml.replace("xml version='1.0' encoding='ASCII'", 'xml version="1.0"')
     return xml
 
+
 @permission_required('gsb_can_export')
 def export(request):
     nb_compte = Compte.objects.count()
@@ -476,11 +491,11 @@ def export(request):
         return reponse
     else:
         return render_to_response('generic.djhtm',
-            {
+                {
                 'titre':'import gsb',
                 'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
             },
-            context_instance=RequestContext(request)
+                                  context_instance=RequestContext(request)
         )
 
 if __name__ == "__main__":

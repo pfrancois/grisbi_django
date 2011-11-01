@@ -18,22 +18,26 @@ class importtests(TestCase):
     def test_mauvais_format(self):
         logger.setLevel(50)
         #import_gsb_050("%s/../test_files/mauvais.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        self.assertRaises(Import_exception, import_gsb_050, "%s/../test_files/mauvais.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+        self.assertRaises(Import_exception, import_gsb_050,
+                          "%s/../test_files/mauvais.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+
     def test_pas_de_titre(self):
         import_gsb_050("%s/../test_files/mauvais2.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         obj = Generalite.gen()
         self.assertIsInstance(obj, Generalite)
         self.assertEquals(obj.titre, '')
-    def test_nbdevisesupa1(self):
-        self.assertRaises(Import_exception, import_gsb_050, "%s/../test_files/mauvais3.gsb" % (os.path.dirname(os.path.abspath(__file__))))
 
+    def test_nbdevisesupa1(self):
+        self.assertRaises(Import_exception, import_gsb_050,
+                          "%s/../test_files/mauvais3.gsb" % (os.path.dirname(os.path.abspath(__file__))))
 
 
 class importposttests(TestCase):
     def setUp(self):
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
+        models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
+                         date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
 
 
