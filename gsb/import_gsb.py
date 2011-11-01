@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os.path
@@ -10,7 +11,8 @@ if __name__ == "__main__":
 
 from django.db import connection, transaction
 
-from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte, Compte_titre, Ope_titre
+from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
+                     Exercice, Rapp, Moyen, Echeance, Generalite, Compte, Compte_titre, Ope_titre)
 import datetime
 import time
 import decimal

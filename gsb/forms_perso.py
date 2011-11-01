@@ -1,5 +1,5 @@
 # -*- coding: utf-8
-
+from __future__ import absolute_import
 #import relatif views
 from django.template import RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,11 +12,11 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include
 
 #import relatif forms
-import mysite.gsb.forms as gsb_forms
-import mysite.gsb.widgets as gsb_field
+from . import forms as gsb_forms
+from . import widgets as gsb_field
 from django import forms
 #models
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
+from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
 from django.db import models
 from django.db.models import Q
 #divers

@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 from django.test import TestCase
-from mysite.gsb.templatetags.smart_if import *
+from ..templatetags.smart_if import *
 
 #===============================================================================
 # Tests

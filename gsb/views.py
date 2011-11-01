@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
+from __future__ import absolute_import
 from django.template import RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from mysite.gsb.models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat
+from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat
 import datetime
-import mysite.gsb.forms as gsb_forms
+from . import forms as gsb_forms
 from django.db import models
 import decimal
 #import logging #@UnusedImport
@@ -27,8 +28,8 @@ def index(request):
     else:
         bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related()
         pl = Compte_titre.objects.filter(ouvert=True).select_related()
-    total_bq =
-    Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
+    total_bq = Ope.objects.filter(mere__exact=None,
+                                  compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
     'solde']
     if total_bq is None:
         total_bq = decimal.Decimal()

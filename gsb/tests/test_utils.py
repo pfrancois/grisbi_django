@@ -2,10 +2,11 @@
 """
 test utils
 """
+from __future__ import absolute_import
 from django.test import TestCase
-import mysite.gsb.utils as utils
+from .. import utils
 import datetime, time
-from mysite.gsb.models import Generalite, Exercice
+from ..models import Generalite, Exercice
 import decimal
 def strpdate(s):
     return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])

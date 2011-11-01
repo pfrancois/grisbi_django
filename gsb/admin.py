@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Ope_titre, Compte
+from __future__ import absolute_import
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Ope_titre, Compte
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models

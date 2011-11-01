@@ -7,7 +7,7 @@ greater than and less than operators. Some common case examples::
     {% if articles|length >= 5 %}...{% endif %}
     {% if "ifnotequal tag" != "beautiful" %}...{% endif %}
 """
-import unittest
+from __future__ import absolute_import
 from django import template
 
 
@@ -167,7 +167,7 @@ class TemplateIfParser(IfParser):
 
     def __init__(self, parser, *args, **kwargs):
         self.template_parser = parser
-        return super(TemplateIfParser, self).__init__(*args, **kwargs)
+        super(TemplateIfParser, self).__init__(*args, **kwargs)
 
     def create_var(self, value):
         return self.template_parser.compile_filter(value)
@@ -207,7 +207,7 @@ class SmartIfNode(template.Node):
 
 @register.tag('if')
 def smart_if(parser, token):
-    '''
+    """
     A smarter {% if %} tag for django templates.
 
     While retaining current Django functionality, it also handles equality,
@@ -217,11 +217,11 @@ def smart_if(parser, token):
         {% if "ifnotequal tag" != "beautiful" %}...{% endif %}
 
     Arguments and operators _must_ have a space between them, so
-    ``{% if 1>2 %}`` is not a valid smart if tag.
+    ''{% if 1>2 %}'' is not a valid smart if tag.
 
-    All supported operators are: ``or``, ``and``, ``in``, ``=`` (or ``==``),
-    ``!=``, ``>``, ``>=``, ``<`` and ``<=``.
-    '''
+    All supported operators are: ''or`', ''and`', ''in`', ''='' (or ''==''),
+    ''!='', ''>'', ''>='', ''<'' and ''<=''.
+    """
     bits = token.split_contents()[1:]
     var = TemplateIfParser(parser, bits).parse()
     nodelist_true = parser.parse(('else', 'endif'))

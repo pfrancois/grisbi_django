@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from django.conf.urls.defaults import patterns, url, include
 from django.views.generic import RedirectView
-import mysite.gsb.forms as gsb_forms
+from . import forms as gsb_forms
 from django.conf import settings
 
 # les vues generales

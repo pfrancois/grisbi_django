@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 
 if __name__ == "__main__":
@@ -10,7 +11,8 @@ if __name__ == "__main__":
 
     setup_environ(settings)
 
-from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre
+from .models import (Generalite, Compte, Ope, Tiers, Cat, Moyen,
+                     Echeance, Ib, Banque, Exercice, Rapp, Titre)
 # Compte_titre, Virement,
 from django.http import HttpResponse
 #from django.core.exceptions import ObjectDoesNotExist

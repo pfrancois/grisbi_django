@@ -1,9 +1,9 @@
 # -*- coding: utf-8
+from __future__ import absolute_import
 from django import forms
-
-from mysite.gsb.models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
+from .models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
                                Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
-import mysite.gsb.widgets as gsb_field
+from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
 #import decimal

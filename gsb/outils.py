@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
+from __future__ import absolute_import
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render_to_response
-import mysite.gsb.forms as gsb_forms
+from . import forms as gsb_forms
 import logging, os, time
-from mysite.gsb.models import Generalite
+from .models import Generalite
 from django.contrib.auth.decorators import login_required
-import mysite.gsb.import_gsb
+from . import import_gsb
 
 @login_required
 def import_file(request):

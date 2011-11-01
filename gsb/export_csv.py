@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
@@ -9,8 +10,8 @@ if __name__ == "__main__":
     setup_environ(settings)
 
 import codecs, csv, cStringIO
-from mysite.gsb.models import Compte, Ope
-from mysite.gsb.utils import Format
+from .models import Compte, Ope
+from .utils import Format
 import logging
 from django.shortcuts import render_to_response
 from django.template import RequestContext
