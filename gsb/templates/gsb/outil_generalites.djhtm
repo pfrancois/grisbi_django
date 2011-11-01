@@ -2,18 +2,18 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
-<form id='form1' action="{% url gsb.outils.modif_gen %}" method="post">
-    <table>
+    <form id='form1' action="{% url gsb.outils.modif_gen %}" method="post">
+        <table>
+            <tr>
+                <td>{% csrf_token %}</td>
+            </tr>
+            {{ form }}
+        </table>
+    </form>
+    <table style=" width: 100%;" summary="bouton">
         <tr>
-            <td>{% csrf_token %}</td>
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb.outils.options_index %}">Annuler</a></td>
         </tr>
-        {{ form }}
     </table>
-</form>
-<table style=" width: 100%;" summary="bouton">
-<tr>
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb.outils.options_index %}">Annuler</a></td>
-</tr>
-</table>
 {% endblock content %}

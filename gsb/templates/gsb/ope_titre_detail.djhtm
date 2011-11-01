@@ -3,28 +3,34 @@
 {% load gsb_extras %}
 {% load url from future %}
 {% block content %}
-<form method="post" action="" id="form1">
-{% csrf_token %}
-<table>
-{{form}}
-    <tr><th>id_ope:</th><td>{{ ope.ope.id }}</td></tr>
-    <tr><th>rapp:</th><td>{{ ope.ope.rapp }}</td></tr>
-</table>
-</form>
-<table style=" width: 100%;" summary="bouton">
-<tr>
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url 'gsb_cpt_titre_detail' ope.compte_id ope.titre_id %}">Annuler</a></td>
-</tr>
-</table>
-{% if not rapp %}
-    <form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
+    <form method="post" action="" id="form1">
         {% csrf_token %}
+        <table>
+            {{ form }}
+            <tr>
+                <th>id_ope:</th>
+                <td>{{ ope.ope.id }}</td></tr>
+            <tr>
+                <th>rapp:</th>
+                <td>{{ ope.ope.rapp }}</td></tr>
+        </table>
     </form>
-    <table style=" width: 100%;" summary="bouton effacer">
-    <tr>
-            <td width="100%" class="boutton"><a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
-    </tr>
+    <table style=" width: 100%;" summary="bouton">
+        <tr>
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton">
+                <a href="{% url 'gsb_cpt_titre_detail' ope.compte_id ope.titre_id %}">Annuler</a></td>
+        </tr>
     </table>
-{% endif %}
+    {% if not rapp %}
+        <form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
+            {% csrf_token %}
+        </form>
+        <table style=" width: 100%;" summary="bouton effacer">
+            <tr>
+                <td width="100%" class="boutton">
+                    <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+            </tr>
+        </table>
+    {% endif %}
 {% endblock content %}

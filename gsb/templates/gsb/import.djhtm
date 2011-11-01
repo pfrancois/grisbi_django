@@ -1,16 +1,16 @@
 {% extends "generic.djhtm" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-<form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
-    <table>
-        {{ form.as_table }}
-    </table>
-    {% csrf_token %}
+    <form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
+        <table>
+            {{ form.as_table }}
+        </table>
+        {% csrf_token %}
+        <p>
+            <input type="submit" value="Importer" />
+        </p>
+    </form>
     <p>
-        <input type="submit" value="Importer"/>
+        <a href="{% url gsb.views.index %}">retour liste comptes</a>
     </p>
-</form>
-<p>
-    <a href="{% url gsb.views.index %}">retour liste comptes</a>
-</p>
 {% endblock content %}

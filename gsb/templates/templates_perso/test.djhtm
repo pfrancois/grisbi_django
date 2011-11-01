@@ -3,8 +3,9 @@
 {% load gsb_extras %}
 {% block content %}
     {% block bouton_haut %}
-    <table width="100%" id="boutons" class="table">
-        <tr><td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr></table>
+        <table width="100%" id="boutons" class="table">
+            <tr><td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
+        </table>
         <form method="post" action="" id="form1">{% csrf_token %}
             <table width="100%" id="date_s" class="table">
                 {{ form }}
@@ -13,10 +14,10 @@
         </form>
 
     {% endblock bouton_haut %}
-    <br/>
-    <table id="main"class="table">
+    <br />
+    <table id="main" class="table">
         <thead class="entete">
-        <tr>{%block titre_col_ope %}
+        <tr>{% block titre_col_ope %}
             <th>ID</th>
             <th>Date</th>
             <th>Tiers</th>
@@ -30,8 +31,9 @@
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement {% endif %}{% if ope.montant < 0 %} debitElement {% endif %}{% if ope.rapp or ope.jumelle and ope.jumelle.rapp %}rappElement{% endif %}">
                     <td class="opDate opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.id }}</a></td>
-                    <td class="opDate opCenter">{{ ope.date}} </td>
-                    <td class="opTier opCenter">{% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</td>
+                    <td class="opDate opCenter">{{ ope.date }} </td>
+                    <td class="opTier opCenter">
+                        {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</td>
                     <td class="opTier">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</td>
                     <td>{{ ope.moyen.nom|default:'aucun moyen' }}</td>
                     <td class="opCredit">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</td>
@@ -41,15 +43,15 @@
         {% empty %}
             <tr class="item">
                 <td colspan="7">
-                    aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
+                    aucune op&eacute;ration n&#39;est affich&eacute;e.<br />
                 </td>
             </tr>
         {% endfor %}
         {% block footer %}
             <tr class="footerbar">
-            <td colspan="4" class="cptLabel">Solde</td>
-            <td colspan="3" class="cptSolde">{{ solde|cur }}</td>
-        </tr>
+                <td colspan="4" class="cptLabel">Solde</td>
+                <td colspan="3" class="cptSolde">{{ solde|cur }}</td>
+            </tr>
         {% endblock footer %}
     </table>
 {% endblock content %}

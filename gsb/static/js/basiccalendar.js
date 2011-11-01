@@ -1,36 +1,36 @@
 /* coding: utf-8 */
 var _DATE_FORMAT_REGXES = {
-    'Y' : new RegExp('^-?[0-9]+'),
-    'd' : new RegExp('^[0-9]{1,2}'),
-    'm' : new RegExp('^[0-9]{1,2}'),
-    'H' : new RegExp('^[0-9]{1,2}'),
-    'M' : new RegExp('^[0-9]{1,2}')
-}
+    'Y':new RegExp('^-?[0-9]+'),
+    'd':new RegExp('^[0-9]{1,2}'),
+    'm':new RegExp('^[0-9]{1,2}'),
+    'H':new RegExp('^[0-9]{1,2}'),
+    'M':new RegExp('^[0-9]{1,2}')};
+
 
 /*
  * _parseData does the actual parsing job needed by `strptime`
  */
 function _parseDate(datestring, format) {
     var parsed = {};
-    for(var i1 = 0, i2 = 0; i1 < format.length; i1++, i2++) {
+    for (var i1 = 0, i2 = 0; i1 < format.length; i1++, i2++) {
         var c1 = format[i1];
         var c2 = datestring[i2];
-        if(c1 == '%') {
+        if ('%' == c1) {
             c1 = format[++i1];
             var data = _DATE_FORMAT_REGXES[c1].exec(datestring.substring(i2));
-            if(!data.length) {
+            if (!data.length) {
                 return null;
             }
             data = data[0];
             i2 += data.length - 1;
             var value = parseInt(data, 10);
-            if(isNaN(value)) {
+            if (isNaN(value)) {
                 return null;
             }
             parsed[c1] = value;
             continue;
         }
-        if(c1 != c2) {
+        if (c1 != c2) {
             return null;
         }
     }
@@ -44,37 +44,37 @@ function _parseDate(datestring, format) {
 function strptime(datestring, format) {
 
     var parsed = _parseDate(datestring, format);
-    if(!parsed) {
+    if (!parsed) {
         return null;
     }
     // create initial date (!!! year=0 means 1900 !!!)
     var date = new Date(0, 0, 1, 0, 0);
     date.setFullYear(0);
     // reset to year 0
-    if(parsed.Y) {
+    if (parsed.Y) {
         date.setFullYear(parsed.Y);
     }
-    if(parsed.m) {
-        if(parsed.m < 1 || parsed.m > 12) {
+    if (parsed.m) {
+        if (1 > parsed.m || 12 < parsed.m) {
             return null;
         }
         // !!! month indexes start at 0 in javascript !!!
         date.setMonth(parsed.m - 1);
     }
-    if(parsed.d) {
-        if(parsed.m < 1 || parsed.m > 31) {
+    if (parsed.d) {
+        if (1 > parsed.m || 31 < parsed.m) {
             return null;
         }
         date.setDate(parsed.d);
     }
-    if(parsed.H) {
-        if(parsed.H < 0 || parsed.H > 23) {
+    if (parsed.H) {
+        if (0 > parsed.H || 23 < parsed.H) {
             return null;
         }
         date.setHours(parsed.H);
     }
-    if(parsed.M) {
-        if(parsed.M < 0 || parsed.M > 59) {
+    if (parsed.M) {
+        if (0 > parsed.M || 59 < parsed.M) {
             return null;
         }
         date.setMinutes(parsed.M);
@@ -90,15 +90,15 @@ var format_date = "";
 function findPosY(obj) {
     var o = obj;
     var curtop = 0;
-    if(o.offsetParent) {
-        while(1) {
+    if (o.offsetParent) {
+        while (1) {
             curtop += o.offsetTop;
-            if(!o.offsetParent) {
+            if (!o.offsetParent) {
                 break;
             }
             o = o.offsetParent;
         }
-    } else if(o.y) {
+    } else if (o.y) {
         curtop += o.y;
     }
     return curtop;
@@ -106,22 +106,22 @@ function findPosY(obj) {
 
 function findPosX(obj) {
     var curleft = 0;
-    if(obj.offsetParent) {
-        while(1) {
+    if (obj.offsetParent) {
+        while (1) {
             curleft += obj.offsetLeft;
-            if(!obj.offsetParent) {
+            if (!obj.offsetParent) {
                 break;
             }
             obj = obj.offsetParent;
         }
-    } else if(obj.x) {
+    } else if (obj.x) {
         curleft += obj.x;
     }
     return curleft;
 }
 
 function closeCurrentEditor() {
-    if(currentEditor !== "") {
+    if ("" !== currentEditor) {
         currentEditor.style.visibility = "hidden";
         editorOriginalValue = "";
         currentEditField = "";
@@ -132,7 +132,7 @@ function closeCurrentEditor() {
 
 function startEditor(editorId, fieldId) {
     var posy;
-    if(currentEditor !== "") {
+    if ("" !== currentEditor) {
         closeCurrentEditor();
     } else {
         currentEditor = document.getElementById(editorId);
@@ -146,11 +146,11 @@ function startEditor(editorId, fieldId) {
 }
 
 /*-----------------------
-* Basic Calendar-By Brian Gosselin at http://scriptasylum.com/bgaudiodr/
-* Script featured on Dynamic Drive (http://www.dynamicdrive.com)
-* This notice must stay intact for use
-* Visit http://www.dynamicdrive.com/ for full source code
----------------------------------------*/
+ * Basic Calendar-By Brian Gosselin at http://scriptasylum.com/bgaudiodr/
+ * Script featured on Dynamic Drive (http://www.dynamicdrive.com)
+ * This notice must stay intact for use
+ * Visit http://www.dynamicdrive.com/ for full source code
+ ---------------------------------------*/
 /**
  * creer effectivement le calendrier
  * @param {int} d
@@ -172,7 +172,7 @@ function buildCal(d, m, y, cM, cH, cDW, cD, brdr) {
     //DD replaced line to fix date bug when current day is 31st
     oD.od = oD.getDay();
     //DD replaced line to fix date bug when current day is 31st
-    if(oD.od === 0) {
+    if (0 === oD.od) {
         oD.od = 7;
     }
     var todaydate = new Date();
@@ -183,29 +183,29 @@ function buildCal(d, m, y, cM, cH, cDW, cD, brdr) {
     var previousYear = y;
     var nextYear = y;
     var previousMonth = m - 1;
-    if(m === 1) {
+    if (1 === m) {
         previousMonth = 12;
-        previousYear = previousYear - 1;
+        previousYear -= 1;
     }
     var nextMonth = m + 1;
-    if(m === 12) {
+    if (12 === m) {
         nextMonth = 1;
-        nextYear = nextYear + 1;
+        nextYear -= 1;
     }
-    //gestion du nnombre de jour pour fevrier
-    dim[1] = (((oD.getFullYear() % 100 !== 0) && (oD.getFullYear() % 4 === 0)) || (oD.getFullYear() % 400 === 0)) ? 29 : 28;
+    //gestion du nombre de jour pour fevrier
+    dim[1] = (((0 !== oD.getFullYear() % 100) && (0 === oD.getFullYear() % 4)) || (0 === oD.getFullYear() % 400)) ? 29 : 28;
     var t = '<div class="' + cM + '"><table class="' + cM + '" cols="7" cellpadding="0" border="' + brdr + '" cellspacing="0"><tr align="center">';
     t += '<td class="boutton"><a href="javascript:calendarSelectMonth(' + previousMonth + ', ' + previousYear + ')">&lt;&lt;</a></td><td colspan="5" align="center" class="' + cH + '">' + mn[m - 1] + ' - ' + y + '</td><td class=boutton><a href="javascript:calendarSelectMonth(' + nextMonth + ', ' + nextYear + ')">&gt;&gt;</a></td></tr><tr align="center">';
-    for( s = 0; s < 7; s++) {
+    for (s = 0; 7 > s; s++) {
         t += '<td class="' + cDW + '">' + "LMMJVSD".substr(s, 1) + '</td>';
     }
     t += '</tr><tr align="center">';
-    for( i = 1; i <= 42; i++) {
+    for (i = 1; 42 >= i; i++) {
         var x = '&nbsp;';
-        if((i - oD.od >= 0) && (i - oD.od < dim[m - 1])) {
+        if ((0 <= i - oD.od) && (i - oD.od < dim[m - 1])) {
             var day = (i - oD.od + 1);
             x = day;
-            if(x === scanfortoday) {//DD added
+            if (x === scanfortoday) {//DD added
                 x = '<span id="calendartoday">' + x + '</span>';
                 //DD added
                 x = '<a href="javascript:calendarSelectDate(' + day + ', ' + m + ', ' + y + ')">' + x + '</a>';
@@ -214,7 +214,7 @@ function buildCal(d, m, y, cM, cH, cDW, cD, brdr) {
             }
         }
         t += '<td class="' + cD + '">' + x + '</td>';
-        if(((i) % 7 === 0) && (i < 36)) {
+        if ((0 === (i) % 7) && (36 > i)) {
             t += '</tr><tr align="center">';
         }
     }
@@ -228,15 +228,16 @@ function editDate(fieldId, format) {
     var curyear;
     var curmonth;
     var curday;
-    if(!format) {
-        if (document.getElementById(fieldId).value.indexOf('/')!=-1) {
+    var myDate;
+    if (!format) {
+        if (document.getElementById(fieldId).value.indexOf('/') != -1) {
             format = "%d/%m/%Y";
         } else {
-            format="%d%m%y";
+            format = "%d%m%y";
         }
     }
     format_date = format;
-    if(currentEditor !== "") {
+    if ("" !== currentEditor) {
         closeCurrentEditor();
     } else {
         currentEditor = document.getElementById("editDateId");
@@ -244,43 +245,47 @@ function editDate(fieldId, format) {
         posy = findPosY(currentEditField);
         editorOriginalValue = currentEditField.value;
         window.scroll(0, posy);
-        myDate = strptime(editorOriginalValue, format)
+        myDate = strptime(editorOriginalValue, format);
         curyear = myDate.getFullYear();
         curmonth = myDate.getMonth() + 1;
         curday = myDate.getDate();
-        currentEditor.innerHTML = buildCal(curday, curmonth, curyear, "calendarmain", "calendarmonth", "calendardaysofweek", "calendardays", 2);
+        currentEditor.innerHTML = buildCal(curday, curmonth, curyear, "calendarmain", "calendarmonth",
+                "calendardaysofweek", "calendardays", 2);
         currentEditor.style.top = (posy + 25) + "px";
         currentEditor.style.visibility = "visible";
     }
 }
 
 function calendarSelectMonth(month, year) {
-    currentEditor.innerHTML = buildCal(0, month, year, "calendarmain", "calendarmonth", "calendardaysofweek", "calendardays", 2);
+    currentEditor.innerHTML = buildCal(0, month, year, "calendarmain", "calendarmonth", "calendardaysofweek",
+            "calendardays", 2);
 }
 
 function calendarSelectDate(day, month, year) {
-    if(day < 10) {
+    if (10 > day) {
         day = "0" + day;
     }
-    if(month < 10) {
+    if (10 > month) {
         month = "0" + month;
     }
     currentEditField.value = "" + day + "/" + month + "/" + year;
     closeCurrentEditor();
 }
 
-function shct_date(offset,fieldId) {
+function shct_date(offset, fieldId) {
     var d = new Date();
-    d.setDate(d.getDate() + offset)
+    var day;
+    var month;
+    d.setDate(d.getDate() + offset);
     currentEditField = document.getElementById(fieldId);
-    day=d.getDate();
-    if(day < 10) {
+    day = d.getDate();
+    if (10 > day) {
         day = "0" + day;
     }
-    month=d.getMonth()+1
-    if(month < 10) {
+    month = d.getMonth() + 1;
+    if (10 > month) {
         month = "0" + month;
     }
     currentEditField.value = "" + day + "/" + month + "/" + (d.getFullYear() * 1);
-    
+
 }

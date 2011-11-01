@@ -7,10 +7,11 @@ It's enough to be useful for writing conversions.
 """
 
 import sys
- 
+
 class QifItem:
     def __init__(self):
-        self.order = ['date', 'amount', 'cleared', 'num', 'payee', 'memo', 'address', 'category', 'categoryInSplit', 'memoInSplit', 'amountOfSplit']
+        self.order = ['date', 'amount', 'cleared', 'num', 'payee', 'memo', 'address', 'category', 'categoryInSplit',
+                      'memoInSplit', 'amountOfSplit']
         self.date = None
         self.amount = None
         self.cleared = None
@@ -25,8 +26,8 @@ class QifItem:
 
     def show(self):
         pass
-    
-    def __repr__(self):
+
+    def __unicode__(self):
         titles = ','.join(self.order)
         tmpstring = ','.join([str(self.__dict__[field]) for field in self.order])
         tmpstring = tmpstring.replace('None', '')
@@ -39,7 +40,8 @@ class QifItem:
         tmpstring = ','.join([str(self.__dict__[field]) for field in self.order])
         tmpstring = tmpstring.replace('None', '')
         return tmpstring
-    
+
+
 def parseQif(infile):
     """
     Parse a qif file and return a list of entries.

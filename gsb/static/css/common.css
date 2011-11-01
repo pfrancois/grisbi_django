@@ -1,172 +1,175 @@
 @charset "UTF-8";
-a {
-	text-decoration: none;
-	padding: 0;
-	margin: 0;
-	color: #FFFFFF;
+a{
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+    color: #FFFFFF;
 }
 
-a:hover {
-	background-color: #706666;
+a:hover{
+    background-color: #706666;
 }
 
-body {
-	font-family: sans-serif;
-	background-color: #333333;
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	color: #FFFFFF;
-	font-size: 100%;
+body{
+    font-family: sans-serif;
+    background-color: #333333;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    color: #FFFFFF;
+    font-size: 100%;
 }
 
-h1 {
-	font-size: 2.5em;
-	padding-top: .3em;
-	padding-bottom: .5em;
-	font-weight: bold;
-	background-color: #990000;
-	margin-top: 0;
-	text-align: center;
+h1{
+    font-size: 2.5em;
+    padding-top: .3em;
+    padding-bottom: .5em;
+    font-weight: bold;
+    background-color: #990000;
+    margin-top: 0;
+    text-align: center;
 }
 
-h2 {
-	font-size: 1.5em;
-	margin-top: 0.4em;
-	margin-bottom: 0.6em;
-	clear: both;
-	border-bottom: 1px solid #D8D8D8;
+h2{
+    font-size: 1.5em;
+    margin-top: 0.4em;
+    margin-bottom: 0.6em;
+    clear: both;
+    border-bottom: 1px solid #D8D8D8;
 }
 
-.boutton {
-	background-color: #554444;
-	border: #ffffff solid 1px;
-	text-align: center;
-	padding: 10px 0 10px 0;
-	font-size: 2em;
-	color: #ffffff;
+.boutton{
+    background-color: #554444;
+    border: #ffffff solid 1px;
+    text-align: center;
+    padding: 10px 0 10px 0;
+    font-size: 2em;
+    color: #ffffff;
 }
 
-.boutton:hover {
-	background-color: #706666;
+.boutton:hover{
+    background-color: #706666;
 }
 
-.table {
-	border-collapse: collapse;
-	width: 100%;
-	border-width: 0;
-	empty-cells: show
+.table{
+    border-collapse: collapse;
+    width: 100%;
+    border-width: 0;
+    empty-cells: show
 }
 
-.item {
-	background-color: #3A0000;
-	border-top: 1px solid #4D0000;
-}
-.item:hover {
-	background-color: #706666;
+.item{
+    background-color: #3A0000;
+    border-top: 1px solid #4D0000;
 }
 
-
-.cptLabel {
-	text-align: left;
-	width: 100%
+.item:hover{
+    background-color: #706666;
 }
 
-.cptSolde {
-	text-align: right;
-	white-space: nowrap;
-	padding-right: .5em;
+.cptLabel{
+    text-align: left;
+    width: 100%
 }
 
-.progress {
-	width: 100%;
-	background: #009900;
-	text-align: center;
-	font-size: 2.5em;
+.cptSolde{
+    text-align: right;
+    white-space: nowrap;
+    padding-right: .5em;
 }
 
-.error {
-	width: 100%;
-	background: #ff00ff;
-	text-align: center;
-	font-size: 2.5em;
+.progress{
+    width: 100%;
+    background: #009900;
+    text-align: center;
+    font-size: 2.5em;
 }
 
-.creditElement {
-	background: #6699FF;
-	padding: 0.6em 0 0.6em 0;
+.error{
+    width: 100%;
+    background: #ff00ff;
+    text-align: center;
+    font-size: 2.5em;
 }
 
-.debitElement {}
+.creditElement{
+    background: #6699FF;
+    padding: 0.6em 0 0.6em 0;
+}
 
+.debitElement{ }
 
 .rappElement{
-	color:red;
-}
-.opCredit {
-	white-space: nowrap;
-	padding: 0 0.6em 0 0.1em;
-	text-align: right;
+    color: red;
 }
 
-.opDebit {
-	white-space: nowrap;
-	padding: 0 0.6em 0 0.3em;
-	text-align: right;
+.opCredit{
+    white-space: nowrap;
+    padding: 0 0.6em 0 0.1em;
+    text-align: right;
 }
-.opCenter {
-	text-align: center !important;;
+
+.opDebit{
+    white-space: nowrap;
+    padding: 0 0.6em 0 0.3em;
+    text-align: right;
 }
-.opDate {
-	white-space: nowrap;
-	text-align: right;
+
+.opCenter{
+    text-align: center !important;;
+}
+
+.opDate{
+    white-space: nowrap;
+    text-align: right;
     width: 10%;
 }
 
-.opTier {
-	width: 50%;
-	padding: 0 0 0 0.3em;
-	text-align: left;
+.opTier{
+    width: 50%;
+    padding: 0 0 0 0.3em;
+    text-align: left;
 }
 
-
-.survol:hover {
-	background-color: #706666;
+.survol:hover{
+    background-color: #706666;
 }
 
-
-.footerbar td {
-	background-color: #990000;
-	font-weight: bold;
-	padding: .7em;
-	border-top: 10px solid #333333;
-	height: 3em;
+.footerbar td{
+    background-color: #990000;
+    font-weight: bold;
+    padding: .7em;
+    border-top: 10px solid #333333;
+    height: 3em;
 }
+
 .padding>td{
-	padding-top: 0.4em;
-	padding-bottom: 0.6em;
+    padding-top: 0.4em;
+    padding-bottom: 0.6em;
 }
 
-th {
-	background-color: #990000;
-	font-weight: bold;
-	padding-top: 0.4em;
-	padding-bottom: 0.6em;
-	text-align: center;
+th{
+    background-color: #990000;
+    font-weight: bold;
+    padding-top: 0.4em;
+    padding-bottom: 0.6em;
+    text-align: center;
 }
+
 .required{
     background: #009900;
 }
+
 .required:after{
-    content:"*";
+    content: "*";
 }
 
-ul.messagelist {
+ul.messagelist{
     padding: 0 0 5px 0;
     margin: 0;
 }
 
-ul.messagelist li {
+ul.messagelist li{
     font-size: 12px;
     display: block;
     padding: 4px 5px 4px 25px;
@@ -184,7 +187,7 @@ ul.messagelist li.error{
     background-image: url(../img/icon_error.gif);
 }
 
-.errornote {
+.errornote{
     font-size: 12px !important;
     display: block;
     padding: 4px 5px 4px 25px;
@@ -194,12 +197,12 @@ ul.messagelist li.error{
     background: #ffc url(../img/icon_error.gif) 5px .3em no-repeat;
 }
 
-ul.errorlist {
+ul.errorlist{
     margin: 0 !important;
     padding: 0 !important;
 }
 
-.errorlist li {
+.errorlist li{
     font-size: 12px !important;
     display: block;
     padding: 4px 5px 4px 25px;
@@ -209,43 +212,43 @@ ul.errorlist {
     background: red url(../img/icon_alert.gif) 5px .3em no-repeat;
 }
 
-.errorlist li a {
- 	color: white;
+.errorlist li a{
+    color: white;
     text-decoration: underline;
 }
 
-td ul.errorlist {
+td ul.errorlist{
     margin: 0 !important;
     padding: 0 !important;
 }
 
-td ul.errorlist li {
+td ul.errorlist li{
     margin: 0 !important;
 }
 
-.errors {
+.errors{
     background: #ffc;
 }
 
-.errors input, .errors select, .errors textarea {
+.errors input, .errors select, .errors textarea{
     border: 1px solid red;
 }
 
-div.system-message {
+div.system-message{
     background: #ffc;
     margin: 10px;
     padding: 6px 8px;
     font-size: .8em;
 }
 
-div.system-message p.system-message-title {
+div.system-message p.system-message-title{
     padding: 4px 5px 4px 25px;
     margin: 0;
     color: red;
     background: #ffc url(../img/icon_error.gif) 5px .3em no-repeat;
 }
 
-.description {
+.description{
     font-size: 12px;
     padding: 5px 0 0 12px;
 }

@@ -1,19 +1,19 @@
 {% extends "generic.djhtm" %}
 {% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-<form id='form1' action="" method="post">
-    {% csrf_token %}
-    <fieldset class="operationMainTable">
-        <table>
-            {{ form.as_table }}
-        </table>
-    </fieldset>
-</form>
-{% load gsb_extras %}
-<table style=" width: 100%;" summary="bouton">
-<tr>
-        <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-        <td width="50%" class="boutton"><a href="{% url gsb_close %}">Annuler</a></td>
-</tr>
-</table>
+    <form id='form1' action="" method="post">
+        {% csrf_token %}
+        <fieldset class="operationMainTable">
+            <table>
+                {{ form.as_table }}
+            </table>
+        </fieldset>
+    </form>
+    {% load gsb_extras %}
+    <table style=" width: 100%;" summary="bouton">
+        <tr>
+            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%" class="boutton"><a href="{% url gsb_close %}">Annuler</a></td>
+        </tr>
+    </table>
 {% endblock content %} 
