@@ -101,7 +101,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
-    list_filter = ('compte', 'date', 'pointe', 'rapp')
+    list_filter = ('compte', 'date', 'pointe', 'rapp','exercice')
     search_fields = ['tiers__nom']
 
     def show_jumelle(self, obj):

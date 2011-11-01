@@ -334,7 +334,7 @@ class Compte(models.Model):
                                default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length=20, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
-    solde_init = CurField()
+    solde_init = CurField(default=Decimal('0.00'))
     solde_mini_voulu = CurField(null=True, blank=True)
     solde_mini_autorise = CurField(null=True, blank=True)
     ouvert = models.BooleanField(default=True)
