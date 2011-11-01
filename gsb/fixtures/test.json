@@ -3,7 +3,7 @@
         "pk": 6,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "cptb2 => cpt_1",
+            "nom": "cptb2 => cpte_1", 
             "notes": "",
             "is_titre": false
         }
@@ -532,7 +532,7 @@
             "montant": "10",
             "date_val": null,
             "notes": "operation 1 servant au test de fusion",
-            "rapp": null,
+            "rapp": 1,
             "exercice": null,
             "cat": 2,
             "num_cheque": "",
@@ -665,6 +665,30 @@
             "mere": null
         }
     },
+    {
+        "pk": 8,
+        "model": "gsb.ope", 
+        "fields": {
+            "jumelle": null, 
+            "tiers": 1, 
+            "_order": 2, 
+            "pointe": false, 
+            "montant": "20", 
+            "date_val": null, 
+            "notes": "", 
+            "rapp": 1, 
+            "exercice": 2, 
+            "cat": null, 
+            "num_cheque": "", 
+            "piece_comptable": "", 
+            "automatique": false, 
+            "date": "2010-10-01", 
+            "moyen": 1, 
+            "compte": 1, 
+            "ib": null, 
+            "mere": null
+        }
+    }, 
     {
         "pk": 1,
         "model": "sites.site",

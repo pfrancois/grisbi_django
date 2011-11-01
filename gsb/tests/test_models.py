@@ -59,21 +59,31 @@ class test_models(TestCase):
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR")
 
     def test_fusionne_error(self):
-        self.assertRaises(TypeError, Tiers.objects.get(nom="tiers1").fusionne, Cat.objects.get(id=1))
-        self.assertRaises(TypeError, Titre.objects.get(nom="t1").fusionne, Cat.objects.get(id=1))
+        self.assertRaises(TypeError, Tiers.objects.get(nom="tiers1").fusionne, Cat.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Tiers.objects.get(nom="tiers1").fusionne, Tiers.objects.get(nom="tiers1"))#fusion sur lui meme
+        self.assertRaises(TypeError, Titre.objects.get(nom="t1").fusionne, Cat.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Titre.objects.get(nom="t1").fusionne, Titre.objects.get(nom="t1"))#fusion sur lui meme
         self.assertRaises(TypeError, Titre.objects.get(nom="t1").fusionne, Titre.objects.get(nom="autre"))
-        self.assertRaises(Gsb_exc, Titre.objects.get(nom="t4").fusionne, Titre.objects.get(nom="autre"))
-        self.assertRaises(TypeError, Cat.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Banque.objects.get(id=1).fusionne, Cat.objects.get(id=1))
-        self.assertRaises(TypeError, Cat.objects.get(id=3).fusionne, Cat.objects.get(id=1))
-        self.assertRaises(TypeError, Ib.objects.get(id=3).fusionne, Ib.objects.get(id=1))
-        self.assertRaises(TypeError, Ib.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Exercice.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Compte.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Compte_titre.objects.get(id=4).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Moyen.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))
-        self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))
+        self.assertRaises(Gsb_exc, Titre.objects.get(nom="t4").fusionne, Titre.objects.get(nom="autre"))#fusion entre deux compte de type difference
+        self.assertRaises(TypeError, Banque.objects.get(id=1).fusionne, Cat.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Banque.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion sur lui meme
+        self.assertRaises(TypeError, Cat.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(TypeError, Cat.objects.get(id=3).fusionne, Cat.objects.get(id=1))#fusion entre deux cat de type difference
+        self.assertRaises(ValueError, Cat.objects.get(id=1).fusionne, Cat.objects.get(id=1))#fusion sur lui meme
+        self.assertRaises(TypeError, Ib.objects.get(id=3).fusionne, Ib.objects.get(id=1))#fusion entre deux ib de type difference
+        self.assertRaises(TypeError, Ib.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Ib.objects.get(id=1).fusionne, Ib.objects.get(id=1))#fusion sur lui meme
+        self.assertRaises(TypeError, Exercice.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Exercice.objects.get(id=1).fusionne, Exercice.objects.get(id=1))#fusion sur lui meme
+        self.assertRaises(TypeError, Compte.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Compte.objects.get(id=1).fusionne, Compte.objects.get(id=1))#fusion sur lui meme
+        self.assertRaises(Gsb_exc, Compte.objects.get(id=1).fusionne, Compte.objects.get(id=2))#fusion entre deux compte de type difference
+        self.assertRaises(TypeError, Compte_titre.objects.get(id=4).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Compte_titre.objects.get(id=4).fusionne, Compte_titre.objects.get(id=4))#fusion sur lui meme
+
+        self.assertRaises(TypeError, Moyen.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
 
     def test_investietnb(self):
         self.assertEqual(Titre.objects.get(id=1).investi(), 0)
@@ -142,8 +152,6 @@ class test_models(TestCase):
 
     def test_exo_fusionne(self):
         exo = Exercice.objects.get(id=1)
-        Ope.objects.create(compte=Compte.objects.get(id=1), date='2010-01-01', montant=20,
-                                       tiers=Tiers.objects.get(id=1),exercice=Exercice.objects.get(id=2))
         Exercice.objects.get(id=2).fusionne(exo)
         self.assertEqual(Exercice.objects.count(), 1)
         self.assertEquals(exo.date_debut,strpdate('2010-1-1'))
@@ -152,7 +160,16 @@ class test_models(TestCase):
         self.assertEqual(exo.ope_set.count(),1)
 
     def test_compte_solde_normal(self):
-        self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('20'))
+        self.assertEqual(Compte.objects.get(id=1).solde(), 40)
+        self.assertEqual(Compte.objects.get(id=6).solde(), 0)
+        self.assertEqual(Compte.objects.get(id=1).solde(rapp=True), 20)
+        self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2009-01-01')), 0)
+
+    def test_creation_compte_compte_titre(self):
+        t=Compte.objects.create(nom="toto", type="t")
+        b=Compte.objects.create(nom="hjhghj", type="b")
+        self.assertIsInstance(Compte_titre.objects.get(nom="toto"), Compte_titre)
+        self.assertIsInstance(Compte.objects.get(nom="hjhghj"), Compte)
 
     def test_compte_abolute_url(self):
         self.assertEqual(Compte.objects.get(id=1).get_absolute_url(), '/compte/1/')
@@ -174,6 +191,10 @@ class test_models(TestCase):
         self.assertEqual(c.solde(), 140)
         c.achat(titre=t, nombre=20, prix=2, date='2011-01-01')
         self.assertEqual(c.solde(), 160)
+        #utilisation des cat et tiers par defaut
+        c.achat(titre=t,nombre=20,frais=20)
+        #"utilisa des cat et tiers donnes
+        c.achat(titre=t,nombre=20,frais=20,cat_frais=3,tiers_frais=2)
 
     def test_cpt_titre_achat_complet(self):
         c = Compte_titre.objects.get(id=5)
@@ -215,9 +236,9 @@ class test_models(TestCase):
 
     def test_virement_verif_property(self):
         Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20, date='2010-01-01', notes='test_notes')
-        v = Virement(Ope.objects.get(id=8))
-        self.assertEquals(v.origine.id, 8)
-        self.assertEquals(v.dest.id, 9)
+        v = Virement(Ope.objects.get(id=9))
+        self.assertEquals(v.origine.id, 9)
+        self.assertEquals(v.dest.id, 10)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom='cpte1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom='cptb2'))
         self.assertEquals(v.date, strpdate('2010-01-01'))
@@ -227,28 +248,28 @@ class test_models(TestCase):
         self.assertEquals(v.__unicode__(), u"cpte1 => cptb2")
         v.date_val = '2011-02-01'
         v.save()
-        self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, strpdate('2011-02-01'))
+        self.assertEquals(Virement(Ope.objects.get(id=9)).date_val, strpdate('2011-02-01'))
 
     def test_virement_create(self):
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
-        self.assertEqual(Compte.objects.get(id=1).solde(), 0)
+        self.assertEqual(Compte.objects.get(id=1).solde(), 20)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom='cpte1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom='cptb2'))
-        self.assertEquals(v.origine.id, 8)
+        self.assertEquals(v.origine.id, 9)
         self.assertEquals(v.date, datetime.date.today())
         self.assertEquals(v.montant, v.origine.montant * -1)
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 20)
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20,
                             '2010-01-01', 'test_notes')
-        self.assertEqual(Compte.objects.get(id=1).solde(), -20)
+        self.assertEqual(Compte.objects.get(id=1).solde(), 0)
         self.assertEqual(v.date, '2010-01-01')
         self.assertEqual(v.notes, 'test_notes')
 
     def test_virement_delete(self):
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
         v.delete()
-        self.assertEquals(Compte.objects.get(nom='cpte1').solde(), 20)
+        self.assertEquals(Compte.objects.get(nom='cpte1').solde(), 40)
         self.assertEquals(Compte.objects.get(nom='cptb2').solde(), -90)
 
     def test_virement_init_form(self):

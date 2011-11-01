@@ -59,6 +59,8 @@ class Tiers(models.Model):
         """fusionnne tiers vers new tiers
         @param new: tiers
         """
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -106,6 +108,8 @@ class Titre(models.Model):
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new"""
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -215,6 +219,8 @@ class Banque(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -244,6 +250,8 @@ class Cat(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
@@ -273,6 +281,8 @@ class Ib(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -302,6 +312,8 @@ class Exercice(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -334,7 +346,7 @@ class Compte(models.Model):
                                default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length=20, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
-    solde_init = CurField(default=Decimal('0.00'))
+    solde_init = CurField(default=decimal.Decimal('0.00'))
     solde_mini_voulu = CurField(null=True, blank=True)
     solde_mini_autorise = CurField(null=True, blank=True)
     ouvert = models.BooleanField(default=True)
@@ -373,6 +385,8 @@ class Compte(models.Model):
         """fusionnne deux compte, verifie avant que c'est le meme type
         @param new
         """
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -395,7 +409,7 @@ class Compte(models.Model):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
         self.alters_data = True
         if self.type == 't' and not isinstance(self, Compte_titre):
-            Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
+            c=Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
                                         banque=self.banque,
                                         guichet=self.guichet, num_compte=self.num_compte,
                                         cle_compte=self.cle_compte,
@@ -405,7 +419,8 @@ class Compte(models.Model):
                                         moyen_debit_defaut=self.moyen_credit_defaut
             )
         else:
-            super(Compte, self).save(*args, **kwargs)
+            c=super(Compte, self).save(*args, **kwargs)
+        return c
 
 
 class Compte_titre(Compte):
@@ -447,7 +462,7 @@ class Compte_titre(Compte):
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes="frais %s@%s" % (nombre, prix),
-                                    moyen_id=settings.MD_DEBIT,
+                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                 )
                 #gestion compta matiere (et donc operation sous jacente et cours)
@@ -499,7 +514,7 @@ class Compte_titre(Compte):
                                     tiers=titre_frais,
                                     cat=cat_frais,
                                     notes="frais %s@%s" % (nombre, prix),
-                                    moyen_id=settings.MD_DEBIT,
+                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                 )
             if virement_vers:
@@ -531,7 +546,7 @@ class Compte_titre(Compte):
                                     tiers=titre_frais,
                                     cat=cat_frais,
                                     notes="frais revenu",
-                                    moyen_id=settings.MD_DEBIT,
+                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                 )
             if virement_vers:
@@ -551,6 +566,8 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne deux compte_titre"""
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
@@ -663,6 +680,8 @@ class Moyen(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         if not (self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT):
             self.alters_data = True
             if type(new) != type(self):
@@ -708,6 +727,8 @@ class Rapp(models.Model):
         return solde
 
     def fusionne(self, new):
+        if new == self:
+            raise ValueError("un objet ne peut etre fusionne sur lui meme")
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError("pas la meme classe d'objet")
