@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import
 from django.db import models
 import datetime
 import decimal
@@ -697,7 +697,7 @@ class Rapp(models.Model):
         if self.ope_set.all():
             return self.ope_set.all()[0].compte.id
         else:
-            raise TypeError
+            return None
 
     def solde(self):
         req = self.ope_set.aggregate(solde=models.Sum('montant'))

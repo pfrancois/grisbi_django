@@ -5,10 +5,10 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-
+from __future__ import absolute_import
 from django.test import TestCase
-import mysite.gsb.models as models_gsb
-from mysite.gsb.import_gsb import * #@UnusedWildImport
+from .. import models as models_gsb
+from ..import_gsb import * #@UnusedWildImport
 import decimal, datetime #@Reimport
 from django.db import models
 import os.path #@Reimport

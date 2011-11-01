@@ -2,14 +2,15 @@
 """
 test models
 """
+from __future__ import absolute_import
 from django.test import TestCase
-from mysite.gsb.models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
-from mysite.gsb.models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
-from mysite.gsb.models import Rapp, Echeance, Gsb_exc
+from ..models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
+from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
+from ..models import Rapp, Echeance, Gsb_exc
 import datetime
 import decimal
 from django.conf import settings
-from mysite.gsb.utils import strpdate
+from ..utils import strpdate
 
 class test_models(TestCase):
     fixtures = ['test.json']
@@ -141,8 +142,14 @@ class test_models(TestCase):
 
     def test_exo_fusionne(self):
         exo = Exercice.objects.get(id=1)
-        Exercice.objects.get(id=2).fusionne(Exercice.objects.get(id=1))
-        self.assertEquals()
+        Ope.objects.create(compte=Compte.objects.get(id=1), date='2010-01-01', montant=20,
+                                       tiers=Tiers.objects.get(id=1),exercice=Exercice.objects.get(id=2))
+        Exercice.objects.get(id=2).fusionne(exo)
+        self.assertEqual(Exercice.objects.count(), 1)
+        self.assertEquals(exo.date_debut,strpdate('2010-1-1'))
+        self.assertEquals(exo.date_fin,strpdate('2011-12-31'))
+        self.assertEqual(exo.echeance_set.count(),1)
+        self.assertEqual(exo.ope_set.count(),1)
 
     def test_compte_solde_normal(self):
         self.assertEqual(Compte.objects.get(id=1).solde(), decimal.Decimal('20'))
