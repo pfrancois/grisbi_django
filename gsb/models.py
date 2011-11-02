@@ -680,20 +680,20 @@ class Moyen(models.Model):
 
     @transaction.commit_on_success
     def fusionne(self, new):
+        if type(new) != type(self):
+            raise TypeError("pas la meme classe d'objet")
         if new == self:
             raise ValueError("un objet ne peut etre fusionne sur lui meme")
-        if not (self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT):
+        if (self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT):
+            raise ValueError("impossible de le fusionner car il est un moyen par default dans les settings")
+        else:
             self.alters_data = True
-            if type(new) != type(self):
-                raise TypeError("pas la meme classe d'objet")
             nb_change = Compte.objects.filter(moyen_credit_defaut=self).update(moyen_credit_defaut=new)
             nb_change += Compte.objects.filter(moyen_debit_defaut=self).update(moyen_debit_defaut=new)
             nb_change += Echeance.objects.filter(moyen=self).update(moyen=new)
             nb_change += Echeance.objects.filter(moyen_virement=self).update(moyen_virement=new)
             nb_change += Ope.objects.filter(moyen=self).update(moyen=new)
             self.delete()
-        else:
-            nb_change = 0
         return nb_change
 
 

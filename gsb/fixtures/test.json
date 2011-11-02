@@ -3,7 +3,7 @@
         "pk": 6,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "cptb2 => cpte_1", 
+            "nom": "cptb2 => cpte_1",
             "notes": "",
             "is_titre": false
         }
@@ -36,29 +36,29 @@
         }
     },
     {
-        "pk": 3, 
+        "pk": 3,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "titre_ t1", 
-            "notes": "1@ACT", 
+            "nom": "titre_ t1",
+            "notes": "1@ACT",
             "is_titre": true
         }
     },
     {
-        "pk": 4, 
+        "pk": 4,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "titre_ t2", 
-            "notes": "2@OBL", 
+            "nom": "titre_ t2",
+            "notes": "2@OBL",
             "is_titre": true
         }
     },
     {
-        "pk": 7, 
+        "pk": 7,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "titre_ t4", 
-            "notes": "aaa@ZZZ", 
+            "nom": "titre_ t4",
+            "notes": "aaa@ZZZ",
             "is_titre": true
         }
     },
@@ -94,16 +94,16 @@
     },
     {
         "pk": 4,
-        "model": "gsb.titre", 
+        "model": "gsb.titre",
         "fields": {
-            "nom": "t4", 
-            "tiers": 7, 
-            "type": "ZZZ", 
+            "nom": "t4",
+            "tiers": 7,
+            "type": "ZZZ",
             "isin": "aaa"
         }
-    }, 
+    },
     {
-        "pk": 4, 
+        "pk": 4,
         "model": "gsb.cours",
         "fields": {
             "date": "2011-10-30",
@@ -112,23 +112,23 @@
         }
     },
     {
-        "pk": 6, 
-        "model": "gsb.cours", 
+        "pk": 6,
+        "model": "gsb.cours",
         "fields": {
-            "date": "2011-10-30", 
-            "titre": 3, 
+            "date": "2011-10-30",
+            "titre": 3,
             "valeur": "1"
         }
-    }, 
+    },
     {
-        "pk": 7, 
-        "model": "gsb.cours", 
+        "pk": 7,
+        "model": "gsb.cours",
         "fields": {
-            "date": "2011-10-30", 
-            "titre": 4, 
+            "date": "2011-10-30",
+            "titre": 4,
             "valeur": "2"
         }
-    }, 
+    },
     {
         "pk": 5,
         "model": "gsb.cours",
@@ -417,6 +417,14 @@
         }
     },
     {
+        "pk": 5,
+        "model": "gsb.moyen",
+        "fields": {
+            "nom": "moyen_dep3",
+            "type": "d"
+        }
+    },
+    {
         "pk": 3,
         "model": "gsb.moyen",
         "fields": {
@@ -667,28 +675,28 @@
     },
     {
         "pk": 8,
-        "model": "gsb.ope", 
+        "model": "gsb.ope",
         "fields": {
-            "jumelle": null, 
-            "tiers": 1, 
-            "_order": 2, 
-            "pointe": false, 
-            "montant": "20", 
-            "date_val": null, 
-            "notes": "", 
-            "rapp": 1, 
-            "exercice": 2, 
-            "cat": null, 
-            "num_cheque": "", 
-            "piece_comptable": "", 
-            "automatique": false, 
-            "date": "2010-10-01", 
-            "moyen": 1, 
-            "compte": 1, 
-            "ib": null, 
+            "jumelle": null,
+            "tiers": 1,
+            "_order": 2,
+            "pointe": false,
+            "montant": "20",
+            "date_val": null,
+            "notes": "",
+            "rapp": 1,
+            "exercice": 2,
+            "cat": null,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2010-10-01",
+            "moyen": 1,
+            "compte": 1,
+            "ib": null,
             "mere": null
         }
-    }, 
+    },
     {
         "pk": 1,
         "model": "sites.site",

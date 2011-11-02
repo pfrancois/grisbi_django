@@ -30,8 +30,8 @@ class test_models(TestCase):
         settings.ID_CAT_COTISATION = 23
         settings.ID_TIERS_COTISATION = 727
         settings.ID_CAT_OST = 64
-        settings.MD_CREDIT = 6
-        settings.MD_DEBIT = 7
+        settings.MD_CREDIT = 1
+        settings.MD_DEBIT = 2
 
     def tearDown(self):
         settings.ID_CPT_M = self.old_ID_CPT_M
@@ -80,8 +80,8 @@ class test_models(TestCase):
         self.assertRaises(Gsb_exc, Compte.objects.get(id=1).fusionne, Compte.objects.get(id=2))#fusion entre deux compte de type difference
         self.assertRaises(TypeError, Compte_titre.objects.get(id=4).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
         self.assertRaises(ValueError, Compte_titre.objects.get(id=4).fusionne, Compte_titre.objects.get(id=4))#fusion sur lui meme
-
         self.assertRaises(TypeError, Moyen.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
+        self.assertRaises(ValueError, Moyen.objects.get(id=1).fusionne, Moyen.objects.get(id=2))#fusion avec un autre type
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
 
@@ -194,7 +194,7 @@ class test_models(TestCase):
         #utilisation des cat et tiers par defaut
         c.achat(titre=t,nombre=20,frais=20)
         #"utilisa des cat et tiers donnes
-        c.achat(titre=t,nombre=20,frais=20,cat_frais=3,tiers_frais=2)
+        c.achat(titre=t,nombre=20,frais=20,cat_frais=Cat.objects.get(id=3),tiers_frais=Tiers.objects.get(id=2))
 
     def test_cpt_titre_achat_complet(self):
         c = Compte_titre.objects.get(id=5)
