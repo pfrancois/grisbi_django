@@ -82,6 +82,8 @@ class test_models(TestCase):
         self.assertRaises(ValueError, Compte_titre.objects.get(id=4).fusionne, Compte_titre.objects.get(id=4))#fusion sur lui meme
         self.assertRaises(TypeError, Moyen.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
         self.assertRaises(ValueError, Moyen.objects.get(id=1).fusionne, Moyen.objects.get(id=2))#fusion avec un autre type
+        self.assertRaises(ValueError, Moyen.objects.get(id=2).fusionne, Moyen.objects.get(id=3))#probleme si fusion d'un moyen settings
+        self.assertRaises(ValueError, Moyen.objects.get(id=4).fusionne, Moyen.objects.get(id=4))#fusion sur lui meme
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
 
@@ -208,7 +210,7 @@ class test_models(TestCase):
         self.assertEqual(c.solde(), 30)
 
     def test_moyen_fusionne(self):
-        Moyen.objects.get(id=2).fusionne(Moyen.objects.get(id=1))
+        Moyen.objects.get(id=3).fusionne(Moyen.objects.get(id=2))
 
     #    def test_rapp_compte(self):
     #    def test_rapp_solde(self):

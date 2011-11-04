@@ -36,7 +36,7 @@ class test_utils(TestCase):
         self.assertEquals(self.f.type(liste, 'jhk'), '0')
     def test_format_max(self):
         self.assertEquals(self.f.max(Generalite.objects.all()), '1')
-        self.assertEquals(self.f.max(Generalite.objects.none(), defaut='25'), '25')
+        self.assertEquals(self.f.max(Generalite.objects.filter('jkjkjkj'), defaut='25'), '25')
         self.assertEquals(self.f.max(Generalite.objects.filter(id=2),), '0')
         self.assertEquals(self.f.max(Generalite.objects.filter(id=2), defaut='3'), '3')
         self.assertEquals(self.f.max(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
