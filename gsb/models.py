@@ -407,7 +407,7 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'mysite.gsb.views.cpt_detail', (), {'cpt_id':str(self.id)}
+        return 'gsb_cpt_detail', (), {'cpt_id':str(self.id)}
 
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
@@ -590,7 +590,7 @@ class Compte_titre(Compte):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'cpt_detail', (), {'pk':str(self.id)}
+        return 'gsb_cpt_detail', (), {'cpt_id':str(self.id)}
 
     def save(self, *args, **kwargs):
         """verifie qu'on a pas changé le type de compte"""
