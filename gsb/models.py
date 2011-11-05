@@ -141,17 +141,14 @@ class Titre(models.Model):
             self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte=None, datel=None, rapp=False):
+    def investi(self, compte=None, datel=None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel:date, renvoie sur avant la date ou tout si none
-        @param rapp: boolean, renvoie uniquement les op rapp
         """
         query = Ope.objects.filter(tiers=self.tiers)
         if compte:
             query = query.filter(compte=compte)
-        if rapp:
-            query = query.filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
@@ -178,12 +175,17 @@ class Titre(models.Model):
         else:
             return nombre
 
-    def encours(self, compte=None):
+    def encours(self, compte=None, datel=None, rapp=False):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
-        if compte:
-            return self.nb(compte) * self.last_cours
+        if datel:
+            cours = self.cours_set.filter(date__lte=datel).latest().valeur
         else:
-            return self.nb() * self.last_cours
+            cours = self.last_cours
+        if compte:
+            nb = self.nb(compte, datel=datel, rapp=rapp)
+        else:
+            nb = self.nb(datel=datel, rapp=rapp)
+        return nb * cours
 
 
 class Cours(models.Model):
@@ -392,6 +394,8 @@ class Compte(models.Model):
             raise TypeError("pas la meme classe d'objet")
         if new.type != self.type:
             raise Gsb_exc("attention ce ne sont pas deux compte de meme type")
+        if not(self.ouvert and new.ouvert):
+            raise Gsb_exc(u"attention un des deux comptes est fermé")
         if self.type == 't':
             nb_change = Compte_titre.objects.get(id=self.id).fusionne(Compte_titre.objects.get(id=new.id))
         else:
@@ -409,17 +413,17 @@ class Compte(models.Model):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
         self.alters_data = True
         if self.type == 't' and not isinstance(self, Compte_titre):
-            c=Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
-                                        banque=self.banque,
-                                        guichet=self.guichet, num_compte=self.num_compte,
-                                        cle_compte=self.cle_compte,
-                                        solde_init=self.solde_init, solde_mini_voulu=self.solde_mini_voulu,
-                                        solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
-                                        notes=self.notes, moyen_credit_defaut=self.moyen_credit_defaut,
-                                        moyen_debit_defaut=self.moyen_credit_defaut
+            c = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
+                                            banque=self.banque,
+                                            guichet=self.guichet, num_compte=self.num_compte,
+                                            cle_compte=self.cle_compte,
+                                            solde_init=self.solde_init, solde_mini_voulu=self.solde_mini_voulu,
+                                            solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
+                                            notes=self.notes, moyen_credit_defaut=self.moyen_credit_defaut,
+                                            moyen_debit_defaut=self.moyen_credit_defaut
             )
         else:
-            c=super(Compte, self).save(*args, **kwargs)
+            c = super(Compte, self).save(*args, **kwargs)
         return c
 
 
@@ -449,19 +453,18 @@ class Compte_titre(Compte):
         @param virement_de
         """
         self.alters_data = True
-        if frais:
-            if not cat_frais:
-                cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
-                                                      defaults={'nom':u'frais bancaires:'})[0]
-            if not tiers_frais:
-                tiers_frais = titre.tiers
         if isinstance(titre, Titre):
             if decimal.Decimal(force_unicode(frais)):
+                if not cat_frais:
+                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
+                                                          defaults={'nom':u'frais bancaires:'})[0]
+                if not tiers_frais:
+                    tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
-                                    notes="frais %s@%s" % (nombre, prix),
+                                    notes=u"frais %s@%s" % (nombre, prix),
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                 )
@@ -482,7 +485,7 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def vente(self, titre, nombre, prix=1,
               date=datetime.date.today(), frais=0, virement_vers=None,
-              cat_frais=None, titre_frais=None):
+              cat_frais=None, tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
         @param nombre
@@ -492,15 +495,10 @@ class Compte_titre(Compte):
         @param virement_vers
         """
         self.alters_data = True
-        if not cat_frais:
-            cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
-                                                  defaults={'nom':u'frais bancaires:'})[0]
-        if not titre_frais:
-            titre_frais = titre.tiers
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            nb_titre_avant = titre.nb(compte=self)
-            if not nb_titre_avant:
+            nb_titre_avant = titre.nb(compte=self, datel=date)
+            if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist('titre pas en portefeuille')
                 #compta matiere
             Ope_titre.objects.create(titre=titre,
@@ -509,11 +507,16 @@ class Compte_titre(Compte):
                                      date=date,
                                      cours=prix)
             if decimal.Decimal(force_unicode(frais)):
+                if not cat_frais:
+                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
+                                                          defaults={'nom':u'frais bancaires:'})[0]
+                if not tiers_frais:
+                    tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
-                                    tiers=titre_frais,
+                                    tiers=tiers_frais,
                                     cat=cat_frais,
-                                    notes="frais %s@%s" % (nombre, prix),
+                                    notes="frais -%s@%s" % (nombre, prix),
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                 )
@@ -529,21 +532,30 @@ class Compte_titre(Compte):
     @transaction.commit_on_success
     def revenu(self, titre, montant=1,
                date=datetime.date.today(), frais=0, virement_vers=None,
-               cat_frais=None, titre_frais=None):
+               cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
         self.alters_data = True
-        if not cat_frais:
-            cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
-        if not titre_frais:
-            titre_frais = titre.tiers
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
-            if not titre.nb(compte=self):
+            nb_titre_avant = titre.nb(compte=self, datel=date)
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
+            if not nb_titre_avant:
                 raise Titre.DoesNotExist('titre pas en portefeuille')
+            self.ope_set.create(date=date,
+                                montant=decimal.Decimal(force_unicode(montant)),
+                                tiers=titre.tiers,
+                                cat=cat_ost,
+                                notes="revenu",
+                                moyen=Moyen.objects.get(id=settings.MD_CREDIT),
+                                automatique=True)
             if decimal.Decimal(force_unicode(frais)):
-                self.ope_set.create(date=date,
+                if not tiers_frais:
+                    tiers_frais = titre.tiers
+                if not cat_frais:
+                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
+                ope=self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
-                                    tiers=titre_frais,
+                                    tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes="frais revenu",
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
@@ -558,9 +570,7 @@ class Compte_titre(Compte):
     def solde(self, datel=None, rapp=False):
         """renvoie le solde"""
         solde_espece = self.solde_espece(datel, rapp)
-        solde_titre = 0
-        for titre in self.titre.all().distinct():
-            solde_titre = solde_titre + titre.encours(self)
+        solde_titre = self.solde_titre(datel, rapp)
         return solde_espece + solde_titre
 
     @transaction.commit_on_success
@@ -590,16 +600,26 @@ class Compte_titre(Compte):
         super(Compte_titre, self).save(*args, **kwargs)
 
     def solde_espece(self, datel=None, rapp=False):
-        return super(Compte_titre, self).solde(datel, rapp)
+        return super(Compte_titre, self).solde(datel=datel, rapp=rapp)
 
-    def solde_titre(self):
+    def solde_titre(self, datel=None, rapp=False):
         solde_titre = 0
         for titre in self.titre.all().distinct():
-            solde_titre = solde_titre + titre.encours(self)
+            nb = titre.nb(compte=self, datel=datel, rapp=rapp)
+            if datel:
+                cours = titre.cours_set.filter(date__lte=datel).latest().valeur
+            else:
+                cours = titre.last_cours
+            solde_titre = solde_titre + nb * cours
         return solde_titre
 
-    def liste_titre(self):
-        return self.titre.all().distinct()
+    def liste_titre(self, datel=None, rapp=False):
+        all = self.titre.all().distinct()
+        liste = []
+        for i in all:
+            if i.nb(compte=self, datel=datel, rapp=rapp):
+                liste.append(i.id)
+        return Titre.objects.filter(id__in=liste)
 
 
 class Ope_titre(models.Model):
@@ -623,8 +643,7 @@ class Ope_titre(models.Model):
         #        super(Ope_titre, self).save(*args, **kwargs)
         if not self.ope:
             #gestion des cours
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[
-                      0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
             if self.cours * self.nombre < 0:#vente
                 moyen = self.compte.moyen_credit_defaut
             else:#achat
@@ -684,7 +703,7 @@ class Moyen(models.Model):
             raise TypeError("pas la meme classe d'objet")
         if new == self:
             raise ValueError("un objet ne peut etre fusionne sur lui meme")
-        if (self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT):
+        if self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT:
             raise ValueError("impossible de le fusionner car il est un moyen par default dans les settings")
         else:
             self.alters_data = True

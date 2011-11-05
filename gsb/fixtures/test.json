@@ -476,7 +476,7 @@
         "pk": 1,
         "model": "gsb.echeance",
         "fields": {
-            "compte_virement": 1,
+            "compte_virement": 2,
             "moyen_virement": 4,
             "tiers": 2,
             "periode_perso": "",

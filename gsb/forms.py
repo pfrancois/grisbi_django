@@ -137,7 +137,7 @@ class Ope_titre_addForm(Baseform):
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
     nombre = forms.DecimalField(initial='0')
     cours = gsb_field.CurField(initial='1')
-    #nom_nouveau_titre = forms.CharField(required = False)
+    frais = forms.DecimalField(initial='0',required=False)
     def clean(self):
         super(Ope_titre_addForm, self).clean()
         if not self.cleaned_data['nombre']:
@@ -153,6 +153,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
+        #on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
         if not(not(data['titre'] is None) or data['nouveau_titre']):
             self._errors['nouveau_titre'] = self.error_class(
                 ["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
@@ -171,7 +172,8 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
-        if not data['compte_titre'].nb(titre=data['titre']):
+        #on verifie qu'il est portfeuille
+        if not data['titre'].nb(compte=data['compte_titre'],datel=data['date']):
             msg = u"titre pas en portefeuille"
             self._errors['titre'] = self.error_class([msg, ])
             del data['titre']

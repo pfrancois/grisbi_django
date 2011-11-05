@@ -470,6 +470,7 @@ def ope_titre_achat(request, cpt_id):
                                                               'isin':form.cleaned_data['nouvel_isin']
                                                     }
                 )[0]
+                messages.info(request,u"nouveau titre crée: %s"%titre)
             compte = form.cleaned_data['compte_titre']
             if form.cleaned_data['compte_espece']:
                 virement = form.cleaned_data['compte_espece']
@@ -479,7 +480,9 @@ def ope_titre_achat(request, cpt_id):
                          nombre=form.cleaned_data['nombre'],
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
-                         virement_de=virement)
+                         virement_de=virement,
+                         frais=form.cleaned_data['frais'])
+            messages.info(request,u"nouvel achat de %s %s @ %s le %s"%(nombre, titre, prix, date))
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':cpt.id}))
     else:
         form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':cpt})

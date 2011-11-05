@@ -87,19 +87,6 @@ class test_models(TestCase):
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
         self.assertRaises(TypeError, Rapp.objects.get(id=1).fusionne, Banque.objects.get(id=1))#fusion avec un autre type
 
-    def test_investietnb(self):
-        self.assertEqual(Titre.objects.get(id=1).investi(), 0)
-        self.assertEqual(Titre.objects.get(id=2).investi(), 100)
-        self.assertEqual(Titre.objects.get(id=2).investi(rapp=True),
-                         0)#todo ajouter des operation afin que l'on trouv un chiffre
-        self.assertEqual(Titre.objects.get(id=2).investi(datel=strpdate("2009-01-01")), 0)
-        self.assertEqual(Titre.objects.get(id=1).nb(), 0)
-        self.assertEqual(Titre.objects.get(id=2).nb(), 20)
-        self.assertEqual(Titre.objects.get(id=2).nb(rapp=True),
-                         0)#todo ajouter des operation afin que l'on trouv un chiffre
-        self.assertEqual(Titre.objects.get(id=2).nb(datel=strpdate("2009-01-01")), 0)
-        self.assertEqual(Titre.objects.get(id=2).encours(), 100)
-
     def test_tiers_fusionne(self):
         Tiers.objects.get(nom="tiers1").fusionne(Tiers.objects.get(nom="tiers2"))
         self.assertEqual(Tiers.objects.count(), 6)
@@ -134,6 +121,46 @@ class test_models(TestCase):
         t.save()
         self.assertEqual(Tiers.objects.get(nom="titre_ t3").notes, "4@ACT")
 
+    def test_titre_investi(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
+        self.assertEquals(t.investi(), 120)
+        self.assertEquals(t.investi(c), 100)
+        self.assertEquals(t.investi(datel='2011-07-01'), 20)
+        self.assertEquals(t.investi(compte=c, datel='2011-07-01'), 0)
+
+    def test_titre_nb(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
+        o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
+        o.rapp = Rapp.objects.get(id=1)
+        o.save()
+        self.assertEquals(t.nb(), 40)
+        self.assertEquals(t.nb(c), 20)
+        self.assertEquals(t.nb(datel='2011-07-01'), 20)
+        self.assertEquals(t.nb(compte=c, datel='2011-07-01'), 0)
+        self.assertEquals(t.nb(rapp=True), 20)
+        self.assertEquals(t.nb(rapp=True, datel='2010-07-01'), 0)
+        self.assertEquals(t.nb(rapp=True, compte=Compte_titre.objects.get(id=5), datel='2010-07-01'), 0)
+
+    def test_titre_encours(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
+        o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
+        o.rapp = Rapp.objects.get(id=1)
+        o.save()
+        self.assertEquals(t.encours(), 200)
+        self.assertEquals(t.encours(c), 100)
+        self.assertEquals(t.encours(datel='2011-07-01'), 20)
+        self.assertEquals(t.encours(compte=c, datel='2011-07-01'), 0)
+        self.assertEquals(t.encours(rapp=True), 100)
+        self.assertEquals(t.encours(rapp=True, datel='2010-07-01'), 0)
+        self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4)), 0)
+        self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4), datel='2010-07-01'), 0)
+
     def test_banque_fusionne(self):
         new_b = Banque.objects.get(cib="10001")
         Banque.objects.get(cib="99999").fusionne(new_b)
@@ -156,10 +183,10 @@ class test_models(TestCase):
         exo = Exercice.objects.get(id=1)
         Exercice.objects.get(id=2).fusionne(exo)
         self.assertEqual(Exercice.objects.count(), 1)
-        self.assertEquals(exo.date_debut,strpdate('2010-1-1'))
-        self.assertEquals(exo.date_fin,strpdate('2011-12-31'))
-        self.assertEqual(exo.echeance_set.count(),1)
-        self.assertEqual(exo.ope_set.count(),1)
+        self.assertEquals(exo.date_debut, strpdate('2010-1-1'))
+        self.assertEquals(exo.date_fin, strpdate('2011-12-31'))
+        self.assertEqual(exo.echeance_set.count(), 1)
+        self.assertEqual(exo.ope_set.count(), 1)
 
     def test_compte_solde_normal(self):
         self.assertEqual(Compte.objects.get(id=1).solde(), 40)
@@ -168,15 +195,44 @@ class test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2009-01-01')), 0)
 
     def test_creation_compte_compte_titre(self):
-        t=Compte.objects.create(nom="toto", type="t")
-        b=Compte.objects.create(nom="hjhghj", type="b")
+        Compte.objects.create(nom="toto", type="t")
+        Compte.objects.create(nom="hjhghj", type="b")
         self.assertIsInstance(Compte_titre.objects.get(nom="toto"), Compte_titre)
         self.assertIsInstance(Compte.objects.get(nom="hjhghj"), Compte)
 
     def test_compte_abolute_url(self):
         self.assertEqual(Compte.objects.get(id=1).get_absolute_url(), '/compte/1/')
 
-    def test_ope_titre_achat_sans_virement(self):
+    def test_compte_fusion(self):
+        n = Compte.objects.get(id=3)
+        o = Compte.objects.get(id=2)
+        self.assertRaises(Gsb_exc, lambda:o.fusionne(Compte.objects.get(id=6)))
+        self.assertRaises(Gsb_exc, lambda:Compte.objects.get(id=6).fusionne(o))
+        o.fusionne(n)
+        self.assertEquals(n.ope_set.count(), 3)
+        self.assertEquals(Echeance.objects.get(id=1).compte_virement_id, 3)
+        self.assertEquals(Ope.objects.get(id=3).compte_id, 3)
+        Compte.objects.get(id=4).fusionne(Compte.objects.get(id=5))
+        self.assertEquals(Ope.objects.get(id=5).compte_id,5)
+        self.assertEquals(Ope_titre.objects.get(id=1).compte_id,5)
+
+    def test_compte_titre_error(self):
+        c1 = Compte_titre.objects.get(id=4)
+        c2 = Compte_titre.objects.get(id=5)
+        #probleme si on utilise pas un titre dans le param titre
+        self.assertRaises(TypeError, c1.achat, c2, 20, '2011-01-01')
+        self.assertRaises(TypeError, c1.vente, c2, 20, '2011-01-01')
+        self.assertRaises(TypeError, c1.revenu, c2, 20, '2011-01-01')
+
+    def test_compte_titre_solde(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        self.assertEqual(c.solde(), 100)
+        t.cours_set.create(date='2011-11-01', valeur=2)
+        self.assertEqual(c.solde(), 40)
+        self.assertEqual(c.solde(datel=strpdate('2011-01-01')), 0)
+
+    def test_compte_titre_achat_sans_virement(self):
         c = Compte_titre.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom="t1")
@@ -187,27 +243,127 @@ class test_models(TestCase):
         self.assertEqual(tall.count(), 2)
         self.assertEqual(tall[0].last_cours, 1)
         self.assertEqual(c.solde(), 100)
-        t.cours_set.create(date='2011-02-01', valeur=2)
-        self.assertEqual(c.solde(), 120)
-        c.vente(titre=t, nombre=10, prix=3, date='2011-06-30')
-        self.assertEqual(c.solde(), 140)
         c.achat(titre=t, nombre=20, prix=2, date='2011-01-01')
-        self.assertEqual(c.solde(), 160)
-        #utilisation des cat et tiers par defaut
-        c.achat(titre=t,nombre=20,frais=20)
-        #"utilisa des cat et tiers donnes
-        c.achat(titre=t,nombre=20,frais=20,cat_frais=Cat.objects.get(id=3),tiers_frais=Tiers.objects.get(id=2))
+        self.assertEqual(c.solde(), 80)
 
-    def test_cpt_titre_achat_complet(self):
+    def test_compte_titre_achat_avec_frais(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t1")
+        #utilisation des cat et tiers par defaut
+        c.achat(titre=t, nombre=20, frais=20, date='2011-07-01')
+        self.assertEqual(c.solde(), 80)
+        self.assertEqual(t.investi(c), 40)
+        o = Ope.objects.filter(compte=c, date='2011-07-01', notes__icontains='frais')[0]
+        self.assertEqual(o.cat_id, 65)
+        self.assertEqual(o.montant, -20)
+        self.assertEquals(o.notes, u"frais 20@1")
+        self.assertEquals(o.moyen_id, 2)
+        #"utilisa des cat et tiers donnes
+        c.achat(titre=t, nombre=20, frais=20,
+                cat_frais=Cat.objects.get(id=3),
+                tiers_frais=Tiers.objects.get(id=2),
+                date='2011-07-02')
+        self.assertEqual(c.solde(), 60)
+        self.assertEqual(t.investi(c), 60)
+        o = Ope.objects.filter(compte=c, date='2011-07-02', notes__icontains='frais')[0]
+        self.assertEqual(o.tiers_id, 2)
+        self.assertEqual(o.cat_id, 3)
+        self.assertEqual(o.montant, -20)
+        self.assertEquals(o.notes, u"frais 20@1")
+        self.assertEquals(o.moyen_id, 2)
+
+    def test_cpt_titre_achat_avec_virement(self):
         c = Compte_titre.objects.get(id=5)
         t = Titre.objects.get(nom="t1")
         c.achat(titre=t, nombre=20, date='2011-01-01', virement_de=Compte.objects.get(id=1))
         self.assertEqual(t.investi(c), 20)
         self.assertEqual(c.solde(), 20)
-        t.cours_set.create(date='2011-02-01', valeur=2)
-        c.vente(t, 10, 3, '2011-06-30', virement_vers=Compte.objects.get(id=1))
-        self.assertEqual(t.investi(c), -10)
-        self.assertEqual(c.solde(), 30)
+        self.assertEquals(Ope.objects.filter(compte=c).count(), 2)
+        self.assertEqual(Compte.objects.get(id=1).solde(), 20)
+
+    def test_compte_titre_vente_sans_virement(self):
+        c = Compte_titre.objects.get(id=4)
+        self.assertEqual(c.nom, u'cpt_titre1')
+        t = Titre.objects.get(nom="t2")
+        self.assertEqual(t.investi(c), 100)
+        self.assertRaises(Titre.DoesNotExist, lambda:c.vente(titre=t, nombre=20, date='2011-01-01'))#trop tot
+        self.assertRaises(Titre.DoesNotExist, lambda:c.vente(titre=t, nombre=40, date='2011-11-02'))#montant trop eleve
+        c.vente(titre=t, nombre=20, date='2011-11-01')
+        self.assertEqual(t.investi(c), 80)
+        tall = c.liste_titre()
+        self.assertEqual(len(tall), 0)
+        self.assertRaises(Titre.DoesNotExist, lambda:c.vente(titre=t, nombre=20, date='2011-11-01'))#a pu de titre
+        self.assertEqual(c.solde(), 20)
+
+
+    def test_compte_titre_vente_avec_frais(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        #utilisation des cat et tiers par defaut
+        c.vente(titre=t, nombre=10, frais=20, date='2011-11-01')
+        self.assertEqual(c.solde(), 0)
+        self.assertEqual(t.investi(c), 110)
+        o = Ope.objects.filter(compte=c, date='2011-11-01', notes__icontains='frais')[0]
+        self.assertEqual(o.cat_id, 65)
+        self.assertEqual(o.montant, -20)
+        self.assertEquals(o.notes, u"frais -10@1")
+        self.assertEquals(o.moyen_id, 2)
+        #"utilisa des cat et tiers donnes
+        c.vente(titre=t, nombre=10, frais=20,
+                cat_frais=Cat.objects.get(id=3),
+                tiers_frais=Tiers.objects.get(id=2),
+                date='2011-11-02')
+        self.assertEqual(c.solde(), -20)
+        self.assertEqual(t.investi(c), 100)
+        o = Ope.objects.filter(compte=c, date='2011-11-02', notes__icontains='frais')[0]
+        self.assertEqual(o.tiers_id, 2)
+        self.assertEqual(o.cat_id, 3)
+        self.assertEqual(o.montant, -20)
+        self.assertEquals(o.notes, u"frais -10@1")
+        self.assertEquals(o.moyen_id, 2)
+
+    def test_cpt_titre_vente_avec_virement(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        c.vente(titre=t, nombre=20, date='2011-11-02', virement_vers=Compte.objects.get(id=1))
+        self.assertEqual(t.investi(c), 80)
+        self.assertEqual(c.solde(), 0)
+        self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
+        self.assertEqual(Compte.objects.get(id=1).solde(), 60)
+
+    def test_cpt_titre_revenu_simple(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        self.assertRaises(Titre.DoesNotExist, lambda:c.revenu(titre=t, montant=20, date='2011-01-01'))#trop tot
+        c.revenu(titre=t, montant=20, date='2011-11-02')
+        self.assertEqual(t.investi(c), 80)
+        self.assertEqual(c.solde(), 120)
+        c.vente(titre=t, nombre=20, date='2011-11-01')
+        self.assertRaises(Titre.DoesNotExist, lambda:c.revenu(titre=t, montant=20, date='2011-01-01'))#a pu
+
+    def test_cpt_titre_revenu_frais(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        c.revenu(titre=t, montant=20, date='2011-11-02', frais=10)
+        self.assertEqual(t.investi(c), 90)
+        self.assertEqual(c.solde(), 110)
+        cat=Cat.objects.get(id=3)
+        tiers=Tiers.objects.get(id=2)
+        c.revenu(titre=t,montant=20, frais=20,
+                        cat_frais=cat,
+                        tiers_frais=tiers,
+                        date='2011-11-02')
+        self.assertEqual(t.investi(c), 90)
+        self.assertEqual(c.solde(), 110)
+        self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
+
+    def test_cpt_titre_revenu_virement(self):
+        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.get(nom="t2")
+        c.revenu(titre=t, montant=20, date='2011-11-02', virement_vers=Compte.objects.get(id=1))
+        self.assertEqual(c.solde(), 100)
+        self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
+        self.assertEqual(Compte.objects.get(id=1).solde(), 60)
 
     def test_moyen_fusionne(self):
         Moyen.objects.get(id=3).fusionne(Moyen.objects.get(id=2))
