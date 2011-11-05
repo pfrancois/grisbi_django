@@ -495,6 +495,28 @@
         }
     },
     {
+        "pk": 2,
+        "model": "gsb.echeance",
+        "fields": {
+            "compte_virement": 1,
+            "moyen_virement": 4,
+            "tiers": 2,
+            "periode_perso": "",
+            "inscription_automatique": false,
+            "montant": "10",
+            "notes": "",
+            "exercice": 2,
+            "cat": 2,
+            "date_limite": null,
+            "intervalle": 0,
+            "date": "2011-10-30",
+            "moyen": 3,
+            "compte": 3,
+            "ib": 2,
+            "periodicite": "u"
+        }
+    },
+    {
         "pk": 1,
         "model": "gsb.generalite",
         "fields": {

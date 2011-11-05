@@ -75,6 +75,7 @@ class Titre(models.Model):
     les titres englobe les actifs financiers
     afin de pouvoir faire le lien dans les operation, il y a un ligne vers les tiers
     :model:`gsb.tiers`
+    le set_null est mis afin de pouvoir effacer le tiers sans que cela ne pose trop de probleme dans les operations.
     """
     typestitres = (
         ('ACT', u'action'),
@@ -202,7 +203,8 @@ class Cours(models.Model):
         get_latest_by = 'date'
 
     def __unicode__(self):
-        return u"le %(date)s, 1 %(titre)s : %(valeur)s" % {'titre':self.titre.nom, 'date':self.date,
+        return u"le %(date)s, 1 %(titre)s : %(valeur)s" % {'titre':self.titre.nom,
+                                                           'date':self.date,
                                                            'valeur':self.valeur}
 
 
@@ -354,9 +356,9 @@ class Compte(models.Model):
     ouvert = models.BooleanField(default=True)
     notes = models.TextField(blank=True, default='')
     moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
-                                            related_name="moyen_credit_set", default=None)
+                                            related_name="compte_moyen_credit_set", default=None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
-                                           related_name="moyen_debit_set", default=None)
+                                           related_name="compte_moyen_debit_set", default=None)
 
     class Meta:
         db_table = 'compte'
@@ -658,12 +660,18 @@ class Ope_titre(models.Model):
                                           )
             self.titre.cours_set.get_or_create(date=self.date, defaults={'date':self.date, 'valeur':self.cours})
         else:
+            old_date=self.ope.date
             self.ope.date = self.date
             self.ope.montant = self.cours * self.nombre * -1
             self.ope.tiers = self.titre.tiers
             self.ope.notes = "%s@%s" % (self.nombre, self.cours)
             self.ope.compte = self.compte
             self.ope.save()
+            co=Cours.objects.get(titre=self.titre,date=old_date)
+            co.date=self.date
+            co.titre=self.titre
+            co.valeur=self.cours
+            co.save()
         super(Ope_titre, self).save(*args, **kwargs)
 
     @models.permalink
@@ -781,10 +789,10 @@ class Echeance(models.Model):
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                             verbose_name=u"catégorie")
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='compte_virement_set',
+    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set',
                                         default=None)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='moyen_virement_set')
+    moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='echeance_moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                            verbose_name=u"imputation")
