@@ -314,12 +314,30 @@ def import_gsb_050(nomfich, efface_table=True):
     list_ope = xml_tree.findall('//Operation')
     nb_ope_final = len(list_ope)
     percent = 1
+    nb_inconnu=0
     for xml_ope in list_ope:
         logger.debug(u'opération %s' % xml_ope.get('No'))
         try:
             ope_tiers = Tiers.objects.get(id=tabl_correspondance_tiers[xml_ope.get('T')])
         except KeyError:
-            ope_tiers = None
+            if int(xml_ope.get('Ro')):
+                jumelle_xml=xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom'%xml_ope.get('Ro'))
+                if fr2decimal(xml_ope.get('M'))<0:
+                    ope_tiers,tiers_created=Tiers.objects.get_or_create(nom='%s => %s'%(element.nom,jumelle_xml),
+                                                          defaults={'nom':'%s => %s'%(element.nom,jumelle_xml)})
+                    if tiers_created:
+                        tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
+                else:
+                    ope_tiers,tiers_created=Tiers.objects.get_or_create(nom='%s => %s'%(jumelle_xml,element.nom),
+                                                          defaults={'nom':'%s => %s'%(jumelle_xml,element.nom)})
+                    if tiers_created:
+                        tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
+
+            else:
+                nb_inconnu+=1
+                inconnu=Tiers.objects.create(nom='inconnu%s'%nb_inconnu)
+                ope_tiers=inconnu
+                tabl_correspondance_tiers[xml_ope.get('T')] = inconnu.id
         ope_montant = fr2decimal(xml_ope.get('M'))
         ope_date = datefr2datesql(xml_ope.get('D'))
         ope_date_val = datefr2datesql(xml_ope.get('Db'))

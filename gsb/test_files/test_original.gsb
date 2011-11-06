@@ -38,7 +38,7 @@
         <Nom>compte bancaire ouvert</Nom>
         <Id_compte/>
         <No_de_compte>0</No_de_compte>
-        <Titulaire></Titulaire>
+        <Titulaire>test</Titulaire>
         <Type_de_compte>0</Type_de_compte>
         <Nb_operations>9</Nb_operations>
         <Devise>1</Devise>
@@ -56,7 +56,7 @@
         <Compte_cloture>0</Compte_cloture>
         <Affichage_r>1</Affichage_r>
         <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
+        <Commentaires>ceci est un commentaire</Commentaires>
         <Adresse_du_titulaire></Adresse_du_titulaire>
         <Nombre_de_types>5</Nombre_de_types>
         <Type_defaut_debit>3</Type_defaut_debit>
@@ -345,6 +345,8 @@
       <Tiers No="4" Nom="quatrieme" Informations="" Liaison="0"/>
       <Tiers No="5" Nom="tiers isole" Informations="" Liaison="0"/>
       <Tiers No="6" Nom="titre_ SG" Informations="FR0000130809@ACT" Liaison="0"/>
+      <Tiers No="7" Nom="titre_ test1" Informations="" Liaison="0"/>
+      <Tiers No="8" Nom="titre_ test2" Informations="DE0000130809" Liaison="0"/>
     </Detail_des_tiers>
   </Tiers>
   <Categories>

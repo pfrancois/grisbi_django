@@ -120,13 +120,13 @@ class test_models(TestCase):
     def test_tiers_fusionne(self):
         Tiers.objects.get(nom="tiers1").fusionne(Tiers.objects.get(nom="tiers2"))
         #un tiers de moins
-        self.assertQuerysetEqual(Tiers.objects.all().order_by('id'),[2,3,4,5,6,7],attrgetter("id"))
+        self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [2, 3, 4, 5, 6, 7], attrgetter("id"))
         #verifie sur les dependance que c'est bien le nouveau tiers
-        t=Tiers.objects.get(nom="tiers2")
+        t = Tiers.objects.get(nom="tiers2")
         #id des operations
-        self.assertQuerysetEqual(t.ope_set.all().order_by('id'),[1,2,3,4,8],attrgetter("id"))
+        self.assertQuerysetEqual(Ope.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4, 8], attrgetter("id"))
         #id des echeances
-        self.assertQuerysetEqual(t.echeance_set.all(),[1,2],attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2], attrgetter("id"))
 
     def test_titre_last_cours_et_date(self):
         #verification des properties
@@ -135,7 +135,7 @@ class test_models(TestCase):
 
     def test_titre_creation(self):
         #on cree le titre
-        t=Titre.objects.create(nom='ceci_est_un_titre',isin="123456789",type='ACT')
+        t = Titre.objects.create(nom='ceci_est_un_titre', isin="123456789", type='ACT')
         #un titre de plus
         tiers = t.tiers
         self.assertEqual(Tiers.objects.count(), 8)
@@ -145,12 +145,17 @@ class test_models(TestCase):
 
     def test_titre_fusionne(self):
         Titre.objects.get(nom="t2").fusionne(Titre.objects.get(nom="t1"))
-        self.assertEqual(Titre.objects.count(), 3)
-        self.assertEqual(Tiers.objects.count(), 6)#verifie que la fusion des tiers sous jacent
+        self.assertQuerysetEqual(Titre.objects.all().order_by('id'), [1, 3, 4], attrgetter("id"))
+        #verifie que la fusion des tiers sous jacent
+        self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 5, 6, 7], attrgetter("id"))
         # ce tiers n'existe plus
-        self.assertRaises(Tiers.DoesNotExist,lambda:Tiers.objects.get(nom='Titre_ t2'))
+        self.assertRaises(Tiers.DoesNotExist, lambda:Tiers.objects.get(nom='Titre_ t2'))
+        #ok pour les ope (et les tiers sous jacent)
+        self.assertQuerysetEqual(Ope.objects.filter(tiers__nom='titre_ t1').order_by('id'), [5], attrgetter("id"))
+        #ok pour les ope titre
+        self.assertQuerysetEqual(Ope_titre.objects.filter(titre__nom='t1').order_by('id'), [1], attrgetter("id"))
+        self.assertQuerysetEqual(Titre.objects.get(nom="t1").ope_titre_set.all(), [1], attrgetter("id"))
         #verifier que les cours ont été fusionneés
-        self.assertQuerysetEqual(Titre.objects.get(nom="t1").ope_titre_set.all(),[1],attrgetter("id"))
         self.assertEquals(Titre.objects.get(nom='t1').cours_set.count(), 4)
 
     def test_titre_save_perso(self):
@@ -204,34 +209,37 @@ class test_models(TestCase):
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4)), 0)
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4), datel='2010-07-01'), 0)
 
-#pas de test specifique pour cours
+    #pas de test specifique pour cours
 
     def test_banque_fusionne(self):
         new_b = Banque.objects.get(cib="10001")
         Banque.objects.get(cib="99999").fusionne(new_b)
-        self.assertEqual(Banque.objects.count(), 1)
-        self.assertEqual(Compte.objects.get(id=1).banque.id, 1)
+        self.assertQuerysetEqual(Banque.objects.all().order_by('id'), [1], attrgetter("id"))
+        self.assertQuerysetEqual(Banque.objects.get(cib='10001').compte_set.all().order_by('id'), [1, 2, 3, 4, 5, 6], attrgetter("id"))
 
     def test_cat_fusionne(self):
         Cat.objects.get(nom="cat2").fusionne(Cat.objects.get(nom="cat1"))
-        self.assertEqual(Cat.objects.count(), 4)
-        self.assertEqual(Ope.objects.filter(cat__nom="cat1").count(), 4)
-        self.assertEquals(Echeance.objects.filter(cat__nom="cat1").count(), 2)
+        self.assertQuerysetEqual(Cat.objects.all().order_by('id'), [1, 3, 4, 64], attrgetter("id"))
+        self.assertQuerysetEqual(Ope.objects.filter(cat__nom="cat1").all().order_by('id'), [1, 2, 3, 4], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(cat__nom="cat1").all().order_by('id'), [1, 2], attrgetter("id"))
 
     def test_ib_fusionne(self):
         Ib.objects.get(nom="ib2").fusionne(Ib.objects.get(nom="ib1"))
-        self.assertEqual(Ib.objects.count(), 3)
-        self.assertEqual(Ope.objects.filter(ib__nom="ib1").count(), 2)
-        self.assertEquals(Echeance.objects.filter(ib__nom="ib1").count(), 2)
+        self.assertQuerysetEqual(Ib.objects.all().order_by('id'), [1, 3, 4], attrgetter("id"))
+        self.assertQuerysetEqual(Ope.objects.filter(ib__nom="ib1").all().order_by('id'), [3, 4], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(ib__nom="ib1").all().order_by('id'), [1, 2], attrgetter("id"))
 
     def test_exo_fusionne(self):
         exo = Exercice.objects.get(id=1)
         Exercice.objects.get(id=2).fusionne(exo)
-        self.assertEqual(Exercice.objects.count(), 1)
+        self.assertQuerysetEqual(Exercice.objects.all().order_by('id'), [1], attrgetter("id"))
+        #on verifie qu'il prend la totalite de la duration
+        exo = Exercice.objects.get(id=1)
         self.assertEquals(exo.date_debut, strpdate('2010-1-1'))
         self.assertEquals(exo.date_fin, strpdate('2011-12-31'))
-        self.assertEqual(exo.echeance_set.count(), 2)
-        self.assertEqual(exo.ope_set.count(), 1)
+        #verification des liens
+        self.assertQuerysetEqual(Ope.objects.filter(exercice__id=1).all().order_by('id'), [8], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(exercice__id=1).all().order_by('id'), [1, 2], attrgetter("id"))
 
     def test_compte_solde_normal(self):
         #version de base
@@ -269,13 +277,13 @@ class test_models(TestCase):
         o.fusionne(n)
         v = Compte.objects.get(id=3)
         #les ope relatives
-        self.assertQuerysetEqual(v.ope_set.all().order_by('id'),[3,4,6],attrgetter("id"))
-        self.assertQuerysetEqual(v.echeance_set.all().order_by('id'),[2],attrgetter("id"))
-        self.assertQuerysetEqual(v.echeance_virement_set.all().order_by('id'),[1],attrgetter("id"))
+        self.assertQuerysetEqual(v.ope_set.all().order_by('id'), [3, 4, 6], attrgetter("id"))
+        self.assertQuerysetEqual(v.echeance_set.all().order_by('id'), [2], attrgetter("id"))
+        self.assertQuerysetEqual(v.echeance_virement_set.all().order_by('id'), [1], attrgetter("id"))
         #fusion de compte_titre
         Compte.objects.get(id=4).fusionne(Compte.objects.get(id=5))
-        self.assertEquals(Ope.objects.get(id=5).compte_id,5)
-        self.assertEquals(Ope_titre.objects.get(id=1).compte_id,5)
+        self.assertEquals(Ope.objects.get(id=5).compte_id, 5)
+        self.assertEquals(Ope_titre.objects.get(id=1).compte_id, 5)
 
     def test_compte_titre_error(self):
         c1 = Compte_titre.objects.get(id=4)
@@ -411,13 +419,13 @@ class test_models(TestCase):
         c.revenu(titre=t, montant=20, date='2011-11-02', frais=10)
         self.assertEqual(t.investi(c), 90)
         self.assertEqual(c.solde(), 110)
-        cat=Cat.objects.get(id=3)
-        tiers=Tiers.objects.get(id=2)
+        cat = Cat.objects.get(id=3)
+        tiers = Tiers.objects.get(id=2)
         #second revenu avec des frais mais ratache a autre chose que le titre
-        c.revenu(titre=t,montant=20, frais=20,
-                        cat_frais=cat,
-                        tiers_frais=tiers,
-                        date='2011-11-02')
+        c.revenu(titre=t, montant=20, frais=20,
+                 cat_frais=cat,
+                 tiers_frais=tiers,
+                 date='2011-11-02')
         self.assertEqual(t.investi(c), 70)
         self.assertEqual(c.solde(), 110)
         self.assertEquals(Ope.objects.filter(compte=c).count(), 6)
@@ -432,60 +440,60 @@ class test_models(TestCase):
 
     def test_compte_titre_liste_titre(self):
         c = Compte_titre.objects.get(id=4)
-        t = Titre.objects.get(nom="t2")
-        self.assertQuerysetEqual(c.liste_titre(),['t2',],attrgetter("nom"))
-        self.assertQuerysetEqual(c.liste_titre(rapp=True),[],attrgetter("nom"))
-        self.assertQuerysetEqual(c.liste_titre(datel='2010-01-01'),[],attrgetter("nom"))
+        self.assertQuerysetEqual(c.liste_titre(), ['t2', ], attrgetter("nom"))
+        self.assertQuerysetEqual(c.liste_titre(rapp=True), [], attrgetter("nom"))
+        self.assertQuerysetEqual(c.liste_titre(datel='2010-01-01'), [], attrgetter("nom"))
 
     def test_compte_titre_save(self):
         c = Compte_titre.objects.get(id=4)
-        c.type='b'
-        c.save
-        self.assertEqual(Compte_titre.objects.get(id=4).type,'t')
+        c.type = 'b'
+        c.save()
+        self.assertEqual(Compte_titre.objects.get(id=4).type, 't')
 
     def test_ope_titre_save(self):
         t = Titre.objects.get(nom="t2")
         c = Compte_titre.objects.get(id=4)
         #creation d'une nouvelle operation
-        o=Ope_titre.objects.create(titre=t,compte=c,nombre=15,date=strpdate('2011-01-01'),cours=10)
-        o_id=o.id
-        self.assertEqual(o.ope.id,9)
-        self.assertEqual(o.ope.montant,-150)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o_id = o.id
+        self.assertEqual(o.ope.id, 9)
+        self.assertEqual(o.ope.montant, -150)
         self.assertEqual(o.ope.moyen_id, 1)
         self.assertEqual(o.ope.notes, "15@10")
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'),titre=t).valeur,10 )
+        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 10)
         #en fait on s'est trompe ce n'est pas un achat c'est une vente
-        o.nombre=-15
+        o.nombre = -15
         o.save()
-        o=Ope_titre.objects.get(id=o_id)
-        self.assertEqual(o.ope.montant,150)
+        o = Ope_titre.objects.get(id=o_id)
+        self.assertEqual(o.ope.montant, 150)
         self.assertEqual(o.ope.notes, "-15@10")
         #changement de cours
-        o.cours=20
+        o.cours = 20
         o.save()
-        o=Ope_titre.objects.get(id=o_id)
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'),titre=t).valeur,20 )
+        o = Ope_titre.objects.get(id=o_id)
+        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 20)
         #changement de cours
-        o.date=strpdate('2011-01-02')
+        o.date = strpdate('2011-01-02')
         o.save()
-        o=Ope_titre.objects.get(id=o_id)
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-02'),titre=t).valeur,20 )
+        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-02'), titre=t).valeur, 20)
 
     def test_ope_titre_get_absolute_url(self):
-         self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')
+        self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')
 
     def test_moyen_fusionne(self):
         Moyen.objects.get(id=3).fusionne(Moyen.objects.get(id=2))
-        self.assertQuerysetEqual(Moyen.objects.all().order_by('id'),[1,2,4,5],attrgetter("id"))
-        m=Moyen.objects.get(id=2)
-        self.assertQuerysetEqual(m.compte_moyen_credit_set.order_by('id'),[],attrgetter("id"))
-        self.assertQuerysetEqual(m.compte_moyen_debit_set.order_by('id'),[1,2,3,4,5],attrgetter("id"))
-        self.assertQuerysetEqual(m.echeance_set.order_by('id'),[1,2],attrgetter("id"))
-        self.assertQuerysetEqual(m.echeance_moyen_virement_set.order_by('id'),[],attrgetter("id"))
-        self.assertQuerysetEqual(m.ope_set.order_by('id'),[2,3,4],attrgetter("id"))
+        self.assertQuerysetEqual(Moyen.objects.all().order_by('id'), [1, 2, 4, 5], attrgetter("id"))
+        m = Moyen.objects.get(id=2)
+        self.assertQuerysetEqual(m.compte_moyen_credit_set.order_by('id'), [], attrgetter("id"))
+        self.assertQuerysetEqual(m.compte_moyen_debit_set.order_by('id'), [1, 2, 3, 4, 5], attrgetter("id"))
+        self.assertQuerysetEqual(m.echeance_set.order_by('id'), [1, 2], attrgetter("id"))
+        self.assertQuerysetEqual(m.echeance_moyen_virement_set.order_by('id'), [], attrgetter("id"))
+        self.assertQuerysetEqual(m.ope_set.order_by('id'), [2, 3, 4], attrgetter("id"))
 
-    #    def test_rapp_compte(self):
-    #    def test_rapp_solde(self):
+    def test_rapp_compte(self):
+        pass
+
+        #    def test_rapp_solde(self):
     #    def test_rapp_fusionne(self):
     #    def test_echeance_save(self):
     def test_generalite_gen(self):

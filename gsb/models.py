@@ -327,6 +327,7 @@ class Exercice(models.Model):
             new.date_debut = min(new.date_debut, self.date_debut)
         if self.date_fin != new.date_fin:
             new.date_fin = max(new.date_fin, self.date_fin)
+        new.save()
         self.delete()
         return nb_change
 
