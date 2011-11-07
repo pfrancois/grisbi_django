@@ -100,9 +100,10 @@ class Ope_admin(Modeladmin_perso):
               'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat')
+    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat','pointe')
     list_filter = ('compte', 'date', 'pointe', 'rapp','exercice')
     search_fields = ['tiers__nom']
+    list_editable = ('pointe',)
 
     def show_jumelle(self, obj):
         if obj.jumelle_id:

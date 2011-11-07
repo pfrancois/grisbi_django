@@ -1,57 +1,58 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% load gsb_extras %}
-{% block content %}
-    {% block bouton_haut %}
-        <table width="100%" id="boutons" class="table">
-            <tr><td width="100%" class="boutton"><a href="{% url gsb.views.index %}">retour liste comptes</a></td></tr>
-        </table>
-        <form method="post" action="" id="form1">{% csrf_token %}
-            <table width="100%" id="date_s" class="table">
-                {{ form }}
-                <tr><td><input type="submit" value="Submit" /></td></tr>
-            </table>
-        </form>
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 
-    {% endblock bouton_haut %}
-    <br />
+{% block content %}
+    <form action="" method = "post">
+
+    </form>
     <table id="main" class="table">
         <thead class="entete">
-        <tr>{% block titre_col_ope %}
-            <th>ID</th>
-            <th>Date</th>
-            <th>Tiers</th>
-            <th class="opTier">Catégorie</th>
-            <th>Moyen</th>
-            <th class="opDebit">Crédit</th>
-            <th class="opDebit">Débit</th>{% endblock titre_col_ope %}
+        <tr>
+            <th><a href="?sort=date">Date</a></th>
+            <th><a href="?sort=tiers">Tiers</a></th>
+            <th><a href="?sort=cat">Catégorie</a></th>
+            <th><a href="?sort=moyen">Moyen</a></th>
+            <th>pointee</th>
+            <th><a href="?sort=jumelle">jumelle</a></th>
+            <th><a href="?sort=ope_titre__id">ope_titre</a></th>
+            <th><a href="?sort=montant">montant</a></th>
         </tr>
         </thead>
-        {% for ope in opes %}
-            {% block ope %}
-                <tr class="item hover{% if ope.montant > 0 %} creditElement {% endif %}{% if ope.montant < 0 %} debitElement {% endif %}{% if ope.rapp or ope.jumelle and ope.jumelle.rapp %}rappElement{% endif %}">
-                    <td class="opDate opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.id }}</a></td>
-                    <td class="opDate opCenter">{{ ope.date }} </td>
-                    <td class="opTier opCenter">
-                        {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</td>
-                    <td class="opTier">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</td>
-                    <td>{{ ope.moyen.nom|default:'aucun moyen' }}</td>
-                    <td class="opCredit">{% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</td>
-                    <td class="opDebit">{% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</td>
-                </tr>
-            {% endblock ope %}
-        {% empty %}
-            <tr class="item">
-                <td colspan="7">
-                    aucune op&eacute;ration n&#39;est affich&eacute;e.<br />
-                </td>
-            </tr>
-        {% endfor %}
-        {% block footer %}
-            <tr class="footerbar">
-                <td colspan="4" class="cptLabel">Solde</td>
-                <td colspan="3" class="cptSolde">{{ solde|cur }}</td>
-            </tr>
-        {% endblock footer %}
+    {% for ope in list_ope.object_list %}
+          {% block ope %}
+              <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
+                  <td><a href="{{ ope.get_absolute_url  }}">{{ ope.date }}</a></td>
+                  <td>{% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</td>
+                  <td>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</td>
+                  <td>{{ ope.moyen.nom|default:"aucune moyen" }}</td>
+                  <td>{% if ope.rapp %}R{% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</td>
+                  <td><a href="{{ ope.jumelle.get_absolute_url  }}">{{ ope.jumelle|default:'-' }}</a></td>
+                  <td><a href="{{ ope.ope_titre.get_absolute_url }}">{{ ope.ope_titre|default:'-' }}</a></td>
+                  <td>{{ ope.montant|cur }}</td>
+              </tr>
+          {% endblock ope %}
+          {% empty %}
+          <tr class="item">
+              <td colspan="8">
+                  aucune op&eacute;ration n&#39;est affich&eacute;e.<br />
+              </td>
+          </tr>
+      {% endfor %}
     </table>
+    <div class="pagination">
+        <H1>
+        <span>
+            {% if list_ope.has_previous %}
+                <a href="?page={{ list_ope.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ list_ope.number }} sur {{ list_ope.paginator.num_pages }}.
+            </span>
+
+            {% if list_ope.has_next %}
+                <a href="?page={{ list_ope.next_page_number }}">next</a>
+            {% endif %}
+        </span>
+        </H1>
+    </div>
 {% endblock content %}

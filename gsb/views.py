@@ -11,7 +11,6 @@ import datetime
 from . import forms as gsb_forms
 from django.db import models
 import decimal
-#import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import smart_unicode
 from django.contrib import messages
