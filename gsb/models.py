@@ -746,6 +746,7 @@ class Rapp(models.Model):
         else:
             return None
 
+    @property
     def solde(self):
         req = self.ope_set.aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
@@ -826,6 +827,8 @@ class Echeance(models.Model):
                 self.moyen_virement = self.compte_virement.moyen_credit_defaut
             if self.compte_virement.moyen_debit_defaut and self.montant >= 0:
                 self.moyen_virement = self.compte_virement.moyen_debit_defaut
+        if self.compte == self.compte_virement:
+            raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
         super(Echeance, self).save(*args, **kwargs)
 
 
@@ -857,14 +860,6 @@ class Generalite(models.Model):
     @staticmethod
     def dev_g():
         return settings.DEVISE_GENERALE
-
-    @staticmethod
-    def last_id(classe):
-        """renvoie le dernier  id de la classe demandée"""
-        try:
-            return classe.objects.latest('id').id
-        except classe.DoesNotExist:
-            return 0
 
     def save(self, *args, **kwargs):
         if Generalite.objects.count() > 0:
@@ -924,12 +919,15 @@ class Ope(models.Model):
 
     def clean(self):
         self.alters_data = True
+        self.deja_clean=True
         super(Ope, self).clean()
         #verification qu'il n'y ni pointe ni rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
 
     def save(self, *args, **kwargs):
+        if not self.deja_clean:
+            self.clean()
         self.alters_data = True
         if not self.moyen:
             if self.montant >= 0:

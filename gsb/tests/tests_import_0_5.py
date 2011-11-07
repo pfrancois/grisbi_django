@@ -46,6 +46,7 @@ class importposttests(TestCase):
         self.assertEqual(obj.is_titre, False)
         self.assertEqual(Tiers.objects.count(), 7)
         self.assertEqual(7, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
+        self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 4, 5, 6, 7], attrgetter("id"))
         self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7], attrgetter("id"))
 
     def test_titre_normal(self):
@@ -71,6 +72,8 @@ class importposttests(TestCase):
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
         self.assertEquals(obj.titre, Titre.objects.get(id=1))
         self.assertEquals(obj.date, datetime.date(day=1, month=1, year=2010))
+
+    def test_banque(self):
         obj = Banque.objects.get(id=1)
         self.assertEqual(obj.nom, u'banque test')
         self.assertEqual(obj.cib, u'30003')
@@ -139,7 +142,7 @@ class importposttests(TestCase):
         self.assertEquals(obj.nom, 'CBO1')
         self.assertEquals(obj.compte, 1)
         self.assertEquals(obj.date, datetime.date(2010, 5, 31))
-        self.assertEquals(obj.solde(), 10)
+        self.assertEquals(obj.solde, 10)
         self.assertEquals(obj.ope_set.all().count(), 1)
         self.assertEquals(obj.ope_set.all()[0], Ope.objects.get(id=5))
         self.assertEqual(Rapp.objects.all().count(), 1)
