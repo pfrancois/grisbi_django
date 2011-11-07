@@ -53,7 +53,7 @@ def import_gsb_050(nomfich, efface_table=True):
         for table in (
         'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
         'titre', 'tiers', 'Ope_titre'):
-            connection.cursor().execute("delete from %s;" % table) #@UndefinedVariable
+            connection.cursor().execute("delete from gsb_%s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
     time.clock()

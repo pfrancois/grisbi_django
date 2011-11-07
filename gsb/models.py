@@ -47,7 +47,7 @@ class Tiers(models.Model):
     is_titre = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'tiers'
+        db_table = 'gsb_tiers'
         verbose_name_plural = u'tiers'
         ordering = ['nom']
 
@@ -90,7 +90,7 @@ class Titre(models.Model):
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
 
     class Meta:
-        db_table = u'titre'
+        db_table = u'gsb_titre'
         ordering = ['nom']
 
     def __unicode__(self):
@@ -196,7 +196,7 @@ class Cours(models.Model):
     date = models.DateField(default=datetime.date.today)
 
     class Meta:
-        db_table = 'cours'
+        db_table = 'gsb_cours'
         verbose_name_plural = u'cours'
         unique_together = ("titre", "date")
         ordering = ['-date']
@@ -215,7 +215,7 @@ class Banque(models.Model):
     notes = models.TextField(blank=True, default='')
 
     class Meta:
-        db_table = 'banque'
+        db_table = 'gsb_banque'
         ordering = ['nom']
 
     def __unicode__(self):
@@ -245,7 +245,7 @@ class Cat(models.Model):
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name="type de la catégorie")
 
     class Meta:
-        db_table = 'cat'
+        db_table = 'gsb_cat'
         verbose_name = u"catégorie"
         ordering = ['nom']
 
@@ -275,7 +275,7 @@ class Ib(models.Model):
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
 
     class Meta:
-        db_table = 'ib'
+        db_table = 'gsb_ib'
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
         ordering = ['type', 'nom']
@@ -307,7 +307,7 @@ class Exercice(models.Model):
     nom = models.CharField(max_length=40, unique=True)
 
     class Meta:
-        db_table = 'exercice'
+        db_table = 'gsb_exercice'
         ordering = ['-date_debut']
         get_latest_by = 'date_debut'
 
@@ -362,7 +362,7 @@ class Compte(models.Model):
                                            related_name="compte_moyen_debit_set", default=None)
 
     class Meta:
-        db_table = 'compte'
+        db_table = 'gsb_compte'
         ordering = ['nom']
 
     def __unicode__(self):
@@ -438,7 +438,7 @@ class Compte_titre(Compte):
     titre = models.ManyToManyField('titre', through="Ope_titre")
 
     class Meta:
-        db_table = 'cpt_titre'
+        db_table = 'gsb_cpt_titre'
         ordering = ['nom']
         verbose_name_plural = "Comptes Titre"
 
@@ -557,12 +557,12 @@ class Compte_titre(Compte):
                 if not cat_frais:
                     cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
                 self.ope_set.create(date=date,
-                                          montant=decimal.Decimal(force_unicode(frais)) * -1,
-                                          tiers=tiers_frais,
-                                          cat=cat_frais,
-                                          notes="frais revenu",
-                                          moyen=Moyen.objects.get(id=settings.MD_DEBIT),
-                                          automatique=True
+                                    montant=decimal.Decimal(force_unicode(frais)) * -1,
+                                    tiers=tiers_frais,
+                                    cat=cat_frais,
+                                    notes="frais revenu",
+                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
+                                    automatique=True
                 )
             if virement_vers:
                 vir = Virement()
@@ -636,7 +636,7 @@ class Ope_titre(models.Model):
     ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
 
     class Meta:
-        db_table = 'ope_titre'
+        db_table = 'gsb_ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
@@ -698,7 +698,7 @@ class Moyen(models.Model):
     type = models.CharField(max_length=1, choices=typesdep, default='d')
 
     class Meta:
-        db_table = 'moyen'
+        db_table = 'gsb_moyen'
         verbose_name = u"moyen de paiment"
         verbose_name_plural = u"moyens de paiment"
         ordering = ['nom']
@@ -731,7 +731,7 @@ class Rapp(models.Model):
     date = models.DateField(null=True, blank=True, default=datetime.date.today)
 
     class Meta:
-        db_table = 'rapp'
+        db_table = 'gsb_rapp'
         verbose_name = u"rapprochement"
         ordering = ['-nom']
         get_latest_by = 'date'
@@ -806,7 +806,7 @@ class Echeance(models.Model):
     date_limite = models.DateField(null=True, blank=True, default=None)
 
     class Meta:
-        db_table = 'echeance'
+        db_table = 'gsb_echeance'
         verbose_name = u"échéance"
         verbose_name_plural = u"echéances"
         ordering = ['-date']
@@ -841,7 +841,7 @@ class Generalite(models.Model):
     affiche_clot = models.BooleanField(default=True)
 
     class Meta:
-        db_table = 'generalite'
+        db_table = 'gsb_generalite'
         verbose_name = u"généralités"
         verbose_name_plural = u'généralités'
 
@@ -896,7 +896,7 @@ class Ope(models.Model):
 
 
     class Meta:
-        db_table = 'ope'
+        db_table = 'gsb_ope'
         get_latest_by = 'date'
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
@@ -955,8 +955,8 @@ def verif_ope_rapp(sender, **kwargs):
     if instance.mere:
         if instance.mere.rapp:
             raise IntegrityError("operation mere rapprochée")
-    if instance.filles_set.count()>0:
-        raise IntegrityError("operations filles existantes %s"%instance.filles_set.all())
+    if instance.filles_set.count() > 0:
+        raise IntegrityError("operations filles existantes %s" % instance.filles_set.all())
 
 
 @receiver(pre_delete, sender=Ope_titre)
