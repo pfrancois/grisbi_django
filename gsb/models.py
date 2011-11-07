@@ -556,13 +556,13 @@ class Compte_titre(Compte):
                     tiers_frais = titre.tiers
                 if not cat_frais:
                     cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
-                ope=self.ope_set.create(date=date,
-                                    montant=decimal.Decimal(force_unicode(frais)) * -1,
-                                    tiers=tiers_frais,
-                                    cat=cat_frais,
-                                    notes="frais revenu",
-                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
-                                    automatique=True
+                self.ope_set.create(date=date,
+                                          montant=decimal.Decimal(force_unicode(frais)) * -1,
+                                          tiers=tiers_frais,
+                                          cat=cat_frais,
+                                          notes="frais revenu",
+                                          moyen=Moyen.objects.get(id=settings.MD_DEBIT),
+                                          automatique=True
                 )
             if virement_vers:
                 vir = Virement()
@@ -661,17 +661,17 @@ class Ope_titre(models.Model):
                                           )
             self.titre.cours_set.get_or_create(date=self.date, defaults={'date':self.date, 'valeur':self.cours})
         else:
-            old_date=self.ope.date
+            old_date = self.ope.date
             self.ope.date = self.date
             self.ope.montant = self.cours * self.nombre * -1
             self.ope.tiers = self.titre.tiers
             self.ope.notes = "%s@%s" % (self.nombre, self.cours)
             self.ope.compte = self.compte
             self.ope.save()
-            co=Cours.objects.get(titre=self.titre,date=old_date)
-            co.date=self.date
-            co.titre=self.titre
-            co.valeur=self.cours
+            co = Cours.objects.get(titre=self.titre, date=old_date)
+            co.date = self.date
+            co.titre = self.titre
+            co.valeur = self.cours
             co.save()
         super(Ope_titre, self).save(*args, **kwargs)
 
@@ -919,15 +919,15 @@ class Ope(models.Model):
 
     def clean(self):
         self.alters_data = True
-        self.deja_clean=True
+        self.deja_clean = True
         super(Ope, self).clean()
         #verification qu'il n'y ni pointe ni rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
+        if not self.compte.ouvert:
+            raise ValidationError(u"cette operation ne peut pas être modifie car le compte est fermé")
 
     def save(self, *args, **kwargs):
-        if not self.deja_clean:
-            self.clean()
         self.alters_data = True
         if not self.moyen:
             if self.montant >= 0:
@@ -948,13 +948,15 @@ def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
     #on evite que cela soit une operation rapproche
     if instance.rapp:
-        raise IntegrityError()
+        raise IntegrityError("operation rapprochee")
     if instance.jumelle:
         if instance.jumelle.rapp:
-            raise IntegrityError()
+            raise IntegrityError("operation jumelle rapprochée")
     if instance.mere:
         if instance.mere.rapp:
-            raise IntegrityError()
+            raise IntegrityError("operation mere rapprochée")
+    if instance.filles_set.count()>0:
+        raise IntegrityError("operations filles existantes %s"%instance.filles_set.all())
 
 
 @receiver(pre_delete, sender=Ope_titre)
@@ -974,8 +976,6 @@ class Virement(object):
                 raise TypeError('pas ope')
             self.origine = ope
             self.dest = self.origine.jumelle
-            if not isinstance(self.dest, Ope):
-                raise Ex_jumelle_neant(self.origine.id)
             self._init = True
         else:
             self._init = False
@@ -1091,7 +1091,7 @@ class Virement(object):
             else:
                 tab['moyen_destination'] = Moyen.objects.filter(type='v')[0]
         else:
-            raise Exception('attention, on ne peut intialiser un form que si virement est bound')
+            raise Gsb_exc('attention, on ne peut intialiser un form que si virement est bound')
         return tab
 
     def __unicode__(self):

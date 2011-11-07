@@ -6,8 +6,9 @@ from __future__ import absolute_import
 from django.test import TestCase
 from ..models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
-from ..models import Rapp, Echeance, Gsb_exc
+from ..models import Rapp, Echeance, Gsb_exc, Ex_jumelle_neant
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 import datetime
 import decimal
 from django.conf import settings
@@ -546,15 +547,71 @@ class test_models(TestCase):
         self.assertQuerysetEqual(Ope.non_meres().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8], attrgetter("id"))
 
     def test_ope_save(self):
-        o = Ope.objects.create(compte=Compte.objects.get(id=1), date='2010-01-01', montant=20,
-                               tiers=Tiers.objects.get(id=1))
-        self.assertEquals(o.moyen, o.compte.moyen_credit_defaut)
-        o = Ope.objects.create(compte=Compte.objects.get(id=1), date='2010-01-01', montant=-20,
-                               tiers=Tiers.objects.get(id=1))
-        self.assertEquals(o.moyen, o.compte.moyen_debit_defaut)
-        o = Ope.objects.create(compte=Compte.objects.get(id=1), date='2010-01-01', montant=-20,
-                               tiers=Tiers.objects.get(id=1), moyen=Moyen.objects.get(id=2))
-        self.assertEquals(o.moyen, Moyen.objects.get(id=2))
+        c=Compte.objects.get(id=1)
+        t=Tiers.objects.get(id=1)
+        #test pas defaut
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
+        self.assertEquals(o.moyen_id, 1)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
+        self.assertEquals(o.moyen_id, 2)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t, moyen=Moyen.objects.get(id=2))
+        self.assertEquals(o.moyen_id, 2)
+        c.moyen_credit_defaut=None
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
+        self.assertEquals(o.moyen_id, 1)
+        c.moyen_debit_defaut=None
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
+        self.assertEquals(o.moyen_id, 2)
+
+    def test_pre_delete_ope_rapp(self):
+        #ope rapp
+        self.assertRaises(IntegrityError,Ope.objects.get(id=3).delete)
+    def test_pre_delete_ope_mere(self):
+        o=Ope.objects.get(id=8)
+        #on transforme l'ope 1 en ope mere
+        o.mere_id=4
+        o.save()
+        #on ne peut effacer un mere qui a encore des filles
+        self.assertRaises(IntegrityError,Ope.objects.get(id=4).delete)
+    def test_pre_delete_ope_rapp_mere(self):
+        o=Ope.objects.get(id=8)
+        o.rapp_id=None
+        o.save()
+        #on transforme l'ope 3 en ope mere
+        o.mere_id=3
+        o.save()
+        o=Ope.objects.get(id=3)
+        o.rapp_id=1
+        o.save()
+        #on ne peut effacer fille qui a une mere rapp
+        o=Ope.objects.get(id=8)
+        self.assertRaises(IntegrityError,o.delete)
+
+    def test_pre_delete_ope_rapp_jumelle(self):
+        o=Ope.objects.get(id=7)
+        o.rapp_id=1
+        o.save()
+        self.assertRaises(IntegrityError,Ope.objects.get(id=6).delete)
+    def test_pre_delete_ope_titre_rapp(self):
+        Compte_titre.objects.get(id=5).achat(titre=Titre.objects.get(id=1), nombre=20, date='2011-01-01')
+        o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
+        o.rapp = Rapp.objects.get(id=1)
+        o.save()
+        self.assertRaises(IntegrityError,Ope_titre.objects.get(id=o.ope_titre.id).delete)
+
+    def test_virement_error(self):
+        #_non_ope
+        self.assertRaises(TypeError,lambda:Virement(Generalite.gen()))
+        #creation avec autre que ope
+        c=Compte.objects.get(id=1)
+        nc=Generalite.gen()
+        v=Virement()
+        self.assertRaises(TypeError,lambda:v.create(compte_origine=nc,compte_dest=c,montant=2))
+        self.assertRaises(TypeError,lambda:v.create(compte_origine=c,compte_dest=nc,montant=2))
+        #save non init
+        self.assertRaises(Gsb_exc,lambda:Virement().save())
+        #form unbound
+        self.assertRaises(Gsb_exc,lambda:Virement().init_form())
 
     def test_virement_verif_property(self):
         Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20, date='2010-01-01', notes='test_notes')
@@ -569,8 +626,12 @@ class test_models(TestCase):
         self.assertEquals(v.montant, 20)
         self.assertEquals(v.__unicode__(), u"cpte1 => cptb2")
         v.date_val = '2011-02-01'
+        v.pointe=True
         v.save()
         self.assertEquals(Virement(Ope.objects.get(id=9)).date_val, strpdate('2011-02-01'))
+
+        self.assertEquals(v.pointe, True)
+
 
     def test_virement_create(self):
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
