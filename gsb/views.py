@@ -394,7 +394,7 @@ def ope_titre_detail(request, pk):
                                                  smart_unicode(form.cleaned_data['nombre'])) * -1,
                                              tiers=ope.titre.tiers,
                                              cat=Cat.objects.get_or_create(id=settings.ID_CAT_OST,
-                                                                           defaults={'nom':u'operation sur titre:'}),
+                                                                           defaults={'nom':u'operation sur titre:'})[0],
                                              notes="%s@%s" % (form.cleaned_data['nombre'], form.cleaned_data['cours']),
                                              moyen=None,
                                              automatique=True,
@@ -440,14 +440,15 @@ def ope_titre_detail(request, pk):
 def ope_titre_delete(request, pk):
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
-        if ope.ope.rapp:
+        if ope.ope and ope.ope.rapp:
             messages.error(request, u"impossible d'effacer une operation rapprochée")
             return HttpResponseRedirect(reverse('mysite.gsb.views.ope_titre_detail', kwargs={'pk':ope.id}))
         cpt_id = ope.compte_id
         cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
         if cours.exists():
             cours.delete()
-        ope.ope.delete()
+        if ope.ope:
+            ope.ope.delete()
         ope.delete()
         return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':cpt_id}))
     else:

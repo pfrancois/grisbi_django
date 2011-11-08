@@ -26,15 +26,13 @@ import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import smart_unicode
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from . import utils as utils
 #-----------les urls.py
 
 
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
                        url(r'search$', 'search_opes', name='g_search_ope'),
-                       (r'^export/$', 'django_tablib.views.export', {
-                           'model': Ope,
-                       }),
     (r'^ope$', 'pel'))
 
 #---------------les fields, widgets  et forms tres perso
@@ -64,30 +62,45 @@ def chgt_ope_titre(request):
     print nb_ope
     return render(request, 'generic.djhtm', {'titre':'chgt'})
 
-
 def pel(request):
-    annee = [2005, 2006, 2007, 2008, 2009]
-    mois = range(1, 13)
-    for a in annee:
-        for m in mois:
-            c = Compte_titre.objects.get(id=4)
-            if m + 1 != 13:
-                jour = datetime.date(a, m + 1, 1) - datetime.timedelta(days=1)
-            else:
-                jour = datetime.date(a + 1, 1, 1) - datetime.timedelta(days=1)
-            t = Titre.objects.get(nom='PEL')
-            c.achat(titre=t, nombre=45, date=jour)
-            print 'otot'
+    now=datetime.date(2004, 4, 1)
+    t = Titre.objects.get(nom='PEL')
+    c = Compte_titre.objects.get(id=4)
+    for ope in Ope_titre.objects.filter(ope=None):
+        ope.save()
+
+        #~ c.achat(titre=t, nombre=s, date=now)
+    #~ print '----'
+    #~ while now < datetime.date(2008, 2,1):
+        #~ now=utils.addmonths(now,1)
+        #~ s=50
+        #~ c.achat(titre=t, nombre=s, date=now)
+    #~ print '----'
+    #~ while now < datetime.date(2010, 4, 1):
+        #~ now=utils.addmonths(now,1)
+        #~ s=100
+        #~ c.achat(titre=t, nombre=s, date=now)
+    #~ print '----'
+    #~ while now < datetime.date(2011, 02, 1):
+        #~ now=utils.addmonths(now,1)
+        #~ c.achat(titre=t, nombre=50, date=now)
+    #~ print '----'
+    #~ while now < datetime.date.today():
+        #~ now=utils.addmonths(now,1,first=True)
+        #~ c.achat(titre=t, nombre=50, date=now,virement_de=Compte.objects.get(id=12))
     return render(request, 'generic.djhtm', {'titre':'pel'})
 
 
 @login_required
 def search_opes(request):
-    q=Ope.objects.filter(mere__exact=None)
+    q=Ope.objects.filter(mere__exact=None).filter(tiers__nom__icontains='pel')
     sort=request.GET.get('sort')
     if sort:
         sort=unicode(sort)
         q=q.order_by(sort)
+        sort_get="&sort=%s"%sort
+    else:
+        sort_get=""
     paginator=Paginator(q, 50)
     try:
         page = int(request.GET.get('page'))
@@ -100,15 +113,4 @@ def search_opes(request):
         ope = paginator.page(1)
     except (EmptyPage, InvalidPage):
             ope = paginator.page(paginator.num_pages)
-    return render(request,'templates_perso/test.djhtm', {'list_ope':ope,'titre':'recherche'})
-
-from django_tablib import ModelDataset
-class MyModelDataset(ModelDataset):
-    class Meta:
-        model = Ope
-
-data = MyModelDataset()
-def search_table(request):
-    qs=Ope.objects.filter(mere__exact=None)
-    e1=Ope_table(qs)
-    return render(request,'templates_perso/test2.djhtm',{'e1':e1})
+    return render(request,'templates_perso/test.djhtm', {'list_ope':ope,'titre':'recherche',"sort":sort_get})

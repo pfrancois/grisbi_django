@@ -17,8 +17,9 @@
     <th class="opDate" style="width: 10%;">Date</th>
     <th class="opTier" style="width: 30%;">Titre</th>
     <th class="opTier" style="width: 30%;">nombre</th>
-    <th class="opDebit" style="width: 15%;">cours</th>
-    <th class="opDebit" style="width: 15%;">montant achete</th>
+    <th class="opDebit" style="width: 10%;">cours</th>
+    <th class="opDebit" style="width: 10%;">montant achete</th>
+    <th class="opDebit" style="width: 10%;">solde</th>
 {% endblock titre_col_ope %}
 {% block ope %}
     <tr class="item hover{% if ope.nombre > 0 %} creditElement{% endif %}{% if ope.nombre < 0 %} debitElement{% endif %}">
@@ -27,6 +28,7 @@
         <td class="opCenter"><a href="{{ ope.get_absolute_url  }}">{{ ope.nombre|floatformat:3 }}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{{ ope.cours|cur }}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">{{ ope.invest|cur }}</a></td>
+        <td>{{ ope.solde|cur }}</td>
     </tr>
 {% endblock ope %}
 {% block footer %}

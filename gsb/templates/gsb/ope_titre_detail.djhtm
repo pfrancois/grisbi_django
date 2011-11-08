@@ -9,7 +9,7 @@
             {{ form }}
             <tr>
                 <th>id_ope:</th>
-                <td>{{ ope.ope.id }}</td></tr>
+                <td><a href="{{ ope.ope.get_absolute_url }}"> {{ ope.ope.id }}</a></td></tr>
             <tr>
                 <th>rapp:</th>
                 <td>{{ ope.ope.rapp }}</td></tr>

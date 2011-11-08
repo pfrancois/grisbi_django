@@ -42,7 +42,7 @@
         <H1>
         <span>
             {% if list_ope.has_previous %}
-                <a href="?page={{ list_ope.previous_page_number }}">previous</a>
+                <a href="?page={{ list_ope.previous_page_number }}{{sort}}">previous</a>
             {% endif %}
 
             <span class="current">
@@ -50,7 +50,7 @@
             </span>
 
             {% if list_ope.has_next %}
-                <a href="?page={{ list_ope.next_page_number }}">next</a>
+                <a href="?page={{ list_ope.next_page_number }}{{sort}}">next</a>
             {% endif %}
         </span>
         </H1>

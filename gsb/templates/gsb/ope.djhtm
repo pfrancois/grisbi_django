@@ -34,6 +34,11 @@
         <fieldset class = "operationMainTable">
             <table>
                 {{ form }}
+                {% if ope.ope_titre %}
+                <tr>
+                    <th>Operation titre:</label></th><td><a href="{{ ope.ope_titre.get_absolute_url }}"> {{ ope.ope_titre.id }}</a></td>
+                </tr>
+                {% endif %}
             </table>
         </fieldset>
     </form>

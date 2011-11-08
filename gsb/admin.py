@@ -139,10 +139,10 @@ class Ope_admin(Modeladmin_perso):
             raise IntegrityError()
         if instance.jumelle:
             if instance.jumelle.rapp:
-                raise IntegrityError
+                raise IntegrityError()
         if instance.mere:
             if instance.mere.rapp:
-                raise IntegrityError
+                raise IntegrityError()
         return super(Ope_admin, self).delete_view(request, object_id, extra_context)
 
 

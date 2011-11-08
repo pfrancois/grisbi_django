@@ -4,6 +4,7 @@ import datetime
 import time
 import decimal
 from django.db.models import Max
+import calendar
 
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
@@ -144,3 +145,17 @@ def fr2decimal(s):
 def strpdate(s):
     """@param s: YYYY-MM-DD"""
     return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
+
+
+def addmonths(sourcedate,months,last=False,first=False):
+    """renvoie le premier jour du mois ou le dernier si option"""
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    if last:
+        day=calendar.monthrange(year,month)[1]
+    elif first:
+        day=1
+    else:
+        day=min(sourcedate.day,calendar.monthrange(year,month)[1])
+    return datetime.date(year,month,day)

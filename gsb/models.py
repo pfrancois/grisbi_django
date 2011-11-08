@@ -611,6 +611,8 @@ class Compte_titre(Compte):
             nb = titre.nb(compte=self, datel=datel, rapp=rapp)
             if datel:
                 cours = titre.cours_set.filter(date__lte=datel).latest().valeur
+                if not cours:
+                    raise Gsb_exc(u'attention pas de cours existant à cette date')
             else:
                 cours = titre.last_cours
             solde_titre = solde_titre + nb * cours
@@ -659,7 +661,6 @@ class Ope_titre(models.Model):
                                           moyen=moyen,
                                           compte=self.compte,
                                           )
-            self.titre.cours_set.get_or_create(date=self.date, defaults={'date':self.date, 'valeur':self.cours})
         else:
             old_date = self.ope.date
             self.ope.date = self.date
@@ -668,11 +669,14 @@ class Ope_titre(models.Model):
             self.ope.notes = "%s@%s" % (self.nombre, self.cours)
             self.ope.compte = self.compte
             self.ope.save()
-            co = Cours.objects.get(titre=self.titre, date=old_date)
-            co.date = self.date
-            co.titre = self.titre
-            co.valeur = self.cours
-            co.save()
+            try:
+                co = Cours.objects.get(titre=self.titre, date=old_date)
+                co.date = self.date
+                co.titre = self.titre
+                co.valeur = self.cours
+                co.save()
+            except  Cours.DoesNotExist:
+                Co=Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
     @models.permalink
@@ -682,6 +686,9 @@ class Ope_titre(models.Model):
     def __unicode__(self):
         return "%s" % self.id
 
+    def solde(self):
+        print
+        return self.compte.solde(datel=self.date)
 
 class Moyen(models.Model):
     """moyen de paiements
