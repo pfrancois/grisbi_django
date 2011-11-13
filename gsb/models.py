@@ -661,6 +661,10 @@ class Ope_titre(models.Model):
                                           moyen=moyen,
                                           compte=self.compte,
                                           )
+            try:
+                Cours.objects.get(titre=self.titre, date=self.date)
+            except  Cours.DoesNotExist:
+                Co=Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         else:
             old_date = self.ope.date
             self.ope.date = self.date
