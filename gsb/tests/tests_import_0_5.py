@@ -6,7 +6,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
-from django.test import TestCase
+from .test_base import TestCase
 from .. import models as models_gsb
 from ..import_gsb import * #@UnusedWildImport
 import decimal, datetime #@Reimport

@@ -3,7 +3,8 @@
 test models
 """
 from __future__ import absolute_import
-from django.test import TestCase
+import os
+from .test_base import TestCase
 from ..models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
 from ..models import Rapp, Echeance, Gsb_exc, Ex_jumelle_neant
@@ -17,34 +18,6 @@ from operator import attrgetter
 
 class test_models(TestCase):
     fixtures = ['test.json']
-
-    def setUp(self):
-        #gestion des parametres
-        self.old_ID_CPT_M = settings.ID_CPT_M
-        self.TAUX_VERSEMENT = settings.TAUX_VERSEMENT
-        self.ID_CAT_COTISATION = settings.ID_CAT_COTISATION
-        self.ID_TIERS_COTISATION = settings.ID_TIERS_COTISATION
-        self.ID_CAT_OST = settings.ID_CAT_OST
-        self.MD_CREDIT = settings.MD_CREDIT
-        self.MD_DEBIT = settings.MD_DEBIT
-        settings.ID_CPT_M = 1
-        settings.TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - (0.08 * 0.97)) * (0.08 * 0.97)))
-        #id et cat des operation speciales
-        settings.ID_CAT_COTISATION = 23
-        settings.ID_TIERS_COTISATION = 727
-        settings.ID_CAT_OST = 64
-        settings.MD_CREDIT = 1
-        settings.MD_DEBIT = 2
-
-    def tearDown(self):
-        #on remet les settings comme avant
-        settings.ID_CPT_M = self.old_ID_CPT_M
-        settings.TAUX_VERSEMENT = self.TAUX_VERSEMENT
-        settings.ID_CAT_COTISATION = self.ID_CAT_COTISATION
-        settings.ID_TIERS_COTISATION = self.ID_TIERS_COTISATION
-        settings.ID_CAT_OST = self.ID_CAT_OST
-        settings.MD_CREDIT = self.MD_CREDIT
-        settings.MD_DEBIT = self.MD_DEBIT
 
     def test_models_unicode(self):
         #on test les sortie unicode
@@ -461,6 +434,7 @@ class test_models(TestCase):
         self.assertEqual(o.ope.montant, -150)
         self.assertEqual(o.ope.moyen_id, 1)
         self.assertEqual(o.ope.notes, "15@10")
+        #on verifie qu'il creer bien un cours a la date
         self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 10)
         #en fait on s'est trompe ce n'est pas un achat c'est une vente
         o.nombre = -15

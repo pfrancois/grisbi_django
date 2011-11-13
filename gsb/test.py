@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 try:
     from mysite import settings
-
     main = False
 except ImportError:
     main = True
@@ -24,24 +23,20 @@ from django.utils import formats#@UnusedImport
 from django.utils.encoding import smart_unicode #@UnusedImport
 from django.utils.safestring import mark_safe #@UnusedImport
 
-logger = logging.getLogger('gsb.test')
+#logger = logging.getLogger('gsb.test')
 from django.shortcuts import render, get_object_or_404
 from django.forms.models import modelformset_factory
 from mysite.gsb.utils import validrib
+from django.contrib import messages
 
 def test(request):
-    cpt_id = 6
-    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    formset = modelformset_factory(Ope_titre, max_num=4, extra=4)
-    if request.method == 'POST':
-        form = modelformset_factory(request.POST)
-    else:
-        form = formset(queryset=Ope_titre.objects.none())
-    return render(request, 'gsb/test.djhtm', {'formset':form, 'titre':'test'})
+    messages.info(request, 'This is an info message.')
+    messages.info(request, 'This is another info message.')
+    messages.success(request, 'This is a success message.')
+    messages.warning(request, 'This is a warning message.')
+    messages.error(request, 'This is an error message.')
+    messages.error(request, 'This is another error message.')
+    return render(request, 'generic.djhtm', )
 
 if main:
-    s = 'abcd'
-    before = ['&#232', '&#233', '&#234', '&#244']
-    after = ['&#xE8', '&#xE9', '&#xEA', '&#xF4']
-    for car in before:
-        s = s.replace(car, after[before.index(car)])
+    pass
