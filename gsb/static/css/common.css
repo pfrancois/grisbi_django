@@ -1,4 +1,5 @@
 @charset "UTF-8";
+/*general*/
 a{
     text-decoration: none;
     padding: 0;
@@ -37,7 +38,7 @@ h2{
     clear: both;
     border-bottom: 1px solid #D8D8D8;
 }
-
+/* gros boutons des forms*/
 .boutton{
     background-color: #554444;
     border: #ffffff solid 1px;
@@ -50,7 +51,7 @@ h2{
 .boutton:hover{
     background-color: #706666;
 }
-
+/*liste*/
 .table{
     border-collapse: collapse;
     width: 100%;
@@ -76,20 +77,6 @@ h2{
     text-align: right;
     white-space: nowrap;
     padding-right: .5em;
-}
-
-.progress{
-    width: 100%;
-    background: #009900;
-    text-align: center;
-    font-size: 2.5em;
-}
-
-.error{
-    width: 100%;
-    background: #ff00ff;
-    text-align: center;
-    font-size: 2.5em;
 }
 
 .creditElement{
@@ -156,45 +143,13 @@ th{
     text-align: center;
 }
 
+/*gestion des forms*/
 .required{
     background: #009900;
 }
 
 .required:after{
     content: "*";
-}
-
-ul.messagelist{
-    padding: 0 0 5px 0;
-    margin: 0;
-}
-
-ul.messagelist li{
-    font-size: 12px;
-    display: block;
-    padding: 4px 5px 4px 25px;
-    margin: 0 0 3px 0;
-    border-bottom: 1px solid #ddd;
-    color: #666;
-    background: #ffc url(../img/icon_success.gif) 5px .3em no-repeat;
-}
-
-ul.messagelist li.warning{
-    background-image: url(../img/icon_alert.gif);
-}
-
-ul.messagelist li.error{
-    background-image: url(../img/icon_error.gif);
-}
-
-.errornote{
-    font-size: 12px !important;
-    display: block;
-    padding: 4px 5px 4px 25px;
-    margin: 0 0 3px 0;
-    border: 1px solid red;
-    color: red;
-    background: #ffc url(../img/icon_error.gif) 5px .3em no-repeat;
 }
 
 ul.errorlist{
@@ -209,7 +164,7 @@ ul.errorlist{
     margin: 0 0 3px 0;
     border: 1px solid red;
     color: white;
-    background: red url(../img/icon_alert.gif) 5px .3em no-repeat;
+    background: red url('/static/img/icon_error.gif') 5px .3em no-repeat;
 }
 
 .errorlist li a{
@@ -225,31 +180,70 @@ td ul.errorlist{
 td ul.errorlist li{
     margin: 0 !important;
 }
-
-.errors{
-    background: #ffc;
+/*notif*/
+.progress{
+    width: 100%;
+    background: #009900;
+    text-align: center;
+    font-size: 2.5em;
 }
 
-.errors input, .errors select, .errors textarea{
-    border: 1px solid red;
+body {
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-div.system-message{
-    background: #ffc;
-    margin: 10px;
-    padding: 6px 8px;
-    font-size: .8em;
+/******** User feedback messages ********/
+.messages {
+    font-size: 0.85em;
 }
 
-div.system-message p.system-message-title{
-    padding: 4px 5px 4px 25px;
-    margin: 0;
-    color: red;
-    background: #ffc url(../img/icon_error.gif) 5px .3em no-repeat;
+.messages ul {
+    list-style: none;
+    margin: 10px 0;
+    padding-left: 0;
 }
 
-.description{
-    font-size: 12px;
-    padding: 5px 0 0 12px;
+.messages ul li {
+    padding: 0.1em;
 }
 
+.info,
+.success,
+.warning,
+.error,
+.validation {
+    border: 2px solid;
+    margin: 10px 0px;
+    padding:0 0 0 41px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+}
+
+.info {
+    color: #00529B;
+    border-color: #789FCC;
+    background-color: #CDEAF7;
+    background-image: url('/static/img/info.png');
+}
+
+.success {
+    color: #264409;
+    border-color: #C6D880;
+    background-color: #E6EFC2;
+    background-image:url('/static/img/success.png');
+}
+
+.warning {
+    color: #514721;
+    border-color: #FFD324;
+    background-color: #FFF6BF;
+    background-image: url('/static/img/warning.png');
+}
+
+.error {
+    color: #8A1F11;
+    border-color: #FBC2C4;
+    background-color: #FBE3E4;
+    background-image: url('/static/img/error.png');
+}
+/******** /User feedback messages ********/

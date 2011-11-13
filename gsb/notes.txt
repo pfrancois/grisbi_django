@@ -1,6 +1,10 @@
+sources:
 les images de 400.jpg
 500.jpg http://www.ronnestam.com/tag/error-500/
+message from https://github.com/mrben/nicer_django_messages
 
 necessite:
 django
 lxml
+django_qbe http://versae.github.com/qbe/
+messages from 

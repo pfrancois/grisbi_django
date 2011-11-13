@@ -7,16 +7,16 @@ from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
 #import decimal
-ERROR_CSS_CLASS = 'error'
+ERROR_CSS_CLASS = ''
 REQUIRED_CSS_CLASS = 'required'
 
 class Baseform(forms.Form):
-    error_css_class = ERROR_CSS_CLASS
+    #error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
 
 class Basemodelform(forms.ModelForm):
-    error_css_class = ERROR_CSS_CLASS
+    #error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
 
