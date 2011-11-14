@@ -850,6 +850,14 @@ class Generalite(models.Model):
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
     affiche_clot = models.BooleanField(default=True)
+    """nb_jours_aff = models.IntegerField(default=100)
+    nb_jours_aff_titre = models.IntegerField(default=100)
+    cpt_m = models.ForeignKey(Compte,relayed_name='+',limit_choices_to={'type__in':('b', 'e')} )
+    cat_cotisation = models.ForeignKey(Cat,relayed_name='+',limit_choices_to={'type':'d'} )
+    car_ost = models.ForeignKey(Cat,relayed_name='+',limit_choices_to={'type':'d'} )
+    md_credit = models.ForeignKey(Moyen,relayed_name='+',limit_choices_to={'type':'r'} )
+    md_debit = models.ForeignKey(Moyen,relayed_name='+',limit_choices_to={'type':'d'} )
+    tiers_cotisation = models.ForeignKey(Tiers,relayed_name='+')"""
 
     class Meta:
         db_table = 'gsb_generalite'

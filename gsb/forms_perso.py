@@ -32,8 +32,8 @@ from . import utils as utils
 
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
-                       url(r'search$', 'search_opes', name='g_search_ope'),
-    (r'^ope$', 'pel'))
+                       url(r'^search$', 'search_opes', name='g_search_ope'),
+                        url(r'^ope$', 'pel'))
 
 #---------------les fields, widgets  et forms tres perso
 class SearchField(gsb_forms.Baseform):
@@ -93,14 +93,14 @@ def pel(request):
 
 @login_required
 def search_opes(request):
-    q=Ope.objects.filter(mere__exact=None).filter(tiers__nom__icontains='pel')
+    q=Ope.objects.filter(mere__exact=None).filter(compte__id=12).filter(montant__gte=0)
     sort=request.GET.get('sort')
     if sort:
         sort=unicode(sort)
         q=q.order_by(sort)
-        sort_get="&sort=%s"%sort
+        sort_get=u"&sort=%s"%sort
     else:
-        sort_get=""
+        sort_get=u""
     paginator=Paginator(q, 50)
     try:
         page = int(request.GET.get('page'))

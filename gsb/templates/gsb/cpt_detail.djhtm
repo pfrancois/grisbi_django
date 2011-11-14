@@ -1,6 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% load gsb_extras %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
     {% block bouton_haut %}
         <table width="100%" id="boutons" class="table">
@@ -23,28 +21,30 @@
     <table id="main" class="table">
         <thead class="entete">
         <tr>{% block titre_col_ope %}
-            <th class="opDate">Date</th>
-            <th class="opTier">Tiers</th>
-            <th class="opTier">Catégorie</th>
-            <th class="opDebit">Crédit</th>
-            <th class="opDebit">Débit</th>{% endblock titre_col_ope %}
+            <th class="opDate"><a href="?sort=-date">Date</a></th>
+            <th class="opTier"><a href="?sort=tiers">Tiers</a></th>
+            <th class="opTier"><a href="?sort=cat">Catégorie</a></th>
+            <th class="opDebit"><a href="?sort=-montant">Crédit</a></th>
+            <th class="opDebit"><a href="?sort=montant">Débit</a></th>{% endblock titre_col_ope %}
         </tr>
         </thead>
-        {% for ope in list_ope %}
+        <tbody>
+        {% for ope in list_ope.object_list %}
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-                    <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date }}</a></td>
-                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}">
+                    <td class="opDate"><a href="{{ ope.get_absolute_url }}"{% if ope.rapp %}class='rappElement' {% endif%}>{{ ope.date }}</a></td>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif%}>
                         {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</a>
                     </td>
-                    <td class="opTier">
-                        <a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a>
+                    <td class="opTier" >
+                        <a href="{{ ope.get_absolute_url  }}"{% if ope.rapp %}class='rappElement' {% endif%}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a>
                     </td>
-                    <td class="opCredit"><a href="{{ ope.get_absolute_url  }}">
+                    <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif%}>
                         {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-                    <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">
+                    <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif%}>
                         {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
                 </tr>
+
             {% endblock ope %}
             {% empty %}
             <tr class="item">
@@ -67,27 +67,55 @@
                 </td>
             </tr>
         {% endfor %}
+        </tbody>
         {% block footer %}
+        <tfoot>
             <tr class="footerbar">
             <td colspan="3" class="cptLabel">Solde</td>
             <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
             </tr>{% endblock footer %}
+        </tfoot>
     </table>
+    <hr>
+    <div class="pagination">
+        <H1>
+        <span>
+            {% if list_ope.has_previous %}
+                <a href="?page={{ list_ope.previous_page_number }}{{sort}}">précédent</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ list_ope.number }} sur {{ list_ope.paginator.num_pages }}.
+            </span>
+
+            {% if list_ope.has_next %}
+                <a href="?page={{ list_ope.next_page_number }}{{sort}}">suivant</a>
+            {% endif %}
+        </span>
+        </H1>
+    </div>
+
     <p>
         {% if nbrapp == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br />
         {% endif %}
         {% if nbrapp > 1 %}
-            note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.
-            <br />
+            note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br />
         {% endif %}
         {% if nbvielles > 1 %}
-            note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.
-            <br />
+            note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br />
+            seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
         {% endif %}
         {% if nbvielles == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br />
+            seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
         {% endif %}
-        seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
+
     </p>
+    <table width="100%" id="boutons" class="table">
+                <tr>
+                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les opérations</a></td>
+                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les operations rapprochées</a></td>
+                </tr>
+</table>
 {% endblock content %}
