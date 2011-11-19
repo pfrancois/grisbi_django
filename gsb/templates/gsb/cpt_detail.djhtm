@@ -18,14 +18,16 @@
         </table>
     {% endblock bouton_haut %}
     <br />
+    {% block RPform1 %}{% endblock RPform1 %}
     <table id="main" class="table">
         <thead class="entete">
         <tr>{% block titre_col_ope %}
             <th class="opDate"><a href="?sort=-date">Date</a></th>
             <th class="opTier"><a href="?sort=tiers">Tiers</a></th>
-            <th class="opTier"><a href="?sort=cat">Catégorie</a></th>
-            <th class="opDebit"><a href="?sort=-montant">Crédit</a></th>
-            <th class="opDebit"><a href="?sort=montant">Débit</a></th>{% endblock titre_col_ope %}
+            <th class="opTier"><a href="?sort=cat">Cat&eacute;gorie</a></th>
+            <th class="opDebit"><a href="?sort=-montant">Cr&eacute;dit</a></th>
+            <th class="opDebit"><a href="?sort=montant">D&eacute;bit</a></th>{% endblock titre_col_ope %}
+            {% block RPentete %}{% endblock RPentete %}
         </tr>
         </thead>
         <tbody>
@@ -43,8 +45,8 @@
                         {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
                     <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif%}>
                         {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+                    {% block RPope %}{% endblock RPope %}
                 </tr>
-
             {% endblock ope %}
             {% empty %}
             <tr class="item">
@@ -71,18 +73,21 @@
         {% block footer %}
         <tfoot>
             <tr class="footerbar">
-            <td colspan="3" class="cptLabel">Solde</td>
-            <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
-            </tr>{% endblock footer %}
+            <td>
+            <td colspan="3" class="cptLabel">Solde<BR>Solde rapproch&eacute; au {{ date_r}}: </td>
+            <td colspan="2" class="cptSolde">{{ solde|cur }}<BR>{{solde_r|cur}}</td>
+            </tr>
+            {% endblock footer %}
         </tfoot>
     </table>
+    {% block RPform2 %}{% endblock RPform2 %}
     {% if list_ope.paginator.num_pages > 1 %}
     <hr>
     <div class="pagination">
         <H1>
         <span>
             {% if list_ope.has_previous %}
-                <a href="?page={{ list_ope.previous_page_number }}{{sort}}">précédent</a>
+                <a href="?page={{ list_ope.previous_page_number }}{{sort|default:""}}">pr&eacute;c&eacute;dente</a>
             {% endif %}
 
             <span class="current">
@@ -90,7 +95,7 @@
             </span>
 
             {% if list_ope.has_next %}
-                <a href="?page={{ list_ope.next_page_number }}{{sort}}">suivant</a>
+                <a href="?page={{ list_ope.next_page_number }}{{sort|default:""}}">suivante</a>
             {% endif %}
         </span>
         </H1>
@@ -105,18 +110,18 @@
         {% endif %}
         {% if nbvielles > 1 %}
             note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br />
-            seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
+            seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
         {% endif %}
         {% if nbvielles == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br />
-            seul les opérations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
+            seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br />
         {% endif %}
 
     </p>
     <table width="100%" id="boutons" class="table">
                 <tr>
-                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les opérations</a></td>
-                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les operations rapprochées</a></td>
+                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les op&eacute;rations</a></td>
+                    <td width="50%" class="boutton"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
                 </tr>
 </table>
 {% endblock content %}
