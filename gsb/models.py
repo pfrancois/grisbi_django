@@ -375,7 +375,7 @@ class Compte(models.Model):
         """
         query = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None)
         if rapp:
-            query = query.filter(rapp__isnull=True)
+            query = query.filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
