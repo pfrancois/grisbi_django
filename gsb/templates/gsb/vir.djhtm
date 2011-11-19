@@ -5,7 +5,7 @@
     <table style=" width: 100%;">
         {% if ope %}
             <tr><td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+                <td width="50%" class="boutton"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
             </tr>
             </table>
             <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">{% csrf_token %}</form>
@@ -18,7 +18,7 @@
             <tr>
                 {% if cpt %}
                     <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+                    <td width="50%" class="boutton"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
                 {% else %}
                     <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
                     <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
@@ -39,7 +39,7 @@
         <table style=" width: 100%;" summary="boutons">
             <tr>
                 <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+                <td width="50%" class="boutton"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
             </tr>
         </table>
         <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
@@ -56,7 +56,7 @@
             <tr>
                 {% if cpt %}
                     <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%" class="boutton"><a href="{% url gsb.views.cpt_detail cpt.id %}">Annuler</a></td>
+                    <td width = "50%" class = "boutton"><a href = "{{ cpt.get_absolute_url }}">Annuler</a></td>
                 {% else %}
                     <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
                     <td width="50%" class="boutton"><a href="{% url gsb.views.index %}">Annuler</a></td>
@@ -64,4 +64,4 @@
             </tr>
         </table>
     {% endif %}
-{% endblock content %} 
+{% endblock content %}

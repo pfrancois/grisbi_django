@@ -76,6 +76,7 @@
             </tr>{% endblock footer %}
         </tfoot>
     </table>
+    {% if list_ope.paginator.num_pages > 1 %}
     <hr>
     <div class="pagination">
         <H1>
@@ -94,7 +95,7 @@
         </span>
         </H1>
     </div>
-
+    {% endif %}
     <p>
         {% if nbrapp == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br />

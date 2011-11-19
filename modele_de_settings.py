@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 import os
-
+import decimal
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 DEFAULT_CHARSET = 'utf-8'
@@ -30,9 +30,11 @@ TAUX_VERSEMENT = 1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal
 #id et cat des operation speciales
 ID_CAT_COTISATION = 23
 ID_TIERS_COTISATION = 727
-ID_CAT_OST = 64
-MD_CREDIT = 6
-MD_DEBIT = 7
+ID_CAT_COTISATION=23
+ID_TIERS_COTISATION=727
+ID_CAT_OST=64
+MD_CREDIT=6
+MD_DEBIT=7
 ##################
 
 
@@ -125,9 +127,8 @@ try:
     from secret_key import *
 except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
-    nomfich = os.path.join(SETTINGS_DIR, 'secret_key.py')
+    nomfich = os.path.join(PROJECT_PATH, 'secret_key.py')
     from random import choice
-
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
@@ -138,8 +139,8 @@ except ImportError:
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    #     'django.template.loaders.eggs.Loader',
-    )
+#     'django.template.loaders.eggs.Loader',
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -147,18 +148,18 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
-    'mysite.django_qbe',
-    )
+    'django.middleware.transaction.TransactionMiddleware'
+)
 
 ROOT_URLCONF = 'mysite.urls'
 
+
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_PATH, 'templates'),
-    )
+)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -171,8 +172,8 @@ INSTALLED_APPS = (
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'django.contrib.formtools',
-    )
+    'mysite.django_qbe',
+)
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
@@ -180,7 +181,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
-    )
+)
 if DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)

@@ -23,20 +23,26 @@ def index(request):
     """
     t = loader.get_template('gsb/index.djhtm')
     if Generalite.gen().affiche_clot:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related()
-        pl = Compte_titre.objects.all().select_related()
+        bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
+        pl = Compte_titre.objects.all()
     else:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related()
-        pl = Compte_titre.objects.filter(ouvert=True).select_related()
+        bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True)
+        pl = Compte_titre.objects.filter(ouvert=True)
+    #calcul du solde des bq
     total_bq = Ope.objects.filter(mere__exact=None,
                                   compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
     'solde']
     if total_bq is None:
         total_bq = decimal.Decimal()
+    #calcul du solde des pla
     total_pla = decimal.Decimal()
+    id_pla=Compte_titre.objects.all().values_list("id",flat=True)
+    solde_espece=Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
+    if solde_espece['solde']:
+        total_pla +=solde_espece['solde']
     for p in pl:
-        total_pla += p.solde()
-    nb_clos = len(Compte.objects.filter(ouvert=False))
+        total_pla += p.solde_titre()
+    nb_clos = Compte.objects.filter(ouvert=False).count()
     c = RequestContext(request, {
         'titre':'liste des comptes',
         'liste_cpt_bq':bq,
@@ -66,7 +72,6 @@ def cpt_detail(request, cpt_id,all=False,rapp=False):
         titre = True
     else:
         titre = False
-
     if not titre:
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
         if all:
@@ -84,6 +89,7 @@ def cpt_detail(request, cpt_id,all=False,rapp=False):
                 nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
                 q = q.filter(rapp__isnull=True)
                 solde=c.solde()
+        #gestion du tri
         try:
             sort=request.GET.get('sort')
         except (ValueError,TypeError):
@@ -96,8 +102,8 @@ def cpt_detail(request, cpt_id,all=False,rapp=False):
         else:
             q=q.order_by('-date')
             sort_get=None
-
-
+        q=q.select_related('tiers','cat')
+        #gestion pagination
         paginator=Paginator(q, 50)
         try:
             page = int(request.GET.get('page'))
@@ -111,7 +117,6 @@ def cpt_detail(request, cpt_id,all=False,rapp=False):
         except (EmptyPage, InvalidPage):
                 opes = paginator.page(paginator.num_pages)
         template = loader.get_template('gsb/cpt_detail.djhtm')
-
         return HttpResponse(
             template.render(
                 RequestContext(
@@ -289,11 +294,10 @@ def vir_new(request, cpt_id=None):
                     {'titre_long':u'création virement interne ',
                      'titre':u'Création',
                      'form':form,
-                     'cpt_id':cpt_id}
+                     'cpt':cpt}
             )
     else:
         form = gsb_forms.VirementForm(
-
             initial={'compte_origine':get_object_or_404(Compte.objects.select_related(), pk=settings.ID_CPT_M),
                      'moyen_origine':Moyen.objects.filter(type='v')[0], 'compte_destination':cpt,
                      'moyen_destination':Moyen.objects.filter(type='v')[0]})
@@ -301,7 +305,7 @@ def vir_new(request, cpt_id=None):
                 {'titre':u'Création',
                  'titre_long':u'Création virement interne ',
                  'form':form,
-                 'cpt_id':cpt_id}
+                 'cpt':cpt}
         )
 
 
@@ -364,7 +368,6 @@ def cpt_titre_espece(request, cpt_id, date_limite=False):
     si date_limite, utilise la date limite sinon affiche toute les ope espece"""
     c = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     if date_limite:
-        date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF_TITRE)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(
             rapp__isnull=True)
         nbvielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(
@@ -372,7 +375,20 @@ def cpt_titre_espece(request, cpt_id, date_limite=False):
     else:
         date_limite = datetime.datetime.fromtimestamp(0).date()
         nbvielles = 0
-        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
+        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').select_related('tiers','tiers__titre','cat')
+    paginator=Paginator(q, 50)
+    try:
+        page = int(request.GET.get('page'))
+    except (ValueError,TypeError):
+        page = 1
+    try:
+        opes = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        opes = paginator.page(1)
+    except (EmptyPage, InvalidPage):
+            opes = paginator.page(paginator.num_pages)
+
     template = loader.get_template('gsb/cpt_placement_espece.djhtm')
     return HttpResponse(
         template.render(
@@ -380,9 +396,9 @@ def cpt_titre_espece(request, cpt_id, date_limite=False):
                 request,
                     {
                     'compte':c,
-                    'list_ope':q,
+                    'list_ope':opes,
                     'titre':"%s: Especes" % c.nom,
-                    'solde':super(Compte_titre, c).solde(),
+                    'solde':c.solde_espece(),
                     'date_limite':date_limite,
                     'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),
                     'nbvielles':nbvielles,
