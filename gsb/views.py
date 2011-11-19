@@ -63,11 +63,13 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     @param cpt_id: id du compte demande
     @param rapp: si true, affiche l'ensemble des operations
     """
-    c = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    c = get_object_or_404(Compte, pk=cpt_id)
+    date_rappro=Ope.objects.filter(compte__pk=cpt_id).latest('rapp__date').date
+    solde_rappro=c.solde(rapp=True)
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
     if c.type in ('t',):
         #on prend les ope_titres
-        c = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+        c = get_object_or_404(Compte_titre, pk=cpt_id)
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF_TITRE)
         titre = True
     else:
@@ -87,7 +89,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             else:
                 nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
                 nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
-                q = q.filter(rapp__isnull=True)
+                q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
                 solde = c.solde()
         #gestion du tri
         try:
@@ -102,7 +104,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
         else:
             q = q.order_by('-date')
             sort_get = None
-        q = q.select_related('tiers', 'cat')
+        q = q.select_related('tiers', 'cat','rapp')
         #gestion pagination
         paginator = Paginator(q, 50)
         try:
@@ -131,6 +133,8 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'date_limite':date_limite,
                         'nb_j':settings.NB_JOURS_AFF,
                         "sort":sort_get,
+                        "date_r":date_rappro,
+                        "solde_r":solde_rappro
                     }
                 )
             )
