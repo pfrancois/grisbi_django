@@ -416,7 +416,7 @@ class Compte(models.Model):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
         self.alters_data = True
         if self.type == 't' and not isinstance(self, Compte_titre):
-            c = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
+            cpt = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
                                             banque=self.banque,
                                             guichet=self.guichet, num_compte=self.num_compte,
                                             cle_compte=self.cle_compte,
@@ -426,8 +426,8 @@ class Compte(models.Model):
                                             moyen_debit_defaut=self.moyen_credit_defaut
             )
         else:
-            c = super(Compte, self).save(*args, **kwargs)
-        return c
+            cpt = super(Compte, self).save(*args, **kwargs)
+        return cpt
 
 
 class Compte_titre(Compte):
@@ -619,9 +619,8 @@ class Compte_titre(Compte):
         return solde_titre
 
     def liste_titre(self, datel=None, rapp=False):
-        all = self.titre.all().distinct()
         liste = []
-        for i in all:
+        for i in self.titre.all().distinct():
             if i.nb(compte=self, datel=datel, rapp=rapp):
                 liste.append(i.id)
         return Titre.objects.filter(id__in=liste)
@@ -664,7 +663,7 @@ class Ope_titre(models.Model):
             try:
                 Cours.objects.get(titre=self.titre, date=self.date)
             except  Cours.DoesNotExist:
-                Co=Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                cours = Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         else:
             old_date = self.ope.date
             self.ope.date = self.date
@@ -674,13 +673,13 @@ class Ope_titre(models.Model):
             self.ope.compte = self.compte
             self.ope.save()
             try:
-                co = Cours.objects.get(titre=self.titre, date=old_date)
-                co.date = self.date
-                co.titre = self.titre
-                co.valeur = self.cours
-                co.save()
+                cours = Cours.objects.get(titre=self.titre, date=old_date)
+                cours.date = self.date
+                cours.titre = self.titre
+                cours.valeur = self.cours
+                cours.save()
             except  Cours.DoesNotExist:
-                Co=Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                cours = Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
     @models.permalink
@@ -691,7 +690,6 @@ class Ope_titre(models.Model):
         return "%s" % self.id
 
     def solde(self):
-        print
         return self.compte.solde(datel=self.date)
 
 class Moyen(models.Model):
@@ -852,12 +850,12 @@ class Generalite(models.Model):
     affiche_clot = models.BooleanField(default=True)
     """nb_jours_aff = models.IntegerField(default=100)
     nb_jours_aff_titre = models.IntegerField(default=100)
-    cpt_m = models.ForeignKey(Compte,relayed_name='+',limit_choices_to={'type__in':('b', 'e')} )
-    cat_cotisation = models.ForeignKey(Cat,relayed_name='+',limit_choices_to={'type':'d'} )
-    car_ost = models.ForeignKey(Cat,relayed_name='+',limit_choices_to={'type':'d'} )
-    md_credit = models.ForeignKey(Moyen,relayed_name='+',limit_choices_to={'type':'r'} )
-    md_debit = models.ForeignKey(Moyen,relayed_name='+',limit_choices_to={'type':'d'} )
-    tiers_cotisation = models.ForeignKey(Tiers,relayed_name='+')"""
+    cpt_m = models.ForeignKey(Compte,relayed_name='+', limit_choices_to={'type__in':('b', 'e')} )
+    cat_cotisation = models.ForeignKey(Cat,relayed_name='+', limit_choices_to={'type':'d'} )
+    car_ost = models.ForeignKey(Cat,relayed_name='+', limit_choices_to={'type':'d'} )
+    md_credit = models.ForeignKey(Moyen,relayed_name='+', limit_choices_to={'type':'r'} )
+    md_debit = models.ForeignKey(Moyen,relayed_name='+', limit_choices_to={'type':'d'} )
+    tiers_cotisation = models.ForeignKey(Tiers, relayed_name='+')"""
 
     class Meta:
         db_table = 'gsb_generalite'
