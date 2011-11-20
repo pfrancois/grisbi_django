@@ -221,7 +221,7 @@ def ope_detail(request, pk):
                                                                       defaults={'nom':form.cleaned_data['nouveau_tiers']
                                                                           , }
                     )[0]
-                    messages.info(request, u"'%s' crée"%form.instance.tiers.nom)
+                    messages.info(request, u"tiers '%s' créé"%form.instance.tiers.nom)
                 if not ope.rapp:
                     messages.success(request, u"opération modifiée")
                     ope = form.save()
@@ -255,7 +255,7 @@ def ope_new(request, cpt_id=None):
                 form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
                                                                   defaults={'nom':form.cleaned_data['nouveau_tiers'], }
                 )[0]
-                messages.info(request, u"tiers '%s' crée"%form.instance.tiers.nom)
+                messages.info(request, u"tiers '%s' créé"%form.instance.tiers.nom)
             ope = form.save()
 
             messages.success(request, u"Opération '%s' crée"%ope)
