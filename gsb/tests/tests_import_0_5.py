@@ -6,7 +6,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
-from .test_base import TestCase
+from .test_base import TestCase as Tcd
 from .. import models as models_gsb
 from ..import_gsb import * #@UnusedWildImport
 import decimal, datetime #@Reimport
@@ -14,7 +14,7 @@ from django.db import models
 import os.path #@Reimport
 from operator import attrgetter
 
-class importtests(TestCase):
+class importtests(Tcd):
     def test_mauvais_format(self):
         logger.setLevel(50)
         self.assertRaises(Import_exception, import_gsb_050,
@@ -30,14 +30,14 @@ class importtests(TestCase):
         self.assertEquals(obj.titre, '')
 
 
-class importposttests(TestCase):
+class importposttests(Tcd):
     def setUp(self):
+        super(importposttests,self).setUp()
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
                          date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
-
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)

@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from django.test import TestCase
+from .test_base import TestCase
 from ..templatetags.smart_if import *
 
 #===============================================================================
@@ -9,6 +9,7 @@ from ..templatetags.smart_if import *
 
 class SmartIfTests(TestCase):
     def setUp(self):
+        super(SmartIfTests,self).setUp()
         self.true = TestVar(True)
         self.false = TestVar(False)
         self.high = TestVar(9000)
@@ -95,4 +96,3 @@ class SmartIfTests(TestCase):
 
         var = IfParser([2, 'not', 'in', [2, 3]]).parse()
         self.assertFalse(var.resolve({}))
-

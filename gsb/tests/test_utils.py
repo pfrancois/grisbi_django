@@ -3,7 +3,7 @@
 test utils
 """
 from __future__ import absolute_import
-from django.test import TestCase
+from .test_base import TestCase
 from .. import utils
 import datetime, time
 from ..models import Generalite, Exercice
@@ -17,6 +17,7 @@ class test_utils(TestCase):
     fixtures = ['test.json']
 
     def setUp(self):
+        super(test_utils,self).setUp()
         self.f = utils.Format()
 
     def test_format_date(self):

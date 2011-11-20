@@ -5,9 +5,8 @@ from django.conf import settings
 import decimal
 class TestCase(Test_Case_django):
     def setUp(self):
-        super(Test_Case_django,self).setUp()
+        super(TestCase,self).setUp()
         #gestion des parametres
-        self.old_ID_CPT_M = settings.ID_CPT_M
         self.TAUX_VERSEMENT = settings.TAUX_VERSEMENT
         self.ID_CAT_COTISATION = settings.ID_CAT_COTISATION
         self.ID_TIERS_COTISATION = settings.ID_TIERS_COTISATION
@@ -22,14 +21,3 @@ class TestCase(Test_Case_django):
         settings.ID_CAT_OST = 64
         settings.MD_CREDIT = 1
         settings.MD_DEBIT = 2
-
-    def tearDown(self):
-        #on remet les settings comme avant
-        settings.ID_CPT_M = self.old_ID_CPT_M
-        settings.TAUX_VERSEMENT = self.TAUX_VERSEMENT
-        settings.ID_CAT_COTISATION = self.ID_CAT_COTISATION
-        settings.ID_TIERS_COTISATION = self.ID_TIERS_COTISATION
-        settings.ID_CAT_OST = self.ID_CAT_OST
-        settings.MD_CREDIT = self.MD_CREDIT
-        settings.MD_DEBIT = self.MD_DEBIT
-        super(Test_Case_django,self).tearDown()
