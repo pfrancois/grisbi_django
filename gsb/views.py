@@ -64,7 +64,10 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     @param rapp: si true, affiche l'ensemble des operations
     """
     c = get_object_or_404(Compte, pk=cpt_id)
-    date_rappro=Ope.objects.filter(compte__pk=cpt_id).latest('rapp__date').date
+    try:
+        date_rappro=Ope.objects.filter(compte__pk=cpt_id).latest('rapp__date').date
+    except Ope.DoesNotExist:
+        date_rappro=None
     solde_rappro=c.solde(rapp=True)
     date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
     if c.type in ('t',):

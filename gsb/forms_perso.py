@@ -113,4 +113,41 @@ def search_opes(request):
         ope = paginator.page(1)
     except (EmptyPage, InvalidPage):
             ope = paginator.page(paginator.num_pages)
-    return render(request,'templates_perso/test.djhtm', {'list_ope':ope,'titre':'recherche',"sort":sort_get})
+    return render(request, 'templates_perso/search.djhtm', {'list_ope':ope,'titre':'recherche',"sort":sort_get})
+
+def rappro(request,cpt_id):
+    c = get_object_or_404(Compte, pk=cpt_id)
+    #on prend les ope non mere non rapproches
+    if request.method == 'POST':#gestion du form
+        pass
+    else:
+        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date').filter(rapp__isnull=True)
+        try:
+            date_rappro=Ope.objects.filter(compte__pk=cpt_id).latest('rapp__date').date
+        except Ope.DoesNotExist:
+            date_rappro=None
+        solde_rappro=c.solde(rapp=True)
+        return render(request, 'templates_perso/search.djhtm',
+                    {   'compte':c,
+                        'list_ope':q,
+                        'titre':c.nom,
+                        'solde':c.solde,
+                        "date_r":date_rappro,
+                        "solde_r":solde_rappro
+                    }
+                )
+
+
+
+class test_f(forms.Form):
+    id=forms.IntegerField()
+    p=forms.CheckboxInput()
+
+def formset(request):
+    q = Ope.non_meres().filter(compte__pk=5).order_by('-date').filter(rapp__isnull=True)
+    testFormSet = formset_factory(test_f, extra=2)
+    return render(request,'test2.djhtm',
+                  {
+
+        }
+    )

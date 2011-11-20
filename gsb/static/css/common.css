@@ -129,8 +129,11 @@ h2{
     background-color: #990000;
     font-weight: bold;
     padding: .7em;
-    border-top: 10px solid #333333;
     height: 3em;
+}
+
+.total_general {
+    border-top: 10px solid #333333;
 }
 
 .padding>td{

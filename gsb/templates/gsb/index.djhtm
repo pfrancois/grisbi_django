@@ -31,13 +31,13 @@
                 <td class="cptLabel" colspan="2"> aucun Compte Comptes titres</td>
             </tr>
         {% endfor %}
-        <tr class="entete">
+        <tr class="footerbar">
             <td class="cptLabel">Solde des comptes titre</td>
             <td class="cptSolde">{{ total_pla|cur }}</td>
         </tr>
     </table>
     <table id="total" class="table">
-        <tr class="footerbar">
+        <tr class="footerbar total_general">
             <td class="cptLabel">Solde global</td>
             <td class="cptSolde">{{ total|cur }}</td>
         </tr>

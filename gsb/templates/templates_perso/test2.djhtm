@@ -1,17 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE }}" xml:lang="{{ LANGUAGE_CODE }}">
-<head>
-    <title>django-tables2 examples</title>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css"/>
-    <style type="text/css">
-        pre{
-            background-color: #D8F0FF;
-            border: 1px solid #9BBBD5;
-            padding: 8px;
-        }
-    </style>
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>django-tables2 examples</title></head>
 <body>
-{{ e1.as_html }}
+
 </body>
 </html>
