@@ -2,41 +2,58 @@
 {% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block bouton_haut %}
-    <table width="100%" id="boutons" class="table">
+    <!-- ajout pla -->
+    <table width="100%" id="boutons_haut" class="table">
         {% if compte.ouvert %}
-            <tr>
-                <td width="50%" class="boutton"><a href="{% url gsb_cpt_ope_new compte.id %}">Nouvelle Op.</a></td>
-                <td width="50%" class="boutton">
+            <tr class="boutton">
+                <td width="50%"><a href="{% url gsb_cpt_ope_new compte.id %}">Nouvelle Op.</a></td>
+                <td width="50%">
                     <a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
             </tr>
-            <tr>
-                <td width="100%" class="boutton" colspan="2">
+            <tr class="boutton">
+                <td width="100%" colspan="2">
                     <a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom }} </a></td>
             </tr>
         {% else %}
-            <tr><td width="100%" class="boutton" colspan="2">
-                <a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td></tr>
+            <tr class="boutton">
+                <td width="100%" colspan="2"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+            </tr>
         {% endif %}
     </table>
+    <!-- ajout pla -->
 {% endblock bouton_haut %}
 {% block titre_col_ope %}
+    <!-- ajout pla -->
     <td class="opDate">Date</td>
     <td class="opTier">Tiers</td>
     <td class="opTier">Catégorie</td>
     <td class="opDebit">Crédit</td>
     <td class="opDebit">Débit</td>
+    <!-- ajout pla -->
 {% endblock titre_col_ope %}
 {% block ope %}
+    <!-- ajout pla -->
     <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
         <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date }}</a></td>
         <td class="opTier"><a href="{{ ope.get_absolute_url  }}">
             {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</a>
         </td>
-        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a>
-        </td>
+        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a></td>
         <td class="opCredit"><a href="{{ ope.get_absolute_url  }}">
             {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">
-            {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a><td>
+            {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
     </tr>
+    <!-- ajout pla -->
 {% endblock ope %}
+{% block boutons_bas %}
+    <!-- ajout pla -->
+    <table width="100%" id="boutons_bas" class="table">
+        <tr class="boutton">
+            <td width="50%"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les op&eacute;rations</a></td>
+            <td width="50%"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+        </tr>
+    </table>
+    <p></p>
+    <!-- ajout pla -->
+{% endblock boutons_bas %}

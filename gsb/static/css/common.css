@@ -42,14 +42,17 @@ h2{
 .boutton{
     background-color: #554444;
     border: #ffffff solid 1px;
-    text-align: center;
-    padding: 10px 0 10px 0;
     font-size: 2em;
     color: #ffffff;
 }
 
 .boutton:hover{
     background-color: #706666;
+}
+.boutton td {
+    text-align: center;
+    padding: 10px 0 10px 0;
+
 }
 /*liste*/
 .table{
