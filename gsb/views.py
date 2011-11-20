@@ -255,8 +255,9 @@ def ope_new(request, cpt_id=None):
                 form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
                                                                   defaults={'nom':form.cleaned_data['nouveau_tiers'], }
                 )[0]
+                messages.info(request, u"tiers '%s' crée"%form.instance.tiers.nom)
             ope = form.save()
-            messages.info(request, u"tiers '%s' crée"%form.instance.tiers.nom)
+
             messages.success(request, u"Opération '%s' crée"%ope)
             return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':ope.compte_id}))
         else:
