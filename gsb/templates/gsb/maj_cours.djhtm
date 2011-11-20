@@ -1,7 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% load gsb_extras %}
-{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block content %}
     <form method="post" action="" id="form1">
         {% csrf_token %}
@@ -12,9 +9,9 @@
 
 
     <table style=" width: 100%;" summary="bouton">
-        <tr>
-            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%" class="boutton">
+        <tr class="boutton">
+            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%">
                 <a href="{% if cpt %}{% url url cpt %}{% else %}{% url url%}{% endif %}">Annuler</a></td>
         </tr>
     </table>

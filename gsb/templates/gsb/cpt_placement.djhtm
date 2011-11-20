@@ -1,33 +1,36 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
     {% load gsb_extras %}{% load url from future %}
     <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
-            <tr><td width="50%" class="boutton"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
-                <td width="50%" class="boutton"><a href="{% url 'cpt_titre_vente' compte.id %}">vente</a></td></tr>
+            <tr class="boutton">
+                <td width="50%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
+                <td width="50%"><a href="{% url 'cpt_titre_vente' compte.id %}">vente</a></td>
+            </tr>
             {% if titres %}
-                <tr><td colspan="2" class="boutton"><a href="{% url 'cpt_titre_maj' compte.id %}">mise à jour
-                global des
-                titres de ce portefeuille</a></td></tr>{% endif %}
-            <tr><td width="100%" colspan="2" class="boutton">
-                <a href="{% url 'gsb.views.index' %}">retour liste comptes</a></td></tr>
+                <tr class="boutton">
+                    <td colspan="2"><a href="{% url 'cpt_titre_maj' compte.id %}">mise à jour global des titres de ce portefeuille</a></td>
+                </tr>{% endif %}
+            <tr class="boutton">
+                <td width="100%" colspan="2"><a href="{% url 'gsb.views.index' %}">retour liste comptes</a></td>
+            </tr>
         {% else %}
-            <tr><td width="100%" class="boutton" colspan="2">
-                <a href="{% url 'gsb.views.index' %}">retour liste comptes</a></td></tr>
+            <tr class="boutton">
+                <td width="100%" colspan="2"><a href="{% url 'gsb.views.index' %}">retour liste comptes</a></td>
+            </tr>
         {% endif %}
     </table>
-    <br />
+    <br/>
     <table width="100%" id="main">
         <thead>
-        <tr>
-            <th>placement</th>
-            <th> nb</th>
-            <th>dernier cours</th>
-            <th align="right">montant plac&eacute;</th>
-            <th>+/- values</th>
-            <th>total</th>
-        </tr>
+            <tr>
+                <th>placement</th>
+                <th> nb</th>
+                <th>dernier cours</th>
+                <th align="right">montant plac&eacute;</th>
+                <th>+/- values</th>
+                <th>total</th>
+            </tr>
         </thead>
         {% for titre in titres %}
             <tr class="item hover{% if titre.pmv < 0 %} creditElement{% else %} debitElement{% endif %}">
@@ -43,7 +46,7 @@
         {% empty %}
             <tr class="item">
                 <td colspan="5"> aucun placement.
-                    <br />
+                    <br/>
                 </td>
             </tr>
         {% endfor %}

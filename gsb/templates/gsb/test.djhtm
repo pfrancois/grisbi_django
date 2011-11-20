@@ -1,5 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 
 {% block content %}
 
@@ -13,7 +12,7 @@
             {% endfor %}
         </table>
         <p>
-            <input type="submit" value="Preview" />
+            <input type="submit" value="Preview"/>
         </p>
     </form>
 {% endblock %}

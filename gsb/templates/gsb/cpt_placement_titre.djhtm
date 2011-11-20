@@ -1,17 +1,15 @@
-{% extends "gsb/cpt_detail.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% load gsb_extras %}
+{% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block bouton_haut %}
     <table width="100%" id="boutons" class="table">
-    {% if compte.ouvert %}
-        <tr>
-            <td class="boutton"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a>
-            </td>
-        </tr>
-    {% else %}
-        <tr><td width="100%" class="boutton" colspan="2">
-            <a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td></tr>
-    {% endif %}
+        {% if compte.ouvert %}
+            <tr class="boutton">
+                <td><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+            </tr>
+        {% else %}
+            <tr class="boutton">
+                <td width="100%" colspan="2"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+            </tr>
+        {% endif %}
     </table>{% endblock bouton_haut %}
 {% block titre_col_ope %}
     <th class="opDate" style="width: 10%;">Date</th>
@@ -33,9 +31,9 @@
 {% endblock ope %}
 {% block footer %}
     <tr class="footerbar">
-    <td>&nbsp;</td>
-    <td>total</td>
-    <td class="opCenter">{{ nb_titre|floatformat:3 }}</td>
-    <td>{{ tit.last_cours|cur }}</td>
-    <td>{{ solde|cur }}</td>
+        <td>&nbsp;</td>
+        <td>total</td>
+        <td class="opCenter">{{ nb_titre|floatformat:3 }}</td>
+        <td>{{ tit.last_cours|cur }}</td>
+        <td>{{ solde|cur }}</td>
     </tr>{% endblock footer %}

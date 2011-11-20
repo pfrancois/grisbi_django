@@ -1,5 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
     <form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
         <table>
@@ -7,7 +6,7 @@
         </table>
         {% csrf_token %}
         <p>
-            <input type="submit" value="Importer" />
+            <input type="submit" value="Importer"/>
         </p>
     </form>
     <p>

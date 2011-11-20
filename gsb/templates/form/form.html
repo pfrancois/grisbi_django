@@ -1,5 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 
 {% block content %}
 
@@ -9,10 +8,10 @@
         <table>
             {{ form }}
         </table>
-        <input type="hidden" name="{{ stage_field }}" value="1" />
+        <input type="hidden" name="{{ stage_field }}" value="1"/>
 
         <p>
-            <input type="submit" value="Preview" />
+            <input type="submit" value="Preview"/>
         </p>
     </form>
 {% endblock %} 

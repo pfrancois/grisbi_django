@@ -1,26 +1,23 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
-{% load gsb_extras %}
-{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block content %}
     <form method="post" action="" id="form1">
         {% csrf_token %}
         <table>
             <thead>
-            <tr>
-                <th>nom de l'opcvm</th>
-                <th>cours/nombre</th>
-                <th>&nbsp;</th>
-            </tr>
+                <tr>
+                    <th>nom de l'opcvm</th>
+                    <th>cours/nombre</th>
+                    <th>&nbsp;</th>
+                </tr>
             </thead>
             {{ form }}
 
         </table>
     </form>
     <table style=" width: 100%;" summary="bouton">
-        <tr>
-            <td width="50%" class="boutton"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%" class="boutton"><a href="{% url 'gsb.views.cpt_detail' cpt.id %}">Annuler</a></td>
+        <tr class="boutton">
+            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%"><a href="{% url 'gsb.views.cpt_detail' cpt.id %}">Annuler</a></td>
 
         </tr>
     </table>

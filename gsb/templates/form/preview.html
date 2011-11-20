@@ -1,5 +1,4 @@
-{% extends "generic.djhtm" %}
-{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 
 {% block content %} <h1>Preview your submission</h1>
     <table>
@@ -17,11 +16,11 @@
         {% csrf_token %}
         {% for field in form %}{{ field.as_hidden }}
         {% endfor %}
-        <input type="hidden" name="{{ stage_field }}" value="2" />
-        <input type="hidden" name="{{ hash_field }}" value="{{ hash_value }}" />
+        <input type="hidden" name="{{ stage_field }}" value="2"/>
+        <input type="hidden" name="{{ hash_field }}" value="{{ hash_value }}"/>
 
         <p>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="Submit"/>
         </p>
     </form>
     <h1>Or edit it again</h1>
@@ -30,10 +29,10 @@
         <table>
             {{ form }}
         </table>
-        <input type="hidden" name="{{ stage_field }}" value="1" />
+        <input type="hidden" name="{{ stage_field }}" value="1"/>
 
         <p>
-            <input type="submit" value="Preview" />
+            <input type="submit" value="Preview"/>
         </p>
     </form>
 {% endblock %} 
