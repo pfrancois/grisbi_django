@@ -416,7 +416,7 @@ class Compte(models.Model):
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
         self.alters_data = True
-        if self.type == 't' and not isinstance(self, Compte_titre):
+        if self.type == 't' and not isinstance(self, Compte_titre) and not self.id:
             cpt = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
                                             banque=self.banque,
                                             guichet=self.guichet, num_compte=self.num_compte,
