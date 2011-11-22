@@ -33,7 +33,8 @@ from . import utils as utils
 #-----------les urls.py
 urlpatterns = patterns('mysite.gsb.forms_perso',
                        url(r'^search$', 'search_opes', name='g_search_ope'),
-                        url(r'^ope$', 'pel'))
+                        url(r'^ope$', 'pel'),
+                        url(r'^formset$','action_view'),)
 
 #---------------les fields, widgets  et forms tres perso
 class SearchField(gsb_forms.Baseform):
@@ -143,11 +144,31 @@ class test_f(forms.Form):
     id=forms.IntegerField()
     p=forms.CheckboxInput()
 
-def formset(request):
-    q = Ope.non_meres().filter(compte__pk=5).order_by('-date').filter(rapp__isnull=True)
-    testFormSet = formset_factory(test_f, extra=2)
-    return render(request,'test2.djhtm',
-                  {
+from django import forms
 
-        }
-    )
+def action_formset(qset):
+    """A form factory which returns a form which allows the user to pick a specific action to
+    perform on a chosen subset of items from a queryset.
+    """
+    class _ActionForm(forms.Form):
+        items = forms.ModelMultipleChoiceField(queryset = qset)
+        #actions = forms.ChoiceField(choices = zip(actions, actions))
+
+    return _ActionForm
+
+def action_view(request):
+
+    qset = Ope.non_meres().filter(compte__pk=5).order_by('-date').filter(rapp__isnull=True)
+    formclass = action_formset(qset)
+
+    if request.method == 'POST':
+        #deal with chosen items
+        form = formclass(request.POST)
+        chosen_qset = form.cleaned_data['items']
+        #do something with items
+        print chosen_qset
+        return render(request, 'templates_perso/test2.djhtm',{'form':form})
+    else:
+        #deal with a GET request
+        form = formclass()
+        return render(request, 'templates_perso/test2.djhtm',{'form':form})

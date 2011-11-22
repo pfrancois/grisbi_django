@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+
+<p>selectionner le rapprochement:</p>
+
+<form action="" method="post">
+
+    {{ rapp_form }}
+
+    <p>les op&eacute;rations suivantes vont êtres rapproch&eacute;s:</p>
+
+    <ul>{{ opes|unordered_list }}</ul>
+
+    <input type="hidden" name="action" value="action_transformer_pointee_rapp" />
+    <input type="submit" name="apply" value="Apply rapp" />
+</form>
+
+{% endblock %}

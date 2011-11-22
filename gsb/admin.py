@@ -9,6 +9,8 @@ from django.utils.safestring import mark_safe
 from django.core import urlresolvers
 from django.db import IntegrityError
 from django.core.exceptions import PermissionDenied
+from django.contrib import messages
+from django.http import HttpResponse, HttpResponseRedirect
 
 
 def fusion(classe, request, queryset, sens):
@@ -22,7 +24,7 @@ def fusion(classe, request, queryset, sens):
     obj_a = queryset[0]
     obj_b = queryset[1]
     if type(obj_a) != type(obj_b):
-        classe.message_user(request, u"attention vous devez selectionner deux item du meme type")
+        messages.error(request,u"attention vous devez selectionner deux item du meme type")
         return
     try:
         if sens == 'ab':
@@ -33,10 +35,10 @@ def fusion(classe, request, queryset, sens):
             message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (
                 nom_module, obj_b, obj_a)
             obj_b.fusionne(obj_a)
-        classe.message_user(request, message)
+        messages.success(request, message)
     except Exception as inst:#TODO mieux gerer
         message = inst.__unicode__()
-        classe.message_user(request, message)
+        messages.error(request, message)
 
 
 class Modeladmin_perso(admin.ModelAdmin):
@@ -78,21 +80,74 @@ class Ib_admin(Modeladmin_perso):
 
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a','action_supprimer_pointe']
     fields = (
         'nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
-    list_display = ('nom', 'solde', 'type', 'ouvert', 'nb_ope')
+    list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
-
+    def solde_rappro(self, obj):
+        return obj.solde(rapp=True)
+    solde_rappro.short_description=u"solde rapproché ou pointé"
+    def date_rappro(self,obj):
+        try:
+            return Ope.objects.filter(compte=obj).latest('rapp__date').date
+        except Ope.DoesNotExist:
+            return None
+    date_rappro.short_description=u"date dernier rapp"
+    def action_supprimer_pointe(self, request, queryset):
+        liste_id=queryset.values_list('id', flat=True)
+        try:
+            Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
+        except e:
+            messages.error(request,e.strerror)
+    action_supprimer_pointe.short_description =u"supprimer tous les statuts 'pointée' dans ce compte"
+    class RappForm(forms.Form):
+        _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+        rapp = forms.ModelChoiceField(Rapp.objects)
+    def action_transformer_pointee_rapp(self, request, queryset):
+        if queryset.count()>1:
+            messages.error(request,u"attention, vous ne pouvez choisir qu'un seul compte")
+            return HttpResponseRedirect(request.get_full_path())
+        form = None
+        if 'apply' in request.POST:
+            form = self.RappForm(request.POST)
+            if form.is_valid():
+                rapp = form.cleaned_data['rapp']
+                count = 0
+                for article in queryset:
+                    article.pointe=False
+                    article.rapp=rapp
+                    count += 1
+                plural = ''
+                if count != 1:
+                    plural = 's'
+                self.message_user(request, u"le compte %s a bien été rapproché (%s operation%s rapprochées)" % (queryset[0], count, plural))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = self.RappForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            print 'toto'
+        return render_to_response('admin/add_rapp.html', {'opes': queryset,
+                                                         'rapp_form': form,
+                                                        })
+    action_transformer_pointee_rapp.short_description = "rapprocher un compte"
 
 class Compte_titre_admin(Modeladmin_perso):
     """compte titre avec inline"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     fields = Compte_admin.fields#on prend comme ca les meme champs
-    list_display = ('nom', 'solde', 'nb_ope')
+    list_display = ('nom', 'solde','solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
-
+    def solde_rappro(self, obj):
+        return obj.solde(rapp=True)
+    solde_rappro.short_description=u"solde rapproché ou pointé"
+    def date_rappro(self,obj):
+        try:
+            #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
+            return Ope.objects.filter(compte__id=obj.id).latest('rapp__date').date
+        except Ope.DoesNotExist:
+            return None
+    date_rappro.short_description=u"date dernier rapp"
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
@@ -100,7 +155,7 @@ class Ope_admin(Modeladmin_perso):
               'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat','pointe')
+    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat','rapp','pointe')
     list_filter = ('compte', 'date', 'pointe', 'rapp','exercice')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
@@ -111,7 +166,6 @@ class Ope_admin(Modeladmin_perso):
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
         else:
             return "(aucun-e)"
-
     show_jumelle.short_description = "jumelle"
 
     def show_mere(self, obj):
@@ -120,7 +174,6 @@ class Ope_admin(Modeladmin_perso):
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.mere))
         else:
             return "(aucun-e)"
-
     show_mere.short_description = "mere"
 
     def oper_titre(self, obj):
@@ -129,21 +182,28 @@ class Ope_admin(Modeladmin_perso):
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre))
         else:
             return "(aucun-e)"
-
     oper_titre.short_description = u"compta matiere"
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
         #on evite que cela soit une operation rapproche
+        error=False
         if instance.rapp:
-            raise IntegrityError()
+            messages.error(request, u'instance rapprochee')
+            error=True
         if instance.jumelle:
             if instance.jumelle.rapp:
-                raise IntegrityError()
+                messages.error(request, u'jumelle rapproche')
+                error=True
         if instance.mere:
             if instance.mere.rapp:
-                raise IntegrityError()
-        return super(Ope_admin, self).delete_view(request, object_id, extra_context)
+                messages.error(request, u'mere rapprochee')
+                error=True
+        if not error:
+            try:
+                return super(Ope_admin, self).delete_view(request, object_id, extra_context)
+            except IntegrityError,e:
+                messages.error(request,e.strerror)
 
 
 class Cours_admin(Modeladmin_perso):

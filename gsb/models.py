@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.db.models import Q
 
 class Gsb_exc(Exception):
     pass
@@ -167,7 +168,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte=compte)
         if rapp:
-            query = query.filter(ope__rapp__isnull=False)
+            query = query.filter(Q(ope__rapp__isnull=False)|Q(ope__pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
         nombre = query.aggregate(nombre=models.Sum('nombre'))['nombre']
@@ -375,7 +376,7 @@ class Compte(models.Model):
         """
         query = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None)
         if rapp:
-            query = query.filter(rapp__isnull=False)
+            query = query.filter(Q(rapp__isnull=False)|Q(pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
@@ -663,7 +664,7 @@ class Ope_titre(models.Model):
             try:
                 Cours.objects.get(titre=self.titre, date=self.date)
             except  Cours.DoesNotExist:
-                cours = Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         else:
             old_date = self.ope.date
             self.ope.date = self.date
@@ -679,7 +680,7 @@ class Ope_titre(models.Model):
                 cours.valeur = self.cours
                 cours.save()
             except  Cours.DoesNotExist:
-                cours = Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
     @models.permalink
@@ -757,7 +758,7 @@ class Rapp(models.Model):
 
     @property
     def solde(self):
-        req = self.ope_set.aggregate(solde=models.Sum('montant'))
+        req = self.ope_set.filter(mere=None).aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
             solde = 0
         else:
@@ -906,7 +907,7 @@ class Ope(models.Model):
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None,
                                    editable=False)
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None,
-                             editable=False)
+                             editable=False,on_delete=models.SET_NULL)
     automatique = models.BooleanField(default=False,
                                       help_text=u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
