@@ -32,7 +32,7 @@ class importtests(Tcd):
 
 class importposttests(Tcd):
     def setUp(self):
-        super(importposttests,self).setUp()
+        super(importposttests, self).setUp()
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),

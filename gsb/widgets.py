@@ -27,10 +27,10 @@ class Dategsbwidget(forms.DateInput):
         auj = '<a href="javascript:shct_date(0,\'%s\')" title="aujourd\'hui">AUJ</a>' % final_attrs['id']
         hier = '<a href="javascript:shct_date(-1,\'%s\')" title="hier">HIER</a>' % final_attrs['id']
         cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (
-        final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+            final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
         return mark_safe(
             u'<input%s /><span id="date_shct">|%s|%s|%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (
-            flatatt(final_attrs), hier, auj, cal))
+                flatatt(final_attrs), hier, auj, cal))
 
 
 class DateFieldgsb(forms.DateField):

@@ -3,9 +3,10 @@ from __future__ import absolute_import
 from django.test import TestCase as Test_Case_django
 from django.conf import settings
 import decimal
+
 class TestCase(Test_Case_django):
     def setUp(self):
-        super(TestCase,self).setUp()
+        super(TestCase, self).setUp()
         #gestion des parametres
         self.TAUX_VERSEMENT = settings.TAUX_VERSEMENT
         self.ID_CAT_COTISATION = settings.ID_CAT_COTISATION

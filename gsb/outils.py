@@ -24,7 +24,7 @@ def import_file(request):
             except KeyError:
                 info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%Y-%b-%d a %H-%M-%S"))
             nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.gsb" % (
-            request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
+                request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
             destination = open(nomfich, 'wb+')
             for chunk in request.FILES['nom_du_fichier'].chunks():
                 destination.write(chunk)

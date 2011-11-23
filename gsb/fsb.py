@@ -23,7 +23,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 def _export():
     #output backup
     cmd = settings.MYSQLDUMP_BIN + ' --opt --compact --skip-add-locks -u %s -p%s %s | gzip -c' % (
-    settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
     stdin, stdout = os.popen2(cmd)
     stdin.close()
     return stdout

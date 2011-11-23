@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django import forms
 from .models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
-                               Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
+                     Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
 from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
@@ -137,7 +137,8 @@ class Ope_titre_addForm(Baseform):
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
     nombre = forms.DecimalField(initial='0')
     cours = gsb_field.CurField(initial='1')
-    frais = forms.DecimalField(initial='0',required=False)
+    frais = forms.DecimalField(initial='0', required=False)
+
     def clean(self):
         super(Ope_titre_addForm, self).clean()
         if not self.cleaned_data['nombre']:
@@ -173,7 +174,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
         #on verifie qu'il est portfeuille
-        if not data['titre'].nb(compte=data['compte_titre'],datel=data['date']):
+        if not data['titre'].nb(compte=data['compte_titre'], datel=data['date']):
             msg = u"titre pas en portefeuille"
             self._errors['titre'] = self.error_class([msg, ])
             del data['titre']

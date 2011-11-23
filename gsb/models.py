@@ -168,7 +168,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte=compte)
         if rapp:
-            query = query.filter(Q(ope__rapp__isnull=False)|Q(ope__pointe=True))
+            query = query.filter(Q(ope__rapp__isnull=False) | Q(ope__pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
         nombre = query.aggregate(nombre=models.Sum('nombre'))['nombre']
@@ -376,7 +376,7 @@ class Compte(models.Model):
         """
         query = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None)
         if rapp:
-            query = query.filter(Q(rapp__isnull=False)|Q(pointe=True))
+            query = query.filter(Q(rapp__isnull=False) | Q(pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
@@ -418,13 +418,13 @@ class Compte(models.Model):
         self.alters_data = True
         if self.type == 't' and not isinstance(self, Compte_titre) and not self.id:
             cpt = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
-                                            banque=self.banque,
-                                            guichet=self.guichet, num_compte=self.num_compte,
-                                            cle_compte=self.cle_compte,
-                                            solde_init=self.solde_init, solde_mini_voulu=self.solde_mini_voulu,
-                                            solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
-                                            notes=self.notes, moyen_credit_defaut=self.moyen_credit_defaut,
-                                            moyen_debit_defaut=self.moyen_credit_defaut
+                                              banque=self.banque,
+                                              guichet=self.guichet, num_compte=self.num_compte,
+                                              cle_compte=self.cle_compte,
+                                              solde_init=self.solde_init, solde_mini_voulu=self.solde_mini_voulu,
+                                              solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
+                                              notes=self.notes, moyen_credit_defaut=self.moyen_credit_defaut,
+                                              moyen_debit_defaut=self.moyen_credit_defaut
             )
         else:
             cpt = super(Compte, self).save(*args, **kwargs)
@@ -664,7 +664,7 @@ class Ope_titre(models.Model):
             try:
                 Cours.objects.get(titre=self.titre, date=self.date)
             except  Cours.DoesNotExist:
-                Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         else:
             old_date = self.ope.date
             self.ope.date = self.date
@@ -680,7 +680,7 @@ class Ope_titre(models.Model):
                 cours.valeur = self.cours
                 cours.save()
             except  Cours.DoesNotExist:
-                Cours.objects.create(titre=self.titre, date=self.date,valeur=self.cours)
+                Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
     @models.permalink
@@ -692,6 +692,7 @@ class Ope_titre(models.Model):
 
     def solde(self):
         return self.compte.solde(datel=self.date)
+
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -907,7 +908,7 @@ class Ope(models.Model):
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None,
                                    editable=False)
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None,
-                             editable=False,on_delete=models.SET_NULL)
+                             editable=False, on_delete=models.SET_NULL)
     automatique = models.BooleanField(default=False,
                                       help_text=u'si cette operation est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
@@ -929,7 +930,7 @@ class Ope(models.Model):
         return Ope.objects.filter(mere=None)
 
     def __unicode__(self):
-        return u"(%s) le %s : %s %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE)
+        return u"(%s) le %s : %s %s pour %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers)
 
     @models.permalink
     def get_absolute_url(self):

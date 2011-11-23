@@ -147,15 +147,15 @@ def strpdate(s):
     return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
 
 
-def addmonths(sourcedate,months,last=False,first=False):
+def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
     month = sourcedate.month - 1 + months
     year = sourcedate.year + month / 12
     month = month % 12 + 1
     if last:
-        day=calendar.monthrange(year,month)[1]
+        day = calendar.monthrange(year, month)[1]
     elif first:
-        day=1
+        day = 1
     else:
-        day=min(sourcedate.day,calendar.monthrange(year,month)[1])
-    return datetime.date(year,month,day)
+        day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return datetime.date(year, month, day)

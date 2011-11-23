@@ -52,7 +52,7 @@ def _export():
         except ValueError:
             list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}
                 , 'scat':None}
-        #creation des id pour cat et sact
+            #creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
         try:
@@ -66,7 +66,7 @@ def _export():
         except ValueError:
             list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type},
                                         'sib':None}
-        #####generalites###
+            #####generalites###
     xml_root = et.Element("Grisbi")
     q_generalite = Generalite.objects.all()[0]
     xml_generalites = et.SubElement(xml_root, "Generalites")
@@ -261,7 +261,7 @@ def _export():
                 xml_element.set('Va', str(ope.mere.id))
                 #raison pour lesquelles il y a des attributs non modifiables
                 #Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
-            ###Echeances###
+                ###Echeances###
 
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")
@@ -396,7 +396,7 @@ def _export():
             xml_sub = et.SubElement(xml_ibe, 'Sous-imputation')
             xml_sub.set('No', str(imp['ib']['id']))
             xml_sub.set('Nom', unicode(imp['sib']['nom']))
-        ##devises##
+            ##devises##
     xml_devises = et.SubElement(xml_root, "Devises")
     xml_generalite = et.SubElement(xml_devises, "Generalites")
     et.SubElement(xml_generalite, "Nb_devises").text = "1"
@@ -445,7 +445,7 @@ def _export():
             #Fax_correspondant: pas ds bdd
             #Tel_correspondant: pas ds bdd
             #Mail_correspondant: pas ds bdd
-        ##exercices##
+            ##exercices##
     xml_exo = et.SubElement(xml_root, "Exercices")
     xml_generalite = et.SubElement(xml_exo, "Generalites")
     et.SubElement(xml_generalite, "Nb_exercices").text = str(Exercice.objects.count())

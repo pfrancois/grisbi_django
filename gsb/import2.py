@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os.path
@@ -60,8 +61,8 @@ def import_gsb(nomfich, efface_table=True):
     tabl_correspondance_ib = {}
     if efface_table:
         for table in (
-        'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
-        'titre', 'tiers', 'Ope_titre'):
+            'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
+            'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from %s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
@@ -344,7 +345,7 @@ def import_gsb(nomfich, efface_table=True):
                 Ope_titre.objects.create(titre=ope_tiers.titre, compte=ope_cpt_titre, nombre=ope_nb, date=ope_date,
                                          cours=ope_cours)
                 ope_tiers.titre.cours_set.get_or_create(date=ope_date, defaults={'date':ope_date, 'valeur':ope_cours})
-            #on cree de toute facon l'operation
+                #on cree de toute facon l'operation
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info(

@@ -17,7 +17,7 @@ class test_utils(TestCase):
     fixtures = ['test.json']
 
     def setUp(self):
-        super(test_utils,self).setUp()
+        super(test_utils, self).setUp()
         self.f = utils.Format()
 
     def test_format_date(self):
@@ -77,6 +77,6 @@ class test_utils(TestCase):
         self.assertEquals(utils.strpdate("2011-12-31"), datetime.date(2011, 12, 31))
 
     def test_add_month(self):
-        self.assertEquals(utils.addmonths(datetime.date(2011,02,15),1),datetime.date(2011,03,15))
-        self.assertEquals(utils.addmonths(datetime.date(2011,02,15),1,first=True),datetime.date(2011,03,01))
-        self.assertEquals(utils.addmonths(datetime.date(2011,02,15),1,last=True),datetime.date(2011,03,31))
+        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1), datetime.date(2011, 03, 15))
+        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, first=True), datetime.date(2011, 03, 01))
+        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, last=True), datetime.date(2011, 03, 31))

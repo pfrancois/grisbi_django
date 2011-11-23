@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
 if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os.path
@@ -51,8 +52,8 @@ def import_gsb_050(nomfich, efface_table=True):
     tabl_correspondance_ope = {}
     if efface_table:
         for table in (
-        'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
-        'titre', 'tiers', 'Ope_titre'):
+            'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
+            'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from gsb_%s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
     logger.info(u"debut du chargement")
@@ -314,29 +315,29 @@ def import_gsb_050(nomfich, efface_table=True):
     list_ope = xml_tree.findall('//Operation')
     nb_ope_final = len(list_ope)
     percent = 1
-    nb_inconnu=0
+    nb_inconnu = 0
     for xml_ope in list_ope:
         logger.debug(u'opération %s' % xml_ope.get('No'))
         try:
             ope_tiers = Tiers.objects.get(id=tabl_correspondance_tiers[xml_ope.get('T')])
         except KeyError:
             if int(xml_ope.get('Ro')):
-                jumelle_xml=xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom'%xml_ope.get('Ro'))
-                if fr2decimal(xml_ope.get('M'))<0:
-                    ope_tiers,tiers_created=Tiers.objects.get_or_create(nom='%s => %s'%(element.nom,jumelle_xml),
-                                                          defaults={'nom':'%s => %s'%(element.nom,jumelle_xml)})
+                jumelle_xml = xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom' % xml_ope.get('Ro'))
+                if fr2decimal(xml_ope.get('M')) < 0:
+                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='%s => %s' % (element.nom, jumelle_xml),
+                                                                           defaults={'nom':'%s => %s' % (element.nom, jumelle_xml)})
                     if tiers_created:
                         tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
                 else:
-                    ope_tiers,tiers_created=Tiers.objects.get_or_create(nom='%s => %s'%(jumelle_xml,element.nom),
-                                                          defaults={'nom':'%s => %s'%(jumelle_xml,element.nom)})
+                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='%s => %s' % (jumelle_xml, element.nom),
+                                                                           defaults={'nom':'%s => %s' % (jumelle_xml, element.nom)})
                     if tiers_created:
                         tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
 
             else:
-                nb_inconnu+=1
-                inconnu=Tiers.objects.create(nom='inconnu%s'%nb_inconnu)
-                ope_tiers=inconnu
+                nb_inconnu += 1
+                inconnu = Tiers.objects.create(nom='inconnu%s' % nb_inconnu)
+                ope_tiers = inconnu
                 tabl_correspondance_tiers[xml_ope.get('T')] = inconnu.id
         ope_montant = fr2decimal(xml_ope.get('M'))
         ope_date = datefr2datesql(xml_ope.get('D'))
@@ -353,7 +354,7 @@ def import_gsb_050(nomfich, efface_table=True):
                 Ope_titre.objects.create(titre=ope_tiers.titre, compte=ope_cpt_titre, nombre=ope_nb, date=ope_date,
                                          cours=ope_cours)
                 ope_tiers.titre.cours_set.get_or_create(date=ope_date, defaults={'date':ope_date, 'valeur':ope_cours})
-            #on cree de toute facon l'operation
+                #on cree de toute facon l'operation
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info(

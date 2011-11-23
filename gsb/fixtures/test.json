@@ -355,54 +355,54 @@
     },
     {
         "pk": 3,
-            "model": "gsb.compte",
-            "fields": {
+        "model": "gsb.compte",
+        "fields": {
             "nom": "cptb3",
-                "cle_compte": 0,
-                "solde_mini_voulu": "0",
+            "cle_compte": 0,
+            "solde_mini_voulu": "0",
             "banque": 2,
             "type": "b",
-                "notes": "",
-                "num_compte": "",
-                "solde_init": "0",
-                "solde_mini_autorise": "0",
+            "notes": "",
+            "num_compte": "",
+            "solde_init": "0",
+            "solde_mini_autorise": "0",
             "moyen_debit_defaut": 2,
-                "titulaire": "",
-                "moyen_credit_defaut": 1,
-                "guichet": "",
-                "ouvert": true
-            }
+            "titulaire": "",
+            "moyen_credit_defaut": 1,
+            "guichet": "",
+            "ouvert": true
+        }
     },
     {
         "pk": 1,
-            "model": "gsb.compte",
-            "fields": {
+        "model": "gsb.compte",
+        "fields": {
             "nom": "cpte1",
             "cle_compte": 72,
-                "solde_mini_voulu": "0",
-                "banque": 1,
+            "solde_mini_voulu": "0",
+            "banque": 1,
             "type": "e",
-                "notes": "",
+            "notes": "",
             "num_compte": "01234567890",
-                "solde_init": "0",
-                "solde_mini_autorise": "0",
+            "solde_init": "0",
+            "solde_mini_autorise": "0",
             "moyen_debit_defaut": 2,
-                "titulaire": "",
-                "moyen_credit_defaut": 1,
+            "titulaire": "",
+            "moyen_credit_defaut": 1,
             "guichet": "12345",
-                "ouvert": true
-            }
+            "ouvert": true
+        }
     },
     {
-            "pk": 4,
-            "model": "gsb.compte_titre",
-            "fields": {}
+        "pk": 4,
+        "model": "gsb.compte_titre",
+        "fields": {}
     },
     {
-            "pk": 5,
-            "model": "gsb.compte_titre",
-            "fields": {}
-        },
+        "pk": 5,
+        "model": "gsb.compte_titre",
+        "fields": {}
+    },
     {
         "pk": 1,
         "model": "gsb.ope_titre",
