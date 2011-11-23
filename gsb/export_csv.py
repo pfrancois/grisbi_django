@@ -9,15 +9,18 @@ if __name__ == "__main__":
     from mysite import settings
 
     setup_environ(settings)
+    from mysite.gsb.models import Compte, Ope
+    from mysite.gsb.utils import Format, strpdate
+else:
+    from .models import Compte, Ope
+    from .utils import Format, strpdate
 
 import codecs, csv, cStringIO
-from .models import Compte, Ope
-from .utils import Format
 import logging
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
-#from django.conf import settings
+from django.conf import settings
 
 class UTF8Recoder:
     """
@@ -58,12 +61,15 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, fich, encoding="utf-8", **kwds):
         # Redirect output to a queue
         self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.writer = csv.writer(self.queue, **kwds)
         self.stream = fich
-        self.encoder = codecs.getincrementalencoder(encoding)()
+        # Force BOM
+        #        if encoding=="utf-16":
+        #            f.write(codecs.BOM_UTF16)
+        self.encoding = encoding
 
     def writerow(self, row):
         self.writer.writerow([unicode(s).encode("utf-8") for s in row])
@@ -71,7 +77,10 @@ class UnicodeWriter:
         data = self.queue.getvalue()
         data = data.decode("utf-8")
         # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
+        data = data.encode(self.encoding)
+        # strip BOM
+        #       if self.encoding == "utf-16":
+        #           data = data[2:]
         # write to the target stream
         self.stream.write(data)
         # empty queue
@@ -93,15 +102,16 @@ class Excel_csv(csv.Dialect):
 
 
 def _export():
+    """
+    fonction principale mais est appelé  par un view
+    """
     logger = logging.getLogger('gsb.export')
     csv.register_dialect("excel_csv", Excel_csv)
     fich = cStringIO.StringIO()
     fmt = Format()
     csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-    csv_file.writerow(
-        u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(
-            ';'))
-    opes = Ope.objects.all().order_by('date').select_related()
+    csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
+    opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(date__gte=strpdate("2009-01-01"))
     i = 0
     total = float(opes.count())
     for ope in opes:
@@ -113,30 +123,32 @@ def _export():
             ligne.append(1)
         ligne.append(fmt.bool(ope.pointe))
         ligne.append(fmt.str(ope.moyen, '', 'nom'))
-        ligne.append(fmt.str(ope.cat, "", "nom"))
+        cat_g = fmt.str(ope.cat, "", "nom").split(":")
+        ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
         ligne.append(ope.tiers)
         ligne.append(ope.notes)
         if ope.ib:
             ligne.append(ope.ib.nom)
         else:
             ligne.append('')
-        ligne.append(ope)
+        ligne.append(ope.num_cheque)
         ligne.append(fmt.str(ope.jumelle, ''))
-        ligne.append(fmt.bool(ope.mere, ''))
+        ligne.append(fmt.bool(ope.mere))
         ligne.append(fmt.str(ope.mere, ''))
         ligne.append(ope.date.strftime('%Y_%m'))
         csv_file.writerow(ligne)
-        if i % 50:
-            logger.log("ligne %s %s%%" % (ope.id, i / total * 100))
+        #on affiche que tous les 100 lignes
+        if not ( i / 100.0 - int(i / 100)) != 0:
+            logger.info("ligne %s %s%%" % (ope.id, i / total * 100))
     return fich
 
 
 def export(request):
     nb_compte = Compte.objects.count()
     if nb_compte:
-        django = _export()
+        dump = _export().getvalue()
         #h=HttpResponse(xml,mimetype="application/xml")
-        reponse = HttpResponse(django, mimetype="text/csv")
+        reponse = HttpResponse(dump, mimetype="text/csv")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE
         return reponse
@@ -150,5 +162,7 @@ def export(request):
 
 if __name__ == '__main__':
     chaine = _export()
-    #f = open('test.csv',"w")
-    print chaine.read()
+    f = open('test.csv', "wb")
+
+    f.write(chaine.getvalue())
+    #print chaine.getvalue()

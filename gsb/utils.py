@@ -34,15 +34,15 @@ class Format:
         """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
         @param s:objet bool
         @param defaut: format a transformer, par defaut c'est 0
-
         """
         if s is None:
             return defaut
         else:
             if isinstance(s, bool):
+                #c'est ici le principe
                 return str(int(s))
             try:
-                i = int(s)
+                i = int("%s"%s)
                 if not i:
                     return '0'
                 else:
@@ -81,22 +81,22 @@ class Format:
         @param defaut: la reponse si neant
         @param membre: l'attribut a demander si pas neant"""
         try:
-            return str(getattr(obj, membre))
+            return unicode(getattr(obj, membre))
         except AttributeError:
-            return str(defaut)
+            return unicode(defaut)
 
 
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
         @return bool """
-    # http://fr.wikipedia.org/wiki/ClĂŠ_RIB#V.C3.A9rifier_un_RIB_avec_une_formule_Excel
+    # http://fr.wikipedia.org/wiki/Clé_RIB#V.C3.A9rifier_un_RIB_avec_une_formule_Excel
     lettres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chiffres = "12345678912345678923456789"
     # subst letters if needed
-    banque = str(banque)
-    guichet = str(guichet)
-    compte = str(compte)
-    cle = str(cle)
+    banque = unicode(banque)
+    guichet = unicode(guichet)
+    compte = unicode(compte)
+    cle = unicode(cle)
     if len(banque) > 5 or len(guichet) > 5 or len(compte) > 11 or len(cle) > 2:
         raise ValueError
     for char in compte:

@@ -24,15 +24,15 @@ class test_models(TestCase):
         self.assertEquals(Tiers.objects.get(nom="tiers1").__unicode__(), u"tiers1")
         self.assertEquals(Titre.objects.get(nom="t1").__unicode__(), u"t1 (1)")
         self.assertEquals(Banque.objects.get(nom="banque1").__unicode__(), u"banque1")
-        self.assertEquals(Cours.objects.get(id=1).__unicode__(), u"le 2009-12-31, 1 t2 : 10")
+        self.assertEquals(Cours.objects.get(id=1).__unicode__(), u"le 2009-12-31, 1 t2 : 10.000")
         self.assertEquals(Cat.objects.get(nom="cat1").__unicode__(), u"cat1")
         self.assertEquals(Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
         self.assertEquals(Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/10/2010")
         self.assertEquals(Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
-        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"1")#TODO a inserer
+        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_rec1 (r)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"r1")
-        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"1")#TODO a inserer
+        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Generalite.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR")
 
