@@ -3,11 +3,11 @@
     <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
             <tr class="boutton">
-                <td><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+                <td><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom }}</a></td>
             </tr>
         {% else %}
             <tr class="boutton">
-                <td width="100%" colspan="2"><a href="{% url gsb.views.cpt_detail compte.id %}">retour detail {{ compte.nom }}</a></td>
+                <td width="100%" colspan="2"><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom }}</a></td>
             </tr>
         {% endif %}
     </table>{% endblock bouton_haut %}
@@ -37,3 +37,12 @@
         <td>{{ tit.last_cours|cur }}</td>
         <td>{{ solde|cur }}</td>
     </tr>{% endblock footer %}
+{% block boutons_bas %}
+    <table width="100%" id="boutons_bas" class="table">
+        <tr class="boutton">
+            <td width="50%"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les op&eacute;rations</a></td>
+            <td width="50%"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+        </tr>
+    </table>
+    <p></p>
+{% endblock boutons_bas %}

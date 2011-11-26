@@ -32,19 +32,24 @@
 {% block ope %}
     <!-- ajout pla -->
     <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-        <td class="opDate"><a href="{{ ope.get_absolute_url  }}">{{ ope.date }}</a></td>
-        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">
+        <td class="opDate "><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
+        <td class="opTier "><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>
             {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</a>
         </td>
-        <td class="opTier"><a href="{{ ope.get_absolute_url  }}">{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a></td>
-        <td class="opCredit"><a href="{{ ope.get_absolute_url  }}">
+        <td class="opTier "><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a></td>
+        <td class="opCredit "><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
             {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-        <td class="opDebit"><a href="{{ ope.get_absolute_url  }}">
+        <td class="opDebit "><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
             {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
     </tr>
     <!-- ajout pla -->
 {% endblock ope %}
 {% block boutons_bas %}
-    <!-- ajout pla -->
-    <!-- ajout pla -->
+    <table width="100%" id="boutons_bas" class="table">
+        <tr class="boutton">
+            <td width="50%"><a href="{% url gsb_cpt_titre_espece_all cpt_id=compte.id%}">voir toutes les op&eacute;rations</a></td>
+            <td width="50%"><a href="{% url gsb_cpt_titre_espece_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+        </tr>
+    </table>
+    <p></p>
 {% endblock boutons_bas %}

@@ -47,7 +47,7 @@
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
                 <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%"><a href="{% url gsb.views.cpt_detail ope.compte_id %}">Annuler</a></td>
+                <td width="50%"><a href="{{ compte.get_absolute_url }}">Annuler</a></td>
             </tr>
         </table>
         <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
