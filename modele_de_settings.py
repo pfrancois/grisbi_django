@@ -18,7 +18,6 @@ ADMINS = (
 #####################################
 #config gsb
 NB_JOURS_AFF = 100
-NB_JOURS_AFF_TITRE = 365
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1

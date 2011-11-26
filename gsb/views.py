@@ -69,10 +69,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     else:
         titre = False
     if not titre:
-        try:
-            date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
-        except Ope.DoesNotExist:
-            date_rappro = None
+        date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
         solde_rappro = c.solde(rapp=True)
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
@@ -367,13 +364,10 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
     """view qui affiche la liste des operations especes d'un compte titre cpt_id
     si date_limite, utilise la date limite sinon affiche toute les ope espece
     @param rapp"""
-    c = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
-    try:
-        date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
-    except Ope.DoesNotExist:
-        date_rappro = None
-    solde_rappro = c.solde_espece(rapp=True)
+    date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
+    solde_rappro = compte.solde_espece(rapp=True)
     if all:
         q = q
     else:
@@ -404,10 +398,10 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
             RequestContext(
                 request,
                     {
-                    'compte':c,
+                    'compte':compte,
                     'list_ope':opes,
-                    'titre':"%s: Especes" % c.nom,
-                    'solde':c.solde_espece(),
+                    'titre':"%s: Especes" % compte.nom,
+                    'solde':compte.solde_espece(),
                     'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),
                     "date_r":date_rappro,
                     "solde_r":solde_rappro,
@@ -422,37 +416,46 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
 
 
 @login_required
-def titre_detail_cpt(request, titre_id, cpt_id, date_limite=True):
+def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si date_limite, utilise la date limite sinon affiche toute les ope """
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
-    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    if date_limite:
-        date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF_TITRE)
-        q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(date__gte=date_limite).filter(
-            titre=titre)
-        nbvielles = Ope_titre.objects.filter(compte__pk=cpt_id).filter(date__lte=date_limite).count()
+    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
+    solde_rappro = compte.solde_espece(rapp=True)
+    q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
+    if all:
+        q = q
     else:
-        date_limite = datetime.datetime.fromtimestamp(0).date()
-        q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
-        nbvielles = 0
+        #on prend comme reference les ope especes
+        if rapp:
+            q = q.filter(ope__rapp__isnull=False)
+        else:
+            q = q.filter(ope__rapp__isnull=True)
+    paginator = Paginator(q, 50)
+    try:
+        page = int(request.GET.get('page'))
+    except (ValueError, TypeError):
+        page = 1
+    try:
+        opes = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        opes = paginator.page(1)
+    except (EmptyPage, InvalidPage):
+        opes = paginator.page(paginator.num_pages)
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
     return HttpResponse(
         template.render(
             RequestContext(
                 request,
                     {
-                    'compte':cpt,
-                    'list_ope':q,
-                    'titre':"%s: %s" % (cpt.nom, titre.nom),
-                    'solde':titre.investi(cpt),
-                    'date_limite':date_limite,
-                    'nbrapp':0,
-                    'nbvielles':nbvielles,
-                    'tit':titre,
-                    'nb_titre':titre.nb(cpt),
-                    'nb_j':settings.NB_JOURS_AFF_TITRE
-                    #                    'nb_titre':titre.nb()
+                    'compte':compte,
+                    'list_ope':opes,
+                    'titre':"%s: %s" % (compte.nom, titre.nom),
+                    'solde':titre.investi(compte),
+                    'titre':titre,
+                    'nb_titre':titre.nb(compte),
                 }
             )
         )
@@ -489,12 +492,12 @@ def ope_titre_detail(request, pk):
                 creation = False
             if form.has_changed() and ope.ope.rapp is None:
                 #on efface au besoin le cours
-                c = Cours.objects.filter(titre=ope.titre, date=date_initial)
-                if c.exists():
-                    c = c[0]
+                compte = Cours.objects.filter(titre=ope.titre, date=date_initial)
+                if compte.exists():
+                    compte = compte[0]
                     if not Cours.objects.filter(titre=ope.titre, date=form.cleaned_data['date']).exists():
-                        c.date = form.cleaned_data['date']
-                    c.save()
+                        compte.date = form.cleaned_data['date']
+                    compte.save()
                     messages.info(request, u'cours crée')
                 if not creation:
                     cours = form.cleaned_data['cours']
