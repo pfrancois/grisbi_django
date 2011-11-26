@@ -42,7 +42,7 @@ class Format:
                 #c'est ici le principe
                 return str(int(s))
             try:
-                i = int("%s"%s)
+                i = int("%s" % s)
                 if not i:
                     return '0'
                 else:

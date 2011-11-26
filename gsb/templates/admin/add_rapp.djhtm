@@ -3,9 +3,7 @@
     {% url 'admin:jsi18n' as jsi18nurl %}
     <script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
     {{ media }}
-{% endblock %}
-{% csrf_token %}
-{% block extrastyle %}{{ block.super }}
+{% endblock %}{% csrf_token %}{% block extrastyle %}{{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css"/>{% endblock %}
 
 
