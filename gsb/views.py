@@ -598,7 +598,7 @@ def ope_titre_achat(request, cpt_id):
 
 
 @login_required
-def ope_titre_vente(request, cpt_id):
+def ope_titre_vente(request, cpt_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_venteForm(data=request.POST, cpt=compte)
@@ -632,6 +632,7 @@ def ope_titre_vente(request, cpt_id):
 
 @login_required
 def view_maj_cpt_titre(request, cpt_id):
+    """mise a jour global d'un portefeuille"""
     cpt = Compte_titre.objects.get(id=cpt_id)
     liste_titre_original = cpt.titre.all().distinct()
     liste_titre = []
@@ -658,7 +659,7 @@ def view_maj_cpt_titre(request, cpt_id):
                        cours:
                         Cours.objects.create(date=form.cleaned_data['date'], titre=titre_en_cours, valeur=cours)
 
-            return HttpResponseRedirect(reverse('mysite.gsb.views.cpt_detail', kwargs={'cpt_id':cpt_id}))
+            return HttpResponseRedirect(cpt.get_absolute_url())
     else:
         form = gsb_forms.Majtitre(titres=liste_titre)
     return render(request, 'gsb/maj_cpt_titre.djhtm',
