@@ -592,6 +592,10 @@ def ope_titre_achat(request, cpt_id):
 @login_required
 def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    if compte.titre.all().distinct().count()<1:
+        messages.error(request,'attention, ce compte ne possede aucun titre. donc vous ne pouvez mettre a jour')
+        return HttpResponseRedirect(compte.get_absolute_url())
+
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_venteForm(data=request.POST, cpt=compte)
         if form.is_valid():
@@ -611,13 +615,13 @@ def ope_titre_vente(request, cpt_id):
                                                                           form.cleaned_data['date']))
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
-        form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':cpte}, cpt=cpte)
-    titre = u' nouvelle vente sur %s' % cpte.nom
+        form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte}, cpt=compte)
+    titre = u' nouvelle vente sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {'titre_long':titre,
              'titre':u'modification',
              'form':form,
-             'cpt':cpte,
+             'cpt':compte,
              'sens':'vente'}
     )
 
@@ -628,6 +632,9 @@ def view_maj_cpt_titre(request, cpt_id):
     cpt = Compte_titre.objects.get(id=cpt_id)
     liste_titre_original = cpt.titre.all().distinct()
     liste_titre = []
+    if liste_titre_original.count()<1:
+        messages.error('attention, ce compte ne possede aucun titre. donc vous ne pouvez mettre a jour')
+        return HttpResponseRedirect(cpt.get_absolute_url())
     for l in liste_titre_original:
         liste_titre.append(l)
     if request.method == 'POST':
