@@ -296,7 +296,7 @@ class Banque_admin(Modeladmin_perso):
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-
+    list_display = ('nom', 'date')
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
