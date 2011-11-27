@@ -152,20 +152,6 @@ class Compte_titre_admin(Modeladmin_perso):
     list_display = ('nom', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-    def solde_rappro(self, obj):
-        return obj.solde(rapp=True)
-
-    solde_rappro.short_description = u"solde rapproché ou pointé"
-
-    def date_rappro(self, obj):
-        try:
-            #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
-            return Ope.objects.filter(compte__id=obj.id).latest('rapp__date').date
-        except Ope.DoesNotExist:
-            return None
-
-    date_rappro.short_description = u"date dernier rapp"
-
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""

@@ -589,6 +589,20 @@ class Compte_titre(Compte):
         solde_titre = self.solde_titre(datel, rapp)
         return solde_espece + solde_titre
 
+    def solde_rappro(self):
+        return self.solde(rapp=True)
+
+    solde_rappro.short_description = u"solde rapproché ou pointé"
+
+    def date_rappro(self):
+        try:
+            #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
+            return Ope.objects.filter(compte__id=self.id).latest('rapp__date').date
+        except Ope.DoesNotExist:
+            return None
+
+    date_rappro.short_description = u"date dernier rapp"
+
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne deux compte_titre"""
