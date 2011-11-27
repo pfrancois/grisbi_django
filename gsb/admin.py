@@ -114,13 +114,8 @@ class Compte_admin(Modeladmin_perso):
     class RappForm(forms.Form):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         #rapp_f = forms.CharField(label=u'nom du rapprochement à creer', help_text=u"sous la forme compteAAAAMM")
-        rapp_f = forms.ModelChoiceField(queryset=Rapp.objects.all())
+        rapp_f = forms.ModelChoiceField(Rapp.objects.all(), required=False)
         date = forms.DateField()
-
-        def clean_rapp(self):
-        #if Rapp.objects.filter(nom=self.cleaned_data['rapp_f']).exists():
-        #                raise forms.ValidationError(u"un rapprochement avec ce nom existe déja")
-            return self.cleaned_data['rapp_f']
 
     def action_transformer_pointee_rapp(self, request, queryset):
         if queryset.count() > 1:
@@ -132,6 +127,16 @@ class Compte_admin(Modeladmin_perso):
             form = self.RappForm(request.POST)
             if form.is_valid():
                 rapp = form.cleaned_data['rapp_f']
+                if not rapp:
+                    rapp_date=form.cleaned_data['date'].year
+                    last=Rapp.objects.filter(date__year=rapp_date)
+                    if last.exists():
+                        last=last.latest('date')
+                        rapp_id=int(last.nom[-2:])+1
+                    else:
+                        rapp_id=1
+                    nomrapp="%s%s%02d"%(queryset[0].nom,rapp_date,rapp_id)
+                    rapp=Rapp.objects.create(nom=nomrapp,date=form.cleaned_data['date'])
                 count = 0
                 for article in query_ope:
                     article.pointe = False
