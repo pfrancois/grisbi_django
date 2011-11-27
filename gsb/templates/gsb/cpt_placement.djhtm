@@ -45,7 +45,7 @@
             </tr>
         {% empty %}
             <tr class="item">
-                <td colspan="5"> aucun placement.
+                <td colspan="6"> aucun placement.
                     <br/>
                 </td>
             </tr>
