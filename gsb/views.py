@@ -69,7 +69,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     else:
         titre = False
     if not titre:
-        date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
+        date_rappro = c.date_rappro()
         solde_rappro = c.solde(rapp=True)
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
@@ -366,7 +366,7 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
     @param rapp"""
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
-    date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
+    date_rappro = compte.date_rappro()
     solde_rappro = compte.solde_espece(rapp=True)
     if all:
         q = q
@@ -413,7 +413,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     si date_limite, utilise la date limite sinon affiche toute les ope """
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    date_rappro = Ope.objects.filter(compte__pk=cpt_id).aggregate(element=models.Max('rapp__date'))['element']
+    date_rappro = compte.date_rappro()
     solde_rappro = compte.solde_espece(rapp=True)
     q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
     if all:

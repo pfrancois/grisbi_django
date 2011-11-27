@@ -88,19 +88,6 @@ class Compte_admin(Modeladmin_perso):
     list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-    def solde_rappro(self, obj):
-        return obj.solde(rapp=True)
-
-    solde_rappro.short_description = u"solde rapproché ou pointé"
-
-    def date_rappro(self, obj):
-        try:
-            return Ope.objects.filter(compte=obj).latest('rapp__date').date
-        except Ope.DoesNotExist:
-            return None
-
-    date_rappro.short_description = u"date dernier rapp"
-
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
@@ -121,15 +108,16 @@ class Compte_admin(Modeladmin_perso):
         if queryset.count() > 1:
             messages.error(request, u"attention, vous ne pouvez choisir qu'un seul compte")
             return HttpResponseRedirect(request.get_full_path())
+        compte = queryset[0]
         form = None
-        query_ope = queryset[0].ope_set.filter(pointe=True).order_by('-date')
+        query_ope = compte.ope_set.filter(pointe=True).order_by('-date')
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
                 rapp = form.cleaned_data['rapp_f']
                 if not rapp:
                     rapp_date=form.cleaned_data['date'].year
-                    last=Rapp.objects.filter(date__year=rapp_date)
+                    last=Rapp.objects.filter(date__year=rapp_date).filter(compte=compte)
                     if last.exists():
                         last=last.latest('date')
                         rapp_id=int(last.nom[-2:])+1

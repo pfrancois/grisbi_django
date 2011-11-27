@@ -430,6 +430,18 @@ class Compte(models.Model):
             cpt = super(Compte, self).save(*args, **kwargs)
         return cpt
 
+    def solde_rappro(self):
+        return self.solde(rapp=True)
+
+    solde_rappro.short_description = u"solde rapproché ou pointé"
+
+    def date_rappro(self):
+        try:
+            return Ope.objects.filter(compte__pk=self.id).aggregate(element=models.Max('rapp__date'))['element']
+        except Ope.DoesNotExist:
+            return None
+
+    date_rappro.short_description = u"date dernier rapp"
 
 class Compte_titre(Compte):
     """
