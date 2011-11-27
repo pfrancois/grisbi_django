@@ -375,11 +375,7 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
             q = q.filter(rapp__isnull=False)
         else:
             q = q.filter(rapp__isnull=True)
-<<<<<<< HEAD
-    q = q.select_related('tiers', 'tiers__titre', 'cat','rapp')
-=======
     q = q.select_related('tiers', 'tiers__titre', 'cat', 'rapp')
->>>>>>> correction bug rapprochement
     paginator = Paginator(q, 50)
     try:
         page = int(request.GET.get('page'))
@@ -405,11 +401,7 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
                     'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),
                     "date_r":date_rappro,
                     "solde_r":solde_rappro,
-<<<<<<< HEAD
-                }
-=======
                     }
->>>>>>> correction bug rapprochement
             )
         )
     )
@@ -598,7 +590,7 @@ def ope_titre_achat(request, cpt_id):
 
 
 @login_required
-def ope_titre_vente(request, cpt_id)
+def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_venteForm(data=request.POST, cpt=compte)
