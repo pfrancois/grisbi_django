@@ -44,6 +44,7 @@ class SearchField(gsb_forms.Baseform):
 
 @login_required
 def search_opes(request):
+
     if request.method == 'POST':
         form = SearchField(request.POST)
         if form.is_valid():

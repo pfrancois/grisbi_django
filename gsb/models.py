@@ -251,7 +251,7 @@ class Cat(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return self.nom
+        return "%s(%s)"%(self.nom,self.type)
 
     @transaction.commit_on_success
     def fusionne(self, new):
