@@ -12,7 +12,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-
+from django.db.models import Q
+import decimal
 
 def fusion(request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""
@@ -87,7 +88,15 @@ class Compte_admin(Modeladmin_perso):
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
     list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
+    def solde_rappro(self,obj):
+        req = Ope.non_meres().filter(compte=obj.id).filter(Q(rapp__isnull=False) | Q(pointe=True)).aggregate(solde=models.Sum('montant'))
+        if req['solde'] is None:
+            solde = decimal.Decimal(0) + decimal.Decimal(obj.solde_init)
+        else:
+            solde = decimal.Decimal(req['solde']) + decimal.Decimal(obj.solde_init)
+        return solde
 
+    solde_rappro.short_description = u"solde rapproché ou pointé"
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
