@@ -448,7 +448,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
                     'solde':titre.investi(compte),
                     'titre':titre,
                     'nb_titre':titre.nb(compte),
-                }
+                    }
             )
         )
     )
@@ -592,8 +592,8 @@ def ope_titre_achat(request, cpt_id):
 @login_required
 def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    if compte.titre.all().distinct().count()<1:
-        messages.error(request,'attention, ce compte ne possède aucun titre. donc vous ne pouvez vendre')
+    if compte.titre.all().distinct().count() < 1:
+        messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez vendre')
         return HttpResponseRedirect(compte.get_absolute_url())
 
     if request.method == 'POST':
@@ -632,7 +632,7 @@ def view_maj_cpt_titre(request, cpt_id):
     cpt = Compte_titre.objects.get(id=cpt_id)
     liste_titre_original = cpt.titre.all().distinct()
     liste_titre = []
-    if liste_titre_original.count()<1:
+    if liste_titre_original.count() < 1:
         messages.error(u'attention, ce compte ne possède aucun titre. donc vous ne pouvez mettre a jour')
         return HttpResponseRedirect(cpt.get_absolute_url())
     for l in liste_titre_original:

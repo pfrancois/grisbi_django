@@ -437,7 +437,7 @@ class Compte(models.Model):
 
     def date_rappro(self):
         try:
-            date_rapp=Ope.objects.filter(compte__pk=self.id).aggregate(element=models.Max('rapp__date'))['element']
+            date_rapp = Ope.objects.filter(compte__pk=self.id).aggregate(element=models.Max('rapp__date'))['element']
             if date_rapp:
                 return date_rapp.strftime("%d/%m/%Y")
             else:
@@ -446,6 +446,7 @@ class Compte(models.Model):
             return "-"
 
     date_rappro.short_description = u"date dernier rapp"
+
 
 class Compte_titre(Compte):
     """
@@ -601,7 +602,7 @@ class Compte_titre(Compte):
     def date_rappro(self):
         try:
             #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
-            date_rapp=Ope.objects.filter(compte__id=self.id).latest('rapp__date').date
+            date_rapp = Ope.objects.filter(compte__id=self.id).latest('rapp__date').date
             if date_rapp:
                 return date_rapp.strftime("%d/%m/%Y")
             else:

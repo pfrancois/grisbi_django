@@ -116,15 +116,15 @@ class Compte_admin(Modeladmin_perso):
             if form.is_valid():
                 rapp = form.cleaned_data['rapp_f']
                 if not rapp:
-                    rapp_date=form.cleaned_data['date'].year
-                    last=Rapp.objects.filter(date__year=rapp_date).filter(compte=compte)
+                    rapp_date = form.cleaned_data['date'].year
+                    last = Rapp.objects.filter(date__year=rapp_date).filter(compte=compte)
                     if last.exists():
-                        last=last.latest('date')
-                        rapp_id=int(last.nom[-2:])+1
+                        last = last.latest('date')
+                        rapp_id = int(last.nom[-2:]) + 1
                     else:
-                        rapp_id=1
-                    nomrapp="%s%s%02d"%(queryset[0].nom,rapp_date,rapp_id)
-                    rapp=Rapp.objects.create(nom=nomrapp,date=form.cleaned_data['date'])
+                        rapp_id = 1
+                    nomrapp = "%s%s%02d" % (queryset[0].nom, rapp_date, rapp_id)
+                    rapp = Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
                 count = 0
                 for article in query_ope:
                     article.pointe = False
@@ -283,6 +283,7 @@ class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_display = ('nom', 'date')
+
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
