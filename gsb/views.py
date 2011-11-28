@@ -124,7 +124,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'compte':c,
                         'list_ope':opes,
                         'nbrapp':nb_ope_rapp,
-                        'nbvieilles':nb_ope_vielles,
+                        'nbvieilles':nb_ope_vieilles,
                         'titre':c.nom,
                         'solde':solde,
                         'date_limite':date_limite,
