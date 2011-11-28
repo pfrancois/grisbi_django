@@ -170,8 +170,7 @@ INSTALLED_APPS = (
     'mysite.gsb',
     #gestion admin
     'django.contrib.admin',
-    'django.contrib.admindocs',
-    'mysite.django_qbe',
+    'django.contrib.admindocs'
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
