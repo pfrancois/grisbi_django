@@ -79,16 +79,16 @@ class Modeladmin_perso(admin.ModelAdmin):
         result = super(Modeladmin_perso, self).add_view(request, *args, **kwargs)
         return self.keepfilter(request, result)
 
-    def change_view(self, request, object_id, extra_context):
+    def change_view(self, request, *args, **kwargs):
         """
         save the referer of the page to return to the filtered
         change_list after saving the page
         """
-        result = super(Modeladmin_perso, self).change_view(request, object_id, extra_context)
+        result = super(Modeladmin_perso, self).change_view(request, *args, **kwargs)
         return self.keepfilter(request, result)
 
     def delete_view(self, request, object_id, extra_context=None):
-        result = super(Modeladmin_perso, self).delete_view(self, request, object_id)
+        result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
 
 
@@ -204,7 +204,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice')
+    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice','cat__type')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
