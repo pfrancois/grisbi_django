@@ -962,7 +962,7 @@ class Ope(models.Model):
 
     @staticmethod
     def non_meres():
-        return Ope.objects.filter(mere=None)
+        return Ope.objects.filter(filles_set__isnull=True)
 
     def __unicode__(self):
         return u"(%s) le %s : %s %s pour %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers)
@@ -1018,7 +1018,7 @@ def verif_ope_titre(sender, **kwargs):
     instance = kwargs['instance']
     if instance.ope:
         if instance.ope.rapp:
-            raise IntegrityError()
+            raise IntegrityError(u"operation espece rapprochee")
 
 
 class Virement(object):
