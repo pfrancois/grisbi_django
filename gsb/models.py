@@ -975,6 +975,8 @@ class Ope(models.Model):
         self.alters_data = True
         self.deja_clean = True
         super(Ope, self).clean()
+        if not self.compte_id:
+            raise ValidationError(u"vous devez mettre un compte")
         #verification qu'il n'y ni pointe ni rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
