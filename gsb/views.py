@@ -74,17 +74,17 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
         if all:
-            nb_ope_vielles = 0
+            nb_ope_vieilles = 0
             nb_ope_rapp = 0
             solde = c.solde()
         else:
             if rapp:
-                nb_ope_vielles = 0
+                nb_ope_vieilles = 0
                 nb_ope_rapp = 0
                 solde = c.solde(rapp=True)
                 q = q.exclude(rapp__isnull=True)
             else:
-                nb_ope_vielles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+                nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
                 nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
                 q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
                 solde = c.solde()
@@ -124,7 +124,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'compte':c,
                         'list_ope':opes,
                         'nbrapp':nb_ope_rapp,
-                        'nbvielles':nb_ope_vielles,
+                        'nbvieilles':nb_ope_vielles,
                         'titre':c.nom,
                         'solde':solde,
                         'date_limite':date_limite,

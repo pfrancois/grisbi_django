@@ -55,12 +55,10 @@
             <tr class="item">
                 <td colspan="5">
                     aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
-                    {% if nbvielles > 1 %}
-                        {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au
-                    del&agrave; de la limite des {{ nb_j }} jours maximum.<br/>
-                    {% else %} {% if nbvielles == 1 %}
-                    1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la
-                    limite des {{ nb_j }} jours maximum.<br/>
+                    {% if nbvieilles > 1 %}
+                        {{ nbvieilles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ nb_j }} jours maximum.<br/>
+                    {% else %} {% if nbvieilles == 1 %}
+                    1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ nb_j }} jours maximum.<br/>
                     {% endif %}{% endif %}
                     {% if nbrapp == 1 %}
                     note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
@@ -101,12 +99,12 @@
         {% if nbrapp > 1 %}
             note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
         {% endif %}
-        {% if nbvielles > 1 %}
-            note: {{ nbvielles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vielles.<br/>
+        {% if nbvieilles > 1 %}
+            note: {{ nbvieilles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vieilles.<br/>
             seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
         {% endif %}
-        {% if nbvielles == 1 %}
-            note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieille.<br/>
+        {% if nbvieilles == 1 %}
+            note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieiille.<br/>
             seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
         {% endif %}
     </div>
