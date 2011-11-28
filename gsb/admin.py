@@ -117,7 +117,7 @@ class Compte_admin(Modeladmin_perso):
                 rapp = form.cleaned_data['rapp_f']
                 if not rapp:
                     rapp_date = form.cleaned_data['date'].year
-                    last = Rapp.objects.filter(date__year=rapp_date).filter(compte=compte)
+                    last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte=compte).distinct()
                     if last.exists():
                         last = last.latest('date')
                         rapp_id = int(last.nom[-2:]) + 1
