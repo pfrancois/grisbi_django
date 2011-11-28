@@ -59,43 +59,38 @@ class Modeladmin_perso(admin.ModelAdmin):
 
     fusionne_b_dans_a.short_description = u"fusion de 2 dans 1"
     #from here http://djangosnippets.org/snippets/2531/
-    def keepfilter(self,request,result):
-       # Look at the referer for a query string '^.*\?.*$'
+    def keepfilter(self, request, result):
+    # Look at the referer for a query string '^.*\?.*$'
         ref = request.META.get('HTTP_REFERER', '')
         if ref.find('?') != -1:
             # We've got a query string, set the session value
-            request.session['filtered'] =  ref
+            request.session['filtered'] = ref
 
         if request.POST.has_key('_save'):
-            """
-            We only kick into action if we've saved and if
-            there is a session key of 'filtered', then we
-            delete the key.
-            """
             try:
                 if request.session['filtered'] is not None:
                     result['Location'] = request.session['filtered']
                     request.session['filtered'] = None
-            except:
+            except KeyError :
                 pass
         return result
+
     def add_view(self, request, *args, **kwargs):
-        result = super(Modeladmin_perso, self).add_view(request, *args, **kwargs )
-        return self.keepfilter(request,result)
-    """
-    Used to redirect users back to their filtered list of locations if there were any
-    """
-    def change_view(self, request, object_id, extra_context={}):
+        result = super(Modeladmin_perso, self).add_view(request, *args, **kwargs)
+        return self.keepfilter(request, result)
+
+    def change_view(self, request, object_id, extra_context):
         """
         save the referer of the page to return to the filtered
         change_list after saving the page
         """
-        result = super(Modeladmin_perso, self).change_view(request, object_id, extra_context )
-        return self.keepfilter(request,result)
+        result = super(Modeladmin_perso, self).change_view(request, object_id, extra_context)
+        return self.keepfilter(request, result)
 
     def delete_view(self, request, object_id, extra_context=None):
-        result = super(Modeladmin_perso, self).delete_view(self, request, object_id, extra_context)
-        return self.keepfilter(request,result)
+        result = super(Modeladmin_perso, self).delete_view(self, request, object_id)
+        return self.keepfilter(request, result)
+
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -125,7 +120,8 @@ class Compte_admin(Modeladmin_perso):
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
     list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
-    def solde_rappro(self,obj):
+
+    def solde_rappro(self, obj):
         req = Ope.non_meres().filter(compte=obj.id).filter(Q(rapp__isnull=False) | Q(pointe=True)).aggregate(solde=models.Sum('montant'))
         if req['solde'] is None:
             solde = decimal.Decimal(0) + decimal.Decimal(obj.solde_init)
@@ -134,6 +130,7 @@ class Compte_admin(Modeladmin_perso):
         return solde
 
     solde_rappro.short_description = u"solde rapproché ou pointé"
+
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
@@ -142,7 +139,7 @@ class Compte_admin(Modeladmin_perso):
         except e:
             messages.error(request, e.strerror)
 
-    action_supprimer_pointe.short_description = u"supprimer tous les statuts 'pointé' dans ce compte"
+    action_supprimer_pointe.short_description = u"supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
     class RappForm(forms.Form):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
@@ -184,6 +181,7 @@ class Compte_admin(Modeladmin_perso):
                 rapp.save()
                 self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (queryset[0], count, plural, plural))
                 return HttpResponseRedirect(request.get_full_path())
+
         if not form:
             form = self.RappForm(initial={'_selected_action':request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
         return render(request, 'admin/add_rapp.djhtm', {'opes':query_ope, 'rapp_form':form, })
@@ -206,9 +204,10 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date','moyen', 'pointe', 'rapp', 'exercice')
+    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
+    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
 
     def show_jumelle(self, obj):
         if obj.jumelle_id:
@@ -237,6 +236,12 @@ class Ope_admin(Modeladmin_perso):
 
     oper_titre.short_description = u"compta matiere"
 
+    def mul(self, request, queryset):
+        queryset.update(montant=models.F('montant') * -1)
+        return HttpResponseRedirect(request.get_full_path())
+
+    mul.short_description = u"multiplier le montant des opérations selectionnnés par -1"
+
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
         #on evite que cela soit une operation rapproche
@@ -257,6 +262,7 @@ class Ope_admin(Modeladmin_perso):
                 return super(Ope_admin, self).delete_view(request, object_id, extra_context)
             except IntegrityError, e:
                 messages.error(request, e.strerror)
+
 
 class Cours_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
