@@ -374,7 +374,7 @@ class Compte(models.Model):
             @param datel date date limite de calcul du solde
             @param rapp boolean faut il prendre uniquement les operation rapproches
         """
-        query = Ope.objects.filter(compte__id__exact=self.id, mere__exact=None)
+        query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
             query = query.filter(Q(rapp__isnull=False) | Q(pointe=True))
         if datel:
