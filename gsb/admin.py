@@ -81,7 +81,7 @@ class Modeladmin_perso(admin.ModelAdmin):
         return result
     def add_view(self, request, *args, **kwargs):
         result = super(Modeladmin_perso, self).add_view(request, *args, **kwargs )
-        return keepfilter(request,result)
+        return self.keepfilter(request,result)
     """
     Used to redirect users back to their filtered list of locations if there were any
     """
@@ -91,11 +91,11 @@ class Modeladmin_perso(admin.ModelAdmin):
         change_list after saving the page
         """
         result = super(Modeladmin_perso, self).change_view(request, object_id, extra_context )
-        return keepfilter(request,result)
+        return self.keepfilter(request,result)
 
     def delete_view(self, request, object_id, extra_context=None):
         result = super(Modeladmin_perso, self).delete_view(self, request, object_id, extra_context)
-        return keepfilter(request,result)
+        return self.keepfilter(request,result)
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
