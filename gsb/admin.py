@@ -160,7 +160,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date', 'pointe', 'rapp', 'exercice')
+    list_filter = ('compte', 'date','moyen', 'pointe', 'rapp', 'exercice')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
 
