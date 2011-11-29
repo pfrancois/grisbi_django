@@ -6,5 +6,5 @@ message from https://github.com/mrben/nicer_django_messages
 necessite:
 django
 lxml
-django_qbe http://versae.github.com/qbe/
-messages from 
+dateutils http://labix.org/python-dateutil#head-de
+
