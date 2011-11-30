@@ -314,33 +314,33 @@ def _export():
         xml_element.set('Notes', ech.notes)
         xml_element.set('Automatique', fmt.bool(ech.inscription_automatique))
         xml_element.set('Notes', str(ech.notes))
-        if ech.periodicite is None or ech.periodicite=='u':
+        if ech.periodicite is None or ech.periodicite == 'u':
             xml_element.set('Periodicite', str(0))
             xml_element.set('Intervalle_periodicite', 0)
         else:
-            if ech.intervalle>1 :#on cree periodicite perso
+            if ech.intervalle > 1:#on cree periodicite perso
                 xml_element.set('Intervalle_periodicite', str(ech.intervalle))
                 xml_element.set('Periodicite', '4')#periodicite perso
-                if ech.periodicite=='s':
-                    xml_element.set('Intervalle_periodicite', str(ech.intervalle*7))
+                if ech.periodicite == 's':
+                    xml_element.set('Intervalle_periodicite', str(ech.intervalle * 7))
                     xml_element.set('Periodicite_personnalisee', '0')
-                if ech.periodicite=='m':
+                if ech.periodicite == 'm':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-                    xml_element.set('Periodicite_personnalisee','1')
-                if ech.periodicite=='a':
+                    xml_element.set('Periodicite_personnalisee', '1')
+                if ech.periodicite == 'a':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-                    xml_element.set('Periodicite_personnalisee','2')
+                    xml_element.set('Periodicite_personnalisee', '2')
             else:
                 xml_element.set('Intervalle_periodicite', 0)
-                if ech.periodicite=='s':
+                if ech.periodicite == 's':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-                    xml_element.set('Periodicite_personnalisee','1')
-                if ech.periodicite=='m':
+                    xml_element.set('Periodicite_personnalisee', '1')
+                if ech.periodicite == 'm':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-                    xml_element.set('Periodicite_personnalisee','2')
-                if ech.periodicite=='a':
+                    xml_element.set('Periodicite_personnalisee', '2')
+                if ech.periodicite == 'a':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-                    xml_element.set('Periodicite_personnalisee','3')
+                    xml_element.set('Periodicite_personnalisee', '3')
 
         xml_element.set('Date_limite', fmt.date(ech.date_limite, defaut=''))
         xml_element.set('Ech_ventilee', '0')

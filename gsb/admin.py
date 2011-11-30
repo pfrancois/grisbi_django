@@ -71,7 +71,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                 if request.session['filtered'] is not None:
                     result['Location'] = request.session['filtered']
                     request.session['filtered'] = None
-            except KeyError :
+            except KeyError:
                 pass
         return result
 
@@ -204,7 +204,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice','cat__type')
+    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
@@ -321,8 +321,8 @@ class Tiers_admin(Modeladmin_perso):
 
 class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
-    list_display = ('id','valide','date', 'compte','compte_virement',  'montant', 'tiers', 'cat')
-    list_filter = ('compte','compte_virement', 'date')
+    list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat')
+    list_filter = ('compte', 'compte_virement', 'date')
 
 
 class Banque_admin(Modeladmin_perso):

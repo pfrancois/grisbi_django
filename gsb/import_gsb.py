@@ -481,11 +481,11 @@ def import_gsb_050(nomfich, efface_table=True):
             element.compte_virement = None
             element.moyen_virement = None
         if  int(xml_ech.get('Periodicite')) == 4: #c'est le mode personalise
-            if int(xml_ech.get('Periodicite_personnalisee'))==7 and int(xml_ech.get('Intervalle_periodicite'))==0:#on cree les semaine
+            if int(xml_ech.get('Periodicite_personnalisee')) == 7 and int(xml_ech.get('Intervalle_periodicite')) == 0:#on cree les semaine
                 element.periodicite = 'h'
                 element.intervalle = 1
             else:
-                element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))+1][0]
+                element.periodicite = liste_type_period[int(xml_ech.get('Periodicite')) + 1][0]
                 element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
         else:
             element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
@@ -493,7 +493,6 @@ def import_gsb_050(nomfich, efface_table=True):
                 element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
             else:
                 element.intervalle = 1
-
 
         element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()

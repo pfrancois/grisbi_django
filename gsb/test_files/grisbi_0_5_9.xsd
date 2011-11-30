@@ -412,7 +412,7 @@
                             </xsd:annotation>
                             <xsd:attribute name="Periodicite_personnalisee" use="required"/>
                             <xsd:annotation>
-                                <xsd:documentation>0=unefois,1=hebdo,2=mensuel,3=annuel,4=personnalisé </xsd:documentation>
+                                <xsd:documentation>0=unefois,1=hebdo,2=mensuel,3=annuel,4=personnalisé</xsd:documentation>
                             </xsd:annotation>
                             <xsd:attribute name="Date_limite">
                                 <xsd:annotation>

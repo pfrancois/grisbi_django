@@ -8,7 +8,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from . import forms as gsb_forms
 import logging, os, time
-from .models import Generalite,Echeance
+from .models import Generalite, Echeance
 from django.contrib.auth.decorators import login_required
 from . import import_gsb
 from django.contrib import messages
@@ -91,6 +91,7 @@ def modif_gen(request):
                  'form':form},
                                    context_instance=RequestContext(request)
         )
+
 
 @login_required
 def gestion_echeances(request):

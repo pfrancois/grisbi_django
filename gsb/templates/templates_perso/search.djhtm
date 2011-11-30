@@ -13,7 +13,7 @@
         <label for="id_date_min">date_maximum:</label>
         {{ form.date_max }}
 
-        <input type="submit" value="Rechercher" />
+        <input type="submit" value="Rechercher"/>
     </form>
     <table id="main" class="table">
         <thead class="entete">
@@ -38,16 +38,30 @@
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
                     <td><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
-                    <td><div {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div></td>
-                    <td><div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</div></td>
-                    <td><div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.moyen.nom|default:"aucune moyen" }}</div></td>
-                    <td><div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R{% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div></td>
+                    <td>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>
+                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div>
+                    </td>
+                    <td>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</div>
+                    </td>
+                    <td>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.moyen.nom|default:"aucune moyen" }}</div>
+                    </td>
+                    <td>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R{% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
+                    </td>
                     <td>{% if ope.jumelle %}<a href="{{ ope.jumelle.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {{ ope.jumelle}}</a>{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>{% endif %}</td>
+                        {{ ope.jumelle }}</a>{% else %}
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>-
+                        </div>{% endif %}</td>
                     <td>{% if ope.ope_titre %}<a href="{{ ope.ope_titre.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {{ ope.ope_titre}}</a>{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>{% endif %}</td>
-                    <td><div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.montant|cur }}</div></td>
+                        {{ ope.ope_titre }}</a>{% else %}
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>-
+                        </div>{% endif %}</td>
+                    <td>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.montant|cur }}</div>
+                    </td>
                 </tr>
             {% endblock ope %}
         {% empty %}

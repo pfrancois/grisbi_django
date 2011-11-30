@@ -12,6 +12,7 @@ from django.dispatch import receiver
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
+
 class Gsb_exc(Exception):
     pass
 
@@ -252,7 +253,7 @@ class Cat(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return "%s(%s)"%(self.nom,self.type)
+        return "%s(%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -830,7 +831,7 @@ class Echeance(models.Model):
     date_limite = models.DateField(null=True, blank=True, default=None)
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
-    valide=models.BooleanField(default=True)
+    valide = models.BooleanField(default=True)
     compte = models.ForeignKey(Compte)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
@@ -844,7 +845,7 @@ class Echeance(models.Model):
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                            verbose_name=u"imputation")
     notes = models.TextField(blank=True, default='')
-    inscription_automatique = models.BooleanField(default=False,help_text=u"attention, ne sert a rien car par defaut les echeances sont automatiques")
+    inscription_automatique = models.BooleanField(default=False, help_text=u"attention, ne sert a rien car par defaut les echeances sont automatiques")
 
     class Meta:
         db_table = 'gsb_echeance'
@@ -855,28 +856,28 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         if self.compte_virement:
-            return "%s=>%s de %s"%(self.compte,self.compte_virement,self.montant)
+            return "%s=>%s de %s" % (self.compte, self.compte_virement, self.montant)
         else:
-            return "%s pour %s"%(self.montant,self.tiers)
+            return "%s pour %s" % (self.montant, self.tiers)
 
     def calcul_next(self):
         """
         calcul la prochaine date d'echeance
         renvoie None si pas de prochaine date
         """
-        initial=self.date
+        initial = self.date
         if self.periodicite == 'u':
             return None
-        finale=None
+        finale = None
         if self.periodicite == 'j':
-            finale=initial + datetime.timedelta(days=self.intervalle)
+            finale = initial + datetime.timedelta(days=self.intervalle)
         if self.periodicite == 's':
-            finale=initial + datetime.timedelta(weeks=self.intervalle)
+            finale = initial + datetime.timedelta(weeks=self.intervalle)
         if self.periodicite == 'm':
-            finale=initial + relativedelta(months=self.intervalle)
+            finale = initial + relativedelta(months=self.intervalle)
         if self.periodicite == 'a':
-            finale=initial + relativedelta(years=self.intervalle)
-        #on verifie que la date limite n'est pas dépasséee
+            finale = initial + relativedelta(years=self.intervalle)
+            #on verifie que la date limite n'est pas dépasséee
         if self.date_limite and finale > self.date_limite:
             finale = None
         return finale
@@ -889,36 +890,37 @@ class Echeance(models.Model):
         verifie si pas d'écheance a passer et la cree au besoin
         """
 
-        liste_ech=Echeance.objects.filter(valide=True,date__lte=datetime.date.today())
+        liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
         for ech in liste_ech:
             #TODO ech titre
             if ech.compte_virement:
-                vir=Virement.create(compte_origine=ech.compte,
-                                compte_dest=ech.compte_virement,
-                                montant=ech.montant,
-                                date=ech.date
-                                )
-                vir.auto=True
-                vir.exercice=ech.exercice
-                vir.save()
-                messages.info(request, u'virement (%s)%s crée'%(vir.origine.id,vir.origine.tiers))
-            else:
-                ope=Ope.objects.create(compte_id=ech.compte_id,
-                                   date=ech.date,
-                                   montant=ech.montant,
-                                   tiers_id=ech.tiers_id,
-                                   cat_id=ech.cat_id,
-                                   automatique=True,
-                                   ib_id=ech.ib_id,
-                                   moyen_id=ech.moyen_id,
-                                   exercice_id=ech.exercice_id
+                vir = Virement.create(compte_origine=ech.compte,
+                                      compte_dest=ech.compte_virement,
+                                      montant=ech.montant,
+                                      date=ech.date
                 )
-                messages.info(request, u'opération "%s" crée'%ope)
-            if ech.calcul_next():
-                ech.date=ech.calcul_next()
+                vir.auto = True
+                vir.exercice = ech.exercice
+                vir.save()
+                messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
             else:
-                ech.valide=False
+                ope = Ope.objects.create(compte_id=ech.compte_id,
+                                         date=ech.date,
+                                         montant=ech.montant,
+                                         tiers_id=ech.tiers_id,
+                                         cat_id=ech.cat_id,
+                                         automatique=True,
+                                         ib_id=ech.ib_id,
+                                         moyen_id=ech.moyen_id,
+                                         exercice_id=ech.exercice_id
+                )
+                messages.info(request, u'opération "%s" crée' % ope)
+            if ech.calcul_next():
+                ech.date = ech.calcul_next()
+            else:
+                ech.valide = False
             ech.save()
+
     def tot_clean(self):
         """
         modifie les moyen automatiquement
@@ -937,6 +939,7 @@ class Echeance(models.Model):
         if self.compte == self.compte_virement:
             raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
         super(Echeance, self).clean()
+
 
 class Generalite(models.Model):
     """config dans le fichier"""
@@ -1038,7 +1041,7 @@ class Ope(models.Model):
         super(Ope, self).clean()
         if not self.compte_id:
             raise ValidationError(u"vous devez mettre un compte")
-        #verification qu'il n'y ni pointe ni rapprochee
+            #verification qu'il n'y ni pointe ni rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette operation ne peut pas etre a la fois pointée et rapprochée")
         if not self.compte.ouvert:
@@ -1145,18 +1148,21 @@ class Virement(object):
     def getauto(self):
         return self.origine.automatique
 
-    def setauto(self,auto):
+    def setauto(self, auto):
         self.origine.automatique = auto
         self.dest.automatique = auto
-    auto = property(getauto,setauto)
+
+    auto = property(getauto, setauto)
 
     def getexo(self):
         return self.origine.exercice
 
-    def setexo(self,auto):
+    def setexo(self, auto):
         self.origine.exercice = auto
         self.dest.exercice = auto
-    exercice = property(getexo,setexo)
+
+    exercice = property(getexo, setexo)
+
     def save(self):
         if self._init:
             nom_tiers = "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
