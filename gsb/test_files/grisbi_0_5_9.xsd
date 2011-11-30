@@ -403,8 +403,17 @@
                             <xsd:attribute name="Notes" type="xsd:string" use="required"/>
                             <xsd:attribute name="Automatique" type="xsd:boolean" use="required"/>
                             <xsd:attribute name="Periodicite" use="required"/>
+                            <xsd:annotation>
+                                <xsd:documentation>0=jours,1=mois,2=années</xsd:documentation>
+                            </xsd:annotation>
                             <xsd:attribute name="Intervalle_periodicite" use="required"/>
+                            <xsd:annotation>
+                                <xsd:documentation>le nombre de jours/mois/années quand la périodicité est personnalisée</xsd:documentation>
+                            </xsd:annotation>
                             <xsd:attribute name="Periodicite_personnalisee" use="required"/>
+                            <xsd:annotation>
+                                <xsd:documentation>0=unefois,1=hebdo,2=mensuel,3=annuel,4=personnalisé </xsd:documentation>
+                            </xsd:annotation>
                             <xsd:attribute name="Date_limite">
                                 <xsd:annotation>
                                     <xsd:documentation>elle peut etre vide</xsd:documentation>
