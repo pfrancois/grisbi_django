@@ -25,7 +25,6 @@ liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 liste_type_period = Echeance.typesperiod
-liste_type_period_perso = Echeance.typesperiodperso
 liste_type_titre = [e[0] for e in Titre.typestitres]
 logger = logging.getLogger('gsb.import')
 try:
@@ -481,10 +480,21 @@ def import_gsb_050(nomfich, efface_table=True):
         else:
             element.compte_virement = None
             element.moyen_virement = None
-        element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
-        if element.periodicite == 'p':
-            element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
-            element.periode_perso = liste_type_period_perso[int(xml_ech.get('Periodicite_personnalisee'))][0]
+        if  int(xml_ech.get('Periodicite')) == 4: #c'est le mode personalise
+            if int(xml_ech.get('Periodicite_personnalisee'))==7 and int(xml_ech.get('Intervalle_periodicite'))==0:#on cree les semaine
+                element.periodicite = 'h'
+                element.intervalle = 1
+            else:
+                element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))+1][0]
+                element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
+        else:
+            element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
+            if int(xml_ech.get('Intervalle_periodicite')):
+                element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
+            else:
+                element.intervalle = 1
+
+
         element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
     logger.warning(u"%s échéances" % nb)

@@ -15,6 +15,7 @@ urlpatterns += patterns('mysite.gsb.outils',
                         url(r'^options$', 'options_index'),
                         url(r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name='modification_preference_generalite'),
+                        url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances'),
                         )
 urlpatterns += patterns('mysite.gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),

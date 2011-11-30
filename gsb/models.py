@@ -10,7 +10,7 @@ from django.utils.encoding import force_unicode
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.db.models import Q
-
+from dateutil.relativedelta import relativedelta
 class Gsb_exc(Exception):
     pass
 
@@ -819,16 +819,10 @@ class Echeance(models.Model):
     """
     typesperiod = (
         ('u', u'unique'),
-        ('h', u'hebdomadaire'),
-        ('m', u'mensuel'),
-        ('a', u'annuel'),
-        ('p', u'personalisé'),
-        )
-    typesperiodperso = (
-        ('j', u'jour'),
+        ('s', u'semaine'),
         ('m', u'mois'),
         ('a', u'année'),
-        ('na', 'non applicable')
+        ('j', u'jour'),
         )
 
     date = models.DateField(default=datetime.date.today)
@@ -847,10 +841,9 @@ class Echeance(models.Model):
     notes = models.TextField(blank=True, default='')
     inscription_automatique = models.BooleanField(default=False)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
-    intervalle = models.IntegerField(default=0)
-    periode_perso = models.CharField(max_length=1, choices=typesperiodperso, blank=True, default="")
+    intervalle = models.IntegerField(default=1)
     date_limite = models.DateField(null=True, blank=True, default=None)
-
+    valide=models.BooleanField(default=True)
     class Meta:
         db_table = 'gsb_echeance'
         verbose_name = u"échéance"
@@ -861,7 +854,61 @@ class Echeance(models.Model):
     def __unicode__(self):
         return u"%s" % (self.id,)
 
-    def save(self, *args, **kwargs):
+    def calcul_next(self):
+        """
+        calcul la prochaine date d'echeance
+        renvoie None si pas de prochaine date
+        """
+        initial=self.date
+        if self.periodicite == 'u':
+            return None
+        finale=None
+        if self.periodicite == 'j':
+            finale=initial + datetime.timedelta(days=self.intervalle)
+        if self.periodicite == 's':
+            finale=initial + datetime.timedelta(weeks=self.intervalle)
+        if self.periodicite == 'm':
+            finale=initial + relativedelta(months=self.intervalle)
+        if self.periodicite == 'a':
+            finale=initial + relativedelta(years=self.intervalle)
+        #on verifie que la date limite n'est pas dépasséee
+        if date_limite and finale > date_limite:
+            finale = None
+        return finale
+
+    @staticmethod
+    @transaction.commit_on_success
+    def check(request):
+        """
+        verifie si pas d'écheance a passer et la cree au besoin
+        """
+
+        liste_ech=Echeance.objects.filter(valide=True,date__lte=datetime.date.today())
+        for ech in liste_ech:
+            if ech.compte_virement:
+                pass#c'est un virement
+            else:
+                ope=Ope.objects.create(compte_id=ech.compte_id,
+                                   date=ech.date,
+                                   montant=ech.montant,
+                                   tiers_id=ech.tiers_id,
+                                   cat_id=ech.cat_id,
+                                   automatique=True,
+                                   ib_id=ech.ib_id,
+                                   moyen_id=ech.moyen_id,
+                                   exercice_id=ech.exercice_id
+                )
+                if ech.calcul_next():
+                    ech.date=ech.calcul_next()
+                else:
+                    ech.valide=False
+                ech.save()
+                messages.info(request, u'opération "%s" crée'%ope)
+
+    def clean(self):
+        """
+        modifie les moyen automatiquement
+        """
         self.alters_data = True
         if not self.moyen:
             if self.compte.moyen_credit_defaut and self.montant >= 0:
@@ -875,9 +922,10 @@ class Echeance(models.Model):
                 self.moyen_virement = self.compte_virement.moyen_debit_defaut
         if self.compte == self.compte_virement:
             raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
-        super(Echeance, self).save(*args, **kwargs)
+        super(Echeance, self).clean()
 
-
+    def save(self, *args, **kwargs):
+        self.next_ech=self.calcul_next()
 class Generalite(models.Model):
     """config dans le fichier"""
     titre = models.CharField(max_length=40, blank=True, default="isbi")
@@ -885,14 +933,6 @@ class Generalite(models.Model):
     utilise_ib = models.BooleanField(default=True)
     utilise_pc = models.BooleanField(default=False)
     affiche_clot = models.BooleanField(default=True)
-    """nb_jours_aff = models.IntegerField(default=100)
-    nb_jours_aff_titre = models.IntegerField(default=100)
-    cpt_m = models.ForeignKey(Compte,relayed_name='+', limit_choices_to={'type__in':('b', 'e')} )
-    cat_cotisation = models.ForeignKey(Cat,relayed_name='+', limit_choices_to={'type':'d'} )
-    car_ost = models.ForeignKey(Cat,relayed_name='+', limit_choices_to={'type':'d'} )
-    md_credit = models.ForeignKey(Moyen,relayed_name='+', limit_choices_to={'type':'r'} )
-    md_debit = models.ForeignKey(Moyen,relayed_name='+', limit_choices_to={'type':'d'} )
-    tiers_cotisation = models.ForeignKey(Tiers, relayed_name='+')"""
 
     class Meta:
         db_table = 'gsb_generalite'
@@ -904,6 +944,9 @@ class Generalite(models.Model):
 
     @staticmethod
     def gen():
+        """
+        renvoie les generalites
+        """
         try:
             gen_1 = Generalite.objects.get(id=1)
         except Generalite.DoesNotExist:
@@ -913,9 +956,13 @@ class Generalite(models.Model):
 
     @staticmethod
     def dev_g():
+        """ renvoie la devise generalement utilise
+        """
         return settings.DEVISE_GENERALE
 
     def save(self, *args, **kwargs):
+        """ gestion de save
+        """
         if Generalite.objects.count() > 0:
             return
         else:
@@ -962,6 +1009,8 @@ class Ope(models.Model):
 
     @staticmethod
     def non_meres():
+        """ renvoie uniquement les operation non mere
+        """
         return Ope.objects.filter(filles_set__isnull=True)
 
     def __unicode__(self):
