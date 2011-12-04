@@ -1,10 +1,8 @@
 sources:
-les images de 400.jpg
-500.jpg http://www.ronnestam.com/tag/error-500/
-message from https://github.com/mrben/nicer_django_messages
+les images de 400.jpg et de 500.jpg http://www.ronnestam.com/tag/error-500/
+le templatetag message from https://github.com/mrben/nicer_django_messages
 
 necessite:
 django
 lxml
 dateutils http://labix.org/python-dateutil#head-de
-
