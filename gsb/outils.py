@@ -16,6 +16,8 @@ from django.contrib import messages
 @login_required
 def import_file(request):
     logger = logging.getLogger('gsb.import')
+    nomfich=""
+    ok=False
     if request.method == 'POST':
         form = gsb_forms.ImportForm(request.POST, request.FILES)
         if form.is_valid():
@@ -33,21 +35,25 @@ def import_file(request):
             #renomage ok
             logger.debug("enregitrement fichier ok")
             ok = False
-            if form.cleaned_data['replace'] == 'remplacement':
-                logger.warning(
+            if form.cleaned_data['version'] == 'qif':
+                import_qif(nomfich)
+                ok=true
+            if form.cleaned_data['version'] == 'gsb_0_5_0':
+                if form.cleaned_data['replace'] == 'remplacement':
+                    logger.warning(
                     u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
-                if form.cleaned_data['version'] == 'gsb_0_5_0':
-                    mysite.gsb.import_gsb.import_gsb_050(nomfich, True)
+                    import_gsb_050(nomfich, True)
                     ok = True
-            else:
-                logger.warning(
+                else:
+                    logger.warning(
                     "fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
-                if form.cleaned_data['version'] == 'gsb_0_5_0':
-                    mysite.gsb.import_gsb.import_gsb_050(nomfich, False)
+                    import_gsb_050(nomfich, False)
                     ok = True
             if ok:
+                messages.success(request,u"import du fichier %s ok"%nomfich)
                 return HttpResponseRedirect(reverse('gsb.views.index'))
             else:
+                messages.success(request,u"erreur dans l'import du fichier %s"%nomfich)
                 return render_to_response('gsb/import.djhtm',
                         {'form':form,
                          'titre':"importation d'un fichier"},

@@ -24,11 +24,13 @@ class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
         ('gsb_0_5_0', 'format grisbi version 0.5.x'),
+        ('qif','format qif')
         ))
     replace = forms.ChoiceField((
         ('remplacement', 'remplacement des données par le fichier'),
         ('fusion', 'fusion des données avec le fichier')
         ))
+    compte=forms.ModelChoiceField(Compte.objects.all(),required=False,label=u"compte de destination")
 
 
 class OperationForm(Basemodelform):

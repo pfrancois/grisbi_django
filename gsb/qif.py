@@ -98,7 +98,12 @@ def parseQif(infile):
 
 if __name__ == "__main__":
     # read from stdin and write CSV to stdout
-    items = parseQif(sys.stdin)
+    import os
+    nomfich = "%s/../perso.qif" % (os.path.dirname(os.path.abspath(__file__)))
+    nomfich = os.path.normpath(nomfich)
+    qiffile=open(nomfich)
+    items = parseQif(qiffile)
+    qiffile.close()
     print repr(items[0])
     for item in items[1:]:
         print item.dataString()
