@@ -13,11 +13,11 @@ DJANGO_EXTENSION = True
 #DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
 
 ADMINS = (
-# ('francois', 'your_email@domain.com'),
+# ('toto', 'your_email@domain.com'),
 )
 #####################################
 #config gsb
-NB_JOURS_AFF = 100
+NB_JOURS_AFF = 30
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1
@@ -104,7 +104,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-#ADMIN_MEDIA_PREFIX = '/static/admin/' #plus utilise car deprecated
+ADMIN_MEDIA_PREFIX = '/static/admin/' #plus utilise car deprecated
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -118,7 +118,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
     )
 
 # Make this unique, and don't share it with anybody.
@@ -229,7 +229,7 @@ LOGGING = {
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
             'filename':os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-            'when':'midnight',
+            'when':'D',
             'backupCount':'30', #approx 1 month worth
         },
         },
