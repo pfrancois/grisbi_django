@@ -20,29 +20,25 @@ ADMINS = (
 NB_JOURS_AFF = 30
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
-ID_CPT_M = 1
+ID_CPT_M = 1#cpt principal utlise si l'on ne rentre pas de compte
 
 #taux de cotisations sociales
 #attention c'est un taux special estime
 __TAUX_VERSEMENT_legal = 0.08 * 0.97
-TAUX_VERSEMENT = 1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal
+TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal))
 #id et cat des operation speciales
 ID_CAT_COTISATION = 23
 ID_TIERS_COTISATION = 727
-ID_CAT_COTISATION=23
-ID_TIERS_COTISATION=727
 ID_CAT_OST=64
 MD_CREDIT=6
 MD_DEBIT=7
 ##################
 
-
 MANAGERS = ADMINS
 
 DATABASES = {
     'default':{
-        'ENGINE':'django.db.backends.sqlite3',
-        # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE':'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME':os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
         'USER':'root', # Not used with sqlite3.
         'PASSWORD':'', # Not used with sqlite3.
