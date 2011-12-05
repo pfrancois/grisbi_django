@@ -222,3 +222,8 @@ class Majtitre(Baseform):
         for titre in titres:
             self.fields[titre.isin] = gsb_field.TitreField(label=titre.nom)
             self.fields[titre.isin].required = False
+
+class SearchField(Baseform):
+    compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
+    date_min = forms.DateField(label='date_min', widget=forms.DateInput)
+    date_max = forms.DateField(label='date_max', widget=forms.DateInput)

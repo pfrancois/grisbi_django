@@ -15,7 +15,7 @@ urlpatterns += patterns('mysite.gsb.outils',
                         url(r'^options$', 'options_index'),
                         url(r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name='modification_preference_generalite'),
-                        url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances'),
+                        url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances')
                         )
 urlpatterns += patterns('mysite.gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
@@ -33,7 +33,8 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope/new$', 'ope_new', name="gsb_ope_new"),
                         url(r'^vir/new$', 'vir_new', name="gsb_vir_new"),
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
-                        url(r'^ope_titre/(?P<pk>\d+)/delete', 'ope_titre_delete', name='ope_titre_delete'),
+                        url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
+                        url(r'^search$', 'search_opes', name='g_search_ope'),
                         )
 
 #les vues relatives aux comptes
@@ -63,8 +64,6 @@ if settings.DEBUG and perso:
         (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
                             url(r'^test$', 'test.test')
     )
-    import mysite.gsb.forms_perso
+    #import mysite.gsb.forms_perso
 
-    urlpatterns += patterns('',
-        (r'^perso/', include(mysite.gsb.forms_perso))
-    )
+    #urlpatterns += patterns('', (r'^perso/', include(mysite.gsb.forms_perso)) )

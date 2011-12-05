@@ -668,3 +668,43 @@ def view_maj_cpt_titre(request, cpt_id):
              'titres':liste_titre,
              'compte':cpt}
     )
+
+
+@login_required
+def search_opes(request):
+    if request.method == 'POST':
+        form = gsb_forms.SearchField(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            compte = data['compte']
+            q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
+            sort = request.GET.get('sort')
+            if sort:
+                sort = unicode(sort)
+                q = q.order_by(sort)
+                sort_get = u"&sort=%s" % sort
+            else:
+                sort_get = ""
+                q = q.order_by('-date')
+            q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope_titre')[:100]
+            return render(request, 'templates_perso/search.djhtm', {'form':form,
+                                                                    'list_ope':q,
+                                                                    'titre':u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom),
+                                                                    "sort":sort_get,
+                                                                    'date_max':data['date_max'],
+                                                                    'solde':compte.solde(datel=data['date_max'])})
+        else:
+            date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
+    else:
+        date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
+        date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
+        form = gsb_forms.SearchField(initial={'date_min':date_min, 'date_max':date_max})
+
+    return render(request, 'templates_perso/search.djhtm', {'form':form,
+                                                            'list_ope':None,
+                                                            'titre':'recherche',
+                                                            "sort":"",
+                                                            'date_max':date_max,
+                                                            'solde':None})
+
+
