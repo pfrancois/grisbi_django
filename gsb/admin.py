@@ -321,8 +321,8 @@ class Tiers_admin(Modeladmin_perso):
 
 class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
-    list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat')
-    list_filter = ('compte', 'compte_virement', 'date')
+    list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
+    list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
 
 
 class Banque_admin(Modeladmin_perso):

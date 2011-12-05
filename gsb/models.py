@@ -837,13 +837,13 @@ class Echeance(models.Model):
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                             verbose_name=u"catégorie")
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set',
-                                        default=None)
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='echeance_moyen_virement_set')
-    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                            verbose_name=u"imputation")
+    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set',
+                                        default=None)
+    moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='echeance_moyen_virement_set')
+    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True, default='')
     inscription_automatique = models.BooleanField(default=False, help_text=u"attention, ne sert a rien car par defaut les echeances sont automatiques")
 
