@@ -133,7 +133,7 @@ def datefr2datesql(chaine):
 
 
 def fr2decimal(s):
-    """fonction qui renvoie un decimal en partant de d'un nombre francais"""
+    """fonction qui renvoie un decimal en partant d'un nombre francais"""
     if s == "0,0000000":
         return decimal.Decimal('0')
     if s is not None:
