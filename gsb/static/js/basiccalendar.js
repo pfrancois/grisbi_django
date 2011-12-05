@@ -1,10 +1,11 @@
 /* coding: utf-8 */
-var _DATE_FORMAT_REGXES = {
+var DATE_FORMAT_REGXES = {
     'Y': new RegExp('^-?[0-9]+'),
     'd': new RegExp('^[0-9]{1,2}'),
     'm': new RegExp('^[0-9]{1,2}'),
     'H': new RegExp('^[0-9]{1,2}'),
-    'M': new RegExp('^[0-9]{1,2}')};
+    'M': new RegExp('^[0-9]{1,2}')
+};
 
 
 /*
@@ -17,7 +18,7 @@ function _parseDate(datestring, format) {
         var c2 = datestring[i2];
         if ('%' == c1) {
             c1 = format[++i1];
-            var data = _DATE_FORMAT_REGXES[c1].exec(datestring.substring(i2));
+            var data = DATE_FORMAT_REGXES[c1].exec(datestring.substring(i2));
             if (!data.length) {
                 return null;
             }
@@ -190,7 +191,7 @@ function buildCal(d, m, y, cM, cH, cDW, cD, brdr) {
     var nextMonth = m + 1;
     if (12 === m) {
         nextMonth = 1;
-        nextYear -= 1;
+        nextYear += 1;
     }
     //gestion du nombre de jour pour fevrier
     dim[1] = (((0 !== oD.getFullYear() % 100) && (0 === oD.getFullYear() % 4)) || (0 === oD.getFullYear() % 400)) ? 29 : 28;
@@ -218,7 +219,7 @@ function buildCal(d, m, y, cM, cH, cDW, cD, brdr) {
             t += '</tr><tr align="center">';
         }
     }
-    t += '</tr><tr><td colspan="7" class="boutton"><a href="javascript:closeCurrentEditor()">Annuler</a></td></table></div>';
+    t += '</tr><tr class="boutton"><td colspan="7"><a href="javascript:closeCurrentEditor()">Annuler</a></td></table></div>';
     return t;
 }
 
