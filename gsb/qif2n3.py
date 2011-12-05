@@ -34,7 +34,7 @@ def zapOut(str, allowed):
         if str[i] in allowed:
             str2 = str2 + str[i]
         else:
-            if str2[-1:] != "_": str2 = str2 + "_"
+            if str2[-1:] != "_": str2 += "_"
     return str2
 
 def dealWithNumber(str):
@@ -171,8 +171,8 @@ def extract(path):
                 print "]",
                 split = 0
             print "qu:accordingTo <>;",
-            if (what == "Bank" or what == "CCard" or what == "Cash"):
-                if toAccount!= None: #@@ mising from citibank download
+            if what == "Bank" or what == "CCard" or what == "Cash":
+                if toAccount is not None: #@@ mising from citibank download
                     print "qu:toAccount ",toAccount,
                 else:
                     print "qu:toAccount acc:%s" % defaultAccount,
@@ -181,7 +181,7 @@ def extract(path):
             inSentence = 0
         else:
             dictionary = properties.get(what, None)
-            if dictionary == None:
+            if dictionary is None:
                 print dictionary
                 raise RuntimeError("@@ No propertylist for <%s>" % what)
             property = dictionary.get(attr, "quicken_"+what+"_"+attr)
@@ -201,9 +201,9 @@ def extract(path):
                 inSentence = 1
             val = ""
             for c in value:
-                if c == '"': val = val+'\\"'
+                if c == '"': val += '\\"'
                 else: val = val + c
-            if property != None:
+            if property is not None:
                 if not inRecord:
                     print ",\n    [",  qq
                     inRecord = 1
@@ -246,7 +246,7 @@ def do(path):
 recursive = 0
 verbose = 0
 files = []
-defaultAccount = "Default";
+defaultAccount = "Default"
 
 #for arg in sys.argv[1:]:
 #    if arg[0:1] == "-":
