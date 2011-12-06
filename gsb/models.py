@@ -893,49 +893,40 @@ class Echeance(models.Model):
         liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
         for ech in liste_ech:
             #TODO ech titre
-            if ech.compte_virement:
-                vir = Virement.create(compte_origine=ech.compte,
-                                      compte_dest=ech.compte_virement,
-                                      montant=ech.montant,
-                                      date=ech.date
-                )
-                vir.auto = True
-                vir.exercice = ech.exercice
-                vir.save()
-                messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
-            else:
-                ope = Ope.objects.create(compte_id=ech.compte_id,
-                                         date=ech.date,
-                                         montant=ech.montant,
-                                         tiers_id=ech.tiers_id,
-                                         cat_id=ech.cat_id,
-                                         automatique=True,
-                                         ib_id=ech.ib_id,
-                                         moyen_id=ech.moyen_id,
-                                         exercice_id=ech.exercice_id
-                )
-                messages.info(request, u'opération "%s" crée' % ope)
-            if ech.calcul_next():
-                ech.date = ech.calcul_next()
-            else:
-                ech.valide = False
-            ech.save()
+            while ech.date < datetime.date.today() and ech.valide:
+                if ech.compte_virement:
+                    vir = Virement.create(compte_origine=ech.compte,
+                                          compte_dest=ech.compte_virement,
+                                          montant=ech.montant,
+                                          date=ech.date
+                    )
+                    vir.auto = True
+                    vir.exercice = ech.exercice
+                    vir.save()
+                    messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
+                else:
+                    ope = Ope.objects.create(compte_id=ech.compte_id,
+                                             date=ech.date,
+                                             montant=ech.montant,
+                                             tiers_id=ech.tiers_id,
+                                             cat_id=ech.cat_id,
+                                             automatique=True,
+                                             ib_id=ech.ib_id,
+                                             moyen_id=ech.moyen_id,
+                                             exercice_id=ech.exercice_id
+                    )
+                    messages.info(request, u'opération "%s" crée' % ope)
+                if ech.calcul_next():
+                    ech.date = ech.calcul_next()
+                else:
+                    ech.valide = False
+                ech.save()
 
-    def tot_clean(self):
+    def clean(self):
         """
         modifie les moyen automatiquement
         """
         self.alters_data = True
-        if not self.moyen:
-            if self.compte.moyen_credit_defaut and self.montant >= 0:
-                self.moyen = self.compte.moyen_credit_defaut
-            if self.compte.moyen_debit_defaut and self.montant <= 0:
-                self.moyen = self.compte.moyen_debit_defaut
-        if not self.moyen_virement and self.compte_virement:
-            if self.compte_virement.moyen_credit_defaut and self.montant <= 0:
-                self.moyen_virement = self.compte_virement.moyen_credit_defaut
-            if self.compte_virement.moyen_debit_defaut and self.montant >= 0:
-                self.moyen_virement = self.compte_virement.moyen_debit_defaut
         if self.compte == self.compte_virement:
             raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
         super(Echeance, self).clean()
