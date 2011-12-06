@@ -24,7 +24,7 @@ class ImportForm(Baseform):
     nom_du_fichier = forms.FileField()
     version = forms.ChoiceField((
         ('gsb_0_5_0', 'format grisbi version 0.5.x'),
-        ('qif','format qif')
+        #('qif','format qif')
         ))
     replace = forms.ChoiceField((
         ('remplacement', 'remplacement des données par le fichier'),
