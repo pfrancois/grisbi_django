@@ -2,11 +2,29 @@
 """
 A simple class to represent a Quicken (QIF) file, and a parser to
 load a QIF file into a sequence of those classes.
-
 It's enough to be useful for writing conversions.
+version SG:
+    importe au niveau des tiers , laisse tomber le P
+    si carte
+        met a la place le tiers a parti du 20
+        choisi la date a la position 14
+    gestion des virements !!
+    en gros se faire un beau dictionnaire avec tous les trucs speciaux.
+    voir si l'operation n'existe pas deja a la date du jour ou a +- 2 jour
 """
 
 import sys
+import decimal
+from mysite.gsb.utils import datefr2datesql, fr2decimal
+#definition
+#expression reg
+#id des moyens,tiers,cat et ib, si None, on ne change pas
+#int de la colonne a commencer pour le tiers
+tiers_perso=(
+    {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC","def":{"moyen":4,"tiers":15,"cat":24,"ib":None},"decal":None,"date":false},
+    {"reg":r"CARTE X\d* (\d\d/\d\d)","def":{"moyen":3,"tiers":None,"cat":None,"ib":None},"decal":None,"date":True},
+    {"reg":r"CARTE X\d* (\d\d/\d\d)","def":{"moyen":3,"tiers":None,"cat":None,"ib":None},"decal":20,"date":True},
+)
 
 class QifItem:
     def __init__(self):
@@ -61,15 +79,15 @@ def parseQif(infile):
             items.append(curItem)
             curItem = QifItem()
         elif line[0] == 'D':
-            curItem.date = line[1:-1]
+            curItem.date = strpdate(datefr2datesql(line[1:-1]))
         elif line[0] == 'T':
-            curItem.amount = line[1:-1]
+            curItem.amount = decimal.Decimal(str(line[1:-1]))
         elif line[0] == 'C':
             curItem.cleared = line[1:-1]
         elif line[0] == 'P':
-            curItem.payee = line[1:-1]
+            pass#on n'en a pas besoin
         elif line[0] == 'M':
-            curItem.memo = line[1:-1]
+            payeur = line[1:-1]
         elif line[0] == 'A':
             curItem.address = line[1:-1]
         elif line[0] == 'L':
