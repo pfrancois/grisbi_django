@@ -2,10 +2,11 @@
 from __future__ import absolute_import
 
 try:
-    from mysite import settings
+    if DJANGO_SETTINGS_MODULE:
+        pass
 
     main = False
-except ImportError:
+except NameError:
     main = True
     from django.core.management import setup_environ
     import sys, os
@@ -41,4 +42,4 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-    pass
+    print "otot"
