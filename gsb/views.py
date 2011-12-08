@@ -95,7 +95,6 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             sort = ''
         if sort:
             sort = unicode(sort)
-            print "'", sort, "'"
             q = q.order_by(sort)
             sort_get = u"&sort=%s" % sort
         else:
@@ -414,7 +413,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     date_rappro = compte.date_rappro()
-    solde_rappro = compte.solde_espece(rapp=True)
+    solde_rappro = titre.encours(compte=compte,rapp=True)
     q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
     if all:
         q = q
@@ -437,17 +436,22 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
+    #print titre.last_cours_date
     return HttpResponse(
         template.render(
             RequestContext(
                 request,
                     {
                     'compte':compte,
+                    'titre_id':titre.id,
                     'list_ope':opes,
                     'titre':"%s: %s" % (compte.nom, titre.nom),
                     'solde':titre.investi(compte),
-                    'titre':titre,
+                    't':titre,
                     'nb_titre':titre.nb(compte),
+                    'nb_r':titre.nb(compte,rapp=True),
+                    'date_rappro':date_rappro,
+                    'solde_rappro':solde_rappro
                     }
             )
         )

@@ -31,6 +31,7 @@ from django.shortcuts import render, get_object_or_404
 from django.forms.models import modelformset_factory
 from mysite.gsb.utils import validrib
 from django.contrib import messages
+from django.db import models
 
 def test(request):
     messages.info(request, 'This is an info message.')
@@ -42,4 +43,12 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-    print "otot"
+    t=Titre.objects.get(id=5)
+    c=Compte_titre.objects.get(id=8)
+    o=Ope.objects.filter(compte__pk=c.id)
+    date_rapp=o.aggregate(element=models.Max('rapp__date'))['element']
+    if date_rapp:
+        print date_rapp.strftime("%d/%m/%Y")
+    else:
+        print "-"
+    print c.solde_rappro()

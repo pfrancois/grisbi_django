@@ -194,7 +194,7 @@ class Titre(models.Model):
 
 class Cours(models.Model):
     """cours des titres"""
-    valeur = CurField(default=1.000)
+    valeur = CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre)
     date = models.DateField(default=datetime.date.today)
 
@@ -597,14 +597,14 @@ class Compte_titre(Compte):
         return solde_espece + solde_titre
 
     def solde_rappro(self):
-        return self.solde(rapp=True)
+        return self.solde_titre(rapp=True)
 
     solde_rappro.short_description = u"solde rapproché ou pointé"
 
     def date_rappro(self):
         try:
             #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
-            date_rapp = Ope.objects.filter(compte__id=self.id).latest('rapp__date').date
+            date_rapp = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
             if date_rapp:
                 return date_rapp.strftime("%d/%m/%Y")
             else:
@@ -649,7 +649,9 @@ class Compte_titre(Compte):
             nb = titre.nb(compte=self, datel=datel, rapp=rapp)
             if datel:
                 cours = titre.cours_set.filter(date__lte=datel).latest().valeur
-                if not cours:
+                if cours==0:
+                    cours=1
+                elif not cours:
                     raise Gsb_exc(u'attention pas de cours existant à cette date')
             else:
                 cours = titre.last_cours
