@@ -141,7 +141,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
         titre_sans_sum = compte.titre.all().distinct()
         titres = []
         for t in titre_sans_sum:
-            invest = t.investi(c)
+            invest = t.investi(compte)
             total = t.encours(compte)
             nb = t.nb(compte)
             if abs(nb) > decimal.Decimal('0.01'):
@@ -409,7 +409,9 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
 @login_required
 def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
-    si date_limite, utilise la date limite sinon affiche toute les ope """
+    si rapp affiche uniquement les rapp
+    si all affiche toute les ope
+    sinon affiche uniquement les non rapp"""
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     date_rappro = compte.date_rappro()
@@ -451,7 +453,8 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
                     'nb_titre':titre.nb(compte),
                     'nb_r':titre.nb(compte,rapp=True),
                     'date_rappro':date_rappro,
-                    'solde_rappro':solde_rappro
+                    'solde_rappro':solde_rappro,
+                    'pmv':titre.encours(compte)-titre.investi(compte)
                     }
             )
         )
@@ -710,5 +713,3 @@ def search_opes(request):
                                                             "sort":"",
                                                             'date_max':date_max,
                                                             'solde':None})
-
-

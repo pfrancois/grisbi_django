@@ -40,8 +40,8 @@
         <td colspan="1">&nbsp;</td>
         <td>total</td>
         <td class="opCenter">{{ nb_titre|floatformat:3 }}</td>
-        <td>{{ titre.last_cours_date }}</td>
-        <td class="opCredit">{{ solde|cur }}</td>
+        <td>à {{ t.last_cours|cur }}</td>
+        <td class="opCredit">encours total:{{ solde|cur }}</td>
     </tr>
     <tr class="footerbar">
         <td colspan="1">&nbsp;</td>
