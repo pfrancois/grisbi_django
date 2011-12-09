@@ -60,10 +60,10 @@ perso = True# ya plus rien dedans
 if settings.DEBUG and perso:
     from mysite.gsb.form_tester import SomeModelFormPreview
 
-    urlpatterns += patterns('mysite.gsb',
-        (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
-                            url(r'^test$', 'test.test')
-    )
+    #urlpatterns += patterns('mysite.gsb',
+    #    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
+    #                        url(r'^test$', 'test.test')
+    #)
     #import mysite.gsb.forms_perso
 
     #urlpatterns += patterns('', (r'^perso/', include(mysite.gsb.forms_perso)) )

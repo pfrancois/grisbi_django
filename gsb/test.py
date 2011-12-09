@@ -4,7 +4,6 @@ from __future__ import absolute_import
 try:
     if DJANGO_SETTINGS_MODULE:
         pass
-
     main = False
 except NameError:
     main = True
@@ -51,4 +50,5 @@ if main:
         print date_rapp.strftime("%d/%m/%Y")
     else:
         print "-"
+    print 'toto'
     print c.solde_rappro()

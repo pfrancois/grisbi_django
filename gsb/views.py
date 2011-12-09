@@ -438,7 +438,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
-    #print titre.last_cours_date
+
     return HttpResponse(
         template.render(
             RequestContext(
