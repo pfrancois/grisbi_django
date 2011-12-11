@@ -32,9 +32,9 @@ class test_models(TestCase):
         self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_rec1 (r)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"r1")
-        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"1")
+        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"cpte1=>cptb2 pour 10")
         self.assertEquals(Generalite.objects.get(id=1).__unicode__(), u"1")
-        self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR")
+        self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR a tiers1")
 
     def test_fusionne_error(self):
         #fusion avec un autre type
@@ -477,22 +477,6 @@ class test_models(TestCase):
         self.assertQuerysetEqual(Ope.objects.filter(rapp__id=2).all().order_by('id'), [3, 8], attrgetter("id"))
 
     def test_echeance_save(self):
-        e1 = Echeance.objects.create(date=strpdate('2011-01-01'), compte=Compte.objects.get(id=1), montant=2, tiers=Tiers.objects.get(id=2))
-        self.assertEquals(Echeance.objects.get(id=e1.id).moyen_id, 1)
-        e2 = Echeance.objects.create(date=strpdate('2011-01-01'), compte=Compte.objects.get(id=1), montant=-2, tiers=Tiers.objects.get(id=2))
-        self.assertEquals(Echeance.objects.get(id=e2.id).moyen_id, 2)
-        e3 = Echeance.objects.create(date=strpdate('2011-01-01'),
-                                     compte=Compte.objects.get(id=1),
-                                     montant=2,
-                                     tiers=Tiers.objects.get(id=2),
-                                     compte_virement=Compte.objects.get(id=2))
-        self.assertEquals(Echeance.objects.get(id=e3.id).moyen_virement_id, 2)
-        e4 = Echeance.objects.create(date=strpdate('2011-01-01'),
-                                     compte=Compte.objects.get(id=1),
-                                     montant=2,
-                                     tiers=Tiers.objects.get(id=2),
-                                     compte_virement=Compte.objects.get(id=2))
-        self.assertEquals(Echeance.objects.get(id=e4.id).moyen_virement_id, 2)
         #on ne peut sauver une echeance avec un virement sur un meme compte
         self.assertRaises(ValidationError, lambda:Echeance.objects.create(date=strpdate('2011-01-01'),
                                                                           compte=Compte.objects.get(id=1),
@@ -645,3 +629,6 @@ class test_models(TestCase):
                'moyen_destination':4
         }
         self.assertEquals(tab, v.init_form())
+
+    def test_exemple(self):
+        pass

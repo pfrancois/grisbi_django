@@ -834,7 +834,7 @@ class Echeance(models.Model):
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     valide = models.BooleanField(default=True)
-    compte = models.ForeignKey(Compte)
+    compte = models.ForeignKey(Compte, blank=False,null=False)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
@@ -858,7 +858,7 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         if self.compte_virement:
-            return "%s=>%s de %s" % (self.compte, self.compte_virement, self.montant)
+            return "%s=>%s pour %s" % (self.compte, self.compte_virement, self.montant)
         else:
             return "%s pour %s" % (self.montant, self.tiers)
 
@@ -926,13 +926,15 @@ class Echeance(models.Model):
 
     def clean(self):
         """
-        modifie les moyen automatiquement
+        verifie que l'on ne peut mettre un virement vers lui meme
         """
         self.alters_data = True
         if self.compte == self.compte_virement:
             raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
         super(Echeance, self).clean()
-
+    def save(self, force_insert=False, force_update=False, using=None):
+        self.clean()
+        super(Echeance,self).save(force_insert,force_update,using)
 
 class Generalite(models.Model):
     """config dans le fichier"""
@@ -1022,7 +1024,7 @@ class Ope(models.Model):
         return Ope.objects.filter(filles_set__isnull=True)
 
     def __unicode__(self):
-        return u"(%s) le %s : %s %s pour %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers)
+        return u"(%s) le %s : %s %s a %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers)
 
     @models.permalink
     def get_absolute_url(self):

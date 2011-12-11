@@ -359,8 +359,8 @@
 </Echeances>
 <Tiers>
     <Generalites>
-        <Nb_tiers>5</Nb_tiers>
-        <No_dernier_tiers>6</No_dernier_tiers>
+        <Nb_tiers>8</Nb_tiers>
+        <No_dernier_tiers>9</No_dernier_tiers>
     </Generalites>
     <Detail_des_tiers>
         <Tiers No="1" Nom="premier" Informations="" Liaison="0"/>
@@ -370,6 +370,8 @@
         <Tiers No="6" Nom="titre_ SG" Informations="FR0000130809@ACT" Liaison="0"/>
         <Tiers No="7" Nom="titre_ test1" Informations="" Liaison="0"/>
         <Tiers No="8" Nom="titre_ test2" Informations="DE0000130809" Liaison="0"/>
+        <Tiers No="9" Nom="titre_ test3" Informations="@ACT" Liaison="0"/>
+        <Tiers No="10" Nom="titre_ test4" Informations="@TOTOT" Liaison="0"/>
     </Detail_des_tiers>
 </Tiers>
 <Categories>

@@ -109,19 +109,21 @@ def import_gsb_050(nomfich, efface_table=True):
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
                 s = s.partition(
                     '@')#on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
+                #comme le tiers est sous la forme titre_ nomtiers
                 titre = Titre(nom=nom[7:])
-                if not s[1]:
+                #dans les notes ISIN@TYPE
+                if not s[1]:#pas de @ et donc pas de type
                     if s[0] == '':
                         titre.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
                     else:
                         titre.isin = s[0]
                     titre.type = "ZZZ"
                 else:
-                    if s[0] == '':
+                    if s[0] == '':#pas d'isin
                         titre.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
                     else:
                         titre.isin = s[0]
-                    if s[2] in liste_type_titre:
+                    if s[2] in liste_type_titre:#verification que le type existe
                         titre.type = s[2]
                     else:
                         titre.type = 'ZZZ'
