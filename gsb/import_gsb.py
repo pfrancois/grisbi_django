@@ -485,14 +485,12 @@ def import_gsb_050(nomfich, efface_table=True):
                 element.periodicite = 'h'
                 element.intervalle = 1
             else:
-                element.periodicite = liste_type_period[int(xml_ech.get('Periodicite')) + 1][0]
-                element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
+                liste_type_periode_perso=('j','m','a')
+                element.periodicite =liste_type_periode_perso[int(xml_ech.get('Intervalle_periodicite'))]
+                element.intervalle = int(xml_ech.get('Periodicite_personnalisee'))
         else:
             element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
-            if int(xml_ech.get('Intervalle_periodicite')):
-                element.intervalle = int(xml_ech.get('Intervalle_periodicite'))
-            else:
-                element.intervalle = 1
+            element.intervalle = 1
 
         element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
