@@ -31,7 +31,7 @@
 
     <tr class="item hover{% if pmv > 0 %} creditElement{% endif %}{% if pmv < 0 %} debitElement{% endif %}">
         <td class="opDate">&nbsp;</td>
-        <td class="opCenter">plus ou mons values</td>
+        <td class="opCenter">plus ou moins values</td>
         <td class="opCenter">&nbsp;</td>
         <td class="opDebit">{{ t.cours|cur }}</td>
         <td class="opCredit">{{ pmv|cur }}</td>
