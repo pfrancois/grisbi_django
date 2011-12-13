@@ -15,6 +15,7 @@ import decimal
 from django.conf import settings
 from ..utils import strpdate
 from operator import attrgetter
+from dateutil.relativedelta import relativedelta
 
 class test_models(TestCase):
     fixtures = ['test.json']
@@ -35,6 +36,9 @@ class test_models(TestCase):
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"cpte1=>cptb2 pour 10")
         self.assertEquals(Generalite.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR a tiers1")
+
+    def test_mul(self):
+        self.assertEquals(Cours.objects.get(id=4).valeur*Cours.objects.get(id=4).valeur,25)
 
     def test_fusionne_error(self):
         #fusion avec un autre type

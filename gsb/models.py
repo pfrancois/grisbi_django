@@ -834,7 +834,7 @@ class Echeance(models.Model):
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     valide = models.BooleanField(default=True)
-    compte = models.ForeignKey(Compte, blank=False,null=False)
+    compte = models.ForeignKey(Compte, blank=False, null=False)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
@@ -934,7 +934,7 @@ class Echeance(models.Model):
         super(Echeance, self).clean()
     def save(self, force_insert=False, force_update=False, using=None):
         self.clean()
-        super(Echeance,self).save(force_insert,force_update,using)
+        super(Echeance,self).save(force_insert, force_update, using)
 
 class Generalite(models.Model):
     """config dans le fichier"""
