@@ -688,7 +688,7 @@ class Ope_titre(models.Model):
         if not self.ope:
             #gestion des cours
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
-            if self.cours * self.nombre < 0:#vente
+            if self.nombre < 0:#vente
                 moyen = self.compte.moyen_credit_defaut
             else:#achat
                 moyen = self.compte.moyen_credit_defaut

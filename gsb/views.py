@@ -474,6 +474,10 @@ def ope_titre_detail(request, pk):
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope is None:
+                if self.nombre < 0:#vente
+                    moyen = self.compte.moyen_credit_defaut
+                else:#achat
+                    moyen = self.compte.moyen_credit_defaut
                 ope.ope = Ope.objects.create(date=form.cleaned_data['date'],
                                              montant=decimal.Decimal(
                                                  smart_unicode(form.cleaned_data['cours'])) * decimal.Decimal(
@@ -482,7 +486,7 @@ def ope_titre_detail(request, pk):
                                              cat=Cat.objects.get_or_create(id=settings.ID_CAT_OST,
                                                                            defaults={'nom':u'operation sur titre:'})[0],
                                              notes="%s@%s" % (form.cleaned_data['nombre'], form.cleaned_data['cours']),
-                                             moyen=None,
+                                             moyen=moyen,
                                              automatique=True,
                                              compte=ope.compte
                 )
