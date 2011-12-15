@@ -186,9 +186,24 @@ class Titre(models.Model):
         else:
             cours = self.last_cours
         if compte:
-            nb = self.nb(compte, datel=datel, rapp=rapp)
+            if rapp:
+            #recup de la derniere date
+                date_rapp = Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
+                date_p=Ope.objects.filter(compte__id=compte.id).filter(pointe=True).latest('date').date
+                try:
+                    if date_rapp > date_p:
+                        self.cours_set.filter(date__lte=date_rapp).latest().valeur
+                        nb = self.nb(compte, datel=date_rapp, rapp=rapp)
+                    else:
+                        self.cours_set.filter(date__lte=date_p).latest().valeur
+                        nb = self.nb(compte, datel=date_p, rapp=rapp)
+                except TypeError:
+                    self.cours_set.filter(date__lte=date_rapp).latest().valeur
+                    nb = self.nb(compte, datel=date_rapp, rapp=rapp)
+            else:
+                nb = self.nb(compte, datel=datel, rapp=rapp)
         else:
-            nb = self.nb(datel=datel, rapp=rapp)
+            nb = self.nb(datel=datel, rapp=False)
         return nb * cours
 
 
