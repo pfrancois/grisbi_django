@@ -414,6 +414,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     sinon affiche uniquement les non rapp"""
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+
     date_rappro = compte.date_rappro()
     solde_rappro = titre.encours(compte=compte,rapp=True)
     q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
@@ -454,6 +455,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
                     'nb_r':titre.nb(compte,rapp=True),
                     'date_rappro':date_rappro,
                     'solde_rappro':solde_rappro,
+                    'investi_r':titre.investi(compte,date_rappro),
                     'pmv':titre.encours(compte)-titre.investi(compte)
                     }
             )

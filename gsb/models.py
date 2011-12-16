@@ -190,16 +190,19 @@ class Titre(models.Model):
             #recup de la derniere date
                 date_rapp = Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
                 date_p=Ope.objects.filter(compte__id=compte.id).filter(pointe=True).latest('date').date
-                try:
-                    if date_rapp > date_p:
-                        self.cours_set.filter(date__lte=date_rapp).latest().valeur
-                        nb = self.nb(compte, datel=date_rapp, rapp=rapp)
+                if date_rapp and date_rapp > date_p:
+                    date_r=date_rapp
+                else:
+                    if date_p:
+                        date_r=date_p
                     else:
-                        self.cours_set.filter(date__lte=date_p).latest().valeur
-                        nb = self.nb(compte, datel=date_p, rapp=rapp)
-                except TypeError:
-                    self.cours_set.filter(date__lte=date_rapp).latest().valeur
-                    nb = self.nb(compte, datel=date_rapp, rapp=rapp)
+                        date_r=None
+                #try:
+                cours = self.cours_set.filter(date__lte=date_r).latest().valeur
+                nb = self.nb(compte, datel=date_r, rapp=rapp)
+                #except (TypeError,ValueError):
+                #    cours = 0
+                #    nb = 0
             else:
                 nb = self.nb(compte, datel=datel, rapp=rapp)
         else:
@@ -456,11 +459,11 @@ class Compte(models.Model):
         try:
             date_rapp = Ope.objects.filter(compte__pk=self.id).aggregate(element=models.Max('rapp__date'))['element']
             if date_rapp:
-                return date_rapp.strftime("%d/%m/%Y")
+                return date_rapp
             else:
-                return "-"
+                return None
         except Ope.DoesNotExist:
-            return "-"
+            return None
 
     date_rappro.short_description = u"date dernier rapp"
 
@@ -618,16 +621,19 @@ class Compte_titre(Compte):
 
     def date_rappro(self):
         try:
-            #attention, il faut faire la requete uniquement sur le compte et non sur le compte titre
             date_rapp = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-            if date_rapp:
-                return date_rapp.strftime("%d/%m/%Y")
+            date_p=Ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
+            if date_rapp and date_rapp > date_p:
+                return date_rapp
             else:
-                return "-"
+                if date_p:
+                    return date_p
+                else:
+                    return None
         except Ope.DoesNotExist:
-            return "-"
+            return None
 
-    date_rappro.short_description = u"date dernier rapp"
+    date_rappro.short_description = u"date dernier rapp ou pointage"
 
     @transaction.commit_on_success
     def fusionne(self, new):

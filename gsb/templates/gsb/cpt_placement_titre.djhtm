@@ -39,10 +39,10 @@
     </tr>
     <tr class="footerbar">
         <td colspan="1">&nbsp;</td>
-        <td>total rapproché le {{ date_rappro }}</td>
+        <td>total rapproché le {{ date_rappro|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="opCenter">{{ nb_r|floatformat:3 }}</td>
-        <td>&nbsp;</td>
-        <td class="opCredit">{{ solde_rappro|cur }}</td>
+        <td>investissement:{{ investi_r|cur }}</td>
+        <td class="opCredit">encours:{{ solde_rappro|cur }}</td>
     </tr>{% endblock footer %}
 {% block boutons_bas %}
     <table width="100%" id="boutons_bas" class="table">

@@ -33,7 +33,7 @@
         <tfoot>
             {% block footer %}
                 <tr class="footerbar">
-                    <td colspan="3" class="cptLabel">Solde<br/>Solde rapproch&eacute; au {{ date_r }}:</td>
+                    <td colspan="3" class="cptLabel">Solde<br/>Solde rapproch&eacute; au {{ date_r|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}:</td>
                     <td colspan="2" class="cptSolde">{{ solde|cur }}<br/>{{ solde_r|cur }}</td>
                 </tr>{% endblock footer %}
         </tfoot>
