@@ -396,7 +396,7 @@ class Compte(models.Model):
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
-            query = query.filter(rapp__isnull=False)
+            query = Ope.non_meres().filter(compte=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
@@ -615,24 +615,55 @@ class Compte_titre(Compte):
         return solde_espece + solde_titre
 
     def solde_rappro(self):
-        return self.solde_titre(rapp=True)
-
-    solde_rappro.short_description = u"solde rapproché ou pointé"
-
-    def date_rappro(self):
-        try:
-            date_rapp = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-            date_p=Ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
-            if date_rapp and date_rapp > date_p:
-                return date_rapp
+        solde_titre=0
+        for titre in self.titre.all().distinct():
+            date_rapp = Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).aggregate(element=models.Max('rapp__date'))['element']
+            if Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).filter(pointe=True).exists():
+                date_p=Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).filter(pointe=True).latest('date').date
+            else:
+                if not date_rapp:
+                    break
+                else:
+                    date_p=None
+            if date_p and date_rapp:
+                if date_rapp > date_p:
+                    date_r=date_rapp
+                else:
+                    date_r=date_p
             else:
                 if date_p:
-                    return date_p
+                    date_r=date_p
                 else:
-                    return None
-        except Ope.DoesNotExist:
-            return None
+                    date_r=date_rapp
+            cours = titre.cours_set.filter(date__lte=date_r).latest().valeur
+            if cours==0:
+                cours=1
+            nb = titre.nb(compte=self, datel=date_r, rapp=True)
+            solde_titre = solde_titre + nb * cours
+        return solde_titre
 
+    solde_rappro.short_description = u"solde titre rapproché ou pointé"
+
+    def date_rappro(self):
+        date_rapp = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
+        if Ope.objects.filter(compte__id=self.id).filter(pointe=True).exists():
+            date_p=Ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
+        else:
+            if not date_rapp:
+                return None
+            else:
+                date_p=None
+        if date_p and date_rapp:
+            if date_rapp > date_p:
+                date_r=date_rapp
+            else:
+                date_r=date_p
+        else:
+            if date_p:
+                date_r=date_p
+            else:
+                date_r=date_rapp
+        return date_r
     date_rappro.short_description = u"date dernier rapp ou pointage"
 
     @transaction.commit_on_success
@@ -668,6 +699,17 @@ class Compte_titre(Compte):
         solde_titre = 0
         for titre in self.titre.all().distinct():
             nb = titre.nb(compte=self, datel=datel, rapp=rapp)
+            if rapp:
+                date_rapp = Ope.ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
+                date_p=Ope.ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
+                if date_rapp and date_rapp > date_p:
+                    date_r=date_rapp
+                else:
+                    if date_p:
+                        date_r=date_p
+                    else:
+                        date_r=None
+                datel=date_r
             if datel:
                 cours = titre.cours_set.filter(date__lte=datel).latest().valeur
                 if cours==0:
@@ -676,7 +718,17 @@ class Compte_titre(Compte):
                     raise Gsb_exc(u'attention pas de cours existant à cette date')
             else:
                 cours = titre.last_cours
+            if rapp:
+                print self.nom
+            if self.id==6 and rapp:
+                print titre.nom
+                print nb
+                print cours
+                print nb*cours
+                print "-"
+                print solde_titre + nb * cours
             solde_titre = solde_titre + nb * cours
+
         return solde_titre
 
     def liste_titre(self, datel=None, rapp=False):

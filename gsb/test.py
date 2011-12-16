@@ -42,13 +42,4 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-    t=Titre.objects.get(id=5)
-    c=Compte_titre.objects.get(id=8)
-    o=Ope.objects.filter(compte__pk=c.id)
-    date_rapp=o.aggregate(element=models.Max('rapp__date'))['element']
-    if date_rapp:
-        print date_rapp.strftime("%d/%m/%Y")
-    else:
-        print "-"
-    print 'toto'
-    print c.solde_rappro()
+    print Compte_titre.objects.get(id=8).date_rappro()

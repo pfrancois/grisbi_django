@@ -121,16 +121,6 @@ class Compte_admin(Modeladmin_perso):
     list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-    def solde_rappro(self, obj):
-        req = Ope.non_meres().filter(compte=obj.id).filter(Q(rapp__isnull=False) | Q(pointe=True)).aggregate(solde=models.Sum('montant'))
-        if req['solde'] is None:
-            solde = decimal.Decimal(0) + decimal.Decimal(obj.solde_init)
-        else:
-            solde = decimal.Decimal(req['solde']) + decimal.Decimal(obj.solde_init)
-        return solde
-
-    solde_rappro.short_description = u"solde rapproché ou pointé"
-
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
@@ -190,7 +180,7 @@ class Compte_admin(Modeladmin_perso):
 
 
 class Compte_titre_admin(Modeladmin_perso):
-    """compte titre avec inline"""
+    """compte titre """
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     fields = Compte_admin.fields#on prend comme ca les meme champs
     list_display = ('nom', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
