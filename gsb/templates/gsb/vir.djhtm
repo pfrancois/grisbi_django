@@ -20,10 +20,10 @@
             <tr class="boutton">
                 {% if cpt %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
+                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">Annuler</a></td>
+                    <td width="50%"><a href="{% url gsb.views.index %}">retour compte</a></td>
                 {% endif %}
             </tr>
         </table>
