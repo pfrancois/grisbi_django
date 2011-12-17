@@ -5,7 +5,7 @@
         <table style=" width: 100%;">
             <tr class="boutton">
                 <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
+                <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
             </tr>
         </table>
         <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">{% csrf_token %}</form>
@@ -58,10 +58,10 @@
             <tr class="boutton">
                 {% if cpt %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
+                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">Annuler</a></td>
+                    <td width="50%"><a href="{% url gsb.views.index %}">retour index</a></td>
                 {% endif %}
             </tr>
         </table>
