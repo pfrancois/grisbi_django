@@ -102,12 +102,12 @@ class Titre(models.Model):
     @property
     def last_cours(self):
         """renvoie le dernier cours"""
-        return self.cours_set.latest().valeur
+        return self.cours_set.latest('date').valeur
 
     @property
     def last_cours_date(self):
         """renvoie la date du dernier cours"""
-        return self.cours_set.latest().date
+        return self.cours_set.latest('date').date
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -145,7 +145,7 @@ class Titre(models.Model):
             self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte=None, datel=None,rapp=None):
+    def investi(self, compte=None, datel=None, rapp=None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel:date, renvoie sur avant la date ou tout si none
@@ -189,16 +189,16 @@ class Titre(models.Model):
             cours = self.last_cours
         if compte:
             if rapp:
-            #recup de la derniere date
-                opes=Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
+                #recup de la derniere date
+                opes = Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
                 if opes:
-                    date_r=opes.latest('date').date
+                    date_r = opes.latest('date').date
                 else:
                     return 0 #comme pas de date, pas d'encours
                 cours = self.cours_set.filter(date__lte=date_r).latest().valeur
                 nb = self.nb(compte, datel=date_r, rapp=rapp)
             else:
-                nb = self.nb(compte, datel=datel, rapp=rapp)
+                nb = self.nb(compte, datel=datel)
         else:
             nb = self.nb(datel=datel, rapp=False)
         return nb * cours
@@ -513,7 +513,7 @@ class Compte_titre(Compte):
             if virement_de:
                 vir = Virement()
                 vir.create(virement_de, self,
-                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)), date)
+                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais, date)
         else:
             raise TypeError("pas un titre")
 
@@ -559,7 +559,7 @@ class Compte_titre(Compte):
                 vir = Virement()
                 vir.create(self,
                            virement_vers,
-                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)),
+                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
                            date)
         else:
             raise TypeError("pas un titre")
@@ -598,7 +598,7 @@ class Compte_titre(Compte):
                 )
             if virement_vers:
                 vir = Virement()
-                vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)), date)
+                vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)) - frais, date)
         else:
             raise TypeError("pas un titre")
 
@@ -613,7 +613,7 @@ class Compte_titre(Compte):
         return solde_espece + solde_titre
 
     def solde_rappro(self):
-        solde_titre=0
+        solde_titre = 0
         for titre in self.titre.all().distinct():
             solde_titre = solde_titre + titre.encours(compte=self, rapp=True)
         return solde_titre
@@ -621,11 +621,11 @@ class Compte_titre(Compte):
     solde_rappro.short_description = u"solde titre rapproché ou pointé"
 
     def date_rappro(self):
-        opes=Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
+        opes = Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
         if opes:
-            date_p=opes.latest('date').date
+            date_p = opes.latest('date').date
             if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exists():
-                date_r= Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
+                date_r = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
                 if date_r > date_p:
                     return date_r
                 else:
@@ -634,6 +634,7 @@ class Compte_titre(Compte):
                 return date_p
         else:
             return None #comme pas de date, pas d'encours
+
     date_rappro.short_description = u"date dernier rapp ou pointage"
 
     @transaction.commit_on_success
@@ -950,9 +951,11 @@ class Echeance(models.Model):
         if self.compte == self.compte_virement:
             raise ValidationError(u"pas possible de mettre un meme compte en virement et compte de base")
         super(Echeance, self).clean()
+
     def save(self, force_insert=False, force_update=False, using=None):
         self.clean()
-        super(Echeance,self).save(force_insert, force_update, using)
+        super(Echeance, self).save(force_insert, force_update, using)
+
 
 class Generalite(models.Model):
     """config dans le fichier"""

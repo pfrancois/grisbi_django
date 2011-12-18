@@ -543,16 +543,17 @@ def ope_titre_delete(request, pk):
             messages.error(request, u"impossible d'effacer une operation rapprochée")
             return HttpResponseRedirect(ope.get_absolute_url())
         compte = ope.compte
+        #gestion des cours inutiles
         cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
         if cours.exists():
             s = u'%s' % cours
             cours.delete()
-            messages.success(request, u'cours effacé:%s' % s)
+            messages.success(request, u'cours effacé: %s' % s)
         if ope.ope:
             ope.ope.delete()
-        s = u'%s' % ope
+        s = u'%s' % ope.id
         ope.delete()
-        messages.success(request, u'ope effacé:%s' % s)
+        messages.success(request, u'ope effacé id %s' % s)
         return HttpResponseRedirect(compte.get_absolute_url())
     else:
         return HttpResponseRedirect(ope.get_absolute_url())

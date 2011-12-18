@@ -42,5 +42,5 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-
-    print titre.investi(compte,date_rappro)
+    c = Compte_titre.objects.get(id=4)
+    print  c.solde(rapp=True)
