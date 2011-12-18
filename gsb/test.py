@@ -42,4 +42,5 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-    print Compte_titre.objects.get(id=8).date_rappro()
+
+    print titre.investi(compte,date_rappro)

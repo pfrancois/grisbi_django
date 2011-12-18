@@ -183,7 +183,7 @@ class test_models(TestCase):
         self.assertEquals(t.encours(c), 100)
         self.assertEquals(t.encours(datel='2011-07-01'), 20)
         self.assertEquals(t.encours(compte=c, datel='2011-07-01'), 0)
-        self.assertEquals(t.encours(rapp=True), 100)
+        self.assertEquals(t.encours(rapp=True), 200)
         self.assertEquals(t.encours(rapp=True, datel='2010-07-01'), 0)
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4)), 0)
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4), datel='2010-07-01'), 0)

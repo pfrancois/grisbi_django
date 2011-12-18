@@ -6,3 +6,4 @@ necessite:
 django
 lxml
 dateutils http://labix.org/python-dateutil#head-de
+

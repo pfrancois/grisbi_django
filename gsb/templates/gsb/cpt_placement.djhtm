@@ -1,7 +1,6 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %} {% load gsb_extras %}{% load url from future %}
 {% block content %}
-    {% load gsb_extras %}{% load url from future %}
-    <table width="100%" id="boutons" class="table">
+       <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
             <tr class="boutton">
                 <td width="50%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
@@ -30,6 +29,7 @@
                 <th align="right">montant plac&eacute;</th>
                 <th>+/- values</th>
                 <th>total</th>
+                <th>solde rapproché ou pointé</th>
             </tr>
         </thead>
         {% for titre in titres %}
@@ -42,22 +42,29 @@
                 <td class="opDebit">{{ titre.invest|cur }}</td>
                 <td class="opCredit">{{ titre.pmv|cur }}</td>
                 <td class="opDebit">{{ titre.total|cur }}</td>
+                <td class="opDebit">{{ titre.rapp|cur }}</td>
             </tr>
         {% empty %}
             <tr class="item">
-                <td colspan="6"> aucun placement.
+                <td colspan="7"> aucun placement.
                     <br/>
                 </td>
             </tr>
         {% endfor %}
+        <tr class="bar">
+            <td class="opTier" colspan="5">solde titre</td>
+            <td class="opDebit">{{ compte.solde_titre|cur }}</td>
+            <td class="opDebit">{{ solde_titre_rapp|cur }}</td>
+        </tr>
         <tr class="item hover">
-            <td class="opTier" colspan="5"><a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a>
-            </td>
+            <td class="opTier" colspan="5"><a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a></td>
             <td class="opDebit">{{ especes|cur }}</td>
+            <td class="opDebit">{{ especes_rapp|cur }}</td>
         </tr>
         <tr class="footerbar">
             <td colspan="5" class="cptLabel">Solde global</td>
             <td colspan="1" class="cptSolde">{{ solde|cur }}</td>
+            <td colspan="1" class="cptSolde">{{ solde_rapp|cur }}</td>
         </tr>
     </table>
 {% endblock content %}

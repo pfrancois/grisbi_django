@@ -13,7 +13,7 @@
                 <td class="cptLabel" colspan="2"> aucun compte esp&egrave;ce ou bancaire</td>
             </tr>
         {% endfor %}
-        <tr class="footerbar">
+        <tr class="bar">
             <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
             <td class="cptSolde">{{ total_bq|cur }}</td>
         </tr>
@@ -31,7 +31,7 @@
                 <td class="cptLabel" colspan="2"> aucun Compte Comptes titres</td>
             </tr>
         {% endfor %}
-        <tr class="footerbar">
+        <tr class="bar">
             <td class="cptLabel">Solde des comptes titre</td>
             <td class="cptSolde">{{ total_pla|cur }}</td>
         </tr>

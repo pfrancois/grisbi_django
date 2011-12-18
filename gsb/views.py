@@ -146,8 +146,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             nb = t.nb(compte)
             if abs(nb) > decimal.Decimal('0.01'):
                 titres.append({'nom':t.nom, 'type':t.get_type_display(), 'nb':nb, 'invest':invest,
-                               'pmv':total - invest, 'total':total, 'id':t.id, 't':t})
-        especes = super(Compte_titre, compte).solde()
+                               'pmv':total - invest, 'total':total, 'id':t.id, 't':t,'rapp':t.encours(rapp=True,compte=compte)})
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
             template.render(
@@ -158,7 +157,10 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'titre':compte.nom,
                         'solde':compte.solde(),
                         'titres':titres,
-                        'especes':especes,
+                        'especes': compte.solde_espece(),
+                        'especes_rapp':compte.solde_espece(rapp=True),
+                        'solde_rapp':compte.solde(rapp=True),
+                        'solde_titre_rapp':compte.solde_titre(rapp=True),
                         }
                 )
             )
@@ -439,7 +441,6 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
-
     return HttpResponse(
         template.render(
             RequestContext(
@@ -455,7 +456,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
                     'nb_r':titre.nb(compte,rapp=True),
                     'date_rappro':date_rappro,
                     'solde_rappro':solde_rappro,
-                    'investi_r':titre.investi(compte,date_rappro),
+                    'investi_r':titre.investi(compte,rapp=True),
                     'pmv':titre.encours(compte)-titre.investi(compte)
                     }
             )

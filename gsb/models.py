@@ -145,7 +145,7 @@ class Titre(models.Model):
             self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte=None, datel=None):
+    def investi(self, compte=None, datel=None,rapp=None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel:date, renvoie sur avant la date ou tout si none
@@ -155,6 +155,8 @@ class Titre(models.Model):
             query = query.filter(compte=compte)
         if datel:
             query = query.filter(date__lte=datel)
+        if rapp:
+            query = query.filter(Q(rapp__isnull=False) | Q(pointe=True))
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
         if not valeur:
             return 0
@@ -188,21 +190,13 @@ class Titre(models.Model):
         if compte:
             if rapp:
             #recup de la derniere date
-                date_rapp = Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
-                date_p=Ope.objects.filter(compte__id=compte.id).filter(pointe=True).latest('date').date
-                if date_rapp and date_rapp > date_p:
-                    date_r=date_rapp
+                opes=Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
+                if opes:
+                    date_r=opes.latest('date').date
                 else:
-                    if date_p:
-                        date_r=date_p
-                    else:
-                        date_r=None
-                #try:
+                    return 0 #comme pas de date, pas d'encours
                 cours = self.cours_set.filter(date__lte=date_r).latest().valeur
                 nb = self.nb(compte, datel=date_r, rapp=rapp)
-                #except (TypeError,ValueError):
-                #    cours = 0
-                #    nb = 0
             else:
                 nb = self.nb(compte, datel=datel, rapp=rapp)
         else:
@@ -610,60 +604,36 @@ class Compte_titre(Compte):
 
     def solde(self, datel=None, rapp=False):
         """renvoie le solde"""
+        if rapp:
+            solde_titre = self.solde_rappro()
+        else:
+            solde_titre = self.solde_titre(datel)
         solde_espece = self.solde_espece(datel, rapp)
-        solde_titre = self.solde_titre(datel, rapp)
+
         return solde_espece + solde_titre
 
     def solde_rappro(self):
         solde_titre=0
         for titre in self.titre.all().distinct():
-            date_rapp = Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).aggregate(element=models.Max('rapp__date'))['element']
-            if Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).filter(pointe=True).exists():
-                date_p=Ope.objects.filter(compte__id=self.id).filter(tiers__id=titre.tiers.id).filter(pointe=True).latest('date').date
-            else:
-                if not date_rapp:
-                    break
-                else:
-                    date_p=None
-            if date_p and date_rapp:
-                if date_rapp > date_p:
-                    date_r=date_rapp
-                else:
-                    date_r=date_p
-            else:
-                if date_p:
-                    date_r=date_p
-                else:
-                    date_r=date_rapp
-            cours = titre.cours_set.filter(date__lte=date_r).latest().valeur
-            if cours==0:
-                cours=1
-            nb = titre.nb(compte=self, datel=date_r, rapp=True)
-            solde_titre = solde_titre + nb * cours
+            solde_titre = solde_titre + titre.encours(compte=self, rapp=True)
         return solde_titre
 
     solde_rappro.short_description = u"solde titre rapproché ou pointé"
 
     def date_rappro(self):
-        date_rapp = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-        if Ope.objects.filter(compte__id=self.id).filter(pointe=True).exists():
-            date_p=Ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
+        opes=Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
+        if opes:
+            date_p=opes.latest('date').date
+            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exist():
+                date_r= Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
+                if date_r > date_p:
+                    return date_r
+                else:
+                    return date_p
+            else:
+                return date_p
         else:
-            if not date_rapp:
-                return None
-            else:
-                date_p=None
-        if date_p and date_rapp:
-            if date_rapp > date_p:
-                date_r=date_rapp
-            else:
-                date_r=date_p
-        else:
-            if date_p:
-                date_r=date_p
-            else:
-                date_r=date_rapp
-        return date_r
+            return None #comme pas de date, pas d'encours
     date_rappro.short_description = u"date dernier rapp ou pointage"
 
     @transaction.commit_on_success
@@ -697,36 +667,11 @@ class Compte_titre(Compte):
 
     def solde_titre(self, datel=None, rapp=False):
         solde_titre = 0
+        if rapp:
+            return self.solde_rappro()
         for titre in self.titre.all().distinct():
-            nb = titre.nb(compte=self, datel=datel, rapp=rapp)
-            if rapp:
-                date_rapp = Ope.ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-                date_p=Ope.ope.objects.filter(compte__id=self.id).filter(pointe=True).latest('date').date
-                if date_rapp and date_rapp > date_p:
-                    date_r=date_rapp
-                else:
-                    if date_p:
-                        date_r=date_p
-                    else:
-                        date_r=None
-                datel=date_r
-            if datel:
-                cours = titre.cours_set.filter(date__lte=datel).latest().valeur
-                if cours==0:
-                    cours=1
-                elif not cours:
-                    raise Gsb_exc(u'attention pas de cours existant à cette date')
-            else:
-                cours = titre.last_cours
-            if rapp:
-                print self.nom
-            if self.id==6 and rapp:
-                print titre.nom
-                print nb
-                print cours
-                print nb*cours
-                print "-"
-                print solde_titre + nb * cours
+            nb = titre.nb(compte=self, datel=datel)
+            cours = titre.last_cours
             solde_titre = solde_titre + nb * cours
 
         return solde_titre
