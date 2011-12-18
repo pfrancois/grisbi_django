@@ -133,10 +133,12 @@ h2{
     padding: .7em;
     height: 3em;
 }
+
 .bar td{
     background-color: #990000;
     font-weight: bold;
 }
+
 .total_general{
     border-top: 10px solid #333333;
 }
@@ -241,22 +243,19 @@ body{
 .success{
     color: #264409;
     border-color: #C6D880;
-    background-color: #E6EFC2;
-    background-image: url('/static/img/success.png');
+    background: #E6EFC2 url('/static/img/success.png');
 }
 
 .warning{
     color: #514721;
     border-color: #FFD324;
-    background-color: #FFF6BF;
-    background-image: url('/static/img/warning.png');
+    background: #FFF6BF url('/static/img/warning.png');
 }
 
 .error{
     color: #8A1F11;
     border-color: #FBC2C4;
-    background-color: #FBE3E4;
-    background-image: url('/static/img/error.png');
+    background: #FBE3E4 url('/static/img/error.png');
 }
 
 /******** /User feedback messages ********/

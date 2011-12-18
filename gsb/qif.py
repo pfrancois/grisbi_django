@@ -15,16 +15,16 @@ version SG:
 
 import sys
 import decimal
-from mysite.gsb.utils import datefr2datesql, fr2decimal,strpdate
+from mysite.gsb.utils import datefr2datesql, fr2decimal, strpdate
 #definition
 #expression reg
 #id des moyens,tiers,cat et ib, si None, on ne change pas
 #int de la colonne a commencer pour le tiers
-tiers_perso=(
-    {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC","def":{"moyen":4,"tiers":15,"cat":24,"ib":None},"decal":None,"date":false},
-    {"reg":r"CARTE X\d* (\d\d/\d\d)","def":{"moyen":3,"tiers":None,"cat":None,"ib":None},"decal":None,"date":True},
-    {"reg":r"CARTE X\d* (\d\d/\d\d)","def":{"moyen":3,"tiers":None,"cat":None,"ib":None},"decal":20,"date":True},
-)
+tiers_perso = (
+        {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC", "def":{"moyen":4, "tiers":15, "cat":24, "ib":None}, "decal":None, "date":false},
+        {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":None, "date":True},
+        {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":20, "date":True},
+    )
 
 class QifItem:
     def __init__(self):
@@ -117,9 +117,10 @@ def parseQif(infile):
 if __name__ == "__main__":
     # read from stdin and write CSV to stdout
     import os
+
     nomfich = "%s/../perso.qif" % (os.path.dirname(os.path.abspath(__file__)))
     nomfich = os.path.normpath(nomfich)
-    qiffile=open(nomfich)
+    qiffile = open(nomfich)
     items = parseQif(qiffile)
     qiffile.close()
     print repr(items[0])

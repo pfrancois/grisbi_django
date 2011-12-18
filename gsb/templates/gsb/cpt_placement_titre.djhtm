@@ -1,9 +1,9 @@
 {% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block bouton_haut %}
     <table width="100%" id="boutons" class="table">
-            <tr class="boutton">
-                <td><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom }}</a></td>
-            </tr>
+        <tr class="boutton">
+            <td><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom }}</a></td>
+        </tr>
     </table>{% endblock bouton_haut %}
 {% block titre_col_ope %}
     <th class="opDate" style="width: 10%;">Date</th>

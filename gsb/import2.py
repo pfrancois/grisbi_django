@@ -242,14 +242,14 @@ def import_gsb(nomfich, efface_table=True):
         nb_moyen = 0
         type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type in ('t',):
-            logger.debug("cpt_titre %s" % (xml_cpt.find('Details/Nom').text))
+            logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
                 'nom':xml_cpt.find('Details/Nom').text,
                 'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
                 'id':int(xml_cpt.find('Details/No_de_compte').text)
             })
         else:
-            logger.debug("cpt %s" % (xml_cpt.find('Details/Nom').text))
+            logger.debug("cpt %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
                 'nom':xml_cpt.find('Details/Nom').text,
                 'ouvert':not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
