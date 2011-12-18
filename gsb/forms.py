@@ -126,6 +126,7 @@ class VirementForm(Baseform):
         virement_objet.dest.compte = self.cleaned_data['compte_destination']
         virement_objet.montant = self.cleaned_data['montant']
         virement_objet.notes = self.cleaned_data['notes']
+        virement_objet.date = self.cleaned_data['date']
         #virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
         #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
