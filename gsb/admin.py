@@ -183,7 +183,7 @@ class Compte_titre_admin(Modeladmin_perso):
     """compte titre """
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     fields = Compte_admin.fields#on prend comme ca les meme champs
-    list_display = ('nom', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
+    list_display = ('nom', 'solde_titre', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
 

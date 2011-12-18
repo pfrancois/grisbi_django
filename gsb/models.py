@@ -624,7 +624,7 @@ class Compte_titre(Compte):
         opes=Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
         if opes:
             date_p=opes.latest('date').date
-            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exist():
+            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exists():
                 date_r= Ope.objects.filter(compte__id=compte.id).aggregate(element=models.Max('rapp__date'))['element']
                 if date_r > date_p:
                     return date_r
@@ -691,7 +691,7 @@ class Ope_titre(models.Model):
     nombre = CurField(default=0, decimal_places=5)
     date = models.DateField()
     cours = CurField(default=1, decimal_places=5)
-    invest = CurField(default=0, editable=False, decimal_places=5)
+    invest = CurField(default=0, editable=False, decimal_places=2)
     ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
 
     class Meta:
