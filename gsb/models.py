@@ -150,7 +150,7 @@ class Titre(models.Model):
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel:date, renvoie sur avant la date ou tout si none
         """
-        query = Ope.objects.filter(tiers=self.tiers)
+        query = Ope.objects.filter(tiers=self.tiers).exclude(cat__id=settings.ID_CAT_PMV)
         if compte:
             query = query.filter(compte=compte)
         if datel:
@@ -184,7 +184,7 @@ class Titre(models.Model):
     def encours(self, compte=None, datel=None, rapp=False):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
         if datel:
-            cours=self.cours_set.filter(date__lte=datel)
+            cours = self.cours_set.filter(date__lte=datel)
             if cours.exists():
                 cours = cours.latest().valeur
             else:
@@ -697,7 +697,8 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default=1, decimal_places=5)
     invest = CurField(default=0, editable=False, decimal_places=2)
-    ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
+    ope = models.OneToOneField('Ope', editable=False, null=True,related_name='ope')#null=true car j'ai des operations sans lien
+    ope_pmv = models.OneToOneField('Ope', editable=False, null=True,related_name='ope_pmv')#null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
@@ -706,51 +707,105 @@ class Ope_titre(models.Model):
         ordering = ['-date']
 
     def save(self, *args, **kwargs):
-        self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
-        #        super(Ope_titre, self).save(*args, **kwargs)
-        if not self.ope:
-            #gestion des cours
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
-            if self.nombre < 0:#vente
-                moyen = self.compte.moyen_credit_defaut
-            else:#achat
-                moyen = self.compte.moyen_credit_defaut
-            self.ope = Ope.objects.create(date=self.date,
-                                          montant=self.cours * self.nombre * -1,
-                                          tiers=self.titre.tiers,
-                                          cat=cat_ost,
-                                          notes="%s@%s" % (self.nombre, self.cours),
-                                          moyen=moyen,
-                                          compte=self.compte,
-                                          )
-            try:
-                Cours.objects.get(titre=self.titre, date=self.date)
-            except  Cours.DoesNotExist:
-                Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+        cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
+        cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
+        if self.nombre > 0:#on doit separer because gestion des plues values
+            self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
+            #        super(Ope_titre, self).save(*args, **kwargs)
+            if not self.ope:
+                #creation des operations
+                moyen = self.compte.moyen_debit_defaut
+                self.ope = Ope.objects.create(date=self.date,
+                                              montant=self.cours * self.nombre * -1,
+                                              tiers=self.titre.tiers,
+                                              cat=cat_ost,
+                                              notes="%s@%s" % (self.nombre, self.cours),
+                                              moyen=moyen,
+                                              compte=self.compte,
+                                              )
+                #gestion des cours
+                try:
+                    Cours.objects.get(titre=self.titre, date=self.date)
+                except  Cours.DoesNotExist:
+                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+            else:
+                old_date = self.ope.date
+                self.ope.date = self.date
+                self.ope.montant = self.cours * self.nombre * -1
+                self.ope.tiers = self.titre.tiers
+                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope.compte = self.compte
+                self.ope.save()
+                try:
+                    cours = Cours.objects.get(titre=self.titre, date=old_date)
+                    cours.date = self.date
+                    cours.titre = self.titre
+                    cours.valeur = self.cours
+                    cours.save()
+                except  Cours.DoesNotExist:
+                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         else:
-            old_date = self.ope.date
-            self.ope.date = self.date
-            self.ope.montant = self.cours * self.nombre * -1
-            self.ope.tiers = self.titre.tiers
-            self.ope.notes = "%s@%s" % (self.nombre, self.cours)
-            self.ope.compte = self.compte
-            self.ope.save()
-            try:
-                cours = Cours.objects.get(titre=self.titre, date=old_date)
-                cours.date = self.date
-                cours.titre = self.titre
-                cours.valeur = self.cours
-                cours.save()
-            except  Cours.DoesNotExist:
-                Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+            #calcul prealable
+            CMUP = titre.investi(self.compte) / titre.nb(self.compte)
+            ost = self.nombre * CMUP
+            pmv = self.nombre * self.cours - ost
+            #on cree ls ope
+            self.invest = ost
+            if not self.ope:
+                moyen = self.compte.moyen_credit_defaut
+                self.ope = Ope.objects.create(date=self.date,
+                                              montant=ost * -1,
+                                              tiers=self.titre.tiers,
+                                              cat=cat_ost,
+                                              notes="%s@%s" % (self.nombre, self.cours),
+                                              moyen=moyen,
+                                              compte=self.compte,
+                                              )
+                self.ope_pmv = Ope.objects.create(date=self.date,
+                                                  montant=pmv * -1,
+                                                  tiers=self.titre.tiers,
+                                                  cat=cat_pmv,
+                                                  notes="%s@%s" % (self.nombre, self.cours),
+                                                  moyen=moyen,
+                                                  compte=self.compte,
+                                                  )
+                #gestion des cours
+                try:
+                    Cours.objects.get(titre=self.titre, date=self.date)
+                except  Cours.DoesNotExist:
+                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+            else:
+                old_date = self.ope.date
+                self.ope.date = self.date
+                self.ope.montant = ost * -1
+                self.ope.tiers = self.titre.tiers
+                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope.compte = self.compte
+                self.ope.save()
+                self.ope_pmv.date = self.date
+                self.ope_pmv.montant = pmv * -1
+                self.ope_pmv.tiers = self.titre.tiers
+                self.ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope_pmv.compte = self.compte
+                self.ope_pmv.save()
+                try:
+                    cours = Cours.objects.get(titre=self.titre, date=old_date)
+                    cours.date = self.date
+                    cours.titre = self.titre
+                    cours.valeur = self.cours
+                    cours.save()
+                except  Cours.DoesNotExist:
+                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return 'ope_titre_detail', (), {'pk':str(self.id)}
 
-    def __unicode__(self):
-        return "%s" % self.id
+@models.permalink
+def get_absolute_url(self):
+    return 'ope_titre_detail', (), {'pk':str(self.id)}
+
+
+def __unicode__(self):
+    return "%s" % self.id
 
 
 class Moyen(models.Model):

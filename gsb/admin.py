@@ -191,7 +191,7 @@ class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
     fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere', 'oper_titre',
               'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
-    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre')
+    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre','show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
@@ -206,8 +206,16 @@ class Ope_admin(Modeladmin_perso):
         else:
             return "(aucun-e)"
 
-    show_jumelle.short_description = "jumelle"
+    show_jumelle.short_description = "operation"
 
+    def show_pmv(self, obj):
+        if obj.ope_pmv_id:
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
+        else:
+            return "(aucun-e)"
+
+    show_jumelle.short_description = "operation"
     def show_mere(self, obj):
         if obj.mere_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))

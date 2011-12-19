@@ -30,6 +30,7 @@ TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_V
 ID_CAT_COTISATION = 23
 ID_TIERS_COTISATION = 727
 ID_CAT_OST=64
+ID_CAT_PMV = 4
 MD_CREDIT=6
 MD_DEBIT=7
 ##################
