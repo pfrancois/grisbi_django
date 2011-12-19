@@ -133,10 +133,12 @@ h2{
     padding: .7em;
     height: 3em;
 }
+
 .bar td{
     background-color: #990000;
     font-weight: bold;
 }
+
 .total_general{
     border-top: 10px solid #333333;
 }
@@ -242,7 +244,7 @@ body{
     color: #264409;
     border-color: #C6D880;
     background-color: #E6EFC2;
-    background-image: url('/static/img/success.png');
+    background-image:  url('/static/img/success.png');
 }
 
 .warning{

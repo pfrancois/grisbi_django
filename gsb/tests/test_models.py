@@ -235,8 +235,8 @@ class test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2009-01-01')), 0)
         #solde rappro
         self.assertEqual(Compte.objects.get(id=1).solde_rappro(), 20)
-        self.assertEqual(Compte.objects.get(id=1).date_rappro(), strpdate('	2011-08-11'))
-        self.assertEqual(Compte.objects.get(id=2).date_rappro(), None)
+        self.assertEqual(Compte.objects.get(id=1).date_rappro(), strpdate('2011-08-11'))
+        self.assertEqual(Compte.objects.get(id=3).date_rappro(), None)
 
     def test_creation_compte_compte_titre(self):
         #on cree un compte titre via compte
@@ -288,6 +288,7 @@ class test_models(TestCase):
         #solde a une date anterieur
         self.assertEqual(c.solde(datel=strpdate('2011-01-01')), 0)
         self.assertEqual(c.solde(rapp=True), 0)
+        self.assertEqual(c.solde_titre(rapp=True), 100)
 
     def test_compte_titre_achat_sans_virement(self):
         c = Compte_titre.objects.get(id=4)

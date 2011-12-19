@@ -8,6 +8,7 @@ from django.conf import settings
 # les vues generales
 urlpatterns = patterns('mysite.gsb',
                        url(r'^$', 'views.index', name='index'),
+                       url(r'^test$', 'test.test')
                        )
 
 #les vues relatives aux outils
@@ -16,7 +17,7 @@ urlpatterns += patterns('mysite.gsb.outils',
                         url(r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name='modification_preference_generalite'),
                         url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances')
-                        )
+)
 urlpatterns += patterns('mysite.gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
                         url(r'^options/csv$', 'export_csv.export', name='export_csv'),
@@ -34,7 +35,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^vir/new$', 'vir_new', name="gsb_vir_new"),
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
-                        url(r'^search$', 'search_opes', name='g_search_ope'),
+                        url(r'^search$', 'search_opes', name='g_search_ope')
                         )
 
 #les vues relatives aux comptes
@@ -55,7 +56,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name="cpt_titre_maj"),
                         )
 #gestion de mes trucs perso
-perso = True# ya plus rien dedans
+perso = False# ya plus rien dedans
 #form tester
 if settings.DEBUG and perso:
     from mysite.gsb.form_tester import SomeModelFormPreview

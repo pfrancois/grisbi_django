@@ -31,9 +31,9 @@ def _export():
 
 @staff_member_required
 def export_database(request): #@UnusedVariable
-    '''
-    view pour export en sql 
-    '''
+    """
+    view pour export en sql
+    """
     response = HttpResponse(_export(), mimetype="application/octet-stream")
     response['Content-Disposition'] = 'attachment; filename=%s' % date.today().__str__() + '_db.sql.bz2'
     return response

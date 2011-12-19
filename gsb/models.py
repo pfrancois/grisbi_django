@@ -184,7 +184,11 @@ class Titre(models.Model):
     def encours(self, compte=None, datel=None, rapp=False):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
         if datel:
-            cours = self.cours_set.filter(date__lte=datel).latest().valeur
+            cours=self.cours_set.filter(date__lte=datel)
+            if cours.exists():
+                cours = cours.latest().valeur
+            else:
+                return 0
         else:
             cours = self.last_cours
         if compte:
@@ -747,9 +751,6 @@ class Ope_titre(models.Model):
 
     def __unicode__(self):
         return "%s" % self.id
-
-    def solde(self):
-        return self.compte.solde(datel=self.date)
 
 
 class Moyen(models.Model):
