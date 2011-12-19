@@ -746,12 +746,13 @@ class Ope_titre(models.Model):
                     Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         else:
             #calcul prealable
-            CMUP = titre.investi(self.compte) / titre.nb(self.compte)
+            CMUP = self.titre.investi(self.compte) / self.titre.nb(self.compte)
             ost = self.nombre * CMUP
             pmv = self.nombre * self.cours - ost
             #on cree ls ope
             self.invest = ost
             if not self.ope:
+                cours_a_creer=True
                 moyen = self.compte.moyen_credit_defaut
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
@@ -761,6 +762,9 @@ class Ope_titre(models.Model):
                                               moyen=moyen,
                                               compte=self.compte,
                                               )
+            if not self.ope_pmv:
+                cours_a_creer=True
+                moyen = self.compte.moyen_credit_defaut
                 self.ope_pmv = Ope.objects.create(date=self.date,
                                                   montant=pmv * -1,
                                                   tiers=self.titre.tiers,
@@ -769,6 +773,7 @@ class Ope_titre(models.Model):
                                                   moyen=moyen,
                                                   compte=self.compte,
                                                   )
+            if cours_a_creer:
                 #gestion des cours
                 try:
                     Cours.objects.get(titre=self.titre, date=self.date)

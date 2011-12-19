@@ -477,46 +477,36 @@ def ope_titre_detail(request, pk):
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope is None:
-                if self.nombre < 0:#vente
-                    moyen = self.compte.moyen_credit_defaut
-                else:#achat
-                    moyen = self.compte.moyen_credit_defaut
-                ope.ope = Ope.objects.create(date=form.cleaned_data['date'],
-                                             montant=decimal.Decimal(
-                                                 smart_unicode(form.cleaned_data['cours'])) * decimal.Decimal(
-                                                 smart_unicode(form.cleaned_data['nombre'])) * -1,
-                                             tiers=ope.titre.tiers,
-                                             cat=Cat.objects.get_or_create(id=settings.ID_CAT_OST,
-                                                                           defaults={'nom':u'operation sur titre:'})[0],
-                                             notes="%s@%s" % (form.cleaned_data['nombre'], form.cleaned_data['cours']),
-                                             moyen=moyen,
-                                             automatique=True,
-                                             compte=ope.compte
-                )
+                    ope.nombre=form.cleaned_data['nombre']
+                    ope.date=form.cleaned_data['date']
+                    ope.cours=form.cleaned_data['cours']
+                    ope.save()
                 creation = True
             else:
                 creation = False
-            if form.has_changed() and ope.ope.rapp is None:
-                #on efface au besoin le cours
-                compte = Cours.objects.filter(titre=ope.titre, date=date_initial)
-                if compte.exists():
-                    compte = compte[0]
-                    if not Cours.objects.filter(titre=ope.titre, date=form.cleaned_data['date']).exists():
-                        compte.date = form.cleaned_data['date']
-                    compte.save()
-                    messages.info(request, u'cours crée')
-                if not creation:
-                    cours = form.cleaned_data['cours']
-                    nb = form.cleaned_data['nombre']
-                    ope.ope.date = form.cleaned_data['date']
-                    ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
-                    ope.ope.note = "%s@%s" % (nb, cours)
-                    ope.ope.save()
-                    message = u"opération modifié"
-                else:
-                    message = u"opération crée"
-                form.save()
-                messages.success(request, u"%s %s" % (message, ope))
+            if ope.ope.rapp is None:
+                if form.has_changed():
+                    #on efface au besoin le cours
+                    cours_req = Cours.objects.filter(titre=ope.titre, date=date_initial)
+                    if cours_req.exists():
+                        cours_ = cours_req[0]
+                        if not Cours.objects.filter(titre=ope.titre, date=form.cleaned_data['date']).exists():
+                            cours_.date = form.cleaned_data['date']
+                        cours_.save()
+                        messages.info(request, u'cours crée')
+                    #pas besoin de else car c'est géré dans ope_titre.save()
+                    if not creation:
+                        cours = form.cleaned_data['cours']
+                        nb = form.cleaned_data['nombre']
+                        ope.ope.date = form.cleaned_data['date']
+                        ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
+                        ope.ope.note = "%s@%s" % (nb, cours)
+                        ope.ope.save()
+                        message = u"opération modifié"
+                    else:
+                        message = u"opération crée"
+                    form.save()
+                    messages.success(request, u"%s %s" % (message, ope))
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
             return HttpResponseRedirect(ope.compte.get_absolute_url())
