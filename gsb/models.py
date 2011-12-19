@@ -799,13 +799,12 @@ class Ope_titre(models.Model):
         super(Ope_titre, self).save(*args, **kwargs)
 
 
-@models.permalink
-def get_absolute_url(self):
-    return 'ope_titre_detail', (), {'pk':str(self.id)}
+    @models.permalink
+    def get_absolute_url(self):
+        return 'ope_titre_detail', (), {'pk':str(self.id)}
 
-
-def __unicode__(self):
-    return "%s" % self.id
+    def __unicode__(self):
+        return "%s" % self.id
 
 
 class Moyen(models.Model):
