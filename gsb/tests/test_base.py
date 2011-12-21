@@ -22,3 +22,4 @@ class TestCase(Test_Case_django):
         settings.ID_CAT_OST = 64
         settings.MD_CREDIT = 1
         settings.MD_DEBIT = 2
+        settings.ID_CAT_PMV = 12345

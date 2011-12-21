@@ -477,10 +477,10 @@ def ope_titre_detail(request, pk):
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope is None:
-                    ope.nombre=form.cleaned_data['nombre']
-                    ope.date=form.cleaned_data['date']
-                    ope.cours=form.cleaned_data['cours']
-                    ope.save()
+                ope.nombre=form.cleaned_data['nombre']
+                ope.date=form.cleaned_data['date']
+                ope.cours=form.cleaned_data['cours']
+                ope.save()
                 creation = True
             else:
                 creation = False

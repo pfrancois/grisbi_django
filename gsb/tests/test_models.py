@@ -16,6 +16,7 @@ from django.conf import settings
 from ..utils import strpdate
 from operator import attrgetter
 from dateutil.relativedelta import relativedelta
+from django.db import models
 
 class test_models(TestCase):
     fixtures = ['test.json']
@@ -438,32 +439,68 @@ class test_models(TestCase):
         self.assertEqual(Compte_titre.objects.get(id=4).type, 't')
 
     def test_ope_titre_save(self):
-        t = Titre.objects.get(nom="t2")
-        c = Compte_titre.objects.get(id=4)
+        t = Titre.objects.create(nom="t3",isin="xxxxxxx")
+        c = Compte_titre.objects.create(type="t",nom="c_test",moyen_credit_defaut=Moyen.objects.get(id=1),moyen_debit_defaut=Moyen.objects.get(id=2))
+        #creation d'une nouvelle operation
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=5, date='2011-01-02', cours=20)
+        o=Ope_titre.objects.get(id=5)
+        self.assertEqual(o.ope.montant, -100)#juste verification
+        self.assertEqual(t.nb(c), 20)
+        self.assertEqual(t.investi(c), 250)
+        self.assertEqual(t.encours(c),20*20)
+        #en on s'est trompé
+        o.nombre=-5
+        o.save()
+        o=Ope_titre.objects.get(id=5)
+        self.assertEqual(o.ope.id, 17)
+        print o.ope.cat
+        print o.ope_pmv.cat
+        self.assertEqual(o.ope_pmv.id, 18)
+
+        self.assertEqual(t.nb(c), 10)
+        self.assertEqual(t.investi(c), 100)
+        self.assertEqual(t.encours(c),10*20)
+        o=Ope_titre.objects.get(id=5)
+        o.nombre=5
+        o.save()
+        self.assertEqual(t.nb(c), 20)
+        self.assertEqual(t.investi(c), 250)
+        self.assertEqual(t.encours(c),20*20)
+
+    def test_ope_titre_save2(self):
+        t = Titre.objects.create(nom="t3",isin="xxxxxxx")
+        c = Compte_titre.objects.create(type="t",nom="c_test",moyen_credit_defaut=Moyen.objects.get(id=1),moyen_debit_defaut=Moyen.objects.get(id=2))
         #creation d'une nouvelle operation
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
         o_id = o.id
         self.assertEqual(o.ope.id, 16)
         self.assertEqual(o.ope.montant, -150)
-        self.assertEqual(o.ope.moyen_id, 1)
-        self.assertEqual(o.ope.notes, "15@10")
+        self.assertEqual(o.ope.moyen_id, 2)
+        self.assertEqual(t.investi(c), 150)
+        self.assertEqual(o. ope.notes, "15@10")
         #on verifie qu'il creer bien un cours a la date
         self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 10)
-        #en fait on s'est trompe ce n'est pas un achat c'est une vente
-        o.nombre = -15
-        o.save()
-        o = Ope_titre.objects.get(id=o_id)
-        self.assertEqual(o.ope.montant, 150)
-        self.assertEqual(o.ope.notes, "-15@10")
-        #changement de cours
-        o.cours = 20
-        o.save()
-        o = Ope_titre.objects.get(id=o_id)
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 20)
-        #changement de cours
-        o.date = strpdate('2011-01-02')
-        o.save()
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-02'), titre=t).valeur, 20)
+        #on vend
+        o=Ope_titre.objects.create(titre=t, compte=c, nombre=-10, date='2011-01-02', cours=15)
+        self.assertEqual(o.ope.id, 17)
+        self.assertEqual(o.ope.montant, 100)
+        self.assertEqual(o.ope.moyen_id, 1)
+        self.assertEqual(o.ope_pmv.id, 18)
+        self.assertEqual(o.ope_pmv.montant, 50)
+        self.assertEqual(o.ope_pmv.moyen_id, 1)
+        self.assertEqual(o.ope_pmv.cat.nom, 'Revenus de placement : Plus-values')
+        self.assertEqual(o. ope.notes, "-10@15")
+        self.assertEqual(t.investi(c), 50)
+        self.assertEqual(t.encours(c),5*15)
+        #on vend cez qui reste
+        o=Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-03', cours=20)
+        self.assertEqual(t.investi(c), 0)
+        self.assertEqual(o.ope.montant, 50)
+        self.assertEqual(o.ope_pmv.montant, 50)
+        self.assertEqual(t.encours(c),0)
+
+
 
     def test_ope_titre_get_absolute_url(self):
         self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')

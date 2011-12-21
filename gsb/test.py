@@ -31,6 +31,7 @@ from django.forms.models import modelformset_factory
 from mysite.gsb.utils import validrib
 from django.contrib import messages
 from django.db import models
+import decimal
 
 def test(request):
     messages.info(request, 'This is an info message.')
@@ -42,5 +43,7 @@ def test(request):
     return render(request, 'generic.djhtm', )
 
 if main:
-    c = Compte_titre.objects.get(id=4)
-    print  c.solde(rapp=True)
+    #c = Compte_titre.objects.get(id=4)
+    #print  c.solde(rapp=True)
+    print decimal.Decimal("%.2f" % (2/3*4))
+
