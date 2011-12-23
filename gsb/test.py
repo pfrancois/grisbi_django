@@ -6,7 +6,6 @@ try:
         pass
     main = False
 except NameError:
-    main = True
     from django.core.management import setup_environ
     import sys, os
     #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -15,6 +14,11 @@ except NameError:
     from mysite import settings
 
     setup_environ(settings)
+
+if __name__ == "__main__":
+    main = True
+else:
+    main = False
 
 import logging
 from django.shortcuts import render
@@ -46,4 +50,3 @@ if main:
     #c = Compte_titre.objects.get(id=4)
     #print  c.solde(rapp=True)
     print decimal.Decimal("%.2f" % (2/3*4))
-
