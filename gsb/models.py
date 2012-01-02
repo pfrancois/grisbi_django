@@ -430,7 +430,8 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return 'gsb_cpt_detail', (), {'cpt_id':str(self.id)}
+        id = str(self.id)
+        return 'gsb_cpt_detail', (), {'cpt_id':id}
 
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
@@ -698,8 +699,8 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default=1, decimal_places=5)
     invest = CurField(default=0, editable=False, decimal_places=2)
-    ope = models.OneToOneField('Ope', editable=False, null=True,on_delete=models.SET_NULL, related_name='ope')#null=true car j'ai des operations sans lien
-    ope_pmv = models.OneToOneField('Ope', editable=False, null=True, on_delete=models.SET_NULL, related_name='ope_pmv')#null=true cr tt les operation d'achat sont null
+    ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
+    ope_pmv_id = models.IntegerField(editable=False, default=0)#null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
@@ -707,18 +708,32 @@ class Ope_titre(models.Model):
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
 
+    def get_ope_pmv(self):
+        try:
+            return Ope.objects.get(id=self.ope_pmv_id)
+        except Ope.DoesNotExist:
+            return None
+
+    def set_ope_pmv(self, obj):
+        if obj:
+            self.ope_pmv_id = obj.id
+        else:
+            self.ope_pmv_id = 0
+    ope_pmv = property(get_ope_pmv, set_ope_pmv)
+
     def save(self, *args, **kwargs):
         cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
         cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
         if self.nombre > 0:#on doit separer because gestion des plues value
-            if self.ope_pmv:#on efface au besoin
-                self.ope_pmv.delete()
-                self.ope.moyen = self.compte.moyen_debit_defaut
+            try:
+                ope_pmv = Ope.objects.get(id=self.ope_pmv_id)
+                ope_pmv.delete()
+                self.ope_pmv = 0
+            except  Ope.DoesNotExist:
+                pass
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
-            #        super(Ope_titre, self).save(*args, **kwargs)
+            moyen = self.compte.moyen_debit_defaut
             if not self.ope:
-                #creation des operations
-                moyen = self.compte.moyen_debit_defaut
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
@@ -739,6 +754,7 @@ class Ope_titre(models.Model):
                 self.ope.tiers = self.titre.tiers
                 self.ope.notes = "%s@%s" % (self.nombre, self.cours)
                 self.ope.compte = self.compte
+                self.ope.moyen = moyen
                 self.ope.save()
                 try:
                     cours = Cours.objects.get(titre=self.titre, date=old_date)
@@ -750,17 +766,21 @@ class Ope_titre(models.Model):
                     Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         else:#c'est une vente
             #calcul prealable
-            if self.ope and not self.ope_pmv and self.id:
-                self.ope.delete()
-            q1=self.titre.investi(self.compte)
-            q2=self.titre.nb(self.compte)+self.nombre
-            ost = "{0:.2f}".format(( q1/q2 ) * self.nombre)
+            #on met des plus car les chiffres sont negatif
+            if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
+                inv_vrai = self.titre.investi(self.compte)+self.ope.montant
+                nb_vrai = self.titre.nb(self.compte)+self.nombre
+            else:
+                inv_vrai = self.titre.investi(self.compte)
+                nb_vrai = self.titre.nb(self.compte)
+
+            ost = "{0:.2f}".format(( inv_vrai/nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
             #on cree ls ope
             self.invest = ost
-            ope_created=False
-            ope_pmv_cre=False
+            ope_created = False
+            ope_pmv_cre = False
             if not self.ope:
                 moyen = self.compte.moyen_credit_defaut
                 self.ope = Ope.objects.create(date=self.date,
@@ -771,7 +791,7 @@ class Ope_titre(models.Model):
                                               moyen=moyen,
                                               compte=self.compte,
                                               )
-                ope_created=True
+                ope_created = True
             if not self.ope_pmv:
                 moyen = self.compte.moyen_credit_defaut
                 self.ope_pmv = Ope.objects.create(date=self.date,
@@ -782,7 +802,7 @@ class Ope_titre(models.Model):
                                                   moyen=moyen,
                                                   compte=self.compte,
                                                   )
-                ope_pmv_cre=True
+                ope_pmv_cre = True
             old_date = self.ope.date
             if not ope_created :
                 self.ope.date = self.date
