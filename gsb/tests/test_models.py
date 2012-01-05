@@ -342,7 +342,7 @@ class test_models(TestCase):
         self.assertEquals(Ope.objects.filter(compte=c).count(), 2)
         self.assertEqual(Compte.objects.get(id=1).solde(), -1480)
 
-    def test_compte_titre_vente_sans_virement(self):
+    def test_compte_titre_vente_simple(self):
         c = Compte_titre.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom="t2")
@@ -389,12 +389,17 @@ class test_models(TestCase):
         self.assertEquals(o.moyen_id, 2)
 
     def test_compte_titre_vente_avec_virement(self):
-        c = Compte_titre.objects.get(id=4)
-        t = Titre.objects.get(nom="t2")
-        c.vente(titre=t, nombre=20, date='2011-11-02', virement_vers=Compte.objects.get(id=1))
-        self.assertEqual(t.investi(c), decimal.Decimal('1411.76'))
-        self.assertEqual(c.solde(), 1501)
-        self.assertEquals(Ope.objects.filter(compte=c).count(), 9)
+       #on cree le compte
+        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),moyen_debit_defaut=Moyen.objects.get(id=2))
+        #on cree le titre
+        t = Titre.objects.create(nom="t_test", isin="xxxxxxx")
+        #Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        c.achat(titre=t, prix=10, nombre=15,date='2011-11-01')
+        c.vente(titre=t, prix=5, nombre=5, date='2011-11-02', virement_vers=Compte.objects.get(id=1))
+        self.assertEqual(t.investi(c), decimal.Decimal('100'))
+        self.assertEqual(t.nb(c), 10)
+        self.assertEqual(c.solde(), -100)
+        self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
         self.assertEqual(Compte.objects.get(id=1).solde(), -1440)
 
     def test_compte_titre_revenu_simple(self):
@@ -472,6 +477,18 @@ class test_models(TestCase):
         self.assertEqual(t.nb(c), 25)
         self.assertEqual(t.investi(c), 15*10+10*20)
         self.assertEqual(t.encours(c), 25*20)
+
+    def test_ope_titre_moins_value(self):
+        t = Titre.objects.create(nom="t3", isin="xxxxxxx")
+        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-02', cours=5)
+        o=Ope.objects.filter(compte=c).filter(date='2011-01-02')[0]
+        self.assertEqual(o.id, 17)
+        self.assertEqual(o.montant, 50)#desinvestissement
+        o=Ope.objects.filter(compte=c).filter(date='2011-01-02')[1]
+        self.assertEqual(o.id, 18)
+        self.assertEqual(o.montant, -25)#desinves!
 
 
     def test_ope_titre_save2(self):
@@ -685,6 +702,3 @@ class test_models(TestCase):
                'moyen_destination':4
         }
         self.assertEquals(tab, v.init_form())
-
-    def test_exemple(self):
-        pass

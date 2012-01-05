@@ -724,7 +724,7 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
         cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
-        if self.nombre > 0:#on doit separer because gestion des plues value
+        if self.nombre > 0:#on doit separer because gestion des plues ou moins value
             try:
                 ope_pmv = Ope.objects.get(id=self.ope_pmv_id)
                 ope_pmv.delete()
@@ -773,7 +773,6 @@ class Ope_titre(models.Model):
             else:
                 inv_vrai = self.titre.investi(self.compte)
                 nb_vrai = self.titre.nb(self.compte)
-
             ost = "{0:.2f}".format(( inv_vrai/nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
