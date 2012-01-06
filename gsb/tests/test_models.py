@@ -37,7 +37,7 @@ class test_models(TestCase):
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"cpte1=>cptb2 pour 10")
         self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"20 pour tiers1")
         self.assertEquals(Generalite.objects.get(id=1).__unicode__(), u"1")
-        self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR a tiers1")
+        self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR a tiers1 cpt: cpte1")
 
     def test_mul(self):
         self.assertEquals(Cours.objects.get(id=4).valeur * Cours.objects.get(id=4).valeur, 25)

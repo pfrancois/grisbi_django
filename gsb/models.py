@@ -1124,7 +1124,7 @@ class Ope(models.Model):
         return Ope.objects.filter(filles_set__isnull=True)
 
     def __unicode__(self):
-        return u"(%s) le %s : %s %s a %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers)
+        return u"(%s) le %s : %s %s a %s cpt: %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers,self.compte)
 
     @models.permalink
     def get_absolute_url(self):
