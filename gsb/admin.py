@@ -125,9 +125,9 @@ class Compte_admin(Modeladmin_perso):
         liste_id = queryset.values_list('id', flat=True)
         try:
             Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
-            messages.success(request, u'suppression des statuts "pointé dans les comptes %s' % queryset)
-        except e:
-            messages.error(request, e.strerror)
+            messages.success(request, u'suppression des statuts "pointé" dans les comptes %s' % queryset)
+        except Exception, err:
+            messages.error(request, err.strerror)
 
     action_supprimer_pointe.short_description = u"supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
@@ -197,9 +197,12 @@ class Ope_admin(Modeladmin_perso):
     list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
+    actions = ['action_supprimer_pointe','fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
 
     def show_jumelle(self, obj):
+        """
+        retourne le lien pour l'operation lié dans le cadre des virements entre comptes
+        """
         if obj.jumelle_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
@@ -209,6 +212,10 @@ class Ope_admin(Modeladmin_perso):
     show_jumelle.short_description = "operation"
 
     def show_pmv(self, obj):
+        """
+        retourne le lien pour l'operation lié dans le cadre des plus ou moins values
+        """
+
         if obj.ope_pmv_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
@@ -240,6 +247,16 @@ class Ope_admin(Modeladmin_perso):
         return HttpResponseRedirect(request.get_full_path())
 
     mul.short_description = u"multiplier le montant des opérations selectionnnés par -1"
+
+    def action_supprimer_pointe(self, request, queryset):
+        #liste_id = queryset.values_list('id', flat=True)
+        try:
+            queryset.update(pointe=False)
+            messages.success(request, u'suppression des statuts "pointé" des opérations selectionnées' )
+        except Exception, err:
+            messages.error(request, unicode(err))
+
+    action_supprimer_pointe.short_description =  u'_suppression des statuts "pointé" des opérations selectionnées'
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))

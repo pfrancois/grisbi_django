@@ -115,6 +115,5 @@
                 <td width="50%"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
             </tr>
         </table>
-        <p></p>
     {% endblock boutons_bas %}
 {% endblock content %}
