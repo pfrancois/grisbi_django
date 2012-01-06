@@ -339,7 +339,11 @@ class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
+    actions = ['check_ech']
 
+    def check_ech(self, request, queryset):
+        Echeance.check(request=request, queryset=queryset)
+    check_ech.short_description =u"verifier si des echeances sont à enregistrer"
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""

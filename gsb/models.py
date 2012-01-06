@@ -980,13 +980,15 @@ class Echeance(models.Model):
 
     @staticmethod
     @transaction.commit_on_success
-    def check(request=None):
+    def check(request=None, queryset=None):
         """
         attention ce n'est pas une vue
         verifie si pas d'écheance a passer et la cree au besoin
         """
-
-        liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
+        if  not queryset:
+            liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
+        else:
+            liste_ech=queryset
         for ech in liste_ech:
             #TODO ech titre
             while ech.date < datetime.date.today() and ech.valide:
