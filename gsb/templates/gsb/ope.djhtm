@@ -15,7 +15,7 @@
                 </tr>
             </table>
         {% endif %}
-        {% else %}
+    {% else %}
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
                 {% if cpt %}
@@ -59,7 +59,7 @@
                     <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
             </tr>
         </table>
-        {% else %}
+    {% else %}
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
                 {% if cpt %}

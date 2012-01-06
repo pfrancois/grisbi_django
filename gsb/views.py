@@ -477,9 +477,9 @@ def ope_titre_detail(request, pk):
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope is None:
-                ope.nombre=form.cleaned_data['nombre']
-                ope.date=form.cleaned_data['date']
-                ope.cours=form.cleaned_data['cours']
+                ope.nombre = form.cleaned_data['nombre']
+                ope.date = form.cleaned_data['date']
+                ope.cours = form.cleaned_data['cours']
                 ope.save()
                 creation = True
             else:
@@ -494,7 +494,7 @@ def ope_titre_detail(request, pk):
                             cours_.date = form.cleaned_data['date']
                         cours_.save()
                         messages.info(request, u'cours crée')
-                    #pas besoin de else car c'est géré dans ope_titre.save()
+                        #pas besoin de else car c'est géré dans ope_titre.save()
                     if not creation:
                         cours = form.cleaned_data['cours']
                         nb = form.cleaned_data['nombre']

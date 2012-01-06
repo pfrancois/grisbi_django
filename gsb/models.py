@@ -456,16 +456,21 @@ class Compte(models.Model):
     solde_rappro.short_description = u"solde rapproché ou pointé"
 
     def date_rappro(self):
-        try:
-            date_rapp = Ope.objects.filter(compte__pk=self.id).aggregate(element=models.Max('rapp__date'))['element']
-            if date_rapp:
-                return date_rapp
+        opes = Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
+        if opes:
+            date_p = opes.latest('date').date
+            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exists():
+                date_r = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
+                if date_r > date_p:
+                    return date_r
+                else:
+                    return date_p
             else:
-                return None
-        except Ope.DoesNotExist:
-            return None
+                return date_p
+        else:
+            return None #comme pas de date, pas d'encours
 
-    date_rappro.short_description = u"date dernier rapp"
+    date_rappro.short_description = u"date dernier rapp ou pointage"
 
 
 class Compte_titre(Compte):
@@ -626,23 +631,6 @@ class Compte_titre(Compte):
 
     solde_rappro.short_description = u"solde titre rapproché ou pointé"
 
-    def date_rappro(self):
-        opes = Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
-        if opes:
-            date_p = opes.latest('date').date
-            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exists():
-                date_r = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-                if date_r > date_p:
-                    return date_r
-                else:
-                    return date_p
-            else:
-                return date_p
-        else:
-            return None #comme pas de date, pas d'encours
-
-    date_rappro.short_description = u"date dernier rapp ou pointage"
-
     @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne deux compte_titre"""
@@ -719,6 +707,7 @@ class Ope_titre(models.Model):
             self.ope_pmv_id = obj.id
         else:
             self.ope_pmv_id = 0
+
     ope_pmv = property(get_ope_pmv, set_ope_pmv)
 
     def save(self, *args, **kwargs):
@@ -768,12 +757,12 @@ class Ope_titre(models.Model):
             #calcul prealable
             #on met des plus car les chiffres sont negatif
             if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte)+self.ope.montant
-                nb_vrai = self.titre.nb(self.compte)+self.nombre
+                inv_vrai = self.titre.investi(self.compte) + self.ope.montant
+                nb_vrai = self.titre.nb(self.compte) + self.nombre
             else:
                 inv_vrai = self.titre.investi(self.compte)
                 nb_vrai = self.titre.nb(self.compte)
-            ost = "{0:.2f}".format(( inv_vrai/nb_vrai ) * self.nombre)
+            ost = "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
             #on cree ls ope
@@ -803,7 +792,7 @@ class Ope_titre(models.Model):
                                                   )
                 ope_pmv_cre = True
             old_date = self.ope.date
-            if not ope_created :
+            if not ope_created:
                 self.ope.date = self.date
                 self.ope.montant = ost * -1
                 self.ope.tiers = self.titre.tiers
@@ -970,6 +959,8 @@ class Echeance(models.Model):
         calcul la prochaine date d'echeance
         renvoie None si pas de prochaine date
         """
+        if not self.valide:
+            return None
         initial = self.date
         if self.periodicite == 'u':
             return None
@@ -989,7 +980,7 @@ class Echeance(models.Model):
 
     @staticmethod
     @transaction.commit_on_success
-    def check(request):
+    def check(request=None):
         """
         attention ce n'est pas une vue
         verifie si pas d'écheance a passer et la cree au besoin
@@ -1008,7 +999,8 @@ class Echeance(models.Model):
                     vir.auto = True
                     vir.exercice = ech.exercice
                     vir.save()
-                    messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
+                    if request:
+                        messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
                 else:
                     ope = Ope.objects.create(compte_id=ech.compte_id,
                                              date=ech.date,
@@ -1020,7 +1012,8 @@ class Echeance(models.Model):
                                              moyen_id=ech.moyen_id,
                                              exercice_id=ech.exercice_id
                     )
-                    messages.info(request, u'opération "%s" crée' % ope)
+                    if request:
+                        messages.info(request, u'opération "%s" crée' % ope)
                 if ech.calcul_next():
                     ech.date = ech.calcul_next()
                 else:
@@ -1185,6 +1178,7 @@ def verif_ope_titre(sender, **kwargs):
     if instance.ope:
         if instance.ope.rapp:
             raise IntegrityError(u"operation espece rapprochee")
+    instance.ope.ope_pmv.delete()
 
 
 class Virement(object):

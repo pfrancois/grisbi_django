@@ -191,7 +191,7 @@ class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
     fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere', 'oper_titre',
               'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
-    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre','show_pmv')
+    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
@@ -216,6 +216,7 @@ class Ope_admin(Modeladmin_perso):
             return "(aucun-e)"
 
     show_jumelle.short_description = "operation"
+
     def show_mere(self, obj):
         if obj.mere_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))

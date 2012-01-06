@@ -51,7 +51,7 @@
                         {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
                 </tr>
             {% endblock ope %}
-            {% empty %}
+        {% empty %}
             <tr class="item">
                 <td colspan="5">
                     aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>

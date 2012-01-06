@@ -457,7 +457,8 @@
             "nombre": "1",
             "date": "2011-12-18",
             "titre": 1,
-            "compte": 4
+            "compte": 4,
+            "ope_pmv_id": 0
         }
     },
     {
@@ -470,7 +471,8 @@
             "nombre": "150",
             "date": "2011-12-17",
             "titre": 2,
-            "compte": 4
+            "compte": 4,
+            "ope_pmv_id": 0
         }
     },
     {
@@ -483,7 +485,8 @@
             "nombre": "20",
             "date": "2011-10-30",
             "titre": 2,
-            "compte": 4
+            "compte": 4,
+            "ope_pmv_id": 0
         }
     },
     {
@@ -592,6 +595,138 @@
             "periodicite": "u",
             "ib": 2,
             "compte": 3
+        }
+    },
+    {
+        "pk": 3,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 2,
+            "valide": true,
+            "tiers": 1,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "sans date limite",
+            "date_limite": null,
+            "cat": 1,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": 1,
+            "periodicite": "j",
+            "ib": null,
+            "compte": 1
+        }
+    },
+    {
+        "pk": 4,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 2,
+            "valide": true,
+            "tiers": 1,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "avec date limite",
+            "date_limite": "2011-11-30",
+            "cat": 1,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": 1,
+            "periodicite": "s",
+            "ib": null,
+            "compte": 1
+        }
+    },
+    {
+        "pk": 5,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 2,
+            "valide": true,
+            "tiers": null,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "",
+            "date_limite": null,
+            "cat": null,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": null,
+            "periodicite": "m",
+            "ib": null,
+            "compte": 1
+        }
+    },
+    {
+        "pk": 6,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 2,
+            "valide": true,
+            "tiers": null,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "",
+            "date_limite": null,
+            "cat": null,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": null,
+            "periodicite": "a",
+            "ib": null,
+            "compte": 1
+        }
+    },
+    {
+        "pk": 7,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 1,
+            "valide": false,
+            "tiers": null,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "",
+            "date_limite": null,
+            "cat": null,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": null,
+            "periodicite": "u",
+            "ib": null,
+            "compte": 1
+        }
+    },
+    {
+        "pk": 8,
+        "model": "gsb.echeance",
+        "fields": {
+            "intervalle": 1,
+            "valide": true,
+            "tiers": null,
+            "inscription_automatique": false,
+            "montant": "20",
+            "moyen_virement": null,
+            "compte_virement": null,
+            "notes": "",
+            "date_limite": "2011-11-30",
+            "cat": null,
+            "exercice": null,
+            "date": "2011-10-30",
+            "moyen": null,
+            "periodicite": "a",
+            "ib": null,
+            "compte": 1
         }
     },
     {

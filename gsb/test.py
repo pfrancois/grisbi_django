@@ -49,4 +49,6 @@ def test(request):
 if main:
     #c = Compte_titre.objects.get(id=4)
     #print  c.solde(rapp=True)
-    print decimal.Decimal("%.2f" % (2/3*4))
+    c = Compte_titre.objects.get(id=4)
+    t = Titre.objects.get(nom="t2")
+    c.vente(titre=t, nombre=20, date='2011-11-01')

@@ -9,7 +9,7 @@ from django.conf import settings
 urlpatterns = patterns('mysite.gsb',
                        url(r'^$', 'views.index', name='index'),
                        url(r'^test$', 'test.test')
-                       )
+)
 
 #les vues relatives aux outils
 urlpatterns += patterns('mysite.gsb.outils',
@@ -36,7 +36,7 @@ urlpatterns += patterns('mysite.gsb.views',
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
                         url(r'^search$', 'search_opes', name='g_search_ope')
-                        )
+)
 
 #les vues relatives aux comptes
 urlpatterns += patterns('mysite.gsb.views',
