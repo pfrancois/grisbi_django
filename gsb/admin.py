@@ -243,7 +243,16 @@ class Ope_admin(Modeladmin_perso):
     oper_titre.short_description = u"compta matiere"
 
     def mul(self, request, queryset):
-        queryset.update(montant=models.F('montant') * -1)
+        #queryset.update(montant=models.F('montant') * -1)  #ca serait optimal de faire mais because virement pas facile
+        for o in queryset:
+            if o.jumelle:
+                o.montant = o.montant * -1
+                o.jumelle.montant = o.jumelle.montant * -1
+                o.save()
+                o.jumelle.save()
+            else:
+                o.montant = o.montant * -1
+                o.save()
         return HttpResponseRedirect(request.get_full_path())
 
     mul.short_description = u"multiplier le montant des opérations selectionnnés par -1"
