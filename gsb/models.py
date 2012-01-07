@@ -926,7 +926,7 @@ class Echeance(models.Model):
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     valide = models.BooleanField(default=True)
-    compte = models.ForeignKey(Compte, blank=False, null=False)
+    compte = models.ForeignKey(Compte)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
