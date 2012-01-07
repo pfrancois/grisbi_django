@@ -198,6 +198,9 @@ class Ope_admin(Modeladmin_perso):
     search_fields = ['tiers__nom']
     list_editable = ('pointe',)
     actions = ['action_supprimer_pointe','fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
+    #save_on_top = True
+    save_as=True
+    search_fields=['tiers__nom']
 
     def show_jumelle(self, obj):
         """
