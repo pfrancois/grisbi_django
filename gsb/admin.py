@@ -201,6 +201,7 @@ class Ope_admin(Modeladmin_perso):
     #save_on_top = True
     save_as=True
     search_fields=['tiers__nom']
+    ordering=['date']
 
     def show_jumelle(self, obj):
         """
