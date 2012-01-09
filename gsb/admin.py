@@ -52,12 +52,12 @@ class Modeladmin_perso(admin.ModelAdmin):
     def fusionne_a_dans_b(self, request, queryset):
         fusion(request, queryset, 'ab')
 
-    fusionne_a_dans_b.short_description = u"fusion de 1 dans 2"
+    fusionne_a_dans_b.short_description = u"Fusion de 1 dans 2"
 
     def fusionne_b_dans_a(self, request, queryset):
         fusion(request, queryset, 'ba')
 
-    fusionne_b_dans_a.short_description = u"fusion de 2 dans 1"
+    fusionne_b_dans_a.short_description = u"Fusion de 2 dans 1"
     #from here http://djangosnippets.org/snippets/2531/
     def keepfilter(self, request, result):
     # Look at the referer for a query string '^.*\?.*$'
@@ -129,7 +129,7 @@ class Compte_admin(Modeladmin_perso):
         except Exception, err:
             messages.error(request, err.strerror)
 
-    action_supprimer_pointe.short_description = u"supprimer tous les statuts 'pointé' dans les comptes selectionnés"
+    action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
     class RappForm(forms.Form):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
@@ -176,7 +176,7 @@ class Compte_admin(Modeladmin_perso):
             form = self.RappForm(initial={'_selected_action':request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
         return render(request, 'admin/add_rapp.djhtm', {'opes':query_ope, 'rapp_form':form, })
 
-    action_transformer_pointee_rapp.short_description = "rapprocher un compte"
+    action_transformer_pointee_rapp.short_description = "Rapprocher un compte"
 
 
 class Compte_titre_admin(Modeladmin_perso):
@@ -259,7 +259,7 @@ class Ope_admin(Modeladmin_perso):
                 o.save()
         return HttpResponseRedirect(request.get_full_path())
 
-    mul.short_description = u"multiplier le montant des opérations selectionnnés par -1"
+    mul.short_description = u"Multiplier le montant des opérations selectionnnés par -1"
 
     def action_supprimer_pointe(self, request, queryset):
         #liste_id = queryset.values_list('id', flat=True)
@@ -269,7 +269,7 @@ class Ope_admin(Modeladmin_perso):
         except Exception, err:
             messages.error(request, unicode(err))
 
-    action_supprimer_pointe.short_description =  u'_suppression des statuts "pointé" des opérations selectionnées'
+    action_supprimer_pointe.short_description =  u'_Suppression des statuts "pointé" des opérations selectionnées'
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
@@ -356,7 +356,7 @@ class Ech_admin(Modeladmin_perso):
 
     def check_ech(self, request, queryset):
         Echeance.check(request=request, queryset=queryset)
-    check_ech.short_description =u"verifier si des echeances sont à enregistrer"
+    check_ech.short_description =u"Verifier si des echeances sont à enregistrer"
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
