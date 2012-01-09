@@ -189,14 +189,14 @@ class Compte_titre_admin(Modeladmin_perso):
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'show_jumelle', 'show_mere', 'oper_titre',
-              'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'pointe', 'rapp')
+    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'pointe','show_jumelle', 'show_mere', 'oper_titre',
+              'notes', 'exercice', 'ib', 'date_val', 'num_cheque',  'rapp')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
     search_fields = ['tiers__nom']
-    list_editable = ('pointe',)
+    list_editable = ('pointe','montant')
     actions = ['action_supprimer_pointe','fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     #save_on_top = True
     save_as=True
