@@ -186,13 +186,13 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
+                    return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
                 else:
                     if ope.rapp:
                         compte = ope.compte
                     else:
                         compte = ope.jumelle.compte
                     messages.error(request, u"impossible de modifier car le virement coté %s est rapprochée" % compte)
-                return HttpResponseRedirect(ope.jumelle.get_absolute_url())
         else:
             form = gsb_forms.VirementForm(ope=ope)
         return render(request, 'gsb/vir.djhtm',
