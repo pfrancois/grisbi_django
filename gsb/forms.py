@@ -72,12 +72,12 @@ class OperationForm(Basemodelform):
 
 
 class VirementForm(Baseform):
+    date = gsb_field.DateFieldgsb()
     compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required=False)
     compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required=False)
     montant = gsb_field.CurField()
-    date = gsb_field.DateFieldgsb()
     notes = forms.CharField(widget=forms.Textarea, required=False)
     pointe = forms.BooleanField(required=False)
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
