@@ -6,7 +6,6 @@ PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-DEBUG_TOOLBAR = False
 DJANGO_EXTENSION = True
 #TEMPLATE_STRING_IF_INVALID="INVALID"
 
@@ -177,27 +176,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
 )
-if DEBUG_TOOLBAR:
-    INSTALLED_APPS += ('debug_toolbar',)
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-    #pour la debug bar
-    INTERNAL_IPS = ('127.0.0.1',)
-    DEBUG_TOOLBAR_CONFIG = {
-        'HIDE_DJANGO_SQL':True,
-        'INTERCEPT_REDIRECTS':False,
-        }
-    DEBUG_TOOLBAR_PANELS = (
-        'debug_toolbar.panels.version.VersionDebugPanel',
-        'debug_toolbar.panels.timer.TimerDebugPanel',
-        'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
-        'debug_toolbar.panels.headers.HeaderDebugPanel',
-        'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-        'debug_toolbar.panels.template.TemplateDebugPanel',
-        'debug_toolbar.panels.sql.SQLDebugPanel',
-        'debug_toolbar.panels.signals.SignalDebugPanel',
-        'debug_toolbar.panels.logger.LoggingPanel',
-
-        )
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
