@@ -945,7 +945,7 @@ class Echeance(models.Model):
         db_table = 'gsb_echeance'
         verbose_name = u"échéance"
         verbose_name_plural = u"echéances"
-        ordering = ['-date']
+        ordering = ['date']
         get_latest_by = 'date'
 
     def __unicode__(self):
