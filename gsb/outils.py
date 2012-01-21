@@ -102,4 +102,4 @@ def modif_gen(request):
 @login_required
 def gestion_echeances(request):
     Echeance.check(request)
-    return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues',}context_instance=RequestContext(request))
+    return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues',},context_instance=RequestContext(request))
