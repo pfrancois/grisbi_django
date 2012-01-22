@@ -35,7 +35,7 @@
         {% for titre in titres %}
             <tr class="item hover{% if titre.pmv < 0 %} creditElement{% else %} debitElement{% endif %}">
                 <td class="opTier">
-                    <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom }} ( {{ titre.type }} )</a> |
+                    <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom|escape }} ( {{ titre.type|escape }} )</a> |
                     <a href="{% url 'maj_cours' titre.id %}">MAJ cours</a></td>
                 <td> {{ titre.nb|floatformat:3 }}</td>
                 <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>

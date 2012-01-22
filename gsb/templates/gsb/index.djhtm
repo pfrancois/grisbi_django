@@ -4,7 +4,7 @@
     <table id="banques" class="table">
         {% for cpt in liste_cpt_bq %}
             <tr class="item padding">
-                <td class="cptLabel"><a href="{{ cpt.get_absolute_url }}">{{ cpt.nom }}
+                <td class="cptLabel"><a href="{{ cpt.get_absolute_url }}">{{ cpt.nom|escape }}
                     {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
                 <td class="cptSolde"><a href="{{ cpt.get_absolute_url }}">{{ cpt.solde|cur }}</a></td>
             </tr>
@@ -22,7 +22,7 @@
     <table id="placements" class="table">
         {% for cpt in liste_cpt_pl %}
             <tr class="item padding">
-                <td class="cptLabel"><a href="{{ cpt.get_absolute_url }}">{{ cpt.nom }}
+                <td class="cptLabel"><a href="{{ cpt.get_absolute_url }}">{{ cpt.nom|escape }}
                     {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
                 <td class="cptSolde"><a href="{{ cpt.get_absolute_url }}">{{ cpt.solde|cur }}</a></td>
             </tr>

@@ -1,12 +1,13 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
+    Etape {{ etape_nb|escape }}
     <form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
         <table>
             {{ form.as_table }}
         </table>
         {% csrf_token %}
         <p>
-            <input type="submit" value="Importer"/>
+            <input type="submit" value="{{ value }}"/>
         </p>
     </form>
     <p>

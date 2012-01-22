@@ -2,7 +2,7 @@
 {% block bouton_haut %}
     <table width="100%" id="boutons" class="table">
         <tr class="boutton">
-            <td><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom }}</a></td>
+            <td><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a></td>
         </tr>
     </table>{% endblock bouton_haut %}
 {% block titre_col_ope %}
@@ -15,7 +15,7 @@
 {% block ope %}
     <tr class="item hover{% if ope.nombre > 0 %} creditElement{% endif %}{% if ope.nombre < 0 %} debitElement{% endif %}">
         <td class="opDate"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
-        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.titre.nom }}</a></td>
+        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.titre.nom|escape }}</a></td>
         <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a></td>
         <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.cours|cur }}</a></td>
         <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}>{{ ope.invest|cur }}</a></td>

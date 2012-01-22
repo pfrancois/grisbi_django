@@ -9,7 +9,7 @@
                 </tr>
                 <tr class="boutton">
                     <td width="100%" colspan="2">
-                        <a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom }} </a>
+                        <a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a>
                     </td>
                 </tr>
             {% else %}
@@ -42,9 +42,9 @@
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
                     <td class="opDate"><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
                     <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</a>
+                        {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom|escape }} {% else %}{{ ope.tiers.nom|default:"aucun tiers"|escape }}{% endif %}</a>
                     </td>
-                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</a></td>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie"|escape }}</a></td>
                     <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
                         {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
                     <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
