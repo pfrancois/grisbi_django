@@ -135,7 +135,7 @@ class Compte_admin(Modeladmin_perso):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         #rapp_f = forms.CharField(label=u'nom du rapprochement à creer', help_text=u"sous la forme compteAAAAMM")
         rapp_f = forms.ModelChoiceField(Rapp.objects.all(), required=False)
-        date = forms.DateField()
+        date = forms.DateField(label="date du rapprochement")
 
     def action_transformer_pointee_rapp(self, request, queryset):
         if queryset.count() > 1:

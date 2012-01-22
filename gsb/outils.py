@@ -10,7 +10,7 @@ from . import forms as gsb_forms
 import logging, os, time
 from .models import Generalite, Echeance
 from django.contrib.auth.decorators import login_required
-from . import import_gsb
+from .import_gsb import import_gsb_050
 from django.contrib import messages
 
 @login_required
@@ -18,51 +18,58 @@ def import_file(request):
     logger = logging.getLogger('gsb.import')
     nomfich = ""
     ok = False
+    etape_nb=1
     if request.method == 'POST':
-        form = gsb_forms.ImportForm(request.POST, request.FILES)
-        if form.is_valid():
-            # on recupere les info pour le nom
-            try:
-                info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%Y-%b-%d a %H-%M-%S"))
-            except KeyError:
-                info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%Y-%b-%d a %H-%M-%S"))
-            nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.gsb" % (
-                request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
-            destination = open(nomfich, 'wb+')
-            for chunk in request.FILES['nom_du_fichier'].chunks():
-                destination.write(chunk)
-            destination.close()
-            #renomage ok
-            logger.debug("enregitrement fichier ok")
-            ok = False
-            if form.cleaned_data['version'] == 'qif':
-                import_qif(nomfich)
-                ok = true
-            if form.cleaned_data['version'] == 'gsb_0_5_0':
-                if form.cleaned_data['replace'] == 'remplacement':
-                    logger.warning(
-                        u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
-                    import_gsb_050(nomfich, True)
-                    ok = True
+        if 'apply' not in request.POST:
+            form = gsb_forms.ImportForm1(request.POST, request.FILES)
+            if form.is_valid():
+                nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.gsb" % (
+                    request.FILES['nom_du_fichier'].name, time.strftime("%Y-%b-%d_%H-%M-%S")))
+                destination = open(nomfich, 'wb+')
+                for chunk in request.FILES['nom_du_fichier'].chunks():
+                    destination.write(chunk)
+                destination.close()
+                #renomage ok
+                logger.debug("enregistrement fichier ok")
+                form = gsb_forms.ImportForm2()
+                etape_nb=2
+        else:
+            form = gsb_forms.ImportForm1(request.POST, request.FILES)
+            if form.is_valid():
+                # on recupere les info pour le nom
+                try:
+                    info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%Y-%b-%d a %H-%M-%S"))
+                except KeyError:
+                    info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%Y-%b-%d a %H-%M-%S"))
+
+                ok = False
+                if form.cleaned_data['version'] == 'qif':
+                    import_qif(nomfich)
+                    ok = true
+                if form.cleaned_data['version'] == 'gsb_0_5_0':
+                    if form.cleaned_data['replace'] == 'remplacement':
+                        logger.warning(
+                            u"remplacement data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
+                        import_gsb_050(nomfich, True)
+                        ok = True
+                    else:
+                        logger.warning(
+                            "fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
+                        import_gsb_050(nomfich, False)
+                        ok = True
+                if ok:
+                    messages.success(request, u"import du fichier %s ok" % nomfich)
+                    return HttpResponseRedirect(reverse('gsb.views.index'))
                 else:
-                    logger.warning(
-                        "fusion data par fichier %s format %s %s" % (nomfich, form.cleaned_data['version'], info))
-                    import_gsb_050(nomfich, False)
-                    ok = True
-            if ok:
-                messages.success(request, u"import du fichier %s ok" % nomfich)
-                return HttpResponseRedirect(reverse('gsb.views.index'))
-            else:
-                messages.success(request, u"erreur dans l'import du fichier %s" % nomfich)
-                return render_to_response('gsb/import.djhtm',
-                        {'form':form,
-                         'titre':"importation d'un fichier"},
-                                          context_instance=RequestContext(request))
+                    messages.success(request, u"erreur dans l'import du fichier %s" % nomfich)
     else:
-        form = gsb_forms.ImportForm()
+        form = gsb_forms.ImportForm1()
+        etape_nb=1
+    param = {'form':form,
+                 'titre':u"importation d'un fichier &tape %s"%etape_nb,
+                 'etape_nb':etape_nb}
     return render_to_response('gsb/import.djhtm',
-            {'form':form,
-             'titre':"importation d'un fichier"},
+                              param,
                               context_instance=RequestContext(request))
 
 
@@ -102,4 +109,4 @@ def modif_gen(request):
 @login_required
 def gestion_echeances(request):
     Echeance.check(request)
-    return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues',},context_instance=RequestContext(request))
+    return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues', }, context_instance=RequestContext(request))

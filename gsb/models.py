@@ -1163,13 +1163,19 @@ def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
     #on evite que cela soit une operation rapproche
     if instance.rapp:
-        raise IntegrityError(u"operation rapprochee")
+        old_instance=Ope.objects.get(id=instance.id)
+        if instance.rapp and old_instance.rapp:
+            raise IntegrityError(u"operation rapprochee")
     if instance.jumelle:
         if instance.jumelle.rapp:
-            raise IntegrityError(u"operation jumelle rapprochée")
+            old_instance=Ope.objects.get(id=instance.id)
+            if old_instance.jumelle.rapp:
+                raise IntegrityError(u"operation jumelle rapprochée")
     if instance.mere:
         if instance.mere.rapp:
-            raise IntegrityError(u"operation mere rapprochée")
+            old_instance=Ope.objects.get(id=instance.id)
+            if old_instance.mere.rapp:
+                raise IntegrityError(u"operation mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"operations filles existantes %s" % instance.filles_set.all())
 
@@ -1179,7 +1185,9 @@ def verif_ope_titre(sender, **kwargs):
     instance = kwargs['instance']
     if instance.ope:
         if instance.ope.rapp:
-            raise IntegrityError(u"operation espece rapprochee")
+            old_instance=Ope_titre.objects.get(id=instance.id)
+            if old_instance.ope.rapp:
+                raise IntegrityError(u"operation espece rapprochee")
     instance.ope.ope_pmv.delete()
 
 
