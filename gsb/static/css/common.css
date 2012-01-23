@@ -177,7 +177,7 @@ ul.errorlist{
     margin: 0 0 3px 0;
     border: 1px solid red;
     color: white;
-    background: red url('/static/img/icon_error.gif') 5px .3em no-repeat;
+    background: red url('/static/img/error.png') no-repeat;
 }
 
 .errorlist li a{
@@ -197,7 +197,7 @@ td ul.errorlist li{
 /*notif*/
 .progress{
     width: 100%;
-    background: #009900;
+    background: Green ;
     text-align: center;
     font-size: 2.5em;
 }
@@ -227,36 +227,33 @@ body{
 .error,
 .validation{
     border: 2px solid;
-    margin: 10px 0px;
+    margin: 10px 0;
     padding: 0 0 0 41px;
-    background-repeat: no-repeat;
-    background-position: 5px center;
+    background: no-repeat 5px center;
 }
 
 .info{
     color: #00529B;
     border-color: #789FCC;
-    background-color: #CDEAF7;
-    background-image: url('/static/img/info.png');
+    background: #CDEAF7  no-repeat  url('/static/img/info.png');
 }
 
 .success{
     color: #264409;
     border-color: #C6D880;
-    background-color: #E6EFC2;
-    background-image: url('/static/img/success.png');
+    background: #E6EFC2 no-repeat url('/static/img/success.png');
 }
 
 .warning{
     color: #514721;
     border-color: #FFD324;
-    background: #FFF6BF url('/static/img/warning.png');
+    background: #FFF6BF no-repeat url('/static/img/warning.png');
 }
 
 .error{
     color: #8A1F11;
     border-color: #FBC2C4;
-    background: #FBE3E4 url('/static/img/error.png');
+    background: #FBE3E4 no-repeat url('/static/img/error.png');
 }
 
 /******** /User feedback messages ********/
