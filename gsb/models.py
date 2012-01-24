@@ -7,7 +7,7 @@ from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete,pre_save
 from django.dispatch import receiver
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
@@ -1163,19 +1163,13 @@ def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
     #on evite que cela soit une operation rapproche
     if instance.rapp:
-        old_instance=Ope.objects.get(id=instance.id)
-        if instance.rapp and old_instance.rapp:
-            raise IntegrityError(u"operation rapprochee")
+        raise IntegrityError(u"operation rapprochee")
     if instance.jumelle:
-        if instance.jumelle.rapp:
-            old_instance=Ope.objects.get(id=instance.id)
-            if old_instance.jumelle.rapp:
-                raise IntegrityError(u"operation jumelle rapprochée")
+        if old_instance.jumelle.rapp:
+            raise IntegrityError(u"operation jumelle rapprochée")
     if instance.mere:
-        if instance.mere.rapp:
-            old_instance=Ope.objects.get(id=instance.id)
-            if old_instance.mere.rapp:
-                raise IntegrityError(u"operation mere rapprochée")
+        if old_instance.mere.rapp:
+            raise IntegrityError(u"operation mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"operations filles existantes %s" % instance.filles_set.all())
 

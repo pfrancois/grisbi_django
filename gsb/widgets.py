@@ -10,6 +10,8 @@ import datetime
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 
 class Dategsbwidget(forms.DateInput):
+    """ widget de gestion des dates simple marche sur n95
+    """
     class Media:
         js = ("js/basiccalendar.js",)
         css = {'all':('css/calendar.css',)}
@@ -34,12 +36,14 @@ class Dategsbwidget(forms.DateInput):
 
 
 class DateFieldgsb(forms.DateField):
+    """field qui marche avec le widget au dessus"""
     def __init__(self, input_formats=input_format_date, initial=datetime.date.today, *args, **kwargs):
         super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget, *args,
                                            **kwargs)
 
 
 class Titrewidget(forms.MultiWidget):
+    """widget utilise pour la maj des titres"""
     def __init__(self, attrs=None):
         widgets = (Curwidget(attrs=attrs, ),
                    forms.TextInput(attrs=attrs, ))
@@ -57,6 +61,7 @@ class Titrewidget(forms.MultiWidget):
 
 
 class TitreField(forms.MultiValueField):
+    """field utilisé pour la maj des titres"""
     def __init__(self, *args, **kwargs):
         fields = (
             CurField(label='cur'),
