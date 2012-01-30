@@ -168,6 +168,7 @@ class Titre(models.Model):
         """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee
                 @param datel:date, renvoie sur avant la date ou tout si none
                 @param rapp: boolean, renvoie uniquement les op rapp
+                @param compte: compte, renvoie uniquement le nombre de titre si dans le compte
                 """
         query = Ope_titre.objects.filter(titre=self)
         if compte:
@@ -184,6 +185,7 @@ class Titre(models.Model):
 
     def encours(self, compte=None, datel=None, rapp=False):
         """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
+        #renvoie le dernier cours sauf si on lui demande a une echeance
         if datel:
             cours = self.cours_set.filter(date__lte=datel)
             if cours.exists():
@@ -197,13 +199,17 @@ class Titre(models.Model):
                 #recup de la derniere date
                 opes = Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
                 if opes:
-                    date_r = opes.latest('date').date
+                    #recupere la derniere date, attention ce n'est pas necessairement la derniere date d'operation
+                    try:
+                        date_r = max(opes.latest('date').rapp.date, opes.latest('date').date)
+                    except AttributeError:
+                        date_r=opes.latest('date').date
                 else:
                     return 0 #comme pas de date, pas d'encours
                 cours = self.cours_set.filter(date__lte=date_r).latest().valeur
-                nb = self.nb(compte, datel=date_r, rapp=rapp)
+                nb = self.nb(compte=compte, rapp=True)
             else:
-                nb = self.nb(compte, datel=datel)
+                nb = self.nb(compte=compte, datel=datel)
         else:
             nb = self.nb(datel=datel, rapp=False)
         return nb * cours
