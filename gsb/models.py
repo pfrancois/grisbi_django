@@ -1163,6 +1163,12 @@ class Ope(models.Model):
                 else:
                     self.moyen_id = settings.MD_DEBIT
         super(Ope, self).save(*args, **kwargs)
+    @property
+    def pr(self):
+        if self.rapp or self.pointe:
+            return True
+        else:
+            return False
 
 
 @receiver(pre_delete, sender=Ope)
