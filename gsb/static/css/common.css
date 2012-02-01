@@ -197,7 +197,7 @@ td ul.errorlist li{
 /*notif*/
 .progress{
     width: 100%;
-    background: Green ;
+    background: Green;
     text-align: center;
     font-size: 2.5em;
 }
@@ -235,7 +235,7 @@ body{
 .info{
     color: #00529B;
     border-color: #789FCC;
-    background: #CDEAF7  no-repeat  url('/static/img/info.png');
+    background: #CDEAF7 no-repeat url('/static/img/info.png');
 }
 
 .success{

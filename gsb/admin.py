@@ -189,19 +189,19 @@ class Compte_titre_admin(Modeladmin_perso):
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'pointe','show_jumelle', 'show_mere', 'oper_titre',
-              'notes', 'exercice', 'ib', 'date_val', 'num_cheque',  'rapp')
+    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'pointe', 'show_jumelle', 'show_mere', 'oper_titre',
+              'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'rapp')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
     search_fields = ['tiers__nom']
-    list_editable = ('pointe','montant')
-    actions = ['action_supprimer_pointe','fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
+    list_editable = ('pointe', 'montant')
+    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     #save_on_top = True
-    save_as=True
-    search_fields=['tiers__nom']
-    ordering=['date']
+    save_as = True
+    search_fields = ['tiers__nom']
+    ordering = ['date']
 
     def show_jumelle(self, obj):
         """
@@ -265,11 +265,11 @@ class Ope_admin(Modeladmin_perso):
         #liste_id = queryset.values_list('id', flat=True)
         try:
             queryset.update(pointe=False)
-            messages.success(request, u'suppression des statuts "pointé" des opérations selectionnées' )
+            messages.success(request, u'suppression des statuts "pointé" des opérations selectionnées')
         except Exception, err:
             messages.error(request, unicode(err))
 
-    action_supprimer_pointe.short_description =  u'_Suppression des statuts "pointé" des opérations selectionnées'
+    action_supprimer_pointe.short_description = u'_Suppression des statuts "pointé" des opérations selectionnées'
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
@@ -356,7 +356,9 @@ class Ech_admin(Modeladmin_perso):
 
     def check_ech(self, request, queryset):
         Echeance.check(request=request, queryset=queryset)
-    check_ech.short_description =u"Verifier si des echeances sont à enregistrer"
+
+    check_ech.short_description = u"Verifier si des echeances sont à enregistrer"
+
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""

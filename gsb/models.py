@@ -7,7 +7,7 @@ from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
-from django.db.models.signals import pre_delete,pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
@@ -203,7 +203,7 @@ class Titre(models.Model):
                     try:
                         date_r = max(opes.latest('date').rapp.date, opes.latest('date').date)
                     except AttributeError:
-                        date_r=opes.latest('date').date
+                        date_r = opes.latest('date').date
                 else:
                     return 0 #comme pas de date, pas d'encours
                 cours = self.cours_set.filter(date__lte=date_r).latest().valeur
@@ -491,7 +491,7 @@ class Compte_titre(Compte):
         ordering = ['nom']
         verbose_name_plural = "Comptes Titre"
 
-        #@transaction.commit_on_success
+    @transaction.commit_on_success
 
     def achat(self, titre, nombre, prix=1,
               date=datetime.date.today(), frais=0, virement_de=None,
@@ -717,6 +717,7 @@ class Ope_titre(models.Model):
     ope_pmv = property(get_ope_pmv, set_ope_pmv)
 
     def save(self, *args, **kwargs):
+        #definition des cat
         cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
         cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
@@ -728,7 +729,7 @@ class Ope_titre(models.Model):
                 pass
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
-            if not self.ope:
+            if not self.ope:#il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
@@ -742,7 +743,7 @@ class Ope_titre(models.Model):
                     Cours.objects.get(titre=self.titre, date=self.date)
                 except  Cours.DoesNotExist:
                     Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
-            else:
+            else:#la modifier juste
                 old_date = self.ope.date
                 self.ope.date = self.date
                 self.ope.montant = self.cours * self.nombre * -1
@@ -751,7 +752,7 @@ class Ope_titre(models.Model):
                 self.ope.compte = self.compte
                 self.ope.moyen = moyen
                 self.ope.save()
-                try:
+                try:#gestion du cours
                     cours = Cours.objects.get(titre=self.titre, date=old_date)
                     cours.date = self.date
                     cours.titre = self.titre
@@ -994,7 +995,7 @@ class Echeance(models.Model):
         if  not queryset:
             liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
         else:
-            liste_ech=queryset
+            liste_ech = queryset
         for ech in liste_ech:
             #TODO ech titre
             while ech.date < datetime.date.today() and ech.valide:
@@ -1130,7 +1131,7 @@ class Ope(models.Model):
         return Ope.objects.filter(filles_set__isnull=True)
 
     def __unicode__(self):
-        return u"(%s) le %s : %s %s a %s cpt: %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers,self.compte)
+        return u"(%s) le %s : %s %s a %s cpt: %s" % (self.id, self.date, self.montant, settings.DEVISE_GENERALE, self.tiers, self.compte)
 
     @models.permalink
     def get_absolute_url(self):
@@ -1171,10 +1172,10 @@ def verif_ope_rapp(sender, **kwargs):
     if instance.rapp:
         raise IntegrityError(u"operation rapprochee")
     if instance.jumelle:
-        if old_instance.jumelle.rapp:
+        if instance.jumelle.rapp:
             raise IntegrityError(u"operation jumelle rapprochée")
     if instance.mere:
-        if old_instance.mere.rapp:
+        if instance.mere.rapp:
             raise IntegrityError(u"operation mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"operations filles existantes %s" % instance.filles_set.all())
@@ -1185,8 +1186,7 @@ def verif_ope_titre(sender, **kwargs):
     instance = kwargs['instance']
     if instance.ope:
         if instance.ope.rapp:
-            old_instance=Ope_titre.objects.get(id=instance.id)
-            if old_instance.ope.rapp:
+            if instance.ope.rapp:
                 raise IntegrityError(u"operation espece rapprochee")
     instance.ope.ope_pmv.delete()
 

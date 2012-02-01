@@ -53,14 +53,14 @@
         <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
             {% csrf_token %}
         </form>
-    {% if not ope.rapp %}
-        <table style=" width: 100%;" summary="bouton effacer">
-            <tr class="boutton">
-                <td width="100%">
-                    <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
-            </tr>
-        </table>
-    {% endif %}
+        {% if not ope.rapp %}
+            <table style=" width: 100%;" summary="bouton effacer">
+                <tr class="boutton">
+                    <td width="100%">
+                        <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+                </tr>
+            </table>
+        {% endif %}
     {% else %}
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
