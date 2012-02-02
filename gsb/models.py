@@ -79,7 +79,8 @@ class Titre(models.Model):
     les titres englobe les actifs financiers
     afin de pouvoir faire le lien dans les operation, il y a un ligne vers les tiers
     :model:`gsb.tiers`
-    le set_null est mis afin de pouvoir effacer le tiers sans que cela ne pose trop de probleme dans les operations.
+    le set_null est mis afin de pouvoir faire du menage dans les titres plus utilise
+     sans que cela ne pose trop de probleme dans les operations.
     """
     typestitres = (
         ('ACT', u'action'),
@@ -764,11 +765,14 @@ class Ope_titre(models.Model):
             #calcul prealable
             #on met des plus car les chiffres sont negatif
             if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte) + self.ope.montant
-                nb_vrai = self.titre.nb(self.compte) + self.nombre
+                inv_vrai = self.titre.investi(self.compte, datel=self.date) - self.ope.montant
+                nb_vrai = self.titre.nb(self.compte, datel=self.date) - self.nombre
+                if self.ope_pmv:
+                    inv_vrai=inv_vrai-self.ope_pmv.montant
             else:
-                inv_vrai = self.titre.investi(self.compte)
-                nb_vrai = self.titre.nb(self.compte)
+                inv_vrai = self.titre.investi(self.compte, datel=self.date)
+                nb_vrai = self.titre.nb(self.compte, datel=self.date)
+            #chaine car comme on a des decimal
             ost = "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost

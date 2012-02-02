@@ -144,7 +144,7 @@ class Ope_titre_addForm(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
     compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
-    nombre = forms.DecimalField(initial='0')
+    nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField(initial='1')
     frais = forms.DecimalField(initial='0', required=False)
 
@@ -198,11 +198,14 @@ class Ope_titreForm(Basemodelform):
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
 
     nombre = forms.DecimalField(localize=True, initial='0')
-    cours = gsb_field.CurField()
+    cours = gsb_field.CurField(initial='1')
     date = gsb_field.DateFieldgsb()
-
-    class Meta:
-        model = Ope_titre
+    def clean(self):
+        super(Ope_titreForm, self).clean()
+        if not self.cleaned_data['nombre']:
+            self._errors['nombre'] = self.error_class([u'le nombre ne peut être nul', ])
+            del self.cleaned_data['nombre']
+        return self.cleaned_data
 
 
 class GeneraliteForm(Basemodelform):

@@ -467,7 +467,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
 @login_required
 def ope_titre_detail(request, pk):
     """
-    view, une seule operation
+    view, une seule operation mais pour les comptes titres
     @param request:
     @param pk: id de l'ope
     """
@@ -489,19 +489,17 @@ def ope_titre_detail(request, pk):
                     #on efface au besoin le cours
                     cours_req = Cours.objects.filter(titre=ope.titre, date=date_initial)
                     if cours_req.exists():
-                        cours_ = cours_req[0]
+                        cours_req = cours_req[0]
                         if not Cours.objects.filter(titre=ope.titre, date=form.cleaned_data['date']).exists():
-                            cours_.date = form.cleaned_data['date']
-                        cours_.save()
+                            cours_req.date = form.cleaned_data['date']
+                        cours_req.save()
                         messages.info(request, u'cours crée')
                         #pas besoin de else car c'est géré dans ope_titre.save()
                     if not creation:
                         cours = form.cleaned_data['cours']
                         nb = form.cleaned_data['nombre']
-                        ope.ope.date = form.cleaned_data['date']
-                        ope.ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
-                        ope.ope.note = "%s@%s" % (nb, cours)
-                        ope.ope.save()
+                        ope.date = form.cleaned_data['date']
+                        ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
                         message = u"opération modifié"
                     else:
                         message = u"opération crée"
