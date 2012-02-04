@@ -761,6 +761,8 @@ class Ope_titre(models.Model):
                     cours.save()
                 except  Cours.DoesNotExist:
                     Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+                except IntegrityError:
+                    pass
         else:#c'est une vente
             #calcul prealable
             #on met des plus car les chiffres sont negatif

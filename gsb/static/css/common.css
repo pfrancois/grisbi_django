@@ -160,11 +160,11 @@ th{
 .required{
     background: #009900;
 }
-
+/*
 .required:after{
     content: "*";
 }
-
+*/
 ul.errorlist{
     margin: 0 !important;
     padding: 0 !important;
