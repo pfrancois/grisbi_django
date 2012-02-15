@@ -721,6 +721,23 @@ class Ope_titre(models.Model):
         #definition des cat
         cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
         cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
+        #gestion des cours
+        try:
+            if self.ope:
+                old_date=self.ope.date
+            else:
+                old_date=self.date
+            obj,created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur':0})
+            obj.date = self.date
+            obj.valeur=self.cours
+            obj.save()
+        except IntegrityError:
+            obj.delete()
+            obj,created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'valeur':0})
+            obj.date = self.date
+            obj.valeur=self.cours
+            obj.save()
+
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
             try:
                 ope_pmv = Ope.objects.get(id=self.ope_pmv_id)
@@ -739,11 +756,7 @@ class Ope_titre(models.Model):
                                               moyen=moyen,
                                               compte=self.compte,
                                               )
-                #gestion des cours
-                try:
-                    Cours.objects.get(titre=self.titre, date=self.date)
-                except  Cours.DoesNotExist:
-                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
+
             else:#la modifier juste
                 old_date = self.ope.date
                 self.ope.date = self.date
@@ -753,16 +766,6 @@ class Ope_titre(models.Model):
                 self.ope.compte = self.compte
                 self.ope.moyen = moyen
                 self.ope.save()
-                try:#gestion du cours
-                    cours = Cours.objects.get(titre=self.titre, date=old_date)
-                    cours.date = self.date
-                    cours.titre = self.titre
-                    cours.valeur = self.cours
-                    cours.save()
-                except  Cours.DoesNotExist:
-                    Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
-                except IntegrityError:
-                    pass
         else:#c'est une vente
             #calcul prealable
             #on met des plus car les chiffres sont negatif
@@ -819,14 +822,6 @@ class Ope_titre(models.Model):
                 self.ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
                 self.ope_pmv.compte = self.compte
                 self.ope_pmv.save()
-            try:
-                cours = Cours.objects.get(titre=self.titre, date=old_date)
-                cours.date = self.date
-                cours.titre = self.titre
-                cours.valeur = self.cours
-                cours.save()
-            except  Cours.DoesNotExist:
-                Cours.objects.create(titre=self.titre, date=self.date, valeur=self.cours)
         super(Ope_titre, self).save(*args, **kwargs)
 
 
