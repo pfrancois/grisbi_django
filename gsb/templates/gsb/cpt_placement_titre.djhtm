@@ -41,7 +41,7 @@
         <td>total</td>
         <td class="opCenter">{{ nb_titre|floatformat:3 }}</td>
         <td>à {{ t.last_cours|cur }}</td>
-        <td class="opCredit">encours total:{{ solde|cur }}</td>
+        <td class="opCredit">encours total:{{ encours|cur }}</td>
     </tr>
     <tr class="footerbar">
         <td colspan="1">&nbsp;</td>

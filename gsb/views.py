@@ -416,12 +416,13 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     sinon affiche uniquement les non rapp"""
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    request.session['titre'] =titre_id
 
     date_rappro = compte.date_rappro()
     solde_rappro = titre.encours(compte=compte, rapp=True)
     q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
     if all:
-        q = q
+        pass
     else:
         #on prend comme reference les ope especes
         if rapp:
@@ -450,7 +451,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
                     'titre_id':titre.id,
                     'list_ope':opes,
                     'titre':"%s: %s" % (compte.nom, titre.nom),
-                    'solde':titre.investi(compte),
+                    'encours':titre.encours(compte),
                     't':titre,
                     'nb_titre':titre.nb(compte),
                     'nb_r':titre.nb(compte, rapp=True),
@@ -549,7 +550,13 @@ def ope_titre_delete(request, pk):
 
 @login_required
 def ope_titre_achat(request, cpt_id):
-    cpt = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    try:
+        titre_id = request.session['titre']
+        titre=Titre.objects.get(id=titre_id)
+    except Exception as e:
+        titre_id=None
+
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_achatForm(request.POST)
         if form.is_valid():
@@ -581,7 +588,10 @@ def ope_titre_achat(request, cpt_id):
 
             return HttpResponseRedirect(cpt.get_absolute_url())
     else:
-        form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':cpt})
+        if titre_id:
+            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte,'titre':titre})
+        else:
+            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte})
     titre = u' nouvel achat sur %s' % cpt.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {'titre_long':titre,
@@ -595,6 +605,11 @@ def ope_titre_achat(request, cpt_id):
 @login_required
 def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    try:
+        titre_id = request.session['titre']
+        titre=Titre.objects.get(id=titre_id)
+    except Exception as e:
+        titre_id=None
     if compte.titre.all().distinct().count() < 1:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez vendre')
         return HttpResponseRedirect(compte.get_absolute_url())
@@ -618,7 +633,10 @@ def ope_titre_vente(request, cpt_id):
                                                                           form.cleaned_data['date']))
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
-        form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte}, cpt=compte)
+        if titre_id:
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte,'titre':titre}, cpt=compte)
+        else:
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte}, cpt=compte)
     titre = u' nouvelle vente sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {'titre_long':titre,
