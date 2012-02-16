@@ -159,6 +159,7 @@ class test_models(TestCase):
         self.assertEquals(t.investi(c), 1600)
         self.assertEquals(t.investi(datel='2011-07-01'), 20)
         self.assertEquals(t.investi(compte=c, datel='2011-07-01'), 0)
+        self.assertEquals(t.investi(compte= Compte_titre.objects.get(id=5),exclude_id=16), 0)
 
 
     def test_titre_nb(self):
@@ -175,6 +176,7 @@ class test_models(TestCase):
         self.assertEquals(t.nb(rapp=True), 40)
         self.assertEquals(t.nb(rapp=True, datel='2010-07-01'), 0)
         self.assertEquals(t.nb(rapp=True, compte=Compte_titre.objects.get(id=5), datel='2010-07-01'), 0)
+        self.assertEquals(t.nb( compte=Compte_titre.objects.get(id=5), exclude_id=4), 0)
 
     def test_titre_encours(self):
         c = Compte_titre.objects.get(id=4)
@@ -353,7 +355,7 @@ class test_models(TestCase):
         self.assertRaises(Titre.DoesNotExist, lambda:c.vente(titre=t, nombre=2000, date='2011-12-31'))#montant trop eleve car entre les deux operations
         c.vente(titre=t, nombre=20, date='2011-11-01')
         a_test = t.investi(c)
-        self.assertEqual(a_test, decimal.Decimal('1411.76'))
+        self.assertEqual(a_test, decimal.Decimal('1500'))
         tall = c.liste_titre()
         self.assertEqual(len(tall), 2)
         self.assertRaises(Titre.DoesNotExist, lambda:c.vente(titre=t, nombre=20, date='2011-11-01'))#a pu de titre
@@ -482,8 +484,8 @@ class test_models(TestCase):
         o.nombre = 10
         o.save()
         self.assertEqual(t.nb(c), 25)
-        self.assertEqual(t.investi(c), 15 * 10 + 10 * 20)
-        self.assertEqual(t.encours(c), 25 * 20)
+        self.assertEqual(t.investi(c), )
+        self.assertEqual(t.encours(c), )
 
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
