@@ -147,10 +147,12 @@ class Titre(models.Model):
             self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
-    def investi(self, compte=None, datel=None, rapp=None):
+    def investi(self, compte=None, datel=None, rapp=None,exclude=None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
-        @param datel:date, renvoie sur avant la date ou tout si none
+        @param datel: date, renvoie sur avant la date ou tout si none
+        @param rapp: Bool, si true, renvoie uniquement les operation rapprochees
+        @param exclude: int ,exclue l'id mentionne ope_titre
         """
         query = Ope.objects.filter(tiers=self.tiers).exclude(cat__id=settings.ID_CAT_PMV)
         if compte:
@@ -159,17 +161,20 @@ class Titre(models.Model):
             query = query.filter(date__lte=datel)
         if rapp:
             query = query.filter(Q(rapp__isnull=False) | Q(pointe=True))
+        if exclude:
+            query=query.exclude(pk=exclude.ope.id)
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
         if not valeur:
             return decimal.Decimal(0)
         else:
             return valeur * -1
 
-    def nb(self, compte=None, datel=None, rapp=False):
+    def nb(self, compte=None, datel=None, rapp=False,exclude=None):
         """renvoie le nombre de titre detenus dans un compte C ou dans tous les comptes si pas de compte donnee
                 @param datel:date, renvoie sur avant la date ou tout si none
                 @param rapp: boolean, renvoie uniquement les op rapp
                 @param compte: compte, renvoie uniquement le nombre de titre si dans le compte
+                @exclude: id ope_titre
                 """
         query = Ope_titre.objects.filter(titre=self)
         if compte:
@@ -178,14 +183,19 @@ class Titre(models.Model):
             query = query.filter(Q(ope__rapp__isnull=False) | Q(ope__pointe=True))
         if datel:
             query = query.filter(date__lte=datel)
+        if exclude:
+            query=query.exclude(pk=exclude.id)
         nombre = query.aggregate(nombre=models.Sum('nombre'))['nombre']
         if not nombre:
             return 0
         else:
             return decimal.Decimal(smart_unicode(nombre))
 
-    def encours(self, compte=None, datel=None, rapp=False):
-        """renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné"""
+    def encours(self, compte=None, datel=None, rapp=False,exclude=None):
+        """
+        renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné
+        @param exclude: id ope
+        """
         #renvoie le dernier cours sauf si on lui demande a une echeance
         if datel:
             cours = self.cours_set.filter(date__lte=datel)
@@ -203,14 +213,28 @@ class Titre(models.Model):
                     #recupere la derniere date, attention ce n'est pas necessairement la derniere date d'operation
                     try:
                         date_r = max(opes.latest('date').rapp.date, opes.latest('date').date)
-                    except AttributeError:
+                    except AttributeError:#si rapp n'existe pas
                         date_r = opes.latest('date').date
                 else:
                     return 0 #comme pas de date, pas d'encours
                 cours = self.cours_set.filter(date__lte=date_r).latest().valeur
                 nb = self.nb(compte=compte, rapp=True)
             else:
-                nb = self.nb(compte=compte, datel=datel)
+                if exclude:
+                    #recup de la derniere date
+                    opes = Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).exclude(pk=exclude.ope.id)
+                    if opes:
+                        #recupere la derniere date, attention ce n'est pas necessairement la derniere date d'operation
+                        try:
+                            date_r = max(opes.latest('date').rapp.date, opes.latest('date').date)
+                        except AttributeError:#si rapp n'existe pas
+                            date_r = opes.latest('date').date
+                    else:
+                        return 0 #comme pas de date, pas d'encours
+                    cours = self.cours_set.filter(date__lte=date_r).latest().valeur
+                    nb = self.nb(compte=compte, rapp=True,exclude=exclude)
+                else:
+                    nb = self.nb(compte=compte, datel=datel)
         else:
             nb = self.nb(datel=datel, rapp=False)
         return nb * cours
@@ -739,7 +763,7 @@ class Ope_titre(models.Model):
             obj.save()
 
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
-            try:
+            try:#comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
                 ope_pmv = Ope.objects.get(id=self.ope_pmv_id)
                 ope_pmv.delete()
                 self.ope_pmv = 0
@@ -758,7 +782,6 @@ class Ope_titre(models.Model):
                                               )
 
             else:#la modifier juste
-                old_date = self.ope.date
                 self.ope.date = self.date
                 self.ope.montant = self.cours * self.nombre * -1
                 self.ope.tiers = self.titre.tiers
@@ -770,8 +793,8 @@ class Ope_titre(models.Model):
             #calcul prealable
             #on met des plus car les chiffres sont negatif
             if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte, datel=self.date) - self.ope.montant
-                nb_vrai = self.titre.nb(self.compte, datel=self.date) - self.nombre
+                inv_vrai = self.titre.investi(self.compte, datel=self.date,exclude=self)
+                nb_vrai = self.titre.nb(self.compte, datel=self.date,exclude=self)
                 if self.ope_pmv:
                     inv_vrai=inv_vrai-self.ope_pmv.montant
             else:
@@ -824,6 +847,17 @@ class Ope_titre(models.Model):
                 self.ope_pmv.save()
         super(Ope_titre, self).save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        try:
+            if self.ope:
+                if self.ope.rapp:
+                    raise IntegrityError(u"operation espece rapprochée")
+                if  self.ope.jumelle.rapp:
+                    raise IntegrityError(u"operation espece rapprochée")
+        except AttributeError as e:
+            pass
+        self.ope_pmv.delete()
+        super(Ope_titre, self).delete(*args, **kwargs)
 
     @models.permalink
     def get_absolute_url(self):
@@ -831,7 +865,6 @@ class Ope_titre(models.Model):
 
     def __unicode__(self):
         return "%s" % self.id
-
 
 class Moyen(models.Model):
     """moyen de paiements
@@ -1186,16 +1219,6 @@ def verif_ope_rapp(sender, **kwargs):
             raise IntegrityError(u"operation mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"operations filles existantes %s" % instance.filles_set.all())
-
-
-@receiver(pre_delete, sender=Ope_titre)
-def verif_ope_titre(sender, **kwargs):
-    instance = kwargs['instance']
-    if instance.ope:
-        if instance.ope.rapp:
-            if instance.ope.rapp:
-                raise IntegrityError(u"operation espece rapprochee")
-    instance.ope.ope_pmv.delete()
 
 
 class Virement(object):

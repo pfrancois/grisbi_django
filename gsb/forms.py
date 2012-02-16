@@ -197,8 +197,8 @@ class Ope_titreForm(Basemodelform):
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
 
-    nombre = forms.DecimalField(localize=True, initial='0')
-    cours = gsb_field.CurField(initial='1')
+    #nombre = forms.DecimalField(localize=True, initial='0')
+    #cours = gsb_field.CurField(initial='1')
     date = gsb_field.DateFieldgsb()
     def clean(self):
         super(Ope_titreForm, self).clean()
@@ -206,6 +206,9 @@ class Ope_titreForm(Basemodelform):
             self._errors['nombre'] = self.error_class([u'le nombre ne peut être nul', ])
             del self.cleaned_data['nombre']
         return self.cleaned_data
+
+    class Meta:
+        model=Ope_titre
 
 
 class GeneraliteForm(Basemodelform):

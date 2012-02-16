@@ -477,35 +477,9 @@ def ope_titre_detail(request, pk):
         date_initial = ope.date
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
-            if ope.ope is None:
-                ope.nombre = form.cleaned_data['nombre']
-                ope.date = form.cleaned_data['date']
-                ope.cours = form.cleaned_data['cours']
-                ope.save()
-                creation = True
-            else:
-                creation = False
             if ope.ope.rapp is None:
-                if form.has_changed():
-                    #on efface au besoin le cours
-                    cours_req = Cours.objects.filter(titre=ope.titre, date=date_initial)
-                    if cours_req.exists():
-                        cours_req = cours_req[0]
-                        if not Cours.objects.filter(titre=ope.titre, date=form.cleaned_data['date']).exists():
-                            cours_req.date = form.cleaned_data['date']
-                        cours_req.save()
-                        messages.info(request, u'cours crée')
-                        #pas besoin de else car c'est géré dans ope_titre.save()
-                    if not creation:
-                        cours = form.cleaned_data['cours']
-                        nb = form.cleaned_data['nombre']
-                        ope.date = form.cleaned_data['date']
-                        ope.montant = decimal.Decimal(cours) * decimal.Decimal(nb) * -1
-                        message = u"opération modifié"
-                    else:
-                        message = u"opération crée"
-                    form.save()
-                    messages.success(request, u"%s %s" % (message, ope))
+                form.save()
+                message = u"opération modifié"
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
             return HttpResponseRedirect(ope.compte.get_absolute_url())
@@ -514,7 +488,7 @@ def ope_titre_detail(request, pk):
     if ope.ope is not None:
         rapp = bool(ope.ope.rapp_id)
     else:
-        rapp = None
+        rapp = False
     return render(request, 'gsb/ope_titre_detail.djhtm',
             {'titre_long':u'opération sur titre %s' % ope.id,
              'titre':u'modification',
