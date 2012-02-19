@@ -485,7 +485,11 @@ def ope_titre_detail(request, pk):
                     messages.error(request,e.unicode())
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
-            return HttpResponseRedirect(ope.compte.get_absolute_url())
+            return HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
+                                                 kwargs={'cpt_id':ope.compte.id,
+                                                         'titre_id':ope.titre.id}
+                                                 )
+                                        )
     else:
         form = gsb_forms.Ope_titreForm(instance=ope)
     if ope.ope is not None:
@@ -508,7 +512,8 @@ def ope_titre_delete(request, pk):
         if ope.ope and ope.ope.rapp:
             messages.error(request, u"impossible d'effacer une operation rapprochée")
             return HttpResponseRedirect(ope.get_absolute_url())
-        compte = ope.compte
+        compte_id = ope.compte.id
+        titre_id=ope.titre.id
         #gestion des cours inutiles
         cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
         if cours.exists():
@@ -520,7 +525,11 @@ def ope_titre_delete(request, pk):
         s = u'%s' % ope.id
         ope.delete()
         messages.success(request, u'ope effacé id %s' % s)
-        return HttpResponseRedirect(compte.get_absolute_url())
+        return HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
+                                             kwargs={'cpt_id':compte_id,
+                                                     'titre_id':titre_id}
+                                             )
+                                    )
     else:
         return HttpResponseRedirect(ope.get_absolute_url())
 
