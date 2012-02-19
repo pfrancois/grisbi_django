@@ -5,7 +5,7 @@ import datetime
 import decimal
 from django.db import transaction, IntegrityError
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.encoding import force_unicode
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
@@ -726,9 +726,15 @@ class Ope_titre(models.Model):
     ope_pmv = property(get_ope_pmv, set_ope_pmv)
 
     def save(self, *args, **kwargs):
-        #definition des cat
-        cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
-        cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
+        #definition des cat avec possibil
+        try:
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
+        except IntegrityError:
+            raise ImproperlyConfigured(u"attention probleme de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'operation sur titre :'"%settings.ID_CAT_OST)
+        try:
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
+        except IntegrityError:
+           raise ImproperlyConfigured(u"attention probleme de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Revenus de placement : Plus-values'"%settings.ID_CAT_OST)
         #gestion des cours
         try:
             if self.ope:
@@ -793,8 +799,8 @@ class Ope_titre(models.Model):
             self.invest = ost
             ope_created = False
             ope_pmv_cre = False
+            moyen = self.compte.moyen_credit_defaut
             if not self.ope:
-                moyen = self.compte.moyen_credit_defaut
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
                                               tiers=self.titre.tiers,
@@ -805,7 +811,6 @@ class Ope_titre(models.Model):
                                               )
                 ope_created = True
             if not self.ope_pmv:
-                moyen = self.compte.moyen_credit_defaut
                 self.ope_pmv = Ope.objects.create(date=self.date,
                                                   montant=pmv * -1,
                                                   tiers=self.titre.tiers,
@@ -815,6 +820,16 @@ class Ope_titre(models.Model):
                                                   compte=self.compte,
                                                   )
                 ope_pmv_cre = True
+            else:
+                #on modifie tout
+                self.ope_pmv.date=self.date
+                self.ope_pmv.montant=pmv*-1
+                self.ope_pmv.tiers=self.titre.tiers
+                self.ope_pmv.cat=cat_pmv
+                self.ope_pmv.notes="%s@%s" % (self.nombre, self.cours)
+                self.ope_pmv.moyen=moyen
+                self.ope_pmv.compte=self.compte
+
             old_date = self.ope.date
             if not ope_created:
                 self.ope.date = self.date
@@ -841,7 +856,8 @@ class Ope_titre(models.Model):
                     raise IntegrityError(u"operation espece rapprochée")
         except AttributeError as e:
             pass
-        self.ope_pmv.delete()
+        if self.ope_pmv_id:
+            self.ope_pmv.delete()
         super(Ope_titre, self).delete(*args, **kwargs)
 
     @models.permalink

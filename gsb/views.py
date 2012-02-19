@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import smart_unicode
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
+from django.core import exceptions as django_exceptions
 
 @login_required
 def index(request):
@@ -53,7 +54,6 @@ def index(request):
         'nb_clos':nb_clos,
         })
     return HttpResponse(t.render(c))
-
 
 @login_required
 def cpt_detail(request, cpt_id, all=False, rapp=False):
@@ -478,8 +478,11 @@ def ope_titre_detail(request, pk):
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope.rapp is None:
-                form.save()
-                message = u"opération modifié"
+                try:
+                    form.save()
+                    messages.info(request,u"opération modifié")
+                except django_exceptions.ImproperlyConfigured as e:
+                    messages.error(request,e.unicode())
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
             return HttpResponseRedirect(ope.compte.get_absolute_url())
@@ -528,7 +531,10 @@ def ope_titre_achat(request, cpt_id):
     try:
         titre_id = request.session['titre']
         titre=Titre.objects.get(id=titre_id)
-    except Exception as e:
+    except Titre.DoesNotExist as e:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request,u"attention le titre demandé intialement n'existe pas")
+        titre_id=None
+    except AttributeError as e:#on est dans le cas où l'on viens d'une page sans titre defini
         titre_id=None
 
     if request.method == 'POST':
@@ -549,17 +555,19 @@ def ope_titre_achat(request, cpt_id):
                 virement = form.cleaned_data['compte_espece']
             else:
                 virement = None
-            compte.achat(titre=titre,
+            try:
+                compte.achat(titre=titre,
                          nombre=form.cleaned_data['nombre'],
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
                          virement_de=virement,
                          frais=form.cleaned_data['frais'])
-            messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
                                                                           form.cleaned_data['titre'],
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']))
-
+            except Exception as e:
+                    message.error(request,e.unicode())
             return HttpResponseRedirect(cpt.get_absolute_url())
     else:
         if titre_id:
@@ -582,10 +590,14 @@ def ope_titre_vente(request, cpt_id):
     try:
         titre_id = request.session['titre']
         titre=Titre.objects.get(id=titre_id)
-    except Exception as e:
+    except Titre.DoesNotExist as e:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request,u"attention le titre demandé intialement n'existe pas")
         titre_id=None
+    except KeyError as e:#on est dans le cas où l'on viens d'une page sans titre defini
+        titre_id=None
+
     if compte.titre.all().distinct().count() < 1:
-        messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez vendre')
+        messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas vendre')
         return HttpResponseRedirect(compte.get_absolute_url())
 
     if request.method == 'POST':
@@ -596,15 +608,18 @@ def ope_titre_vente(request, cpt_id):
                 virement = form.cleaned_data['compte_espece']
             else:
                 virement = None
-            compte.vente(titre=form.cleaned_data['titre'],
+            try:
+                compte.vente(titre=form.cleaned_data['titre'],
                          nombre=form.cleaned_data['nombre'],
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
                          virement_vers=virement)
-            messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
                                                                           form.cleaned_data['titre'],
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']))
+            except Exception as e:
+                    message.error(request,e.unicode())
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
