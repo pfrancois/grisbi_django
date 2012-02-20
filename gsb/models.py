@@ -788,9 +788,6 @@ class Ope_titre(models.Model):
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date)
-            print inv_vrai
-            print nb_vrai
-            print "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
             #chaine car comme on a des decimal
             ost = "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
