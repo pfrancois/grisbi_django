@@ -29,7 +29,7 @@
                 <th align="right">montant plac&eacute;</th>
                 <th>+/- values</th>
                 <th>total</th>
-                <th>solde titre rapproché ou pointé</th>
+                <th>encours titre rapproché ou pointé</th>
             </tr>
         </thead>
         {% for titre in titres %}

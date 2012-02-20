@@ -718,7 +718,7 @@ class Ope_titre(models.Model):
         except Ope.DoesNotExist:
             return None
     
-    def set_ope_pmv(self):
+    def set_ope_pmv(self,obj):
         raise NotImplementedError('pas possible')
     
     def del_ope_pmv(self):
@@ -813,14 +813,14 @@ class Ope_titre(models.Model):
                 self.ope.compte = self.compte
                 self.ope.save()
             if not self.ope_pmv:
-                self.ope_pmv = Ope.objects.create(date=self.date,
+                self.ope_pmv_id = Ope.objects.create(date=self.date,
                                                   montant=pmv * -1,
                                                   tiers=self.titre.tiers,
                                                   cat=cat_pmv,
                                                   notes="%s@%s" % (self.nombre, self.cours),
                                                   moyen=moyen,
                                                   compte=self.compte,
-                                                  )
+                                                  ).id
             else:
                 #on modifie tout
                 ope_pmv=self.ope_pmv
