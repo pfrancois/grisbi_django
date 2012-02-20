@@ -710,20 +710,22 @@ class Ope_titre(models.Model):
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
+    
 
     def get_ope_pmv(self):
         try:
             return Ope.objects.get(id=self.ope_pmv_id)
         except Ope.DoesNotExist:
             return None
-
-    def set_ope_pmv(self, obj):
-        if obj:
-            self.ope_pmv_id = obj.id
-        else:
-            self.ope_pmv_id = 0
-
-    ope_pmv = property(get_ope_pmv, set_ope_pmv)
+    
+    def set_ope_pmv(self):
+        raise NotImplementedError('pas possible')
+    
+    def del_ope_pmv(self):
+        self.ope_pmv.delete()
+        self.ope_pmv_id=0
+    
+    ope_pmv = property(get_ope_pmv, set_ope_pmv,del_ope_pmv)
 
     def save(self, *args, **kwargs):
         #definition des cat avec possibil
@@ -754,9 +756,7 @@ class Ope_titre(models.Model):
 
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
             try:#comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
-                ope_pmv = Ope.objects.get(id=self.ope_pmv_id)
-                ope_pmv.delete()
-                self.ope_pmv = 0
+                del self.ope_pmv
             except  Ope.DoesNotExist:
                 pass
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
@@ -794,9 +794,8 @@ class Ope_titre(models.Model):
             pmv = self.nombre * self.cours - ost
             #on cree ls ope
             self.invest = ost
-            ope_created = False
-            ope_pmv_cre = False
             moyen = self.compte.moyen_credit_defaut
+            
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
@@ -806,7 +805,13 @@ class Ope_titre(models.Model):
                                               moyen=moyen,
                                               compte=self.compte,
                                               )
-                ope_created = True
+            else:
+                self.ope.date = self.date
+                self.ope.montant = ost * -1
+                self.ope.tiers = self.titre.tiers
+                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope.compte = self.compte
+                self.ope.save()
             if not self.ope_pmv:
                 self.ope_pmv = Ope.objects.create(date=self.date,
                                                   montant=pmv * -1,
@@ -816,32 +821,19 @@ class Ope_titre(models.Model):
                                                   moyen=moyen,
                                                   compte=self.compte,
                                                   )
-                ope_pmv_cre = True
             else:
                 #on modifie tout
-                self.ope_pmv.date=self.date
-                self.ope_pmv.montant=pmv*-1
-                self.ope_pmv.tiers=self.titre.tiers
-                self.ope_pmv.cat=cat_pmv
-                self.ope_pmv.notes="%s@%s" % (self.nombre, self.cours)
-                self.ope_pmv.moyen=moyen
-                self.ope_pmv.compte=self.compte
-
+                ope_pmv=self.ope_pmv
+                ope_pmv.date=self.date
+                ope_pmv.montant=pmv*-1
+                ope_pmv.tiers=self.titre.tiers
+                ope_pmv.cat=cat_pmv
+                ope_pmv.notes="%s@%s" % (self.nombre, self.cours)
+                ope_pmv.moyen=moyen
+                ope_pmv.compte=self.compte
+                ope_pmv.save()
             old_date = self.ope.date
-            if not ope_created:
-                self.ope.date = self.date
-                self.ope.montant = ost * -1
-                self.ope.tiers = self.titre.tiers
-                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope.compte = self.compte
-                self.ope.save()
-            if not ope_pmv_cre:
-                self.ope_pmv.date = self.date
-                self.ope_pmv.montant = pmv * -1
-                self.ope_pmv.tiers = self.titre.tiers
-                self.ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope_pmv.compte = self.compte
-                self.ope_pmv.save()
+
         super(Ope_titre, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -854,7 +846,7 @@ class Ope_titre(models.Model):
         except AttributeError as e:
             pass
         if self.ope_pmv_id:
-            self.ope_pmv.delete()
+            del self.ope_pmv
         super(Ope_titre, self).delete(*args, **kwargs)
 
     @models.permalink
