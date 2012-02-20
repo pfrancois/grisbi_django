@@ -564,19 +564,16 @@ def ope_titre_achat(request, cpt_id):
                 virement = form.cleaned_data['compte_espece']
             else:
                 virement = None
-            try:
-                compte.achat(titre=titre,
-                         nombre=form.cleaned_data['nombre'],
-                         prix=form.cleaned_data['cours'],
-                         date=form.cleaned_data['date'],
-                         virement_de=virement,
-                         frais=form.cleaned_data['frais'])
-                messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                          form.cleaned_data['titre'],
-                                                                          form.cleaned_data['cours'],
-                                                                          form.cleaned_data['date']))
-            except Exception as e:
-                    message.error(request,e.unicode())
+            compte.achat(titre=titre,
+                     nombre=form.cleaned_data['nombre'],
+                     prix=form.cleaned_data['cours'],
+                     date=form.cleaned_data['date'],
+                     virement_de=virement,
+                     frais=form.cleaned_data['frais'])
+            messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                                                                      form.cleaned_data['titre'],
+                                                                      form.cleaned_data['cours'],
+                                                                      form.cleaned_data['date']))
             return HttpResponseRedirect(cpt.get_absolute_url())
     else:
         if titre_id:
@@ -617,18 +614,15 @@ def ope_titre_vente(request, cpt_id):
                 virement = form.cleaned_data['compte_espece']
             else:
                 virement = None
-            try:
-                compte.vente(titre=form.cleaned_data['titre'],
-                         nombre=form.cleaned_data['nombre'],
-                         prix=form.cleaned_data['cours'],
-                         date=form.cleaned_data['date'],
-                         virement_vers=virement)
-                messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                          form.cleaned_data['titre'],
-                                                                          form.cleaned_data['cours'],
-                                                                          form.cleaned_data['date']))
-            except Exception as e:
-                    message.error(request,e.unicode())
+            compte.vente(titre=form.cleaned_data['titre'],
+                     nombre=form.cleaned_data['nombre'],
+                     prix=form.cleaned_data['cours'],
+                     date=form.cleaned_data['date'],
+                     virement_vers=virement)
+            messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                                                                      form.cleaned_data['titre'],
+                                                                      form.cleaned_data['cours'],
+                                                                      form.cleaned_data['date']))
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:

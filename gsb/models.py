@@ -722,7 +722,10 @@ class Ope_titre(models.Model):
         raise NotImplementedError('pas possible')
     
     def del_ope_pmv(self):
-        self.ope_pmv.delete()
+        try:
+            self.ope_pmv.delete()
+        except AttributeError:
+            pass
         self.ope_pmv_id=0
     
     ope_pmv = property(get_ope_pmv, set_ope_pmv,del_ope_pmv)
@@ -755,10 +758,7 @@ class Ope_titre(models.Model):
             obj.save()
 
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
-            try:#comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
-                del self.ope_pmv
-            except  Ope.DoesNotExist:
-                pass
+            del self.ope_pmv #comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
             if not self.ope:#il faut creer l'ope sous jacente
