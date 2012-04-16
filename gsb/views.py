@@ -480,7 +480,7 @@ def ope_titre_detail(request, pk):
             if ope.ope.rapp is None:
                 try:
                     form.save()
-                    messages.info(request,u"opération modifié")
+                    messages.info(request,u"opération modifiée")
                 except django_exceptions.ImproperlyConfigured as e:
                     messages.error(request,e.unicode())
             else:
