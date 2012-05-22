@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls import patterns, url, include
 from django.views.generic import RedirectView
 from . import forms as gsb_forms
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.conf import settings
 # les vues generales
 urlpatterns = patterns('mysite.gsb',
                        url(r'^$', 'views.index', name='index'),
-                       url(r'^test$', 'test.test')
+                       #url(r'^test$', 'test.test')
 )
 
 #les vues relatives aux outils

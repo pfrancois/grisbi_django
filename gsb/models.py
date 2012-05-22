@@ -13,7 +13,7 @@ from django.db.models import Q
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode
-
+from .model_field import CurField
 class Gsb_exc(Exception):
     pass
 
@@ -22,22 +22,6 @@ class Ex_jumelle_neant(Exception):
     pass
 
 #import logging
-#definition d'un moneyfield
-class CurField(models.DecimalField):
-    """
-    un champ decimal mais defini pour les monnaies
-    """
-    description = u"A Monetary value"
-    # __metaclass__ = models.SubfieldBase # ca marche pas chez always data
-    def __init__(self, verbose_name=None, name=None, max_digits=15, decimal_places=2, default=0.00,
-                 **kwargs):
-        super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
-
-    def get_internal_type(self):
-        return "DecimalField"
-
-    def __mul(self, other):
-        return decimal.Decimal(self) * decimal.Decimal(other)
 
 
 class Tiers(models.Model):
@@ -710,24 +694,24 @@ class Ope_titre(models.Model):
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
-    
+
 
     def get_ope_pmv(self):
         try:
             return Ope.objects.get(id=self.ope_pmv_id)
         except Ope.DoesNotExist:
             return None
-    
+
     def set_ope_pmv(self,obj):
         raise NotImplementedError('pas possible')
-    
+
     def del_ope_pmv(self):
         try:
             self.ope_pmv.delete()
         except AttributeError:
             pass
         self.ope_pmv_id=0
-    
+
     ope_pmv = property(get_ope_pmv, set_ope_pmv,del_ope_pmv)
 
     def save(self, *args, **kwargs):
@@ -795,7 +779,7 @@ class Ope_titre(models.Model):
             #on cree ls ope
             self.invest = ost
             moyen = self.compte.moyen_credit_defaut
-            
+
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,

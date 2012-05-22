@@ -6,14 +6,14 @@ try:
         pass
     main = False
 except NameError:
-    from django.core.management import setup_environ
+    from django.conf.settings import configure
     import sys, os
     #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
     s = os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
     sys.path.append(s)
-    from mysite import settings
+    from mysite.gsb import settings
 
-    setup_environ(settings)
+    configure(default_settings=settings,DEBUG=True)
 
 if __name__ == "__main__":
     main = True

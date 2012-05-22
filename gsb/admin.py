@@ -9,7 +9,6 @@ from django.utils.safestring import mark_safe
 from django.core import urlresolvers
 from django.db import IntegrityError
 from django.core.exceptions import PermissionDenied
-from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.db.models import Q

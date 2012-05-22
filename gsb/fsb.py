@@ -4,13 +4,13 @@ if __name__ == "__main__":
     from django.core.management import setup_environ
     import sys, os
 
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
+    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..','..')))
     from mysite import settings
 
     setup_environ(settings)
 
 #from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte, Compte_titre, Histo_ope_titres, Virement, Titres_detenus, Cours
-# 
+#
 from django.http import HttpResponse
 
 #from django.core.exceptions import ObjectDoesNotExist

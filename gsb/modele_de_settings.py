@@ -1,7 +1,10 @@
 # -*- coding: utf-8
 import os
 import decimal
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+#on change le context par defaut
+decimal.getcontext().rouding=decimal.ROUND_HALF_UP
+decimal.getcontext().precision=3
+PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__),'..'))
 
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = False
@@ -57,7 +60,7 @@ LOGIN_REDIRECT_URL = "/"
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'Europe/Paris'
-
+USE_TZ = True
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'fr-fr'
@@ -204,8 +207,7 @@ LOGGING = {
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
             'filename':os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-            'when':'D',
-            'backupCount':'30', #approx 1 month worth
+            'mode': 'a', #append+create
         },
         },
     'loggers':{
