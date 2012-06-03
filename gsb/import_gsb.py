@@ -32,7 +32,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 
-from mysite.gsb.utils import datefr2datesql, fr2decimal
+from .utils import datefr2datesql, fr2decimal
 
 class Import_exception(Exception):
     pass

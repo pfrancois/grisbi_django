@@ -27,7 +27,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 import logging
-import mysite.gsb.utils
+from . import utils
 #definitions des listes
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -35,7 +35,7 @@ liste_type_compte = Compte.typescpt
 
 def _export():
     logger = logging.getLogger('gsb.export')
-    fmt = mysite.gsb.utils.Format()
+    fmt = utils.Format()
     #creation des id pour cat et sact
     list_cats = {}
     for cat_en_cours in Cat.objects.all().order_by('id'):

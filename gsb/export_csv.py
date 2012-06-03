@@ -2,15 +2,18 @@
 from __future__ import absolute_import
 
 if __name__ == "__main__":
-    from django.core.management import setup_environ
     import sys, os
-
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.gsb.settings")
     sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    from mysite import settings
+    from django.core.management import execute_from_command_line
 
-    setup_environ(settings)
-    from mysite.gsb.models import Compte, Ope
-    from mysite.gsb.utils import Format, strpdate
+
+    #from django.conf import settings
+    #from mysite.gsb import settings as defaults
+    #settings.configure(default_settings=defaults)
+
+    from .models import Compte, Ope
+    from .utils import Format, strpdate
 else:
     from .models import Compte, Ope
     from .utils import Format, strpdate

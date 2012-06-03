@@ -11,7 +11,7 @@
             <table style=" width: 100%;" summary="bouton effacer">
                 <tr class="boutton">
                     <td width="100%">
-                        <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+                        <a href="javascript:document.forms['form2'].submit();">supprimer l'op&eacute;ration</a></td>
                 </tr>
             </table>
         {% endif %}
@@ -36,7 +36,7 @@
                 {{ form }}
                 {% if ope.ope_titre %}
                     <tr>
-                        <th><label> Operation titre:</label></th>
+                        <th><label> Op&eacute;ration titre:</label></th>
                         <td><a href="{{ ope.ope_titre.get_absolute_url }}"> {{ ope.ope_titre.id }}</a></td>
                     </tr>
                 {% endif %}
@@ -57,7 +57,7 @@
             <table style=" width: 100%;" summary="bouton effacer">
                 <tr class="boutton">
                     <td width="100%">
-                        <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+                        <a href="javascript:document.forms['form2'].submit();">supprimer l'op&eacute;ration</a></td>
                 </tr>
             </table>
         {% endif %}

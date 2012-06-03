@@ -12,7 +12,7 @@ TEMPLATE_DEBUG = DEBUG
 DJANGO_EXTENSION = True
 #TEMPLATE_STRING_IF_INVALID="INVALID"
 
-DEBUG_PROPAGATE_EXCEPTIONS= DEBUG
+DEBUG_PROPAGATE_EXCEPTIONS= False
 
 ADMINS = (
 # ('toto', 'your_email@domain.com'),
@@ -149,7 +149,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware'
 )
 
-ROOT_URLCONF = 'mysite.urls'
+ROOT_URLCONF = 'urls'
 
 
 TEMPLATE_DIRS = (
@@ -166,7 +166,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mysite.gsb',
+    'gsb',
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs'
@@ -207,7 +207,8 @@ LOGGING = {
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
             'filename':os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-            'mode': 'a', #append+create
+            'when':'D',
+            'backupCount':'30', #approx 1 month worth
         },
         },
     'loggers':{

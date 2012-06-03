@@ -31,7 +31,7 @@ from . import utils as utils
 
 
 #-----------les urls.py
-urlpatterns = patterns('mysite.gsb.forms_perso',
+urlpatterns = patterns('gsb.forms_perso',
                        url(r'^search$', 'search_opes', name='g_search_ope'),
                        )
 
@@ -79,4 +79,3 @@ def search_opes(request):
                                                             "sort":"",
                                                             'date_max':'',
                                                             'solde':None})
-

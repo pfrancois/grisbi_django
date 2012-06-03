@@ -15,7 +15,7 @@ version SG:
 
 import sys
 import decimal
-from mysite.gsb.utils import datefr2datesql, fr2decimal, strpdate
+from .utils import datefr2datesql, fr2decimal, strpdate
 #definition
 #expression reg
 #id des moyens,tiers,cat et ib, si None, on ne change pas

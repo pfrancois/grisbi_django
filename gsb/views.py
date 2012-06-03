@@ -267,7 +267,7 @@ def ope_new(request, cpt_id=None):
                 cpt = get_object(Compte.objects.select_related(), pk=settings.ID_CPT_M)
             except Compte.DoesNotExists:
                 messages.error(request, u"pas de compte par defaut")
-                return HttpResponseRedirect(reverse('mysite.gsb.views.index'))
+                return HttpResponseRedirect(reverse('gsb.views.index'))
         form = gsb_forms.OperationForm(initial={'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
         return render(request, 'gsb/ope.djhtm',
                 {'titre':u'création',

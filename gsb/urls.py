@@ -6,29 +6,29 @@ from . import forms as gsb_forms
 from django.conf import settings
 
 # les vues generales
-urlpatterns = patterns('mysite.gsb',
+urlpatterns = patterns('gsb',
                        url(r'^$', 'views.index', name='index'),
                        #url(r'^test$', 'test.test')
 )
 
 #les vues relatives aux outils
-urlpatterns += patterns('mysite.gsb.outils',
+urlpatterns += patterns('gsb.outils',
                         url(r'^options$', 'options_index'),
                         url(r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name='modification_preference_generalite'),
                         url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances')
 )
-urlpatterns += patterns('mysite.gsb',
+urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
                         url(r'^options/csv$', 'export_csv.export', name='export_csv'),
                         )
 urlpatterns += patterns('',
     (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
-                        url(r'^maj_cours/(?P<pk>\d+)$', 'mysite.gsb.views.maj_cours', name='maj_cours')
+                        url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
 )
 
 #les vues relatives aux operations
-urlpatterns += patterns('mysite.gsb.views',
+urlpatterns += patterns('gsb.views',
                         url(r'^ope/(?P<pk>\d+)/delete', 'ope_delete', name='gsb_ope_delete'),
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name='gsb_ope_detail'),
                         url(r'^ope/new$', 'ope_new', name="gsb_ope_new"),
@@ -39,7 +39,7 @@ urlpatterns += patterns('mysite.gsb.views',
 )
 
 #les vues relatives aux comptes
-urlpatterns += patterns('mysite.gsb.views',
+urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail', name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$', 'cpt_detail', {'rapp':True}, name='gsb_cpt_detail_rapp'),
                         url(r'^compte/(?P<cpt_id>\d+)/all$', 'cpt_detail', {'all':True}, name='gsb_cpt_detail_all'),
@@ -58,13 +58,13 @@ urlpatterns += patterns('mysite.gsb.views',
 #gestion de mes trucs perso
 perso = False# ya plus rien dedans
 #form tester
-if settings.DEBUG and perso:
-    from mysite.gsb.form_tester import SomeModelFormPreview
+#if settings.DEBUG and perso:
+#    from gsb.form_tester import SomeModelFormPreview
 
-    #urlpatterns += patterns('mysite.gsb',
+    #urlpatterns += patterns('gsb',
     #    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
     #                        url(r'^test$', 'test.test')
     #)
-    #import mysite.gsb.forms_perso
+    #import gsb.forms_perso
 
-    #urlpatterns += patterns('', (r'^perso/', include(mysite.gsb.forms_perso)) )
+    #urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )
