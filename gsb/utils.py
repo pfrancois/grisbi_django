@@ -81,7 +81,6 @@ class Format:
         @param defaut: la reponse si neant ou inexistant
         @param membre: l'attribut a demander si pas neant"""
         try:
-            print obj
             return unicode(getattr(obj, membre))
         except AttributeError:
             return unicode(defaut)

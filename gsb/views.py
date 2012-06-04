@@ -17,6 +17,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
 from django.views.generic.edit import FormView
+from django.utils.decorators import method_decorator
+
 @login_required
 def index(request):
     """
