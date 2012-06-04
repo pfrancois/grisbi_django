@@ -1,22 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-if __name__ == "__main__":
-    import sys, os
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.gsb.settings")
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    from django.core.management import execute_from_command_line
-
-
-    #from django.conf import settings
-    #from mysite.gsb import settings as defaults
-    #settings.configure(default_settings=defaults)
-
-    from .models import Compte, Ope
-    from .utils import Format, strpdate
-else:
-    from .models import Compte, Ope
-    from .utils import Format, strpdate
+from .models import Compte, Ope
+from .utils import Format as fmt
+from .utils import strpdate
 
 import codecs, csv, cStringIO
 import logging
@@ -24,7 +11,13 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 from django.conf import settings
-
+#pour les vues
+from . import forms as gsb_forms
+from django.db import models
+from django.shortcuts import render
+from django.contrib import messages
+from .views import ExportViewBase
+from django.core.exceptions import ObjectDoesNotExist
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
@@ -104,68 +97,57 @@ class Excel_csv(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-def _export():
-    """
-    fonction principale mais est appelé  par un view
-    """
-    logger = logging.getLogger('gsb.export')
-    csv.register_dialect("excel_csv", Excel_csv)
-    fich = cStringIO.StringIO()
-    fmt = Format()
-    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-    csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
-    opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(date__gte=strpdate("2009-01-01"))
-    i = 0
-    total = float(opes.count())
-    for ope in opes:
-        i += 1
-        ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
-        if ope.rapp is None:
-            ligne.append(0)
+class Export_csv(ExportViewBase):
+    template_name = 'gsb/param_export.djhtm'
+    form_class=gsb_forms.SearchField
+    def export(self, q=None):
+        """
+        fonction principale mais est appelé  par une view (au dessous)
+        """
+        logger = logging.getLogger('gsb.export')
+        csv.register_dialect("excel_csv", Excel_csv)
+        fich = cStringIO.StringIO()
+        csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
+        csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
+        if q:
+            opes=q.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
-            ligne.append(1)
-        ligne.append(fmt.bool(ope.pointe))
-        ligne.append(fmt.str(ope.moyen, '', 'nom'))
-        cat_g = fmt.str(ope.cat, "", "nom").split(":")
-        ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
-        ligne.append(ope.tiers)
-        ligne.append(ope.notes)
-        if ope.ib:
-            ligne.append(ope.ib.nom)
-        else:
-            ligne.append('')
-        ligne.append(ope.num_cheque)
-        ligne.append(fmt.str(ope.jumelle, ''))
-        ligne.append(fmt.bool(ope.mere))
-        ligne.append(fmt.str(ope.mere, ''))
-        ligne.append(ope.date.strftime('%Y_%m'))
-        csv_file.writerow(ligne)
-        #on affiche que tous les 100 lignes
-        if not ( i / 100.0 - int(i / 100)) != 0:
-            logger.info("ligne %s %s%%" % (ope.id, i / total * 100))
-    return fich
-
-
-def export(request):
-    nb_compte = Compte.objects.count()
-    if nb_compte:
-        dump = _export().getvalue()
-        #h=HttpResponse(xml,mimetype="application/xml")
-        reponse = HttpResponse(dump, mimetype="text/csv")
+            opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(date__gte=strpdate("2009-01-01"))
+        i = 0
+        total = float(opes.count())
+        for ope in opes:
+            i += 1
+            ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
+            if ope.rapp is None:
+                ligne.append(0)
+            else:
+                ligne.append(1)
+            ligne.append(fmt.bool(ope.pointe))
+            try:
+                ligne.append(fmt.str(ope.moyen, '', 'nom'))
+            except ObjectDoesNotExist:
+                ligne.append("")
+            try:
+                cat_g = fmt.str(ope.cat, "", "nom").split(":")
+                ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
+            except ObjectDoesNotExist:
+                ligne.append("")
+            ligne.append(fmt.str(ope.tiers,''))
+            ligne.append(ope.notes)
+            try:
+                ligne.append(fmt.str(ope.ib,'','nom'))
+            except ObjectDoesNotExist:
+                ligne.append("")
+            ligne.append(ope.num_cheque)
+            ligne.append(fmt.str(ope.jumelle, ''))
+            ligne.append(fmt.bool(ope.mere))
+            ligne.append(fmt.str(ope.mere, ''))
+            ligne.append(ope.date.strftime('%Y_%m'))
+            csv_file.writerow(ligne)
+            #on affiche que tous les 100 lignes
+            if not ( i / 100.0 - int(i / 100)) != 0:
+                logger.info("ligne %s %s%%" % (ope.id, i / total * 100))
+        reponse = HttpResponse(fich.getvalue(), mimetype="text/csv")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE
         return reponse
-    else:
-        return render_to_response('generic.djhtm',
-                {'titre':'import csv',
-                 'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
-            },
-                                  context_instance=RequestContext(request)
-        )
-
-if __name__ == '__main__':
-    chaine = _export()
-    f = open('test.csv', "wb")
-
-    f.write(chaine.getvalue())
-    #print chaine.getvalue()

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-# Create your views here.
+"""les vues qui sont implementés ici
+import_file : vue qui gere les import
+option_index: vue qui gere l'index de toutes les options possible accesibles vie le menu option
+modif_gen:vue pour modifier les generalites
+gestion_echeances:vue qui gere les echeances
+"""
+
 from __future__ import absolute_import
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
@@ -96,11 +102,13 @@ def import_file(request):
 
 
 def options_index(request):
+    """vue qui gere l'index de toutes les options possible accesibles vie le menu option"""
     return render_to_response('gsb/options.djhtm', context_instance=RequestContext(request))
 
 
 @login_required
 def modif_gen(request):
+    """vue pour modifier les generalites"""
     logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.GeneraliteForm(request.POST, request.FILES)
@@ -130,5 +138,6 @@ def modif_gen(request):
 
 @login_required
 def gestion_echeances(request):
+    """vue qui gere les echeances"""
     Echeance.check(request)
     return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues', }, context_instance=RequestContext(request))

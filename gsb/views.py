@@ -16,7 +16,7 @@ from django.utils.encoding import smart_unicode
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
-
+from django.views.generic.edit import FormView
 @login_required
 def index(request):
     """
@@ -719,3 +719,33 @@ def search_opes(request):
                                                             "sort":"",
                                                             'date_max':date_max,
                                                             'solde':None})
+
+class ExportViewBase(FormView):
+    template_name = None
+    form_class=None
+    def export(self, q=None):
+        """
+        fonction principale mais est appelé  par une view (au dessous)
+        """
+        django_exception.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
+    def get_initial(self):
+        #prend la date de la premiere operation de l'ensemble des compte
+        date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
+        #la derniere operation
+        date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
+        return {'date_min':date_min, 'date_max':date_max}
+    def get_success_url(self):
+        return reverse('outils_index')
+    def form_valid(self,form):
+        data = form.cleaned_data
+        compte = data['compte']
+        if compte==None:
+            q=Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+        else:
+            q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
+        if q.count()>0:
+            reponse = self.export(q=q)
+            return reponse
+        else:
+            messages.error(self.request,u"attention pas d'opérations dans la selection demandée")
+            return self.render_to_response({'form':form,})

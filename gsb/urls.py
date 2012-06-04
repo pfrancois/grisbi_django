@@ -4,6 +4,8 @@ from django.conf.urls import patterns, url, include
 from django.views.generic import RedirectView
 from . import forms as gsb_forms
 from django.conf import settings
+from . import views as gsb_views
+from . import export_csv
 
 # les vues generales
 urlpatterns = patterns('gsb',
@@ -13,14 +15,14 @@ urlpatterns = patterns('gsb',
 
 #les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
-                        url(r'^options$', 'options_index'),
+                        url(r'^options$', 'options_index',name="outils_index"),
                         url(r'^options/import$', 'import_file'),
                         url(r'^options/modif_gen$', 'modif_gen', name='modification_preference_generalite'),
                         url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances')
 )
 urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
-                        url(r'^options/csv$', 'export_csv.export', name='export_csv'),
+                        url(r'^options/csv$', export_csv.Export_csv.as_view(), name='export_csv'),
                         )
 urlpatterns += patterns('',
     (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
