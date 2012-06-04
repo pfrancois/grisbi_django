@@ -5,11 +5,11 @@ import time
 import decimal
 from django.db.models import Max
 import calendar
-
+from django.core.exceptions import ObjectDoesNotExist
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
-
-    def date(self, s, defaut="0/0/0"):
+    @staticmethod
+    def date(s, defaut="0/0/0"):
         """
         fonction qui transforme un object date en une chaine AA/MM/JJJJ
         @param s:objet datetime
@@ -29,8 +29,8 @@ class Format:
                 return "/".join(result)
             else:
                 raise TypeError('attention ce ne peut pas etre qu\'un objet date')
-
-    def bool(self, s, defaut='0'):
+    @staticmethod
+    def bool( s, defaut='0'):
         """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
         @param s:objet bool
         @param defaut: format a transformer, par defaut c'est 0
@@ -49,13 +49,13 @@ class Format:
                     return '1'
             except ValueError:
                 return str(int(bool(s)))
-
-    def float(self, s):
+    @staticmethod
+    def float( s):
         """ convertit un float en string 10,7"""
         s = "%10.7f" % s
         return s.replace('.', ',').strip()
-
-    def type(self, liste, s, defaut='0'):
+    @staticmethod
+    def type( liste, s, defaut='0'):
         """convertit un indice d'une liste par une string
         @param liste: liste a utiliser
         @param s: string comprenand le truc a chercher dans la liste
@@ -66,25 +66,27 @@ class Format:
         except ValueError:##on en un ca par defaut
             s = defaut
         return s
-
-    def max(self, query, defaut='0', champ='id'):
+    @staticmethod
+    def max( query, defaut='0', champ='id'):
         """recupere le max d'un queryset"""
         agg = query.aggregate(id=Max(champ))['id']
         if agg is None:
             return defaut
         else:
             return str(agg)
-
-    def str(self, obj, defaut='0', membre='id'):
+    @staticmethod
+    def str( obj, defaut='0', membre='id'):
         """renvoie id d'un objet avec la gestion des null
         @param obj: l'objet a interroger
-        @param defaut: la reponse si neant
+        @param defaut: la reponse si neant ou inexistant
         @param membre: l'attribut a demander si pas neant"""
         try:
+            print obj
             return unicode(getattr(obj, membre))
         except AttributeError:
             return unicode(defaut)
-
+        except ObjectDoesNotExist:
+            return unicode(defaut)
 
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
