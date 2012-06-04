@@ -721,22 +721,25 @@ def search_opes(request):
                                                             'solde':None})
 
 class ExportViewBase(FormView):
-    template_name = None
-    form_class=None
-    def export(self, q=None):
+    template_name = 'gsb/param_export.djhtm'
+    form_class=gsb_forms.SearchField
+    def export(self, q):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
         django_exception.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
     def get_initial(self):
+        """gestion des donnees initiales"""
         #prend la date de la premiere operation de l'ensemble des compte
         date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
         #la derniere operation
         date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
         return {'date_min':date_min, 'date_max':date_max}
-    def get_success_url(self):
-        return reverse('outils_index')
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ExportViewBase, self).dispatch(*args, **kwargs)
     def form_valid(self,form):
+        """si le form est valid"""
         data = form.cleaned_data
         compte = data['compte']
         if compte==None:

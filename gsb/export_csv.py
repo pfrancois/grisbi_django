@@ -98,9 +98,7 @@ class Excel_csv(csv.Dialect):
 
 
 class Export_csv(ExportViewBase):
-    template_name = 'gsb/param_export.djhtm'
-    form_class=gsb_forms.SearchField
-    def export(self, q=None):
+    def export(self, q):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
