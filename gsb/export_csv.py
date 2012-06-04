@@ -143,8 +143,8 @@ class Export_csv(ExportViewBase):
             ligne.append(ope.date.strftime('%Y_%m'))
             csv_file.writerow(ligne)
             #on affiche que tous les 100 lignes
-            if not ( i / 100.0 - int(i / 100)) != 0:
-                logger.info("ligne %s %s%%" % (ope.id, i / total * 100))
+            if ( (i-1)%500) == 0:
+                logger.info("ope %s %s%%" % (ope.id, i / total * 100))
         reponse = HttpResponse(fich.getvalue(), mimetype="text/csv")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE

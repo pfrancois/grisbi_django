@@ -686,7 +686,7 @@ class Ope_titre(models.Model):
     cours = CurField(default=1, decimal_places=5)
     invest = CurField(default=0, editable=False, decimal_places=2)
     ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
-    ope_pmv_id = models.IntegerField(editable=False, default=0)#null=true cr tt les operation d'achat sont null
+    ope_pmv_id = models.IntegerField(editable=False, default=0, null=True)#null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
