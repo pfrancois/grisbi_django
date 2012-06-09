@@ -38,3 +38,4 @@ secret_key.py
 .pydevproject
 perso
 coverage
+*.sublime*
