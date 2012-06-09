@@ -160,3 +160,17 @@ def addmonths(sourcedate, months, last=False, first=False):
     else:
         day = min(sourcedate.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
+
+class UTF8Recoder:
+    """
+    Iterator that reads an encoded stream and reencodes the input to UTF-8
+    """
+
+    def __init__(self, fich, encoding):
+        self.reader = codecs.getreader(encoding)(fich)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.reader.next().encode("utf-8")

@@ -5,7 +5,7 @@ from django.views.generic import RedirectView
 from . import forms as gsb_forms
 from django.conf import settings
 from . import views as gsb_views
-from . import export_csv
+from . import export_csv,export_qif
 
 # les vues generales
 urlpatterns = patterns('gsb',
@@ -23,6 +23,7 @@ urlpatterns += patterns('gsb.outils',
 urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
                         url(r'^options/csv$', export_csv.Export_csv.as_view(), name='export_csv'),
+                        url(r'^options/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
                         )
 urlpatterns += patterns('',
     (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),

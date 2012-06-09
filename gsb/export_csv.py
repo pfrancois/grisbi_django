@@ -16,19 +16,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from .views import ExportViewBase
 from django.core.exceptions import ObjectDoesNotExist
-class UTF8Recoder:
-    """
-    Iterator that reads an encoded stream and reencodes the input to UTF-8
-    """
-
-    def __init__(self, fich, encoding):
-        self.reader = codecs.getreader(encoding)(fich)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self.reader.next().encode("utf-8")
+from .utils import UTF8Recoder
 
 class UnicodeReader:
     """
