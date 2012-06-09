@@ -7,8 +7,6 @@ from .utils import strpdate
 
 import codecs, csv, cStringIO
 import logging
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 from django.http import HttpResponse
 from django.conf import settings
 #pour les vues
@@ -31,7 +29,6 @@ class UTF8Recoder:
 
     def next(self):
         return self.reader.next().encode("utf-8")
-
 
 class UnicodeReader:
     """
@@ -110,7 +107,7 @@ class Export_csv(ExportViewBase):
         if q:
             opes=q.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
-            opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(date__gte=strpdate("2009-01-01"))
+            opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(filles_set__isnull=True)
         i = 0
         total = float(opes.count())
         for ope in opes:
@@ -147,5 +144,6 @@ class Export_csv(ExportViewBase):
                 logger.info("ope %s %s%%" % (ope.id, i / total * 100))
         reponse = HttpResponse(fich.getvalue(), mimetype="text/csv")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
-        reponse["Content-Disposition"] = "attachment; filename=%s.csv" % settings.TITRE
+        reponse["Content-Disposition"] = "attachment; filename=export.csv"
+        fich.close()
         return reponse
