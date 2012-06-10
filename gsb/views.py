@@ -724,8 +724,8 @@ def search_opes(request):
 
 class ExportViewBase(FormView):
     template_name = 'gsb/param_export.djhtm'
-    form_class=gsb_forms.SearchField
-    def export(self, q):
+    form_class=gsb_forms.Exportform
+    def export(self, q=None):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
@@ -745,11 +745,16 @@ class ExportViewBase(FormView):
         data = form.cleaned_data
         compte = data['compte']
         if compte==None:
-            q=Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+            #en fonction des dates demandes
+            q = Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
         else:
+            #o rajoute un compte
             q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
-        if q.count()>0:
-            reponse = self.export(q=q)
+        if q.count()>0:#si des operations existent
+            if data['export_total']:
+                reponse=self.export()
+            else:
+                reponse = self.export(q=q)
             return reponse
         else:
             messages.error(self.request,u"attention pas d'opérations dans la selection demandée")
