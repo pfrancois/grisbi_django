@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 from django.db import models
 from datetime import date
-from time import strftime,mktime
+from time import  mktime
 from django import forms
 import decimal
 #definition d'un moneyfield
@@ -26,7 +26,7 @@ class UnixTimestampField(models.DateTimeField):
     """UnixTimestampField: creates a DateTimeField that is represented on the
     database as a TIMESTAMP field rather than the usual DATETIME field.
     """
-    description="utilisation des timestamp"
+    description = "utilisation des timestamp"
     __metaclass__ = models.SubfieldBase
     def __init__(self, null=False, blank=False, **kwargs):
         super(UnixTimestampField, self).__init__(**kwargs)
@@ -34,10 +34,10 @@ class UnixTimestampField(models.DateTimeField):
         # cheat a little:
         self.blank, self.isnull = blank, null
         self.null = True # To prevent the framework from shoving in "not null".
-        self.editable=False
+        self.editable = False
 
-    def db_type(self):
-        typ=['TIMESTAMP']
+    def db_type(self, connection):
+        typ = ['TIMESTAMP']
         # See above!
         if self.isnull:
             typ += ['NULL']
@@ -46,14 +46,14 @@ class UnixTimestampField(models.DateTimeField):
     def to_python(self, value):
         if value == None:
             return None
-        elif value=="":
+        elif value == "":
             return date.fromtimestamp(1)
         else:
-            value=u"%s"%value
+            value = u"%s"%value
             return date.fromtimestamp(float(value.replace(",",".")))
 
-    def get_db_prep_value(self, value):
-        if value==None:
+    def get_db_prep_value(self, value, connection, prepared=False):
+        if value == None:
             return None
         return mktime(value.timetuple())
 

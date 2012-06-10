@@ -8,11 +8,11 @@ import django.forms as forms
 from django.utils.safestring import mark_safe
 from django.core import urlresolvers
 from django.db import IntegrityError
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseRedirect
+#from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.db.models import Q
-import decimal
+#from django.db.models import Q
+#import decimal
 
 def fusion(request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""

@@ -8,11 +8,11 @@ class MessagesNode(template.Node):
 
     def __init__(self, messages):
         self.messages = messages
+        super(MessagesNode,self).__init__()
 
     def render(self, context):
         try:
             messages = context[self.messages]
-
             # Make a dictionary of messages grouped by tag, sorted by level.
             grouped = {}
             for m in messages:
@@ -21,7 +21,6 @@ class MessagesNode(template.Node):
                     grouped[(m.level, m.tags)].append(m.message)
                 else:
                     grouped[(m.level, m.tags)] = [m.message]
-
             # Create a list of messages for each tag.
             out_str = ''
             for level, tag in sorted(grouped.iterkeys()):
@@ -29,9 +28,7 @@ class MessagesNode(template.Node):
                 for m in grouped[(level, tag)]:
                     out_str += '<li>%s</li>' % m
                 out_str += '</ul>\n</div>\n'
-
             return out_str
-
         except KeyError:
             return ''
 

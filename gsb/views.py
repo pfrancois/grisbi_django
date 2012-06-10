@@ -33,8 +33,7 @@ def index(request):
         pl = Compte_titre.objects.filter(ouvert=True)
         #calcul du solde des bq
     total_bq = Ope.objects.filter(mere__exact=None,
-                                  compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
-               'solde']
+                                  compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
     if total_bq is None:
         total_bq = decimal.Decimal()
         #calcul du solde des pla
@@ -266,7 +265,7 @@ def ope_new(request, cpt_id=None):
     else:
         if not cpt_id:
             try:
-                cpt = get_object(Compte.objects.select_related(), pk=settings.ID_CPT_M)
+                cpt = Compte.objects.get(Compte.objects.select_related(), pk=settings.ID_CPT_M)
             except Compte.DoesNotExists:
                 messages.error(request, u"pas de compte par defaut")
                 return HttpResponseRedirect(reverse('gsb.views.index'))
@@ -418,7 +417,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     sinon affiche uniquement les non rapp"""
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    request.session['titre'] =titre_id
+    request.session['titre'] = titre_id
 
     date_rappro = compte.date_rappro()
     solde_rappro = titre.encours(compte=compte, rapp=True)
@@ -482,9 +481,9 @@ def ope_titre_detail(request, pk):
             if ope.ope.rapp is None:
                 try:
                     form.save()
-                    messages.info(request,u"opération modifiée")
+                    messages.info(request, u"opération modifiée")
                 except django_exceptions.ImproperlyConfigured as e:
-                    messages.error(request,e.unicode())
+                    messages.error(request, e.unicode())
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
             return HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
@@ -515,7 +514,7 @@ def ope_titre_delete(request, pk):
             messages.error(request, u"impossible d'effacer une operation rapprochée")
             return HttpResponseRedirect(ope.get_absolute_url())
         compte_id = ope.compte.id
-        titre_id=ope.titre.id
+        titre_id = ope.titre.id
         #gestion des cours inutiles
         cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
         if cours.exists():
@@ -541,12 +540,12 @@ def ope_titre_achat(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     try:
         titre_id = request.session['titre']
-        titre=Titre.objects.get(id=titre_id)
-    except Titre.DoesNotExist as e:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
-        messages.error(request,u"attention le titre demandé intialement n'existe pas")
-        titre_id=None
-    except AttributeError as e:#on est dans le cas où l'on viens d'une page sans titre defini
-        titre_id=None
+        titre = Titre.objects.get(id=titre_id)
+    except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request, u"attention le titre demandé intialement n'existe pas")
+        titre_id = None
+    except AttributeError:#on est dans le cas où l'on viens d'une page sans titre defini
+        titre_id = None
 
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_achatForm(request.POST)
@@ -576,18 +575,18 @@ def ope_titre_achat(request, cpt_id):
                                                                       form.cleaned_data['titre'],
                                                                       form.cleaned_data['cours'],
                                                                       form.cleaned_data['date']))
-            return HttpResponseRedirect(cpt.get_absolute_url())
+            return HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
-            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte,'titre':titre})
+            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte, 'titre':titre})
         else:
             form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte})
-    titre = u' nouvel achat sur %s' % cpt.nom
+    titre = u' nouvel achat sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
             {'titre_long':titre,
              'titre':u'modification',
              'form':form,
-             'cpt':cpt,
+             'cpt':compte,
              'sens':'achat'}
     )
 
@@ -597,12 +596,12 @@ def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
     try:
         titre_id = request.session['titre']
-        titre=Titre.objects.get(id=titre_id)
-    except Titre.DoesNotExist as e:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
-        messages.error(request,u"attention le titre demandé intialement n'existe pas")
-        titre_id=None
-    except KeyError as e:#on est dans le cas où l'on viens d'une page sans titre defini
-        titre_id=None
+        titre = Titre.objects.get(id=titre_id)
+    except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request, u"attention le titre demandé intialement n'existe pas")
+        titre_id = None
+    except KeyError:#on est dans le cas où l'on viens d'une page sans titre defini
+        titre_id = None
 
     if compte.titre.all().distinct().count() < 1:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas vendre')
@@ -628,7 +627,7 @@ def ope_titre_vente(request, cpt_id):
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
-            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte,'titre':titre}, cpt=compte)
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte, 'titre':titre}, cpt=compte)
         else:
             form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte}, cpt=compte)
     titre = u' nouvelle vente sur %s' % compte.nom
@@ -724,12 +723,12 @@ def search_opes(request):
 
 class ExportViewBase(FormView):
     template_name = 'gsb/param_export.djhtm'
-    form_class=gsb_forms.Exportform
+    form_class = gsb_forms.Exportform
     def export(self, q=None):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
-        django_exception.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
+        django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
     def get_initial(self):
         """gestion des donnees initiales"""
         #prend la date de la premiere operation de l'ensemble des compte
@@ -740,22 +739,22 @@ class ExportViewBase(FormView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ExportViewBase, self).dispatch(*args, **kwargs)
-    def form_valid(self,form):
+    def form_valid(self, form):
         """si le form est valid"""
         data = form.cleaned_data
         compte = data['compte']
-        if compte==None:
+        if compte is None:
             #en fonction des dates demandes
             q = Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
         else:
             #o rajoute un compte
             q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
-        if q.count()>0:#si des operations existent
+        if q.count() > 0:#si des operations existent
             if data['export_total']:
-                reponse=self.export()
+                reponse = self.export()
             else:
                 reponse = self.export(q=q)
             return reponse
         else:
-            messages.error(self.request,u"attention pas d'opérations dans la selection demandée")
-            return self.render_to_response({'form':form,})
+            messages.error(self.request, u"attention pas d'opérations dans la selection demandée")
+            return self.render_to_response({'form':form, })

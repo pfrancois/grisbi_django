@@ -14,6 +14,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode
 from .model_field import CurField
+import logging
 class Gsb_exc(Exception):
     pass
 
@@ -429,8 +430,7 @@ class Compte(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        id = str(self.id)
-        return 'gsb_cpt_detail', (), {'cpt_id':id}
+        return 'gsb_cpt_detail', (), {'cpt_id':str(self.id)}
 
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
@@ -485,10 +485,7 @@ class Compte_titre(Compte):
         verbose_name_plural = "Comptes Titre"
 
     @transaction.commit_on_success
-
-    def achat(self, titre, nombre, prix=1,
-              date=datetime.date.today(), frais=0, virement_de=None,
-              cat_frais=None, tiers_frais=None):
+    def achat(self, titre, nombre, prix=1, date=datetime.date.today(), frais=0, virement_de=None, cat_frais=None, tiers_frais=None):
         """fonction pour achat de titre:
         @param titre
         @param nombre
@@ -528,9 +525,7 @@ class Compte_titre(Compte):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def vente(self, titre, nombre, prix=1,
-              date=datetime.date.today(), frais=0, virement_vers=None,
-              cat_frais=None, tiers_frais=None):
+    def vente(self, titre, nombre, prix=1, date=datetime.date.today(), frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
         @param nombre
@@ -575,9 +570,7 @@ class Compte_titre(Compte):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def revenu(self, titre, montant=1,
-               date=datetime.date.today(), frais=0, virement_vers=None,
-               cat_frais=None, tiers_frais=None):
+    def revenu(self, titre, montant=1, date=datetime.date.today(), frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
         self.alters_data = True
         if isinstance(titre, Titre):
@@ -677,7 +670,6 @@ class Compte_titre(Compte):
                 liste.append(i.id)
         return Titre.objects.filter(id__in=liste)
 
-
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
@@ -702,7 +694,7 @@ class Ope_titre(models.Model):
         except Ope.DoesNotExist:
             return None
 
-    def set_ope_pmv(self,obj):
+    def set_ope_pmv(self, obj):
         raise NotImplementedError('pas possible')
 
     def del_ope_pmv(self):
@@ -710,12 +702,12 @@ class Ope_titre(models.Model):
             self.ope_pmv.delete()
         except AttributeError:
             pass
-        self.ope_pmv_id=0
+        self.ope_pmv_id = 0
 
-    ope_pmv = property(get_ope_pmv, set_ope_pmv,del_ope_pmv)
+    ope_pmv = property(get_ope_pmv, set_ope_pmv, del_ope_pmv)
 
     def save(self, *args, **kwargs):
-        #definition des cat avec possibil
+        #definition des cat avec possibilite
         try:
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
         except IntegrityError:
@@ -723,22 +715,22 @@ class Ope_titre(models.Model):
         try:
             cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
         except IntegrityError:
-           raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement : Plus-values'"%settings.ID_CAT_OST)
+            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement : Plus-values'"%settings.ID_CAT_OST)
         #gestion des cours
         try:
             if self.ope:
-                old_date=self.ope.date
+                old_date = self.ope.date
             else:
-                old_date=self.date
-            obj,created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur':0})
+                old_date = self.date
+            obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur':0})
             obj.date = self.date
-            obj.valeur=self.cours
+            obj.valeur = self.cours
             obj.save()
         except IntegrityError:
             obj.delete()
-            obj,created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'valeur':0})
+            obj, created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'valeur':0})
             obj.date = self.date
-            obj.valeur=self.cours
+            obj.valeur = self.cours
             obj.save()
 
         if self.nombre > 0:#on doit separer because gestion des plues ou moins value
@@ -807,14 +799,14 @@ class Ope_titre(models.Model):
                                                   ).id
             else:
                 #on modifie tout
-                ope_pmv=self.ope_pmv
-                ope_pmv.date=self.date
-                ope_pmv.montant=pmv*-1
-                ope_pmv.tiers=self.titre.tiers
-                ope_pmv.cat=cat_pmv
-                ope_pmv.notes="%s@%s" % (self.nombre, self.cours)
-                ope_pmv.moyen=moyen
-                ope_pmv.compte=self.compte
+                ope_pmv = self.ope_pmv
+                ope_pmv.date = self.date
+                ope_pmv.montant = pmv*-1
+                ope_pmv.tiers = self.titre.tiers
+                ope_pmv.cat = cat_pmv
+                ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
+                ope_pmv.moyen = moyen
+                ope_pmv.compte = self.compte
                 ope_pmv.save()
             old_date = self.ope.date
 
@@ -828,7 +820,8 @@ class Ope_titre(models.Model):
                 if  self.ope.jumelle.rapp:
                     raise IntegrityError(u"opération espece rapprochée")
         except AttributeError as e:
-            pass
+            logger = logging.getLogger('gsb')
+            logger.warning("attribute error({0}): {1}".format(e.errno, e.strerror))
         if self.ope_pmv_id:
             del self.ope_pmv
         super(Ope_titre, self).delete(*args, **kwargs)
@@ -1065,7 +1058,7 @@ class Generalite(models.Model):
         verbose_name_plural = u'généralités'
 
     def __unicode__(self):
-        return u"%s" % (self.id,)
+        return u"%s" % (self.id, )
 
     @staticmethod
     def gen():
@@ -1158,6 +1151,7 @@ class Ope(models.Model):
             raise ValidationError(u"cette opération ne peut pas être modifie car le compte est fermé")
 
     def save(self, *args, **kwargs):
+        """surcharge afin mettre les moyen par defaut"""
         self.alters_data = True
         if not self.moyen:
             if self.montant >= 0:
@@ -1171,8 +1165,10 @@ class Ope(models.Model):
                 else:
                     self.moyen_id = settings.MD_DEBIT
         super(Ope, self).save(*args, **kwargs)
+
     @property
     def pr(self):
+        """renvoie true si pointee ou rapprochée"""
         if self.rapp or self.pointe:
             return True
         else:

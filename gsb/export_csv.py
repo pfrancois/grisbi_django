@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .models import Compte, Ope
+from .models import Ope
 from .utils import Format as fmt
-from .utils import strpdate
+#from .utils import strpdate
 
-import codecs, csv, cStringIO
+import csv, cStringIO
 import logging
 from django.http import HttpResponse
-from django.conf import settings
+#from django.conf import settings
 #pour les vues
-from . import forms as gsb_forms
-from django.db import models
-from django.shortcuts import render
-from django.contrib import messages
+#from . import forms as gsb_forms
+#from django.db import models
+#from django.shortcuts import render
+#from django.contrib import messages
 from .views import ExportViewBase
 from django.core.exceptions import ObjectDoesNotExist
 from .utils import UTF8Recoder
@@ -83,7 +83,7 @@ class Excel_csv(csv.Dialect):
 
 
 class Export_csv(ExportViewBase):
-    def export(self, q):
+    def export(self, q=None):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
@@ -93,7 +93,7 @@ class Export_csv(ExportViewBase):
         csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
         csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
         if q:
-            opes=q.order_by('date').select_related('cat', "compte", "tiers", "ib")
+            opes = q.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
             opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(filles_set__isnull=True)
         i = 0
@@ -115,10 +115,10 @@ class Export_csv(ExportViewBase):
                 ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
             except ObjectDoesNotExist:
                 ligne.append("")
-            ligne.append(fmt.str(ope.tiers,''))
+            ligne.append(fmt.str(ope.tiers, ''))
             ligne.append(ope.notes)
             try:
-                ligne.append(fmt.str(ope.ib,'','nom'))
+                ligne.append(fmt.str(ope.ib, '', 'nom'))
             except ObjectDoesNotExist:
                 ligne.append("")
             ligne.append(ope.num_cheque)

@@ -2,15 +2,6 @@
 from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 
-if __name__ == "__main__":
-    from django.core.management import setup_environ
-    import sys, os
-
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    from mysite import settings
-
-    setup_environ(settings)
-
 from .models import (Generalite, Compte, Ope, Tiers, Cat, Moyen,
                      Echeance, Ib, Banque, Exercice, Rapp, Titre)
 # Compte_titre, Virement,
@@ -105,7 +96,7 @@ def _export():
     logger.debug("gen ok")
     nb_compte = 0
     for cpt in Compte.objects.all().order_by('id'):
-        logger.debug('compte %s' % cpt.id)
+        logger.debug('compte %s (%s eme)' % (cpt.id,))
         nb_compte += 1
         xml_compte = et.SubElement(xml_comptes, "Compte")
         xml_detail = et.SubElement(xml_compte, "Details")
@@ -519,9 +510,3 @@ def export(request):
             },
                                   context_instance=RequestContext(request)
         )
-
-if __name__ == "__main__":
-    xml_export = _export()
-    fichier = open("%s/test_files/test.gsb" % (os.path.dirname(os.path.abspath(__file__))), "w")
-    fichier.write(xml_export)
-    fichier.close()
