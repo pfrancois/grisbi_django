@@ -83,7 +83,7 @@ class Excel_csv(csv.Dialect):
 
 
 class Export_csv(ExportViewBase):
-    def export(self, q=None):
+    def export(self, q=None,export_all=None):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """

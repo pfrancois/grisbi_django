@@ -751,9 +751,9 @@ class ExportViewBase(FormView):
             q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
         if q.count() > 0:#si des operations existent
             if data['export_total']:
-                reponse = self.export()
+                reponse = self.export(export_all=True)
             else:
-                reponse = self.export(q=q)
+                reponse = self.export(q=q, export_all=False)
             return reponse
         else:
             messages.error(self.request, u"attention pas d'opérations dans la selection demandée")
