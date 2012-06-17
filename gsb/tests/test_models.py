@@ -159,7 +159,7 @@ class test_models(TestCase):
         self.assertEquals(t.investi(c), 1600)
         self.assertEquals(t.investi(datel='2011-07-01'), 20)
         self.assertEquals(t.investi(compte=c, datel='2011-07-01'), 0)
-        self.assertEquals(t.investi(compte= Compte_titre.objects.get(id=5),exclude_id=16), 0)
+        self.assertEquals(t.investi(compte= Compte_titre.objects.get(id=5), exclude_id=16), 0)
 
 
     def test_titre_nb(self):

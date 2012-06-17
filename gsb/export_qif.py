@@ -14,9 +14,21 @@ from django.core.exceptions import ObjectDoesNotExist
 #django
 from .models import Cat, Ope, Ib, Compte
 
+def convert_type2qif(type_a_transformer):
+    if type_a_transformer == "b":
+        return "Bank"
+    if type_a_transformer == "e":
+        return "Cash"
+    if type_a_transformer == "t":
+        return "Invst"
+    if type_a_transformer == "a":
+        return "Oth A"
+    if type_a_transformer == "p":
+        return "Oth L"
+
 class QifWriter(object):
     """
-    A pseudofile which will write rows to file "f", 
+    A pseudofile which will write rows to file "f",
     which is encoded in the given encoding.
     """
 
@@ -62,41 +74,21 @@ class Export_qif(ExportViewBase):
         if not q:
             export_all = True
             q = Ope.objects.all()
-        opes = q.order_by('date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(mere__isnull=False)
+        opes = q.order_by('compte','date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(mere__isnull=False)
         comptes = Compte.object.filter(pk__in=set(opes.values_list('compte__id', flat=True)))
         #initialisation
         i = 0
         total = float(opes.count())
         #debut
         #entete du fichier
+        qif.writerow("!Option:AutoSwitch")
         qif.writerow("!Account")
         for cpt in comptes:
             qif.w("N", cpt.nom)
             qif.w('D', '')
-            if cpt.type == "b":
-                qif.w("T", "Bank")
-            if cpt.type == "e":
-                qif.w("T", "Cash")
-            if cpt.type == "t":
-                qif.w("T", "Invst")
-            if cpt.type == "a":
-                qif.w("T", "Oth A")
-            if cpt.type == "p":
-                qif.w("T", "Oth L")
-        if not export_all:
-            ope = opes[0]
-            type_compte = ope.compte.type
-            if type_compte == "b":
-                qif.writerow("!Type:Bank")
-            if type_compte == "e":
-                qif.writerow("!Type:Cash")
-            if type_compte == "t":
-                qif.writerow("!Type:Invst")
-            if type_compte == "a":
-                qif.writerow("Type:Oth A")
-            if type_compte == "p":
-                qif.writerow("!Type:Oth L")
-        else:
+            qif.w("T", convert_type2qif(cpt.type))
+        qif.writerow("!Clear:AutoSwitch")
+        if export_all:
             #extraction categorie
             if Cat.objects.all().exists():
                 qif.writerow("!Type:Cat")
@@ -117,7 +109,19 @@ class Export_qif(ExportViewBase):
                 qif.w('D', '')
                 qif.end_record()
         #boucle export ope
+        cpt=opes[0].cpt.nom
+        qif.writerow("!Account")
+        qif.w("N", cpt)
+        qif.w('D', '')
+        qif.w("T", convert_type2qif(cpt.type))
         for ope in opes.iterator():
+            if ope.cpt.nom != cpt:
+                qif.writerow("!Account")
+                qif.w("N", ope.cpt)
+                qif.w('D', '')
+                qif.w("T", convert_type2qif(ope.cpt.type))
+                qif.end_record()
+                qif.w("!Type:", convert_type2qif(ope.cpt.type))
             i += 1
             if ope.filles_set:
                 mere = True

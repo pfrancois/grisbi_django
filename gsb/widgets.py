@@ -116,7 +116,7 @@ class ReadonlyField(forms.FileField):
         else:
             self.instance = None
 
-    def clean(self, value, initial):
+    def clean(self, value, initial=None):
         return getattr(self, 'initial', None)
 
 

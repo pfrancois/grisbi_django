@@ -177,7 +177,7 @@ class SmartIfNode(template.Node):
     def __init__(self, var, nodelist_true, nodelist_false=None):
         self.nodelist_true, self.nodelist_false = nodelist_true, nodelist_false
         self.var = var
-        super(SmartIfNode,self).__init__()
+        super(SmartIfNode, self).__init__()
 
     def render(self, context):
         if self.var.resolve(context):

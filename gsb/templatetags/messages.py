@@ -8,7 +8,7 @@ class MessagesNode(template.Node):
 
     def __init__(self, messages):
         self.messages = messages
-        super(MessagesNode,self).__init__()
+        super(MessagesNode, self).__init__()
 
     def render(self, context):
         try:
