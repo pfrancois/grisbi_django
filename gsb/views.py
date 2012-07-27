@@ -475,7 +475,7 @@ def ope_titre_detail(request, pk):
     """
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
-        date_initial = ope.date
+        #date_initial = ope.date#inutile
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope.rapp is None:
@@ -724,7 +724,7 @@ def search_opes(request):
 class ExportViewBase(FormView):
     template_name = 'gsb/param_export.djhtm'
     form_class = gsb_forms.Exportform
-    def export(self, q=None):
+    def export(self, query=None,export_all=False):
         """
         fonction principale mais est appelé  par une view (au dessous)
         """
@@ -738,23 +738,23 @@ class ExportViewBase(FormView):
         return {'date_min':date_min, 'date_max':date_max}
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        """on a besoin pour le method decorator"""
         return super(ExportViewBase, self).dispatch(*args, **kwargs)
     def form_valid(self, form):
         """si le form est valid"""
         data = form.cleaned_data
-        compte = data['compte']
-        if compte is None:
+        comptes = [cpt.id for cpt in data['compte']]
+        if comptes == [] or len(comptes) == Compte.objects.all().count():
             #en fonction des dates demandes
-            q = Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+            query = Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+            export_total = True
         else:
             #o rajoute un compte
-            q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
-        if q.count() > 0:#si des operations existent
-            if data['export_total']:
-                reponse = self.export(export_all=True)
-            else:
-                reponse = self.export(q=q, export_all=False)
+            query = Ope.objects.filter(compte__pk__in=comptes, date__gte=data['date_min'], date__lte=data['date_max'])
+            export_total = False
+        if query.count() > 0:#si des operations existent
+            reponse = self.export(query=query, export_all=export_total)
             return reponse
         else:
-            messages.error(self.request, u"attention pas d'opérations dans la selection demandée")
+            messages.error(self.request, u"attention pas d'opérations pour la selection demandée")
             return self.render_to_response({'form':form, })

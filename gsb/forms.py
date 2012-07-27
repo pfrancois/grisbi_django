@@ -208,7 +208,7 @@ class Ope_titreForm(Basemodelform):
         return self.cleaned_data
 
     class Meta:
-        model=Ope_titre
+        model = Ope_titre
 
 
 class GeneraliteForm(Basemodelform):
@@ -243,7 +243,6 @@ class SearchField(Baseform):
     date_max = forms.DateField(label='date_max', widget=forms.DateInput)
 
 class Exportform(Baseform):
-    compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
+    compte = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False)
     date_min = forms.DateField(label='date minimum', widget=forms.DateInput)
     date_max = forms.DateField(label='date maximum', widget=forms.DateInput)
-    export_total = forms.BooleanField(label='export de tout ?', required=False)

@@ -81,11 +81,13 @@ class Format:
         @param defaut: la reponse si neant ou inexistant
         @param membre: l'attribut a demander si pas neant"""
         try:
-            return unicode(getattr(obj, membre))
-        except AttributeError:
-            return unicode(defaut)
-        except ObjectDoesNotExist:
-            return unicode(defaut)
+            retour = unicode(getattr(obj, membre))
+            if retour[-1] == ":":
+                retour = retour[0:-1]
+        except (AttributeError, ObjectDoesNotExist):
+            retour = unicode(defaut)
+        retour = retour.strip()
+        return retour
 
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
