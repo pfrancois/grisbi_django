@@ -726,7 +726,7 @@ class ExportViewBase(FormView):
     form_class = gsb_forms.Exportform
     def export(self, query=None,export_all=False):
         """
-        fonction principale mais est appelé  par une view (au dessous)
+        fonction principale mais abstraite
         """
         django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
     def get_initial(self):

@@ -22,7 +22,7 @@ urlpatterns += patterns('gsb.outils',
 )
 urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
-                        url(r'^options/csv$', export_csv.Export_csv.as_view(), name='export_csv'),
+                        url(r'^options/csv$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
                         url(r'^options/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
                         )
 urlpatterns += patterns('',

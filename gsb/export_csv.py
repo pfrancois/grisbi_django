@@ -82,7 +82,7 @@ class Excel_csv(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 
-class Export_csv(ExportViewBase):
+class Export_ope_csv(ExportViewBase):
     def export(self, q=None,export_all=None):
         """
         fonction principale mais est appelé  par une view (au dessous)
