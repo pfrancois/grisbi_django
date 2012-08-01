@@ -185,6 +185,7 @@ class Export_qif(ExportViewBase):
             if mere:
                 for fille in ope.filles_set.all():
                     qif.w("S", "%s" % cat_export(fille))#on cree une nouvelle categorie a au besoin
+                    qif.w("E","%s" % fille.notes)
                     qif.w('$',fille.montant)
             qif.end_record()
         #finalisation
