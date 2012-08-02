@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .models import Ope
+from .models import Ope,Cours,Ope_titre
 from .utils import Format as fmt
 #from .utils import strpdate
 
@@ -83,17 +83,17 @@ class Excel_csv(csv.Dialect):
 
 
 class Export_ope_csv(ExportViewBase):
-    def export(self, q=None,export_all=None):
+    def export(self, query=None,export_all=None):
         """
-        fonction principale mais est appelé  par une view (au dessous)
+        fonction principale
         """
         logger = logging.getLogger('gsb.export')
         csv.register_dialect("excel_csv", Excel_csv)
         fich = cStringIO.StringIO()
         csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
         csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
-        if q:
-            opes = q.order_by('date').select_related('cat', "compte", "tiers", "ib")
+        if query:
+            opes = query.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
             opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(filles_set__isnull=True)
         i = 0
@@ -135,3 +135,51 @@ class Export_ope_csv(ExportViewBase):
         reponse["Content-Disposition"] = "attachment; filename=export.csv"
         fich.close()
         return reponse
+
+def export_cours(request):
+    logger = logging.getLogger('gsb.export')
+    csv.register_dialect("excel_csv", Excel_csv)
+    fich = cStringIO.StringIO()
+    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
+    csv_file.writerow(["id","date","nom","value"])
+    i=0
+    collection=Cours.objects.all().select_related('titre').order_by('date')
+    total = float(collection.count())
+    for objet in collection:
+        i=i+1
+        ligne=[objet.titre.isin,objet.date,objet.titre.nom,objet.valeur]
+        csv_file.writerow(ligne)
+        if ( (i-1)%500) == 0:
+            logger.info("ope %s %s%%" % (objet.id, i / total * 100))
+    reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
+    #reponse["Cache-Control"] = "no-cache, must-revalidate"
+    #reponse["Content-Disposition"] = "attachment; filename=%s.csv" % "cours"
+    fich.close()
+    return reponse
+
+def export_ope_titres(request):
+    data=[["id","date","compte","titre_id","titre_nom","sens","nombre","value"],]
+    collection=Ope_titre.objects.all().select_related('titre',"compte").order_by('date')
+    for objet in collection:
+        ligne=[objet.id,objet.date,objet.compte.nom,objet.titre.nom,objet.titre.isin]
+        if objet.nombre>0:
+            ligne.append("achat")
+        else:
+            ligne.append("vente")
+        ligne.append(objet.nombre)
+        ligne.append(objet.invest)
+        data.append(ligne)
+    return export_csv(data,nomfich="ope_titre")
+
+def export_csv(data,nomfich="export",csv=True):
+    csv.register_dialect("excel_csv", Excel_csv)
+    fich = cStringIO.StringIO()
+    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
+    for ligne in data:
+        csv_file.writerow(ligne)
+    reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
+    if csv:
+        reponse["Cache-Control"] = "no-cache, must-revalidate"
+        reponse["Content-Disposition"] = "attachment; filename=%s.csv" % nomfich
+    fich.close()
+    return reponse

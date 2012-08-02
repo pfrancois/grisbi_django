@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url, include
 from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 from . import forms as gsb_forms
 from django.conf import settings
 from . import views as gsb_views
@@ -24,9 +25,13 @@ urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
                         url(r'^options/csv$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
                         url(r'^options/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
+                        url(r'^options/export_autres$', TemplateView.as_view(template_name="gsb/export_autres.djhtm"), name='export_autres'),
+                        url(r'^options/export_ope_titres$', 'export_csv.export_ope_titres', name='export_ope_titre'),
+                        url(r'^options/cours$', 'export_csv.export_cours', name='export_cours'),
+
                         )
 urlpatterns += patterns('',
-    (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+                        (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
                         url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
 )
 
