@@ -19,6 +19,20 @@ from django.core import exceptions as django_exceptions
 from django.views.generic.edit import FormView
 from django.utils.decorators import method_decorator
 
+def has_changed(instance, field):
+    if not instance.pk:
+        return False
+    old_value = getattr(instance.__class__._default_manager.get(pk=instance.pk), field)
+    new_value = getattr(instance, field)
+    if hasattr(new_value, "file"):
+        # Handle FileFields as special cases, because the uploaded filename could be
+        # the same as the filename that's already there even though there may
+        # be different file contents.
+        from django.core.files.uploadedfile import UploadedFile
+        return isinstance(new_value.file, UploadedFile)
+
+    return not getattr(instance, field) == old_value
+
 @login_required
 def index(request):
     """
@@ -220,7 +234,12 @@ def ope_detail(request, pk):
                     messages.success(request, u"opération modifiée")
                     ope = form.save()
                 else:
-                    messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
+                    #verification que les données essentielles ne sont pas modifiés
+                    if (has_changed(ope,'montant') or  has_changed(ope,'compte') or has_changed(ope,'pointe') or has_changed(ope,'jumelle') or has_changed(ope,'mere')):
+                        messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
+                    else:
+                        messages.success(request, u"opération modifiée")
+                        ope = form.save()
                 return HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
             form = gsb_forms.OperationForm(instance=ope)
