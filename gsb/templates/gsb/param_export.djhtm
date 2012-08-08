@@ -13,5 +13,5 @@
         </fieldset>
 
     </form>
-<a href="{% url outils_index %}" class="progress">retour vers le menu des options</a><br/>
+<a href="{% url export_autres %}" class="progress">retour vers le menu des options</a><br/>
 {% endblock %}

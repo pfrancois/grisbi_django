@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 from .models import Ope,Cours,Ope_titre
 from .utils import Format as fmt
+import time
 #from .utils import strpdate
 
 import csv, cStringIO
@@ -91,7 +92,7 @@ class Export_ope_csv(ExportViewBase):
         csv.register_dialect("excel_csv", Excel_csv)
         fich = cStringIO.StringIO()
         csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-        csv_file.writerow(u'ID;Account name;date;montant;P;M;moyen;cat;Tiers;Notes;projet;N chq;id lié;op vent M;num op vent M;mois'.split(';'))
+        csv_file.writerow(u'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois'.split(';'))
         if query:
             opes = query.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
@@ -112,10 +113,13 @@ class Export_ope_csv(ExportViewBase):
                 ligne.append("")
             try:
                 cat_g = fmt.str(ope.cat, "", "nom").split(":")
-                ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
+                if cat_g[0]:
+                    ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
+                else:
+                    ligne.append("")
             except ObjectDoesNotExist:
                 ligne.append("")
-            ligne.append(fmt.str(ope.tiers, ''))
+            ligne.append(fmt.str(ope.tiers, '','nom'))
             ligne.append(ope.notes)
             try:
                 ligne.append(fmt.str(ope.ib, '', 'nom'))
@@ -127,12 +131,13 @@ class Export_ope_csv(ExportViewBase):
             ligne.append(fmt.str(ope.mere, ''))
             ligne.append(ope.date.strftime('%Y_%m'))
             csv_file.writerow(ligne)
-            #on affiche que tous les 100 lignes
+            #on affiche que tous les 500 lignes
             if ( (i-1)%500) == 0:
                 logger.info("ope %s %s%%" % (ope.id, i / total * 100))
-        reponse = HttpResponse(fich.getvalue(), mimetype="text/csv")
+        logger.info('export ope csv')
+        reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
-        reponse["Content-Disposition"] = "attachment; filename=export.csv"
+        reponse["Content-Disposition"] = "attachment; filename=export_ope_%s.csv" % time.strftime("%d_%m_%Y-%H_%M_%S",time.localtime())
         fich.close()
         return reponse
 
