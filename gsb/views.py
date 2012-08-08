@@ -710,7 +710,10 @@ def search_opes(request):
         if form.is_valid():
             data = form.cleaned_data
             compte = data['compte']
-            q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
+            if compte:
+                q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
+            else:
+                q = Ope.objects.filter(date__gte=data['date_min'], date__lte=data['date_max'])
             sort = request.GET.get('sort')
             if sort:
                 sort = unicode(sort)
@@ -720,12 +723,21 @@ def search_opes(request):
                 sort_get = ""
                 q = q.order_by('-date')
             q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope_titre')[:100]
+            if compte:
+                titre=u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom)
+            else:
+                titre=u'recherche des %s premières opérations' % q.count()
+            if compte:
+                solde=compte.solde(datel=data['date_max'])
+            else:
+               solde=0
+
             return render(request, 'templates_perso/search.djhtm', {'form':form,
                                                                     'list_ope':q,
-                                                                    'titre':u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom),
+                                                                    'titre':titre,
                                                                     "sort":sort_get,
                                                                     'date_max':data['date_max'],
-                                                                    'solde':compte.solde(datel=data['date_max'])})
+                                                                    'solde':solde})
         else:
             date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
     else:

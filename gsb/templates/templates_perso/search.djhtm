@@ -10,7 +10,7 @@
         <label for="id_date_min">date minimum:</label>
         {{ form.date_min }}
         {{ form.date_max.errors }}
-        <label for="id_date_min">date_maximum:</label>
+        <label for="id_date_max">date_maximum:</label>
         {{ form.date_max }}
 
         <input type="submit" value="Rechercher"/>
