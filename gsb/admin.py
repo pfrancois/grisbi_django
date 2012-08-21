@@ -11,8 +11,44 @@ from django.db import IntegrityError
 #from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+
+from django.utils.translation import ugettext_lazy as _
 #from django.db.models import Q
 #import decimal
+from django.contrib.admin import DateFieldListFilter
+from django.utils import timezone
+import datetime
+
+class date_perso_filter(DateFieldListFilter):
+    def __init__(self, field, request, params, model, model_admin, field_path):
+        super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
+        now = timezone.now()
+        today = now.date()
+        tomorrow = today + datetime.timedelta(days=1)
+
+        self.links = (
+            (_('Any date'), {}),
+            (_('Past 7 days'), {
+                self.lookup_kwarg_since: str(today - datetime.timedelta(days=7)),
+                self.lookup_kwarg_until: str(tomorrow),
+            }),
+            (_('This month'), {
+                self.lookup_kwarg_since: str(today.replace(day=1)),
+                self.lookup_kwarg_until: str(tomorrow),
+            }),
+            ('Les trois derniers mois',{
+                self.lookup_kwarg_since:str(today.replace(day=1,month=today.month-3)),
+                self.lookup_kwarg_until:str(today.replace(day=1)- datetime.timedelta(days=1)),
+            }),
+            (_('This year'), {
+                self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
+                self.lookup_kwarg_until: str(tomorrow),
+            }),
+            ('L\'an dernier',{
+                self.lookup_kwarg_since:str(today.replace(day=1,year=today.year-1,month=1)),
+                self.lookup_kwarg_until:str(today.replace(day=31,month=12,year=today.year-1)),
+            }),
+        )
 
 def fusion(request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""
@@ -186,14 +222,15 @@ class Compte_titre_admin(Modeladmin_perso):
     list_filter = ('type', 'banque', 'ouvert')
 
 
+
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'pointe', 'show_jumelle', 'show_mere', 'oper_titre',
-              'notes', 'exercice', 'ib', 'date_val', 'num_cheque', 'rapp')
+    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp'), 'show_jumelle', 'show_mere', 'oper_titre',
+              'notes', 'exercice',   'num_cheque')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type','cat__nom')
+    list_filter = ('compte', ('date',date_perso_filter), 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
@@ -290,6 +327,7 @@ class Ope_admin(Modeladmin_perso):
                 return super(Ope_admin, self).delete_view(request, object_id, extra_context)
             except IntegrityError, e:
                 messages.error(request, e.strerror)
+
 
 
 class Cours_admin(Modeladmin_perso):
