@@ -193,7 +193,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type')
+    list_filter = ('compte', 'date', 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
@@ -268,7 +268,7 @@ class Ope_admin(Modeladmin_perso):
         except Exception, err:
             messages.error(request, unicode(err))
 
-    action_supprimer_pointe.short_description = u'_Suppression des statuts "pointé" des opérations selectionnées'
+    action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))

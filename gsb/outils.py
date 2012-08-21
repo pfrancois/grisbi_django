@@ -52,9 +52,9 @@ def import_file(request):
                 if form.is_valid():
                     # on recupere les info pour le nom
                     try:
-                        info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%A %d %B %Y a %Hh%Mm%Ss tz:%z"))
+                        info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
                     except KeyError:
-                        info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%A %d %B %Y a %Hh%Mm%Ss tz:%z"))
+                        info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss") )
                         #-----------------------gestion des imports
                     try:
                         nomfich = request.session['nomfich']

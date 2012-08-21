@@ -146,7 +146,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_cat in xml_tree.find('//Detail_des_categories'):
         nb_cat += 1
-        query = {'nom':"%s :" % (xml_cat.get('Nom'),), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
+        query = {'nom':"%s" % (xml_cat.get('Nom'),), 'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_cat[xml_cat.get('No')] = {'0':element.id}
         if created:
@@ -154,7 +154,7 @@ def import_gsb_050(nomfich, efface_table=True):
             logger.debug('cat %s cree au numero %s' % (int(xml_cat.get('No')), element.id))
         for xml_scat in xml_cat:
             nb_cat += 1
-            query = {'nom':"%s : %s" % (xml_cat.get('Nom'), xml_scat.get('Nom')),
+            query = {'nom':"%s:%s" % (xml_cat.get('Nom'), xml_scat.get('Nom')),
                      'type':liste_type_cat[int(xml_cat.get('Type'))][0]}
             element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_cat[xml_cat.get('No')][xml_scat.get('No')] = element.id
@@ -325,13 +325,13 @@ def import_gsb_050(nomfich, efface_table=True):
             if int(xml_ope.get('Ro')):
                 jumelle_xml = xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom' % xml_ope.get('Ro'))
                 if fr2decimal(xml_ope.get('M')) < 0:
-                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='%s => %s' % (element.nom, jumelle_xml),
-                                                                           defaults={'nom':'%s => %s' % (element.nom, jumelle_xml)})
+                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='Virement',
+                                                                           defaults={'nom':'Virement'})
                     if tiers_created:
                         tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
                 else:
-                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='%s => %s' % (jumelle_xml, element.nom),
-                                                                           defaults={'nom':'%s => %s' % (jumelle_xml, element.nom)})
+                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom="Virement",
+                                                                           defaults={'nom':"Virement"})
                     if tiers_created:
                         tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
 
@@ -496,8 +496,6 @@ def import_gsb_050(nomfich, efface_table=True):
 
         element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
-    logger.warning(u"%s échéances" % nb)
-    logger.warning(u'{!s}'.format(time.clock()))
     logger.warning(u'fini')
 
 if __name__ == "__main__":

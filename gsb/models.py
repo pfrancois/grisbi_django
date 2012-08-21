@@ -1269,7 +1269,7 @@ class Virement(object):
 
     def save(self):
         if self._init:
-            nom_tiers = "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
+            nom_tiers = "Virement"
             tier = Tiers.objects.get_or_create(nom=nom_tiers, defaults={'nom':nom_tiers})[0]
             self.origine.tiers = tier
             self.dest.tiers = tier
