@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 #from django.db.models import Q
 #import decimal
 from django.contrib.admin import DateFieldListFilter
+from django.contrib.admin import SimpleListFilter
 from django.utils import timezone
 import datetime
 
@@ -49,6 +50,42 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until:str(today.replace(day=31,month=12,year=today.year-1)),
             }),
         )
+
+class rapprochement_filter(SimpleListFilter):
+    title="type de rapprochement"
+    parameter_name = 'rapp'
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return (
+            ('rien', u'ni rapproché ni pointé'),
+            ('p', u'pointé uniquement'),
+            ('nrapp',u'non-rapproché'),
+            ('rapp',u'rapproché uniquement'),
+            ('pr',u'pointé ou rapproché')
+        )
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        if self.value() == 'p':
+            return queryset.filter(pointe=True)
+        if self.value() == 'rapp':
+            return queryset.filter(rapp__isnull=False)
+        if self.value() == 'rien':
+            return queryset.filter(rapp__isnull=True,pointe=False)
+        if self.value() == 'pr':
+            return queryset.exclude(rapp__isnull=True,pointe=False)
+        if self.value() == 'nrapp':
+            return queryset.exclude(rapp__isnull=False)
+
 
 def fusion(request, queryset, sens):
     """fonction générique de fusion entre 2 objets"""
@@ -230,7 +267,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', ('date',date_perso_filter), 'moyen', 'pointe', 'rapp', 'exercice', 'cat__type','cat__nom')
+    list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
