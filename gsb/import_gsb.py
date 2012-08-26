@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-if __name__ == "__main__":
-    from django.core.management import setup_environ
-    import sys, os.path
-
-    sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..')))
-    from mysite import settings
-
-    setup_environ(settings)
-
 from django.db import connection, transaction
 
 from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
@@ -324,17 +315,9 @@ def import_gsb_050(nomfich, efface_table=True):
         except KeyError:
             if int(xml_ope.get('Ro')):
                 jumelle_xml = xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom' % xml_ope.get('Ro'))
-                if fr2decimal(xml_ope.get('M')) < 0:
-                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='Virement',
-                                                                           defaults={'nom':'Virement'})
-                    if tiers_created:
-                        tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
-                else:
-                    ope_tiers, tiers_created = Tiers.objects.get_or_create(nom="Virement",
-                                                                           defaults={'nom':"Virement"})
-                    if tiers_created:
-                        tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
-
+                ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='Virement', defaults={'nom':'Virement'})
+                if tiers_created:
+                    tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
             else:
                 nb_inconnu += 1
                 inconnu = Tiers.objects.create(nom='inconnu%s' % nb_inconnu)
@@ -497,11 +480,3 @@ def import_gsb_050(nomfich, efface_table=True):
         element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
     logger.warning(u'fini')
-
-if __name__ == "__main__":
-    #nomfich = "%s/20040701.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    nomfich = "%s/test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__)))
-    nomfich = os.path.normpath(nomfich)
-    logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
-    import_gsb_050(nomfich)
-    logger.info(u'fichier %s importe' % nomfich)
