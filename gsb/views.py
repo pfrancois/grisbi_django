@@ -186,7 +186,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
 def ope_detail(request, pk):
     """
     view, une seule operation
-    @param request:
+    @param request: la requette hhtp
     @param pk: id de l'ope
     """
     ope = get_object_or_404(Ope.objects.select_related(), pk=pk)

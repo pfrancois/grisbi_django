@@ -93,17 +93,17 @@ class importposttests(Tcd):
 
     def test_cat(self):
         obj = Cat.objects.get(id=1)
-        self.assertEqual(obj.nom, u'Revenus divers :')
+        self.assertEqual(obj.nom, u'Revenus divers')
         self.assertEqual(obj.type, 'r')
         obj = Cat.objects.get(id=3)
-        self.assertEqual(obj.nom, u'Alimentation : Bar')
+        self.assertEqual(obj.nom, u'Alimentation:Bar')
         self.assertEqual(obj.type, 'd')
         self.assertEqual(Cat.objects.count(), 27)
         self.assertEqual(Cat.objects.all().aggregate(max=models.Max('id'))['max'], 27)
 
     def test_ib(self):
         obj = Ib.objects.get(id=1)
-        self.assertEqual(obj.nom, u'imputation_credit:')
+        self.assertEqual(obj.nom, u'imputation_credit')
         self.assertEqual(obj.type, 'r')
         obj = Ib.objects.get(id=3)
         self.assertEqual(obj.nom, u'imputation_debit:sous_imputation')

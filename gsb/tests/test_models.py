@@ -484,8 +484,8 @@ class test_models(TestCase):
         o.nombre = 10
         o.save()
         self.assertEqual(t.nb(c), 25)
-        self.assertEqual(t.investi(c), )
-        self.assertEqual(t.encours(c), )
+        self.assertEqual(t.investi(c), 350)
+        self.assertEqual(t.encours(c), 25*20)
 
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
@@ -521,7 +521,7 @@ class test_models(TestCase):
         self.assertEqual(o.ope_pmv.id, 18)
         self.assertEqual(o.ope_pmv.montant, 50)
         self.assertEqual(o.ope_pmv.moyen_id, 1)
-        self.assertEqual(o.ope_pmv.cat.nom, 'Revenus de placement : Plus-values')
+        self.assertEqual(o.ope_pmv.cat.nom, 'Revenus de placement:Plus-values')
         self.assertEqual(o. ope.notes, "-10@15")
         self.assertEqual(t.investi(c), 50)
         self.assertEqual(t.encours(c), 5 * 15)

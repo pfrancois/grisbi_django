@@ -169,14 +169,14 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
         nb_ib += 1
-        query = {'nom':"%s:" % (xml_ib.get('Nom'),), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
+        query = {'nom':"%s" % (xml_ib.get('Nom'),), 'type':liste_type_cat[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_ib[xml_ib.get('No')] = {'0':element.id}
         if created:
             nb_nx += 1
             logger.debug('ib %s cree au numero %s' % (int(xml_ib.get('No')), element.id))
         for xml_sib in xml_ib:
-            logger.debug("ib %s: sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
+            logger.debug("ib %s:sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
             nb_ib += 1
             query = {'nom':"%s:%s" % (xml_ib.get('Nom'), xml_sib.get('Nom')),
                      'type':liste_type_cat[int(xml_ib.get('Type'))][0]}

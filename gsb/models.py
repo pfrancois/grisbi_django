@@ -576,7 +576,7 @@ class Compte_titre(Compte):
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
             nb_titre_avant = titre.nb(compte=self, datel=date)
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre'})[0]
             if not nb_titre_avant:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille')
             self.ope_set.create(date=date,
@@ -590,7 +590,7 @@ class Compte_titre(Compte):
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom':u'frais bancaires:'})[0]
+                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires", defaults={'nom':u'frais bancaires'})[0]
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -709,13 +709,13 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         #definition des cat avec possibilite
         try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre :'})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre'})[0]
         except IntegrityError:
-            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'operation sur titre :'"%settings.ID_CAT_OST)
+            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'operation sur titre'"%settings.ID_CAT_OST)
         try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement : Plus-values'})[0]
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom':u'Revenus de placement:Plus-values'})[0]
         except IntegrityError:
-            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement : Plus-values'"%settings.ID_CAT_OST)
+            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'"%settings.ID_CAT_OST)
         #gestion des cours
         try:
             if self.ope:
@@ -759,8 +759,8 @@ class Ope_titre(models.Model):
             #calcul prealable
             #on met des plus car les chiffres sont negatif
             if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self.id)
-                nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.ope.id)
+                inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self.ope.id)
+                nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date)
@@ -768,7 +768,7 @@ class Ope_titre(models.Model):
             ost = "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
-            #on cree ls ope
+            #on cree les ope
             self.invest = ost
             moyen = self.compte.moyen_credit_defaut
 
