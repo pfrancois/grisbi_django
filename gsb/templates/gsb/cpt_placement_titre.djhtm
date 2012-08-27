@@ -20,11 +20,11 @@
 {% endblock titre_col_ope %}
 {% block ope %}
     <tr class="item hover{% if ope.nombre > 0 %} creditElement{% endif %}{% if ope.nombre < 0 %} debitElement{% endif %}">
-        <td class="opDate"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.pr %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
-        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.pr %}class='rappElement' {% endif %}>{{ ope.titre.nom|escape }}</a></td>
-        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.pr %}class='rappElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a></td>
-        <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.pr %}class='rappElement' {% endif %}>{{ ope.cours|cur }}</a></td>
-        <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.pr %}class='rappElement' {% endif %}>{{ ope.invest|cur }}</a></td>
+        <td class="opDate"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.date }}</a></td>
+        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.titre.nom|escape }}</a></td>
+        <td class="opCenter"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a></td>
+        <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.cours|cur }}</a></td>
+        <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.invest|cur }}</a></td>
     </tr>
 {% endblock ope %}
 {% block footer %}
@@ -45,10 +45,10 @@
     </tr>
     <tr class="footerbar">
         <td colspan="1">&nbsp;</td>
-        <td>total rapproché ou pointé le {{ date_rappro|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}</td>
+        <td>total rapproch&eacute; ou point&eacute; le {{ date_rappro|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="opCenter">{{ nb_r|floatformat:3 }}</td>
-        <td>investissement rapproché ou pointé :{{ investi_r|cur }}</td>
-        <td class="opCredit">encours rapproché ou pointé:{{ solde_rappro|cur }}</td>
+        <td>investissement rapproch&eacute; ou point&eacute; :{{ investi_r|cur }}</td>
+        <td class="opCredit">encours rapproch&eacute; ou point&eacute;:{{ solde_rappro|cur }}</td>
     </tr>{% endblock footer %}
 {% block boutons_bas %}
     <table width="100%" id="boutons_bas" class="table">

@@ -21,6 +21,8 @@ from django.utils import timezone
 import datetime
 
 class date_perso_filter(DateFieldListFilter):
+    """filtre date perso
+    """
     def __init__(self, field, request, params, model, model_admin, field_path):
         super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
         now = timezone.now()
@@ -204,8 +206,11 @@ class Compte_admin(Modeladmin_perso):
     action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
     class RappForm(forms.Form):
+        """form pour la transfo de pointe en rapprochee
+        la seule chose demande est la date
+        sinon on decide automatiquement du nom
+        """
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-        #rapp_f = forms.CharField(label=u'nom du rapprochement à creer', help_text=u"sous la forme compteAAAAMM")
         rapp_f = forms.ModelChoiceField(Rapp.objects.all(), required=False)
         date = forms.DateField(label="date du rapprochement")
 

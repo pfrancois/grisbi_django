@@ -160,8 +160,16 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             total = t.encours(compte)
             nb = t.nb(compte)
             if abs(nb) > decimal.Decimal('0.01'):
-                titres.append({'nom':t.nom, 'type':t.get_type_display(), 'nb':nb, 'invest':invest,
-                               'pmv':total - invest, 'total':total, 'id':t.id, 't':t, 'rapp':t.encours(rapp=True, compte=compte)})
+                titres.append({'nom':t.nom,
+                               'type':t.get_type_display(),
+                               'nb':nb, 'invest':invest,
+                               'pmv':total - invest,
+                               'total':total,
+                               'id':t.id,
+                               't':t,
+                               'rapp':t.encours(rapp=True, compte=compte)
+                               }
+                              )
         template = loader.get_template('gsb/cpt_placement.djhtm')
         return HttpResponse(
             template.render(

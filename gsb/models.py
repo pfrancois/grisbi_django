@@ -87,15 +87,30 @@ class Titre(models.Model):
     def __unicode__(self):
         return u"%s (%s)" % (self.nom, self.isin)
 
-    @property
-    def last_cours(self):
+    def last_cours(self, rapp=False):
         """renvoie le dernier cours"""
-        return self.cours_set.latest('date').valeur
+        date = self.last_cours_date(rapp=rapp)
+        if date:
+            return self.cours_set.get(date=date).valeur
+        else:
+            return 0
 
-    @property
-    def last_cours_date(self):
+    def last_cours_date(self, rapp=False):
         """renvoie la date du dernier cours"""
-        return self.cours_set.latest('date').date
+        if not rapp:
+            return self.cours_set.latest('date').date
+        else:
+            opes = Ope.objects.filter(tiers=self.tiers).filter(rapp__isnull=False)
+            if opes.exists():
+                date_ope = opes.latest('date').date
+                date_rapp = opes.latest('date').rapp.date
+                liste = Cours.objects.filter(titre=self).filter(date__in=[date_ope, date_rapp])
+                if liste.exists():
+                    return liste.latest('date').date
+                else:
+                    return None
+            else:
+                return None
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -144,7 +159,7 @@ class Titre(models.Model):
         if datel:
             query = query.filter(date__lte=datel)
         if rapp:
-            query = query.filter(Q(rapp__isnull=False) | Q(pointe=True))
+            query = query.filter(rapp__isnull=False)
         if exclude_id:
             query = query.exclude(pk=exclude_id)
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
@@ -163,7 +178,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte=compte)
         if rapp:
-            query = query.filter(Q(ope__rapp__isnull=False) | Q(ope__pointe=True))
+            query = query.filter(ope__rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         if exclude_id:
@@ -174,12 +189,13 @@ class Titre(models.Model):
         else:
             return decimal.Decimal(smart_unicode(nombre))
 
-    def encours(self, compte=None, datel=None, rapp=False):
+    def encours(self, compte=None, datel=None, rapp=False, p=False):
         """
         renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné
         @param compte: objet compte
         @param datel: chaine au format "aaaa-mm-dd"
-        @param rapp: boolean, renvoie les operation pointes ou rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
+        @param rapp: boolean, renvoie les operation rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
+        @param p: boolean idem que pour rapp mais avec les operations pointee
         """
         #renvoie le dernier cours sauf si on lui demande a une echeance
         opes = Ope.objects.filter(tiers=self.tiers)
@@ -196,11 +212,10 @@ class Titre(models.Model):
             opes = opes.filter(compte=compte)
         if rapp:
             #recup de la derniere date
-            opes = opes.filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
+            opes = opes.filter(tiers=self.tiers).filter(rapp__isnull=False)
             if opes.exists():
                 liste = [utils.strpdate(datel)]
                 liste.append(getattr(opes.latest('date'), "rapp.date", datetime.date(1, 1, 1)))
-                liste.append(opes.latest('date').date)
                 date_r = max(liste)
             else:
                 return 0 #comme pas d'ope, pas d'encours
@@ -406,7 +421,7 @@ class Compte(models.Model):
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
-            query = Ope.non_meres().filter(compte=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
+            query = Ope.non_meres().filter(compte=self.id).filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
@@ -463,24 +478,17 @@ class Compte(models.Model):
     def solde_rappro(self):
         return self.solde(rapp=True)
 
-    solde_rappro.short_description = u"solde rapproché ou pointé"
+    solde_rappro.short_description = u"solde rapproché"
 
     def date_rappro(self):
-        opes = Ope.objects.filter(compte__id=self.id).filter(Q(rapp__isnull=False) | Q(pointe=True))
-        if opes:
+        opes = Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False)
+        if opes.exists():
             date_p = opes.latest('date').date
-            if Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).exists():
-                date_r = Ope.objects.filter(compte__id=self.id).aggregate(element=models.Max('rapp__date'))['element']
-                if date_r > date_p:
-                    return date_r
-                else:
-                    return date_p
-            else:
-                return date_p
+            return date_p
         else:
             return None #comme pas de date, pas d'encours
 
-    date_rappro.short_description = u"date dernier rapp ou pointage"
+    date_rappro.short_description = u"date dernier rapp"
 
 
 class Compte_titre(Compte):
@@ -632,7 +640,7 @@ class Compte_titre(Compte):
             solde_titre = solde_titre + titre.encours(compte=self, rapp=True)
         return solde_titre
 
-    solde_rappro.short_description = u"solde titre rapproché ou pointé"
+    solde_rappro.short_description = u"solde titre rapproché"
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -1155,9 +1163,9 @@ class Ope(models.Model):
         super(Ope, self).clean()
         if not self.compte_id:
             raise ValidationError(u"vous devez mettre un compte")
-            #verification qu'il n'y ni pointe ni rapprochee
+            #verification qu'il n'y pas pointe et rapprochee
         if self.pointe and self.rapp is not None:
-            raise ValidationError(u"cette opération ne peut pas etre a la fois pointée et rapprochée")
+            raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifie car le compte est fermé")
 

@@ -109,10 +109,22 @@ class test_models(TestCase):
         #id des echeances
         self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4], attrgetter("id"))
 
-    def test_titre_last_cours_et_date(self):
-        #verification des properties
-        self.assertEquals(Titre.objects.get(nom="t1").last_cours, 1)
-        self.assertEqual(Titre.objects.get(nom="t1").last_cours_date, datetime.date(2011, 12, 18))
+    def test_titre_last_cours(self):
+        t = Titre.objects.get(nom="t1")
+        self.assertEquals(t.last_cours(), 1)
+        self.assertEquals(t.last_cours(rapp=True), 0)
+        t = Titre.objects.get(nom="t2")
+        self.assertEquals(t.last_cours(), 10)
+        self.assertEquals(t.last_cours(rapp=True), 10)
+
+    def test_titre_last_date(self):
+        t = Titre.objects.get(nom="t2")
+        self.assertEqual(t.last_cours_date(), datetime.date(2011, 12, 17))
+        self.assertEqual(t.last_cours_date(rapp=True),  datetime.date(2011, 12, 17))
+        t = Titre.objects.get(nom="t1")
+        self.assertEqual(t.last_cours_date(rapp=True),  None)
+        self.assertEqual(t.last_cours_date(),  datetime.date(2011, 12, 18))
+
 
     def test_titre_creation(self):
         #on cree le titre
@@ -198,10 +210,6 @@ class test_models(TestCase):
         self.assertEquals(t.encours(rapp=True, datel='2011-07-01'), 400)
         self.assertEquals(t.encours(rapp=True, compte=c), 1500)
         self.assertEquals(t.encours(rapp=True, compte=c, datel='2011-11-01'), 0)
-        o.rapp = None
-        o.pointe = True
-        o.save()
-        self.assertEquals(t.encours(rapp=True), 1700)
 
 
     #pas de test specifique pour cours

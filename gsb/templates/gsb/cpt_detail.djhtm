@@ -40,14 +40,14 @@
         {% for ope in list_ope.object_list %}
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-                    <td class="opDate"><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
-                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                    <td class="opDate"><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>{{ ope.date }}</a></td>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
                         {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom|escape }} {% else %}{{ ope.tiers.nom|default:"aucun tiers"|escape }}{% endif %}</a>
                     </td>
-                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie"|escape }}</a></td>
-                    <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                    <td class="opTier"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie"|escape }}</a></td>
+                    <td class="opCredit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
                         {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
-                    <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                    <td class="opDebit"><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
                         {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
                 </tr>
             {% endblock ope %}
