@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 import os
 import decimal
+import sys
 #on change le context par defaut
 decimal.getcontext().rouding=decimal.ROUND_HALF_UP
 decimal.getcontext().precision=3
@@ -49,6 +50,8 @@ DATABASES = {
         'PORT':'', # Set to empty string for default. Not used with sqlite3.
     }
 }
+if 'testserver' in sys.argv:
+    DATABASES['default']['TEST_NAME'] = os.path.join(PROJECT_PATH, 'test_db.db')
 LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 
