@@ -19,7 +19,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import models
 
 class test_models(TestCase):
-    fixtures = ['test.json']
+    fixtures = ['test.json', 'auth.json']
 
     def test_models_unicode(self):
         #on test les sortie unicode
@@ -184,7 +184,7 @@ class test_models(TestCase):
         self.assertEquals(t.encours(datel='1900-01-01'), 0)
         Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
         o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
-        o.rapp = Rapp.objects.get(id=1)
+        #o.rapp = Rapp.objects.get(id=1)
         o.save()
         self.assertEquals(t.encours(), 1900)
         self.assertEquals(t.encours(c), 1700)
@@ -194,6 +194,11 @@ class test_models(TestCase):
         self.assertEquals(t.encours(rapp=True, datel='2010-07-01'), 0)
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4)), 100)
         self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4), datel='2010-07-01'), 100)
+        self.assertEquals(t.encours(rapp=True), 1900)
+        o.rapp = None
+        o.pointe = True
+        o.save()
+
 
     #pas de test specifique pour cours
 
