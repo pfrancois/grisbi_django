@@ -146,8 +146,12 @@ def fr2decimal(s):
 
 
 def strpdate(s):
-    """@param s: YYYY-MM-DD"""
-    return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
+    """@param s: YYYY-MM-DD
+    attention si s est None ou impossible renvoie None"""
+    if s:
+            return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
+    else:
+        return datetime.date(1, 1, 1)
 
 
 def addmonths(sourcedate, months, last=False, first=False):
