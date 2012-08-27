@@ -176,7 +176,9 @@ class Titre(models.Model):
     def encours(self, compte=None, datel=None, rapp=False):
         """
         renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné
-        @param exclude: id ope
+        @param compte: objet compte
+        @param datel: chaine au format "aaaa-mm-dd"
+        @param rapp: boolean, renvoie les operation pointes ou rapproches
         """
         #renvoie le dernier cours sauf si on lui demande a une echeance
         if datel:
