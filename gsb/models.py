@@ -14,6 +14,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode
 from .model_field import CurField
+from . import utils
 import logging
 class Gsb_exc(Exception):
     pass
@@ -178,35 +179,43 @@ class Titre(models.Model):
         renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné
         @param compte: objet compte
         @param datel: chaine au format "aaaa-mm-dd"
-        @param rapp: boolean, renvoie les operation pointes ou rapproches
+        @param rapp: boolean, renvoie les operation pointes ou rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
         """
         #renvoie le dernier cours sauf si on lui demande a une echeance
+        opes = Ope.objects.filter(tiers=self.tiers)
         if datel:
             cours = self.cours_set.filter(date__lte=datel)
             if cours.exists():
                 cours = cours.latest().valeur
             else:
                 return 0
+            opes = opes.filter(date__lte=datel)
         else:
             cours = self.last_cours
         if compte:
-            if rapp:
-                #recup de la derniere date
-                opes = Ope.objects.filter(compte__id=compte.id).filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
-                if opes:
-                    #recupere la derniere date, attention ce n'est pas necessairement la derniere date d'opération
-                    try:
-                        date_r = max(opes.latest('date').rapp.date, opes.latest('date').date)
-                    except AttributeError:#si rapp n'existe pas
-                        date_r = opes.latest('date').date
-                else:
-                    return 0 #comme pas de date, pas d'encours
-                cours = self.cours_set.filter(date__lte=date_r).latest().valeur
-                nb = self.nb(compte=compte, rapp=True)
+            opes = opes.filter(compte=compte)
+        if rapp:
+            #recup de la derniere date
+            opes = opes.filter(tiers=self.tiers).filter(Q(rapp__isnull=False) | Q(pointe=True))
+            if opes.exists():
+                liste = [utils.strpdate(datel)]
+                liste.append(getattr(opes.latest('date'), "rapp.date", datetime.date(1, 1, 1)))
+                liste.append(opes.latest('date').date)
+                date_r = max(liste)
             else:
-                nb = self.nb(compte=compte, datel=datel)
+                return 0 #comme pas d'ope, pas d'encours
         else:
-            nb = self.nb(datel=datel, rapp=False)
+            if datel:
+                date_r = datel
+            else:
+                date_r = datetime.date.today()
+        if opes.exists():
+            #recupere la derniere date, attention ce n'est pas necessairement la derniere date d'opération
+            cours = self.cours_set.filter(date__lte=date_r).latest().valeur
+        else:
+            return 0 #comme pas d'ope, pas d'encours
+        #renvoie la gestion des param de nb
+        nb = self.nb(compte=compte, rapp=rapp, datel=datel)
         return nb * cours
 
 

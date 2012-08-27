@@ -182,22 +182,26 @@ class test_models(TestCase):
         c = Compte_titre.objects.get(id=4)
         t = Titre.objects.get(nom="t2")
         self.assertEquals(t.encours(datel='1900-01-01'), 0)
-        Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
+        self.assertEquals(t.encours(), 1700)
+        self.assertEquals(t.encours(rapp=True, compte=c), 1500)
+        Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01', prix=20)
         o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
-        #o.rapp = Rapp.objects.get(id=1)
+        self.assertEquals(t.encours(rapp=True), 1500)
+        o.rapp = Rapp.objects.get(id=1)
         o.save()
+        self.assertEquals(t.encours(rapp=True), 1700)
         self.assertEquals(t.encours(), 1900)
         self.assertEquals(t.encours(c), 1700)
-        self.assertEquals(t.encours(datel='2011-07-01'), 20)
+        self.assertEquals(t.encours(datel='2011-07-01'), 400)
         self.assertEquals(t.encours(compte=c, datel='2011-07-01'), 0)
-        self.assertEquals(t.encours(rapp=True), 1900)
-        self.assertEquals(t.encours(rapp=True, datel='2010-07-01'), 0)
-        self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4)), 100)
-        self.assertEquals(t.encours(rapp=True, compte=Compte_titre.objects.get(id=4), datel='2010-07-01'), 100)
-        self.assertEquals(t.encours(rapp=True), 1900)
+        self.assertEquals(t.encours(compte=c, datel='2011-11-01'), 100)
+        self.assertEquals(t.encours(rapp=True, datel='2011-07-01'), 400)
+        self.assertEquals(t.encours(rapp=True, compte=c), 1500)
+        self.assertEquals(t.encours(rapp=True, compte=c, datel='2011-11-01'), 0)
         o.rapp = None
         o.pointe = True
         o.save()
+        self.assertEquals(t.encours(rapp=True), 1700)
 
 
     #pas de test specifique pour cours
@@ -281,7 +285,7 @@ class test_models(TestCase):
         self.assertEquals(Ope.objects.get(id=5).compte_id, 5)
         self.assertEquals(Ope_titre.objects.get(id=1).compte_id, 5)
 
-    def test_compte_titre_error(self):
+    def test_compte_titre_achat_vente_error(self):
         c1 = Compte_titre.objects.get(id=4)
         c2 = Compte_titre.objects.get(id=5)
         #probleme si on utilise pas un titre dans le param titre
