@@ -379,7 +379,7 @@ def maj_cours(request, pk):
             compte = Ope_titre.objects.filter(titre=titre).latest('date').compte
             return HttpResponseRedirect(compte.get_absolute_url())
     else:
-        form = gsb_forms.MajCoursform(initial={'titre':titre, 'cours':titre.last_cours, 'date':titre.last_cours_date})
+        form = gsb_forms.MajCoursform(initial={'titre':titre, 'cours':titre.last_cours(), 'date':titre.last_cours_date()})
         #petit bidoullage afin recuperer le compte d'origine
     if titre.compte_titre_set.all().distinct().count() == 1:
         url = titre.compte_titre_set.all().distinct()[0].get_absolute_url()

@@ -10,6 +10,7 @@ from django.utils.encoding import force_unicode
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.db.models import Q
+from django.core.exceptions import ImproperlyConfigured
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode
@@ -24,7 +25,6 @@ class Ex_jumelle_neant(Exception):
     pass
 
 #import logging
-
 
 class Tiers(models.Model):
     """
@@ -153,7 +153,7 @@ class Titre(models.Model):
         @param datel: date, renvoie sur avant la date ou tout si none
         @param rapp: Bool, si true, renvoie uniquement les opération rapprochées
         """
-        query = Ope.objects.filter(tiers=self.tiers).exclude(cat__id=settings.ID_CAT_PMV)
+        query = Ope.non_meres().filter(tiers=self.tiers).exclude(cat__id=settings.ID_CAT_PMV)
         if compte:
             query = query.filter(compte=compte)
         if datel:
@@ -193,30 +193,24 @@ class Titre(models.Model):
         """
         renvoie l'encours detenu dans ce titre dans un compte ou dans tous les comptes si pas de compte donné
         @param compte: objet compte
-        @param datel: chaine au format "aaaa-mm-dd"
+        @param datel: chaine au format "aaaa-mm-dd" ou date
         @param rapp: boolean, renvoie les operation rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
         @param p: boolean idem que pour rapp mais avec les operations pointee
         """
-        #renvoie le dernier cours sauf si on lui demande a une echeance
+        if datel and (not self.cours_set.filter(date__lte=datel).exists()):
+            return 0
         opes = Ope.objects.filter(tiers=self.tiers)
-        if datel:
-            cours = self.cours_set.filter(date__lte=datel)
-            if cours.exists():
-                cours = cours.latest().valeur
-            else:
-                return 0
-            opes = opes.filter(date__lte=datel)
-        else:
-            cours = self.last_cours
         if compte:
             opes = opes.filter(compte=compte)
         if rapp:
             #recup de la derniere date
             opes = opes.filter(tiers=self.tiers).filter(rapp__isnull=False)
             if opes.exists():
-                liste = [utils.strpdate(datel)]
-                liste.append(getattr(opes.latest('date'), "rapp.date", datetime.date(1, 1, 1)))
-                date_r = max(liste)
+                liste = []
+                if datel:
+                    liste.append(utils.strpdate(datel))
+                liste.append(self.last_cours_date(rapp=rapp))
+                date_r = min(liste)
             else:
                 return 0 #comme pas d'ope, pas d'encours
         else:
@@ -421,7 +415,7 @@ class Compte(models.Model):
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
-            query = Ope.non_meres().filter(compte=self.id).filter(rapp__isnull=False)
+            query = query.filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         req = query.aggregate(solde=models.Sum('montant'))
@@ -478,6 +472,20 @@ class Compte(models.Model):
     def solde_rappro(self):
         return self.solde(rapp=True)
 
+    def solde_pointe(self):
+        """renvoie le solde du compte pour les operations pointees
+              @param datel date date limite de calcul du solde
+              @param rapp boolean faut il prendre uniquement les opération rapproches
+        """
+        query = Ope.non_meres().filter(compte__id__exact=self.id).filter(pointe=True)
+        req = query.aggregate(solde=models.Sum('montant'))
+        if req['solde'] is None:
+            solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
+        else:
+            solde = decimal.Decimal(req['solde']) + decimal.Decimal(self.solde_init)
+        return solde
+
+
     solde_rappro.short_description = u"solde rapproché"
 
     def date_rappro(self):
@@ -503,19 +511,19 @@ class Compte_titre(Compte):
         ordering = ['nom']
         verbose_name_plural = "Comptes Titre"
 
-    @transaction.commit_on_success
+    #@transaction.commit_on_success
     def achat(self, titre, nombre, prix=1, date=datetime.date.today(), frais=0, virement_de=None, cat_frais=None, tiers_frais=None):
         """fonction pour achat de titre:
-        @param titre
-        @param nombre
-        @param prix
-        @param date
-        @param frais
-        @param virement_de
+        @param titre:object titre
+        @param nombre:decimal
+        @param prix;decimal
+        @param date:date
+        @param frais:decimal
+        @param virement_de: object compte
         """
         self.alters_data = True
         if isinstance(titre, Titre):
-            if decimal.Decimal(force_unicode(frais)):
+            if decimal.Decimal(force_unicode(frais)):  #des frais bancaires existent
                 if not cat_frais:
                     cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
                                                           defaults={'nom':u'frais bancaires:'})[0]
@@ -677,7 +685,7 @@ class Compte_titre(Compte):
             return self.solde_rappro()
         for titre in self.titre.all().distinct():
             nb = titre.nb(compte=self, datel=datel)
-            cours = titre.last_cours
+            cours = titre.last_cours()
             solde_titre = solde_titre + nb * cours
 
         return solde_titre
@@ -736,23 +744,18 @@ class Ope_titre(models.Model):
         except IntegrityError:
             raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'"%settings.ID_CAT_OST)
         #gestion des cours
-        try:
-            if self.ope:
-                old_date = self.ope.date
-            else:
-                old_date = self.date
-            obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur':0})
-            obj.date = self.date
-            obj.valeur = self.cours
-            obj.save()
-        except IntegrityError:
+        if self.ope:
+            old_date = self.ope.date
+            obj = Cours.objects.get(titre=self.titre, date=old_date)
             obj.delete()
-            obj, created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'valeur':0})
-            obj.date = self.date
-            obj.valeur = self.cours
-            obj.save()
+        else:
+            old_date = self.date
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur':0})
+        obj.date = self.date
+        obj.valeur = self.cours
+        obj.save()
 
-        if self.nombre > 0:#on doit separer because gestion des plues ou moins value
+        if self.nombre >= 0:#on doit separer because gestion des plues ou moins value
             del self.ope_pmv #comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
@@ -1177,12 +1180,14 @@ class Ope(models.Model):
                 if self.compte.moyen_credit_defaut:
                     self.moyen = self.compte.moyen_credit_defaut
                 else:
-                    self.moyen_id = settings.MD_CREDIT
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom':"moyen_par_defaut_credit", "id": settings.MD_CREDIT})[0]
+                    self.moyen = moyen
             if  self.montant <= 0:
                 if self.compte.moyen_debit_defaut:
                     self.moyen = self.compte.moyen_debit_defaut
                 else:
-                    self.moyen_id = settings.MD_DEBIT
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom':"moyen_par_defaut_debit", "id": settings.MD_DEBIT})[0]
+                    self.moyen = moyen
         super(Ope, self).save(*args, **kwargs)
 
     @property

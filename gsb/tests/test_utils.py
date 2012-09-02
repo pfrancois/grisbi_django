@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .test_base import TestCase
 from .. import utils
 import datetime, time
-from ..models import Generalite, Exercice
+from ..models import Generalite, Exercice, Cat
 import decimal
 
 
@@ -50,6 +50,7 @@ class test_utils(TestCase):
         self.assertEquals(utils.Format.str(Generalite.objects.get(id=1)), '1')
         self.assertEquals(utils.Format.str(None), '0')
         self.assertEquals(utils.Format.str(None, defaut='toto'), 'toto')
+        self.assertEquals(utils.Format.str(Cat.objects.get(id=65), membre='nom'), 'frais bancaires')
         self.assertEquals(utils.Format.str(Generalite.objects.get(id=1), membre='utilise_exercices'), 'True')
 
     def test_validrib(self):
@@ -71,7 +72,7 @@ class test_utils(TestCase):
 
     def test_strpdate(self):
         self.assertEquals(utils.strpdate("2011-12-31"), datetime.date(2011, 12, 31))
-        self.assertRaises(ValueError,utils.strpdate, None)
+        self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
         self.assertRaises(ValueError,utils.strpdate, "2011-12-52")
 
 

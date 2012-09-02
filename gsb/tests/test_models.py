@@ -125,7 +125,6 @@ class test_models(TestCase):
         self.assertEqual(t.last_cours_date(rapp=True),  None)
         self.assertEqual(t.last_cours_date(),  datetime.date(2011, 12, 18))
 
-
     def test_titre_creation(self):
         #on cree le titre
         t = Titre.objects.create(nom='ceci_est_un_titre', isin="123456789", type='ACT')
@@ -165,12 +164,14 @@ class test_models(TestCase):
     def test_titre_investi(self):
         c = Compte_titre.objects.get(id=4)
         t = Titre.objects.get(nom="t2")
-        self.assertEquals(t.investi(c, rapp=True), 100)
+        self.assertEquals(t.investi(c, rapp=True), 1500)
+        self.assertEquals(Titre.objects.get(nom="t2").investi(compte=Compte_titre.objects.get(id=5)), 0)
         Compte_titre.objects.get(id=5).achat(titre=t, nombre=20, date='2011-01-01')
         self.assertEquals(t.investi(), 1620)
         self.assertEquals(t.investi(c), 1600)
         self.assertEquals(t.investi(datel='2011-07-01'), 20)
         self.assertEquals(t.investi(compte=c, datel='2011-07-01'), 0)
+
         self.assertEquals(t.investi(compte= Compte_titre.objects.get(id=5), exclude_id=16), 0)
 
 
@@ -185,7 +186,7 @@ class test_models(TestCase):
         self.assertEquals(t.nb(c), 170)
         self.assertEquals(t.nb(datel='2011-07-01'), 20)
         self.assertEquals(t.nb(compte=c, datel='2011-07-01'), 0)
-        self.assertEquals(t.nb(rapp=True), 40)
+        self.assertEquals(t.nb(rapp=True), 170)
         self.assertEquals(t.nb(rapp=True, datel='2010-07-01'), 0)
         self.assertEquals(t.nb(rapp=True, compte=Compte_titre.objects.get(id=5), datel='2010-07-01'), 0)
         self.assertEquals(t.nb( compte=Compte_titre.objects.get(id=5), exclude_id=4), 0)
@@ -254,11 +255,17 @@ class test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde(rapp=True), 20)
         #a une date anterieur
         self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2009-01-01')), 0)
-        #solde rappro
-        self.assertEqual(Compte.objects.get(id=1).solde_rappro(), 20)
-        self.assertEqual(Compte.objects.get(id=1).date_rappro(), strpdate('2011-08-11'))
+    def test_solde_rappro(self):
+        c = Compte.objects.get(id=1)
+        self.assertEqual(c.solde_rappro(), 20)
+        self.assertEqual(c.date_rappro(), strpdate('2010-10-01'))
         self.assertEqual(Compte.objects.get(id=3).date_rappro(), None)
-
+    def test_solde_pointe(self):
+        self.assertEqual(Compte.objects.get(id=1).solde_pointe(), 0)
+        o = Ope.objects.get(id=10)
+        o.pointe = True
+        o.save()
+        self.assertEqual(Compte.objects.get(id=1).solde_pointe(), -1500)
     def test_creation_compte_compte_titre(self):
         #on cree un compte titre via compte
         Compte.objects.create(nom="toto", type="t")
@@ -311,7 +318,7 @@ class test_models(TestCase):
         #solde a une date anterieur
         self.assertEqual(c.solde(datel=strpdate('2011-01-01')), 0)
         self.assertEqual(c.solde(rapp=True), 0)
-        self.assertEqual(c.solde_titre(rapp=True), 100)
+        self.assertEqual(c.solde_titre(rapp=True), 1500)
 
     def test_compte_titre_achat_sans_virement(self):
         c = Compte_titre.objects.get(id=4)
@@ -322,7 +329,7 @@ class test_models(TestCase):
         self.assertEqual(t.investi(c), 22)
         tall = c.titre.all().distinct()
         self.assertEqual(tall.count(), 2)
-        self.assertEqual(tall[0].last_cours, 1)
+        self.assertEqual(tall[0].last_cours(), 1)
         self.assertEqual(c.solde(), 1701)
         c.achat(titre=t, nombre=20, prix=2, date='2011-01-01')
         self.assertEqual(c.solde(), 1681)
@@ -473,7 +480,7 @@ class test_models(TestCase):
         self.assertEqual(Compte_titre.objects.get(id=4).type, 't')
 
     def test_compte_titre_date_rappro(self):
-        self.assertEqual(Compte_titre.objects.get(id=4).date_rappro(), strpdate('2011-11-30'))
+        self.assertEqual(Compte_titre.objects.get(id=4).date_rappro(), strpdate('2011-12-17'))
         self.assertEqual(Compte_titre.objects.get(id=5).date_rappro(), None)
 
     def test_ope_titre_save(self):
@@ -496,6 +503,15 @@ class test_models(TestCase):
         self.assertEqual(t.nb(c), 10)
         self.assertEqual(t.investi(c), 100)
         self.assertEqual(t.encours(c), 10 * 20)
+        o = Ope_titre.objects.get(id=5)
+        o.nombre = -10
+        o.save()
+        self.assertEqual(o.ope.id, 17)
+        self.assertEqual(o.ope_pmv.id, 18)
+        self.assertEqual(t.nb(c), 5)
+        self.assertEqual(t.investi(c), 5*10)
+        self.assertEqual(t.encours(c), 5 * 20)
+
         #finalement c'etait vraiment ca
         o = Ope_titre.objects.get(id=5)
         o.nombre = 10
@@ -503,6 +519,7 @@ class test_models(TestCase):
         self.assertEqual(t.nb(c), 25)
         self.assertEqual(t.investi(c), 350)
         self.assertEqual(t.encours(c), 25*20)
+
 
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
@@ -610,6 +627,22 @@ class test_models(TestCase):
 
     def test_ope_non_mere(self):
         self.assertQuerysetEqual(Ope.non_meres().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], attrgetter("id"))
+
+    def test_ope_pr(self):
+        c = Compte.objects.get(id=1)
+        t = Tiers.objects.get(id=1)
+        #test pas defaut
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
+        id = o.id
+        self.assertEquals(o.pr, False)
+        o.pointe = True
+        o.save()
+        self.assertEquals(Ope.objects.get(id=id).pr, True)
+        o = Ope.objects.get(id=id)
+        o.rapp_id = 1
+        o.pointe = False
+        o.save()
+        self.assertEquals(Ope.objects.get(id=id).pr, True)
 
     def test_ope_save(self):
         c = Compte.objects.get(id=1)
@@ -736,3 +769,38 @@ class test_models(TestCase):
                'moyen_destination':4
         }
         self.assertEquals(tab, v.init_form())
+#TODO verifier le create de compte_titre
+########################################################################
+from django.core.exceptions import ImproperlyConfigured
+class test_model2(TestCase):
+    """"""
+    def test_last_cours_date_special(self):
+        #on cree les elements indiepensables
+        c = Compte_titre.objects.create(nom="cpt_titre1")
+        t = Titre.objects.create(isin="0000", nom="titre1")
+        self.assertEqual(t.encours(), 0)
+        c.achat(t, 10, date=strpdate('2012-01-01'))
+        r = Rapp.objects.create(nom="rapp1", date=strpdate('2012-01-20'))
+        o = Ope.objects.get(id=1)
+        o.rapp = r
+        o.save()
+        Cours.objects.get(id=1).delete()
+        self.assertEquals(t.last_cours_date(rapp=True), None)
+    def test_ope_titre_special(self):
+        t = Titre.objects.create(isin="0000", nom="titre1")
+        c = Compte_titre.objects.create(nom="cpt_titre1")
+        Cat.objects.create(nom=u'operation sur titre')
+        self.assertRaises(ImproperlyConfigured, lambda:Ope_titre.objects.create(titre=t, compte=c, date=datetime.date.today()))
+    def test_ope_titre_special2(self):
+        t = Titre.objects.create(isin="0000", nom="titre1")
+        c = Compte_titre.objects.create(nom="cpt_titre1")
+        Cat.objects.create(nom=u'Revenus de placement:Plus-values')
+        self.assertRaises(ImproperlyConfigured, lambda:Ope_titre.objects.create(titre=t, compte=c, date=datetime.date.today()))
+    def test_ope_titre_special3(self):
+        t = Titre.objects.create(isin="0000", nom="titre1")
+        c = Compte_titre.objects.create(nom="cpt_titre1")
+        o= Ope_titre.objects.create(titre=t, compte=c, date=strpdate('2011-01-01'), nombre=10)
+        o.cours = 3;
+        o.save()
+        self.assertEqual(t.encours(), 30)
+

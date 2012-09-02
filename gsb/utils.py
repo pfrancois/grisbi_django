@@ -8,6 +8,7 @@ import calendar
 from django.core.exceptions import ObjectDoesNotExist
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
+
     @staticmethod
     def date(s, defaut="0/0/0"):
         """
@@ -29,6 +30,7 @@ class Format:
                 return "/".join(result)
             else:
                 raise TypeError('attention ce ne peut pas etre qu\'un objet date')
+
     @staticmethod
     def bool( s, defaut='0'):
         """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
@@ -49,11 +51,13 @@ class Format:
                     return '1'
             except ValueError:
                 return str(int(bool(s)))
+
     @staticmethod
     def float( s):
         """ convertit un float en string 10,7"""
         s = "%10.7f" % s
         return s.replace('.', ',').strip()
+
     @staticmethod
     def type( liste, s, defaut='0'):
         """convertit un indice d'une liste par une string
@@ -66,6 +70,7 @@ class Format:
         except ValueError:##on en un ca par defaut
             s = defaut
         return s
+
     @staticmethod
     def max( query, defaut='0', champ='id'):
         """recupere le max d'un queryset"""
@@ -74,6 +79,7 @@ class Format:
             return defaut
         else:
             return str(agg)
+
     @staticmethod
     def str( obj, defaut='0', membre='id'):
         """renvoie id d'un objet avec la gestion des null
@@ -166,17 +172,3 @@ def addmonths(sourcedate, months, last=False, first=False):
     else:
         day = min(sourcedate.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
-
-class UTF8Recoder:
-    """
-    Iterator that reads an encoded stream and reencodes the input to UTF-8
-    """
-
-    def __init__(self, fich, encoding):
-        self.reader = codecs.getreader(encoding)(fich)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self.reader.next().encode("utf-8")
