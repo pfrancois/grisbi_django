@@ -237,7 +237,7 @@ class Majtitre(Baseform):
             self.fields[titre.isin].required = False
 
 
-class SearchField(Baseform):
+class SearchForm(Baseform):
     compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
     date_min = forms.DateField(label='date_min', widget=forms.DateInput)
     date_max = forms.DateField(label='date_max', widget=forms.DateInput)

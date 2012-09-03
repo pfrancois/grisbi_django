@@ -714,7 +714,7 @@ def view_maj_cpt_titre(request, cpt_id):
 @login_required
 def search_opes(request):
     if request.method == 'POST':
-        form = gsb_forms.SearchField(request.POST)
+        form = gsb_forms.SearchForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             compte = data['compte']
@@ -751,7 +751,7 @@ def search_opes(request):
     else:
         date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
         date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
-        form = gsb_forms.SearchField(initial={'date_min':date_min, 'date_max':date_max})
+        form = gsb_forms.SearchForm(initial={'date_min':date_min, 'date_max':date_max})
 
     return render(request, 'templates_perso/search.djhtm', {'form':form,
                                                             'list_ope':None,

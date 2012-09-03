@@ -607,6 +607,9 @@ class test_models(TestCase):
         self.assertEquals(Echeance.objects.get(id=6).calcul_next(), strpdate('2013-10-30'))
         self.assertEquals(Echeance.objects.get(id=7).calcul_next(), None)
         self.assertEquals(Echeance.objects.get(id=8).calcul_next(), None)
+    def test_echeance_check1(self):
+        Echeance.check()
+
 
     def test_generalite_gen(self):
         self.assertEquals(Generalite.gen().id, 1)
