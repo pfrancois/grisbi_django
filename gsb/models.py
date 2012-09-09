@@ -1181,7 +1181,7 @@ class Ope(models.Model):
 
     @property
     def is_mere(self):
-        return (self.filles_set.count() > 1)
+        return (self.filles_set.count() > 1 and self.id)
 
     @property
     def is_fille(self):

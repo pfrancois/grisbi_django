@@ -275,7 +275,7 @@ class ope_fille_admin(admin.TabularInline):
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'show_mere', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
+    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
@@ -292,6 +292,7 @@ class Ope_admin(Modeladmin_perso):
 
     def is_mere(self, obj):
         if obj.is_mere:
+            print obj.filles_set.count(), obj.id
             return u"opérations filles ci dessous"
         else:
             return u"aucune opération fille"
