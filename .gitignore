@@ -38,4 +38,10 @@ secret_key.py
 .pydevproject
 perso
 coverage
-*.sublime*
+*.qif
+*.7z
+*.wpr
+*.wpu
+test.py
+sqlite2mysql.py
+test_db.db

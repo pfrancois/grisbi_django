@@ -54,7 +54,7 @@ class OperationForm(Basemodelform):
 
     class Meta:
         model = Ope
-        exclude = ('jumelle')#car sinon c'est un virement
+        exclude = ('jumelle', 'mere')#car sinon c'est un virement
 
     def __init__(self, *args, **kwargs):
         super(OperationForm, self).__init__(*args, **kwargs)

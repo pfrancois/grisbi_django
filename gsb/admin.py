@@ -275,7 +275,7 @@ class ope_fille_admin(admin.TabularInline):
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'show_mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
+    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'show_mere', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
@@ -288,6 +288,7 @@ class Ope_admin(Modeladmin_perso):
     search_fields = ['tiers__nom']
     ordering = ['date']
     inlines = [ope_fille_admin]
+    raw_id_fields = ('mere', )
 
     def is_mere(self, obj):
         if obj.is_mere:

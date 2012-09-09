@@ -1131,7 +1131,7 @@ class Ope(models.Model):
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None,
                                    editable=False)
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None,
-                             editable=False, on_delete=models.PROTECT, verbose_name=u'Mere')
+                              on_delete=models.PROTECT, verbose_name=u'Mere')
     automatique = models.BooleanField(default=False,
                                       help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
