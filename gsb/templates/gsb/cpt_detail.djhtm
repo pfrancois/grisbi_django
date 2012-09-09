@@ -30,12 +30,25 @@
                 <th class="opDebit"><a href="?sort=montant">D&eacute;bit</a></th>{% endblock titre_col_ope %}
             </tr>
         </thead>
-        <tfoot>
+        <tfoot class="bar">
             {% block footer %}
-                <tr class="footerbar">
-                    <td colspan="3" class="cptLabel">Solde<br/>Solde rapproch&eacute; au {{ date_r|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}:</td>
-                    <td colspan="2" class="cptSolde">{{ solde|cur }}<br/>{{ solde_r|cur }}</td>
-                </tr>{% endblock footer %}
+                <tr >
+                    <td colspan="3" class="cptLabel">Solde</td>
+                    <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="cptLabel">Solde rapproch&eacute; au {{ date_r|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}:</td>
+                    <td colspan="2" class="cptSolde">{{ solde_r|cur }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="cptLabel">Solde point&eacute; :</td>
+                    <td colspan="2" class="cptSolde">{{ solde_p|cur }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="cptLabel">Solde p&r:</td>
+                    <td colspan="2" class="cptSolde">{{ solde_r|add:solde_p|cur }}</td>
+                </tr>
+            {% endblock footer %}
         </tfoot>
         {% for ope in list_ope.object_list %}
             {% block ope %}
@@ -111,12 +124,12 @@
     {% block boutons_bas %}
         <table width="100%" id="boutons_bas" class="table">
             <tr class="boutton">
-                <td width="50%"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id%}">voir toutes les op&eacute;rations</a></td>
-                <td width="50%"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+                <td width="50%"><a href="{% url gsb_cpt_detail_all cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>
+                <td width="50%"><a href="{% url gsb_cpt_detail_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations pointés ou rapproch&eacute;es</a></td>
             </tr>
             <tr class="boutton">
                 <td width="100%" colspan="2">
-                <a href=<a href="{% url gsb_cpt_detail cpt_id=compte.id%}">voir uniquement les opérations non rapprochées</a>
+                <a href="{% url gsb_cpt_detail cpt_id=compte.id%}">voir uniquement les opérations non rapprochées</a>
                 </td>
             </tr>
         </table>

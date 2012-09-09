@@ -77,7 +77,7 @@ class Titre(models.Model):
         )
     nom = models.CharField(max_length=40, unique=True)
     isin = models.CharField(max_length=12, unique=True)
-    tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False, on_delete=models.SET_NULL)
+    tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False)
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
 
     class Meta:
@@ -280,7 +280,7 @@ class Cat(models.Model):
         ('d', u'dépense'),
         ('v', u'virement')
         )
-    nom = models.CharField(max_length=50, unique=True)
+    nom = models.CharField(max_length=50, unique=True, verbose_name=u"nom de la catégorie")
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name=u"type de la catégorie")
 
     class Meta:
@@ -387,8 +387,8 @@ class Compte(models.Model):
     titulaire = models.CharField(max_length=40, blank=True, default='')
     type = models.CharField(max_length=1, choices=typescpt, default='b')
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    guichet = models.CharField(max_length=15, blank=True,
-                               default='')#il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
+    guichet = models.CharField(max_length=15, blank=True, default='')
+    #il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length=20, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
     solde_init = CurField(default=decimal.Decimal('0.00'))
@@ -491,7 +491,8 @@ class Compte(models.Model):
     def date_rappro(self):
         opes = Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False)
         if opes.exists():
-            date_p = opes.latest('date').date
+            o = opes.latest('date')
+            date_p = o.rapp.date
             return date_p
         else:
             return None #comme pas de date, pas d'encours
@@ -499,7 +500,7 @@ class Compte(models.Model):
     date_rappro.short_description = u"date dernier rapp"
 
 
-class Compte_titre(Compte):
+class Compte_titre(Compte ):
     """
     comptes titres
     compte de classe "t" avec des fonctions en plus. une compta matiere
@@ -705,7 +706,7 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = CurField(default=1, decimal_places=5)
     invest = CurField(default=0, editable=False, decimal_places=2)
-    ope = models.OneToOneField('Ope', editable=False, null=True)#null=true car j'ai des operations sans lien
+    ope = models.OneToOneField('Ope', editable=False, null=True, on_delete=models.CASCADE)#null=true car j'ai des operations sans lien
     ope_pmv_id = models.IntegerField(editable=False, default=0, null=True)#null=true cr tt les operation d'achat sont null
 
     class Meta:
@@ -736,7 +737,7 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         #definition des cat avec possibilite
         try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'operation sur titre'})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom':u'Operation Sur Titre'})[0]
         except IntegrityError:
             raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'operation sur titre'"%settings.ID_CAT_OST)
         try:
@@ -958,10 +959,10 @@ class Echeance(models.Model):
     valide = models.BooleanField(default=True)
     compte = models.ForeignKey(Compte)
     montant = CurField()
-    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.SET_NULL, default=None,
+    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.PROTECT, default=None)
+    cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.PROTECT, default=None,
                             verbose_name=u"catégorie")
-    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.PROTECT, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                            verbose_name=u"imputation")
     compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set',
@@ -1119,18 +1120,18 @@ class Ope(models.Model):
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.PROTECT, default=None,
                             verbose_name=u"Catégorie")
     notes = models.TextField(blank=True, default='')
-    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.PROTECT, default=None)
+    moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     num_cheque = models.CharField(max_length=20, blank=True, default='')
     pointe = models.BooleanField(default=False)
-    rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.PROTECT, default=None,
+    rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                              verbose_name=u'Rapprochement')
-    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.PROTECT, default=None)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.PROTECT, default=None,
+    exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                            verbose_name=u"projet")
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None,
                                    editable=False)
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None,
-                             editable=False, on_delete=models.SET_NULL, verbose_name=u'Mere')
+                             editable=False, on_delete=models.PROTECT, verbose_name=u'Mere')
     automatique = models.BooleanField(default=False,
                                       help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
@@ -1171,24 +1172,24 @@ class Ope(models.Model):
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifie car le compte est fermé")
+        if self.is_mere:
+            if self.montant != self.tot_fille:
+                if (self.rapp or self.pointe):
+                    raise ValidationError(u"attention cette opération est pointée ou rapproché et on change le montant global")
+                else:
+                    self.montant = self.tot_fille
 
-    def save(self, *args, **kwargs):
-        """surcharge afin mettre les moyen par defaut"""
-        self.alters_data = True
-        if not self.moyen:
-            if self.montant >= 0:
-                if self.compte.moyen_credit_defaut:
-                    self.moyen = self.compte.moyen_credit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom':"moyen_par_defaut_credit", "id": settings.MD_CREDIT})[0]
-                    self.moyen = moyen
-            if  self.montant <= 0:
-                if self.compte.moyen_debit_defaut:
-                    self.moyen = self.compte.moyen_debit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom':"moyen_par_defaut_debit", "id": settings.MD_DEBIT})[0]
-                    self.moyen = moyen
-        super(Ope, self).save(*args, **kwargs)
+    @property
+    def is_mere(self):
+        return (self.filles_set.count() > 1)
+
+    @property
+    def is_fille(self):
+        return (self.mere != None)
+
+    @property
+    def tot_fille(self):
+        return self.filles_set.aggregate(total=models.Sum('montant'))['total']
 
     @property
     def pr(self):
@@ -1197,23 +1198,6 @@ class Ope(models.Model):
             return True
         else:
             return False
-
-
-@receiver(pre_delete, sender=Ope)
-def verif_ope_rapp(sender, **kwargs):
-    instance = kwargs['instance']
-    #on evite que cela soit une opération rapproche
-    if instance.rapp:
-        raise IntegrityError(u"opération rapprochee")
-    if instance.jumelle:
-        if instance.jumelle.rapp:
-            raise IntegrityError(u"opération jumelle rapprochée")
-    if instance.mere:
-        if instance.mere.rapp:
-            raise IntegrityError(u"opération mere rapprochée")
-    if instance.filles_set.count() > 0:
-        raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
-
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""
@@ -1361,3 +1345,38 @@ class Virement(object):
 
     def __unicode__(self):
         return "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
+
+@receiver(pre_delete, sender=Ope)
+def verif_ope_rapp(sender, **kwargs):
+    instance = kwargs['instance']
+    #on evite que cela soit une opération rapproche
+    if instance.rapp:
+        raise IntegrityError(u"opération rapprochee")
+    if instance.jumelle:
+        if instance.jumelle.rapp:
+            raise IntegrityError(u"opération jumelle rapprochée")
+    if instance.mere:
+        if instance.mere.rapp:
+            raise IntegrityError(u"opération mere rapprochée")
+    if instance.filles_set.count() > 0:
+        raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
+    if instance.is_mere:
+        instance.cat = Cat.objects.get_or_create(nom=u"Operation Ventilée", defaults={'type': "d", 'nom': u"Operation Ventilée"})
+        if instance.montant != instance.tot_fille:
+            if (instance.rapp or instance.pointe):
+                raise ValidationError(u"attention cette opération est pointée ou rapproché et on change le montant global")
+            else:
+                instance.montant = instance.tot_fille
+    if not instance.moyen:
+        if instance.montant >= 0:
+            if instance.compte.moyen_credit_defaut:
+                instance.moyen = instance.compte.moyen_credit_defaut
+            else:
+                moyen = Moyen.objects.get_or_create(id=settings.sMD_CREDIT, defaults={'nom':"moyen_par_defaut_credit", "id": settings.MD_CREDIT})[0]
+                instance.moyen = moyen
+        if  instance.montant <= 0:
+            if instance.compte.moyen_debit_defaut:
+                instance.moyen = instance.compte.moyen_debit_defaut
+            else:
+                moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom':"moyen_par_defaut_debit", "id": settings.MD_DEBIT})[0]
+                instance.moyen = moyen

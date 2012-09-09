@@ -11,6 +11,7 @@ from django.db import IntegrityError
 #from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django import forms
 
 from django.utils.translation import ugettext_lazy as _
 #from django.db.models import Q
@@ -116,7 +117,7 @@ def fusion(request, queryset, sens):
         message = inst.__unicode__()
         messages.error(request, message)
 
-
+from urlparse import urlparse
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
 
@@ -139,7 +140,8 @@ class Modeladmin_perso(admin.ModelAdmin):
         if ref.find('?') != -1:
             # We've got a query string, set the session value
             request.session['filtered'] = ref
-
+        #else:
+            #request.session['filtered'] = None
         if request.POST.has_key('_save'):
             try:
                 if request.session['filtered'] is not None:
@@ -263,13 +265,18 @@ class Compte_titre_admin(Modeladmin_perso):
     list_display = ('nom', 'solde_titre', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-
+class ope_fille_admin(admin.TabularInline):
+    model = Ope
+    fields = ('compte', 'date', 'montant', 'cat','ib')
+    readonly_fields = ('compte', 'date', 'montant', 'cat','ib')
+    fk_name = 'mere'
+    can_delete = False
+    extra = 0
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp'), 'show_jumelle', 'show_mere', 'oper_titre',
-              'notes', 'exercice',   'num_cheque')
-    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'show_pmv')
+    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'show_mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
+    readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
@@ -280,7 +287,13 @@ class Ope_admin(Modeladmin_perso):
     save_as = True
     search_fields = ['tiers__nom']
     ordering = ['date']
+    inlines = [ope_fille_admin]
 
+    def is_mere(self, obj):
+        if obj.is_mere:
+            return u"opérations filles ci dessous"
+        else:
+            return u"aucune opération fille"
     def show_jumelle(self, obj):
         """
         retourne le lien pour l'operation lié dans le cadre des virements entre comptes
@@ -291,20 +304,8 @@ class Ope_admin(Modeladmin_perso):
         else:
             return "(aucun-e)"
 
-    show_jumelle.short_description = "operation"
+    show_jumelle.short_description = u"Opération jumelle"
 
-    def show_pmv(self, obj):
-        """
-        retourne le lien pour l'operation lié dans le cadre des plus ou moins values
-        """
-
-        if obj.ope_pmv_id:
-            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
-        else:
-            return "(aucun-e)"
-
-    show_jumelle.short_description = "operation"
 
     def show_mere(self, obj):
         if obj.mere_id:
@@ -463,7 +464,7 @@ class Gen_admin(Modeladmin_perso):
 
 class Ope_titre_admin(Modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
-    readonly_fields = ('invest', 'show_ope')
+    readonly_fields = ('invest', 'show_ope', "show_ope_pmv")
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)
@@ -472,8 +473,14 @@ class Ope_titre_admin(Modeladmin_perso):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
 
-    show_ope.short_description = "ope"
+    show_ope.short_description = "operation"
 
+    def show_ope_pmv(self, obj):
+        o = Ope.objects.get(id=obj.ope_pmv)
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(o.id, ))
+        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
+
+    show_ope_pmv.short_description = "operation relative aux plus ou moins values"
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)

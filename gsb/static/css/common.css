@@ -129,12 +129,13 @@ h2{
     background-color: #706666;
 }
 
-.footerbar td{
+.footerbar{
     background-color: #990000;
     font-weight: bold;
     padding: .7em;
     height: 3em;
 }
+
 
 .bar td{
     background-color: #990000;

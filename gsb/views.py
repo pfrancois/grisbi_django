@@ -18,6 +18,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnIn
 from django.core import exceptions as django_exceptions
 from django.views.generic.edit import FormView
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 
 def has_changed(instance, field):
     if not instance.pk:
@@ -84,30 +85,26 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     else:
         titre = False
     if not titre:
-        date_rappro = c.date_rappro()
-        solde_rappro = c.solde(rapp=True)
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
         if all:
             nb_ope_vieilles = 0
             nb_ope_rapp = 0
-            solde = c.solde()
-        else:
-            if rapp:
-                nb_ope_vieilles = 0
-                nb_ope_rapp = 0
-                solde = c.solde(rapp=True)
-                q = q.exclude(rapp__isnull=True)
-            else:
-                nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
-                nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
-                q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
-                solde = c.solde()
-                #gestion du tri
+        if rapp:
+            nb_ope_vieilles = 0
+            nb_ope_rapp = 0
+            q = q.filter(Q(rapp__isnull=False)|Q(pointe=True))
+        if not all and not rapp:
+            nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+            nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
+            q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
+        #gestion du tri
         try:
-            sort = request.GET.get('sort')
-        except (ValueError, TypeError):
-            sort = ''
+            sort = request.GET.get('sort')  #il y a un sort dans le get
+        except (ValueError, TypeError):  #non donc on regarde dans l'historique
+            sort = False
+            if request.session.key('sort', False):
+                sort = request.session.key('sort', False)
         if sort:
             sort = unicode(sort)
             q = q.order_by(sort)
@@ -116,6 +113,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             q = q.order_by('-date')
             sort_get = None
         q = q.select_related('tiers', 'cat', 'rapp')
+
         #gestion pagination
         paginator = Paginator(q, 50)
         try:
@@ -140,12 +138,14 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'nbrapp':nb_ope_rapp,
                         'nbvieilles':nb_ope_vieilles,
                         'titre':c.nom,
-                        'solde':solde,
+                        'solde':c.solde(),
                         'date_limite':date_limite,
                         'nb_j':settings.NB_JOURS_AFF,
                         "sort":sort_get,
-                        "date_r":date_rappro,
-                        "solde_r":solde_rappro
+                        "date_r":c.date_rappro(),
+                        "solde_r":c.solde(rapp=True),
+                        "solde_p": c.solde_pointe(),
+                        "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
                     }
                 )
             )
@@ -316,7 +316,7 @@ def vir_new(request, cpt_id=None):
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
-            messages.success(request, u"virement crée %s" % ope.jumelle.tiers)
+            messages.success(request, u"virement crée %s=>%s" % (ope.compte, ope.jumelle.compte))
             return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
