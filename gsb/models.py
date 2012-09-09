@@ -1360,8 +1360,12 @@ def verif_ope_rapp(sender, **kwargs):
             raise IntegrityError(u"opération mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
+
+@receiver(pre_save, sender=Ope)
+def verif_ope_save(sender, **kwargs):
+    instance = kwargs['instance']
     if instance.is_mere:
-        instance.cat = Cat.objects.get_or_create(nom=u"Operation Ventilée", defaults={'type': "d", 'nom': u"Operation Ventilée"})
+        instance.cat = Cat.objects.get_or_create(nom=u"Operation Ventilée", defaults={'type': "d", 'nom': u"Operation Ventilée"})[0]
         if instance.montant != instance.tot_fille:
             if (instance.rapp or instance.pointe):
                 raise ValidationError(u"attention cette opération est pointée ou rapproché et on change le montant global")

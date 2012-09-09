@@ -267,8 +267,10 @@ class Compte_titre_admin(Modeladmin_perso):
 
 class ope_fille_admin(admin.TabularInline):
     model = Ope
-    fields = ('compte', 'date', 'montant', 'cat','ib')
-    readonly_fields = ('compte', 'date', 'montant', 'cat','ib')
+    fields = ( 'montant', 'cat','ib', 'notes')
+    formfield_overrides = {
+        models.TextField: {'widget': forms.TextInput,},
+    }
     fk_name = 'mere'
     can_delete = False
     extra = 0
@@ -292,7 +294,6 @@ class Ope_admin(Modeladmin_perso):
 
     def is_mere(self, obj):
         if obj.is_mere:
-            print obj.filles_set.count(), obj.id
             return u"opérations filles ci dessous"
         else:
             return u"aucune opération fille"
@@ -303,7 +304,6 @@ class Ope_admin(Modeladmin_perso):
             if obj.cat.nom == u"Operation Ventilée":
                 return "mere"
             else:
-                print obj.cat.nom
                 return "solitaire"
 
     def show_jumelle(self, obj):
