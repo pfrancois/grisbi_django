@@ -278,7 +278,7 @@ class Ope_admin(Modeladmin_perso):
     fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
+    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe', "mere_fille")
     list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
@@ -296,6 +296,16 @@ class Ope_admin(Modeladmin_perso):
             return u"opérations filles ci dessous"
         else:
             return u"aucune opération fille"
+    def mere_fille(self, obj):
+        if obj.is_fille:
+            return "fille"
+        else:
+            if obj.cat.nom == u"Operation Ventilée":
+                return "mere"
+            else:
+                print obj.cat.nom
+                return "solitaire"
+
     def show_jumelle(self, obj):
         """
         retourne le lien pour l'operation lié dans le cadre des virements entre comptes
