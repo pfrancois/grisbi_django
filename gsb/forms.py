@@ -41,7 +41,7 @@ class ImportForm1(Baseform):
 
 class OperationForm(Basemodelform):
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required=False)
-    compte = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    compte = forms.ModelChoiceField(Compte.objects.filter(ouvert=True), empty_label=None)
     cat = forms.ModelChoiceField(Cat.objects.all().order_by('type', 'nom'), empty_label=None, required=True)
     ib = forms.ModelChoiceField(Ib.objects.all().order_by('type', 'nom'), required=False)
     montant = gsb_field.CurField()
@@ -79,9 +79,9 @@ class OperationForm(Basemodelform):
 
 class VirementForm(Baseform):
     date = gsb_field.DateFieldgsb()
-    compte_origine = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    compte_origine = forms.ModelChoiceField(Compte.objects.filter(ouvert=True), empty_label=None)
     moyen_origine = forms.ModelChoiceField(Moyen.objects.all(), required=False)
-    compte_destination = forms.ModelChoiceField(Compte.objects.all(), empty_label=None)
+    compte_destination = forms.ModelChoiceField(Compte.objects.filter(ouvert=True), empty_label=None)
     moyen_destination = forms.ModelChoiceField(Moyen.objects.all(), required=False)
     montant = gsb_field.CurField()
     notes = forms.CharField(widget=forms.Textarea, required=False)
