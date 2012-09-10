@@ -283,7 +283,7 @@ class Ope_admin(Modeladmin_perso):
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe', "mere_fille")
     list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('pointe', 'montant')
+    list_editable = ('pointe', 'montant', 'cat')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     #save_on_top = True
     save_as = True
@@ -299,9 +299,9 @@ class Ope_admin(Modeladmin_perso):
             return u"aucune opération fille"
     def mere_fille(self, obj):
         if obj.is_fille:
-            return "fille"
+            return "fille de %s" % (obj.mere_id)
         else:
-            if obj.cat.nom == u"Operation Ventilée":
+            if obj.cat.nom == u"Opération Ventilée":
                 return "mere"
             else:
                 return "solitaire"

@@ -211,6 +211,8 @@ class Titre(models.Model):
                     liste.append(utils.strpdate(datel))
                 liste.append(self.last_cours_date(rapp=rapp))
                 date_r = min(liste)
+                if date_r == None:
+                    return 0
             else:
                 return 0 #comme pas d'ope, pas d'encours
         else:
@@ -1365,7 +1367,7 @@ def verif_ope_rapp(sender, **kwargs):
 def verif_ope_save(sender, **kwargs):
     instance = kwargs['instance']
     if instance.is_mere:
-        instance.cat = Cat.objects.get_or_create(nom=u"Operation Ventilée", defaults={'type': "d", 'nom': u"Operation Ventilée"})[0]
+        instance.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
         if instance.montant != instance.tot_fille:
             if (instance.rapp or instance.pointe):
                 raise ValidationError(u"attention cette opération est pointée ou rapproché et on change le montant global")
