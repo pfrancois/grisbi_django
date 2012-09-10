@@ -112,6 +112,24 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
         else:
             q = q.order_by('-date')
             sort_get = None
+        sort_t = {}
+        if sort == "-date":
+            sort_t['date'] = "date"
+        else:
+            sort_t['date'] = "-date"
+        if sort == "tiers":
+            sort_t['tiers'] = "-tiers"
+        else:
+            sort_t['tiers'] = "tiers"
+        if sort == "cat":
+            sort_t['cat'] = "-cat"
+        else:
+            sort_t['cat'] = "cat"
+        if sort == "montant":
+            sort_t['montant'] = "-montant"
+        else:
+            sort_t['montant'] = "montant"
+
         q = q.select_related('tiers', 'cat', 'rapp')
 
         #gestion pagination
@@ -146,6 +164,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         "solde_r":c.solde(rapp=True),
                         "solde_p": c.solde_pointe(),
                         "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
+                        "sort_tab": sort_t,
                     }
                 )
             )

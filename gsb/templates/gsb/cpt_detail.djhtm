@@ -23,11 +23,11 @@
     <table id="main" class="table">
         <thead class="entete">
             <tr>{% block titre_col_ope %}
-                <th class="opDate"><a href="?sort=-date">Date</a></th>
-                <th class="opTier"><a href="?sort=tiers">Tiers</a></th>
-                <th class="opTier"><a href="?sort=cat">Cat&eacute;gorie</a></th>
-                <th class="opDebit"><a href="?sort=-montant">Cr&eacute;dit</a></th>
-                <th class="opDebit"><a href="?sort=montant">D&eacute;bit</a></th>{% endblock titre_col_ope %}
+                <th class="opDate"><a href="?sort={{ sort_tab.date }}">Date</a></th>
+                <th class="opTier"><a href="?sort={{ sort_tab.tiers }}">Tiers</a></th>
+                <th class="opTier"><a href="?sort={{ sort_tab.cat }}">Cat&eacute;gorie</a></th>
+                <th class="opDebit"><a href="?sort={{ sort_tab.montant }}">Cr&eacute;dit</a></th>
+                <th class="opDebit"><a href="?sort={{ sort_tab.montant }}">D&eacute;bit</a></th>{% endblock titre_col_ope %}
             </tr>
         </thead>
         <tfoot class="bar">
