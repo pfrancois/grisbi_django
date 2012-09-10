@@ -46,7 +46,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="cptLabel">Solde p&r:</td>
-                    <td colspan="2" class="cptSolde">{{ solde_r|add:solde_p|cur }}</td>
+                    <td colspan="2" class="cptSolde">{{ solde_pr|cur }}</td>
                 </tr>
             {% endblock footer %}
         </tfoot>
