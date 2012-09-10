@@ -113,10 +113,10 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             q = q.order_by('-date')
             sort_get = None
         sort_t = {}
-        if sort == "-date":
-            sort_t['date'] = "date"
-        else:
+        if sort == "date":
             sort_t['date'] = "-date"
+        else:
+            sort_t['date'] = "date"
         if sort == "tiers":
             sort_t['tiers'] = "-tiers"
         else:
@@ -129,7 +129,6 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             sort_t['montant'] = "-montant"
         else:
             sort_t['montant'] = "montant"
-
         q = q.select_related('tiers', 'cat', 'rapp')
 
         #gestion pagination
