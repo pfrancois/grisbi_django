@@ -506,7 +506,7 @@ def export(request):
         return render_to_response('generic.djhtm',
                 {
                 'titre':'import gsb',
-                'resultats':({'texte':u"attention, il n'y a pas de comptes donc pas de possibilité d'export."},)
+                'resultats':(u"attention, il n'y a pas de comptes donc pas de possibilité d'export.",)
             },
                                   context_instance=RequestContext(request)
         )

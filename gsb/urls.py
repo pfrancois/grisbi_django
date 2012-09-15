@@ -62,6 +62,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name="cpt_titre_maj"),
+                        url(r'^perso$', 'perso'),
                         )
 #gestion de mes trucs perso
 perso = False# ya plus rien dedans

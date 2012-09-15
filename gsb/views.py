@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat
+from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
 import datetime
 from . import forms as gsb_forms
 from django.db import models
@@ -334,7 +334,7 @@ def vir_new(request, cpt_id=None):
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
-            messages.success(request, u"virement crée %s=>%s" % (ope.compte, ope.jumelle.compte))
+            messages.success(request, u"virement crée %s=>%s de %s le %s" % (ope.compte, ope.jumelle.compte, ope.compte.montant, ope.date))
             return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
@@ -815,3 +815,21 @@ class ExportViewBase(FormView):
         else:
             messages.error(self.request, u"attention pas d'opérations pour la selection demandée")
             return self.render_to_response({'form':form, })
+
+import string
+def perso(request):
+    resultat=[]
+    sg=Compte.objects.get(id=12)
+    visa=Compte.objects.get(id=19)
+    for r in Rapp.objects.filter(nom__startswith="Sg"):
+        solde_visa=r.ope_set.filter(compte__nom="Visa").aggregate(total=models.Sum('montant'))['total']
+        if solde_visa:
+            resultat.append(r.nom)
+            resultat.append(solde_visa)
+        #r.save()
+    return render(request, 'generic.djhtm',
+            {'resultats':resultat,
+             'titre_long':"traitement personalise",
+             'titre':"perso",
+             }
+    )
