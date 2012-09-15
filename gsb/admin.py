@@ -283,7 +283,7 @@ class Ope_admin(Modeladmin_perso):
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe', "mere_fille")
     list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('pointe', 'montant', 'cat')
+    list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     #save_on_top = True
     save_as = True
@@ -456,12 +456,19 @@ class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
 
+class ope_rapp_admin(admin.TabularInline):
+    model = Ope
+    fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat','ib', 'notes')
+    readonly_fields = ( 'compte', 'date', 'tiers','moyen', 'montant', 'cat','ib', 'notes')
+    fk_name = 'rapp'
+    can_delete = False
+    extra = 0
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_display = ('nom', 'date')
-
+    inlines = [ope_rapp_admin]
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
