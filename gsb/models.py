@@ -1069,49 +1069,6 @@ class Echeance(models.Model):
         super(Echeance, self).save(force_insert, force_update, using)
 
 
-class Generalite(models.Model):
-    """config dans le fichier"""
-    titre = models.CharField(max_length=40, blank=True, default="isbi")
-    utilise_exercices = models.BooleanField(default=True)
-    utilise_ib = models.BooleanField(default=True)
-    utilise_pc = models.BooleanField(default=False)
-    affiche_clot = models.BooleanField(default=True)
-
-    class Meta:
-        db_table = 'gsb_generalite'
-        verbose_name = u"généralités"
-        verbose_name_plural = u'généralités'
-
-    def __unicode__(self):
-        return u"%s" % (self.id, )
-
-    @staticmethod
-    def gen():
-        """
-        renvoie les generalites
-        """
-        try:
-            gen_1 = Generalite.objects.get(id=1)
-        except Generalite.DoesNotExist:
-            Generalite.objects.create(id=1)
-            gen_1 = Generalite.objects.get(id=1)
-        return gen_1
-
-    @staticmethod
-    def dev_g():
-        """ renvoie la devise generalement utilise
-        """
-        return settings.DEVISE_GENERALE
-
-    def save(self, *args, **kwargs):
-        """ gestion de save
-        """
-        if Generalite.objects.count() > 0:
-            return
-        else:
-            super(Generalite, self).save(*args, **kwargs)
-
-
 class Ope(models.Model):
     """operation"""
     compte = models.ForeignKey(Compte)

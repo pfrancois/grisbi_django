@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
+from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
 import datetime
 from . import forms as gsb_forms
 from django.db import models
@@ -40,7 +40,7 @@ def index(request):
     view index
     """
     t = loader.get_template('gsb/index.djhtm')
-    if Generalite.gen().affiche_clot:
+    if settings.affiche_clot:
         bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
         pl = Compte_titre.objects.all()
     else:

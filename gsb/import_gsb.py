@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from django.db import connection, transaction
 
 from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Generalite, Compte, Compte_titre, Ope_titre)
+                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
 import datetime
 import time
 import decimal
@@ -42,7 +42,7 @@ def import_gsb_050(nomfich, efface_table=True):
     tabl_correspondance_ope = {}
     if efface_table:
         for table in (
-            'generalite', 'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
+            'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
             'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from gsb_%s;" % table) #@UndefinedVariable
             transaction.commit_unless_managed()
@@ -62,16 +62,6 @@ def import_gsb_050(nomfich, efface_table=True):
         titre_fichier = ""
     else:
         titre_fichier = xml_generalite.find('Titre').text
-
-    element, created = Generalite.objects.get_or_create(
-        id=1,
-        defaults={
-            'titre':titre_fichier,
-            'utilise_exercices':bool(int(xml_generalite.find('Utilise_exercices').text)),
-            'utilise_ib':bool(int(xml_generalite.find('Utilise_IB').text)),
-            'utilise_pc':bool(int(xml_generalite.find('Utilise_PC').text))
-        })
-    logger.warning(u'generalites ok')
     #------------------------------devises---------------------------
     nb = 0
     nb_nx = 0

@@ -16,7 +16,7 @@ from . import forms as gsb_forms
 from . import widgets as gsb_field
 from django import forms
 #models
-from .models import Generalite, Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
+from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
 from django.db import models
 from django.db.models import Q
 #divers

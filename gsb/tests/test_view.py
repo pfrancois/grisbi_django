@@ -5,7 +5,7 @@ test models
 from __future__ import absolute_import
 import os
 from .test_base import TestCase
-from ..models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
+from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
 from ..models import Rapp, Echeance, Gsb_exc, Ex_jumelle_neant
 from django.core.exceptions import ValidationError

@@ -731,17 +731,6 @@
     },
     {
         "pk": 1,
-        "model": "gsb.generalite",
-        "fields": {
-            "titre": "isbi",
-            "affiche_clot": true,
-            "utilise_exercices": true,
-            "utilise_pc": false,
-            "utilise_ib": true
-        }
-    },
-    {
-        "pk": 1,
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,

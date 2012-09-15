@@ -5,7 +5,7 @@ test models
 from __future__ import absolute_import
 import os
 from .test_base import TestCase
-from ..models import Generalite, Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
+from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
 from ..models import Rapp, Echeance, Gsb_exc, Ex_jumelle_neant
 from django.core.exceptions import ValidationError
@@ -36,7 +36,6 @@ class test_models(TestCase):
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"r1")
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"cpte1=>cptb2 pour 10")
         self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"20 pour tiers1")
-        self.assertEquals(Generalite.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-08-11 : 10 EUR a tiers1 cpt: cpte1")
 
     def test_mul(self):
@@ -610,21 +609,6 @@ class test_models(TestCase):
     def test_echeance_check1(self):
         Echeance.check()
 
-
-    def test_generalite_gen(self):
-        self.assertEquals(Generalite.gen().id, 1)
-        #on efface afin de le recreer
-        Generalite.gen().delete()
-        self.assertEquals(Generalite.gen().id, 1)
-        self.assertEquals(Generalite.gen().titre, "isbi")
-
-    def test_generalite_dev_g(self):
-        self.assertEqual(Generalite.dev_g(), 'EUR')
-
-    def test_generalite_save(self):
-        Generalite.objects.create()
-        self.assertEquals(Generalite.objects.count(), 1)
-
     def test_ope_absolute_url(self):
         self.assertEqual(Ope.objects.get(id=1).get_absolute_url(), '/ope/1/')
 
@@ -705,10 +689,10 @@ class test_models(TestCase):
 
     def test_virement_error(self):
         #_non_ope
-        self.assertRaises(TypeError, lambda:Virement(Generalite.gen()))
+        self.assertRaises(TypeError, lambda:Virement('35'))
         #creation avec autre que ope
         c = Compte.objects.get(id=1)
-        nc = Generalite.gen()
+        nc = "ceci est un compte en fait mais non"
         v = Virement()
         self.assertRaises(TypeError, lambda:v.create(compte_origine=nc, compte_dest=c, montant=2))
         self.assertRaises(TypeError, lambda:v.create(compte_origine=c, compte_dest=nc, montant=2))
@@ -806,4 +790,3 @@ class test_model2(TestCase):
         o.cours = 3;
         o.save()
         self.assertEqual(t.encours(), 30)
-

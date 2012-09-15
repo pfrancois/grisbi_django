@@ -1,8 +1,7 @@
 # -*- coding: utf-8
 from __future__ import absolute_import
 from django import forms
-from .models import (Compte, Cat, Moyen, Ope, Virement, Generalite,
-                     Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
+from .models import (Compte, Cat, Moyen, Ope, Virement, Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
 from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
@@ -209,15 +208,6 @@ class Ope_titreForm(Basemodelform):
 
     class Meta:
         model = Ope_titre
-
-
-class GeneraliteForm(Basemodelform):
-    class Meta:
-        model = Generalite
-        fields = ('utilise_exercices', 'utilise_ib', 'utilise_pc', 'affiche_clot')
-
-    def __init__(self, *args, **kwargs):
-        super(GeneraliteForm, self).__init__(*args, **kwargs)
 
 
 class MajCoursform(Baseform):

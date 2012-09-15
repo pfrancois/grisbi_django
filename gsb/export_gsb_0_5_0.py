@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 
-from .models import (Generalite, Compte, Ope, Tiers, Cat, Moyen,
+from .models import (Compte, Ope, Tiers, Cat, Moyen,
                      Echeance, Ib, Banque, Exercice, Rapp, Titre)
 # Compte_titre, Virement,
 from django.http import HttpResponse
@@ -57,18 +57,17 @@ def _export():
                                         'sib':None}
             #####generalites###
     xml_root = et.Element("Grisbi")
-    q_generalite = Generalite.objects.all()[0]
     xml_generalites = et.SubElement(xml_root, "Generalites")
     et.SubElement(xml_generalites, "Version_fichier").text = "0.5.0"
     et.SubElement(xml_generalites, "Version_grisbi").text = "0.5.9 for Windows (GTK>=2.6.9)"#NOT IN BDD
     et.SubElement(xml_generalites, "Fichier_ouvert").text = "0"
     et.SubElement(xml_generalites, "Backup").text = "sauvegarde.gsb"#NOT IN BDD
-    et.SubElement(xml_generalites, "Titre").text = str(q_generalite.titre)#NOT IN BDD
+    et.SubElement(xml_generalites, "Titre").text = str(settings.titre)#NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_commune").text = ''#NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_secondaire").text = ''#NOT IN BDD
-    et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(q_generalite.utilise_exercices)
-    et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(q_generalite.utilise_ib)
-    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(q_generalite.utilise_pc)
+    et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(settings.utilise_exercices)
+    et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(settings.utilise_ib)
+    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(setiings.utilise_pc)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = "1"
     et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = "1"

@@ -24,6 +24,11 @@ NB_JOURS_AFF = 30
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1#cpt principal utlise si l'on ne rentre pas de compte
+affiche_clot=False
+titre="20041127"
+Utilise_exercices=False
+utilise_ib=True
+utilise_pc=False
 
 #taux de cotisations sociales
 #attention c'est un taux special estime

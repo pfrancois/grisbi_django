@@ -2,7 +2,6 @@
 """les vues qui sont implementés ici
 import_file : vue qui gere les import
 option_index: vue qui gere l'index de toutes les options possible accesibles vie le menu option
-modif_gen:vue pour modifier les generalites
 gestion_echeances:vue qui gere les echeances
 """
 
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from . import forms as gsb_forms
 import logging, os, time
-from .models import Generalite, Echeance
+from .models import Echeance
 from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
@@ -104,36 +103,6 @@ def import_file(request):
 def options_index(request):
     """vue qui gere l'index de toutes les options possible accesibles vie le menu option"""
     return render_to_response('gsb/options.djhtm', context_instance=RequestContext(request))
-
-
-@login_required
-def modif_gen(request):
-    """vue pour modifier les generalites"""
-    logger = logging.getLogger('gsb')
-    if request.method == 'POST':
-        form = gsb_forms.GeneraliteForm(request.POST, request.FILES)
-        if form.is_valid():
-            g = Generalite.gen()
-            logger.info('modification de gen')
-            g.utilise_exercices = form.cleaned_data['utilise_exercices']
-            g.utilise_ib = form.cleaned_data['utilise_ib']
-            g.utilise_pc = form.cleaned_data['utilise_pc']
-            g.affiche_clot = form.cleaned_data['affiche_clot']
-            g.save()
-            return HttpResponseRedirect(reverse('gsb.outils.options_index'))
-        else:
-            return  render_to_response('gsb/outil_generalites.djhtm',
-                    {'titre':u'modification de certaines options',
-                     'form':form},
-                                       context_instance=RequestContext(request)
-            )
-    else:
-        form = gsb_forms.GeneraliteForm(instance=Generalite.gen())
-        return  render_to_response('gsb/outil_generalites.djhtm',
-                {'titre':u'modification de certaines options',
-                 'form':form},
-                                   context_instance=RequestContext(request)
-        )
 
 
 @login_required

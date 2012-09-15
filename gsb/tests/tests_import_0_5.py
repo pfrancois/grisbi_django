@@ -25,9 +25,7 @@ class importtests(Tcd):
 
     def test_pas_de_titre(self):
         import_gsb_050("%s/../test_files/mauvais2.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        obj = Generalite.gen()
-        self.assertIsInstance(obj, Generalite)
-        self.assertEquals(obj.titre, '')
+        self.assertEquals(obj.titre, settings.titre)
 
 
 class importposttests(Tcd):
@@ -190,14 +188,6 @@ class importposttests(Tcd):
         self.assertEquals(obj.notes, u"echeance")
         self.assertEquals(obj.inscription_automatique, False)
         self.assertEquals(obj.periodicite[0], 'u')
-
-    def test_generalites(self):
-        obj = Generalite.gen()
-        self.assertIsInstance(obj, Generalite)
-        self.assertEquals(obj.titre, 'tiitre du fichier')
-        self.assertEquals(obj.utilise_exercices, True)
-        self.assertEquals(obj.utilise_ib, True)
-        self.assertEquals(obj.utilise_pc, True)
 
     def test_ope(self):
         self.assertEqual(Ope.objects.all().count(), 13)

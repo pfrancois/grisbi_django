@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .test_base import TestCase
 from .. import utils
 import datetime, time
-from ..models import Generalite, Exercice, Cat
+from ..models import Exercice, Cat
 import decimal
 
 
@@ -40,18 +40,12 @@ class test_utils(TestCase):
         self.assertEquals(utils.Format.type(liste, 'jhk'), '0')
 
     def test_format_max(self):
-        self.assertEquals(utils.Format.max(Generalite.objects.all()), '1')
-        self.assertEquals(utils.Format.max(Generalite.objects.filter(id=2), defaut='25'), '25')
-        self.assertEquals(utils.Format.max(Generalite.objects.filter(id=2), ), '0')
-        self.assertEquals(utils.Format.max(Generalite.objects.filter(id=2), defaut='3'), '3')
         self.assertEquals(utils.Format.max(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
 
     def test_format_str(self):
-        self.assertEquals(utils.Format.str(Generalite.objects.get(id=1)), '1')
         self.assertEquals(utils.Format.str(None), '0')
         self.assertEquals(utils.Format.str(None, defaut='toto'), 'toto')
         self.assertEquals(utils.Format.str(Cat.objects.get(id=65), membre='nom'), 'frais bancaires')
-        self.assertEquals(utils.Format.str(Generalite.objects.get(id=1), membre='utilise_exercices'), 'True')
 
     def test_validrib(self):
         self.assertEquals(utils.validrib('10001', '12345', '01234567890', 72), True)

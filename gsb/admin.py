@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Generalite, Compte_titre, Ope_titre, Compte
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
@@ -513,6 +513,5 @@ admin.site.register(Exercice, Exo_admin)
 admin.site.register(Rapp, Rapp_admin)
 admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
-admin.site.register(Generalite, Gen_admin)
 admin.site.register(Compte_titre, Compte_titre_admin)
 admin.site.register(Ope_titre, Ope_titre_admin)
