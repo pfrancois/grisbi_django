@@ -127,7 +127,7 @@ function closeCurrentEditor() {
         editorOriginalValue = "";
         currentEditField = "";
         currentEditor = "";
-        window.scroll(0, 0);
+        window.scrollTo(0, 0);
     }
 }
 
@@ -142,7 +142,7 @@ function startEditor(editorId, fieldId) {
         currentEditor.style.top = (posy + 25) + "px";
         currentEditor.style.visibility = "visible";
         editorOriginalValue = currentEditField.innerHTML;
-        scroll(0, posy);
+        window.scrollTo(0, posy);
     }
 }
 

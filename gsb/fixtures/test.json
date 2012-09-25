@@ -1,27 +1,9 @@
 [
     {
-        "pk": 9,
+        "pk": 7,
         "model": "gsb.tiers",
         "fields": {
-            "nom": "cptb2 => cpt_titre1",
-            "notes": "",
-            "is_titre": false
-        }
-    },
-    {
-        "pk": 6,
-        "model": "gsb.tiers",
-        "fields": {
-            "nom": "cptb2 => cpte_1",
-            "notes": "",
-            "is_titre": false
-        }
-    },
-    {
-        "pk": 8,
-        "model": "gsb.tiers",
-        "fields": {
-            "nom": "cpte1 => cpt_titre1",
+            "nom": "Virement",
             "notes": "",
             "is_titre": false
         }
@@ -45,7 +27,7 @@
         }
     },
     {
-        "pk": 5,
+        "pk": 3,
         "model": "gsb.tiers",
         "fields": {
             "nom": "titre_ autre",
@@ -54,7 +36,16 @@
         }
     },
     {
-        "pk": 3,
+        "pk": 8,
+        "model": "gsb.tiers",
+        "fields": {
+            "nom": "titre_ autre 2",
+            "notes": "svjkdfkjh@ZZZ",
+            "is_titre": true
+        }
+    },
+    {
+        "pk": 4,
         "model": "gsb.tiers",
         "fields": {
             "nom": "titre_ t1",
@@ -63,7 +54,7 @@
         }
     },
     {
-        "pk": 4,
+        "pk": 5,
         "model": "gsb.tiers",
         "fields": {
             "nom": "titre_ t2",
@@ -72,41 +63,51 @@
         }
     },
     {
-        "pk": 7,
+        "pk": 6,
         "model": "gsb.tiers",
         "fields": {
             "nom": "titre_ t4",
-            "notes": "aaa@ZZZ",
+            "notes": "aaa@CSL",
             "is_titre": true
-        }
-    },
-    {
-        "pk": 3,
-        "model": "gsb.titre",
-        "fields": {
-            "nom": "autre",
-            "tiers": 5,
-            "type": "ZZZ",
-            "isin": "a"
         }
     },
     {
         "pk": 1,
         "model": "gsb.titre",
         "fields": {
-            "nom": "t1",
+            "nom": "autre",
             "tiers": 3,
-            "type": "ACT",
-            "isin": "1"
+            "type": "ZZZ",
+            "isin": "a"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "gsb.titre",
+        "fields": {
+            "nom": "autre 2",
+            "tiers": 8,
+            "type": "ZZZ",
+            "isin": "svjkdfkjh"
         }
     },
     {
         "pk": 2,
         "model": "gsb.titre",
         "fields": {
-            "nom": "t2",
+            "nom": "t1",
             "tiers": 4,
             "type": "ACT",
+            "isin": "1"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "gsb.titre",
+        "fields": {
+            "nom": "t2",
+            "tiers": 5,
+            "type": "OBL",
             "isin": "2"
         }
     },
@@ -115,62 +116,35 @@
         "model": "gsb.titre",
         "fields": {
             "nom": "t4",
-            "tiers": 7,
-            "type": "ZZZ",
+            "tiers": 6,
+            "type": "CSL",
             "isin": "aaa"
-        }
-    },
-    {
-        "pk": 8,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2011-12-18",
-            "titre": 1,
-            "valeur": "1"
-        }
-    },
-    {
-        "pk": 9,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2011-12-17",
-            "titre": 2,
-            "valeur": "10"
         }
     },
     {
         "pk": 4,
         "model": "gsb.cours",
         "fields": {
-            "date": "2011-10-30",
-            "titre": 2,
-            "valeur": "5"
-        }
-    },
-    {
-        "pk": 6,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2011-10-30",
-            "titre": 3,
+            "date": "2012-09-24",
+            "titre": 1,
             "valeur": "1"
-        }
-    },
-    {
-        "pk": 7,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2011-10-30",
-            "titre": 4,
-            "valeur": "2"
         }
     },
     {
         "pk": 5,
         "model": "gsb.cours",
         "fields": {
-            "date": "2011-01-30",
-            "titre": 1,
+            "date": "2012-09-23",
+            "titre": 5,
+            "valeur": "2"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "gsb.cours",
+        "fields": {
+            "date": "2011-12-18",
+            "titre": 2,
             "valeur": "1"
         }
     },
@@ -178,27 +152,18 @@
         "pk": 2,
         "model": "gsb.cours",
         "fields": {
-            "date": "2010-01-01",
-            "titre": 1,
-            "valeur": "1"
+            "date": "2011-11-30",
+            "titre": 3,
+            "valeur": "10"
         }
     },
     {
         "pk": 3,
         "model": "gsb.cours",
         "fields": {
-            "date": "2010-01-01",
-            "titre": 2,
-            "valeur": "1"
-        }
-    },
-    {
-        "pk": 1,
-        "model": "gsb.cours",
-        "fields": {
-            "date": "2009-12-31",
-            "titre": 2,
-            "valeur": "10"
+            "date": "2011-10-29",
+            "titre": 3,
+            "valeur": "5"
         }
     },
     {
@@ -217,6 +182,38 @@
             "cib": "99999",
             "notes": "",
             "nom": "banque2"
+        }
+    },
+    {
+        "pk": 64,
+        "model": "gsb.cat",
+        "fields": {
+            "nom": "Operation Sur Titre",
+            "type": "d"
+        }
+    },
+    {
+        "pk": 66,
+        "model": "gsb.cat",
+        "fields": {
+            "nom": "Op\u00e9ration Ventil\u00e9e",
+            "type": "d"
+        }
+    },
+    {
+        "pk": 67,
+        "model": "gsb.cat",
+        "fields": {
+            "nom": "Revenus de placement:Plus-values",
+            "type": "d"
+        }
+    },
+    {
+        "pk": 65,
+        "model": "gsb.cat",
+        "fields": {
+            "nom": "Virement",
+            "type": "d"
         }
     },
     {
@@ -239,7 +236,7 @@
         "pk": 3,
         "model": "gsb.cat",
         "fields": {
-            "nom": "cat3_d",
+            "nom": "cat3",
             "type": "d"
         }
     },
@@ -247,24 +244,8 @@
         "pk": 4,
         "model": "gsb.cat",
         "fields": {
-            "nom": "cat4_v",
+            "nom": "cat4",
             "type": "v"
-        }
-    },
-    {
-        "pk": 65,
-        "model": "gsb.cat",
-        "fields": {
-            "nom": "frais bancaires:",
-            "type": "d"
-        }
-    },
-    {
-        "pk": 64,
-        "model": "gsb.cat",
-        "fields": {
-            "nom": "operation sur titre :",
-            "type": "d"
         }
     },
     {
@@ -292,14 +273,6 @@
         }
     },
     {
-        "pk": 4,
-        "model": "gsb.ib",
-        "fields": {
-            "nom": "ib4",
-            "type": "v"
-        }
-    },
-    {
         "pk": 2,
         "model": "gsb.exercice",
         "fields": {
@@ -313,7 +286,7 @@
         "model": "gsb.exercice",
         "fields": {
             "nom": "exo1",
-            "date_fin": "2010-10-31",
+            "date_fin": "2010-12-31",
             "date_debut": "2010-01-01"
         }
     },
@@ -344,15 +317,15 @@
             "nom": "cpt_titre1",
             "cle_compte": 0,
             "solde_mini_voulu": "0",
-            "banque": 1,
+            "banque": 2,
             "type": "t",
             "notes": "",
             "num_compte": "",
             "solde_init": "0",
             "solde_mini_autorise": "0",
-            "moyen_debit_defaut": 3,
+            "moyen_debit_defaut": 2,
             "titulaire": "",
-            "moyen_credit_defaut": 1,
+            "moyen_credit_defaut": 4,
             "guichet": "",
             "ouvert": true
         }
@@ -364,7 +337,7 @@
             "nom": "cpt_titre2",
             "cle_compte": 0,
             "solde_mini_voulu": "0",
-            "banque": 1,
+            "banque": 2,
             "type": "t",
             "notes": "",
             "num_compte": "",
@@ -372,7 +345,7 @@
             "solde_mini_autorise": "0",
             "moyen_debit_defaut": 3,
             "titulaire": "",
-            "moyen_credit_defaut": 1,
+            "moyen_credit_defaut": 4,
             "guichet": "",
             "ouvert": true
         }
@@ -390,9 +363,9 @@
             "num_compte": "",
             "solde_init": "0",
             "solde_mini_autorise": "0",
-            "moyen_debit_defaut": 2,
+            "moyen_debit_defaut": 1,
             "titulaire": "",
-            "moyen_credit_defaut": 1,
+            "moyen_credit_defaut": 4,
             "guichet": "",
             "ouvert": true
         }
@@ -410,9 +383,9 @@
             "num_compte": "",
             "solde_init": "0",
             "solde_mini_autorise": "0",
-            "moyen_debit_defaut": 2,
+            "moyen_debit_defaut": 1,
             "titulaire": "",
-            "moyen_credit_defaut": 1,
+            "moyen_credit_defaut": 4,
             "guichet": "",
             "ouvert": true
         }
@@ -430,9 +403,9 @@
             "num_compte": "01234567890",
             "solde_init": "0",
             "solde_mini_autorise": "0",
-            "moyen_debit_defaut": 2,
+            "moyen_debit_defaut": 1,
             "titulaire": "",
-            "moyen_credit_defaut": 1,
+            "moyen_credit_defaut": 4,
             "guichet": "12345",
             "ouvert": true
         }
@@ -448,15 +421,29 @@
         "fields": {}
     },
     {
-        "pk": 3,
+        "pk": 4,
+        "model": "gsb.ope_titre",
+        "fields": {
+            "cours": "1",
+            "invest": "5",
+            "ope": 10,
+            "nombre": "5",
+            "date": "2012-09-24",
+            "titre": 1,
+            "compte": 4,
+            "ope_pmv_id": 0
+        }
+    },
+    {
+        "pk": 1,
         "model": "gsb.ope_titre",
         "fields": {
             "cours": "1",
             "invest": "1",
-            "ope": 13,
+            "ope": 1,
             "nombre": "1",
             "date": "2011-12-18",
-            "titre": 1,
+            "titre": 2,
             "compte": 4,
             "ope_pmv_id": 0
         }
@@ -467,30 +454,30 @@
         "fields": {
             "cours": "10",
             "invest": "1500",
-            "ope": 9,
+            "ope": 2,
             "nombre": "150",
-            "date": "2011-12-17",
-            "titre": 2,
-            "compte": 4,
-            "ope_pmv_id": 0
-        }
-    },
-    {
-        "pk": 1,
-        "model": "gsb.ope_titre",
-        "fields": {
-            "cours": "5",
-            "invest": "100",
-            "ope": 5,
-            "nombre": "20",
-            "date": "2011-10-30",
-            "titre": 2,
-            "compte": 4,
+            "date": "2011-11-30",
+            "titre": 3,
+            "compte": 5,
             "ope_pmv_id": 0
         }
     },
     {
         "pk": 3,
+        "model": "gsb.ope_titre",
+        "fields": {
+            "cours": "5",
+            "invest": "100",
+            "ope": 3,
+            "nombre": "20",
+            "date": "2011-10-29",
+            "titre": 3,
+            "compte": 5,
+            "ope_pmv_id": 0
+        }
+    },
+    {
+        "pk": 1,
         "model": "gsb.moyen",
         "fields": {
             "nom": "moyen_dep1",
@@ -506,7 +493,7 @@
         }
     },
     {
-        "pk": 5,
+        "pk": 3,
         "model": "gsb.moyen",
         "fields": {
             "nom": "moyen_dep3",
@@ -514,7 +501,7 @@
         }
     },
     {
-        "pk": 1,
+        "pk": 4,
         "model": "gsb.moyen",
         "fields": {
             "nom": "moyen_rec1",
@@ -522,7 +509,7 @@
         }
     },
     {
-        "pk": 4,
+        "pk": 5,
         "model": "gsb.moyen",
         "fields": {
             "nom": "moyen_vir4",
@@ -530,27 +517,27 @@
         }
     },
     {
+        "pk": 2,
+        "model": "gsb.rapp",
+        "fields": {
+            "date": "2011-10-30",
+            "nom": "cpt_titre2201101"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "gsb.rapp",
+        "fields": {
+            "date": "2011-08-12",
+            "nom": "cpte1201101"
+        }
+    },
+    {
         "pk": 3,
         "model": "gsb.rapp",
         "fields": {
-            "date": "2011-11-30",
-            "nom": "cpt_titre1201101"
-        }
-    },
-    {
-        "pk": 1,
-        "model": "gsb.rapp",
-        "fields": {
-            "date": "2011-08-11",
-            "nom": "r1"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "gsb.rapp",
-        "fields": {
-            "date": "2011-08-11",
-            "nom": "r2"
+            "date": "2012-09-22",
+            "nom": "rapp sans rien"
         }
     },
     {
@@ -562,39 +549,17 @@
             "tiers": 2,
             "inscription_automatique": false,
             "montant": "10",
-            "moyen_virement": 4,
+            "moyen_virement": 3,
             "compte_virement": 2,
-            "notes": "",
+            "notes": "avec virement et exercice",
             "date_limite": null,
             "cat": 2,
-            "exercice": 2,
+            "exercice": 1,
             "date": "2011-10-30",
-            "moyen": 3,
+            "moyen": 5,
             "periodicite": "u",
-            "ib": 2,
+            "ib": 1,
             "compte": 1
-        }
-    },
-    {
-        "pk": 2,
-        "model": "gsb.echeance",
-        "fields": {
-            "intervalle": 1,
-            "valide": true,
-            "tiers": 2,
-            "inscription_automatique": false,
-            "montant": "10",
-            "moyen_virement": 4,
-            "compte_virement": 1,
-            "notes": "",
-            "date_limite": null,
-            "cat": 2,
-            "exercice": 2,
-            "date": "2011-10-30",
-            "moyen": 3,
-            "periodicite": "u",
-            "ib": 2,
-            "compte": 3
         }
     },
     {
@@ -605,15 +570,15 @@
             "valide": true,
             "tiers": 1,
             "inscription_automatique": false,
-            "montant": "20",
+            "montant": "-20",
             "moyen_virement": null,
             "compte_virement": null,
-            "notes": "sans date limite",
+            "notes": "",
             "date_limite": null,
-            "cat": 1,
+            "cat": 3,
             "exercice": null,
             "date": "2011-10-30",
-            "moyen": 1,
+            "moyen": 3,
             "periodicite": "j",
             "ib": null,
             "compte": 1
@@ -627,15 +592,15 @@
             "valide": true,
             "tiers": 1,
             "inscription_automatique": false,
-            "montant": "20",
+            "montant": "-10",
             "moyen_virement": null,
             "compte_virement": null,
-            "notes": "avec date limite",
-            "date_limite": "2011-11-30",
-            "cat": 1,
+            "notes": "",
+            "date_limite": null,
+            "cat": 3,
             "exercice": null,
             "date": "2011-10-30",
-            "moyen": 1,
+            "moyen": 2,
             "periodicite": "s",
             "ib": null,
             "compte": 1
@@ -647,17 +612,17 @@
         "fields": {
             "intervalle": 2,
             "valide": true,
-            "tiers": null,
+            "tiers": 1,
             "inscription_automatique": false,
             "montant": "20",
             "moyen_virement": null,
             "compte_virement": null,
             "notes": "",
             "date_limite": null,
-            "cat": null,
+            "cat": 1,
             "exercice": null,
             "date": "2011-10-30",
-            "moyen": null,
+            "moyen": 4,
             "periodicite": "m",
             "ib": null,
             "compte": 1
@@ -669,17 +634,17 @@
         "fields": {
             "intervalle": 2,
             "valide": true,
-            "tiers": null,
+            "tiers": 1,
             "inscription_automatique": false,
             "montant": "20",
             "moyen_virement": null,
             "compte_virement": null,
             "notes": "",
             "date_limite": null,
-            "cat": null,
+            "cat": 1,
             "exercice": null,
             "date": "2011-10-30",
-            "moyen": null,
+            "moyen": 4,
             "periodicite": "a",
             "ib": null,
             "compte": 1
@@ -691,42 +656,42 @@
         "fields": {
             "intervalle": 1,
             "valide": false,
-            "tiers": null,
+            "tiers": 1,
             "inscription_automatique": false,
-            "montant": "20",
+            "montant": "30",
             "moyen_virement": null,
             "compte_virement": null,
             "notes": "",
             "date_limite": null,
-            "cat": null,
+            "cat": 1,
             "exercice": null,
             "date": "2011-10-30",
-            "moyen": null,
+            "moyen": 4,
             "periodicite": "u",
             "ib": null,
             "compte": 1
         }
     },
     {
-        "pk": 8,
+        "pk": 2,
         "model": "gsb.echeance",
         "fields": {
-            "intervalle": 1,
+            "intervalle": 2,
             "valide": true,
-            "tiers": null,
+            "tiers": 2,
             "inscription_automatique": false,
-            "montant": "20",
+            "montant": "10",
             "moyen_virement": null,
             "compte_virement": null,
-            "notes": "",
-            "date_limite": "2011-11-30",
-            "cat": null,
-            "exercice": null,
-            "date": "2011-10-30",
-            "moyen": null,
-            "periodicite": "a",
-            "ib": null,
-            "compte": 1
+            "notes": "sans date limite",
+            "date_limite": null,
+            "cat": 1,
+            "exercice": 2,
+            "date": "2011-11-30",
+            "moyen": 5,
+            "periodicite": "j",
+            "ib": 2,
+            "compte": 2
         }
     },
     {
@@ -734,14 +699,62 @@
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,
+            "tiers": 4,
+            "_order": 0,
+            "pointe": false,
+            "montant": "-1",
+            "date_val": null,
+            "notes": "1@1",
+            "rapp": null,
+            "exercice": null,
+            "cat": 64,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2011-12-18",
+            "moyen": 2,
+            "compte": 4,
+            "ib": null,
+            "mere": null
+        }
+    },
+    {
+        "pk": 2,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": null,
+            "tiers": 5,
+            "_order": 0,
+            "pointe": false,
+            "montant": "-1500",
+            "date_val": null,
+            "notes": "150@10",
+            "rapp": null,
+            "exercice": null,
+            "cat": 64,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2011-11-30",
+            "moyen": 3,
+            "compte": 5,
+            "ib": null,
+            "mere": null
+        }
+    },
+    {
+        "pk": 4,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": null,
             "tiers": 1,
             "_order": 0,
             "pointe": false,
-            "montant": "10",
+            "montant": "-100",
             "date_val": null,
             "notes": "",
-            "rapp": null,
-            "exercice": null,
+            "rapp": 1,
+            "exercice": 1,
             "cat": 1,
             "num_cheque": "",
             "piece_comptable": "",
@@ -758,46 +771,22 @@
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,
-            "tiers": 1,
-            "_order": 0,
+            "tiers": 5,
+            "_order": 1,
             "pointe": false,
-            "montant": "10",
+            "montant": "-100",
             "date_val": null,
-            "notes": "operation 1 servant au test de fusion",
-            "rapp": 1,
+            "notes": "20@5",
+            "rapp": 2,
             "exercice": null,
-            "cat": 2,
+            "cat": 64,
             "num_cheque": "",
             "piece_comptable": "",
             "automatique": false,
-            "date": "2011-08-11",
+            "date": "2011-10-29",
             "moyen": 3,
-            "compte": 2,
-            "ib": 2,
-            "mere": null
-        }
-    },
-    {
-        "pk": 4,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": null,
-            "tiers": 1,
-            "_order": 0,
-            "pointe": false,
-            "montant": "10",
-            "date_val": null,
-            "notes": "operation 2 servant au test de fusion",
-            "rapp": null,
-            "exercice": null,
-            "cat": 2,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-08-11",
-            "moyen": 2,
-            "compte": 3,
-            "ib": 1,
+            "compte": 5,
+            "ib": null,
             "mere": null
         }
     },
@@ -806,165 +795,21 @@
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,
-            "tiers": 4,
-            "_order": 0,
-            "pointe": false,
-            "montant": "-100",
-            "date_val": null,
-            "notes": "20@5",
-            "rapp": null,
-            "exercice": null,
-            "cat": 64,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-10-30",
-            "moyen": 1,
-            "compte": 4,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 2,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": null,
             "tiers": 1,
             "_order": 1,
             "pointe": false,
             "montant": "10",
             "date_val": null,
             "notes": "",
-            "rapp": null,
-            "exercice": null,
+            "rapp": 1,
+            "exercice": 1,
             "cat": 2,
             "num_cheque": "",
             "piece_comptable": "",
             "automatique": false,
             "date": "2011-08-11",
-            "moyen": 2,
+            "moyen": 4,
             "compte": 1,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 6,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": 7,
-            "tiers": 6,
-            "_order": 1,
-            "pointe": false,
-            "montant": "-100",
-            "date_val": null,
-            "notes": "",
-            "rapp": null,
-            "exercice": null,
-            "cat": null,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-10-30",
-            "moyen": 4,
-            "compte": 2,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 7,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": 6,
-            "tiers": 6,
-            "_order": 1,
-            "pointe": false,
-            "montant": "100",
-            "date_val": null,
-            "notes": "",
-            "rapp": null,
-            "exercice": null,
-            "cat": null,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-10-30",
-            "moyen": 4,
-            "compte": 4,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 8,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": null,
-            "tiers": 1,
-            "_order": 2,
-            "pointe": false,
-            "montant": "20",
-            "date_val": null,
-            "notes": "",
-            "rapp": 1,
-            "exercice": 2,
-            "cat": null,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2010-10-01",
-            "moyen": 1,
-            "compte": 1,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 9,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": null,
-            "tiers": 4,
-            "_order": 2,
-            "pointe": false,
-            "montant": "-1500",
-            "date_val": null,
-            "notes": "150@10",
-            "rapp": 3,
-            "exercice": null,
-            "cat": 64,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-12-17",
-            "moyen": 1,
-            "compte": 4,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 14,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": 15,
-            "tiers": 9,
-            "_order": 2,
-            "pointe": false,
-            "montant": "-2",
-            "date_val": null,
-            "notes": "",
-            "rapp": null,
-            "exercice": null,
-            "cat": null,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-12-18",
-            "moyen": 4,
-            "compte": 2,
             "ib": null,
             "mere": null
         }
@@ -973,21 +818,117 @@
         "pk": 10,
         "model": "gsb.ope",
         "fields": {
-            "jumelle": 11,
-            "tiers": 8,
-            "_order": 3,
+            "jumelle": null,
+            "tiers": 3,
+            "_order": 1,
             "pointe": false,
-            "montant": "-1500",
+            "montant": "-5",
+            "date_val": null,
+            "notes": "5@1",
+            "rapp": null,
+            "exercice": null,
+            "cat": 64,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2012-09-24",
+            "moyen": 2,
+            "compte": 4,
+            "ib": null,
+            "mere": null
+        }
+    },
+    {
+        "pk": 6,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": null,
+            "tiers": 2,
+            "_order": 2,
+            "pointe": false,
+            "montant": "10",
+            "date_val": null,
+            "notes": "fusion avec ope1",
+            "rapp": null,
+            "exercice": null,
+            "cat": 2,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2011-08-21",
+            "moyen": 4,
+            "compte": 1,
+            "ib": 2,
+            "mere": null
+        }
+    },
+    {
+        "pk": 9,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": 8,
+            "tiers": 7,
+            "_order": 2,
+            "pointe": false,
+            "montant": "100",
             "date_val": null,
             "notes": "",
             "rapp": null,
             "exercice": null,
-            "cat": null,
+            "cat": 65,
             "num_cheque": "",
             "piece_comptable": "",
             "automatique": false,
-            "date": "2011-12-18",
+            "date": "2011-10-30",
+            "moyen": 5,
+            "compte": 3,
+            "ib": null,
+            "mere": null
+        }
+    },
+    {
+        "pk": 7,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": null,
+            "tiers": 1,
+            "_order": 3,
+            "pointe": true,
+            "montant": "10",
+            "date_val": null,
+            "notes": "",
+            "rapp": null,
+            "exercice": null,
+            "cat": 1,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2011-08-11",
             "moyen": 4,
+            "compte": 1,
+            "ib": 1,
+            "mere": null
+        }
+    },
+    {
+        "pk": 8,
+        "model": "gsb.ope",
+        "fields": {
+            "jumelle": 9,
+            "tiers": 7,
+            "_order": 4,
+            "pointe": false,
+            "montant": "-100",
+            "date_val": null,
+            "notes": "",
+            "rapp": null,
+            "exercice": null,
+            "cat": 65,
+            "num_cheque": "",
+            "piece_comptable": "",
+            "automatique": false,
+            "date": "2011-10-30",
+            "moyen": 5,
             "compte": 1,
             "ib": null,
             "mere": null
@@ -997,22 +938,22 @@
         "pk": 11,
         "model": "gsb.ope",
         "fields": {
-            "jumelle": 10,
-            "tiers": 8,
-            "_order": 3,
+            "jumelle": null,
+            "tiers": 2,
+            "_order": 5,
             "pointe": false,
-            "montant": "1500",
+            "montant": "100",
             "date_val": null,
             "notes": "",
             "rapp": null,
             "exercice": null,
-            "cat": null,
+            "cat": 66,
             "num_cheque": "",
             "piece_comptable": "",
             "automatique": false,
-            "date": "2011-12-18",
+            "date": "2012-09-24",
             "moyen": 4,
-            "compte": 4,
+            "compte": 1,
             "ib": null,
             "mere": null
         }
@@ -1022,23 +963,23 @@
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,
-            "tiers": 3,
-            "_order": 4,
+            "tiers": 2,
+            "_order": 6,
             "pointe": false,
-            "montant": "-1",
+            "montant": "99",
             "date_val": null,
-            "notes": "frais 1@1",
+            "notes": "",
             "rapp": null,
             "exercice": null,
-            "cat": 65,
+            "cat": 1,
             "num_cheque": "",
             "piece_comptable": "",
-            "automatique": true,
-            "date": "2011-12-18",
-            "moyen": 2,
-            "compte": 4,
+            "automatique": false,
+            "date": "2012-09-24",
+            "moyen": 4,
+            "compte": 1,
             "ib": null,
-            "mere": null
+            "mere": 11
         }
     },
     {
@@ -1046,47 +987,23 @@
         "model": "gsb.ope",
         "fields": {
             "jumelle": null,
-            "tiers": 3,
-            "_order": 5,
+            "tiers": 2,
+            "_order": 7,
             "pointe": false,
-            "montant": "-1",
-            "date_val": null,
-            "notes": "1@1",
-            "rapp": null,
-            "exercice": null,
-            "cat": 64,
-            "num_cheque": "",
-            "piece_comptable": "",
-            "automatique": false,
-            "date": "2011-12-18",
-            "moyen": 1,
-            "compte": 4,
-            "ib": null,
-            "mere": null
-        }
-    },
-    {
-        "pk": 15,
-        "model": "gsb.ope",
-        "fields": {
-            "jumelle": 14,
-            "tiers": 9,
-            "_order": 6,
-            "pointe": false,
-            "montant": "2",
+            "montant": "1",
             "date_val": null,
             "notes": "",
             "rapp": null,
             "exercice": null,
-            "cat": null,
+            "cat": 2,
             "num_cheque": "",
             "piece_comptable": "",
             "automatique": false,
-            "date": "2011-12-18",
+            "date": "2012-09-24",
             "moyen": 4,
-            "compte": 4,
+            "compte": 1,
             "ib": null,
-            "mere": null
+            "mere": 11
         }
     }
 ]

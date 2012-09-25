@@ -67,7 +67,7 @@ def _export():
     et.SubElement(xml_generalites, "Adresse_secondaire").text = ''#NOT IN BDD
     et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(settings.utilise_exercices)
     et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(settings.utilise_ib)
-    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(setiings.utilise_pc)
+    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(settings.utilise_pc)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = "1"
     et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = "1"
@@ -95,7 +95,7 @@ def _export():
     logger.debug("gen ok")
     nb_compte = 0
     for cpt in Compte.objects.all().order_by('id'):
-        logger.debug('compte %s (%s eme)' % (cpt.id,))
+        logger.debug('compte %s (%s eme)' % cpt.id)
         nb_compte += 1
         xml_compte = et.SubElement(xml_comptes, "Compte")
         xml_detail = et.SubElement(xml_compte, "Details")
@@ -302,7 +302,7 @@ def _export():
             else:
                 xml_element.set('Sous-imputation', str(0))
         xml_element.set('Notes', ech.notes)
-        xml_element.set('Automatique', fmt.bool(ech.inscription_automatique))
+        xml_element.set('Automatique', fmt.bool(False)) #not in bdd
         xml_element.set('Notes', str(ech.notes))
         if ech.periodicite is None or ech.periodicite == 'u':
             xml_element.set('Periodicite', str(0))

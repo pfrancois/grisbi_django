@@ -44,7 +44,7 @@ class UnixTimestampField(models.DateTimeField):
         return ' '.join(typ)
 
     def to_python(self, value):
-        if value == None:
+        if value is None:
             return None
         elif value == "":
             return date.fromtimestamp(1)
@@ -53,11 +53,11 @@ class UnixTimestampField(models.DateTimeField):
             return date.fromtimestamp(float(value.replace(",",".")))
 
     def get_db_prep_value(self, value, connection, prepared=False):
-        if value == None:
+        if value is None:
             return None
         return mktime(value.timetuple())
 
-    def formfield(self, *args, **kwargs):
+    def formfield(self,**kwargs):
         defaults = {'form_class': forms.DateTimeField}
         defaults.update(kwargs)
-        return super(UnixTimestampField, self).formfield( *args, **kwargs)
+        return super(UnixTimestampField, self).formfield( **kwargs)

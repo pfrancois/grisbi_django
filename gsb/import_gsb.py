@@ -11,6 +11,7 @@ import decimal
 import logging
 ###from django.conf import settings #@Reimport
 import django.utils.encoding as dj_encoding
+from .utils import strpdate
 
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -57,11 +58,7 @@ def import_gsb_050(nomfich, efface_table=True):
         raise Import_exception(u"le format n'est pas reconnu")
     percent = 1
     #------------------------------generalites#------------------------------
-    xml_generalite = xml_tree.find('Generalites')
-    if not xml_generalite.find('Titre').text:
-        titre_fichier = ""
-    else:
-        titre_fichier = xml_generalite.find('Titre').text
+    #les generalités sont maintenant dans stting.py
     #------------------------------devises---------------------------
     nb = 0
     nb_nx = 0
@@ -72,13 +69,14 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
     for xml_tiers in xml_tree.find('//Detail_des_tiers'):
         affiche = False
+        created = False
         if nb == int(nb_tiers_final * int("%s0" % percent) / 100):#logging
             affiche = True
             logger.info("tiers %s soit %% %s" % (xml_tiers.get('No'), "%s0" % percent))
             percent += 1
         nb += 1
         query = {'nom':xml_tiers.get('Nom'), 'notes':xml_tiers.get('Informations')}
-        if xml_tiers.get('Nom')[:6] != 'titre_':
+        if xml_tiers.get('Nom')[:6] != 'titre_':#creation du tiers titre
             element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
         else:
             #test puis creation du titre (et donc du tiers automatiquement)
@@ -88,8 +86,8 @@ def import_gsb_050(nomfich, efface_table=True):
                 nb_titre += 1
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
-                s = s.partition(
-                    '@')#on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
+                s = s.partition('@')
+                #on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
                 #comme le tiers est sous la forme titre_ nomtiers
                 titre = Titre(nom=nom[7:])
                 #dans les notes ISIN@TYPE
@@ -217,8 +215,8 @@ def import_gsb_050(nomfich, efface_table=True):
     for xml_cpt in xml_tree.findall('//Compte'):
         nb += 1
         nb_moyen = 0
-        type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
-        if type in ('t',):
+        type_compte = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
+        if type_compte in ('t',):
             logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
                 'nom':xml_cpt.find('Details/Nom').text,
@@ -304,7 +302,6 @@ def import_gsb_050(nomfich, efface_table=True):
             ope_tiers = Tiers.objects.get(id=tabl_correspondance_tiers[xml_ope.get('T')])
         except KeyError:
             if int(xml_ope.get('Ro')):
-                jumelle_xml = xml_tree.findall('//Operation[@No=\'%s\']/../../Details/Nom' % xml_ope.get('Ro'))
                 ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='Virement', defaults={'nom':'Virement'})
                 if tiers_created:
                     tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
@@ -373,9 +370,8 @@ def import_gsb_050(nomfich, efface_table=True):
         try: #gestion des rapprochements
             ope.rapp_id = tabl_correspondance_rapp[xml_ope.get('R')]
             #gestion de la date du rapprochement
-            if datetime.datetime.combine(ope.rapp.date, datetime.time()) > datetime.datetime.strptime(ope.date,
-                                                                                                      "%Y-%m-%d"):
-                ope.rapp.date = ope.date
+            if ope.rapp.date > strpdate(ope.date):
+                ope.rapp.date = strpdate(ope.date)
                 ope.rapp.save()
         except KeyError:
             ope.rapp = None
@@ -422,13 +418,12 @@ def import_gsb_050(nomfich, efface_table=True):
             montant=fr2decimal(xml_ech.get('Montant')),
             compte_id=tabl_correspondance_compte[xml_ech.get('Compte')],
             )
-        element.save()
         tabl_correspondance_ech[xml_ech.get('No')] = element.id
         try:
             element.tiers_id = tabl_correspondance_tiers[xml_ech.get('Tiers')]
         except KeyError:
             element.tiers = None
-        element.inscription_automatique = bool(int(xml_ech.get('Automatique')))
+        element.inscription_automatique = bool(int(xml_ech.get('Automatique')))#not in bdd
         try:
             element.moyen_id = tabl_correspondance_moyen[xml_ech.get('Compte')][xml_ech.get('Type')]
         except KeyError:

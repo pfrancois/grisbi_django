@@ -32,7 +32,7 @@ class QifWriter(object):
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, encoding="utf-8", **kwds):
+    def __init__(self, fich, encoding="utf-8"):
         """ Redirect output to a queue
         """
         self.queue = cStringIO.StringIO()
@@ -57,7 +57,7 @@ class QifWriter(object):
         # write to the target stream
         self.stream.write(data)
         # empty queue
-        self.queue.truncate(0)
+        self.queue.truncate()
 
     def w(self, type_data, row):
         """ecrit une ligne avec le type"""
@@ -81,20 +81,26 @@ class QifWriter(object):
 
 
 def cat_export(ope):
-    if not ope.jumelle:
+    """
+    renvoie la categorie au format qif adequat avec la gestion des ib
+    @param ope:
+    @return:
+    """
+    if not ope.jumelle:#dans ce cas la c'est une operation normale
         try:
-            cat_g = fmt.str(ope.cat, "", "nom")
+            cat_g = fmt.str(ope.cat, "", "nom")#recupere la cat de l'operation
         except ObjectDoesNotExist:
             cat_g="inconnu"
-        if bool(fille.ib):
+        ib=None
+        if bool(ope.ib):#gestion de l'ib
             try:
-                ib=fmt.str(fille.ib, "", "nom")
+                ib=fmt.str(ope.ib, "", "nom")
             except ObjectDoesNotExist:
                 ib=None
-        if bool(ib):
-           return u"/".join([cat_g, ib])
+        if ib is not None:
+           return u"/".join([cat_g, ib]) #s ib on a une cat de la forme cat/ib
         else:
-            return u"%s" % cat_g
+            return u"%s" % cat_g#sinon c'est cat
     else:
         return u"[%s]" % ope.jumelle.compte.nom
 

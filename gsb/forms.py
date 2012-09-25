@@ -72,7 +72,7 @@ class OperationForm(Basemodelform):
                     ["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'] is not None and data['moyen'].type == u'd' and data['montant'] > 0:
-            data['montant'] = -1 * data['montant']
+            data['montant'] *= -1 * data['montant']
         return data
 
 
@@ -140,8 +140,8 @@ class VirementForm(Baseform):
 
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
-    titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
-    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None)
+    titre = forms.ModelChoiceField(Titre.objects.all(), required=True, empty_label=None)
+    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
     nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField(initial='1')

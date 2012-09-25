@@ -39,8 +39,8 @@ class Dategsbwidget(forms.DateInput):
 class DateFieldgsb(forms.DateField):
     """field qui marche avec le widget au dessus"""
 
-    def __init__(self, input_formats=input_format_date, initial=datetime.date.today, *args, **kwargs):
-        super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget, *args,
+    def __init__(self, input_formats=input_format_date, initial=datetime.date.today, **kwargs):
+        super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget,
                                            **kwargs)
 
 

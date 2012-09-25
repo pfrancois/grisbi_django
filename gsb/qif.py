@@ -21,7 +21,7 @@ from .utils import datefr2datesql, fr2decimal, strpdate
 #id des moyens,tiers,cat et ib, si None, on ne change pas
 #int de la colonne a commencer pour le tiers
 tiers_perso = (
-        {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC", "def":{"moyen":4, "tiers":15, "cat":24, "ib":None}, "decal":None, "date":false},
+        {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC", "def":{"moyen":4, "tiers":15, "cat":24, "ib":None}, "decal":None, "date":False},
         {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":None, "date":True},
         {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":20, "date":True},
     )
@@ -121,6 +121,6 @@ if __name__ == "__main__":
     qiffile = open(nomfich)
     operation = parseqif(qiffile)
     qiffile.close()
-    print repr(operation[0])
+    print unicode(operation[0])
     for item in operation[1:]:
         print item.dataString()

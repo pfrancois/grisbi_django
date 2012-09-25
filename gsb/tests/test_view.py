@@ -30,13 +30,15 @@ class test_views(TestCase):
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
     def test_form_ope_normal(self):
         #self.client.post(path="/ope/15/", data=, follow=True)
-        self.assertEqual(self.client.get('/ope/15/').status_code, 200)
-        form_data = { 'compte': "1", 'date': "02/09/2012", 'date_val': "",'montant': "24", 'tiers':"1" , 'cat': "3", "notes": "",'moyen': "1", "num_cheque": "",'rapp': "", "exercice": "", "ib": "", "piece_comptable": "", "nouveau_tiers": "", "operation_mere": "",};
+        self.assertEqual(self.client.get('/ope/1/').status_code, 200)
+        form_data = { 'compte': "1", 'date': "02/09/2012", 'date_val': "",'montant': decimal.Decimal(24), 'tiers':"1" , 'cat': "3", "notes": "",'moyen': "1", "num_cheque": "",'rapp': "", "exercice": "", "ib": "", "piece_comptable": "", "nouveau_tiers": "", "operation_mere": "",}
         form = gsb_forms.OperationForm(data=form_data)
-        self.assertEqual(form.is_valid(), True)
-        self.assertEqual(form.cleaned_data[montant], -24)
+        r=form.is_valid()
+        self.assertEqual(r, True)
+        r=form.cleaned_data['montant']
+        self.assertEqual(r, -576)
     def test_form_ope_clean(self):
-        form_data = { 'compte': "1", 'date': "02/09/2012", 'date_val': "",'montant': "24", 'tiers':"" , 'cat': "3", "notes": "",'moyen': "1", "num_cheque": "",'rapp': "", "exercice": "", "ib": "", "piece_comptable": "", "nouveau_tiers": "", "operation_mere": "",};
+        form_data = { 'compte': "1", 'date': "02/09/2012", 'date_val': "",'montant': "24", 'tiers':"" , 'cat': "3", "notes": "",'moyen': "1", "num_cheque": "",'rapp': "", "exercice": "", "ib": "", "piece_comptable": "", "nouveau_tiers": "", "operation_mere": "",}
         form = gsb_forms.OperationForm(data=form_data)
         self.assertEqual(form.is_valid(), False)
         form.is_valid()

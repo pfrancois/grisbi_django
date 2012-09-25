@@ -40,7 +40,7 @@ def index(request):
     view index
     """
     t = loader.get_template('gsb/index.djhtm')
-    if settings.affiche_clot:
+    if settings.AFFICHE_CLOT:
         bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
         pl = Compte_titre.objects.all()
     else:
@@ -87,13 +87,15 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     if not titre:
         date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
+        nb_ope_vieilles = 0
+        nb_ope_rapp = 0
         if all:
             nb_ope_vieilles = 0
             nb_ope_rapp = 0
         if rapp:
             nb_ope_vieilles = 0
             nb_ope_rapp = 0
-            q = q.filter(Q(rapp__isnull=False)|Q(pointe=True))
+            q = q.filter(rapp__isnull=False)
         if not all and not rapp:
             nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
             nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
@@ -261,7 +263,7 @@ def ope_detail(request, pk):
                     ope = form.save()
                 else:
                     #verification que les données essentielles ne sont pas modifiés
-                    if (has_changed(ope,'montant') or  has_changed(ope,'compte') or has_changed(ope,'pointe') or has_changed(ope,'jumelle') or has_changed(ope,'mere')):
+                    if has_changed(ope,'montant') or  has_changed(ope,'compte') or has_changed(ope,'pointe') or has_changed(ope,'jumelle') or has_changed(ope,'mere'):
                         messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
                     else:
                         messages.success(request, u"opération modifiée")
@@ -325,16 +327,21 @@ def ope_new(request, cpt_id=None):
 
 @login_required
 def vir_new(request, cpt_id=None):
+    cpt_par_def=Compte.objects.filter(id=settings.ID_CPT_M)
+    if cpt_par_def.exists():
+        cpt_origine=cpt_par_def[0]
+    else:
+        cpt_origine=Compte.objects.get(id=1)
     if cpt_id:
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
-        cpt = get_object_or_404(Compte.objects.select_related(), pk=settings.ID_CPT_M)
+        cpt = cpt_origine
         #logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
-            messages.success(request, u"virement crée %s=>%s de %s le %s" % (ope.compte, ope.jumelle.compte, ope.compte.montant, ope.date))
+            messages.success(request, u"virement crée %s=>%s de %s le %s" % (ope.compte, ope.jumelle.compte, ope.montant, ope.date))
             return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
@@ -345,9 +352,12 @@ def vir_new(request, cpt_id=None):
             )
     else:
         form = gsb_forms.VirementForm(
-            initial={'compte_origine':get_object_or_404(Compte.objects.select_related(), pk=settings.ID_CPT_M),
-                     'moyen_origine':Moyen.objects.filter(type='v')[0], 'compte_destination':cpt,
-                     'moyen_destination':Moyen.objects.filter(type='v')[0]})
+                    initial={'compte_origine':cpt_origine,
+                             'moyen_origine':Moyen.objects.filter(type='v')[0],
+                             'compte_destination':cpt,
+                             'moyen_destination':Moyen.objects.filter(type='v')[0]
+                    }
+        )
         return render(request, 'gsb/vir.djhtm',
                 {'titre':u'Création',
                  'titre_long':u'Création virement interne ',
@@ -589,8 +599,10 @@ def ope_titre_achat(request, cpt_id):
     except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
         messages.error(request, u"attention le titre demandé intialement n'existe pas")
         titre_id = None
-    except AttributeError:#on est dans le cas où l'on viens d'une page sans titre defini
+        titre = None
+    except KeyError:#on est dans le cas où l'on viens d'une page sans titre defini
         titre_id = None
+        titre = None
 
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_achatForm(request.POST)
@@ -645,8 +657,10 @@ def ope_titre_vente(request, cpt_id):
     except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
         messages.error(request, u"attention le titre demandé intialement n'existe pas")
         titre_id = None
-    except KeyError:#on est dans le cas où l'on viens d'une page sans titre defini
+        titre = None
+    except AttributeError:#on est dans le cas où l'on viens d'une page sans titre defini
         titre_id = None
+        titre = None
 
     if compte.titre.all().distinct().count() < 1:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas vendre')

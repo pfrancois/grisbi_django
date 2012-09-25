@@ -13,6 +13,7 @@ import decimal, datetime #@Reimport
 from django.db import models
 import os.path #@Reimport
 from operator import attrgetter
+from django.conf import settings
 
 class importtests(Tcd):
     def test_mauvais_format(self):
@@ -21,12 +22,6 @@ class importtests(Tcd):
                           "%s/../test_files/mauvais.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         self.assertRaises(Import_exception, import_gsb_050,
                           "%s/../test_files/mauvais3.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-
-
-    def test_pas_de_titre(self):
-        import_gsb_050("%s/../test_files/mauvais2.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        self.assertEquals(obj.titre, settings.titre)
-
 
 class importposttests(Tcd):
     def setUp(self):
@@ -164,7 +159,6 @@ class importposttests(Tcd):
         self.assertEquals(obj.compte.id, 1)
         self.assertEquals(obj.montant, decimal.Decimal('-123'))
         self.assertEquals(obj.notes, u"automatique")
-        self.assertEquals(obj.inscription_automatique, True)
         self.assertEquals(obj.periodicite, 'm')
         self.assertEquals(obj.intervalle, 1)
         obj = Echeance.objects.get(id=5)
@@ -186,7 +180,6 @@ class importposttests(Tcd):
         self.assertEquals(obj.compte_virement, None)
         self.assertEquals(obj.exercice.id, 1)
         self.assertEquals(obj.notes, u"echeance")
-        self.assertEquals(obj.inscription_automatique, False)
         self.assertEquals(obj.periodicite[0], 'u')
 
     def test_ope(self):

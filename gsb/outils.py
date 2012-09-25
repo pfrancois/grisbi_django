@@ -17,6 +17,7 @@ from .models import Echeance
 from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
+
 import os
 
 @login_required
@@ -63,7 +64,8 @@ def import_file(request):
                         destination.close()
                         if request.session['import_type'] == 'qif':
                             if nomfich[-3:] == "qif":
-                                import_qif(nomfich, compte=form.cleaned_data['compte'])
+                                #import_qif(nomfich, compte=form.cleaned_data['compte']) #pas encore fait
+                                pass
                             else:
                                 raise ValueError("pas le bon format")
                         elif request.session['import_type'] == 'gsb_0_5_0':
@@ -88,6 +90,8 @@ def import_file(request):
                         return HttpResponseRedirect(reverse('gsb.views.index'))
             except KeyError:
                 messages.error(request, message="type d'import inconnu")
+                form = gsb_forms.ImportForm1()
+                etape_nb = 1
     else:
         form = gsb_forms.ImportForm1()
         etape_nb = 1
@@ -110,3 +114,38 @@ def gestion_echeances(request):
     """vue qui gere les echeances"""
     Echeance.check(request)
     return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues', }, context_instance=RequestContext(request))
+
+from .models import Compte,Cat,Tiers,Moyen
+def verif_element_config(element,request,collection=None):
+    id=getattr(settings,element,None)
+    if id is None:
+        messages.error(request,"%s non definit dans setting.py"%element)
+    if collection is not None:
+        objet=collection.objects.filter(id=id)
+        if not objet.exists():
+            messages.error(request, u"%s n'existe pas"%element)
+
+def verif_config(request):
+    verif_element_config("NB_JOURS_AFF",request)
+    verif_element_config("ID_CPT_M",request,Compte)
+    verif_element_config("TAUX_VERSEMENT",request)
+    verif_element_config("ID_CAT_COTISATION",request,Cat)
+    verif_element_config("ID_CAT_OST",request,Cat)
+    verif_element_config("ID_CAT_PMV",request,Cat)
+    verif_element_config("ID_TIERS_COTISATION",request,Tiers)
+    verif_element_config("MD_CREDIT",request,Moyen)
+    verif_element_config("MD_DEBIT",request,Moyen)
+    verif_element_config("TITRE",request)
+    verif_element_config("DEVISE_GENERALE",request)
+    verif_element_config("TAUX_VERSEMENT",request)
+    verif_element_config("AFFICHE_CLOT",request)
+    verif_element_config("UTILISE_EXERCICES",request)
+
+    return render_to_response(
+                'generic.djhtm',
+                {'resultats':(u"vous trouverez les résultats de la verification de la config",),
+                   'titre_long':"verif config",
+                   'titre':"verif _config",
+                },
+                context_instance=RequestContext(request)
+    )

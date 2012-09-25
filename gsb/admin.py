@@ -11,7 +11,7 @@ from django.db import IntegrityError
 #from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django import forms
+#from django import forms
 
 from django.utils.translation import ugettext_lazy as _
 #from django.db.models import Q
@@ -117,7 +117,6 @@ def fusion(request, queryset, sens):
         message = inst.__unicode__()
         messages.error(request, message)
 
-from urlparse import urlparse
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
 
@@ -203,7 +202,7 @@ class Compte_admin(Modeladmin_perso):
             Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
             messages.success(request, u'suppression des statuts "pointé" dans les comptes %s' % queryset)
         except Exception, err:
-            messages.error(request, err.strerror)
+            messages.error(request, err)
 
     action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
@@ -299,9 +298,9 @@ class Ope_admin(Modeladmin_perso):
             return u"aucune opération fille"
     def mere_fille(self, obj):
         if obj.is_fille:
-            return "fille de %s" % (obj.mere_id)
+            return "fille de %s" % obj.mere_id
         else:
-            if obj.cat.nom == u"Opération Ventilée":
+            if obj.is_mere:
                 return "mere"
             else:
                 return "solitaire"
@@ -341,12 +340,12 @@ class Ope_admin(Modeladmin_perso):
         #queryset.update(montant=models.F('montant') * -1)  #ca serait optimal de faire mais because virement pas facile
         for o in queryset:
             if o.jumelle:
-                o.montant = o.montant * -1
-                o.jumelle.montant = o.jumelle.montant * -1
+                o.montant *= -1
+                o.jumelle.montant *= -1
                 o.save()
                 o.jumelle.save()
             else:
-                o.montant = o.montant * -1
+                o.montant *=  -1
                 o.save()
         return HttpResponseRedirect(request.get_full_path())
 

@@ -18,7 +18,8 @@ urlpatterns = patterns('gsb',
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$', 'options_index',name="outils_index"),
                         url(r'^options/import$', 'import_file'),
-                        url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances')
+                        url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances'),
+                        url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
 urlpatterns += patterns('gsb',
                         url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),

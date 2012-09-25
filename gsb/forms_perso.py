@@ -9,7 +9,7 @@ from django.contrib import messages
 #import relatif urls
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls import patterns, url, include
 
 #import relatif forms
 from . import forms as gsb_forms

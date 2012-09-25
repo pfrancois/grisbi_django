@@ -1,25 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-try:
-    if DJANGO_SETTINGS_MODULE:
-        pass
-    main = False
-except NameError:
-    from django.conf.settings import configure
-    import sys, os
-    #sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '../..')))
-    s = os.path.realpath(os.path.join(os.path.dirname(__file__), '../..'))
-    sys.path.append(s)
-    from .gsb import settings
-
-    configure(default_settings=settings,DEBUG=True)
-
-if __name__ == "__main__":
-    main = True
-else:
-    main = False
-
 import logging
 from django.shortcuts import render
 from django.template import RequestContext
@@ -45,10 +26,3 @@ def test(request):
     messages.error(request, 'This is an error message.')
     messages.error(request, 'This is another error message.')
     return render(request, 'generic.djhtm', )
-
-if main:
-    #c = Compte_titre.objects.get(id=4)
-    #print  c.solde(rapp=True)
-    c = Compte_titre.objects.get(id=4)
-    t = Titre.objects.get(nom="t2")
-    c.vente(titre=t, nombre=20, date='2011-11-01')

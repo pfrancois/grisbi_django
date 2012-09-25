@@ -6,7 +6,7 @@ from .utils import Format as fmt
 import time
 #from .utils import strpdate
 
-import csv, cStringIO
+import csv, cStringIO, codecs
 import logging
 from django.http import HttpResponse
 #from django.conf import settings
@@ -80,7 +80,7 @@ class UnicodeWriter:
         # write to the target stream
         self.stream.write(data)
         # empty queue
-        self.queue.truncate(0)
+        self.queue.truncate()
 
     def writerows(self, rows):
         for row in rows:
@@ -156,6 +156,11 @@ class Export_ope_csv(ExportViewBase):
         return reponse
 
 def export_cours(request):
+    """
+    renvoie l'ensemble des cours.
+    @param request:
+    @return: object httpreposne se composant du fichier csv
+    """
     logger = logging.getLogger('gsb.export')
     csv.register_dialect("excel_csv", Excel_csv)
     fich = cStringIO.StringIO()
@@ -165,18 +170,23 @@ def export_cours(request):
     collection=Cours.objects.all().select_related('titre').order_by('date')
     total = float(collection.count())
     for objet in collection:
-        i=i+1
+        i += 1
         ligne=[objet.titre.isin,objet.date,objet.titre.nom,objet.valeur]
         csv_file.writerow(ligne)
         if ( (i-1)%500) == 0:
             logger.info("ope %s %s%%" % (objet.id, i / total * 100))
     reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
-    #reponse["Cache-Control"] = "no-cache, must-revalidate"
-    #reponse["Content-Disposition"] = "attachment; filename=%s.csv" % "cours"
+    reponse["Cache-Control"] = "no-cache, must-revalidate"
+    reponse["Content-Disposition"] = "attachment; filename=%s.csv" % "cours"
     fich.close()
     return reponse
 
 def export_ope_titres(request):
+    """
+    renvoie l'ensemble des operations sur titres.
+    @param request:
+    @return: object httpreposne se composant du fichier csv
+    """
     data=[["id","date","compte","titre_id","titre_nom","sens","nombre","value"],]
     collection=Ope_titre.objects.all().select_related('titre',"compte").order_by('date')
     for objet in collection:

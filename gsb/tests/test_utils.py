@@ -45,7 +45,7 @@ class test_utils(TestCase):
     def test_format_str(self):
         self.assertEquals(utils.Format.str(None), '0')
         self.assertEquals(utils.Format.str(None, defaut='toto'), 'toto')
-        self.assertEquals(utils.Format.str(Cat.objects.get(id=65), membre='nom'), 'frais bancaires')
+        self.assertEquals(utils.Format.str(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
 
     def test_validrib(self):
         self.assertEquals(utils.validrib('10001', '12345', '01234567890', 72), True)
