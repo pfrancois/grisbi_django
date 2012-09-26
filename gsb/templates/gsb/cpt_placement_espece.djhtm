@@ -17,6 +17,9 @@
                 <td width="100%" colspan="2"><a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a></td>
             </tr>
         {% endif %}
+            <tr class="boutton">
+                <td width="100%" colspan="2"><a href="{% url gsb.views.index %}">retour liste des comptes</a></td>
+            </tr>
     </table>
     <!-- ajout pla -->
 {% endblock bouton_haut %}
