@@ -34,8 +34,8 @@ class test_models(TestCase):
         self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
-        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"cpte1=>cptb2 pour 10")
-        self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"-20 pour tiers1")
+        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:2011-10-30)")
+        self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:2011-10-30)")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 2011-12-18 : -1 EUR a titre_ t1 cpt: cpt_titre1")
 
     def test_fusionne_error(self):

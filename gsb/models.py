@@ -1023,9 +1023,9 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         if self.compte_virement:
-            return "%s=>%s pour %s" % (self.compte, self.compte_virement, self.montant)
+            return "({0.id}) {0.compte}=>{0.compte_virement} de {0.montant} (ech:{0.date})".format(self)
         else:
-            return "%s pour %s" % (self.montant, self.tiers)
+            return u"({0.id}) {0.compte} à {0.tiers} de {0.montant} (ech:{0.date})".format(self)
 
     def calcul_next(self):
         """
