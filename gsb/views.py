@@ -425,14 +425,44 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
     q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
     date_rappro = compte.date_rappro()
     solde_rappro = compte.solde_espece(rapp=True)
+    try:
+        sort = request.GET.get('sort')  #il y a un sort dans le get
+    except (ValueError, TypeError):  #non donc on regarde dans l'historique
+        sort = False
+        if request.session.key('sort', False):
+            sort = request.session.key('sort', False)
     if all:
         q = q
+    if rapp:
+        q = q.filter(rapp__isnull=False)
+    if not rapp and not all:
+        q = q.filter(rapp__isnull=True)
+    if sort:
+        sort = unicode(sort)
+        q = q.order_by(sort)
+        sort_get = u"&sort=%s" % sort
     else:
-        if rapp:
-            q = q.filter(rapp__isnull=False)
-        else:
-            q = q.filter(rapp__isnull=True)
+        q = q.order_by('-date')
+    sort_get = None
+    sort_t = {}
+    if sort == "date":
+        sort_t['date'] = "-date"
+    else:
+        sort_t['date'] = "date"
+    if sort == "tiers":
+        sort_t['tiers'] = "-tiers"
+    else:
+        sort_t['tiers'] = "tiers"
+    if sort == "cat":
+        sort_t['cat'] = "-cat"
+    else:
+        sort_t['cat'] = "cat"
+    if sort == "montant":
+        sort_t['montant'] = "-montant"
+    else:
+        sort_t['montant'] = "montant"
     q = q.select_related('tiers', 'tiers__titre', 'cat', 'rapp')
+
     paginator = Paginator(q, 50)
     try:
         page = int(request.GET.get('page'))
@@ -451,13 +481,15 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
             RequestContext(
                 request,
                     {
-                    'compte':compte,
-                    'list_ope':opes,
-                    'titre':"%s: Especes" % compte.nom,
-                    'solde':compte.solde_espece(),
-                    'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),
+                    'compte':compte,#objet compte qui va etre parcouru
+                    'list_ope':opes,#liste des ope
+                    'titre':"%s: Especes" % compte.nom,#nom du compte
+                    'solde':compte.solde_espece(),#solde espece du compte
+                    'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),#nombre d'operations rapprochés
                     "date_r":date_rappro,
                     "solde_r":solde_rappro,
+                    "sort_tab": sort_t,
+                    "sort":sort_get,
                     }
             )
         )
