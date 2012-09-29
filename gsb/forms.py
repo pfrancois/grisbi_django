@@ -61,10 +61,10 @@ class OperationForm(Basemodelform):
         self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere', required=False)
 
     def clean(self):
-        super(OperationForm, self).clean()
+        self.cleaned_data = super(OperationForm, self).clean()
         data = self.cleaned_data
         if data['tiers'] is None:
-            if not data['nouveau_tiers']:
+            if data['nouveau_tiers']=="":
                 self._errors['tiers'] = self.error_class([
                     "si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"
                     , ])
@@ -72,7 +72,7 @@ class OperationForm(Basemodelform):
                     ["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if data['moyen'] is not None and data['moyen'].type == u'd' and data['montant'] > 0:
-            data['montant'] *= -1 * data['montant']
+            data['montant'] *= -1
         return data
 
 
