@@ -862,7 +862,6 @@ class ExportViewBase(FormView):
             messages.error(self.request, u"attention pas d'opérations pour la selection demandée")
             return self.render_to_response({'form':form, })
 
-import string
 def perso(request):
     resultat=[]
     sg=Compte.objects.get(id=12)

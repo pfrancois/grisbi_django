@@ -190,6 +190,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
+#noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {
     'version':1,
     'disable_existing_loggers':True,

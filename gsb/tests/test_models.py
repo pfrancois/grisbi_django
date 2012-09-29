@@ -31,7 +31,7 @@ class test_models(TestCase):
         self.assertEquals(Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
         self.assertEquals(Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
         self.assertEquals(Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
-        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"1")
+        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"achat de 1 t1 (1) à 1 EUR le 2011-12-18 cpt:cpt_titre1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:2011-10-30)")
@@ -102,7 +102,7 @@ class test_models(TestCase):
         #id des operations
         self.assertQuerysetEqual(Ope.objects.filter(tiers=t).order_by('id'), [4, 5, 6, 7, 11, 12, 13], attrgetter("id"))
         #id des echeances
-        self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4,5,6,7], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4,5,6,7,8], attrgetter("id"))
 
     def test_titre_last_cours(self):
         t = Titre.objects.get(nom="t2")
@@ -145,7 +145,10 @@ class test_models(TestCase):
         self.assertQuerysetEqual(t.ope_titre_set.all(), [4], attrgetter("id"))
         #verifier que les cours ont été fusionneés
         self.assertEquals(t.cours_set.count(), 2)
-
+    def test_titre_fusionne_error(self):
+        Cours.objects.create(titre=Titre.objects.get(nom="autre"),valeur=20,date=strpdate('2011-01-01'))
+        Cours.objects.create(titre=Titre.objects.get(nom="autre 2"),valeur=40,date=strpdate('2011-01-01'))
+        self.assertRaises(Gsb_exc, Titre.objects.get(nom="autre").fusionne,Titre.objects.get(nom="autre 2"))
 
     def test_titre_investi(self):
         c1 = Compte_titre.objects.get(id=4)
@@ -288,7 +291,7 @@ class test_models(TestCase):
         #les ope relatives
         self.assertEqual(Compte.objects.filter(id=3).exists(),False)
         self.assertQuerysetEqual(Ope.objects.filter(compte__id=2).order_by('id'), [9,], attrgetter("id"))
-        self.assertQuerysetEqual(Echeance.objects.filter(compte__id=2).order_by('id'), [2], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(compte__id=2).order_by('id'), [2,8], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(compte_virement__id=2).order_by('id'), [1], attrgetter("id"))
         #fusion de compte_titre
         Compte.objects.get(id=4).fusionne(Compte.objects.get(id=5))
@@ -556,12 +559,37 @@ class test_models(TestCase):
         self.assertEqual(o.ope.notes, "-10@15")
         self.assertEqual(t.investi(c), 50)
         self.assertEqual(t.encours(c), 5 * 15)
-        #on vend cez qui reste
+        #on vend ce qui reste
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-03', cours=20)
         self.assertEqual(t.investi(c), 0)
         self.assertEqual(o.ope.montant, 50)
         self.assertEqual(o.ope_pmv.montant, 50)
         self.assertEqual(t.encours(c), 0)
+
+    def test_ope_titre_delete(self):
+        t = Titre.objects.create(nom="t3", isin="xxxxxxx")
+        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
+        #on cree l'ope
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o_id=o.id
+        #on l'efface
+        o.delete()
+
+        self.assertFalse(Ope_titre.objects.filter(id=o_id).exists())
+        #on la recree
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o_id=o.id
+        #on rapproche son ope
+        o.ope.rapp_id=1
+        o.save()
+        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
+        #on la recree mais avec une vente comme ca il y a des plus values
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=strpdate('2011-01-01'), cours=10)
+        o_id=o.id
+        #on rapproche son ope
+        o.ope.rapp_id=1
+        o.save()
+        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
 
 
     def test_ope_titre_get_absolute_url(self):
@@ -572,7 +600,7 @@ class test_models(TestCase):
         self.assertQuerysetEqual(Moyen.objects.order_by('id'), [1, 2, 4, 5], attrgetter("id"))
         self.assertQuerysetEqual(Compte.objects.filter(moyen_credit_defaut__id=2).order_by('id'), [], attrgetter("id"))
         self.assertQuerysetEqual(Compte.objects.filter(moyen_debit_defaut__id=2).order_by('id'), [ 4, 5], attrgetter("id"))
-        self.assertQuerysetEqual(Echeance.objects.filter(moyen__id=2).order_by('id'), [3,4], attrgetter("id"))
+        self.assertQuerysetEqual(Echeance.objects.filter(moyen__id=2).order_by('id'), [3,4,8], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(moyen_virement__id=2).order_by('id'), [1,], attrgetter("id"))
         self.assertQuerysetEqual(Ope.objects.filter(moyen__id=2).order_by('id'), [1,2,3,10], attrgetter("id"))
 
@@ -596,7 +624,7 @@ class test_models(TestCase):
                                                                           tiers=Tiers.objects.get(id=2),
                                                                           compte_virement=Compte.objects.get(id=1)))
 
-    def test_echeance_calculnext(self):
+    def test_echeance_calcul_next(self):
         self.assertEquals(Echeance.objects.get(id=1).calcul_next(), None)
         self.assertEquals(Echeance.objects.get(id=3).calcul_next(), strpdate('2011-11-01'))
         self.assertEquals(Echeance.objects.get(id=4).calcul_next(), strpdate('2011-11-13'))
@@ -611,9 +639,9 @@ class test_models(TestCase):
 
     def test_ope_non_mere(self):
         self.assertQuerysetEqual(Ope.non_meres().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9,10,12,13], attrgetter("id"))
-    def test__ope_is_mere(self):
+    def test_ope_is_mere(self):
         self.assertEqual(Ope.objects.get(id=11).is_mere,True)
-    def test__ope_is_fille(self):
+    def test_ope_is_fille(self):
         self.assertEqual(Ope.objects.get(id=12).is_fille,True)
 
     def test_ope_pr(self):
@@ -760,7 +788,7 @@ class test_models(TestCase):
         self.assertEquals(tab, v.init_form())
 
 from django.core.exceptions import ImproperlyConfigured
-class test_model2(TestCase):
+class test_models2(TestCase):
     """"""
     def test_last_cours_date_special(self):
         #on cree les elements indiepensables
