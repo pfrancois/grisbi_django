@@ -1,6 +1,6 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-    <form enctype="multipart/form-data" action="{% url gsb.outils.import_file %}" method="post">
+    <form enctype="multipart/form-data" action="{% url 'gsb.outils.import_file' %}" method="post">
         <table>
             {{ form.as_table }}
         </table>
@@ -10,6 +10,6 @@
         </p>
     </form>
     <p>
-        <a href="{% url gsb.views.index %}">retour liste comptes</a>
+        <a href="{% url 'index' %}">retour liste comptes</a>
     </p>
 {% endblock content %}

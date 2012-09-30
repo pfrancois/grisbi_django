@@ -483,6 +483,14 @@ class test_models(TestCase):
         self.assertEqual(Compte_titre.objects.get(id=5).date_rappro(), strpdate('2011-10-30'))
         self.assertEqual(Compte_titre.objects.get(id=4).date_rappro(), None)
 
+    def test_compte_titre_solde_rappro(self):
+        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
+        self.assertEqual(c.solde_rappro(),0)
+        self.assertEqual(Compte_titre.objects.get(id=4).solde_rappro(),0)
+        v=Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=5), 20)
+        v.dest.rapp=Rapp.objects.get(id=1)
+        v.save()
+        self.assertEqual(Compte_titre.objects.get(id=5).solde_rappro(),20)
     def test_ope_titre_save(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
@@ -591,7 +599,6 @@ class test_models(TestCase):
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
 
-
     def test_ope_titre_get_absolute_url(self):
         self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')
 
@@ -626,13 +633,18 @@ class test_models(TestCase):
 
     def test_echeance_calcul_next(self):
         self.assertEquals(Echeance.objects.get(id=1).calcul_next(), None)
+        self.assertEquals(Echeance.objects.get(id=2).calcul_next(), strpdate('2011-12-02'))
         self.assertEquals(Echeance.objects.get(id=3).calcul_next(), strpdate('2011-11-01'))
         self.assertEquals(Echeance.objects.get(id=4).calcul_next(), strpdate('2011-11-13'))
         self.assertEquals(Echeance.objects.get(id=5).calcul_next(), strpdate('2011-12-30'))
         self.assertEquals(Echeance.objects.get(id=6).calcul_next(), strpdate('2013-10-30'))
         self.assertEquals(Echeance.objects.get(id=7).calcul_next(), None)
     def test_echeance_check1(self):
-        Echeance.check()
+        Echeance.check(to=strpdate('2011-12-31'))
+        self.assertEqual(Ope.objects.count(),71)
+    def test_echeance_check2(self):
+        Echeance.check(queryset=Echeance.objects.filter(id=2),to=strpdate('2011-12-09'))
+        self.assertEqual(Ope.objects.count(),18)
 
     def test_ope_absolute_url(self):
         self.assertEqual(Ope.objects.get(id=1).get_absolute_url(), '/ope/1/')
@@ -712,12 +724,30 @@ class test_models(TestCase):
         o.save()
         self.assertRaises(IntegrityError, Ope.objects.get(id=8).delete)
 
+    def test_pre_delete_ope_mere(self):
+        self.assertRaises(IntegrityError, Ope.objects.get(id=11).delete)
+
     def test_pre_delete_ope_titre_rapp(self):
         Compte_titre.objects.get(id=5).achat(titre=Titre.objects.get(id=1), nombre=20, date='2011-01-01')
         o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
         o.rapp = Rapp.objects.get(id=1)
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope_titre.id).delete)
+    def test_pre_save_ope_mere(self):
+        o=Ope.objects.get(id=11)
+        o.cat=Cat.objects.get(id=1)
+        o.save()
+        o=Ope.objects.get(id=11)
+        self.assertEquals(o.cat.nom,u"Opération Ventilée")
+        o.montant=154563
+        o.save()
+        o=Ope.objects.get(id=11)
+        self.assertEquals(o.montant,100)
+        o.pointe=True
+        o.save()
+        o=Ope.objects.get(id=11)
+        o.montant=154563
+        self.assertRaises(IntegrityError, o.save)
 
     def test_virement_error(self):
         #_non_ope
@@ -744,6 +774,8 @@ class test_models(TestCase):
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 100)
         self.assertEquals(v.__unicode__(), u"cpte1 => cptb3")
+        self.assertEquals(v.auto, False)
+        self.assertEquals(v.exercice, None)
         v.date_val = '2011-02-01'
         v.pointe = True
         v.save()

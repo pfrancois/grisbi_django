@@ -1,7 +1,7 @@
-{% extends "generic.djhtm" %}
+{% extends "generic.djhtm" %}{% load url from future %}
 {% block titre %}<h1>Page not found</h1>{% endblock %}
 
 {% block content %}
     <p style="text-align: center;"><img src="{{ STATIC_URL }}img/404.jpg" alt="404" /> <br/>
-    <a class="boutton" href="{% url index %}">retour index</a></p>
+    <a class="boutton" href="{% url 'index' %}">retour index</a></p>
 {% endblock %}

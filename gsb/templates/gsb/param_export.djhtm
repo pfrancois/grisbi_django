@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load url from future %}
 {% load gsb_extras %}
 {% block content %}
 
@@ -13,5 +13,5 @@
         </fieldset>
 
     </form>
-<a href="{% url export_autres %}" class="progress">retour vers le menu des options</a><br/>
+<a href="{% url 'export_autres' %}" class="progress">retour vers le menu des options</a><br/>
 {% endblock %}

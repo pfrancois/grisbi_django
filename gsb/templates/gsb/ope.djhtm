@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block content %}
     {% if ope %}
         <table style=" width: 100%;" summary="boutons">
@@ -23,7 +23,7 @@
                     <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">Annuler</a></td>
+                    <td width="50%"><a href="{% url 'index' %}">Annuler</a></td>
                 {% endif %}
             </tr>
         </table>
@@ -50,7 +50,7 @@
                 <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
             </tr>
         </table>
-        <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+        <form id='form2' action="{% url 'gsb.views.ope_delete' ope.id %}" method="post">
             {% csrf_token %}
         </form>
         {% if not ope.rapp %}
@@ -69,7 +69,7 @@
                     <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">Annuler</a></td>
+                    <td width="50%"><a href="{% url 'index' %}">Annuler</a></td>
                 {% endif %}
             </tr>
         </table>

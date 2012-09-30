@@ -1,16 +1,16 @@
-{% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
+{% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block bouton_haut %}
     <!-- ajout pla -->
     <table width="100%" id="boutons_haut" class="table">
         {% if compte.ouvert %}
             <tr class="boutton">
-                <td width="50%"><a href="{% url gsb_cpt_ope_new compte.id %}">Nouvelle Op.</a></td>
+                <td width="50%"><a href="{% url 'gsb_cpt_ope_new' compte.id %}">Nouvelle Op.</a></td>
                 <td width="50%">
                     <a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a></td>
             </tr>
             <tr class="boutton">
                 <td width="100%" colspan="2">
-                    <a href="{% url gsb.views.vir_new compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
+                    <a href="{% url 'gsb.views.vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
             </tr>
         {% else %}
             <tr class="boutton">
@@ -18,7 +18,7 @@
             </tr>
         {% endif %}
             <tr class="boutton">
-                <td width="100%" colspan="2"><a href="{% url gsb.views.index %}">retour liste des comptes</a></td>
+                <td width="100%" colspan="2"><a href="{% url 'index' %}">retour liste des comptes</a></td>
             </tr>
     </table>
     <!-- ajout pla -->
@@ -42,8 +42,8 @@
 {% block boutons_bas %}
     <table width="100%" id="boutons_bas" class="table">
         <tr class="boutton">
-            <td width="50%"><a href="{% url gsb_cpt_titre_espece_all cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>
-            <td width="50%"><a href="{% url gsb_cpt_titre_espece_rapp cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+            <td width="50%"><a href="{% url 'gsb_cpt_titre_espece_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>
+            <td width="50%"><a href="{% url 'gsb_cpt_titre_espece_rapp' cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
         </tr>
     </table>
     <p></p>

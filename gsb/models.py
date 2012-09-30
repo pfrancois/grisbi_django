@@ -132,7 +132,7 @@ class Titre(models.Model):
             try:
                 if new.cours_set.get(date=cours.date).valeur != cours.valeur:
                     raise Gsb_exc(
-                        u"attention les titre {0:>s} et {1:>s} ne peuvent etre fusionné à cause histo de cours".format(self, new))
+                        u"attention les titre %s et %s ne peuvent etre fusionné à cause histo de cours"%(self, new))
             except Cours.DoesNotExist:
                 new.cours_set.create(date=cours.date, valeur=cours.valeur)
         nb_change = 0
@@ -682,12 +682,10 @@ class Compte_titre(Compte):
         #date de la premiere operation
         solde_titre = self.solde_titre(datel, rapp)
         solde_espece = self.solde_espece(datel, rapp)
-
         return solde_espece + solde_titre
 
     def solde_rappro(self, datel=None):
         return self.solde(datel=datel, rapp=True)
-
     solde_rappro.short_description = u"solde titre rapproché"
 
     @transaction.commit_on_success
@@ -1072,17 +1070,22 @@ class Echeance(models.Model):
 
     @staticmethod
     @transaction.commit_on_success
-    def check(request=None, queryset=None):
+    def check(request=None, queryset=None,to=None):
         """
         attention ce n'est pas une vue
         verifie si pas d'écheance a passer et la cree au besoin
+        @param queryset: le queryset de definition
+        @param request: la requete qui permet d'afficher les messages
+        @param to: date finale de checking (a priori, utile seulement pour le test afin d'avoir une date fixe)
         """
-        if  not queryset:
-            liste_ech = Echeance.objects.filter(valide=True, date__lte=datetime.date.today())
+        if to is None:
+            to=datetime.date.today()
+        if  queryset is None:
+            liste_ech = Echeance.objects.filter(valide=True, date__lte=to)
         else:
             liste_ech = queryset
         for ech in liste_ech:
-            while ech.date < datetime.date.today() and ech.valide:
+            while ech.date < to and ech.valide:
                 if ech.compte_virement:
                     vir = Virement.create(compte_origine=ech.compte,
                                           compte_dest=ech.compte_virement,
@@ -1092,7 +1095,7 @@ class Echeance(models.Model):
                     vir.auto = True
                     vir.exercice = ech.exercice
                     vir.save()
-                    if request:
+                    if request is not None:
                         messages.info(request, u'virement (%s)%s crée' % (vir.origine.id, vir.origine.tiers))
                 else:
                     ope = Ope.objects.create(compte_id=ech.compte_id,
@@ -1105,7 +1108,7 @@ class Echeance(models.Model):
                                              moyen_id=ech.moyen_id,
                                              exercice_id=ech.exercice_id
                     )
-                    if request:
+                    if request is not None:
                         messages.info(request, u'opération "%s" crée' % ope)
                 if ech.calcul_next():
                     ech.date = ech.calcul_next()
@@ -1408,7 +1411,7 @@ def verif_ope_save(sender, **kwargs):
         instance.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
         if instance.montant != instance.tot_fille:
             if instance.rapp or instance.pointe:
-                raise ValidationError(
+                raise IntegrityError(
                     u"attention cette opération est pointée ou rapproché et on change le montant global")
             else:
                 instance.montant = instance.tot_fille

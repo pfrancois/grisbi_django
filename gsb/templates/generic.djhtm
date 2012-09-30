@@ -1,4 +1,4 @@
-{% load messages %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load messages %}{% load url from future %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE|default:"fr-fr" }}" xml:lang="{{ LANGUAGE_CODE|default:"fr-fr" }}">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
@@ -14,14 +14,14 @@
     <title>{% block title %}{{ titre|escape }}{% endblock title %}</title>
 </head>
 <body {% block body_js %}{% endblock body_js %}>
-{% block titre %}<h1><a href="{% url index %}">{% if titre_long %}{{ titre_long|escape }}{% else %}{{ titre|escape }}{% endif %}</a></h1>{% endblock %}
+{% block titre %}<h1><a href="{% url 'index' %}">{% if titre_long %}{{ titre_long|escape }}{% else %}{{ titre|escape }}{% endif %}</a></h1>{% endblock %}
 {% block messages %}{% if messages %}{% render_messages messages %}{% endif %}{% endblock messages %}
 {% block result %}{% for resultat in resultats %}
     <div >{{ resultat|escape }}</div>
 {% endfor %}{% endblock result %}
 {% block content %}
     <div class="progress">
-        <a href='{% url gsb.views.index %}'>retour</a>
+        <a href='{% url 'index' %}'>retour</a>
     </div>
 {% endblock %}
 {% if user.is_authenticated %} <a href="/logout">logout</a>

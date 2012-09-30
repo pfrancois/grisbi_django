@@ -1,9 +1,9 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load url from future %}
 {% block titre %}<h1>Outils</h1>{% endblock titre %}
 {% block content %}
-    <a href="{% url export_autres %}" class="progress"> exporter </a><br/>
-    <a href="{% url gsb.outils.import_file %}" class="progress"> import d'un fichier dans l'application</a><br/>
-    <a href="{% url gestion_echeances %}" class="progress"> enregistrer les &eacute;ch&eacute;ances qui sont échues</a><br/>
-    <a href="{% url g_search_ope %}" class="progress"> recherche d'opération </a><br/>
-    <a href="{% url gsb.views.index %}" class="progress">retour vers le menu général</a><br/>
+    <a href="{% url 'export_autres' %}" class="progress"> exporter </a><br/>
+    <a href="{% url 'gsb.outils.import_file' %}" class="progress"> import d'un fichier dans l'application</a><br/>
+    <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les &eacute;ch&eacute;ances qui sont échues</a><br/>
+    <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'opération </a><br/>
+    <a href="{% url 'index' %}" class="progress">retour vers le menu général</a><br/>
 {% endblock content %}

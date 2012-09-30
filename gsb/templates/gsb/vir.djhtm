@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load url from future %}
 {% block content %}
     {% load gsb_extras %}
     {% if ope %}
@@ -8,7 +8,7 @@
                 <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
             </tr>
         </table>
-        <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">{% csrf_token %}</form>
+        <form id='form2' action="{% url 'gsb.views.ope_delete' ope.id %}" method="post">{% csrf_token %}</form>
         <table style=" width: 100%;" summary="bouton effacer">
             <tr class="boutton">
                 <td width="100%">
@@ -23,7 +23,7 @@
                     <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">retour compte</a></td>
+                    <td width="50%"><a href="{% url 'index' %}">retour compte</a></td>
                 {% endif %}
             </tr>
         </table>
@@ -44,7 +44,7 @@
                 <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
             </tr>
         </table>
-        <form id='form2' action="{% url gsb.views.ope_delete ope.id %}" method="post">
+        <form id='form2' action="{% url 'gsb.views.ope_delete' ope.id %}" method="post">
             {% csrf_token %}
         </form>
         <table style=" width: 100%;" summary="bouton effacer">
@@ -61,7 +61,7 @@
                     <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url gsb.views.index %}">retour index</a></td>
+                    <td width="50%"><a href="{% url 'index' %}">retour index</a></td>
                 {% endif %}
             </tr>
         </table>
