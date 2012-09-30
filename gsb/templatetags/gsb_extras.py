@@ -13,7 +13,7 @@ from django.conf import settings
 register = template.Library()
 
 
-@register.filter()
+@register.filter(is_safe=True)
 def cur(value, symbol=None):
     """
     affiche le montant evc son symbole monetaire et comme il faut pour les virgules
@@ -45,9 +45,7 @@ def cur(value, symbol=None):
         val_decim = 0
     return mark_safe("%s %s" % (formats.number_format(val_decim, 2), symbol))
 
-cur.is_safe = True
-
-@register.filter()
+@register.filter(is_safe=True)
 def centimes(value):
     """
     renvoie un montant en centine
@@ -56,8 +54,6 @@ def centimes(value):
     """
     return str(Decimal(force_unicode(value)) * Decimal(100))
 
-centimes.is_safe = True
-
 @register.simple_tag()
 def dev(symbol=None):
     if symbol is None:
@@ -65,6 +61,5 @@ def dev(symbol=None):
     if symbol == 'EUR':
         symbol = "&#8364;"
     return symbol
-
 dev.is_safe = True
 

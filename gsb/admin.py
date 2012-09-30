@@ -328,9 +328,9 @@ class Ope_admin(Modeladmin_perso):
     show_mere.short_description = "mere"
 
     def oper_titre(self, obj):
-        if obj.ope_titre:
-            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre))
+        if obj.ope:
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
         else:
             return "(aucun-e)"
 
@@ -491,14 +491,13 @@ class Ope_titre_admin(Modeladmin_perso):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
 
-    show_ope.short_description = "operation"
+    show_ope.short_description = u"opération"
 
     def show_ope_pmv(self, obj):
-        o = Ope.objects.get(id=obj.ope_pmv)
-        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(o.id, ))
-        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id, ))
+        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
 
-    show_ope_pmv.short_description = "operation relative aux plus ou moins values"
+    show_ope_pmv.short_description = u"opération relative aux plus ou moins values"
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)

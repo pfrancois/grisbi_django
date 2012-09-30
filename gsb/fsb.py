@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-#from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Histo_ope_titres, Virement, Titres_detenus, Cours
+#from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, ope_titres, Virement, Cours
 #
 from django.http import HttpResponse
 

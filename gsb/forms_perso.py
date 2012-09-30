@@ -59,7 +59,7 @@ def search_opes(request):
             else:
                 sort_get = ""
                 q = q.order_by('-date')
-            q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope_titre')[:100]
+            q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope')[:100]
             return render(request, 'templates_perso/search.djhtm', {'form':form,
                                                                     'list_ope':q,
                                                                     'titre':u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom),

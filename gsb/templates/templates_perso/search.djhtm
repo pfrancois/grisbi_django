@@ -24,7 +24,7 @@
                 <th><a href="?sort=moyen">Moyen</a></th>
                 <th>pointée</th>
                 <th><a href="?sort=jumelle">jumelle</a></th>
-                <th><a href="?sort=ope_titre__id">ope_titre</a></th>
+                <th><a href="?sort=ope__id">ope_titre</a></th>
                 <th><a href="?sort=montant">montant</a></th>
             </tr>
         </thead>
@@ -55,8 +55,8 @@
                         {{ ope.jumelle }}</a>{% else %}
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>-
                         </div>{% endif %}</td>
-                    <td>{% if ope.ope_titre %}<a href="{{ ope.ope_titre.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {{ ope.ope_titre }}</a>{% else %}
+                    <td>{% if ope.ope %}<a href="{{ ope.ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                        {{ ope.ope }}</a>{% else %}
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>-
                         </div>{% endif %}</td>
                     <td>

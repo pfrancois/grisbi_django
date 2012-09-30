@@ -31,7 +31,7 @@ class test_models(TestCase):
         self.assertEquals(Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
         self.assertEquals(Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
         self.assertEquals(Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
-        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"achat de 1 t1 (1) à 1 EUR le 2011-12-18 cpt:cpt_titre1")
+        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"(1) achat de 1 t1 (1) à 1 EUR le 2011-12-18 cpt:cpt_titre1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:2011-10-30)")
@@ -595,7 +595,8 @@ class test_models(TestCase):
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=strpdate('2011-01-01'), cours=10)
         o_id=o.id
         #on rapproche son ope
-        o.ope.rapp_id=1
+        r=Rapp.objects.get(id=1)
+        o.ope_pmv.rapp=r
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
 
@@ -732,7 +733,7 @@ class test_models(TestCase):
         o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
         o.rapp = Rapp.objects.get(id=1)
         o.save()
-        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope_titre.id).delete)
+        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope.id).delete)
     def test_pre_save_ope_mere(self):
         o=Ope.objects.get(id=11)
         o.cat=Cat.objects.get(id=1)

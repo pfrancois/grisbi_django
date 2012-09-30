@@ -34,10 +34,10 @@
         <fieldset class="operationMainTable">
             <table>
                 {{ form }}
-                {% if ope.ope_titre %}
+                {% if ope.ope %}
                     <tr>
                         <th><label> Op&eacute;ration titre:</label></th>
-                        <td><a href="{{ ope.ope_titre.get_absolute_url }}"> {{ ope.ope_titre.id }}</a></td>
+                        <td><a href="{{ ope.ope.get_absolute_url }}"> {{ ope.ope.id }}</a></td>
                     </tr>
                 {% endif %}
             </table>

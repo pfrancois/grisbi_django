@@ -794,7 +794,7 @@ def search_opes(request):
             else:
                 sort_get = ""
                 q = q.order_by('-date')
-            q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope_titre')[:100]
+            q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope')[:100]
             if compte:
                 titre=u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom)
             else:

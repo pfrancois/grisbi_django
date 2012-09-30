@@ -577,7 +577,7 @@ class Compte_titre(Compte):
                                     automatique=True
                 )
                 #gestion compta matiere (et donc opération sous jacente et cours)
-            Ope_titre.objects.create(titre=titre,
+            ope_titre=Ope_titre.objects.create(titre=titre,
                                      compte=self,
                                      nombre=decimal.Decimal(force_unicode(nombre)),
                                      date=date,
@@ -587,7 +587,7 @@ class Compte_titre(Compte):
                 vir = Virement()
                 vir.create(virement_de, self,
                            decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais, date)
-
+            return ope_titre
         else:
             raise TypeError("pas un titre")
 
@@ -609,7 +609,7 @@ class Compte_titre(Compte):
             if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
                 #compta matiere
-            Ope_titre.objects.create(titre=titre,
+            ope_titre=Ope_titre.objects.create(titre=titre,
                                      compte=self,
                                      nombre=decimal.Decimal(force_unicode(nombre)) * -1,
                                      date=date,
@@ -634,6 +634,7 @@ class Compte_titre(Compte):
                            virement_vers,
                            decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
                            date)
+            return ope_titre
         else:
             raise TypeError("pas un titre")
 
@@ -751,10 +752,13 @@ class Ope_titre(models.Model):
     ope = models.OneToOneField('Ope',
                                editable=False,
                                null=True,
-                               on_delete=models.CASCADE)#null=true car j'ai des operations sans lien
-    ope_pmv_id = models.IntegerField(editable=False,
-                                     default=0,
-                                     null=True)#null=true cr tt les operation d'achat sont null
+                               on_delete=models.CASCADE,
+                               related_name="ope")#null=true car j'ai des operations sans lien
+    ope_pmv = models.OneToOneField(  'Ope',
+                                        editable=False,
+                                        null=True,
+                                        on_delete=models.CASCADE,
+                                        related_name="ope_pmv")#null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
@@ -762,24 +766,6 @@ class Ope_titre(models.Model):
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
 
-
-    def get_ope_pmv(self):
-        try:
-            return Ope.objects.get(id=self.ope_pmv_id)
-        except Ope.DoesNotExist:
-            return None
-
-    def set_ope_pmv(self, obj):
-        raise NotImplementedError('pas possible')
-
-    def del_ope_pmv(self):
-        try:
-            self.ope_pmv.delete()
-        except AttributeError:
-            pass
-        self.ope_pmv_id = 0
-
-    ope_pmv = property(get_ope_pmv, set_ope_pmv, del_ope_pmv)
 
     def save(self, *args, **kwargs):
         #definition des cat avec possibilite
@@ -807,7 +793,8 @@ class Ope_titre(models.Model):
         obj.save()
 
         if self.nombre >= 0:#on doit separer because gestion des plues ou moins value
-            del self.ope_pmv #comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
+            if self.ope_pmv is not None:
+                self.ope_pmv.delete() #comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
             if not self.ope:#il faut creer l'ope sous jacente
@@ -861,38 +848,35 @@ class Ope_titre(models.Model):
                 self.ope.notes = "%s@%s" % (self.nombre, self.cours)
                 self.ope.compte = self.compte
                 self.ope.save()
-            if not self.ope_pmv:
-                self.ope_pmv_id = Ope.objects.create(date=self.date,
+            if self.ope_pmv is None:
+                self.ope_pmv = Ope.objects.create(date=self.date,
                                                      montant=pmv * -1,
                                                      tiers=self.titre.tiers,
                                                      cat=cat_pmv,
                                                      notes="%s@%s" % (self.nombre, self.cours),
                                                      moyen=moyen,
                                                      compte=self.compte,
-                                                    ).id
+                                                    )
             else:
                 #on modifie tout
-                ope_pmv = self.ope_pmv
-                ope_pmv.date = self.date
-                ope_pmv.montant = pmv * -1
-                ope_pmv.tiers = self.titre.tiers
-                ope_pmv.cat = cat_pmv
-                ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
-                ope_pmv.moyen = moyen
-                ope_pmv.compte = self.compte
-                ope_pmv.save()
+                self.ope_pmv.date = self.date
+                self.ope_pmv.montant = pmv * -1
+                self.ope_pmv.tiers = self.titre.tiers
+                self.ope_pmv.cat = cat_pmv
+                self.ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope_pmv.moyen = moyen
+                self.ope_pmv.compte = self.compte
+                self.ope_pmv.save()
 
         super(Ope_titre, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        if self.ope:
+        if self.ope is not None:
             if self.ope.rapp is not None:
                 raise IntegrityError(u"opération espèce rapprochée")
-            if  self.ope_pmv is not None:
-                if self.ope_pmv.rapp is not None:
-                    raise IntegrityError(u"opération jumelle rapprochée")
-        if self.ope_pmv_id:
-            del self.ope_pmv
+        if  self.ope_pmv is not None:
+            if self.ope_pmv.rapp is not None:
+                raise IntegrityError(u"opération jumelle rapprochée")
         super(Ope_titre, self).delete(*args, **kwargs)
 
 
@@ -905,7 +889,7 @@ class Ope_titre(models.Model):
             sens="achat"
         else:
             sens="vente"
-        chaine=u"%s de %s %s à %s EUR le %s cpt:%s"%(sens, self.nombre, self.titre, self.cours, self.date, self.compte)
+        chaine=u"(%s) %s de %s %s à %s EUR le %s cpt:%s"%(self.id, sens, self.nombre, self.titre, self.cours, self.date, self.compte)
         return chaine
 
 
