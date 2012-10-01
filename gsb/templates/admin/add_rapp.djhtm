@@ -1,28 +1,28 @@
 {% extends "admin/base_site.html" %}{% comment %} coding: utf-8 {% endcomment %}
 {% load i18n admin_modify adminmedia %}
+
 {% load url from future %}
 {% block extrahead %}{{ block.super }}
     {% url 'admin:jsi18n' as jsi18nurl %}
     <script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
     {{ media }}
 {% endblock %}{% csrf_token %}{% block extrastyle %}{{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{{ settings.STATIC }}/admin/css/forms.css"/>{% endblock %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}admin/css/forms.css"/>{% endblock %}
 
 
 {% block content %}
 
     <p>selectionner le rapprochement:</p>
-
     <form action="" method="post">
         {% csrf_token %}
         {{ rapp_form }}
 
-        <p>les op&eacute;rations suivantes vont &ecirc;tres rapproch&eacute;s:</p>
+        <p>les op&eacute;rations suivantes vont &ecirc;tre rapproch&eacute;s:</p>
 
         <ul>{{ opes|unordered_list }}</ul>
 
         <input type="hidden" name="action" value="action_transformer_pointee_rapp"/>
-        <input type="submit" name="apply" value="rapproche le compte"/>
+        <input type="submit" name="apply" value="rapprocher le compte"/>
     </form>
 
 {% endblock %}
