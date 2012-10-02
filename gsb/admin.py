@@ -21,6 +21,7 @@ from django.contrib.admin import SimpleListFilter
 from django.utils import timezone
 import datetime
 
+##-------------ici les class generiques------
 class date_perso_filter(DateFieldListFilter):
     """filtre date perso
     """
@@ -166,6 +167,34 @@ class Modeladmin_perso(admin.ModelAdmin):
         result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
 
+class liste_perso_inline(admin.TabularInline):
+    can_delete = False
+    extra = 0
+    formfield_overrides = {
+        models.TextField: {'widget': forms.TextInput,},
+        }
+    related=None
+    readonly=False
+    def __init__(self, parent_model, admin_site):
+        if self.readonly:
+            self.readonly_fields=self.fields
+            self.can_delete=False
+        super(liste_perso_inline,self).__init__(parent_model, admin_site)
+    def queryset(self, request):
+        if self.related is not None:
+            args=self.related
+            qs = super(liste_perso_inline, self).queryset(request)
+            return qs.select_related(*args)
+        else:
+            return super(liste_perso_inline, self).queryset(request).select_related()
+
+##------------defintiion des classes
+class ope_cat_admin(liste_perso_inline):
+    model = Ope
+    fields = ('date','compte', 'montant', 'tiers','ib', 'notes')
+    readonly = True
+    fk_name = 'cat'
+    related = ('compte','tiers','ib')
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -175,6 +204,12 @@ class Cat_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type':admin.VERTICAL}
+    list_select_related=True
+    inlines = [ope_cat_admin]
+    def queryset(self, request):
+        qs = super(Cat_admin, self).queryset(request)
+        return qs.select_related('ope')
+
 
 
 class Ib_admin(Modeladmin_perso):
@@ -212,7 +247,7 @@ class Compte_admin(Modeladmin_perso):
         sinon on decide automatiquement du nom
         """
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-        rapp_f = forms.ModelChoiceField(Rapp.objects.all(), required=False)
+        rapp_ = forms.ModelChoiceField(Rapp.objects.all(), required=False)
         date = forms.DateField(label="date du rapprochement")
 
     def action_transformer_pointee_rapp(self, request, queryset):
@@ -225,7 +260,7 @@ class Compte_admin(Modeladmin_perso):
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
-                rapp = form.cleaned_data['rapp_f']
+                rapp = form.cleaned_data['rapp_']
                 if not rapp:
                     rapp_date = form.cleaned_data['date'].year
                     last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte=compte).distinct()
@@ -264,22 +299,19 @@ class Compte_titre_admin(Modeladmin_perso):
     list_display = ('nom', 'solde_titre', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
-class ope_fille_admin(admin.TabularInline):
+
+class ope_fille_admin(liste_perso_inline):
     model = Ope
     fields = ( 'montant', 'cat','ib', 'notes')
-    formfield_overrides = {
-        models.TextField: {'widget': forms.TextInput,},
-    }
     fk_name = 'mere'
-    can_delete = False
-    extra = 0
+    related = ('cat','ib')
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
     fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe', "mere_fille")
+    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
@@ -290,6 +322,9 @@ class Ope_admin(Modeladmin_perso):
     ordering = ['date']
     inlines = [ope_fille_admin]
     raw_id_fields = ('mere', )
+    def queryset(self, request):
+        qs = super(Ope_admin, self).queryset(request)
+        return qs.select_related('compte','rapp','moyen','tiers','cat')
 
     def is_mere(self, obj):
         if obj.is_mere:
@@ -366,7 +401,7 @@ class Ope_admin(Modeladmin_perso):
         #on evite que cela soit une operation rapproche
         error = False
         if instance.rapp:
-            messages.error(request, u'instance rapprochee')
+            messages.error(request, u'ope rapprochee')
             error = True
         if instance.jumelle:
             if instance.jumelle.rapp:
@@ -379,8 +414,8 @@ class Ope_admin(Modeladmin_perso):
         if not error:
             try:
                 return super(Ope_admin, self).delete_view(request, object_id, extra_context)
-            except IntegrityError, e:
-                messages.error(request, e.strerror)
+            except IntegrityError, excp:
+                messages.error(request, excp)
 
 
 
@@ -424,7 +459,12 @@ class Moyen_admin(Modeladmin_perso):
 
     list_display = ('nom', 'type', 'nb_ope')
 
-
+class ope_tiers_admin(liste_perso_inline):
+    model = Ope
+    fields = ('date','compte', 'montant', 'cat','ib', 'notes')
+    readonly = True
+    fk_name = 'tiers'
+    related = ('compte','cat','ib')
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
@@ -433,6 +473,7 @@ class Tiers_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('is_titre',)
     search_fields = ['nom']
+    inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField:{'widget':forms.TextInput}, }
 
     def nb_ope(self, obj):
@@ -455,13 +496,13 @@ class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
 
-class ope_rapp_admin(admin.TabularInline):
+class ope_rapp_admin(liste_perso_inline):
     model = Ope
-    fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat','ib', 'notes')
-    readonly_fields = ( 'compte', 'date', 'tiers','moyen', 'montant', 'cat','ib', 'notes')
+    fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+    readonly_fields = ( 'compte', 'date', 'tiers','moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
-    can_delete = False
-    extra = 0
+    related=('compte','tiers','moyen','cat')
+
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
@@ -473,11 +514,6 @@ class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_filter = ('date_debut', 'date_fin')
-
-
-class Gen_admin(Modeladmin_perso):
-    """classe de gestion de l'admin pour les preferences"""
-    pass
 
 
 class Ope_titre_admin(Modeladmin_perso):
