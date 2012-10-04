@@ -9,7 +9,7 @@ from django.http import HttpResponse
 #pour les vues
 #from django.db import models
 #from django.contrib import messages
-from .views import ExportViewBase
+from .export_base import ExportViewBase
 from django.core.exceptions import ObjectDoesNotExist
 #django
 from .models import Cat, Ib, Compte

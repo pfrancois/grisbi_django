@@ -1,120 +1,78 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .models import Ope,Cours,Ope_titre
+from gsb import models
 from .utils import Format as fmt
 import time
 #from .utils import strpdate
 
-import csv, cStringIO, codecs
 import logging
 from django.http import HttpResponse
 #from django.conf import settings
 #pour les vues
-#from . import forms as gsb_forms
-#from django.db import models
-#from django.shortcuts import render
-#from django.contrib import messages
-from .views import ExportViewBase
+import gsb.export_base as ex
+
+
 from django.core.exceptions import ObjectDoesNotExist
 
+class Export_view_csv_base(ex.ExportViewBase):
+    model_initial = None
+    model_collec = None
+    nom_collec_form = None
+    form_class = None
 
-class UTF8Recoder:
-    """
-    Iterator that reads an encoded stream and reencodes the input to UTF-8
-    """
+    def export_csv_view(self,data,nomfich="export",debug=False):
+        csv_file = ex.UnicodeWriter( encoding='iso-8859-15')
+        for ligne in data:
+            csv_file.writerow(ligne)
+        reponse = HttpResponse(csv_file.getvalue(), mimetype="text/plain")
+        if not debug:
+            reponse["Cache-Control"] = "no-cache, must-revalidate"
+            reponse["Content-Disposition"] = "attachment; filename=%s_%s.csv" % (nomfich,
+                                                                                 time.strftime("%d_%m_%Y-%H_%M_%S",
+                                                                                               time.localtime()
+                                                                                              )
+                                                                                 )
+        return reponse
 
-    def __init__(self, fich, encoding):
-        self.reader = codecs.getreader(encoding)(fich)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self.reader.next().encode("utf-8")
-
-class UnicodeReader:
-    """
-    A CSV reader which will iterate over lines in the CSV file "f",
-    which is encoded in the given encoding.
-    """
-
-    def __init__(self, fich, dialect=csv.excel, encoding="utf-8", **kwds):
-        fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.reader(fich, dialect=dialect, **kwds)
-
-    def next(self):
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
-
-    def __iter__(self):
-        return self
-
-
-class UnicodeWriter:
-    """
-    A CSV writer which will write rows to CSV file "f",
-    which is encoded in the given encoding.
-    """
-
-    def __init__(self, fich, encoding="utf-8", **kwds):
-        # Redirect output to a queue
-        self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, **kwds)
-        self.stream = fich
-        # Force BOM
-        #        if encoding=="utf-16":
-        #            f.write(codecs.BOM_UTF16)
-        self.encoding = encoding
-
-    def writerow(self, row):
-        self.writer.writerow([unicode(s).encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
-        data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
-        data = data.encode(self.encoding)
-        # strip BOM
-        #       if self.encoding == "utf-16":
-        #           data = data[2:]
-        # write to the target stream
-        self.stream.write(data)
-        # empty queue
-        self.queue.truncate()
-
-    def writerows(self, rows):
-        for row in rows:
-            self.writerow(row)
+    def form_valid(self, form):
+        """si le form est valid"""
+        data = form.cleaned_data
+        ensemble = [objet.id for objet in data[self.nom_collec_form]]
+        query = self.model_initial.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+        if ensemble == [] or len(ensemble) == self.model_collec.objects.all().count():
+            extra=None
+        else:
+            extra=ensemble
+        if query.count() > 0:#si des operations existent
+            reponse = self.export(query=query,extra=extra)#dans ce cas la on appelle la fonction d'export
+            return reponse
+        else:
+            ex.messages.error(self.request, u"attention pas d'opérations pour la selection demandée")
+            return self.render_to_response({'form':form, })
 
 
-class Excel_csv(csv.Dialect):
-    """Describe the usual properties of Excel-generated CSV files."""
-    delimiter = ';'
-    quotechar = '"'
-    doublequote = True
-    skipinitialspace = False
-    lineterminator = '\r\n'
-    quoting = csv.QUOTE_MINIMAL
+class Exportform_ope(ex.gsb_forms.Baseform):
+    compte = ex.forms.ModelMultipleChoiceField(models.Compte.objects.all(), required=False)
+    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
+    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
 
-
-class Export_ope_csv(ExportViewBase):
-    def export(self, query=None,export_all=None):
+class Export_ope_csv(Export_view_csv_base):
+    form_class = Exportform_ope
+    model_initial = models.Ope
+    model_collec = models.Compte
+    nom_collec_form = 'compte'
+    def export(self, query=None,extra=None):
         """
         fonction principale
         """
         logger = logging.getLogger('gsb.export')
-        csv.register_dialect("excel_csv", Excel_csv)
-        fich = cStringIO.StringIO()
-        csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-        csv_file.writerow(u'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois'.split(';'))
+        data=[(u'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois'.split(';')),]
         if query:
             opes = query.order_by('date').select_related('cat', "compte", "tiers", "ib")
         else:
-            opes = Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(filles_set__isnull=True)
-        i = 0
-        total = float(opes.count())
+            opes = models.Ope.objects.all().order_by('date').select_related('cat', "compte", "tiers", "ib").filter(filles_set__isnull=True)
         for ope in opes:
-            i += 1
             ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
             if ope.rapp is None:
                 ligne.append(0)
@@ -144,71 +102,70 @@ class Export_ope_csv(ExportViewBase):
             ligne.append(fmt.bool(ope.mere))
             ligne.append(fmt.str(ope.mere, ''))
             ligne.append(ope.date.strftime('%Y_%m'))
-            csv_file.writerow(ligne)
-            #on affiche que tous les 500 lignes
-            if ( (i-1)%500) == 0:
-                logger.info("ope %s %s%%" % (ope.id, i / total * 100))
+            data.append(ligne)
         logger.info('export ope csv')
-        reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
-        reponse["Cache-Control"] = "no-cache, must-revalidate"
-        reponse["Content-Disposition"] = "attachment; filename=export_ope_%s.csv" % time.strftime("%d_%m_%Y-%H_%M_%S",time.localtime())
-        fich.close()
+        return self.export_csv_view(data=data,nomfich="export_ope")
+
+class Exportform_cours(ex.gsb_forms.Baseform):
+    titre = ex.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False)
+    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
+    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
+
+
+class Export_cours_csv(Export_view_csv_base):
+    model_initial = models.Cours
+    model_collec = models.Titre
+    nom_collec_form = 'titre'
+    form_class = Exportform_cours
+
+    def export(self, query=None,extra=None):
+        """
+        renvoie l'ensemble des cours.
+        @param query: queryset des cours filtre avec les dates
+        @param extra liste des titre a filtrer
+        @return: object httpreposne se composant du fichier csv
+        """
+        data=[["id","date","nom","value"]]
+        if extra is not None:
+            query = self.model_initial.objects.filter(titre__pk__in=extra)
+        for objet in query.select_related('titre'):
+            ligne=[objet.titre.isin,objet.date,objet.titre.nom,objet.valeur]
+            data.append(ligne)
+        reponse = self.export_csv_view(data=data,nomfich="export_cours",debug=True)
         return reponse
 
-def export_cours(request):
-    """
-    renvoie l'ensemble des cours.
-    @param request:
-    @return: object httpreposne se composant du fichier csv
-    """
-    logger = logging.getLogger('gsb.export')
-    csv.register_dialect("excel_csv", Excel_csv)
-    fich = cStringIO.StringIO()
-    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-    csv_file.writerow(["id","date","nom","value"])
-    i=0
-    collection=Cours.objects.all().select_related('titre').order_by('date')
-    total = float(collection.count())
-    for objet in collection:
-        i += 1
-        ligne=[objet.titre.isin,objet.date,objet.titre.nom,objet.valeur]
-        csv_file.writerow(ligne)
-        if ( (i-1)%500) == 0:
-            logger.info("ope %s %s%%" % (objet.id, i / total * 100))
-    reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
-    reponse["Cache-Control"] = "no-cache, must-revalidate"
-    reponse["Content-Disposition"] = "attachment; filename=%s.csv" % "cours"
-    fich.close()
-    return reponse
+class Exportform_Compte_titre(ex.gsb_forms.Baseform):
+    compte_titre = ex.forms.ModelMultipleChoiceField(models.Compte_titre.objects.all(), required=False)
+    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
+    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
 
-def export_ope_titres(request):
-    """
-    renvoie l'ensemble des operations sur titres.
-    @param request:
-    @return: object httpreposne se composant du fichier csv
-    """
-    data=[["id","date","compte","titre_id","titre_nom","sens","nombre","value"],]
-    collection=Ope_titre.objects.all().select_related('titre',"compte").order_by('date')
-    for objet in collection:
-        ligne=[objet.id,objet.date,objet.compte.nom,objet.titre.nom,objet.titre.isin]
-        if objet.nombre>0:
-            ligne.append("achat")
-        else:
-            ligne.append("vente")
-        ligne.append(objet.nombre)
-        ligne.append(objet.invest)
-        data.append(ligne)
-    return export_csv(data,nomfich="ope_titre")
 
-def export_csv(data,nomfich="export",csv=True):
-    csv.register_dialect("excel_csv", Excel_csv)
-    fich = cStringIO.StringIO()
-    csv_file = UnicodeWriter(fich, encoding='iso-8859-15', dialect=Excel_csv)
-    for ligne in data:
-        csv_file.writerow(ligne)
-    reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
-    if csv:
-        reponse["Cache-Control"] = "no-cache, must-revalidate"
-        reponse["Content-Disposition"] = "attachment; filename=%s.csv" % nomfich
-    fich.close()
-    return reponse
+class Export_ope_titre_csv(Export_view_csv_base):
+    model_initial = models.Ope_titre
+    form_class = Exportform_Compte_titre
+    nom_collec_form = 'compte_titre'
+    model_collec = models.Compte_titre
+
+    def export(self, query=None,extra=None):
+        """
+        renvoie l'ensemble des operations titres.
+        @param query: filtre avec les dates
+        @param extra: liste des compte titre a filtrer
+        @return: object httpreposne se composant du fichier csv
+        """
+        if extra is not None:
+            query = self.model_initial.objects.filter(compte_titre__pk__in=extra)
+
+        data=[["id","date","nom","value"]]
+        for objet in query.select_related('compte','titre'):
+            ligne=[objet.id,objet.date,objet.compte.nom,objet.titre.nom,objet.titre.isin]
+            if objet.nombre>0:
+                ligne.append("achat")
+            else:
+                ligne.append("vente")
+            ligne.append(objet.nombre)
+            ligne.append(objet.invest)
+            data.append(ligne)
+        reponse = self.export_csv_view(data=data,nomfich="export_ope_titre")
+        return reponse
+

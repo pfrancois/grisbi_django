@@ -16,8 +16,6 @@ from django.utils.encoding import smart_unicode
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
-from django.views.generic.edit import FormView
-from django.utils.decorators import method_decorator
 from django.db.models import Q
 
 def has_changed(instance, field):
@@ -824,43 +822,6 @@ def search_opes(request):
                                                             'date_max':date_max,
                                                             'solde':None})
 
-class ExportViewBase(FormView):
-    template_name = 'gsb/param_export.djhtm'
-    form_class = gsb_forms.Exportform
-    def export(self, query=None,export_all=False):
-        """
-        fonction principale mais abstraite
-        """
-        django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
-    def get_initial(self):
-        """gestion des donnees initiales"""
-        #prend la date de la premiere operation de l'ensemble des compte
-        date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
-        #la derniere operation
-        date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
-        return {'date_min':date_min, 'date_max':date_max}
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        """on a besoin pour le method decorator"""
-        return super(ExportViewBase, self).dispatch(*args, **kwargs)
-    def form_valid(self, form):
-        """si le form est valid"""
-        data = form.cleaned_data
-        comptes = [cpt.id for cpt in data['compte']]
-        if comptes == [] or len(comptes) == Compte.objects.all().count():
-            #en fonction des dates demandes
-            query = Ope.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
-            export_total = True
-        else:
-            #o rajoute un compte
-            query = Ope.objects.filter(compte__pk__in=comptes, date__gte=data['date_min'], date__lte=data['date_max'])
-            export_total = False
-        if query.count() > 0:#si des operations existent
-            reponse = self.export(query=query, export_all=export_total)
-            return reponse
-        else:
-            messages.error(self.request, u"attention pas d'opérations pour la selection demandée")
-            return self.render_to_response({'form':form, })
 
 def perso(request):
     resultat=[]

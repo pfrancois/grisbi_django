@@ -1,4 +1,5 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% load url from future %}
 {% block titre %}<h1>export de autres données totales</h1>{% endblock titre %}
 {% block content %}
     <a href="{% url 'export_gsb_050' %}" class="progress"> exporter sous format 0.5.0</a><br/>

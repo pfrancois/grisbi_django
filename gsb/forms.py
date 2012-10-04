@@ -232,7 +232,3 @@ class SearchForm(Baseform):
     date_min = forms.DateField(label='date_min', widget=forms.DateInput)
     date_max = forms.DateField(label='date_max', widget=forms.DateInput)
 
-class Exportform(Baseform):
-    compte = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False)
-    date_min = forms.DateField(label='date minimum', widget=forms.DateInput)
-    date_max = forms.DateField(label='date maximum', widget=forms.DateInput)

@@ -26,9 +26,8 @@ urlpatterns += patterns('gsb',
                         url(r'^options/csv$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
                         url(r'^options/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
                         url(r'^options/export_autres$', TemplateView.as_view(template_name="gsb/export_autres.djhtm"), name='export_autres'),
-                        url(r'^options/export_ope_titres$', 'export_csv.export_ope_titres', name='export_ope_titre'),
-                        url(r'^options/cours$', 'export_csv.export_cours', name='export_cours'),
-
+                        url(r'^options/export_ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
+                        url(r'^options/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
