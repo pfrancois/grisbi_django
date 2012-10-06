@@ -9,10 +9,10 @@ from django.http import HttpResponse
 #pour les vues
 #from django.db import models
 #from django.contrib import messages
-from .export_base import ExportViewBase
+from .export_base import ExportViewBase,Exportform_ope
 from django.core.exceptions import ObjectDoesNotExist
 #django
-from .models import Cat, Ib, Compte
+from .models import Cat, Ib, Compte,Ope
 
 def convert_type2qif(type_a_transformer):
     if type_a_transformer == "b":
@@ -105,6 +105,8 @@ def cat_export(ope):
         return u"[%s]" % ope.jumelle.compte.nom
 
 class Export_qif(ExportViewBase):
+    form_class = Exportform_ope
+    model_initial = Ope
     """elle permet d'exporter au format qif"""
     def export(self, query=None, export_all=False):
         """exportationn effective du fichier qif"""

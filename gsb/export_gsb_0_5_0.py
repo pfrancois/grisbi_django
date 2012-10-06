@@ -62,12 +62,12 @@ def _export():
     et.SubElement(xml_generalites, "Version_grisbi").text = "0.5.9 for Windows (GTK>=2.6.9)"#NOT IN BDD
     et.SubElement(xml_generalites, "Fichier_ouvert").text = "0"
     et.SubElement(xml_generalites, "Backup").text = "sauvegarde.gsb"#NOT IN BDD
-    et.SubElement(xml_generalites, "Titre").text = str(settings.titre)#NOT IN BDD
+    et.SubElement(xml_generalites, "Titre").text = str(settings.TITRE)#NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_commune").text = ''#NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_secondaire").text = ''#NOT IN BDD
-    et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(settings.utilise_exercices)
-    et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(settings.utilise_ib)
-    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(settings.utilise_pc)
+    et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(settings.UTILISE_EXERCICES)
+    et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(settings.UTILISE_IB)
+    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(settings.UTILISE_PC)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"#NOT IN BDD
     et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = "1"
     et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = "1"
@@ -95,7 +95,7 @@ def _export():
     logger.debug("gen ok")
     nb_compte = 0
     for cpt in Compte.objects.all().order_by('id'):
-        logger.debug('compte %s (%s eme)' % cpt.id)
+        logger.debug('compte %s' % cpt.id)
         nb_compte += 1
         xml_compte = et.SubElement(xml_comptes, "Compte")
         xml_detail = et.SubElement(xml_compte, "Details")
@@ -132,7 +132,7 @@ def _export():
             et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(
                 Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
             et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(
-                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde())
+                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(
                 Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
         except Ope.DoesNotExist:
@@ -306,7 +306,7 @@ def _export():
         xml_element.set('Notes', str(ech.notes))
         if ech.periodicite is None or ech.periodicite == 'u':
             xml_element.set('Periodicite', str(0))
-            xml_element.set('Intervalle_periodicite', 0)
+            xml_element.set('Intervalle_periodicite', '0')
         else:
             if ech.intervalle > 1:#on cree periodicite perso
                 xml_element.set('Intervalle_periodicite', str(ech.intervalle))
@@ -321,7 +321,7 @@ def _export():
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
                     xml_element.set('Periodicite_personnalisee', '2')
             else:
-                xml_element.set('Intervalle_periodicite', 0)
+                xml_element.set('Intervalle_periodicite', '0')
                 if ech.periodicite == 's':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
                     xml_element.set('Periodicite_personnalisee', '1')

@@ -52,13 +52,9 @@ class Export_view_csv_base(ex.ExportViewBase):
             return self.render_to_response({'form':form, })
 
 
-class Exportform_ope(ex.gsb_forms.Baseform):
-    compte = ex.forms.ModelMultipleChoiceField(models.Compte.objects.all(), required=False)
-    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
-    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
 
 class Export_ope_csv(Export_view_csv_base):
-    form_class = Exportform_ope
+    form_class = ex.Exportform_ope
     model_initial = models.Ope
     model_collec = models.Compte
     nom_collec_form = 'compte'

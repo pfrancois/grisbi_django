@@ -7,7 +7,7 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
-
+from .models import  Compte
 
 from django.views.generic.edit import FormView
 from gsb import forms as gsb_forms
@@ -105,6 +105,10 @@ class UnicodeWriter:
     def close(self):
         self.stream.close()
 
+class Exportform_ope(gsb_forms.Baseform):
+    compte = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False)
+    date_min = forms.DateField(label='date minimum', widget=forms.DateInput)
+    date_max = forms.DateField(label='date maximum', widget=forms.DateInput)
 
 
 class ExportViewBase(FormView):
@@ -119,7 +123,7 @@ class ExportViewBase(FormView):
         """gestion des donnees initiales"""
         #prend la date de la premiere operation de l'ensemble des compte
         if self.model_initial is None:
-            django_exceptions.ImproperlyConfigured("un modele d'ou on tire les dates initiales doit etre defini")
+            raise django_exceptions.ImproperlyConfigured("un modele d'ou on tire les dates initiales doit etre defini")
         date_min = self.model_initial.objects.aggregate(element=models_agg.Min('date'))['element']
         #la derniere operation
         date_max = self.model_initial.objects.aggregate(element=models_agg.Max('date'))['element']
