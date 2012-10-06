@@ -17,7 +17,7 @@ urlpatterns = patterns('gsb',
 #les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$', 'options_index',name="outils_index"),
-                        url(r'^options/import$', 'import_file'),
+                        url(r'^options/import$', 'import_file',name="import_1"),
                         url(r'^options/ech$', 'gestion_echeances', name='gestion_echeances'),
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )

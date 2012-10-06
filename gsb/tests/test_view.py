@@ -20,20 +20,65 @@ from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.test.client import Client
 
-class test_views(TestCase):
+class test_urls(TestCase):
     fixtures = ['test.json', 'auth.json']
     def setUp(self):
+        super(test_urls, self).setUp()
         self.client.login(username='admin', password='mdp')
 
     def test_404(self):
         self.assertEqual(self.client.get('/ope/2200/').status_code, 404)
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
+        self.assertEqual(self.client.get('/compte/1/especes').status_code, 404)
+
     def test_normaux(self):
         self.assertEqual(self.client.get('/').status_code, 200)
+        self.assertEqual(self.client.get('/gestion_bdd/doc/').status_code, 200)
+        self.assertEqual(self.client.get('/login').status_code, 200)
+    def test_normaux2(self):
+        self.assertEqual(self.client.get('/options').status_code, 200)
+        self.assertEqual(self.client.get('/options/cours').status_code, 200)
+        self.assertEqual(self.client.get('/options/import').status_code, 200)
+        self.assertEqual(self.client.get('/options/ech').status_code, 200)
+        self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
+        self.assertEqual(self.client.get('/options/gsb050').status_code, 200)
+        self.assertEqual(self.client.get('/options/csv').status_code, 200)
+        self.assertEqual(self.client.get('/options/qif').status_code, 200)
+        self.assertEqual(self.client.get('/options/export_autres').status_code, 200)
+        self.assertEqual(self.client.get('/options/export_ope_titres').status_code, 200)
+        self.assertEqual(self.client.get('/options/cours').status_code, 200)
+    def test_normaux3(self):
+        self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
+        self.assertEqual(self.client.get('/ope/1/').status_code, 200)
+        self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
+        self.assertEqual(self.client.get('/ope/new').status_code, 200)
+        self.assertEqual(self.client.get('/vir/new').status_code, 200)
+        self.assertEqual(self.client.get('/ope_titre/1/').status_code, 200)
+        self.assertEqual(self.client.get('/ope_titre/1/delete').status_code, 302)
+        self.assertEqual(self.client.get('/search').status_code, 200)
+    def test_normaux4(self):
+        self.assertEqual(self.client.get('/compte/1/').status_code, 200)
+        self.assertEqual(self.client.get('/compte/1/rapp').status_code, 200)
+        self.assertEqual(self.client.get('/compte/1/all').status_code, 200)
+        self.assertEqual(self.client.get('/compte/1/new').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/especes/all').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/especes/rapp').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/titre/1').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/titre/1/all').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/titre/1/rapp').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
+        self.assertEqual(self.client.get('/compte/4/maj').status_code, 200)
+
+
+class test_views(TestCase):
+    fixtures = ['test.json', 'auth.json']
+    def setUp(self):
+        super(test_views, self).setUp()
+        self.client.login(username='admin', password='mdp')
+
 
     def test_form_ope_normal(self):
-        #self.client.post(path="/ope/15/", data=, follow=True)
-        self.assertEqual(self.client.get('/ope/1/').status_code, 200)
         form_data = { 'compte': "1",
                       'date': "02/09/2012",
                       'date_val': "",

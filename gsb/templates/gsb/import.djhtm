@@ -1,6 +1,7 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% load url from future %}
 {% block content %}
-    <form enctype="multipart/form-data" action="{% url 'gsb.outils.import_file' %}" method="post">
+    <form enctype="multipart/form-data" action="{% url 'import_1' %}" method="post">
         <table>
             {{ form.as_table }}
         </table>

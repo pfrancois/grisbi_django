@@ -310,8 +310,8 @@ def ope_new(request, cpt_id=None):
     else:
         if not cpt_id:
             try:
-                cpt = Compte.objects.get(Compte.objects.select_related(), pk=settings.ID_CPT_M)
-            except Compte.DoesNotExists:
+                cpt = Compte.objects.filter(pk=settings.ID_CPT_M).select_related()[0]
+            except Compte.DoesNotExist:
                 messages.error(request, u"pas de compte par defaut")
                 return HttpResponseRedirect(reverse('gsb.views.index'))
         form = gsb_forms.OperationForm(initial={'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
