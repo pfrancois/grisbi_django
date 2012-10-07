@@ -7,29 +7,34 @@ Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
 from .test_base import TestCase as Tcd
-from .. import models as models_gsb
-from ..import_gsb import * #@UnusedWildImport
+from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte,\
+    Cat, Ib, Exercice, Moyen, Rapp
+from ..import_gsb import import_gsb_050, Import_exception
 import decimal, datetime #@Reimport
 from django.db import models
-import os.path #@Reimport
 from operator import attrgetter
 from django.conf import settings
+import os.path
+import logging
 
 class importtests(Tcd):
     def test_mauvais_format(self):
+        logger = logging.getLogger('gsb')
         logger.setLevel(50)
         self.assertRaises(Import_exception, import_gsb_050,
-                          "%s/../test_files/mauvais.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+                          "%s/../test_files/mauvais.gsb" % os.path.join(settings.PROJECT_PATH))
         self.assertRaises(Import_exception, import_gsb_050,
                           "%s/../test_files/mauvais3.gsb" % (os.path.dirname(os.path.abspath(__file__))))
 
+
 class importposttests(Tcd):
     def setUp(self):
+        logger = logging.getLogger('gsb')
         super(importposttests, self).setUp()
         logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        models_gsb.Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
-                         date=datetime.date(day=1, month=1, year=2010)).save()
+        Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
+              date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
 
     def test_tiers_properties(self):
@@ -40,7 +45,8 @@ class importposttests(Tcd):
         self.assertEqual(Tiers.objects.count(), 9)
         self.assertEqual(9, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
         self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9], attrgetter("id"))
-        self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9], attrgetter("id"))
+        self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9],
+                                 attrgetter("id"))
 
     def test_titre_normal(self):
         obj = Titre.objects.get(id=1)

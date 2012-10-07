@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from django.conf.urls import patterns, url, include
+from django.conf.urls import patterns, url
+#from django.conf.urls import include #non utilise actuellement
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
-from . import forms as gsb_forms
-from django.conf import settings
-from . import views as gsb_views
 from . import export_csv,export_qif
 
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', 'views.index', name='index'),
-                       #url(r'^test$', 'test.test')
+                       url(r'^test$', 'test.test')
 )
 
 #les vues relatives aux outils
@@ -22,12 +20,12 @@ urlpatterns += patterns('gsb.outils',
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
 urlpatterns += patterns('gsb',
-                        url(r'^options/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
-                        url(r'^options/csv$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
-                        url(r'^options/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
+                        url(r'^options/export/gsb050$', 'export_gsb_0_5_0.export', name='export_gsb_050'),
+                        url(r'^options/export/csv/ope$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
+                        url(r'^options/export/qif/ope$', export_qif.Export_qif.as_view(), name='export_qif'),
                         url(r'^options/export_autres$', TemplateView.as_view(template_name="gsb/export_autres.djhtm"), name='export_autres'),
-                        url(r'^options/export_ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
-                        url(r'^options/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
+                        url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
+                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
                         )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
