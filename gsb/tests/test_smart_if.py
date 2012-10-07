@@ -7,9 +7,9 @@ from ..templatetags.smart_if import *
 #===============================================================================
 
 
-class SmartIfTests(TestCase):
+class Test_SmartIf(TestCase):
     def setUp(self):
-        super(SmartIfTests, self).setUp()
+        super(Test_SmartIf, self).setUp()
         self.true = TestVar(True)
         self.false = TestVar(False)
         self.high = TestVar(9000)

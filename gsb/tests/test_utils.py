@@ -10,11 +10,11 @@ from ..models import Exercice, Cat
 import decimal
 
 
-class test_utils(TestCase):
+class Test_utils(TestCase):
     fixtures = ['test.json']
 
     def setUp(self):
-        super(test_utils, self).setUp()
+        super(Test_utils, self).setUp()
 
     def test_format_date(self):
         d = utils.strpdate('2011-01-01')

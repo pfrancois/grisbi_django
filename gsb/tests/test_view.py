@@ -20,11 +20,14 @@ from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.test.client import Client
 
-class test_urls(TestCase):
+class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
     def setUp(self):
-        super(test_urls, self).setUp()
+        super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
+
+class Test_urls(Test_view_base):
+
 
     def test_404(self):
         self.assertEqual(self.client.get('/ope/2200/').status_code, 404)
@@ -70,13 +73,17 @@ class test_urls(TestCase):
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/maj').status_code, 200)
 
+class Test_export_csv(Test_view_base):
+    def test(self):
+        pass
 
-class test_views(TestCase):
-    fixtures = ['test.json', 'auth.json']
-    def setUp(self):
-        super(test_views, self).setUp()
-        self.client.login(username='admin', password='mdp')
+class Test_import_csv(Test_view_base):
+    def test(self):
+        pass
 
+
+
+class Test_views(Test_view_base):
 
     def test_form_ope_normal(self):
         form_data = { 'compte': "1",
@@ -121,4 +128,7 @@ class test_views(TestCase):
         form = gsb_forms.OperationForm(data=form_data)
         self.assertEqual(form.is_valid(), False)
         form.is_valid()
-        self.assertEqual(form._errors, {'nouveau_tiers': [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'], 'tiers': [u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]})
+        self.assertEqual(form._errors, {'nouveau_tiers':
+                                            [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
+                                        'tiers':
+                                            [u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]})

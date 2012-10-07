@@ -13,6 +13,7 @@ import logging
 @override_settings(ID_CAT_PMV=67)
 class TestCase(Test_Case_django):
     def setUp(self):
+        #supprime l'affichage des probleme de 404
         logger = logging.getLogger('django.request')
         logger.setLevel(logging.ERROR)
         super(TestCase, self).setUp()

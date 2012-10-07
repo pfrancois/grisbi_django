@@ -18,7 +18,7 @@ from operator import attrgetter
 from dateutil.relativedelta import relativedelta
 from django.db import models
 
-class test_models(TestCase):
+class Test_models(TestCase):
     fixtures = ['test.json']
 
     def test_models_unicode(self):
@@ -821,7 +821,7 @@ class test_models(TestCase):
         self.assertEquals(tab, v.init_form())
 
 from django.core.exceptions import ImproperlyConfigured
-class test_models2(TestCase):
+class Test_models2(TestCase):
     """"""
     def test_last_cours_date_special(self):
         #on cree les elements indiepensables
