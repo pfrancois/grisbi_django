@@ -24,7 +24,6 @@ import datetime
 import decimal
 import logging #@UnusedImport
 from django.contrib.auth.decorators import login_required
-from django.utils.encoding import smart_unicode
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from . import utils as utils
 #-----------les urls.py

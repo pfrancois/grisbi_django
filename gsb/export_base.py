@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import csv, cStringIO, codecs
-import decimal
-import datetime
+
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
-from .models import  Compte
+from .models import  Compte,Ope
 
 from django.views.generic.edit import FormView
 from gsb import forms as gsb_forms
 from django.db import models as models_agg
-from django.contrib import messages
 from django import forms
-
+import time
 
 class Excel_csv(csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
@@ -22,7 +20,7 @@ class Excel_csv(csv.Dialect):
     quotechar = '"'
     doublequote = True
     skipinitialspace = False
-    lineterminator = '\r\n'
+    lineterminator = "\r\n"
     quoting = csv.QUOTE_MINIMAL
 csv.register_dialect("excel_csv", Excel_csv)
 
@@ -90,12 +88,12 @@ class UnicodeWriter:
         # write to the target stream
         self.stream.write(data)
         # empty queue
-        self.queue.truncate()
+
+        self.queue.truncate(0)
 
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
-
 
     def getvalue(self,close=True):
         reponse=self.stream.getvalue()
@@ -106,19 +104,41 @@ class UnicodeWriter:
         self.stream.close()
 
 class Exportform_ope(gsb_forms.Baseform):
-    compte = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False)
+    collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False,label="Comptes")
     date_min = forms.DateField(label='date minimum', widget=forms.DateInput)
     date_max = forms.DateField(label='date maximum', widget=forms.DateInput)
+    model_initial=Ope
+    model_collec = Compte
+    def clean(self):
+        if self.model_collec is None:
+            raise django_exceptions.ImproperlyConfigured("model_collec non defini")
+        super(Exportform_ope, self).clean()
+        data = self.cleaned_data
+        ensemble = [objet.id for objet in data["collection"]]
+        self.query=self.model_initial.objects.filter( date__gte=data['date_min'], date__lte=data['date_max'])
+        if ensemble == [] or len(ensemble) == self.model_collec.objects.count():
+            pass
+        else:
+            self.query=self.verif_collec(self.query,ensemble)
+
+        if self.query.count() == 0:#si des operations existent
+            raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée",)
+        return data
+    def verif_collec(self,query,ensemble):
+        return query.filter(compte__pk__in=ensemble)
+
 
 
 class ExportViewBase(FormView):
-    template_name = 'gsb/param_export.djhtm'
-    model_initial=None
-    def export(self, query=None,extra=None):
+    template_name = 'gsb/param_export.djhtm'#nom du template
+    model_initial=None#model d'ou on tire les dates initiales
+    extension_file=None
+    nomfich=None
+    def export(self, query):
         """
         fonction principale mais abstraite
         """
-        django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
+        raise django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
     def get_initial(self):
         """gestion des donnees initiales"""
         #prend la date de la premiere operation de l'ensemble des compte
@@ -133,5 +153,22 @@ class ExportViewBase(FormView):
         """on a besoin pour le method decorator"""
         return super(ExportViewBase, self).dispatch(*args, **kwargs)
     def form_valid(self, form):
-        django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
+        """si le form est valid"""
+        reponse = self.export(query=form.query)#comme on a verifier dans le form que c'etait ok
+        debug=False#ce debug permet d'afficher les export
+        if self.nomfich is None:
+            raise django_exceptions.ImproperlyConfigured('nomfich non defini')
+        if self.extension_file is None:
+            raise django_exceptions.ImproperlyConfigured('extension_file non defini')
 
+        if not debug:
+            reponse["Cache-Control"] = "no-cache, must-revalidate"
+            reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
+                                                                         time.strftime("%d_%m_%Y-%H_%M_%S",
+                                                                                       time.localtime())
+                                                                            ,self.extension_file
+                )
+        return reponse
+
+    def form_invalid(self, form):
+        return self.render_to_response({'form':form, })

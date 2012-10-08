@@ -57,7 +57,7 @@ class QifWriter(object):
         # write to the target stream
         self.stream.write(data)
         # empty queue
-        self.queue.truncate()
+        self.queue.truncate(0)
 
     def w(self, type_data, row):
         """ecrit une ligne avec le type"""
@@ -107,8 +107,10 @@ def cat_export(ope):
 class Export_qif(ExportViewBase):
     form_class = Exportform_ope
     model_initial = Ope
+    extension_file="qif"
+    nomfich = "export_ope"
     """elle permet d'exporter au format qif"""
-    def export(self, query=None, export_all=False):
+    def export(self, query):
         """exportationn effective du fichier qif"""
         #ouverture du fichier
         fich = cStringIO.StringIO()
@@ -116,6 +118,7 @@ class Export_qif(ExportViewBase):
         #recuperation des requete
         opes = query.order_by('compte','date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(mere__isnull=False)
         comptes = Compte.objects.filter(pk__in=set(opes.values_list('compte__id', flat=True)))
+
         #initialisation
         #nb_ope = 0
         #nb_total = float(opes.count())
@@ -130,7 +133,7 @@ class Export_qif(ExportViewBase):
             qif.w("T", convert_type2qif(cpt.type))
         qif.writerow("!Clear:AutoSwitch")
         #liste d
-        if export_all:
+        if comptes.count() == Compte.objects.count():
             #extraction categorie
             if Cat.objects.all().exists():
                 qif.writerow("!Type:Cat")
@@ -198,6 +201,4 @@ class Export_qif(ExportViewBase):
             qif.end_record()
         #finalisation
         reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
-        reponse["Cache-Control"] = "no-cache, must-revalidate"
-        reponse["Content-Disposition"] = "attachment; filename=export.qif"
         return reponse
