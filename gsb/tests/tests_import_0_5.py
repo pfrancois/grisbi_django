@@ -22,9 +22,9 @@ class importtests(Tcd):
         logger = logging.getLogger('gsb')
         logger.setLevel(50)
         self.assertRaises(Import_exception, import_gsb_050,
-                          "%s/../test_files/mauvais.gsb" % os.path.join(settings.PROJECT_PATH))
+                          os.path.join(settings.PROJECT_PATH,"gsb","test_files","mauvais.gsb"))
         self.assertRaises(Import_exception, import_gsb_050,
-                          "%s/../test_files/mauvais3.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+                          os.path.join(settings.PROJECT_PATH,"gsb","test_files","mauvais3.gsb"))
 
 
 class importposttests(Tcd):
