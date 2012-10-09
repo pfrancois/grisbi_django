@@ -104,11 +104,6 @@ def import_file(request):
                               context_instance=RequestContext(request))
 
 
-def options_index(request):
-    """vue qui gere l'index de toutes les options possible accesibles vie le menu option"""
-    return render_to_response('gsb/options.djhtm', context_instance=RequestContext(request))
-
-
 @login_required
 def gestion_echeances(request):
     """vue qui gere les echeances"""
