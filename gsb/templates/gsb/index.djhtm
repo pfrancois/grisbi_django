@@ -1,5 +1,5 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
-{% block titre %}<h1 class="survol"><a href="{% url 'gsb.outils.options_index' %}">Comptes</a>
+{% block titre %}<h1 class="survol"><a href="{% url 'outils_index' %}">Comptes</a>
     </h1>{% endblock titre %}
 {% block content %} <h2>comptes esp&egrave;ces ou bancaires</h2>
     <table id="banques" class="table">

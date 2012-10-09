@@ -50,7 +50,7 @@
                 <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
             </tr>
         </table>
-        <form id='form2' action="{% url 'gsb.views.ope_delete' ope.id %}" method="post">
+        <form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
             {% csrf_token %}
         </form>
         {% if not ope.rapp %}

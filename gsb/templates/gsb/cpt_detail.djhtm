@@ -5,16 +5,16 @@
             {% if compte.ouvert %}
                 <tr class="boutton">
                     <td width="50%"><a href="{% url 'gsb_cpt_ope_new' compte.id %}">Nouvelle Op.</a></td>
-                    <td width="50%"><a href="{% url 'gsb.views.vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
+                    <td width="50%"><a href="{% url 'gsb_cpt_vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
                 </tr>
                 <tr class="boutton">
                     <td width="100%" colspan="2">
-                    <a href="{% url 'gsb.views.index' %}">retour liste comptes</a>
+                    <a href="{% url 'index' %}">retour liste comptes</a>
                     </td>
                 </tr>
             {% else %}
                 <tr class="boutton">
-                    <td width="100%" colspan="2"><a href="{% url 'gsb.views.index' %}">retour liste comptes</a></td>
+                    <td width="100%" colspan="2"><a href="{% url 'index' %}">retour liste comptes</a></td>
                 </tr>
             {% endif %}
         </table>

@@ -10,7 +10,7 @@
             </tr>
             <tr class="boutton">
                 <td width="100%" colspan="2">
-                    <a href="{% url 'gsb.views.vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
+                    <a href="{% url 'gsb_cpt_vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
             </tr>
         {% else %}
             <tr class="boutton">
