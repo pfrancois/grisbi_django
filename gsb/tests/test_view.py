@@ -33,7 +33,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
         self.assertEqual(self.client.get('/options/import').status_code, 200)
-        self.assertEqual(self.client.get('/options/ech').status_code, 200)
+        self.assertEqual(self.client.get('/options/ech').status_code, 301)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)
@@ -65,7 +65,6 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/maj').status_code, 200)
 
-
 class Test_export_csv(Test_view_base):
     def test1(self):
         rep=self.client.post(reverse('export_csv'),data={"compte":1,"date_min":"2011-01-01","date_max":"2012-09-24"})
@@ -74,14 +73,25 @@ class Test_export_csv(Test_view_base):
         rep=self.client.post(reverse('export_csv'),data={"compte":2,"date_min":"2011-01-01","date_max":"2011-02-01"})
         self.assertFormError(rep,'form','',u"attention pas d'opérations pour la selection demandée")
 
-class Test_import_csv(Test_view_base):
-    def test(self):
-        with open(os.path.join(settings.PROJECT_PATH,'gsb','test_files','export_ope_07_10_2012-21_18_25.csv')) as fp:
-            self.client.post(reverse('import_csv'),data={'attachment': fp})
+class Test_views_general(Test_view_base):
+    def test_view_index(self):
+        resp=self.client.get('/')
+        c=resp.context
+        self.assertTrue('titre' in c)
+        self.assertEqual(c['titre'],'liste des comptes')
+        self.assertQueryset(resp.context['liste_cpt_bq'],[1,2,3])
+        self.assertQueryset(resp.context['liste_cpt_pl'],[4,5])
+        self.assertEqual(resp.context['total_bq'],30)
+        self.assertEqual(resp.context['total_pla'],100)
+        self.assertEqual(resp.context['total'],130)
+        self.assertEqual(resp.context['nb_clos'],1)
+    def test_view_cpt_detail(self):
+        resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
 
 
 
-class Test_views(Test_view_base):
+
+class Test_views_ope(Test_view_base):
     def test_form_ope_normal(self):
         form_data = {'compte': "1",
                      'date': "02/09/2012",

@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
 
-import os
+from .models import Compte,Cat,Tiers,Moyen
 
 @login_required
 def import_file(request):
@@ -104,13 +104,13 @@ def import_file(request):
                               context_instance=RequestContext(request))
 
 
-@login_required
+
 def gestion_echeances(request):
     """vue qui gere les echeances"""
     Echeance.check(request)
     return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues', }, context_instance=RequestContext(request))
 
-from .models import Compte,Cat,Tiers,Moyen
+
 def verif_element_config(element,request,collection=None):
     id=getattr(settings,element,None)
     if id is None:

@@ -17,7 +17,9 @@ from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
 from django.db.models import Q
-
+from django.views.generic import TemplateView
+from django.views.generic import RedirectView
+from django.utils.decorators import method_decorator
 def has_changed(instance, field):
     if not instance.pk:
         return False
@@ -31,6 +33,27 @@ def has_changed(instance, field):
         return isinstance(new_value.file, UploadedFile)
 
     return not getattr(instance, field) == old_value
+
+class Mytemplateview(TemplateView):
+    template_name='gsb/options.djhtm'
+    titre=None
+    def get_context_data(self, **kwargs):
+        return {
+            'titre': self.titre
+        }
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """on a besoin pour le method decorator"""
+        return super(Mytemplateview, self).dispatch(*args, **kwargs)
+
+class Myredirectview(RedirectView):
+    call=None
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        #on regarde si c'est appelle
+        if self.call is not None and callable(self.call):
+            self.call()
+        return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
 @login_required
 def index(request):
