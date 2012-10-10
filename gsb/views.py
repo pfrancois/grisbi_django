@@ -51,8 +51,8 @@ class Myredirectview(RedirectView):
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         #on regarde si c'est appelle
-        if self.call is not None and callable(self.call):
-            self.call()
+        #if self.call is not None and callable(self.call):
+        #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
 @login_required
@@ -119,6 +119,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             q = q.filter(rapp__isnull=False)
         if not all and not rapp:
             nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+            #on exclue les operations vielles des operations rapprochés
             nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
             q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
         #gestion du tri
@@ -179,7 +180,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
                         'nbvieilles':nb_ope_vieilles,
                         'titre':c.nom,
                         'solde':c.solde(),
-                        'date_limite':date_limite,
+                        'date_limite':date_limite,#date en dessous c'est des operation vielles
                         'nb_j':settings.NB_JOURS_AFF,
                         "sort":sort_get,
                         "date_r":c.date_rappro(),

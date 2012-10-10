@@ -9,7 +9,7 @@ from gsb import forms as gsb_forms
 from django.core.urlresolvers import reverse
 import os.path
 from django.conf import settings
-from ..models import Compte
+from ..utils import strpdate
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
 
@@ -33,7 +33,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
         self.assertEqual(self.client.get('/options/import').status_code, 200)
-        self.assertEqual(self.client.get('/options/ech').status_code, 301)
+        self.assertEqual(self.client.get('/options/ech').status_code, 200)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)
@@ -43,7 +43,7 @@ class Test_urls(Test_view_base):
 
     def test_normaux3(self):
         self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
-        self.assertEqual(self.client.get('/ope/1/').status_code, 200)
+        self.assertEqual(self.client.get(reverse('gsb_cpt_detail',args=(1,))).status_code, 200)
         self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
         self.assertEqual(self.client.get('/ope/new').status_code, 200)
         self.assertEqual(self.client.get('/vir/new').status_code, 200)
@@ -76,9 +76,7 @@ class Test_export_csv(Test_view_base):
 class Test_views_general(Test_view_base):
     def test_view_index(self):
         resp=self.client.get('/')
-        c=resp.context
-        self.assertTrue('titre' in c)
-        self.assertEqual(c['titre'],'liste des comptes')
+        self.assertEqual(resp.context['titre'],'liste des comptes')
         self.assertQueryset(resp.context['liste_cpt_bq'],[1,2,3])
         self.assertQueryset(resp.context['liste_cpt_pl'],[4,5])
         self.assertEqual(resp.context['total_bq'],30)
@@ -87,7 +85,18 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['nb_clos'],1)
     def test_view_cpt_detail(self):
         resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
+        self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
+        self.assertEqual(resp.context['titre'],'cpte1')
+        self.assertEqual(resp.context['compte'].id,1)
+        self.assertEqual(resp.context['nbrapp'],0)
+        self.assertEqual(resp.context['solde'],-70)
+        self.assertEqual(resp.context['date_r'],strpdate('2011-08-12'))
+        self.assertEqual(resp.context['solde_r'],-90)
+        self.assertEqual(resp.context['solde_p'],10)
+        self.assertEqual(resp.context['solde_pr'],-80)
 
+
+        self.assertQueryset(resp.context['list_ope'].object_list,[12,13])
 
 
 

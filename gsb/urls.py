@@ -4,8 +4,8 @@ from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
 from .views import Mytemplateview,Myredirectview
 from . import export_csv,export_qif
-from django.core.urlresolvers import reverse_lazy
-from .models import Echeance
+from .outils import Echeance_view
+
 
 # les vues generales
 urlpatterns = patterns('gsb',
@@ -22,8 +22,7 @@ urlpatterns += patterns('gsb.outils',
                         ),
                         url(r'^options/import$', 'import_file',name="import_1"),
                         url(r'^options/ech$',
-                            Myredirectview.as_view(url=reverse_lazy('outils_index'),
-                                                   call=Echeance.check),
+                            Echeance_view.as_view(),
                             name='gestion_echeances'
                         ),
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
@@ -73,7 +72,11 @@ urlpatterns += patterns('gsb.views',
 #les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail', name='gsb_cpt_detail'),
-                        url(r'^compte/(?P<cpt_id>\d+)/rapp$', 'cpt_detail', {'rapp':True}, name='gsb_cpt_detail_rapp'),
+                        url(r'^compte/(?P<cpt_id>\d+)/rapp$',
+                            'cpt_detail',
+                            {'rapp':True},
+                            name='gsb_cpt_detail_rapp'
+                        ),
                         url(r'^compte/(?P<cpt_id>\d+)/all$', 'cpt_detail', {'all':True}, name='gsb_cpt_detail_all'),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),

@@ -17,8 +17,8 @@ from .models import Echeance
 from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
-
-from .models import Compte,Cat,Tiers,Moyen
+from .views import Mytemplateview,Myredirectview
+from .models import Compte,Cat,Tiers,Moyen,Echeance
 
 @login_required
 def import_file(request):
@@ -144,3 +144,15 @@ def verif_config(request):
                 },
                 context_instance=RequestContext(request)
     )
+
+class Echeance_view(Mytemplateview):
+    template_name='generic.djhtm'
+    titre=u"écheances échus"
+    def get_context_data(self, **kwargs):
+        return {
+            'titre': self.titre
+        }
+    def dispatch(self,  request, *args, **kwargs):
+        """on a besoin pour le method decorator"""
+        Echeance.check(request)
+        return super(Echeance_view, self).dispatch(request, *args, **kwargs)
