@@ -91,7 +91,7 @@ class Titre(models.Model):
         @param datel: la date max du cours ou l'on veut
         @return : decimal"""
         if datel is None:
-            datel = datetime.date.today()
+            datel = utils.today()
         reponse = self.cours_set.filter(date__lte=datel)
         if reponse.exists():
             return reponse.latest('date').valeur
@@ -233,7 +233,7 @@ class Titre(models.Model):
             if datel:
                 date_r = datel
             else:
-                date_r = datetime.date.today()
+                date_r = utils.today()
             #maintenant que l'on a la date max, on peut filtrer
         opes = opes.filter(date__lte=date_r)
         if opes.exists():
@@ -250,7 +250,7 @@ class Cours(models.Model):
     """cours des titres"""
     valeur = CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=utils.today)
 
     class Meta:
         db_table = 'gsb_cours'
@@ -369,7 +369,7 @@ class Exercice(models.Model):
     """listes des exercices des comptes
     attention, il ne faut confondre exercice et rapp. les exercices sont les même pour tous les comptes alors q'un rapp est pour un seul compte
     """
-    date_debut = models.DateField(default=datetime.date.today)
+    date_debut = models.DateField(default=utils.today)
     date_fin = models.DateField(null=True, blank=True)
     nom = models.CharField(max_length=40, unique=True)
 
@@ -550,7 +550,7 @@ class Compte_titre(Compte):
         verbose_name_plural = "Comptes Titre"
 
     #@transaction.commit_on_success
-    def achat(self, titre, nombre, prix=1, date=datetime.date.today(), frais=0, virement_de=None, cat_frais=None,
+    def achat(self, titre, nombre, prix=1, date=utils.today(), frais=0, virement_de=None, cat_frais=None,
               tiers_frais=None):
         """fonction pour achat de titre:
         @param titre:object titre
@@ -592,7 +592,7 @@ class Compte_titre(Compte):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def vente(self, titre, nombre, prix=1, date=datetime.date.today(), frais=0, virement_vers=None, cat_frais=None,
+    def vente(self, titre, nombre, prix=1, date=utils.today(), frais=0, virement_vers=None, cat_frais=None,
               tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
@@ -639,7 +639,7 @@ class Compte_titre(Compte):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def revenu(self, titre, montant=1, date=datetime.date.today(), frais=0, virement_vers=None, cat_frais=None,
+    def revenu(self, titre, montant=1, date=utils.today(), frais=0, virement_vers=None, cat_frais=None,
                tiers_frais=None):
         """fonction pour ost de titre:"""
         self.alters_data = True
@@ -941,7 +941,7 @@ class Moyen(models.Model):
 class Rapp(models.Model):
     """rapprochement d'un compte"""
     nom = models.CharField(max_length=40, unique=True)
-    date = models.DateField(null=True, blank=True, default=datetime.date.today)
+    date = models.DateField(null=True, blank=True, default=utils.today)
 
     class Meta:
         db_table = 'gsb_rapp'
@@ -995,7 +995,7 @@ class Echeance(models.Model):
         ('j', u'jour'),
         )
 
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=utils.today)
     date_limite = models.DateField(null=True, blank=True, default=None)
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
@@ -1063,7 +1063,7 @@ class Echeance(models.Model):
         @param to: date finale de checking (a priori, utile seulement pour le test afin d'avoir une date fixe)
         """
         if to is None:
-            to=datetime.date.today()
+            to=utils.today()
         if  queryset is None:
             liste_ech = Echeance.objects.filter(valide=True, date__lte=to)
         else:
@@ -1117,7 +1117,7 @@ class Echeance(models.Model):
 class Ope(models.Model):
     """operation"""
     compte = models.ForeignKey(Compte)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=utils.today)
     date_val = models.DateField(null=True, blank=True, default=None)
     montant = CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.PROTECT, default=None)
@@ -1322,7 +1322,7 @@ class Virement(object):
         if date:
             vir.date = date
         else:
-            vir.date = datetime.date.today()
+            vir.date = utils.today()
         vir.notes = notes
         vir._init = True
         moyen = Moyen.objects.filter(type='v')[0]

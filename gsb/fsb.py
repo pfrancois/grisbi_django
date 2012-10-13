@@ -11,6 +11,7 @@ from django.conf import settings #@Reimport
 from datetime import date
 from django.contrib.admin.views.decorators import staff_member_required
 import os
+import gsb.utils as utils
 
 def _export():
     #output backup
@@ -27,7 +28,7 @@ def export_database(request): #@UnusedVariable
     view pour export en sql
     """
     response = HttpResponse(_export(), mimetype="application/octet-stream")
-    response['Content-Disposition'] = 'attachment; filename=%s' % date.today().__str__() + '_db.sql.bz2'
+    response['Content-Disposition'] = 'attachment; filename=%s' % utils.today().__str__() + '_db.sql.bz2'
     return response
 
 if __name__ == "__main__":

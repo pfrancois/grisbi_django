@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
-import datetime
+#import datetime
 from . import forms as gsb_forms
 from django.db import models
 import decimal
@@ -20,6 +20,7 @@ from django.db.models import Q
 from django.views.generic import TemplateView
 from django.views.generic import RedirectView
 from django.utils.decorators import method_decorator
+from gsb import utils
 def has_changed(instance, field):
     if not instance.pk:
         return False
@@ -106,7 +107,7 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
     else:
         titre = False
     if not titre:
-        date_limite = datetime.date.today() - datetime.timedelta(days=settings.NB_JOURS_AFF)
+        date_limite = utils.today() - utils.datetime.timedelta(days=settings.NB_JOURS_AFF)
         q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
         nb_ope_vieilles = 0
         nb_ope_rapp = 0
@@ -465,7 +466,7 @@ def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
         sort_get = u"&sort=%s" % sort
     else:
         q = q.order_by('-date')
-    sort_get = None
+        sort_get = None
     sort_t = {}
     if sort == "date":
         sort_t['date'] = "-date"

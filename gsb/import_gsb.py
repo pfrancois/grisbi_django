@@ -11,7 +11,8 @@ import decimal
 import logging
 ###from django.conf import settings #@Reimport
 import django.utils.encoding as dj_encoding
-from .utils import strpdate
+import gsb.utils as utils
+
 
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -93,13 +94,13 @@ def import_gsb_050(nomfich, efface_table=True):
                 #dans les notes ISIN@TYPE
                 if not s[1]:#pas de @ et donc pas de type
                     if s[0] == '':
-                        titre.isin = "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
+                        titre.isin = "ZZ%sN%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
                     else:
                         titre.isin = s[0]
                     titre.type = "ZZZ"
                 else:
                     if s[0] == '':#pas d'isin
-                        titre.isin = "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), nb_titre)
+                        titre.isin = "XX%sN%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
                     else:
                         titre.isin = s[0]
                     if s[2] in liste_type_titre:#verification que le type existe
@@ -370,8 +371,8 @@ def import_gsb_050(nomfich, efface_table=True):
         try: #gestion des rapprochements
             ope.rapp_id = tabl_correspondance_rapp[xml_ope.get('R')]
             #gestion de la date du rapprochement
-            if ope.rapp.date > strpdate(ope.date):
-                ope.rapp.date = strpdate(ope.date)
+            if ope.rapp.date > utils.strpdate(ope.date):
+                ope.rapp.date = utils.strpdate(ope.date)
                 ope.rapp.save()
         except KeyError:
             ope.rapp = None

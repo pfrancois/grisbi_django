@@ -159,7 +159,10 @@ def strpdate(s):
     else:
         return datetime.date(1, 1, 1)
 
-
+def today():
+    return datetime.date.today()
+def now():
+    return datetime.date.now()
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
     month = sourcedate.month - 1 + months

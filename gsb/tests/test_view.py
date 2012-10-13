@@ -9,7 +9,11 @@ from gsb import forms as gsb_forms
 from django.core.urlresolvers import reverse
 import os.path
 from django.conf import settings
-from ..utils import strpdate
+import gsb.utils as utils
+import sys
+import mock
+import datetime
+import logging
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
 
@@ -67,6 +71,8 @@ class Test_urls(Test_view_base):
 
 class Test_export_csv(Test_view_base):
     def test1(self):
+        logger = logging.getLogger('gsb')
+        logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
         rep=self.client.post(reverse('export_csv'),data={"compte":1,"date_min":"2011-01-01","date_max":"2012-09-24"})
         self.assertEqual(rep.content,'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;0;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;0;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;1;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;0;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;0;0;moyen_rec1;(d)Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;2012_09\r\n')
         #erreur
@@ -74,7 +80,9 @@ class Test_export_csv(Test_view_base):
         self.assertFormError(rep,'form','',u"attention pas d'opérations pour la selection demandée")
 
 class Test_views_general(Test_view_base):
-    def test_view_index(self):
+    @mock.patch('gsb.utils.today')
+    def test_view_index(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
         resp=self.client.get('/')
         self.assertEqual(resp.context['titre'],'liste des comptes')
         self.assertQueryset(resp.context['liste_cpt_bq'],[1,2,3])
@@ -83,21 +91,34 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['total_pla'],100)
         self.assertEqual(resp.context['total'],130)
         self.assertEqual(resp.context['nb_clos'],1)
-    def test_view_cpt_detail(self):
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_detail(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
         resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
         self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'],'cpte1')
         self.assertEqual(resp.context['compte'].id,1)
         self.assertEqual(resp.context['nbrapp'],0)
         self.assertEqual(resp.context['solde'],-70)
-        self.assertEqual(resp.context['date_r'],strpdate('2011-08-12'))
+        self.assertEqual(resp.context['date_r'],utils.strpdate('2011-08-12'))
         self.assertEqual(resp.context['solde_r'],-90)
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
-
-
         self.assertQueryset(resp.context['list_ope'].object_list,[12,13])
-
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_detail_rapp(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
+        resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
+        self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
+        self.assertEqual(resp.context['titre'],'cpte1')
+        self.assertEqual(resp.context['compte'].id,1)
+        self.assertEqual(resp.context['nbrapp'],0)
+        self.assertEqual(resp.context['solde'],-70)
+        self.assertEqual(resp.context['date_r'],utils.strpdate('2011-08-12'))
+        self.assertEqual(resp.context['solde_r'],-90)
+        self.assertEqual(resp.context['solde_p'],10)
+        self.assertEqual(resp.context['solde_pr'],-80)
+        self.assertQueryset(resp.context['list_ope'].object_list,[4,5])
 
 
 class Test_views_ope(Test_view_base):

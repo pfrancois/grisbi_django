@@ -5,7 +5,7 @@ from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 from django.conf import settings
-import datetime
+import gsb.utils as utils
 
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 
@@ -39,7 +39,7 @@ class Dategsbwidget(forms.DateInput):
 class DateFieldgsb(forms.DateField):
     """field qui marche avec le widget au dessus"""
 
-    def __init__(self, input_formats=input_format_date, initial=datetime.date.today, **kwargs):
+    def __init__(self, input_formats=input_format_date, initial=utils.today, **kwargs):
         super(DateFieldgsb, self).__init__(input_formats=input_formats, initial=initial, widget=Dategsbwidget,
                                            **kwargs)
 

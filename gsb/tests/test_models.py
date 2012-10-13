@@ -15,7 +15,7 @@ import decimal
 from django.conf import settings
 from ..utils import strpdate
 from operator import attrgetter
-from dateutil.relativedelta import relativedelta
+import mock
 from django.db import models
 
 class Test_models(TestCase):
@@ -197,7 +197,6 @@ class Test_models(TestCase):
         self.assertEquals(t2.encours(compte=c1), 0)
         self.assertEquals(t2.encours(compte=c2), 1700)
         c1.achat(titre=t2, nombre=20, date='2011-01-01', prix=20)
-        o = Ope.objects.filter(compte=c1, date='2011-01-01',tiers=t2.tiers )[0]
         self.assertEquals(t2.encours(rapp=True), 100)
         self.assertEquals(t2.encours(), 1900)
         self.assertEquals(t2.encours(c1), 200)
@@ -424,7 +423,6 @@ class Test_models(TestCase):
         c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
         #on cree le titre
         t = Titre.objects.create(nom="t_test", isin="xxxxxxx")
-        #Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
         c.achat(titre=t, prix=10, nombre=15, date='2011-11-01')
         c.vente(titre=t, prix=5, nombre=5, date='2011-11-02', virement_vers=Compte.objects.get(id=1))
         self.assertEqual(t.investi(c), decimal.Decimal('100'))
@@ -783,14 +781,15 @@ class Test_models(TestCase):
         self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, strpdate('2011-02-01'))
         self.assertEquals(Virement(Ope.objects.get(id=8)).pointe, True)
 
-
-    def test_virement_create(self):
+    @mock.patch('gsb.utils.today')
+    def test_virement_create(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
         self.assertEqual(Compte.objects.get(id=1).solde(), -90)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom='cpte1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom='cptb2'))
         self.assertEquals(v.origine.id, 14)
-        self.assertEquals(v.date, datetime.date.today())
+        self.assertEquals(v.date, datetime.date(2012, 10, 14))
         self.assertEquals(v.montant, v.origine.montant * -1)
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 20)
@@ -801,12 +800,14 @@ class Test_models(TestCase):
         self.assertEqual(v.notes, 'test_notes')
 
     def test_virement_delete(self):
+        """on cree puis on efface un virement"""
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
         v.delete()
         self.assertEquals(Compte.objects.get(nom='cpte1').solde(), -70)
         self.assertEquals(Compte.objects.get(nom='cptb2').solde(), 0)
 
     def test_virement_init_form(self):
+        """creation d'un virement puis verification avec les form"""
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20,
                             '2010-01-01', 'test_notes')
         tab = {'compte_origine':1,
@@ -822,7 +823,7 @@ class Test_models(TestCase):
 
 from django.core.exceptions import ImproperlyConfigured
 class Test_models2(TestCase):
-    """"""
+
     def test_last_cours_date_special(self):
         #on cree les elements indiepensables
         c = Compte_titre.objects.create(nom="cpt_titre1")
@@ -836,11 +837,13 @@ class Test_models2(TestCase):
         Cours.objects.get(id=1).delete()
         self.assertEquals(t.last_cours_date(rapp=True), None)
     def test_ope_titre_special(self):
+        """si une categorie "operation sur titre" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
         c = Compte_titre.objects.create(nom="cpt_titre1")
         Cat.objects.create(nom=u'Operation Sur Titre')
         self.assertRaises(ImproperlyConfigured, lambda:Ope_titre.objects.create(titre=t, compte=c, date=datetime.date.today()))
     def test_ope_titre_special2(self):
+        """si une categorie "revenue de placement" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
         c = Compte_titre.objects.create(nom="cpt_titre1")
         Cat.objects.create(nom=u'Revenus de placement:Plus-values')
