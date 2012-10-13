@@ -30,7 +30,7 @@ dist
 bdd.sqlite
 settings.py
 *.lnk
-grisbi.db
+grisbi*.db
 .idea
 grisbi-manuel-txt-0.4.0.pdf
 secret_key.py
