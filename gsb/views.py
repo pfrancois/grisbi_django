@@ -56,7 +56,7 @@ class Myredirectview(RedirectView):
         #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
-class Index(Mytemplateview):
+class Index_view(Mytemplateview):
     template_name = 'gsb/index.djhtm'
     def get(self, request, *args, **kwargs):
         if settings.AFFICHE_CLOT:
@@ -79,7 +79,7 @@ class Index(Mytemplateview):
         for p in self.pl:
             self.total_pla += p.solde_titre()
         self.nb_clos = Compte.objects.filter(ouvert=False).count()
-        return super(Index,self).get(request,*args,**kwargs)
+        return super(Index_view,self).get(request,*args,**kwargs)
 
     def get_context_data(self, **kwargs):
         return  {
@@ -93,7 +93,7 @@ class Index(Mytemplateview):
             }
 
 
-class Cpt_detail(Mytemplateview):
+class Cpt_detail_view(Mytemplateview):
     template_name = 'gsb/cpt_detail.djhtm'
     cpt_titre_espece=False
     rapp=False
@@ -122,7 +122,7 @@ class Cpt_detail(Mytemplateview):
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
-            nb_ope_rapp=self.cpt_espece_nb(compte,q)
+            nb_ope_rapp=self.cpt_espece_nb(compte)
             sort_tab,opes=self.cpt_espece_tri(request,q)
             q = q.select_related('tiers', 'cat', 'rapp')
             context=self.get_context_data(compte,opes,nb_ope_rapp,sort_tab)
@@ -152,7 +152,7 @@ class Cpt_detail(Mytemplateview):
             context=self.get_context_data(compte_titre,titres)
         return self.render_to_response(context)
 
-    def cpt_espece_nb(self,c,q):
+    def cpt_espece_nb(self,c):
         """calcul les nombres d'operation"""
         nb_ope_rapp = 0
         if self.all:
@@ -160,7 +160,7 @@ class Cpt_detail(Mytemplateview):
         if self.rapp:
             nb_ope_rapp = 0
         if not self.all and not self.rapp:
-            nb_ope_rapp = q.filter(rapp__isnull=False).count()
+            nb_ope_rapp = Ope.objects.filter(compte=c,rapp__isnull=False).count()
         return nb_ope_rapp
     def cpt_espece_tri(self,request,q):
         """gestion du tri"""
@@ -208,7 +208,7 @@ class Cpt_detail(Mytemplateview):
     def get_context_data(self,*kwargs):
         type_long={
             "nrapp":u"Opérations non rapprochées",
-            "rapp":u"Opérations rapprochés",
+            "rapp":u"Opérations rapprochées",
             "all":u"Ensemble des opérations"
         }
         c=kwargs[0]

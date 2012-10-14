@@ -7,7 +7,7 @@ from . import export_csv,export_qif,views,outils
 
 # les vues generales
 urlpatterns = patterns('gsb',
-                       url(r'^$', views.Index.as_view(), name='index'),
+                       url(r'^$', views.Index_view.as_view(), name='index'),
                        url(r'^test$', 'test.test')
 )
 
@@ -69,25 +69,25 @@ urlpatterns += patterns('gsb.views',
 
 #les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',
-                        url(r'^compte/(?P<cpt_id>\d+)/$',views.Cpt_detail.as_view() , name='gsb_cpt_detail'),
+                        url(r'^compte/(?P<cpt_id>\d+)/$',views.Cpt_detail_view.as_view() , name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$',
-                            views.Cpt_detail.as_view(rapp=True),
+                            views.Cpt_detail_view.as_view(rapp=True),
                             name='gsb_cpt_detail_rapp'
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/all$',
-                            views.Cpt_detail.as_view(all=True),
+                            views.Cpt_detail_view.as_view(all=True),
                             name='gsb_cpt_detail_all'
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes$',
-                            views.Cpt_detail.as_view(cpt_titre_espece=True),
+                            views.Cpt_detail_view.as_view(cpt_titre_espece=True),
                             name="gsb_cpt_titre_espece"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/all$',
-                            views.Cpt_detail.as_view(cpt_titre_espece=True,all=True),
+                            views.Cpt_detail_view.as_view(cpt_titre_espece=True,all=True),
                             name="gsb_cpt_titre_espece_all"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$',
-                            views.Cpt_detail.as_view(cpt_titre_espece=True,rapp=True),
+                            views.Cpt_detail_view.as_view(cpt_titre_espece=True,rapp=True),
                             name="gsb_cpt_titre_espece_rapp"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
