@@ -2,24 +2,21 @@
 # Create your views here.
 from __future__ import absolute_import
 from django.template import RequestContext, loader
-from django.http import HttpResponse, HttpResponseRedirect
+from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
-#import datetime
+from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
 from . import forms as gsb_forms
 from django.db import models
 import decimal
 from django.contrib.auth.decorators import login_required
-from django.utils.encoding import smart_unicode
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
-from django.db.models import Q
-from django.views.generic import TemplateView,RedirectView,ListView
+from django.views.generic import TemplateView,RedirectView
 from django.utils.decorators import method_decorator
-from gsb import utils
+
 def has_changed(instance, field):
     if not instance.pk:
         return False
@@ -104,7 +101,6 @@ class Cpt_detail_view(Mytemplateview):
         view qui affiche la liste des operation de ce compte
         @param request:
         @param cpt_id: id du compte demande
-        @param rapp: si true, affiche les operations rapp ou pointee
         """
         compte = get_object_or_404(Compte, pk=cpt_id)
         self.type="nrapp"
@@ -112,6 +108,14 @@ class Cpt_detail_view(Mytemplateview):
             self.type="all"
         if self.rapp:
             self.type="rapp"
+        if compte.type != 't' and self.cpt_titre_espece==True:#onredirige vers la vue standart
+            url=reverse("gsb_cpt_detail",args=(cpt_id,))
+            print url
+            if self.rapp:
+                url=reverse("gsb_cpt_detail_%s"%'rapp',args=(cpt_id,))
+            if self.all:
+                url=reverse("gsb_cpt_detail_%s"%'all',args=(cpt_id,))
+            return http.HttpResponsePermanentRedirect(url)
         if compte.type not in ('t',) or self.cpt_titre_espece==True:
             if self.cpt_titre_espece:
                 self.template_name='gsb/cpt_placement_espece.djhtm'
@@ -124,7 +128,7 @@ class Cpt_detail_view(Mytemplateview):
                     q = q.filter(rapp__isnull=True)
             nb_ope_rapp=self.cpt_espece_nb(compte)
             sort_tab,opes=self.cpt_espece_tri(request,q)
-            q = q.select_related('tiers', 'cat', 'rapp')
+            opes = opes.select_related('tiers', 'cat', 'rapp')
             context=self.get_context_data(compte,opes,nb_ope_rapp,sort_tab)
         else:
             self.espece=False
@@ -258,7 +262,7 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
-                    return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
+                    return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
                 else:
                     if ope.rapp:
                         compte = ope.compte
@@ -277,7 +281,7 @@ def ope_detail(request, pk):
     else:#sinon c'est une operation normale
         if ope.filles_set.all().count() > 0: #c'est une ope mere
             messages.error(request, u"attention cette operation n'est pas éditable car c'est une ope mere.")
-            HttpResponseRedirect(ope.compte.get_absolute_url())
+            http.HttpResponseRedirect(ope.compte.get_absolute_url())
         if request.method == 'POST':
             form = gsb_forms.OperationForm(request.POST, instance=ope)
             if form.is_valid():
@@ -297,7 +301,7 @@ def ope_detail(request, pk):
                     else:
                         messages.success(request, u"opération modifiée")
                         ope = form.save()
-                return HttpResponseRedirect(ope.compte.get_absolute_url())
+                return http.HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
             form = gsb_forms.OperationForm(instance=ope)
         return render(request, 'gsb/ope.djhtm',
@@ -330,7 +334,7 @@ def ope_new(request, cpt_id=None):
 
             messages.success(request, u"Opération '%s' crée" % ope)
             #retour vers
-            return HttpResponseRedirect(ope.compte.get_absolute_url())
+            return http.HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
             #TODO message
             return render(request, 'gsb/ope.djhtm',
@@ -345,7 +349,7 @@ def ope_new(request, cpt_id=None):
                 cpt = Compte.objects.filter(pk=settings.ID_CPT_M).select_related()[0]
             except Compte.DoesNotExist:
                 messages.error(request, u"pas de compte par defaut")
-                return HttpResponseRedirect(reverse('gsb.views.index'))
+                return http.HttpResponseRedirect(reverse('gsb.views.index'))
         form = gsb_forms.OperationForm(initial={'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
         return render(request, 'gsb/ope.djhtm',
                 {'titre':u'création',
@@ -372,7 +376,7 @@ def vir_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (ope.compte, ope.jumelle.compte, ope.montant, ope.date))
-            return HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
+            return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
                     {'titre_long':u'création virement interne ',
@@ -402,12 +406,12 @@ def ope_delete(request, pk):
     if request.method == 'POST':
         if ope.rapp:
             messages.error(request, u"impossible d'effacer une opération rapprochée")
-            return HttpResponseRedirect(ope.get_absolute_url())
+            return http.HttpResponseRedirect(ope.get_absolute_url())
         else:
             if ope.jumelle:
                 if ope.jumelle.rapp:
                     messages.error(request, u"impossible d'effacer une opération rapprochée")
-                    return HttpResponseRedirect(ope.get_absolute_url())
+                    return http.HttpResponseRedirect(ope.get_absolute_url())
                 else:
                     ope.jumelle.delete()
                     ope.delete()
@@ -416,9 +420,9 @@ def ope_delete(request, pk):
                 ope.delete()
                 messages.success(request, u"opération effacé")
     else:
-        return HttpResponseRedirect(ope.get_absolute_url())
+        return http.HttpResponseRedirect(ope.get_absolute_url())
         #si pas de formulaire, c'est que c'est une tentative d'intrusion
-    return HttpResponseRedirect(ope.compte.get_absolute_url())
+    return http.HttpResponseRedirect(ope.compte.get_absolute_url())
 
 
 @login_required
@@ -435,7 +439,7 @@ def maj_cours(request, pk):
             else:
                 titre.cours_set.get(date=date).valeur = form.cleaned_data['cours']
             compte = Ope_titre.objects.filter(titre=titre).latest('date').compte
-            return HttpResponseRedirect(compte.get_absolute_url())
+            return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         form = gsb_forms.MajCoursform(initial={'titre':titre, 'cours':titre.last_cours(), 'date':titre.last_cours_date()})
         #petit bidoullage afin recuperer le compte d'origine
@@ -481,7 +485,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
     template = loader.get_template('gsb/cpt_placement_titre.djhtm')
-    return HttpResponse(
+    return http.HttpResponse(
         template.render(
             RequestContext(
                 request,
@@ -524,7 +528,7 @@ def ope_titre_detail(request, pk):
                     messages.error(request, e.unicode())
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
-            return HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
+            return http.HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
                                                  kwargs={'cpt_id':ope.compte.id,
                                                          'titre_id':ope.titre.id}
                                                  )
@@ -550,7 +554,7 @@ def ope_titre_delete(request, pk):
     if request.method == 'POST':
         if ope.ope and ope.ope.rapp:
             messages.error(request, u"impossible d'effacer une operation rapprochée")
-            return HttpResponseRedirect(ope.get_absolute_url())
+            return http.HttpResponseRedirect(ope.get_absolute_url())
         compte_id = ope.compte.id
         titre_id = ope.titre.id
         #gestion des cours inutiles
@@ -564,13 +568,13 @@ def ope_titre_delete(request, pk):
         s = u'%s' % ope.id
         ope.delete()
         messages.success(request, u'ope effacé id %s' % s)
-        return HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
+        return http.HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
                                              kwargs={'cpt_id':compte_id,
                                                      'titre_id':titre_id}
                                              )
                                     )
     else:
-        return HttpResponseRedirect(ope.get_absolute_url())
+        return http.HttpResponseRedirect(ope.get_absolute_url())
 
 
 @login_required
@@ -615,7 +619,7 @@ def ope_titre_achat(request, cpt_id):
                                                                       form.cleaned_data['titre'],
                                                                       form.cleaned_data['cours'],
                                                                       form.cleaned_data['date']))
-            return HttpResponseRedirect(compte.get_absolute_url())
+            return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
             form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte, 'titre':titre})
@@ -647,7 +651,7 @@ def ope_titre_vente(request, cpt_id):
 
     if compte.titre.all().distinct().count() < 1:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas vendre')
-        return HttpResponseRedirect(compte.get_absolute_url())
+        return http.HttpResponseRedirect(compte.get_absolute_url())
 
     if request.method == 'POST':
         form = gsb_forms.Ope_titre_add_venteForm(data=request.POST, cpt=compte)
@@ -666,7 +670,7 @@ def ope_titre_vente(request, cpt_id):
                                                                       form.cleaned_data['titre'],
                                                                       form.cleaned_data['cours'],
                                                                       form.cleaned_data['date']))
-            return HttpResponseRedirect(compte.get_absolute_url())
+            return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
             form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte, 'titre':titre}, cpt=compte)
@@ -690,7 +694,7 @@ def view_maj_cpt_titre(request, cpt_id):
     liste_titre = []
     if liste_titre_original.count() < 1:
         messages.error(request, u'attention, ce compte ne possède aucun titre. donc vous ne pouvez mettre a jour')
-        return HttpResponseRedirect(cpt.get_absolute_url())
+        return http.HttpResponseRedirect(cpt.get_absolute_url())
     for l in liste_titre_original:
         liste_titre.append(l)
     if request.method == 'POST':
@@ -714,7 +718,7 @@ def view_maj_cpt_titre(request, cpt_id):
                        cours:
                         Cours.objects.create(date=form.cleaned_data['date'], titre=titre_en_cours, valeur=cours)
 
-            return HttpResponseRedirect(cpt.get_absolute_url())
+            return http.HttpResponseRedirect(cpt.get_absolute_url())
     else:
         form = gsb_forms.Majtitre(titres=liste_titre)
     return render(request, 'gsb/maj_cpt_titre.djhtm',

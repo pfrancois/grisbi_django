@@ -11,7 +11,7 @@ import os.path
 from django.conf import settings
 import gsb.utils as utils
 import sys
-#import mock
+import mock
 import datetime
 import logging
 class Test_view_base(TestCase):
@@ -36,14 +36,16 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
         self.assertEqual(self.client.get('/options/import').status_code, 200)
-        self.assertEqual(self.client.get('/options/ech').status_code, 200)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_qif')).status_code, 200)
         self.assertEqual(self.client.get('/options/export_autres').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_ope_titre')).status_code, 200)
-
+    @mock.patch('gsb.utils.today')
+    def test_echeance(self, today_mock):
+        today_mock.return_value = datetime.date(2010, 1, 1)
+        self.assertEqual(self.client.get('/options/ech').status_code, 200)
     def test_normaux3(self):
         self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
         self.assertEqual(self.client.get(reverse('gsb_cpt_detail',args=(1,))).status_code, 200)
