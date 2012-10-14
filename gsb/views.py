@@ -17,8 +17,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
 from django.db.models import Q
-from django.views.generic import TemplateView
-from django.views.generic import RedirectView
+from django.views.generic import TemplateView,RedirectView,ListView
 from django.utils.decorators import method_decorator
 from gsb import utils
 def has_changed(instance, field):
@@ -47,6 +46,7 @@ class Mytemplateview(TemplateView):
         """on a besoin pour le method decorator"""
         return super(Mytemplateview, self).dispatch(*args, **kwargs)
 
+
 class Myredirectview(RedirectView):
     call=None
     @method_decorator(login_required)
@@ -56,74 +56,115 @@ class Myredirectview(RedirectView):
         #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
-@login_required
-def index(request):
-    """
-    view index
-    """
-    t = loader.get_template('gsb/index.djhtm')
-    if settings.AFFICHE_CLOT:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
-        pl = Compte_titre.objects.all()
-    else:
-        bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True)
-        pl = Compte_titre.objects.filter(ouvert=True)
-        #calcul du solde des bq
-    total_bq = Ope.objects.filter(mere__exact=None,
-                                  compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
-    if total_bq is None:
-        total_bq = decimal.Decimal()
+class Index(Mytemplateview):
+    template_name = 'gsb/index.djhtm'
+    def get(self, request, *args, **kwargs):
+        if settings.AFFICHE_CLOT:
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
+            self.pl = Compte_titre.objects.all()
+        else:
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True)
+            self.pl = Compte_titre.objects.filter(ouvert=True)
+            #calcul du solde des bq
+        self.total_bq = Ope.objects.filter(mere__exact=None,
+                                      compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+        if self.total_bq is None:
+            self.total_bq = decimal.Decimal()
         #calcul du solde des pla
-    total_pla = decimal.Decimal()
-    id_pla = Compte_titre.objects.all().values_list("id", flat=True)
-    solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
-    if solde_espece['solde']:
-        total_pla += solde_espece['solde']
-    for p in pl:
-        total_pla += p.solde_titre()
-    nb_clos = Compte.objects.filter(ouvert=False).count()
-    c = RequestContext(request, {
-        'titre':'liste des comptes',
-        'liste_cpt_bq':bq,
-        'liste_cpt_pl':pl,
-        'total_bq':total_bq,
-        'total_pla':total_pla,
-        'total':total_bq + total_pla,
-        'nb_clos':nb_clos,
-        })
-    return HttpResponse(t.render(c))
+        self.total_pla = decimal.Decimal('0')
+        id_pla = Compte_titre.objects.all().values_list("id", flat=True)
+        solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
+        if solde_espece['solde']:
+            self.total_pla += solde_espece['solde']
+        for p in self.pl:
+            self.total_pla += p.solde_titre()
+        self.nb_clos = Compte.objects.filter(ouvert=False).count()
+        return super(Index,self).get(request,*args,**kwargs)
 
-@login_required
-def cpt_detail(request, cpt_id, all=False, rapp=False):
-    """
-    view qui affiche la liste des operation de ce compte
-    @param request:
-    @param cpt_id: id du compte demande
-    @param rapp: si true, affiche l'ensemble des operations
-    """
-    c = get_object_or_404(Compte, pk=cpt_id)
-    if c.type in ('t',):
-        titre = True
-    else:
-        titre = False
-    if not titre:
-        date_limite = utils.today() - utils.datetime.timedelta(days=settings.NB_JOURS_AFF)
-        q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
+    def get_context_data(self, **kwargs):
+        return  {
+            'titre':'liste des comptes',
+            'liste_cpt_bq':self.bq,
+            'liste_cpt_pl':self.pl,
+            'total_bq':self.total_bq,
+            'total_pla':self.total_pla,
+            'total':self.total_bq + self.total_pla,
+            'nb_clos':self.nb_clos,
+            }
+
+
+class Cpt_detail(Mytemplateview):
+    template_name = 'gsb/cpt_detail.djhtm'
+    cpt_titre_espece=False
+    rapp=False
+    all=False
+    nb_ope_par_pages=50
+    def get(self, request,cpt_id):
+        """
+        view qui affiche la liste des operation de ce compte
+        @param request:
+        @param cpt_id: id du compte demande
+        @param rapp: si true, affiche les operations rapp ou pointee
+        """
+        compte = get_object_or_404(Compte, pk=cpt_id)
+        if compte.type not in ('t',) or self.cpt_titre_espece==True:
+            if self.cpt_titre_espece:
+                self.template_name='gsb/cpt_placement_espece.djhtm'
+            self.espece=True
+            date_limite = utils.today() - utils.datetime.timedelta(days=settings.NB_JOURS_AFF)
+            q = Ope.non_meres().filter(compte=compte).order_by('-date')
+            if self.rapp:
+                q = q.filter(rapp__isnull=False)
+            else:
+                if not self.all:
+                    q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
+            nb_ope_rapp,nb_ope_vieilles=self.cpt_espece_nb(compte,date_limite,q)
+            sort_tab,opes=self.cpt_espece_tri(request,q)
+            q = q.select_related('tiers', 'cat', 'rapp')
+            context=self.get_context_data(compte,opes,nb_ope_vieilles,nb_ope_rapp,date_limite,sort_tab)
+        else:
+            self.espece=False
+            self.template_name='gsb/cpt_placement.djhtm'
+        #recupere la liste des titres qui sont utilise dans ce compte
+            compte_titre=get_object_or_404(Compte_titre, pk=cpt_id)
+            titre_sans_sum = compte_titre.titre.all().distinct()
+            titres = []
+            for t in titre_sans_sum:
+                invest = t.investi(compte_titre)
+                total = t.encours(compte_titre)
+                nb = t.nb(compte_titre)
+                if abs(nb) > decimal.Decimal('0.01'):
+                    titres.append(
+                        {'nom':t.nom,
+                         'type':t.get_type_display(),
+                         'nb':nb,
+                         'invest':invest,
+                         'pmv':total - invest,
+                         'total':total,
+                         'id':t.id,
+                         't':t,
+                         'rapp':t.encours(rapp=True, compte=compte_titre)
+                    })
+            context=self.get_context_data(compte_titre,titres)
+        return self.render_to_response(context)
+
+    def cpt_espece_nb(self,c,date_limite,q):
+        """calcul les nombres d'operation"""
         nb_ope_vieilles = 0
         nb_ope_rapp = 0
-        if all:
+        if self.all:
             nb_ope_vieilles = 0
             nb_ope_rapp = 0
-        if rapp:
+        if self.rapp:
             nb_ope_vieilles = 0
             nb_ope_rapp = 0
-            q = q.filter(rapp__isnull=False)
-        if not all and not rapp:
-            nb_ope_vieilles = Ope.non_meres().filter(compte__pk=cpt_id).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
+        if not self.all and not self.rapp:
+            nb_ope_vieilles = Ope.non_meres().filter(compte=c).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
             #on exclue les operations vielles des operations rapprochés
             nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
-            q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
-        #gestion du tri
+        return [nb_ope_vieilles,nb_ope_rapp]
+    def cpt_espece_tri(self,request,q):
+        """gestion du tri"""
         try:
             sort = request.GET.get('sort')  #il y a un sort dans le get
         except (ValueError, TypeError):  #non donc on regarde dans l'historique
@@ -133,10 +174,8 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
         if sort:
             sort = unicode(sort)
             q = q.order_by(sort)
-            sort_get = u"&sort=%s" % sort
         else:
             q = q.order_by('-date')
-            sort_get = None
         sort_t = {}
         if sort == "date":
             sort_t['date'] = "-date"
@@ -154,85 +193,47 @@ def cpt_detail(request, cpt_id, all=False, rapp=False):
             sort_t['montant'] = "-montant"
         else:
             sort_t['montant'] = "montant"
-        q = q.select_related('tiers', 'cat', 'rapp')
+        return [sort_t,q]
 
+    def cpt_espece_pagination(self,request,q):
         #gestion pagination
-        paginator = Paginator(q, 50)
+        paginator = Paginator(q, self.nb_ope_par_pages)
         try:
             page = int(request.GET.get('page'))
-        except (ValueError, TypeError):
-            page = 1
-        try:
-            opes = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            opes = paginator.page(1)
+            return paginator.page(page)
+        except (ValueError, TypeError,PageNotAnInteger):
+            return paginator.page(1)
         except (EmptyPage, InvalidPage):
-            opes = paginator.page(paginator.num_pages)
-        template = loader.get_template('gsb/cpt_detail.djhtm')
-        return HttpResponse(
-            template.render(
-                RequestContext(
-                    request,
-                        {
-                        'compte':c,
-                        'list_ope':opes,
-                        'nbrapp':nb_ope_rapp,
-                        'nbvieilles':nb_ope_vieilles,
-                        'titre':c.nom,
-                        'solde':c.solde(),
-                        'date_limite':date_limite,#date en dessous c'est des operation vielles
-                        'nb_j':settings.NB_JOURS_AFF,
-                        "sort":sort_get,
-                        "date_r":c.date_rappro(),
-                        "solde_r":c.solde(rapp=True),
-                        "solde_p": c.solde_pointe(),
-                        "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
-                        "sort_tab": sort_t,
+            return paginator.page(paginator.num_pages)
+    def get_context_data(self,*kwargs):
+        c=kwargs[0]
+        if self.espece:
+            context={  'compte':c,
+                    'list_ope':kwargs[1],
+                    'nbrapp':kwargs[2],
+                    'nbvieilles':kwargs[3],
+                    'titre':c.nom,
+                    'solde':c.solde(),
+                    'date_limite':kwargs[4],#date en dessous c'est des operation vielles
+                    'nb_j':settings.NB_JOURS_AFF,
+                    "date_r":c.date_rappro(),
+                    "solde_r":c.solde(rapp=True),
+                    "solde_p": c.solde_pointe(),
+                    "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
+                    "sort_tab": kwargs[5],
+                }
+        else:
+            context={
+                    'compte':c,
+                    'titre':c.nom,
+                    'solde':c.solde(),
+                    'titres':kwargs[1],
+                    'especes':c.solde_espece(),
+                    'especes_rapp':c.solde_espece(rapp=True),
+                    'solde_rapp':c.solde(rapp=True),
+                    'solde_titre_rapp':c.solde_titre(rapp=True),
                     }
-                )
-            )
-        )
-    else:
-        compte = get_object_or_404(Compte_titre, pk=cpt_id)
-        #recupere la liste des titres qui sont utilise dans ce compte
-        titre_sans_sum = compte.titre.all().distinct()
-        titres = []
-        for t in titre_sans_sum:
-            invest = t.investi(compte)
-            total = t.encours(compte)
-            nb = t.nb(compte)
-            if abs(nb) > decimal.Decimal('0.01'):
-                titres.append({'nom':t.nom,
-                               'type':t.get_type_display(),
-                               'nb':nb, 'invest':invest,
-                               'pmv':total - invest,
-                               'total':total,
-                               'id':t.id,
-                               't':t,
-                               'rapp':t.encours(rapp=True, compte=compte)
-                               }
-                              )
-        template = loader.get_template('gsb/cpt_placement.djhtm')
-        return HttpResponse(
-            template.render(
-                RequestContext(
-                    request,
-                        {
-                        'compte':compte,
-                        'titre':compte.nom,
-                        'solde':compte.solde(),
-                        'titres':titres,
-                        'especes':compte.solde_espece(),
-                        'especes_rapp':compte.solde_espece(rapp=True),
-                        'solde_rapp':compte.solde(rapp=True),
-                        'solde_titre_rapp':compte.solde_titre(rapp=True),
-                        }
-                )
-            )
-        )
-
-
+        return context
 @login_required
 def ope_detail(request, pk):
     """
@@ -323,6 +324,7 @@ def ope_new(request, cpt_id=None):
             ope = form.save()
 
             messages.success(request, u"Opération '%s' crée" % ope)
+            #retour vers
             return HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
             #TODO message
@@ -438,85 +440,6 @@ def maj_cours(request, pk):
         url = reverse("gsb.views.index")
     return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom, "form":form, "url":url})
 
-
-@login_required
-def cpt_titre_espece(request, cpt_id, all=False, rapp=False):
-    """view qui affiche la liste des operations especes d'un compte titre cpt_id
-    si date_limite, utilise la date limite sinon affiche toute les ope espece
-    @param rapp"""
-    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
-    q = Ope.non_meres().filter(compte__pk=cpt_id).order_by('-date')
-    date_rappro = compte.date_rappro()
-    solde_rappro = compte.solde_espece(rapp=True)
-    try:
-        sort = request.GET.get('sort')  #il y a un sort dans le get
-    except (ValueError, TypeError):  #non donc on regarde dans l'historique
-        sort = False
-        if request.session.key('sort', False):
-            sort = request.session.key('sort', False)
-    if all:
-        q = q
-    if rapp:
-        q = q.filter(rapp__isnull=False)
-    if not rapp and not all:
-        q = q.filter(rapp__isnull=True)
-    if sort:
-        sort = unicode(sort)
-        q = q.order_by(sort)
-        sort_get = u"&sort=%s" % sort
-    else:
-        q = q.order_by('-date')
-        sort_get = None
-    sort_t = {}
-    if sort == "date":
-        sort_t['date'] = "-date"
-    else:
-        sort_t['date'] = "date"
-    if sort == "tiers":
-        sort_t['tiers'] = "-tiers"
-    else:
-        sort_t['tiers'] = "tiers"
-    if sort == "cat":
-        sort_t['cat'] = "-cat"
-    else:
-        sort_t['cat'] = "cat"
-    if sort == "montant":
-        sort_t['montant'] = "-montant"
-    else:
-        sort_t['montant'] = "montant"
-    q = q.select_related('tiers', 'tiers__titre', 'cat', 'rapp')
-
-    paginator = Paginator(q, 50)
-    try:
-        page = int(request.GET.get('page'))
-    except (ValueError, TypeError):
-        page = 1
-    try:
-        opes = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        opes = paginator.page(1)
-    except (EmptyPage, InvalidPage):
-        opes = paginator.page(paginator.num_pages)
-    template = loader.get_template('gsb/cpt_placement_espece.djhtm')
-    return HttpResponse(
-        template.render(
-            RequestContext(
-                request,
-                    {
-                    'compte':compte,#objet compte qui va etre parcouru
-                    'list_ope':opes,#liste des ope
-                    'titre':"%s: Especes" % compte.nom,#nom du compte
-                    'solde':compte.solde_espece(),#solde espece du compte
-                    'nbrapp':Ope.non_meres().filter(compte__pk=cpt_id).filter(rapp__isnull=False).count(),#nombre d'operations rapprochés
-                    "date_r":date_rappro,
-                    "solde_r":solde_rappro,
-                    "sort_tab": sort_t,
-                    "sort":sort_get,
-                    }
-            )
-        )
-    )
 
 
 @login_required

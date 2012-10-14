@@ -26,7 +26,6 @@ class Test_urls(Test_view_base):
     def test_404(self):
         self.assertEqual(self.client.get('/ope/2200/').status_code, 404)
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
-        self.assertEqual(self.client.get('/compte/1/especes').status_code, 404)
 
     def test_normaux(self):
         self.assertEqual(self.client.get('/').status_code, 200)
@@ -104,11 +103,11 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_r'],-90)
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
-        self.assertQueryset(resp.context['list_ope'].object_list,[12,13])
+        self.assertQueryset(resp.context['list_ope'],[12,13])
     @mock.patch('gsb.utils.today')
     def test_view_cpt_detail_rapp(self, today_mock):
         today_mock.return_value=datetime.date(2012, 10, 14)
-        resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
+        resp=self.client.get(reverse('gsb_cpt_detail_rapp',args=(1,)))
         self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'],'cpte1')
         self.assertEqual(resp.context['compte'].id,1)
@@ -118,8 +117,35 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_r'],-90)
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
-        self.assertQueryset(resp.context['list_ope'].object_list,[4,5])
-
+        self.assertQueryset(resp.context['list_ope'],[4,5])
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_detail_all(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
+        resp=self.client.get(reverse('gsb_cpt_detail_all',args=(1,)))
+        self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
+        self.assertEqual(resp.context['titre'],'cpte1')
+        self.assertEqual(resp.context['compte'].id,1)
+        self.assertEqual(resp.context['nbrapp'],0)
+        self.assertEqual(resp.context['solde'],-70)
+        self.assertEqual(resp.context['date_r'],utils.strpdate('2011-08-12'))
+        self.assertEqual(resp.context['solde_r'],-90)
+        self.assertEqual(resp.context['solde_p'],10)
+        self.assertEqual(resp.context['solde_pr'],-80)
+        self.assertQueryset(resp.context['list_ope'],[4,5,6,7,8,12,13])
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_espece(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
+        resp=self.client.get(reverse('gsb_cpt_detail_all',args=(1,)))
+        self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
+        self.assertEqual(resp.context['titre'],'cpte1')
+        self.assertEqual(resp.context['compte'].id,1)
+        self.assertEqual(resp.context['nbrapp'],0)
+        self.assertEqual(resp.context['solde'],-70)
+        self.assertEqual(resp.context['date_r'],utils.strpdate('2011-08-12'))
+        self.assertEqual(resp.context['solde_r'],-90)
+        self.assertEqual(resp.context['solde_p'],10)
+        self.assertEqual(resp.context['solde_pr'],-80)
+        self.assertQueryset(resp.context['list_ope'],[4,5,6,7,8,12,13])
 
 class Test_views_ope(Test_view_base):
     def test_form_ope_normal(self):

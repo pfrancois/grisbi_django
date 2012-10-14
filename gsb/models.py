@@ -453,11 +453,8 @@ class Compte(models.Model):
             query = query.filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
-        req = query.aggregate(solde=models.Sum('montant'))
-        if req['solde'] is None:
-            solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
-        else:
-            solde = decimal.Decimal(req['solde']) + decimal.Decimal(self.solde_init)
+        req = Ope.solde_set(query)
+        solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         return solde
 
     @transaction.commit_on_success
@@ -1157,7 +1154,11 @@ class Ope(models.Model):
         """ renvoie uniquement les opération non mere
         """
         return Ope.objects.filter(filles_set__isnull=True)
-
+    @staticmethod
+    def solde_set(q):
+        if not q.exists():
+            return 0
+        return q.aggregate(total=models.Sum('montant'))['total']
     def __unicode__(self):
         return u"(%s) le %s : %s %s a %s cpt: %s" % (
                                                         self.id,
@@ -1205,7 +1206,7 @@ class Ope(models.Model):
 
     @property
     def tot_fille(self):
-        return self.filles_set.aggregate(total=models.Sum('montant'))['total']
+        return Ope.solde_set(self.filles_set)
 
     @property
     def pr(self):

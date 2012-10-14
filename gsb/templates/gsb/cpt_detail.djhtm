@@ -50,7 +50,7 @@
                 </tr>
             {% endblock footer %}
         </tfoot>
-        {% for ope in list_ope.object_list %}
+        {% for ope in list_ope %}
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
                     <td class="opDate"><a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>{{ ope.date }}</a></td>
@@ -125,7 +125,7 @@
         <table width="100%" id="boutons_bas" class="table">
             <tr class="boutton">
                 <td width="50%"><a href="{% url 'gsb_cpt_detail_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>
-                <td width="50%"><a href="{% url 'gsb_cpt_detail_rapp' cpt_id=compte.id %}">voir uniquement les op&eacute;rations pointés ou rapproch&eacute;es</a></td>
+                <td width="50%"><a href="{% url 'gsb_cpt_detail_rapp' cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
             </tr>
             <tr class="boutton">
                 <td width="100%" colspan="2">

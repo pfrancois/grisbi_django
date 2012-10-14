@@ -2,27 +2,25 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
-from .views import Mytemplateview,Myredirectview
-from . import export_csv,export_qif
-from .outils import Echeance_view
+from . import export_csv,export_qif,views,outils
 
 
 # les vues generales
 urlpatterns = patterns('gsb',
-                       url(r'^$', 'views.index', name='index'),
+                       url(r'^$', views.Index.as_view(), name='index'),
                        url(r'^test$', 'test.test')
 )
 
 #les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
-                            Mytemplateview.as_view(template_name="gsb/options.djhtm",
+                            views.Mytemplateview.as_view(template_name="gsb/options.djhtm",
                                                    titre="liste des outils disponible")
                             ,name="outils_index"
                         ),
                         url(r'^options/import$', 'import_file',name="import_1"),
                         url(r'^options/ech$',
-                            Echeance_view.as_view(),
+                            outils.Echeance_view.as_view(),
                             name='gestion_echeances'
                         ),
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
@@ -41,7 +39,7 @@ urlpatterns += patterns('gsb',
                                 name='export_qif'
                         ),
                         url(r'^options/export_autres$',
-                                Mytemplateview.as_view(template_name="gsb/export_autres.djhtm"),
+                            views.Mytemplateview.as_view(template_name="gsb/export_autres.djhtm"),
                                 name='export_autres'
                         ),
                         url(r'^options/export/csv/ope_titres$',
@@ -54,7 +52,7 @@ urlpatterns += patterns('gsb',
                         ),
                         )
 urlpatterns += patterns('',
-                        (r'^favicon\.ico$', Myredirectview.as_view(url='/static/img/favicon.ico')),
+                        (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),
                         url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
 )
 
@@ -71,26 +69,30 @@ urlpatterns += patterns('gsb.views',
 
 #les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',
-                        url(r'^compte/(?P<cpt_id>\d+)/$', 'cpt_detail', name='gsb_cpt_detail'),
+                        url(r'^compte/(?P<cpt_id>\d+)/$',views.Cpt_detail.as_view() , name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$',
-                            'cpt_detail',
-                            {'rapp':True},
+                            views.Cpt_detail.as_view(rapp=True),
                             name='gsb_cpt_detail_rapp'
                         ),
-                        url(r'^compte/(?P<cpt_id>\d+)/all$', 'cpt_detail', {'all':True}, name='gsb_cpt_detail_all'),
-                        url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
-                        url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),
-                        url(r'^compte/(?P<cpt_id>\d+)/especes$', 'cpt_titre_espece', name="gsb_cpt_titre_espece"),
+                        url(r'^compte/(?P<cpt_id>\d+)/all$',
+                            views.Cpt_detail.as_view(all=True),
+                            name='gsb_cpt_detail_all'
+                        ),
+                        url(r'^compte/(?P<cpt_id>\d+)/especes$',
+                            views.Cpt_detail.as_view(cpt_titre_espece=True),
+                            name="gsb_cpt_titre_espece"
+                        ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/all$',
-                            'cpt_titre_espece',
-                            {'all':True},
+                            views.Cpt_detail.as_view(cpt_titre_espece=True,all=True),
                             name="gsb_cpt_titre_espece_all"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$',
-                            'cpt_titre_espece',
-                            {'rapp':True},
+                            views.Cpt_detail.as_view(cpt_titre_espece=True,rapp=True),
                             name="gsb_cpt_titre_espece_rapp"
                         ),
+                        url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
+                        url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),
+
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)$',
                             'titre_detail_cpt',
                             name="gsb_cpt_titre_detail"
