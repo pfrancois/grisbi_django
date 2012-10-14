@@ -393,7 +393,7 @@ def vir_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (
-            ope.compte, ope.jumelle.compte, ope.montant, ope.date))
+            ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date))
             return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
