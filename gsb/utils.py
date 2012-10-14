@@ -6,6 +6,7 @@ import decimal
 from django.db.models import Max
 import calendar
 from django.core.exceptions import ObjectDoesNotExist
+
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
 
@@ -95,6 +96,7 @@ class Format:
         retour = retour.strip()
         return retour
 
+
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
         @return bool """
@@ -155,14 +157,19 @@ def strpdate(s):
     """@param s: YYYY-MM-DD
     attention si s est None ou impossible renvoie None"""
     if s:
-            return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
+        return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
     else:
         return datetime.date(1, 1, 1)
 
+
 def today():
     return datetime.date.today()
+
+
 def now():
     return datetime.date.now()
+
+
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
     month = sourcedate.month - 1 + months

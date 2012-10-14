@@ -9,10 +9,10 @@ from django.http import HttpResponse
 #pour les vues
 #from django.db import models
 #from django.contrib import messages
-from .export_base import ExportViewBase,Exportform_ope
+from .export_base import ExportViewBase, Exportform_ope
 from django.core.exceptions import ObjectDoesNotExist
 #django
-from .models import Cat, Ib, Compte,Ope
+from .models import Cat, Ib, Compte, Ope
 
 def convert_type2qif(type_a_transformer):
     if type_a_transformer == "b":
@@ -25,6 +25,7 @@ def convert_type2qif(type_a_transformer):
         return "Oth A"
     if type_a_transformer == "p":
         return "Oth L"
+
 
 class QifWriter(object):
     """
@@ -61,7 +62,7 @@ class QifWriter(object):
 
     def w(self, type_data, row):
         """ecrit une ligne avec le type"""
-        chaine = "%s%s"%(type_data, row)
+        chaine = "%s%s" % (type_data, row)
         self.writerow(chaine)
 
     def end_record(self):
@@ -73,6 +74,7 @@ class QifWriter(object):
         """ecrit plusieurs lignes"""
         for row in rows:
             self.writerow(row)
+
     def debug(self, all=False):
         if not all:
             print self.enregistrement
@@ -90,33 +92,36 @@ def cat_export(ope):
         try:
             cat_g = fmt.str(ope.cat, "", "nom")#recupere la cat de l'operation
         except ObjectDoesNotExist:
-            cat_g="inconnu"
-        ib=None
+            cat_g = "inconnu"
+        ib = None
         if bool(ope.ib):#gestion de l'ib
             try:
-                ib=fmt.str(ope.ib, "", "nom")
+                ib = fmt.str(ope.ib, "", "nom")
             except ObjectDoesNotExist:
-                ib=None
+                ib = None
         if ib is not None:
-           return u"/".join([cat_g, ib]) #s ib on a une cat de la forme cat/ib
+            return u"/".join([cat_g, ib]) #s ib on a une cat de la forme cat/ib
         else:
             return u"%s" % cat_g#sinon c'est cat
     else:
         return u"[%s]" % ope.jumelle.compte.nom
 
+
 class Export_qif(ExportViewBase):
     form_class = Exportform_ope
     model_initial = Ope
-    extension_file="qif"
+    extension_file = "qif"
     nomfich = "export_ope"
     """elle permet d'exporter au format qif"""
+
     def export(self, query):
         """exportationn effective du fichier qif"""
         #ouverture du fichier
         fich = cStringIO.StringIO()
         qif = QifWriter(fich, encoding='iso-8859-15')
         #recuperation des requete
-        opes = query.order_by('compte','date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(mere__isnull=False)
+        opes = query.order_by('compte', 'date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(
+            mere__isnull=False)
         comptes = Compte.objects.filter(pk__in=set(opes.values_list('compte__id', flat=True)))
 
         #initialisation
@@ -137,7 +142,7 @@ class Export_qif(ExportViewBase):
             #extraction categorie
             if Cat.objects.all().exists():
                 qif.writerow("!Type:Cat")
-            #export des categories
+                #export des categories
             for cat in Cat.objects.all().order_by('nom').iterator():
                 qif.w("N", fmt.str(cat.nom))
                 qif.w('D', '')
@@ -148,12 +153,12 @@ class Export_qif(ExportViewBase):
                 qif.end_record()
             if Ib.objects.all().exists():
                 qif.writerow("!Type:Class")
-            #export des classes
+                #export des classes
             for ib in Ib.objects.all().order_by('nom').iterator():
                 qif.w("N", fmt.str(ib.nom))
                 qif.w('D', '')
                 qif.end_record()
-        #boucle export ope
+            #boucle export ope
         cpt = ""
         for ope in opes:
             if ope.compte.nom != cpt:
@@ -172,7 +177,7 @@ class Export_qif(ExportViewBase):
                 virement = True
             else:
                 virement = True
-            #montant
+                #montant
             qif.w("T", fmt.float(ope.montant))
             #tiers
             qif.w("P", fmt.str(ope.tiers, '', "nom"))
@@ -180,7 +185,7 @@ class Export_qif(ExportViewBase):
                 qif.w('N', ope.moyen.nom)
             else:
                 qif.w('N', "")
-            #cleared status
+                #cleared status
             qif.w("M", ope.notes)#TODO verifier si split
             if ope.rapp is None:
                 if ope.pointe:
@@ -196,9 +201,9 @@ class Export_qif(ExportViewBase):
             if mere:
                 for fille in ope.filles_set.all():
                     qif.w("S", "%s" % cat_export(fille))#on cree une nouvelle categorie a au besoin
-                    qif.w("E","%s" % fille.notes)
-                    qif.w('$',fille.montant)
+                    qif.w("E", "%s" % fille.notes)
+                    qif.w('$', fille.montant)
             qif.end_record()
-        #finalisation
+            #finalisation
         reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
         return reponse

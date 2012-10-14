@@ -17,30 +17,33 @@
     </form>
     <table id="main" class="table">
         <thead class="entete">
-            <tr>
-                <th><a href="?sort=date">Date</a></th>
-                <th><a href="?sort=tiers">Tiers</a></th>
-                <th><a href="?sort=cat">Catégorie</a></th>
-                <th><a href="?sort=moyen">Moyen</a></th>
-                <th>pointée</th>
-                <th><a href="?sort=jumelle">jumelle</a></th>
-                <th><a href="?sort=ope__id">ope_titre</a></th>
-                <th><a href="?sort=montant">montant</a></th>
-            </tr>
+        <tr>
+            <th><a href="?sort=date">Date</a></th>
+            <th><a href="?sort=tiers">Tiers</a></th>
+            <th><a href="?sort=cat">Catégorie</a></th>
+            <th><a href="?sort=moyen">Moyen</a></th>
+            <th>pointée</th>
+            <th><a href="?sort=jumelle">jumelle</a></th>
+            <th><a href="?sort=ope__id">ope_titre</a></th>
+            <th><a href="?sort=montant">montant</a></th>
+        </tr>
         </thead>
         <tfoot>
-            {% block footer %}
-                <tr class="footerbar">
-                    <td colspan="100" class="cptLabel">Solde au {{ date_max }}: {{ solde|cur }}</td>
-                </tr>{% endblock footer %}
+        {% block footer %}
+            <tr class="footerbar">
+                <td colspan="100" class="cptLabel">Solde au {{ date_max }}: {{ solde|cur }}</td>
+            </tr>{% endblock footer %}
         </tfoot>
         {% for ope in list_ope %}
             {% block ope %}
                 <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-                    <td><a href="{{ ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a></td>
+                    <td>
+                        <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a>
+                    </td>
                     <td>
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>
-                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}{{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div>
+                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}
+                                {{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div>
                     </td>
                     <td>
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</div>
@@ -49,13 +52,16 @@
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.moyen.nom|default:"aucune moyen" }}</div>
                     </td>
                     <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R{% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
+                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R
+                            {% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
                     </td>
-                    <td>{% if ope.jumelle %}<a href="{{ ope.jumelle.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                    <td>{% if ope.jumelle %}
+                        <a href="{{ ope.jumelle.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>
                         {{ ope.jumelle }}</a>{% else %}
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>-
                         </div>{% endif %}</td>
-                    <td>{% if ope.ope %}<a href="{{ ope.ope.get_absolute_url  }}" {% if ope.rapp %}class='rappElement' {% endif %}>
+                    <td>{% if ope.ope %}
+                        <a href="{{ ope.ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>
                         {{ ope.ope }}</a>{% else %}
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>-
                         </div>{% endif %}</td>

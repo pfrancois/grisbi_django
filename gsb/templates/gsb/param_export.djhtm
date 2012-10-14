@@ -3,16 +3,17 @@
 {% load gsb_extras %}
 {% block content %}
 
-    {% if form.errors %}<h1>Merci de corriger les erreurs suivantes</h1>{% else %}<h1>Remplissez les champs suivants</h1>{% endif %}
+    {% if form.errors %}<h1>Merci de corriger les erreurs suivantes</h1>
+        {% else %}<h1>Remplissez les champs suivants</h1>{% endif %}
     <form id='form1' action="" method="post">
         {% csrf_token %}
         <fieldset class="operationMainTable" title="parametre de l'export">
             <table>
                 {{ form }}
             </table>
-        <input type="submit" value="export"/>
+            <input type="submit" value="export"/>
         </fieldset>
 
     </form>
-<a href="{% url 'export_autres' %}" class="progress">retour vers le menu des options</a><br/>
+    <a href="{% url 'export_autres' %}" class="progress">retour vers le menu des options</a><br/>
 {% endblock %}

@@ -2,8 +2,9 @@
 {% block titre %}<h1>Outils</h1>{% endblock titre %}
 {% block content %}
     <a href="{% url 'export_autres' %}" class="progress"> exporter </a><br/>
-    <a href="{% url 'import_1' %}" class="progress"> import d'un fichier dans l'application</a><br/>
-    <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les &eacute;ch&eacute;ances qui sont échues</a><br/>
-    <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'opération </a><br/>
-    <a href="{% url 'index' %}" class="progress">retour vers le menu général</a><br/>
+    <a href="{% url 'import_1' %}" class="progress"> import de fichier dans l'application</a><br/>
+    <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les &eacute;ch&eacute;ances qui sont
+        &eacute;chues</a><br/>
+    <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'op&eacute;rations </a><br/>
+    <a href="{% url 'index' %}" class="progress">retour vers le menu g&eacute;n&eacute;ral</a><br/>
 {% endblock content %}

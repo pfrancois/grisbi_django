@@ -15,15 +15,18 @@ version SG:
 
 import sys
 import decimal
-from .utils import datefr2datesql, fr2decimal, strpdate
+from .utils import datefr2datesql, strpdate
 #definition
 #expression reg
 #id des moyens,tiers,cat et ib, si None, on ne change pas
 #int de la colonne a commencer pour le tiers
 tiers_perso = (
-        {"reg":r"PRELEVEMENT \d*  TRESOR PUBLIC", "def":{"moyen":4, "tiers":15, "cat":24, "ib":None}, "decal":None, "date":False},
-        {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":None, "date":True},
-        {"reg":r"CARTE X\d* (\d\d/\d\d)", "def":{"moyen":3, "tiers":None, "cat":None, "ib":None}, "decal":20, "date":True},
+    {"reg": r"PRELEVEMENT \d*  TRESOR PUBLIC", "def": {"moyen": 4, "tiers": 15, "cat": 24, "ib": None}, "decal": None,
+     "date": False},
+    {"reg": r"CARTE X\d* (\d\d/\d\d)", "def": {"moyen": 3, "tiers": None, "cat": None, "ib": None}, "decal": None,
+     "date": True},
+    {"reg": r"CARTE X\d* (\d\d/\d\d)", "def": {"moyen": 3, "tiers": None, "cat": None, "ib": None}, "decal": 20,
+     "date": True},
     )
 
 class qifitem:

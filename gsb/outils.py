@@ -11,22 +11,22 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render_to_response
-from . import forms as gsb_forms
+from .import forms as gsb_forms
 import logging, os, time
 from .models import Echeance
 from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
-from .views import Mytemplateview,Myredirectview
-from .models import Compte,Cat,Tiers,Moyen,Echeance
+from .views import Mytemplateview, Myredirectview
+from .models import Compte, Cat, Tiers, Moyen, Echeance
 
 @login_required
 def import_file(request):
     logger = logging.getLogger('gsb.import')
     nomfich = ""
     etape_nb = 1
-    liste_import = {"gsb_0_5_0":gsb_forms.ImportForm2_gsb_0_5_0,
-                    "qif":gsb_forms.ImportForm2_qif}
+    liste_import = {"gsb_0_5_0": gsb_forms.ImportForm2_gsb_0_5_0,
+                    "qif": gsb_forms.ImportForm2_qif}
     if request.method == 'POST':
         if request.session.get('import_etape_nb', '1') == 1:
             form = gsb_forms.ImportForm1(request.POST, request.FILES)
@@ -72,11 +72,13 @@ def import_file(request):
                             if nomfich[-3:] == "gsb":
                                 if form.cleaned_data['replace'] == 'remplacement':
                                     logger.warning(
-                                        u"remplacement data par fichier %s format %s %s" % (nomfich, request.session['import_type'], info))
+                                        u"remplacement data par fichier %s format %s %s" % (
+                                        nomfich, request.session['import_type'], info))
                                     import_gsb_050(nomfich=nomfich, efface_table=True)
                                 else:
                                     logger.warning(
-                                        u"fusion data par fichier %s format %s %s" % (nomfich, request.session['import_type'], info))
+                                        u"fusion data par fichier %s format %s %s" % (
+                                        nomfich, request.session['import_type'], info))
                                     import_gsb_050(nomfich=nomfich, efface_table=False)
                             else:
                                 raise ValueError("pas le bon format")
@@ -96,63 +98,67 @@ def import_file(request):
         form = gsb_forms.ImportForm1()
         etape_nb = 1
     request.session['import_etape_nb'] = etape_nb
-    param = {'form':form,
-             'titre':u"importation d'un fichier: étape %s" % etape_nb,
-             'etape_nb':etape_nb}
+    param = {'form': form,
+             'titre': u"importation d'un fichier: étape %s" % etape_nb,
+             'etape_nb': etape_nb}
     return render_to_response('gsb/import.djhtm',
                               param,
                               context_instance=RequestContext(request))
 
 
-
 def gestion_echeances(request):
     """vue qui gere les echeances"""
     Echeance.check(request)
-    return render_to_response('gsb/options.djhtm', {'titre':u'integration des échéances échues', }, context_instance=RequestContext(request))
+    return render_to_response('gsb/options.djhtm', {'titre': u'integration des échéances échues', },
+                              context_instance=RequestContext(request))
 
 
-def verif_element_config(element,request,collection=None):
-    id=getattr(settings,element,None)
+def verif_element_config(element, request, collection=None):
+    id = getattr(settings, element, None)
     if id is None:
-        messages.error(request,"%s non definit dans setting.py"%element)
+        messages.error(request, "%s non definit dans setting.py" % element)
     if collection is not None:
-        objet=collection.objects.filter(id=id)
+        objet = collection.objects.filter(id=id)
         if not objet.exists():
-            messages.error(request, u"%s n'existe pas"%element)
+            messages.error(request, u"%s n'existe pas" % element)
+
 
 def verif_config(request):
-    verif_element_config("NB_JOURS_AFF",request)
-    verif_element_config("ID_CPT_M",request,Compte)
-    verif_element_config("TAUX_VERSEMENT",request)
-    verif_element_config("ID_CAT_COTISATION",request,Cat)
-    verif_element_config("ID_CAT_OST",request,Cat)
-    verif_element_config("ID_CAT_PMV",request,Cat)
-    verif_element_config("ID_TIERS_COTISATION",request,Tiers)
-    verif_element_config("MD_CREDIT",request,Moyen)
-    verif_element_config("MD_DEBIT",request,Moyen)
-    verif_element_config("TITRE",request)
-    verif_element_config("DEVISE_GENERALE",request)
-    verif_element_config("TAUX_VERSEMENT",request)
-    verif_element_config("AFFICHE_CLOT",request)
-    verif_element_config("UTILISE_EXERCICES",request)
+    verif_element_config("NB_JOURS_AFF", request)
+    verif_element_config("ID_CPT_M", request, Compte)
+    verif_element_config("TAUX_VERSEMENT", request)
+    verif_element_config("ID_CAT_COTISATION", request, Cat)
+    verif_element_config("ID_CAT_OST", request, Cat)
+    verif_element_config("ID_CAT_PMV", request, Cat)
+    verif_element_config("ID_TIERS_COTISATION", request, Tiers)
+    verif_element_config("MD_CREDIT", request, Moyen)
+    verif_element_config("MD_DEBIT", request, Moyen)
+    verif_element_config("TITRE", request)
+    verif_element_config("DEVISE_GENERALE", request)
+    verif_element_config("TAUX_VERSEMENT", request)
+    verif_element_config("AFFICHE_CLOT", request)
+    verif_element_config("UTILISE_EXERCICES", request)
 
     return render_to_response(
-                'generic.djhtm',
-                {'resultats':(u"vous trouverez les résultats de la verification de la config",),
-                   'titre_long':"verif config",
-                   'titre':"verif _config",
-                },
-                context_instance=RequestContext(request)
+        'generic.djhtm',
+        {'resultats': (u"vous trouverez les résultats de la verification de la config",),
+         'titre_long': "verif config",
+         'titre': "verif _config",
+        },
+        context_instance=RequestContext(request)
     )
 
+
 class Echeance_view(Mytemplateview):
-    template_name='generic.djhtm'
-    titre=u"écheances échus"
+    template_name = 'generic.djhtm'
+    titre = u"écheances échus"
+
     def get_context_data(self, **kwargs):
         return {
             'titre': self.titre
         }
-    def dispatch(self,  request, *args, **kwargs):
+
+    def dispatch(self, request, *args, **kwargs):
         """on a besoin pour le method decorator"""
         Echeance.check(request)
         return super(Echeance_view, self).dispatch(request, *args, **kwargs)

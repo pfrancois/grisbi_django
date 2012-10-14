@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
-from . import export_csv,export_qif,views,outils
+from .import export_csv, export_qif, views, outils
 
 
 # les vues generales
@@ -15,10 +15,10 @@ urlpatterns = patterns('gsb',
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
                             views.Mytemplateview.as_view(template_name="gsb/options.djhtm",
-                                                   titre="liste des outils disponible")
-                            ,name="outils_index"
+                                                         titre="liste des outils disponible")
+                            , name="outils_index"
                         ),
-                        url(r'^options/import$', 'import_file',name="import_1"),
+                        url(r'^options/import$', 'import_file', name="import_1"),
                         url(r'^options/ech$',
                             outils.Echeance_view.as_view(),
                             name='gestion_echeances'
@@ -27,20 +27,20 @@ urlpatterns += patterns('gsb.outils',
 )
 urlpatterns += patterns('gsb',
                         url(r'^options/export/gsb050$',
-                                'export_gsb_0_5_0.export',
-                                name='export_gsb_050'
+                            'export_gsb_0_5_0.export',
+                            name='export_gsb_050'
                         ),
                         url(r'^options/export/csv/ope$',
-                                export_csv.Export_ope_csv.as_view(),
-                                name='export_csv'
+                            export_csv.Export_ope_csv.as_view(),
+                            name='export_csv'
                         ),
                         url(r'^options/export/qif/ope$',
-                                export_qif.Export_qif.as_view(),
-                                name='export_qif'
+                            export_qif.Export_qif.as_view(),
+                            name='export_qif'
                         ),
                         url(r'^options/export_autres$',
                             views.Mytemplateview.as_view(template_name="gsb/export_autres.djhtm"),
-                                name='export_autres'
+                            name='export_autres'
                         ),
                         url(r'^options/export/csv/ope_titres$',
                             export_csv.Export_ope_titre_csv.as_view(),
@@ -50,7 +50,7 @@ urlpatterns += patterns('gsb',
                             export_csv.Export_cours_csv.as_view(),
                             name='export_cours'
                         ),
-                        )
+)
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),
                         url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
@@ -69,7 +69,7 @@ urlpatterns += patterns('gsb.views',
 
 #les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',
-                        url(r'^compte/(?P<cpt_id>\d+)/$',views.Cpt_detail_view.as_view() , name='gsb_cpt_detail'),
+                        url(r'^compte/(?P<cpt_id>\d+)/$', views.Cpt_detail_view.as_view(), name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$',
                             views.Cpt_detail_view.as_view(rapp=True),
                             name='gsb_cpt_detail_rapp'
@@ -83,11 +83,11 @@ urlpatterns += patterns('gsb.views',
                             name="gsb_cpt_titre_espece"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/all$',
-                            views.Cpt_detail_view.as_view(cpt_titre_espece=True,all=True),
+                            views.Cpt_detail_view.as_view(cpt_titre_espece=True, all=True),
                             name="gsb_cpt_titre_espece_all"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$',
-                            views.Cpt_detail_view.as_view(cpt_titre_espece=True,rapp=True),
+                            views.Cpt_detail_view.as_view(cpt_titre_espece=True, rapp=True),
                             name="gsb_cpt_titre_espece_rapp"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
@@ -99,29 +99,29 @@ urlpatterns += patterns('gsb.views',
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/all$',
                             'titre_detail_cpt',
-                            {'all':True},
+                            {'all': True},
                             name="gsb_cpt_titre_detail_all"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/rapp$',
                             'titre_detail_cpt',
-                            {'rapp':True},
+                            {'rapp': True},
                             name="gsb_cpt_titre_detail_rapp"
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name="cpt_titre_maj"),
                         url(r'^perso$', 'perso'),
-                        )
+)
 #gestion de mes trucs perso
 perso = False# ya plus rien dedans
 #form tester
 #if settings.DEBUG and perso:
 #    from gsb.form_tester import SomeModelFormPreview
 
-    #urlpatterns += patterns('gsb',
-    #    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
-    #                        url(r'^test$', 'test.test')
-    #)
-    #import gsb.forms_perso
+#urlpatterns += patterns('gsb',
+#    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
+#                        url(r'^test$', 'test.test')
+#)
+#import gsb.forms_perso
 
-    #urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )
+#urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )

@@ -1,55 +1,55 @@
 @charset "UTF-8";
 
-.moyenAvecNumero{
-    display: inline;
+.moyenAvecNumero {
+    display : inline;
 }
 
-.operationMainTable{
-    background: #3A0000;
+.operationMainTable {
+    background : #3A0000;
 }
 
-.ligne{
-    padding: 0.5em;
+.ligne {
+    padding : 0.5em;
 }
 
-label{
-    display: inline;
-    float: left;
-    font-size: .9em;
-    font-weight: bold;
-    width: 15%;
+label {
+    display     : inline;
+    float       : left;
+    font-size   : .9em;
+    font-weight : bold;
+    width       : 15%;
 }
 
-span label{
-    float: none;
-    padding-left: 0.5em;
+span label {
+    float        : none;
+    padding-left : 0.5em;
 }
 
-input[type='text']{
-    padding: 0.5em;
+input[type='text'] {
+    padding : 0.5em;
 }
 
-select{
-    padding: 0.5em;
+select {
+    padding : 0.5em;
 }
 
-input{
-    border: 0;
+input {
+    border : 0;
 }
 
-legend{
-    font-size: 110%;
-    padding-bottom: .5em;
-    color: #FFFFFF;
+legend {
+    font-size      : 110%;
+    padding-bottom : .5em;
+    color          : #FFFFFF;
 }
 
-.invisible{
-    display: none;
+.invisible {
+    display : none;
 }
 
-table{
-    border-collapse: collapse;
-    width: 100%;
-    border-width: 0;
-    empty-cells: show
+table {
+    border-collapse : collapse;
+    width           : 100%;
+    border-width    : 0;
+    empty-cells     : show
 }

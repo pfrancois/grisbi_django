@@ -85,17 +85,17 @@ class TestVar(object):
         return self.value
 
 OPERATORS = {
-    '=':(Equals, True),
-    '==':(Equals, True),
-    '!=':(Equals, False),
-    '>':(Greater, True),
-    '>=':(GreaterOrEqual, True),
-    '<=':(Greater, False),
-    '<':(GreaterOrEqual, False),
-    'or':(Or, True),
-    'and':(And, True),
-    'in':(In, True),
-    }
+    '=': (Equals, True),
+    '==': (Equals, True),
+    '!=': (Equals, False),
+    '>': (Greater, True),
+    '>=': (GreaterOrEqual, True),
+    '<=': (Greater, False),
+    '<': (GreaterOrEqual, False),
+    'or': (Or, True),
+    'and': (And, True),
+    'in': (In, True),
+}
 
 class IfParser(object):
     error_class = ValueError

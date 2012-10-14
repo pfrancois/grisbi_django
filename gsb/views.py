@@ -7,14 +7,14 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
-from . import forms as gsb_forms
+from .import forms as gsb_forms
 from django.db import models
 import decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
-from django.views.generic import TemplateView,RedirectView
+from django.views.generic import TemplateView, RedirectView
 from django.utils.decorators import method_decorator
 
 def has_changed(instance, field):
@@ -27,17 +27,21 @@ def has_changed(instance, field):
         # the same as the filename that's already there even though there may
         # be different file contents.
         from django.core.files.uploadedfile import UploadedFile
+
         return isinstance(new_value.file, UploadedFile)
 
     return not getattr(instance, field) == old_value
 
+
 class Mytemplateview(TemplateView):
-    template_name='gsb/options.djhtm'
-    titre=None
+    template_name = 'gsb/options.djhtm'
+    titre = None
+
     def get_context_data(self, **kwargs):
         return {
             'titre': self.titre
         }
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """on a besoin pour le method decorator"""
@@ -45,7 +49,8 @@ class Mytemplateview(TemplateView):
 
 
 class Myredirectview(RedirectView):
-    call=None
+    call = None
+
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         #on regarde si c'est appelle
@@ -53,8 +58,10 @@ class Myredirectview(RedirectView):
         #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
+
 class Index_view(Mytemplateview):
     template_name = 'gsb/index.djhtm'
+
     def get(self, request, *args, **kwargs):
         if settings.AFFICHE_CLOT:
             self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
@@ -64,77 +71,80 @@ class Index_view(Mytemplateview):
             self.pl = Compte_titre.objects.filter(ouvert=True)
             #calcul du solde des bq
         self.total_bq = Ope.objects.filter(mere__exact=None,
-                                      compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+                                           compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
+                        'solde']
         if self.total_bq is None:
             self.total_bq = decimal.Decimal()
-        #calcul du solde des pla
+            #calcul du solde des pla
         self.total_pla = decimal.Decimal('0')
         id_pla = Compte_titre.objects.all().values_list("id", flat=True)
-        solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
+        solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(
+            solde=models.Sum('montant'))
         if solde_espece['solde']:
             self.total_pla += solde_espece['solde']
         for p in self.pl:
             self.total_pla += p.solde_titre()
         self.nb_clos = Compte.objects.filter(ouvert=False).count()
-        return super(Index_view,self).get(request,*args,**kwargs)
+        return super(Index_view, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         return  {
-            'titre':'liste des comptes',
-            'liste_cpt_bq':self.bq,
-            'liste_cpt_pl':self.pl,
-            'total_bq':self.total_bq,
-            'total_pla':self.total_pla,
-            'total':self.total_bq + self.total_pla,
-            'nb_clos':self.nb_clos,
-            }
+            'titre': 'liste des comptes',
+            'liste_cpt_bq': self.bq,
+            'liste_cpt_pl': self.pl,
+            'total_bq': self.total_bq,
+            'total_pla': self.total_pla,
+            'total': self.total_bq + self.total_pla,
+            'nb_clos': self.nb_clos,
+        }
 
 
 class Cpt_detail_view(Mytemplateview):
     template_name = 'gsb/cpt_detail.djhtm'
-    cpt_titre_espece=False
-    rapp=False
-    all=False
-    nb_ope_par_pages=50
-    def get(self, request,cpt_id):
+    cpt_titre_espece = False
+    rapp = False
+    all = False
+    nb_ope_par_pages = 50
+
+    def get(self, request, cpt_id):
         """
         view qui affiche la liste des operation de ce compte
         @param request:
         @param cpt_id: id du compte demande
         """
         compte = get_object_or_404(Compte, pk=cpt_id)
-        self.type="nrapp"
+        self.type = "nrapp"
         if self.all:
-            self.type="all"
+            self.type = "all"
         if self.rapp:
-            self.type="rapp"
-        if compte.type != 't' and self.cpt_titre_espece==True:#onredirige vers la vue standart
-            url=reverse("gsb_cpt_detail",args=(cpt_id,))
+            self.type = "rapp"
+        if compte.type != 't' and self.cpt_titre_espece == True:#onredirige vers la vue standart
+            url = reverse("gsb_cpt_detail", args=(cpt_id,))
             print url
             if self.rapp:
-                url=reverse("gsb_cpt_detail_%s"%'rapp',args=(cpt_id,))
+                url = reverse("gsb_cpt_detail_%s" % 'rapp', args=(cpt_id,))
             if self.all:
-                url=reverse("gsb_cpt_detail_%s"%'all',args=(cpt_id,))
+                url = reverse("gsb_cpt_detail_%s" % 'all', args=(cpt_id,))
             return http.HttpResponsePermanentRedirect(url)
-        if compte.type not in ('t',) or self.cpt_titre_espece==True:
+        if compte.type not in ('t',) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
-                self.template_name='gsb/cpt_placement_espece.djhtm'
-            self.espece=True
+                self.template_name = 'gsb/cpt_placement_espece.djhtm'
+            self.espece = True
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
-            nb_ope_rapp=self.cpt_espece_nb(compte)
-            sort_tab,opes=self.cpt_espece_tri(request,q)
+            nb_ope_rapp = self.cpt_espece_nb(compte)
+            sort_tab, opes = self.cpt_espece_tri(request, q)
             opes = opes.select_related('tiers', 'cat', 'rapp')
-            context=self.get_context_data(compte,opes,nb_ope_rapp,sort_tab)
+            context = self.get_context_data(compte, opes, nb_ope_rapp, sort_tab)
         else:
-            self.espece=False
-            self.template_name='gsb/cpt_placement.djhtm'
-        #recupere la liste des titres qui sont utilise dans ce compte
-            compte_titre=get_object_or_404(Compte_titre, pk=cpt_id)
+            self.espece = False
+            self.template_name = 'gsb/cpt_placement.djhtm'
+            #recupere la liste des titres qui sont utilise dans ce compte
+            compte_titre = get_object_or_404(Compte_titre, pk=cpt_id)
             titre_sans_sum = compte_titre.titre.all().distinct()
             titres = []
             for t in titre_sans_sum:
@@ -143,20 +153,20 @@ class Cpt_detail_view(Mytemplateview):
                 nb = t.nb(compte_titre)
                 if abs(nb) > decimal.Decimal('0.01'):
                     titres.append(
-                        {'nom':t.nom,
-                         'type':t.get_type_display(),
-                         'nb':nb,
-                         'invest':invest,
-                         'pmv':total - invest,
-                         'total':total,
-                         'id':t.id,
-                         't':t,
-                         'rapp':t.encours(rapp=True, compte=compte_titre)
-                    })
-            context=self.get_context_data(compte_titre,titres)
+                        {'nom': t.nom,
+                         'type': t.get_type_display(),
+                         'nb': nb,
+                         'invest': invest,
+                         'pmv': total - invest,
+                         'total': total,
+                         'id': t.id,
+                         't': t,
+                         'rapp': t.encours(rapp=True, compte=compte_titre)
+                        })
+            context = self.get_context_data(compte_titre, titres)
         return self.render_to_response(context)
 
-    def cpt_espece_nb(self,c):
+    def cpt_espece_nb(self, c):
         """calcul les nombres d'operation"""
         nb_ope_rapp = 0
         if self.all:
@@ -164,9 +174,10 @@ class Cpt_detail_view(Mytemplateview):
         if self.rapp:
             nb_ope_rapp = 0
         if not self.all and not self.rapp:
-            nb_ope_rapp = Ope.objects.filter(compte=c,rapp__isnull=False).count()
+            nb_ope_rapp = Ope.objects.filter(compte=c, rapp__isnull=False).count()
         return nb_ope_rapp
-    def cpt_espece_tri(self,request,q):
+
+    def cpt_espece_tri(self, request, q):
         """gestion du tri"""
         try:
             sort = request.GET.get('sort')  #il y a un sort dans le get
@@ -196,53 +207,56 @@ class Cpt_detail_view(Mytemplateview):
             sort_t['montant'] = "-montant"
         else:
             sort_t['montant'] = "montant"
-        sort_t['actuel']="?sort=%s"%sort
-        return [sort_t,q]
+        sort_t['actuel'] = "?sort=%s" % sort
+        return [sort_t, q]
 
-    def cpt_espece_pagination(self,request,q):
+    def cpt_espece_pagination(self, request, q):
         #gestion pagination
         paginator = Paginator(q, self.nb_ope_par_pages)
         try:
             page = int(request.GET.get('page'))
             return paginator.page(page)
-        except (ValueError, TypeError,PageNotAnInteger):
+        except (ValueError, TypeError, PageNotAnInteger):
             return paginator.page(1)
         except (EmptyPage, InvalidPage):
             return paginator.page(paginator.num_pages)
-    def get_context_data(self,*kwargs):
-        type_long={
-            "nrapp":u"Opérations non rapprochées",
-            "rapp":u"Opérations rapprochées",
-            "all":u"Ensemble des opérations"
+
+    def get_context_data(self, *kwargs):
+        type_long = {
+            "nrapp": u"Opérations non rapprochées",
+            "rapp": u"Opérations rapprochées",
+            "all": u"Ensemble des opérations"
         }
-        c=kwargs[0]
+        c = kwargs[0]
         if self.espece:
-            solde=c.solde()
-            context={  'compte':c,
-                    'list_ope':kwargs[1],
-                    'nbrapp':kwargs[2],
-                    'titre':c.nom,
-                    'solde':solde,
-                    "date_r":c.date_rappro(),
-                    "solde_r":c.solde(rapp=True),
-                    "solde_p": c.solde_pointe(),
-                    "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
-                    "sort_tab": kwargs[3],
-                    "type":self.type,
-                    "titre_long":"%s (%s)"%(c.nom, type_long[self.type]),
-                }
+            solde = c.solde()
+            context = {'compte': c,
+                       'list_ope': kwargs[1],
+                       'nbrapp': kwargs[2],
+                       'titre': c.nom,
+                       'solde': solde,
+                       "date_r": c.date_rappro(),
+                       "solde_r": c.solde(rapp=True),
+                       "solde_p": c.solde_pointe(),
+                       "solde_pr": c.solde(rapp=True) + c.solde_pointe(),
+                       "sort_tab": kwargs[3],
+                       "type": self.type,
+                       "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
+            }
         else:
-            context={
-                    'compte':c,
-                    'titre':c.nom,
-                    'solde':c.solde_espece(),
-                    'titres':kwargs[1],
-                    'especes':c.solde_espece(),
-                    'especes_rapp':c.solde_espece(rapp=True),
-                    'solde_rapp':c.solde(rapp=True),
-                    'solde_titre_rapp':c.solde_titre(rapp=True),
-                    }
+            context = {
+                'compte': c,
+                'titre': c.nom,
+                'solde': c.solde_espece(),
+                'titres': kwargs[1],
+                'especes': c.solde_espece(),
+                'especes_rapp': c.solde_espece(rapp=True),
+                'solde_rapp': c.solde(rapp=True),
+                'solde_titre_rapp': c.solde_titre(rapp=True),
+            }
         return context
+
+
 @login_required
 def ope_detail(request, pk):
     """
@@ -272,10 +286,10 @@ def ope_detail(request, pk):
         else:
             form = gsb_forms.VirementForm(ope=ope)
         return render(request, 'gsb/vir.djhtm',
-                {'titre_long':u'modification virement interne %s' % ope.id,
-                 'titre':u'modification',
-                 'form':form,
-                 'ope':ope}
+                      {'titre_long': u'modification virement interne %s' % ope.id,
+                       'titre': u'modification',
+                       'form': form,
+                       'ope': ope}
         )
     #--------ope normale----------
     else:#sinon c'est une operation normale
@@ -287,7 +301,8 @@ def ope_detail(request, pk):
             if form.is_valid():
                 if not form.cleaned_data['tiers']:
                     form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
-                                                                      defaults={'nom':form.cleaned_data['nouveau_tiers']
+                                                                      defaults={
+                                                                      'nom': form.cleaned_data['nouveau_tiers']
                                                                           , }
                     )[0]
                     messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
@@ -296,7 +311,9 @@ def ope_detail(request, pk):
                     ope = form.save()
                 else:
                     #verification que les données essentielles ne sont pas modifiés
-                    if has_changed(ope,'montant') or  has_changed(ope,'compte') or has_changed(ope,'pointe') or has_changed(ope,'jumelle') or has_changed(ope,'mere'):
+                    if has_changed(ope, 'montant') or  has_changed(ope, 'compte') or has_changed(ope,
+                                                                                                 'pointe') or has_changed(
+                        ope, 'jumelle') or has_changed(ope, 'mere'):
                         messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
                     else:
                         messages.success(request, u"opération modifiée")
@@ -305,10 +322,10 @@ def ope_detail(request, pk):
         else:
             form = gsb_forms.OperationForm(instance=ope)
         return render(request, 'gsb/ope.djhtm',
-                {'titre_long':u'modification opération %s' % ope.id,
-                 'titre':u'modification',
-                 'form':form,
-                 'ope':ope}
+                      {'titre_long': u'modification opération %s' % ope.id,
+                       'titre': u'modification',
+                       'form': form,
+                       'ope': ope}
         )
 
 
@@ -327,7 +344,7 @@ def ope_new(request, cpt_id=None):
         if form.is_valid():
             if not form.cleaned_data['tiers']:
                 form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
-                                                                  defaults={'nom':form.cleaned_data['nouveau_tiers'], }
+                                                                  defaults={'nom': form.cleaned_data['nouveau_tiers'], }
                 )[0]
                 messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
             ope = form.save()
@@ -338,10 +355,10 @@ def ope_new(request, cpt_id=None):
         else:
             #TODO message
             return render(request, 'gsb/ope.djhtm',
-                    {'titre':u'création',
-                     'titre_long':u'création opération',
-                     'form':form,
-                     'cpt':cpt}
+                          {'titre': u'création',
+                           'titre_long': u'création opération',
+                           'form': form,
+                           'cpt': cpt}
             )
     else:
         if not cpt_id:
@@ -350,22 +367,22 @@ def ope_new(request, cpt_id=None):
             except Compte.DoesNotExist:
                 messages.error(request, u"pas de compte par defaut")
                 return http.HttpResponseRedirect(reverse('gsb.views.index'))
-        form = gsb_forms.OperationForm(initial={'compte':cpt, 'moyen':cpt.moyen_debit_defaut})
+        form = gsb_forms.OperationForm(initial={'compte': cpt, 'moyen': cpt.moyen_debit_defaut})
         return render(request, 'gsb/ope.djhtm',
-                {'titre':u'création',
-                 'titre_long':u'création opération',
-                 'form':form,
-                 'cpt':cpt}
+                      {'titre': u'création',
+                       'titre_long': u'création opération',
+                       'form': form,
+                       'cpt': cpt}
         )
 
 
 @login_required
 def vir_new(request, cpt_id=None):
-    cpt_par_def=Compte.objects.filter(id=settings.ID_CPT_M)
+    cpt_par_def = Compte.objects.filter(id=settings.ID_CPT_M)
     if cpt_par_def.exists():
-        cpt_origine=cpt_par_def[0]
+        cpt_origine = cpt_par_def[0]
     else:
-        cpt_origine=Compte.objects.get(id=1)
+        cpt_origine = Compte.objects.get(id=1)
     if cpt_id:
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
@@ -375,28 +392,29 @@ def vir_new(request, cpt_id=None):
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
-            messages.success(request, u"virement crée %s=>%s de %s le %s" % (ope.compte, ope.jumelle.compte, ope.montant, ope.date))
+            messages.success(request, u"virement crée %s=>%s de %s le %s" % (
+            ope.compte, ope.jumelle.compte, ope.montant, ope.date))
             return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
-                    {'titre_long':u'création virement interne ',
-                     'titre':u'Création',
-                     'form':form,
-                     'cpt':cpt}
+                          {'titre_long': u'création virement interne ',
+                           'titre': u'Création',
+                           'form': form,
+                           'cpt': cpt}
             )
     else:
         form = gsb_forms.VirementForm(
-                    initial={'compte_origine':cpt_origine,
-                             'moyen_origine':Moyen.objects.filter(type='v')[0],
-                             'compte_destination':cpt,
-                             'moyen_destination':Moyen.objects.filter(type='v')[0]
-                    }
+            initial={'compte_origine': cpt_origine,
+                     'moyen_origine': Moyen.objects.filter(type='v')[0],
+                     'compte_destination': cpt,
+                     'moyen_destination': Moyen.objects.filter(type='v')[0]
+            }
         )
         return render(request, 'gsb/vir.djhtm',
-                {'titre':u'Création',
-                 'titre_long':u'Création virement interne ',
-                 'form':form,
-                 'cpt':cpt}
+                      {'titre': u'Création',
+                       'titre_long': u'Création virement interne ',
+                       'form': form,
+                       'cpt': cpt}
         )
 
 
@@ -441,14 +459,14 @@ def maj_cours(request, pk):
             compte = Ope_titre.objects.filter(titre=titre).latest('date').compte
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
-        form = gsb_forms.MajCoursform(initial={'titre':titre, 'cours':titre.last_cours(), 'date':titre.last_cours_date()})
+        form = gsb_forms.MajCoursform(
+            initial={'titre': titre, 'cours': titre.last_cours(), 'date': titre.last_cours_date()})
         #petit bidoullage afin recuperer le compte d'origine
     if titre.compte_titre_set.all().distinct().count() == 1:
         url = titre.compte_titre_set.all().distinct()[0].get_absolute_url()
     else:
         url = reverse("gsb.views.index")
-    return render(request, "gsb/maj_cours.djhtm", {"titre":u"maj du titre '%s'" % titre.nom, "form":form, "url":url})
-
+    return render(request, "gsb/maj_cours.djhtm", {"titre": u"maj du titre '%s'" % titre.nom, "form": form, "url": url})
 
 
 @login_required
@@ -489,19 +507,19 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
         template.render(
             RequestContext(
                 request,
-                    {
-                    'compte':compte,
-                    'titre_id':titre.id,
-                    'list_ope':opes,
-                    'titre':"%s: %s" % (compte.nom, titre.nom),
-                    'encours':titre.encours(compte),
-                    't':titre,
-                    'nb_titre':titre.nb(compte),
-                    'nb_r':titre.nb(compte, rapp=True),
-                    'date_rappro':date_rappro,
-                    'solde_rappro':solde_rappro,
-                    'investi_r':titre.investi(compte, rapp=True),
-                    'pmv':titre.encours(compte) - titre.investi(compte)
+                {
+                    'compte': compte,
+                    'titre_id': titre.id,
+                    'list_ope': opes,
+                    'titre': "%s: %s" % (compte.nom, titre.nom),
+                    'encours': titre.encours(compte),
+                    't': titre,
+                    'nb_titre': titre.nb(compte),
+                    'nb_r': titre.nb(compte, rapp=True),
+                    'date_rappro': date_rappro,
+                    'solde_rappro': solde_rappro,
+                    'investi_r': titre.investi(compte, rapp=True),
+                    'pmv': titre.encours(compte) - titre.investi(compte)
                 }
             )
         )
@@ -528,11 +546,11 @@ def ope_titre_detail(request, pk):
                     messages.error(request, e.unicode())
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
-            return http.HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
-                                                 kwargs={'cpt_id':ope.compte.id,
-                                                         'titre_id':ope.titre.id}
-                                                 )
-                                        )
+            return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
+                                                     kwargs={'cpt_id': ope.compte.id,
+                                                             'titre_id': ope.titre.id}
+            )
+            )
     else:
         form = gsb_forms.Ope_titreForm(instance=ope)
     if ope.ope is not None:
@@ -540,11 +558,11 @@ def ope_titre_detail(request, pk):
     else:
         rapp = False
     return render(request, 'gsb/ope_titre_detail.djhtm',
-            {'titre_long':u'opération sur titre %s' % ope.id,
-             'titre':u'modification',
-             'form':form,
-             'ope':ope,
-             'rapp':rapp}
+                  {'titre_long': u'opération sur titre %s' % ope.id,
+                   'titre': u'modification',
+                   'form': form,
+                   'ope': ope,
+                   'rapp': rapp}
     )
 
 
@@ -568,11 +586,11 @@ def ope_titre_delete(request, pk):
         s = u'%s' % ope.id
         ope.delete()
         messages.success(request, u'ope effacé id %s' % s)
-        return http.HttpResponseRedirect( reverse('gsb_cpt_titre_detail',
-                                             kwargs={'cpt_id':compte_id,
-                                                     'titre_id':titre_id}
-                                             )
-                                    )
+        return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
+                                                 kwargs={'cpt_id': compte_id,
+                                                         'titre_id': titre_id}
+        )
+        )
     else:
         return http.HttpResponseRedirect(ope.get_absolute_url())
 
@@ -598,9 +616,9 @@ def ope_titre_achat(request, cpt_id):
                 titre = form.cleaned_data['titre']
             else:
                 titre = Titre.objects.get_or_create(nom=form.cleaned_data['nouveau_titre'],
-                                                    defaults={'nom':form.cleaned_data['nouveau_titre'],
-                                                              'type':'ZZZ',
-                                                              'isin':form.cleaned_data['nouvel_isin']
+                                                    defaults={'nom': form.cleaned_data['nouveau_titre'],
+                                                              'type': 'ZZZ',
+                                                              'isin': form.cleaned_data['nouvel_isin']
                                                     }
                 )[0]
                 messages.info(request, u"nouveau titre crée: %s" % titre)
@@ -610,28 +628,28 @@ def ope_titre_achat(request, cpt_id):
             else:
                 virement = None
             compte.achat(titre=titre,
-                     nombre=form.cleaned_data['nombre'],
-                     prix=form.cleaned_data['cours'],
-                     date=form.cleaned_data['date'],
-                     virement_de=virement,
-                     frais=form.cleaned_data['frais'])
+                         nombre=form.cleaned_data['nombre'],
+                         prix=form.cleaned_data['cours'],
+                         date=form.cleaned_data['date'],
+                         virement_de=virement,
+                         frais=form.cleaned_data['frais'])
             messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                      form.cleaned_data['titre'],
-                                                                      form.cleaned_data['cours'],
-                                                                      form.cleaned_data['date']))
+                                                                          form.cleaned_data['titre'],
+                                                                          form.cleaned_data['cours'],
+                                                                          form.cleaned_data['date']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
-            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte, 'titre':titre})
+            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre': compte, 'titre': titre})
         else:
-            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre':compte})
+            form = gsb_forms.Ope_titre_add_achatForm(initial={'compte_titre': compte})
     titre = u' nouvel achat sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
-            {'titre_long':titre,
-             'titre':u'modification',
-             'form':form,
-             'cpt':compte,
-             'sens':'achat'}
+                  {'titre_long': titre,
+                   'titre': u'modification',
+                   'form': form,
+                   'cpt': compte,
+                   'sens': 'achat'}
     )
 
 
@@ -662,27 +680,27 @@ def ope_titre_vente(request, cpt_id):
             else:
                 virement = None
             compte.vente(titre=form.cleaned_data['titre'],
-                     nombre=form.cleaned_data['nombre'],
-                     prix=form.cleaned_data['cours'],
-                     date=form.cleaned_data['date'],
-                     virement_vers=virement)
+                         nombre=form.cleaned_data['nombre'],
+                         prix=form.cleaned_data['cours'],
+                         date=form.cleaned_data['date'],
+                         virement_vers=virement)
             messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                      form.cleaned_data['titre'],
-                                                                      form.cleaned_data['cours'],
-                                                                      form.cleaned_data['date']))
+                                                                          form.cleaned_data['titre'],
+                                                                          form.cleaned_data['cours'],
+                                                                          form.cleaned_data['date']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
-            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte, 'titre':titre}, cpt=compte)
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte, 'titre': titre}, cpt=compte)
         else:
-            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre':compte}, cpt=compte)
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte}, cpt=compte)
     titre = u' nouvelle vente sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
-            {'titre_long':titre,
-             'titre':u'modification',
-             'form':form,
-             'cpt':compte,
-             'sens':'vente'}
+                  {'titre_long': titre,
+                   'titre': u'modification',
+                   'form': form,
+                   'cpt': compte,
+                   'sens': 'vente'}
     )
 
 
@@ -722,11 +740,11 @@ def view_maj_cpt_titre(request, cpt_id):
     else:
         form = gsb_forms.Majtitre(titres=liste_titre)
     return render(request, 'gsb/maj_cpt_titre.djhtm',
-            {'titre_long':u'operations sur le %s' % cpt.nom,
-             'titre':u'ope',
-             'form':form,
-             'titres':liste_titre,
-             'compte':cpt}
+                  {'titre_long': u'operations sur le %s' % cpt.nom,
+                   'titre': u'ope',
+                   'form': form,
+                   'titres': liste_titre,
+                   'compte': cpt}
     )
 
 
@@ -751,48 +769,48 @@ def search_opes(request):
                 q = q.order_by('-date')
             q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope')[:100]
             if compte:
-                titre=u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom)
+                titre = u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom)
             else:
-                titre=u'recherche des %s premières opérations' % q.count()
+                titre = u'recherche des %s premières opérations' % q.count()
             if compte:
-                solde=compte.solde(datel=data['date_max'])
+                solde = compte.solde(datel=data['date_max'])
             else:
-               solde=0
+                solde = 0
 
-            return render(request, 'templates_perso/search.djhtm', {'form':form,
-                                                                    'list_ope':q,
-                                                                    'titre':titre,
-                                                                    "sort":sort_get,
-                                                                    'date_max':data['date_max'],
-                                                                    'solde':solde})
+            return render(request, 'templates_perso/search.djhtm', {'form': form,
+                                                                    'list_ope': q,
+                                                                    'titre': titre,
+                                                                    "sort": sort_get,
+                                                                    'date_max': data['date_max'],
+                                                                    'solde': solde})
         else:
             date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
     else:
         date_min = Ope.objects.aggregate(element=models.Min('date'))['element']
         date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
-        form = gsb_forms.SearchForm(initial={'date_min':date_min, 'date_max':date_max})
+        form = gsb_forms.SearchForm(initial={'date_min': date_min, 'date_max': date_max})
 
-    return render(request, 'templates_perso/search.djhtm', {'form':form,
-                                                            'list_ope':None,
-                                                            'titre':'recherche',
-                                                            "sort":"",
-                                                            'date_max':date_max,
-                                                            'solde':None})
+    return render(request, 'templates_perso/search.djhtm', {'form': form,
+                                                            'list_ope': None,
+                                                            'titre': 'recherche',
+                                                            "sort": "",
+                                                            'date_max': date_max,
+                                                            'solde': None})
 
 
 def perso(request):
-    resultat=[]
-    sg=Compte.objects.get(id=12)
-    visa=Compte.objects.get(id=19)
+    resultat = []
+    sg = Compte.objects.get(id=12)
+    visa = Compte.objects.get(id=19)
     for r in Rapp.objects.filter(nom__startswith="Sg"):
-        solde_visa=r.ope_set.filter(compte__nom="Visa").aggregate(total=models.Sum('montant'))['total']
+        solde_visa = r.ope_set.filter(compte__nom="Visa").aggregate(total=models.Sum('montant'))['total']
         if solde_visa:
             resultat.append(r.nom)
             resultat.append(solde_visa)
-        #r.save()
+            #r.save()
     return render(request, 'generic.djhtm',
-            {'resultats':resultat,
-             'titre_long':"traitement personalise",
-             'titre':"perso",
-             }
+                  {'resultats': resultat,
+                   'titre_long': "traitement personalise",
+                   'titre': "perso",
+                  }
     )

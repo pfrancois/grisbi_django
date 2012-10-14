@@ -29,7 +29,6 @@ def cur(value, symbol=None):
     nan = (1e200 * 1e200) / (1e200 * 1e200)
     special_floats = [str(pos_inf), str(neg_inf), str(nan)]
     input_val = force_unicode(value)
-    val_decim = Decimal()
     try:
         val_decim = Decimal(input_val)
     except UnicodeEncodeError:
@@ -45,6 +44,7 @@ def cur(value, symbol=None):
         val_decim = 0
     return mark_safe("%s %s" % (formats.number_format(val_decim, 2), symbol))
 
+
 @register.filter(is_safe=True)
 def centimes(value):
     """
@@ -54,6 +54,7 @@ def centimes(value):
     """
     return str(Decimal(force_unicode(value)) * Decimal(100))
 
+
 @register.simple_tag()
 def dev(symbol=None):
     if symbol is None:
@@ -61,5 +62,6 @@ def dev(symbol=None):
     if symbol == 'EUR':
         symbol = "&#8364;"
     return symbol
+
 dev.is_safe = True
 

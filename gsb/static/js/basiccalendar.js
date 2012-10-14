@@ -1,10 +1,10 @@
 /* coding: utf-8 */
 var DATE_FORMAT_REGXES = {
-    'Y': new RegExp('^-?[0-9]+'),
-    'd': new RegExp('^[0-9]{1,2}'),
-    'm': new RegExp('^[0-9]{1,2}'),
-    'H': new RegExp('^[0-9]{1,2}'),
-    'M': new RegExp('^[0-9]{1,2}')
+    'Y':new RegExp('^-?[0-9]+'),
+    'd':new RegExp('^[0-9]{1,2}'),
+    'm':new RegExp('^[0-9]{1,2}'),
+    'H':new RegExp('^[0-9]{1,2}'),
+    'M':new RegExp('^[0-9]{1,2}')
 };
 
 

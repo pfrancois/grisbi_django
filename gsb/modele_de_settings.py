@@ -3,9 +3,9 @@ import os
 import decimal
 import sys
 #on change le context par defaut
-decimal.getcontext().rouding=decimal.ROUND_HALF_UP
-decimal.getcontext().precision=3
-PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__),'..'))
+decimal.getcontext().rouding = decimal.ROUND_HALF_UP
+decimal.getcontext().precision = 3
+PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = False
@@ -23,10 +23,10 @@ ADMINS = (
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1#cpt principal utlise si l'on ne rentre pas de compte
-AFFICHE_CLOT=False#affiche les comptes clos
-UTILISE_EXERCICES=False
-UTILISE_IB=True
-UTILISE_PC=False
+AFFICHE_CLOT = False#affiche les comptes clos
+UTILISE_EXERCICES = False
+UTILISE_IB = True
+UTILISE_PC = False
 
 #taux de cotisations sociales
 #attention c'est un taux special estime
@@ -44,13 +44,14 @@ MD_DEBIT = 7
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default':{
-        'ENGINE':'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME':os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
-        'USER':'root', # Not used with sqlite3.
-        'PASSWORD':'', # Not used with sqlite3.
-        'HOST':'', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT':'', # Set to empty string for default. Not used with sqlite3.
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
+        'USER': 'root', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 if 'testserver' in sys.argv:
@@ -133,6 +134,7 @@ except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
     nomfich = os.path.join(PROJECT_PATH, 'secret_key.py')
     from random import choice
+
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
@@ -143,8 +145,8 @@ except ImportError:
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+    #     'django.template.loaders.eggs.Loader',
+    )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -153,17 +155,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.transaction.TransactionMiddleware'
-)
+    )
 
 ROOT_URLCONF = 'urls'
 
-
 TEMPLATE_DIRS = (
-# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-# Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_PATH, 'templates'),
-)
+    )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -176,7 +177,7 @@ INSTALLED_APPS = (
     #gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs'
-)
+    )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
@@ -184,60 +185,60 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
-)
+    )
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
 #noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {
-    'version':1,
-    'disable_existing_loggers':True,
-    'formatters':{
-        'verbose':{
-            'format':'[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] %(asctime)s - %(name)s - %(pathname)s:%(lineno)d in %(funcName)s,  MSG:%(message)s'
         },
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
         },
-    'handlers':{
-        'null':{
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
-            },
-        'console-simple':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter':'verbose'
+        'console-simple': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
-        'log-file':{
-            'level':'WARNING',
-            'class':'logging.handlers.TimedRotatingFileHandler',
-            'formatter':'verbose',
+        'log-file': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'formatter': 'verbose',
             #consider: 'filename': '/var/log/<myapp>/app.log',
             #will need perms at location below:
-            'filename':os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
-            'when':'D',
-            'backupCount':'30', #approx 1 month worth
+            'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
+            'when': 'D',
+            'backupCount': '30', #approx 1 month worth
         },
+    },
+    'loggers': {
+        'django': {
+            'level': 'WARNING',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': True,
         },
-    'loggers':{
-        'django':{
-            'level':'WARNING',
-            'handlers':['console-simple', 'log-file'],
-            'propagate':True,
-            },
-        'django.request':{
-            'level':'DEBUG',
-            'handlers':['console-simple', 'log-file'],
-            'propagate':False,
-            },
-        'django.db.backends':{
-            'level':'WARNING',
-            'handlers':['console-simple', 'log-file'],
-            'propagate':False,
-            },
-        'gsb':{
-            'level':'INFO',
-            'handlers':['console-simple', 'log-file'],
-            'propagate':True,
-            }
+        'django.request': {
+            'level': 'DEBUG',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'WARNING',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': False,
+        },
+        'gsb': {
+            'level': 'INFO',
+            'handlers': ['console-simple', 'log-file'],
+            'propagate': True,
+        }
     }
 }

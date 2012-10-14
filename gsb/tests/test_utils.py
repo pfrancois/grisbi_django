@@ -4,8 +4,8 @@ test utils
 """
 from __future__ import absolute_import
 from .test_base import TestCase
-from .. import utils
-import datetime, time
+from ..import utils
+import datetime
 from ..models import Exercice, Cat
 import decimal
 
@@ -67,7 +67,7 @@ class Test_utils(TestCase):
     def test_strpdate(self):
         self.assertEquals(utils.strpdate("2011-12-31"), datetime.date(2011, 12, 31))
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
-        self.assertRaises(ValueError,utils.strpdate, "2011-12-52")
+        self.assertRaises(ValueError, utils.strpdate, "2011-12-52")
 
 
     def test_add_month(self):

@@ -4,14 +4,13 @@
         {% csrf_token %}
         <table>
             <thead>
-                <tr>
-                    <th>nom de l'opcvm</th>
-                    <th>cours/nombre</th>
-                    <th>&nbsp;</th>
-                </tr>
+            <tr>
+                <th>nom de l'opcvm</th>
+                <th>cours/nombre</th>
+                <th>&nbsp;</th>
+            </tr>
             </thead>
             {{ form }}
-
         </table>
     </form>
     <table style=" width: 100%;" summary="bouton">

@@ -28,6 +28,7 @@ class UnixTimestampField(models.DateTimeField):
     """
     description = "utilisation des timestamp"
     __metaclass__ = models.SubfieldBase
+
     def __init__(self, null=False, blank=False, **kwargs):
         super(UnixTimestampField, self).__init__(**kwargs)
         # default for TIMESTAMP is NOT NULL unlike most fields, so we have to
@@ -49,15 +50,15 @@ class UnixTimestampField(models.DateTimeField):
         elif value == "":
             return date.fromtimestamp(1)
         else:
-            value = u"%s"%value
-            return date.fromtimestamp(float(value.replace(",",".")))
+            value = u"%s" % value
+            return date.fromtimestamp(float(value.replace(",", ".")))
 
     def get_db_prep_value(self, value, connection, prepared=False):
         if value is None:
             return None
         return mktime(value.timetuple())
 
-    def formfield(self,**kwargs):
+    def formfield(self, **kwargs):
         defaults = {'form_class': forms.DateTimeField}
         defaults.update(kwargs)
-        return super(UnixTimestampField, self).formfield( **kwargs)
+        return super(UnixTimestampField, self).formfield(**kwargs)

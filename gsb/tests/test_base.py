@@ -17,8 +17,9 @@ class TestCase(Test_Case_django):
         logger = logging.getLogger('django.request')
         logger.setLevel(logging.ERROR)
         super(TestCase, self).setUp()
+
     def assertQueryset(self, qs1, list1):
-        pk=qs1.values_list('pk', flat=True)
+        pk = qs1.values_list('pk', flat=True)
         return self.assertEqual(
             sorted(list(pk)),
             sorted(list(list1))

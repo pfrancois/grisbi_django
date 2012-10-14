@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import logging
 from django.shortcuts import render
-from django.template import RequestContext
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP #@UnusedImport
-from .models import * #@UnusedWildImport
-from django.utils import formats#@UnusedImport
-from django.utils.encoding import smart_unicode #@UnusedImport
-from django.utils.safestring import mark_safe #@UnusedImport
 
 #logger = logging.getLogger('gsb.test')
-from django.shortcuts import render, get_object_or_404
-from django.forms.models import modelformset_factory
-from .utils import validrib
 from django.contrib import messages
-from django.db import models
-import decimal
 
 def test(request):
     messages.info(request, 'This is an info message.')

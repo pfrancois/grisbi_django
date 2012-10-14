@@ -1,4 +1,5 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %} {% load gsb_extras %}{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
+{% load gsb_extras %}{% load url from future %}
 {% block content %}
     <table width="100%" id="boutons" class="table">
         {% if compte.ouvert %}
@@ -8,7 +9,8 @@
             </tr>
             {% if titres %}
                 <tr class="boutton">
-                    <td colspan="2"><a href="{% url 'cpt_titre_maj' compte.id %}">mise à jour global des titres de ce portefeuille</a></td>
+                    <td colspan="2"><a href="{% url 'cpt_titre_maj' compte.id %}">mise à jour global des titres de ce
+                        portefeuille</a></td>
                 </tr>{% endif %}
             <tr class="boutton">
                 <td width="100%" colspan="2"><a href="{% url 'index' %}">retour liste comptes</a></td>
@@ -22,20 +24,21 @@
     <br/>
     <table width="100%" id="main">
         <thead>
-            <tr>
-                <th>placement</th>
-                <th> nb</th>
-                <th>dernier cours</th>
-                <th align="right">montant plac&eacute;</th>
-                <th>+/- values</th>
-                <th>total</th>
-                <th>encours titre rapproché ou pointé</th>
-            </tr>
+        <tr>
+            <th>placement</th>
+            <th> nb</th>
+            <th>dernier cours</th>
+            <th align="right">montant plac&eacute;</th>
+            <th>+/- values</th>
+            <th>total</th>
+            <th>encours titre rapproch&eacute; ou point&eacute;</th>
+        </tr>
         </thead>
         {% for titre in titres %}
             <tr class="item hover{% if titre.pmv < 0 %} creditElement{% else %} debitElement{% endif %}">
                 <td class="opTier">
-                    <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom|escape }} ( {{ titre.type|escape }} )</a> |
+                    <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom|escape }}
+                        ( {{ titre.type|escape }} )</a> |
                     <a href="{% url 'maj_cours' titre.id %}">MAJ cours</a></td>
                 <td> {{ titre.nb|floatformat:3 }}</td>
                 <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>
@@ -57,7 +60,9 @@
             <td class="opDebit">{{ solde_titre_rapp|cur }}</td>
         </tr>
         <tr class="item hover">
-            <td class="opTier" colspan="5"><a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a></td>
+            <td class="opTier" colspan="5">
+                <a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a>
+            </td>
             <td class="opDebit">{{ especes|cur }}</td>
             <td class="opDebit">{{ especes_rapp|cur }}</td>
         </tr>

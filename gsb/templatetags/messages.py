@@ -21,7 +21,7 @@ class MessagesNode(template.Node):
                     grouped[(m.level, m.tags)].append(m.message)
                 else:
                     grouped[(m.level, m.tags)] = [m.message]
-            # Create a list of messages for each tag.
+                # Create a list of messages for each tag.
             out_str = ''
             for level, tag in sorted(grouped.iterkeys()):
                 out_str += '<div class="messages %s">\n<ul class="messages-list-%s">' % (tag, tag)
@@ -38,5 +38,5 @@ def render_messages(parser, token):
     parts = token.split_contents()
     if len(parts) != 2:
         raise template.TemplateSyntaxError("%r tag requires a single argument"
-        % token.contents.split()[0])
+                                           % token.contents.split()[0])
     return MessagesNode(parts[1])

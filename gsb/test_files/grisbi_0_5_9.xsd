@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!-- edited with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by pegory (personel) -->
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:grisbi="http://www.grisbi.org" elementFormDefault="unqualified" version="1.1">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified" version="1.1">
 <xsd:annotation>
     <xsd:documentation>
         version 2009-04-09 1.3.2
@@ -209,7 +209,8 @@
                     <xsd:attribute name="Numerotation_auto" type="xsd:boolean"/>
                     <xsd:attribute name="No_en_cours">
                         <xsd:annotation>
-                            <xsd:documentation>attention a ne pas mettre en int car des bq int des numeros alpha</xsd:documentation>
+                            <xsd:documentation>attention a ne pas mettre en int car des bq int des numeros alpha
+                            </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
                 </xsd:complexType>
@@ -229,7 +230,8 @@
                     </xsd:attribute>
                     <xsd:attribute name="Id" use="optional">
                         <xsd:annotation>
-                            <xsd:documentation> attention, cet atttibut a disparu avec la version 5.7</xsd:documentation>
+                            <xsd:documentation> attention, cet atttibut a disparu avec la version 5.7
+                            </xsd:documentation>
                         </xsd:annotation>
                         <xsd:simpleType>
                             <xsd:union memberTypes="vide index"/>
@@ -408,11 +410,14 @@
                             </xsd:annotation>
                             <xsd:attribute name="Intervalle_periodicite" use="required"/>
                             <xsd:annotation>
-                                <xsd:documentation>le nombre de jours/mois/années quand la périodicité est personnalisée</xsd:documentation>
+                                <xsd:documentation>le nombre de jours/mois/années quand la périodicité est
+                                    personnalisée
+                                </xsd:documentation>
                             </xsd:annotation>
                             <xsd:attribute name="Periodicite_personnalisee" use="required"/>
                             <xsd:annotation>
-                                <xsd:documentation>0=unefois,1=hebdo,2=mensuel,3=annuel,4=personnalisé</xsd:documentation>
+                                <xsd:documentation>0=unefois,1=hebdo,2=mensuel,3=annuel,4=personnalisé
+                                </xsd:documentation>
                             </xsd:annotation>
                             <xsd:attribute name="Date_limite">
                                 <xsd:annotation>
@@ -503,7 +508,9 @@
                             </xsd:attribute>
                             <xsd:attribute name="No_derniere_sous_cagegorie" type="index">
                                 <xsd:annotation>
-                                    <xsd:documentation>attention, il y a une 'erreur' de frappe dans le nom. mais c'est bien ca j'ai verifié</xsd:documentation>
+                                    <xsd:documentation>attention, il y a une 'erreur' de frappe dans le nom. mais c'est
+                                        bien ca j'ai verifié
+                                    </xsd:documentation>
                                 </xsd:annotation>
                             </xsd:attribute>
                         </xsd:complexType>
@@ -596,7 +603,9 @@
                     <xsd:element name="Nb_banques" type="xsd:integer"/>
                     <xsd:element name="No_derniere_banque" type="index">
                         <xsd:annotation>
-                            <xsd:documentation>attention, le numero n'est pas totalement juste, il peut etre inferieur à nb banques</xsd:documentation>
+                            <xsd:documentation>attention, le numero n'est pas totalement juste, il peut etre inferieur à
+                                nb banques
+                            </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
                 </xsd:sequence>

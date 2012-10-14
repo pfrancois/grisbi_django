@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django import forms
 from .models import (Compte, Cat, Moyen, Ope, Virement, Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
-from . import widgets as gsb_field
+from .import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
 #import decimal
@@ -46,7 +46,7 @@ class OperationForm(Basemodelform):
     montant = gsb_field.CurField()
     notes = forms.CharField(widget=forms.TextInput, required=False)
     date = gsb_field.DateFieldgsb()
-    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'),empty_label=None, required=True)
+    moyen = forms.ModelChoiceField(Moyen.objects.all().order_by('type'), empty_label=None, required=True)
     pointe = forms.BooleanField(required=False)
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required=False)
     nouveau_tiers = forms.CharField(required=False)
@@ -64,7 +64,7 @@ class OperationForm(Basemodelform):
         self.cleaned_data = super(OperationForm, self).clean()
         data = self.cleaned_data
         if data['tiers'] is None:
-            if data['nouveau_tiers']=="":
+            if data['nouveau_tiers'] == "":
                 self._errors['tiers'] = self.error_class([
                     "si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"
                     , ])
@@ -199,6 +199,7 @@ class Ope_titreForm(Basemodelform):
     #nombre = forms.DecimalField(localize=True, initial='0')
     #cours = gsb_field.CurField(initial='1')
     date = gsb_field.DateFieldgsb()
+
     def clean(self):
         super(Ope_titreForm, self).clean()
         if not self.cleaned_data['nombre']:

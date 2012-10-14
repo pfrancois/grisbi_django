@@ -25,6 +25,7 @@ import datetime
 class date_perso_filter(DateFieldListFilter):
     """filtre date perso
     """
+
     def __init__(self, field, request, params, model, model_admin, field_path):
         super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
         now = timezone.now()
@@ -41,23 +42,25 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_since: str(today.replace(day=1)),
                 self.lookup_kwarg_until: str(tomorrow),
             }),
-            ('Les trois derniers mois',{
-                self.lookup_kwarg_since:str(today.replace(day=1,month=today.month-3)),
-                self.lookup_kwarg_until:str(today.replace(day=1)- datetime.timedelta(days=1)),
+            ('Les trois derniers mois', {
+                self.lookup_kwarg_since: str(today.replace(day=1, month=today.month - 3)),
+                self.lookup_kwarg_until: str(today.replace(day=1) - datetime.timedelta(days=1)),
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
                 self.lookup_kwarg_until: str(tomorrow),
             }),
-            ('L\'an dernier',{
-                self.lookup_kwarg_since:str(today.replace(day=1,year=today.year-1,month=1)),
-                self.lookup_kwarg_until:str(today.replace(day=31,month=12,year=today.year-1)),
+            ('L\'an dernier', {
+                self.lookup_kwarg_since: str(today.replace(day=1, year=today.year - 1, month=1)),
+                self.lookup_kwarg_until: str(today.replace(day=31, month=12, year=today.year - 1)),
             }),
-        )
+            )
+
 
 class rapprochement_filter(SimpleListFilter):
-    title="type de rapprochement"
+    title = "type de rapprochement"
     parameter_name = 'rapp'
+
     def lookups(self, request, model_admin):
         """
         Returns a list of tuples. The first element in each
@@ -69,10 +72,11 @@ class rapprochement_filter(SimpleListFilter):
         return (
             ('rien', u'ni rapproché ni pointé'),
             ('p', u'pointé uniquement'),
-            ('nrapp',u'non-rapproché'),
-            ('rapp',u'rapproché uniquement'),
-            ('pr',u'pointé ou rapproché')
-        )
+            ('nrapp', u'non-rapproché'),
+            ('rapp', u'rapproché uniquement'),
+            ('pr', u'pointé ou rapproché')
+            )
+
     def queryset(self, request, queryset):
         """
         Returns the filtered queryset based on the value
@@ -84,9 +88,9 @@ class rapprochement_filter(SimpleListFilter):
         if self.value() == 'rapp':
             return queryset.filter(rapp__isnull=False)
         if self.value() == 'rien':
-            return queryset.filter(rapp__isnull=True,pointe=False)
+            return queryset.filter(rapp__isnull=True, pointe=False)
         if self.value() == 'pr':
-            return queryset.exclude(rapp__isnull=True,pointe=False)
+            return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
             return queryset.exclude(rapp__isnull=False)
 
@@ -97,7 +101,9 @@ def fusion(request, queryset, sens):
     if queryset.count() != 2:
         messages.error(request,
                        u"attention, vous devez selectionner 2 %(type)s et uniquement 2, vous en avez selectionné %(n)s" % {
-                           'n':queryset.count(), 'type':nom_module})
+                           'n': queryset.count(),
+                           'type': nom_module}
+        )
         return
     obj_a = queryset[0]
     obj_b = queryset[1]
@@ -107,16 +113,21 @@ def fusion(request, queryset, sens):
     try:
         if sens == 'ab':
             message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (
-                nom_module, obj_a, obj_b)
+                nom_module,
+                obj_a,
+                obj_b)
             obj_a.fusionne(obj_b)
         else:
             message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (
-                nom_module, obj_b, obj_a)
+                nom_module,
+                obj_b,
+                obj_a)
             obj_b.fusionne(obj_a)
         messages.success(request, message)
     except Exception as inst:#TODO mieux gerer
         message = inst.__unicode__()
         messages.error(request, message)
+
 
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
@@ -140,8 +151,6 @@ class Modeladmin_perso(admin.ModelAdmin):
         if ref.find('?') != -1:
             # We've got a query string, set the session value
             request.session['filtered'] = ref
-        #else:
-            #request.session['filtered'] = None
         if request.POST.has_key('_save'):
             try:
                 if request.session['filtered'] is not None:
@@ -167,22 +176,25 @@ class Modeladmin_perso(admin.ModelAdmin):
         result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
 
+
 class liste_perso_inline(admin.TabularInline):
     can_delete = False
     extra = 0
     formfield_overrides = {
-        models.TextField: {'widget': forms.TextInput,},
-        }
-    related=None
-    readonly=False
+        models.TextField: {'widget': forms.TextInput, },
+    }
+    related = None
+    readonly = False
+
     def __init__(self, parent_model, admin_site):
         if self.readonly:
-            self.readonly_fields=self.fields
-            self.can_delete=False
-        super(liste_perso_inline,self).__init__(parent_model, admin_site)
+            self.readonly_fields = self.fields
+            self.can_delete = False
+        super(liste_perso_inline, self).__init__(parent_model, admin_site)
+
     def queryset(self, request):
         if self.related is not None:
-            args=self.related
+            args = self.related
             qs = super(liste_perso_inline, self).queryset(request)
             return qs.select_related(*args)
         else:
@@ -191,10 +203,11 @@ class liste_perso_inline(admin.TabularInline):
 ##------------defintiion des classes
 class ope_cat_admin(liste_perso_inline):
     model = Ope
-    fields = ('date','compte', 'montant', 'tiers','ib', 'notes')
+    fields = ('date', 'compte', 'montant', 'tiers', 'ib', 'notes')
     readonly = True
     fk_name = 'cat'
-    related = ('compte','tiers','ib')
+    related = ('compte', 'tiers', 'ib')
+
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -203,13 +216,13 @@ class Cat_admin(Modeladmin_perso):
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
-    radio_fields = {'type':admin.VERTICAL}
-    list_select_related=True
+    radio_fields = {'type': admin.VERTICAL}
+    list_select_related = True
     inlines = [ope_cat_admin]
+
     def queryset(self, request):
         qs = super(Cat_admin, self).queryset(request)
         return qs.select_related('ope')
-
 
 
 class Ib_admin(Modeladmin_perso):
@@ -219,7 +232,7 @@ class Ib_admin(Modeladmin_perso):
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
-    radio_fields = {'type':admin.VERTICAL}
+    radio_fields = {'type': admin.VERTICAL}
 
 
 class Compte_admin(Modeladmin_perso):
@@ -282,12 +295,13 @@ class Compte_admin(Modeladmin_perso):
                     plural = 's'
                 rapp.date = form.cleaned_data['date']
                 rapp.save()
-                self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (queryset[0], count, plural, plural))
+                self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
+                queryset[0], count, plural, plural))
                 return HttpResponseRedirect(request.get_full_path())
 
         if not form:
-            form = self.RappForm(initial={'_selected_action':request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
-        return render(request, 'admin/add_rapp.djhtm', {'opes':query_ope, 'rapp_form':form, })
+            form = self.RappForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+        return render(request, 'admin/add_rapp.djhtm', {'opes': query_ope, 'rapp_form': form, })
 
     action_transformer_pointee_rapp.short_description = "Rapprocher un compte"
 
@@ -302,17 +316,21 @@ class Compte_titre_admin(Modeladmin_perso):
 
 class ope_fille_admin(liste_perso_inline):
     model = Ope
-    fields = ( 'montant', 'cat','ib', 'notes')
+    fields = ( 'montant', 'cat', 'ib', 'notes')
     fk_name = 'mere'
-    related = ('cat','ib')
+    related = ('cat', 'ib')
+
 
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
-    fields = ('compte', ('date','date_val'), 'montant', 'tiers', 'moyen', ('cat','ib'), ('pointe','rapp', 'exercice'), ('show_jumelle', 'mere', 'is_mere'), 'oper_titre','num_cheque', 'notes')
+    fields = (
+    'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
+    ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers_virement', 'moyen', 'cat', 'rapp', 'pointe')
-    list_filter = ('compte', ('date',date_perso_filter), rapprochement_filter ,'moyen', 'exercice', 'cat__type','cat__nom')
+    list_filter = (
+    'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
@@ -322,15 +340,17 @@ class Ope_admin(Modeladmin_perso):
     ordering = ['date']
     inlines = [ope_fille_admin]
     raw_id_fields = ('mere', )
+
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
-        return qs.select_related('compte','rapp','moyen','tiers','cat')
+        return qs.select_related('compte', 'rapp', 'moyen', 'tiers', 'cat')
 
     def is_mere(self, obj):
         if obj.is_mere:
             return u"opérations filles ci dessous"
         else:
             return u"aucune opération fille"
+
     def mere_fille(self, obj):
         if obj.is_fille:
             return "fille de %s" % obj.mere_id
@@ -380,7 +400,7 @@ class Ope_admin(Modeladmin_perso):
                 o.save()
                 o.jumelle.save()
             else:
-                o.montant *=  -1
+                o.montant *= -1
                 o.save()
         return HttpResponseRedirect(request.get_full_path())
 
@@ -416,7 +436,8 @@ class Ope_admin(Modeladmin_perso):
                 return super(Ope_admin, self).delete_view(request, object_id, extra_context)
             except IntegrityError, excp:
                 messages.error(request, excp)
-    def tiers_virement(self,obj):
+
+    def tiers_virement(self, obj):
         try:
             if obj.jumelle_id:
                 return u"virement vers %s " % obj.jumelle.compte.nom
@@ -424,6 +445,7 @@ class Ope_admin(Modeladmin_perso):
                 return u"%s" % obj.tiers.nom
         except Moyen.DoesNotExist:
             return u"inconnu"
+
     tiers_virement.short_description = "Tiers"
 
 
@@ -443,8 +465,8 @@ class Titre_admin(Modeladmin_perso):
     readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
     formfield_overrides = {
-        models.TextField:{'widget':admin.widgets.AdminTextInputWidget},
-        }
+        models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
+    }
 
     def show_tiers(self, obj):
         if obj.tiers_id:
@@ -467,12 +489,15 @@ class Moyen_admin(Modeladmin_perso):
 
     list_display = ('nom', 'type', 'nb_ope')
 
+
 class ope_tiers_admin(liste_perso_inline):
     model = Ope
-    fields = ('date','compte', 'montant', 'cat','ib', 'notes')
+    fields = ('date', 'compte', 'montant', 'cat', 'ib', 'notes')
     readonly = True
     fk_name = 'tiers'
-    related = ('compte','cat','ib')
+    related = ('compte', 'cat', 'ib')
+
+
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
@@ -482,7 +507,7 @@ class Tiers_admin(Modeladmin_perso):
     list_filter = ('is_titre',)
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
-    formfield_overrides = {models.TextField:{'widget':forms.TextInput}, }
+    formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
 
     def nb_ope(self, obj):
         return '%s' % (obj.ope_set.count())
@@ -490,7 +515,8 @@ class Tiers_admin(Modeladmin_perso):
 
 class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
-    list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
+    list_display = (
+    'id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
     actions = ['check_ech']
 
@@ -504,12 +530,13 @@ class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
 
+
 class ope_rapp_admin(liste_perso_inline):
     model = Ope
     fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
-    readonly_fields = ( 'compte', 'date', 'tiers','moyen', 'montant', 'cat', 'notes')
+    readonly_fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
-    related=('compte','tiers','moyen','cat')
+    related = ('compte', 'tiers', 'moyen', 'cat')
 
 
 class Rapp_admin(Modeladmin_perso):
@@ -517,6 +544,7 @@ class Rapp_admin(Modeladmin_perso):
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_display = ('nom', 'date')
     inlines = [ope_rapp_admin]
+
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""

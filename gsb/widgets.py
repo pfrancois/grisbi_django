@@ -15,7 +15,7 @@ class Dategsbwidget(forms.DateInput):
 
     class Media:
         js = ("js/basiccalendar.js",)
-        css = {'all':('css/calendar.css',)}
+        css = {'all': ('css/calendar.css',)}
 
     def __init__(self, attrs=None): #@UnusedVariable
         super(Dategsbwidget, self).__init__(attrs)

@@ -18,7 +18,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 import logging
-from . import utils
+from .import utils
 #definitions des listes
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -33,28 +33,30 @@ def _export():
         try:
             cat_nom, scat_nom = cat_en_cours.nom.split(":")
             if scat_nom:
-                list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_nom, 'type':cat_en_cours.type},
-                                              'scat':{'id':cat_en_cours.id, 'nom':scat_nom}}
+                list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_nom, 'type': cat_en_cours.type},
+                                              'scat': {'id': cat_en_cours.id, 'nom': scat_nom}}
             else:
                 list_cats[cat_en_cours.id] = {
-                    'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}, 'scat':None}
+                    'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}, 'scat': None}
         except ValueError:
-            list_cats[cat_en_cours.id] = {'cat':{'id':cat_en_cours.id, 'nom':cat_en_cours.nom, 'type':cat_en_cours.type}
-                , 'scat':None}
+            list_cats[cat_en_cours.id] = {
+            'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}
+                , 'scat': None}
             #creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
         try:
             ib_nom, sib_nom = ib_en_cours.nom.split(":")
             if sib_nom:
-                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_nom, 'type':ib_en_cours.type},
-                                            'sib':{'id':ib_en_cours.id, 'nom':sib_nom}}
+                list_ibs[ib_en_cours.id] = {'ib': {'id': ib_en_cours.id, 'nom': ib_nom, 'type': ib_en_cours.type},
+                                            'sib': {'id': ib_en_cours.id, 'nom': sib_nom}}
             else:
-                list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type},
-                                            'sib':None}
+                list_ibs[ib_en_cours.id] = {
+                'ib': {'id': ib_en_cours.id, 'nom': ib_en_cours.nom, 'type': ib_en_cours.type},
+                'sib': None}
         except ValueError:
-            list_ibs[ib_en_cours.id] = {'ib':{'id':ib_en_cours.id, 'nom':ib_en_cours.nom, 'type':ib_en_cours.type},
-                                        'sib':None}
+            list_ibs[ib_en_cours.id] = {'ib': {'id': ib_en_cours.id, 'nom': ib_en_cours.nom, 'type': ib_en_cours.type},
+                                        'sib': None}
             #####generalites###
     xml_root = et.Element("Grisbi")
     xml_generalites = et.SubElement(xml_root, "Generalites")
@@ -503,9 +505,10 @@ def export(request):
         return reponse
     else:
         return render_to_response('generic.djhtm',
-                {
-                'titre':'import gsb',
-                'resultats':(u"attention, il n'y a pas de comptes donc pas de possibilité d'export.",)
-            },
+                                  {
+                                      'titre': 'import gsb',
+                                      'resultats': (
+                                      u"attention, il n'y a pas de comptes donc pas de possibilité d'export.",)
+                                  },
                                   context_instance=RequestContext(request)
         )

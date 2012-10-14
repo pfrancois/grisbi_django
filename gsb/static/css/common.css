@@ -1,262 +1,265 @@
 @charset "UTF-8";
 /*general*/
-a{
-    text-decoration: none;
-    padding: 0;
-    margin: 0;
-    color: #FFFFFF;
+a {
+    text-decoration : none;
+    padding         : 0;
+    margin          : 0;
+    color           : #FFFFFF;
 }
 
-a:hover{
-    background-color: #706666;
+a:hover {
+    background-color : #706666;
 }
 
-body{
-    font-family: sans-serif;
-    background-color: #333333;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    color: #FFFFFF;
-    font-size: 100%;
+body {
+    font-family      : sans-serif;
+    background-color : #333333;
+    margin           : 0;
+    padding          : 0;
+    width            : 100%;
+    color            : #FFFFFF;
+    font-size        : 100%;
 }
 
-h1{
-    font-size: 2.5em;
-    padding-top: .3em;
-    padding-bottom: .5em;
-    font-weight: bold;
-    background-color: #990000;
-    margin-top: 0;
-    text-align: center;
+h1 {
+    font-size        : 2.5em;
+    padding-top      : .3em;
+    padding-bottom   : .5em;
+    font-weight      : bold;
+    background-color : #990000;
+    margin-top       : 0;
+    text-align       : center;
 }
 
-h2{
-    font-size: 1.5em;
-    margin-top: 0.4em;
-    margin-bottom: 0.6em;
-    clear: both;
-    border-bottom: 1px solid #D8D8D8;
+h2 {
+    font-size     : 1.5em;
+    margin-top    : 0.4em;
+    margin-bottom : 0.6em;
+    clear         : both;
+    border-bottom : 1px solid #D8D8D8;
 }
 
 /* gros boutons des forms*/
-.boutton{
-    background-color: #554444;
-    border: #ffffff solid 1px;
-    font-size: 2em;
-    color: #ffffff;
+.boutton {
+    background-color : #554444;
+    border           : #ffffff solid 1px;
+    font-size        : 2em;
+    color            : #ffffff;
 }
 
-.boutton td:hover{
-    background-color: #706666;
+.boutton td:hover {
+    background-color : #706666;
 }
 
-.boutton td{
-    text-align: center;
-    padding: 10px 0 10px 0;
+.boutton td {
+    text-align : center;
+    padding    : 10px 0 10px 0;
 }
 
 /*liste*/
-.table{
-    border-collapse: collapse;
-    width: 100%;
-    border-width: 0;
-    empty-cells: show
+.table {
+    border-collapse : collapse;
+    width           : 100%;
+    border-width    : 0;
+    empty-cells     : show
 }
 
-.item{
-    background-color: #3A0000;
-    border-top: 1px solid #4D0000;
+.item {
+    background-color : #3A0000;
+    border-top       : 1px solid #4D0000;
 }
 
-.item:hover{
-    background-color: #706666;
+.item:hover {
+    background-color : #706666;
 }
 
-.cptLabel{
-    text-align: left;
-    width: 100%
+.cptLabel {
+    text-align : left;
+    width      : 100%
 }
 
-.cptSolde{
-    text-align: right;
-    white-space: nowrap;
-    padding-right: .5em;
+.cptSolde {
+    text-align    : right;
+    white-space   : nowrap;
+    padding-right : .5em;
 }
 
-.creditElement{
-    background: #6699FF;
-    padding: 0.6em 0 0.6em 0;
+.creditElement {
+    background : #6699FF;
+    padding    : 0.6em 0 0.6em 0;
 }
 
-.debitElement{ }
-
-.rappElement{
-    color: red;
-}
-.poiElement{
-    color: blue;
-}
-.opCredit{
-    white-space: nowrap;
-    padding: 0 0.6em 0 0.1em;
-    text-align: right;
+.debitElement {
 }
 
-.opDebit{
-    white-space: nowrap;
-    padding: 0 0.6em 0 0.3em;
-    text-align: right;
+.rappElement {
+    color : red;
 }
 
-.opCenter{
-    text-align: center !important;;
+.poiElement {
+    color : blue;
 }
 
-.opDate{
-    white-space: nowrap;
-    text-align: right;
-    width: 10%;
+.opCredit {
+    white-space : nowrap;
+    padding     : 0 0.6em 0 0.1em;
+    text-align  : right;
 }
 
-.opTier{
-    width: 50%;
-    padding: 0 0 0 0.3em;
-    text-align: left;
+.opDebit {
+    white-space : nowrap;
+    padding     : 0 0.6em 0 0.3em;
+    text-align  : right;
 }
 
-.survol:hover{
-    background-color: #706666;
+.opCenter {
+    text-align : center !important;;
 }
 
-.footerbar{
-    background-color: #990000;
-    font-weight: bold;
-    padding: .7em;
-    height: 3em;
+.opDate {
+    white-space : nowrap;
+    text-align  : right;
+    width       : 10%;
 }
 
-
-.bar td{
-    background-color: #990000;
-    font-weight: bold;
+.opTier {
+    width      : 50%;
+    padding    : 0 0 0 0.3em;
+    text-align : left;
 }
 
-.total_general{
-    border-top: 10px solid #333333;
+.survol:hover {
+    background-color : #706666;
 }
 
-.padding>td{
-    padding-top: 0.4em;
-    padding-bottom: 0.6em;
+.footerbar {
+    background-color : #990000;
+    font-weight      : bold;
+    padding          : .7em;
+    height           : 3em;
 }
 
-th{
-    background-color: #990000;
-    font-weight: bold;
-    padding-top: 0.4em;
-    padding-bottom: 0.6em;
-    text-align: center;
+.bar td {
+    background-color : #990000;
+    font-weight      : bold;
+}
+
+.total_general {
+    border-top : 10px solid #333333;
+}
+
+.padding>td {
+    padding-top    : 0.4em;
+    padding-bottom : 0.6em;
+}
+
+th {
+    background-color : #990000;
+    font-weight      : bold;
+    padding-top      : 0.4em;
+    padding-bottom   : 0.6em;
+    text-align       : center;
 }
 
 /*gestion des forms*/
-.required{
-    background: #009900;
+.required {
+    background : #009900;
 }
+
 /*
 .required:after{
     content: "*";
 }
 */
-ul.errorlist{
-    margin: 0 !important;
-    padding: 0 !important;
+ul.errorlist {
+    margin  : 0 !important;
+    padding : 0 !important;
 }
 
-.errorlist li{
-    font-size: 12px !important;
-    display: block;
-    padding: 4px 5px 4px 25px;
-    margin: 0 0 3px 0;
-    border: 1px solid red;
-    color: white;
-    background: red url('/static/img/error.png') no-repeat;
+.errorlist li {
+    font-size  : 12px !important;
+    display    : block;
+    padding    : 4px 5px 4px 25px;
+    margin     : 0 0 3px 0;
+    border     : 1px solid red;
+    color      : white;
+    background : red url('/static/img/error.png') no-repeat;
 }
 
-.errorlist li a{
-    color: white;
-    text-decoration: underline;
+.errorlist li a {
+    color           : white;
+    text-decoration : underline;
 }
 
-td ul.errorlist{
-    margin: 0 !important;
-    padding: 0 !important;
+td ul.errorlist {
+    margin  : 0 !important;
+    padding : 0 !important;
 }
 
-td ul.errorlist li{
-    margin: 0 !important;
+td ul.errorlist li {
+    margin : 0 !important;
 }
 
 /*notif*/
-.progress{
-    width: 100%;
-    background: Green;
-    text-align: center;
-    font-size: 2.5em;
+.progress {
+    width      : 100%;
+    background : Green;
+    text-align : center;
+    font-size  : 2.5em;
 }
 
-body{
-    font-family: Arial, Helvetica, sans-serif;
+body {
+    font-family : Arial, Helvetica, sans-serif;
 }
 
 /******** User feedback messages ********/
-.messages{
-    font-size: 0.85em;
+.messages {
+    font-size : 0.85em;
 }
 
-.messages ul{
-    list-style: none;
-    margin: 10px 0;
-    padding-left: 0;
+.messages ul {
+    list-style   : none;
+    margin       : 10px 0;
+    padding-left : 0;
 }
 
-.messages ul li{
-    padding: 0.1em;
+.messages ul li {
+    padding : 0.1em;
 }
 
 .info,
 .success,
 .warning,
 .error,
-.validation{
-    border: 2px solid;
-    margin: 10px 0;
-    padding: 0 0 0 41px;
-    background: no-repeat 5px center;
+.validation {
+    border     : 2px solid;
+    margin     : 10px 0;
+    padding    : 0 0 0 41px;
+    background : no-repeat 5px center;
 }
 
-.info{
-    color: #00529B;
-    border-color: #789FCC;
-    background: #CDEAF7 no-repeat url('/static/img/info.png');
+.info {
+    color        : #00529B;
+    border-color : #789FCC;
+    background   : #CDEAF7 no-repeat url('/static/img/info.png');
 }
 
-.success{
-    color: #264409;
-    border-color: #C6D880;
-    background: #E6EFC2 no-repeat url('/static/img/success.png');
+.success {
+    color        : #264409;
+    border-color : #C6D880;
+    background   : #E6EFC2 no-repeat url('/static/img/success.png');
 }
 
-.warning{
-    color: #514721;
-    border-color: #FFD324;
-    background: #FFF6BF no-repeat url('/static/img/warning.png');
+.warning {
+    color        : #514721;
+    border-color : #FFD324;
+    background   : #FFF6BF no-repeat url('/static/img/warning.png');
 }
 
-.error{
-    color: #8A1F11;
-    border-color: #FBC2C4;
-    background: #FBE3E4 no-repeat url('/static/img/error.png');
+.error {
+    color        : #8A1F11;
+    border-color : #FBC2C4;
+    background   : #FBE3E4 no-repeat url('/static/img/error.png');
 }
 
 /******** /User feedback messages ********/

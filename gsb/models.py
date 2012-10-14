@@ -13,8 +13,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode
 from .model_field import CurField
-from . import utils
-import logging
+from gsb import utils
 
 class Gsb_exc(Exception):
     pass
@@ -132,7 +131,7 @@ class Titre(models.Model):
             try:
                 if new.cours_set.get(date=cours.date).valeur != cours.valeur:
                     raise Gsb_exc(
-                        u"attention les titre %s et %s ne peuvent etre fusionné à cause histo de cours"%(self, new))
+                        u"attention les titre %s et %s ne peuvent etre fusionné à cause histo de cours" % (self, new))
             except Cours.DoesNotExist:
                 new.cours_set.create(date=cours.date, valeur=cours.valeur)
         nb_change = 0
@@ -234,7 +233,7 @@ class Titre(models.Model):
                 date_r = datel
             else:
                 date_r = utils.today()
-            #maintenant que l'on a la date max, on peut filtrer
+                #maintenant que l'on a la date max, on peut filtrer
         opes = opes.filter(date__lte=date_r)
         if opes.exists():
             #recupere le dernier cours
@@ -574,11 +573,11 @@ class Compte_titre(Compte):
                                     automatique=True
                 )
                 #gestion compta matiere (et donc opération sous jacente et cours)
-            ope_titre=Ope_titre.objects.create(titre=titre,
-                                     compte=self,
-                                     nombre=decimal.Decimal(force_unicode(nombre)),
-                                     date=date,
-                                     cours=prix)
+            ope_titre = Ope_titre.objects.create(titre=titre,
+                                                 compte=self,
+                                                 nombre=decimal.Decimal(force_unicode(nombre)),
+                                                 date=date,
+                                                 cours=prix)
             #virement
             if virement_de:
                 vir = Virement()
@@ -606,11 +605,11 @@ class Compte_titre(Compte):
             if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
                 #compta matiere
-            ope_titre=Ope_titre.objects.create(titre=titre,
-                                     compte=self,
-                                     nombre=decimal.Decimal(force_unicode(nombre)) * -1,
-                                     date=date,
-                                     cours=prix)
+            ope_titre = Ope_titre.objects.create(titre=titre,
+                                                 compte=self,
+                                                 nombre=decimal.Decimal(force_unicode(nombre)) * -1,
+                                                 date=date,
+                                                 cours=prix)
             if decimal.Decimal(force_unicode(frais)):
                 if not cat_frais:
                     cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
@@ -684,6 +683,7 @@ class Compte_titre(Compte):
 
     def solde_rappro(self, datel=None):
         return self.solde(datel=datel, rapp=True)
+
     solde_rappro.short_description = u"solde titre rapproché"
 
     @transaction.commit_on_success
@@ -751,11 +751,11 @@ class Ope_titre(models.Model):
                                null=True,
                                on_delete=models.CASCADE,
                                related_name="ope")#null=true car j'ai des operations sans lien
-    ope_pmv = models.OneToOneField(  'Ope',
-                                        editable=False,
-                                        null=True,
-                                        on_delete=models.CASCADE,
-                                        related_name="ope_pmv")#null=true cr tt les operation d'achat sont null
+    ope_pmv = models.OneToOneField('Ope',
+                                   editable=False,
+                                   null=True,
+                                   on_delete=models.CASCADE,
+                                   related_name="ope_pmv")#null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
@@ -847,13 +847,13 @@ class Ope_titre(models.Model):
                 self.ope.save()
             if self.ope_pmv is None:
                 self.ope_pmv = Ope.objects.create(date=self.date,
-                                                     montant=pmv * -1,
-                                                     tiers=self.titre.tiers,
-                                                     cat=cat_pmv,
-                                                     notes="%s@%s" % (self.nombre, self.cours),
-                                                     moyen=moyen,
-                                                     compte=self.compte,
-                                                    )
+                                                  montant=pmv * -1,
+                                                  tiers=self.titre.tiers,
+                                                  cat=cat_pmv,
+                                                  notes="%s@%s" % (self.nombre, self.cours),
+                                                  moyen=moyen,
+                                                  compte=self.compte,
+                )
             else:
                 #on modifie tout
                 self.ope_pmv.date = self.date
@@ -883,10 +883,11 @@ class Ope_titre(models.Model):
 
     def __unicode__(self):
         if self.nombre > 0:
-            sens="achat"
+            sens = "achat"
         else:
-            sens="vente"
-        chaine=u"(%s) %s de %s %s à %s EUR le %s cpt:%s"%(self.id, sens, self.nombre, self.titre, self.cours, self.date, self.compte)
+            sens = "vente"
+        chaine = u"(%s) %s de %s %s à %s EUR le %s cpt:%s" % (
+            self.id, sens, self.nombre, self.titre, self.cours, self.date, self.compte)
         return chaine
 
 
@@ -1051,7 +1052,7 @@ class Echeance(models.Model):
 
     @staticmethod
     @transaction.commit_on_success
-    def check(request=None, queryset=None,to=None):
+    def check(request=None, queryset=None, to=None):
         """
         attention ce n'est pas une vue
         verifie si pas d'écheance a passer et la cree au besoin
@@ -1060,7 +1061,7 @@ class Echeance(models.Model):
         @param to: date finale de checking (a priori, utile seulement pour le test afin d'avoir une date fixe)
         """
         if to is None:
-            to=utils.today()
+            to = utils.today()
         if  queryset is None:
             liste_ech = Echeance.objects.filter(valide=True, date__lte=to)
         else:
@@ -1154,20 +1155,22 @@ class Ope(models.Model):
         """ renvoie uniquement les opération non mere
         """
         return Ope.objects.filter(filles_set__isnull=True)
+
     @staticmethod
     def solde_set(q):
         if not q.exists():
             return 0
         return q.aggregate(total=models.Sum('montant'))['total']
+
     def __unicode__(self):
         return u"(%s) le %s : %s %s a %s cpt: %s" % (
-                                                        self.id,
-                                                        self.date,
-                                                        self.montant,
-                                                        settings.DEVISE_GENERALE,
-                                                        self.tiers,
-                                                        self.compte
-                                                    )
+            self.id,
+            self.date,
+            self.montant,
+            settings.DEVISE_GENERALE,
+            self.tiers,
+            self.compte
+            )
 
     @models.permalink
     def get_absolute_url(self):
@@ -1393,7 +1396,10 @@ def verif_ope_save(sender, **kwargs):
     """
     instance = kwargs['instance']
     if instance.is_mere:
-        instance.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
+        instance.cat = Cat.objects.get_or_create(
+            nom=u"Opération Ventilée",
+            defaults={'type': "d", 'nom': u"Opération Ventilée"}
+        )[0]
         if instance.montant != instance.tot_fille:
             if instance.rapp or instance.pointe:
                 raise IntegrityError(
