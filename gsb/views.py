@@ -107,21 +107,25 @@ class Cpt_detail(Mytemplateview):
         @param rapp: si true, affiche les operations rapp ou pointee
         """
         compte = get_object_or_404(Compte, pk=cpt_id)
+        self.type="nrapp"
+        if self.all:
+            self.type="all"
+        if self.rapp:
+            self.type="rapp"
         if compte.type not in ('t',) or self.cpt_titre_espece==True:
             if self.cpt_titre_espece:
                 self.template_name='gsb/cpt_placement_espece.djhtm'
             self.espece=True
-            date_limite = utils.today() - utils.datetime.timedelta(days=settings.NB_JOURS_AFF)
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
             else:
                 if not self.all:
-                    q = q.filter(rapp__isnull=True).filter(date__gte=date_limite)
-            nb_ope_rapp,nb_ope_vieilles=self.cpt_espece_nb(compte,date_limite,q)
+                    q = q.filter(rapp__isnull=True)
+            nb_ope_rapp=self.cpt_espece_nb(compte,q)
             sort_tab,opes=self.cpt_espece_tri(request,q)
             q = q.select_related('tiers', 'cat', 'rapp')
-            context=self.get_context_data(compte,opes,nb_ope_vieilles,nb_ope_rapp,date_limite,sort_tab)
+            context=self.get_context_data(compte,opes,nb_ope_rapp,sort_tab)
         else:
             self.espece=False
             self.template_name='gsb/cpt_placement.djhtm'
@@ -148,21 +152,16 @@ class Cpt_detail(Mytemplateview):
             context=self.get_context_data(compte_titre,titres)
         return self.render_to_response(context)
 
-    def cpt_espece_nb(self,c,date_limite,q):
+    def cpt_espece_nb(self,c,q):
         """calcul les nombres d'operation"""
-        nb_ope_vieilles = 0
         nb_ope_rapp = 0
         if self.all:
-            nb_ope_vieilles = 0
             nb_ope_rapp = 0
         if self.rapp:
-            nb_ope_vieilles = 0
             nb_ope_rapp = 0
         if not self.all and not self.rapp:
-            nb_ope_vieilles = Ope.non_meres().filter(compte=c).filter(date__lte=date_limite).filter(rapp__isnull=True).count()
-            #on exclue les operations vielles des operations rapprochés
-            nb_ope_rapp = q.filter(rapp__isnull=False).filter(date__gte=date_limite).count()
-        return [nb_ope_vieilles,nb_ope_rapp]
+            nb_ope_rapp = q.filter(rapp__isnull=False).count()
+        return nb_ope_rapp
     def cpt_espece_tri(self,request,q):
         """gestion du tri"""
         try:
@@ -193,6 +192,7 @@ class Cpt_detail(Mytemplateview):
             sort_t['montant'] = "-montant"
         else:
             sort_t['montant'] = "montant"
+        sort_t['actuel']="?sort=%s"%sort
         return [sort_t,q]
 
     def cpt_espece_pagination(self,request,q):
@@ -206,27 +206,32 @@ class Cpt_detail(Mytemplateview):
         except (EmptyPage, InvalidPage):
             return paginator.page(paginator.num_pages)
     def get_context_data(self,*kwargs):
+        type_long={
+            "nrapp":u"Opérations non rapprochées",
+            "rapp":u"Opérations rapprochés",
+            "all":u"Ensemble des opérations"
+        }
         c=kwargs[0]
         if self.espece:
+            solde=c.solde()
             context={  'compte':c,
                     'list_ope':kwargs[1],
                     'nbrapp':kwargs[2],
-                    'nbvieilles':kwargs[3],
                     'titre':c.nom,
-                    'solde':c.solde(),
-                    'date_limite':kwargs[4],#date en dessous c'est des operation vielles
-                    'nb_j':settings.NB_JOURS_AFF,
+                    'solde':solde,
                     "date_r":c.date_rappro(),
                     "solde_r":c.solde(rapp=True),
                     "solde_p": c.solde_pointe(),
                     "solde_pr": c.solde(rapp=True)+c.solde_pointe(),
-                    "sort_tab": kwargs[5],
+                    "sort_tab": kwargs[3],
+                    "type":self.type,
+                    "titre_long":"%s (%s)"%(c.nom, type_long[self.type]),
                 }
         else:
             context={
                     'compte':c,
                     'titre':c.nom,
-                    'solde':c.solde(),
+                    'solde':c.solde_espece(),
                     'titres':kwargs[1],
                     'especes':c.solde_espece(),
                     'especes_rapp':c.solde_espece(rapp=True),

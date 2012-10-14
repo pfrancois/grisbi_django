@@ -11,7 +11,7 @@ import os.path
 from django.conf import settings
 import gsb.utils as utils
 import sys
-import mock
+#import mock
 import datetime
 import logging
 class Test_view_base(TestCase):
@@ -79,9 +79,7 @@ class Test_export_csv(Test_view_base):
         self.assertFormError(rep,'form','',u"attention pas d'opérations pour la selection demandée")
 
 class Test_views_general(Test_view_base):
-    @mock.patch('gsb.utils.today')
-    def test_view_index(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+    def test_view_index(self):
         resp=self.client.get('/')
         self.assertEqual(resp.context['titre'],'liste des comptes')
         self.assertQueryset(resp.context['liste_cpt_bq'],[1,2,3])
@@ -90,9 +88,9 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['total_pla'],100)
         self.assertEqual(resp.context['total'],130)
         self.assertEqual(resp.context['nb_clos'],1)
-    @mock.patch('gsb.utils.today')
-    def test_view_cpt_detail(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+    #@mock.patch('gsb.utils.today')
+    def test_view_cpt_detail(self):
+        #today_mock.return_value=datetime.date(2012, 10, 14)
         resp=self.client.get(reverse('gsb_cpt_detail',args=(1,)))
         self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'],'cpte1')
@@ -103,10 +101,8 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_r'],-90)
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
-        self.assertQueryset(resp.context['list_ope'],[12,13])
-    @mock.patch('gsb.utils.today')
-    def test_view_cpt_detail_rapp(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+        self.assertQueryset(resp.context['list_ope'],[6,7,8,12,13])
+    def test_view_cpt_detail_rapp(self):
         resp=self.client.get(reverse('gsb_cpt_detail_rapp',args=(1,)))
         self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'],'cpte1')
@@ -118,9 +114,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
         self.assertQueryset(resp.context['list_ope'],[4,5])
-    @mock.patch('gsb.utils.today')
-    def test_view_cpt_detail_all(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+    def test_view_cpt_detail_all(self):
         resp=self.client.get(reverse('gsb_cpt_detail_all',args=(1,)))
         self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'],'cpte1')
@@ -132,17 +126,15 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
         self.assertQueryset(resp.context['list_ope'],[4,5,6,7,8,12,13])
-    @mock.patch('gsb.utils.today')
-    def test_view_cpt_espece(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
-        resp=self.client.get(reverse('gsb_cpt_detail_all',args=(1,)))
-        self.assertTemplateUsed(resp,template_name="gsb/cpt_detail.djhtm")
-        self.assertEqual(resp.context['titre'],'cpte1')
-        self.assertEqual(resp.context['compte'].id,1)
+    def test_view_cpt_espece(self):
+        resp=self.client.get(reverse('gsb_cpt_titre_espece',args=(5,)))
+        self.assertTemplateUsed(resp,template_name="gsb/cpt_placement_espece.djhtm")
+        self.assertEqual(resp.context['titre'],'cpt_titre1')
+        self.assertEqual(resp.context['compte'].id,5)
         self.assertEqual(resp.context['nbrapp'],0)
-        self.assertEqual(resp.context['solde'],-70)
-        self.assertEqual(resp.context['date_r'],utils.strpdate('2011-08-12'))
-        self.assertEqual(resp.context['solde_r'],-90)
+        self.assertEqual(resp.context['solde'],-6)
+        self.assertEqual(resp.context['date_r'],None)
+        self.assertEqual(resp.context['solde_r'],0)
         self.assertEqual(resp.context['solde_p'],10)
         self.assertEqual(resp.context['solde_pr'],-80)
         self.assertQueryset(resp.context['list_ope'],[4,5,6,7,8,12,13])

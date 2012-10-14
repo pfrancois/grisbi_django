@@ -36,18 +36,24 @@
                     <td colspan="3" class="cptLabel">Solde</td>
                     <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
                 </tr>
+                {% if date_r %}
                 <tr>
                     <td colspan="3" class="cptLabel">Solde rapproch&eacute; au {{ date_r|default_if_none:"-"|date:"SHORT_DATE_FORMAT" }}:</td>
                     <td colspan="2" class="cptSolde">{{ solde_r|cur }}</td>
                 </tr>
+                {% endif %}
+                {% if solde_p != 0 %}
                 <tr>
                     <td colspan="3" class="cptLabel">Solde point&eacute; :</td>
                     <td colspan="2" class="cptSolde">{{ solde_p|cur }}</td>
                 </tr>
+                {% endif %}
+                {% if solde_pr != 0 %}
                 <tr>
                     <td colspan="3" class="cptLabel">Solde p&r:</td>
                     <td colspan="2" class="cptSolde">{{ solde_pr|cur }}</td>
                 </tr>
+                {% endif %}
             {% endblock footer %}
         </tfoot>
         {% for ope in list_ope %}
@@ -68,70 +74,33 @@
             <tr class="item">
                 <td colspan="5">
                     aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
-                    {% if nbvieilles > 1 %}
-                        {{ nbvieilles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont au del&agrave; de la limite des {{ nb_j }} jours maximum.<br/>
-                    {% else %} {% if nbvieilles == 1 %}
-                    1 op&eacute;ration a &eacute;t&eacute; filtr&eacute;e car elle est au del&agrave; de la limite des {{ nb_j }} jours maximum.<br/>
-                    {% endif %}{% endif %}
-                    {% if nbrapp == 1 %}
-                    note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
-                    {% endif %}
-                    {% if nbrapp > 1 %}
-                    note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.
-                        <br/>
-                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
 
     </table>
-    {% if list_ope.paginator.num_pages > 1 %}
-        <hr/>
-        <div class="pagination">
-            <h1>
-        <span>
-            {% if list_ope.has_previous %}
-                <a href="?page={{ list_ope.previous_page_number }}{{sort|default:""}}">pr&eacute;c&eacute;dente</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ list_ope.number }} sur {{ list_ope.paginator.num_pages }}.
-            </span>
-
-            {% if list_ope.has_next %}
-                <a href="?page={{ list_ope.next_page_number }}{{sort|default:""}}">suivante</a>
-            {% endif %}
-        </span>
-            </h1>
-        </div>
-    {% endif %}
     <div id="mentions_finales">
         {% if nbrapp == 1 %}
             note: 1 op&eacute;ration est filtr&eacute;e car elle est rapproch&eacute;e.<br/>
         {% endif %}
         {% if nbrapp > 1 %}
-            note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.<br/>
-        {% endif %}
-        {% if nbvieilles > 1 %}
-            note: {{ nbvieilles }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont trop vieilles.<br/>
-            seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
-        {% endif %}
-        {% if nbvieilles == 1 %}
-            note: 1 op&eacute;ration est filtr&eacute;e car elle est trop vieiille.<br/>
-            seul les op&eacute;rations apr&egrave;s le {{ date_limite }} sont affich&eacute;es.<br/>
+            note: {{ nbrapp }} op&eacute;rations ont &eacute;t&eacute; filtr&eacute;es car elles sont rapproch&eacute;es.
+            <br/>
         {% endif %}
     </div>
     {% block boutons_bas %}
         <table width="100%" id="boutons_bas" class="table">
             <tr class="boutton">
-                <td width="50%"><a href="{% url 'gsb_cpt_detail_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>
-                <td width="50%"><a href="{% url 'gsb_cpt_detail_rapp' cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>
+                {%  if type != "all" %}<td width="{% if type == "rapp" %}100{% else %}50{% endif %}%"><a href="{% url 'gsb_cpt_detail_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a></td>{% endif %}
+                {%  if type != "rapp" %}<td width="{% if type == "all" %}100{% else %}50{% endif %}%"><a href="{% url 'gsb_cpt_detail_rapp' cpt_id=compte.id %}">voir uniquement les op&eacute;rations rapproch&eacute;es</a></td>{% endif %}
             </tr>
+        {%  if type != "nrapp" %}
             <tr class="boutton">
                 <td width="100%" colspan="2">
                 <a href="{% url 'gsb_cpt_detail' cpt_id=compte.id%}">voir uniquement les opérations non rapprochées</a>
                 </td>
             </tr>
+        {% endif %}
         </table>
     {% endblock boutons_bas %}
 {% endblock content %}
