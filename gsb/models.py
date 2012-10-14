@@ -1218,7 +1218,27 @@ class Ope(models.Model):
             return True
         else:
             return False
+    def tiers_virement(self):
+        try:
+            if self.jumelle_id:
+                if self.montant <0:
+                    return u"virement vers %s " % self.jumelle.compte.nom
+                else:
+                    return u"virement de %s " % self.jumelle.compte.nom
+            else:
+                return u"%s" % self.tiers.nom
+        except Tiers.DoesNotExist:
+            return u"inconnu"
 
+    tiers_virement.short_description = "Tiers"
+    def is_editable(self):
+        if self.is_mere or self.rapp or self.compte.ouvert==False:
+            if self.jumelle:
+                if self.jumelle.rapp:
+                    return False
+            return False
+        else:
+            return True
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""
@@ -1388,7 +1408,7 @@ def verif_ope_rapp(sender, **kwargs):
 @receiver(pre_save, sender=Ope)
 def verif_ope_save(sender, **kwargs):
     """
-    verifie que l'operation ventile n'est pas poitne ot rapproche
+    verifie que l'operation ventile n'est pas pointe ni rapproche
 
     @param sender:
     @param kwargs:
@@ -1403,7 +1423,7 @@ def verif_ope_save(sender, **kwargs):
         if instance.montant != instance.tot_fille:
             if instance.rapp or instance.pointe:
                 raise IntegrityError(
-                    u"attention cette opération est pointée ou rapproché et on change le montant global")
+                    u"attention opération ( %s ) est pointée ou rapproché et on change le montant global"%instance.id)
             else:
                 instance.montant = instance.tot_fille
     if not instance.moyen:

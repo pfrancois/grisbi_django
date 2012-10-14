@@ -68,7 +68,7 @@
                     <td class="opTier">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
                             {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom|escape }} {% else %}
-                                {{ ope.tiers.nom|default:"aucun tiers"|escape }}{% endif %}</a>
+                                {{ ope.tiers_virement|escape }}{% endif %}</a>
                     </td>
                     <td class="opTier">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie"|escape }}</a>

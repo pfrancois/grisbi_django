@@ -1,17 +1,28 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
 {% block content %}
     {% if ope %}
-        <table style=" width: 100%;" summary="boutons">
-            <tr class="boutton">
-                <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
-            </tr>
-        </table>
-        {% if not ope.rapp %}
+        {% if ope.is_editable  %}
+            <table style=" width: 100%;" summary="boutons">
+                <tr class="boutton">
+                    <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+                    <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour vers le compte {{ ope.compte.nom }}</a></td>
+                </tr>
+            </table>
+
+            <form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
+                {% csrf_token %}
+            </form>
             <table style=" width: 100%;" summary="bouton effacer">
                 <tr class="boutton">
                     <td width="100%">
+
                         <a href="javascript:document.forms['form2'].submit();">supprimer l'op&eacute;ration</a></td>
+                </tr>
+            </table>
+        {% else %}
+            <table style=" width: 100%;" summary="boutons">
+                <tr class="boutton">
+                    <td width="100%"><a href="{{ ope.compte.get_absolute_url }}">retour vers le compte {{ ope.compte.nom }}</a></td>
                 </tr>
             </table>
         {% endif %}
@@ -44,32 +55,42 @@
         </fieldset>
     </form>
     {% if ope %}
+        {% if ope.is_editable  %}
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
                 <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
                 <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">Annuler</a></td>
             </tr>
         </table>
+
         <form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
             {% csrf_token %}
         </form>
-        {% if not ope.rapp %}
+
+
             <table style=" width: 100%;" summary="bouton effacer">
                 <tr class="boutton">
                     <td width="100%">
+
                         <a href="javascript:document.forms['form2'].submit();">supprimer l'op&eacute;ration</a></td>
                 </tr>
             </table>
-        {% endif %}
+        {% else %}
+            <table style=" width: 100%;" summary="boutons">
+                <tr class="boutton">
+                    <td width="100%"><a href="{{ ope.compte.get_absolute_url }}">retour vers le compte {{ ope.compte.nom }}</a></td>
+                </tr>
+            </table>
+         {% endif %}
     {% else %}
         <table style=" width: 100%;" summary="boutons">
             <tr class="boutton">
                 {% if cpt %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
+                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour vers le compte {{ ope.compte.nom }}</a></td>
                 {% else %}
                     <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url 'index' %}">Annuler</a></td>
+                    <td width="50%"><a href="{% url 'index' %}">retour vers le compte {{ ope.compte.nom }}</a></td>
                 {% endif %}
             </tr>
         </table>

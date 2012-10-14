@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte,Virement
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
@@ -237,7 +237,9 @@ class Ib_admin(Modeladmin_perso):
 
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
+    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a',
+               'action_supprimer_pointe', 'action_transformer_pointee_rapp',
+               'action_ajustement_cb']
     fields = (
         'nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
@@ -262,21 +264,16 @@ class Compte_admin(Modeladmin_perso):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         rapp_ = forms.ModelChoiceField(Rapp.objects.all(), required=False)
         date = forms.DateField(label="date du rapprochement")
-
     def action_transformer_pointee_rapp(self, request, queryset):
-        if queryset.count() > 1:
-            messages.error(request, u"attention, vous ne pouvez choisir qu'un seul compte")
-            return HttpResponseRedirect(request.get_full_path())
-        compte = queryset[0]
         form = None
-        query_ope = compte.ope_set.filter(pointe=True).order_by('-date')
+        query_ope = Ope.objects.filter(pointe=True,compte__in=queryset).order_by('-date')
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
                 rapp = form.cleaned_data['rapp_']
                 if not rapp:
                     rapp_date = form.cleaned_data['date'].year
-                    last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte=compte).distinct()
+                    last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte__in=queryset).distinct()
                     if last.exists():
                         last = last.latest('date')
                         rapp_id = int(last.nom[-2:]) + 1
@@ -407,7 +404,6 @@ class Ope_admin(Modeladmin_perso):
     mul.short_description = u"Multiplier le montant des opérations selectionnnés par -1"
 
     def action_supprimer_pointe(self, request, queryset):
-        #liste_id = queryset.values_list('id', flat=True)
         try:
             queryset.update(pointe=False)
             messages.success(request, u'suppression des statuts "pointé" des opérations selectionnées')
@@ -415,6 +411,7 @@ class Ope_admin(Modeladmin_perso):
             messages.error(request, unicode(err))
 
     action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
+
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
@@ -436,17 +433,6 @@ class Ope_admin(Modeladmin_perso):
                 return super(Ope_admin, self).delete_view(request, object_id, extra_context)
             except IntegrityError, excp:
                 messages.error(request, excp)
-
-    def tiers_virement(self, obj):
-        try:
-            if obj.jumelle_id:
-                return u"virement vers %s " % obj.jumelle.compte.nom
-            else:
-                return u"%s" % obj.tiers.nom
-        except Moyen.DoesNotExist:
-            return u"inconnu"
-
-    tiers_virement.short_description = "Tiers"
 
 
 class Cours_admin(Modeladmin_perso):

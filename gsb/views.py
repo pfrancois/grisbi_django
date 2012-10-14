@@ -293,10 +293,10 @@ def ope_detail(request, pk):
         )
     #--------ope normale----------
     else:#sinon c'est une operation normale
-        if ope.filles_set.all().count() > 0: #c'est une ope mere
-            messages.error(request, u"attention cette operation n'est pas éditable car c'est une ope mere.")
-            http.HttpResponseRedirect(ope.compte.get_absolute_url())
         if request.method == 'POST':
+            if ope.filles_set.all().count() > 0: #c'est une ope mere
+                messages.error(request, u"attention cette operation n'est pas éditable car c'est une ope mere.")
+                http.HttpResponseRedirect(ope.compte.get_absolute_url())
             form = gsb_forms.OperationForm(request.POST, instance=ope)
             if form.is_valid():
                 if not form.cleaned_data['tiers']:
