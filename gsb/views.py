@@ -276,7 +276,7 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
-                    return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
+                    return http.HttpResponseRedirect(ope.compte.get_absolute_url())
                 else:
                     if ope.rapp:
                         compte = ope.compte
@@ -394,7 +394,7 @@ def vir_new(request, cpt_id=None):
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (
             ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date))
-            return http.HttpResponseRedirect(ope.jumelle.compte.get_absolute_url())
+            return http.HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
             return render(request, 'gsb/vir.djhtm',
                           {'titre_long': u'création virement interne ',
