@@ -9,7 +9,7 @@ from django.http import HttpResponse
 #pour les vues
 #from django.db import models
 #from django.contrib import messages
-from .export_base import ExportViewBase, Exportform_ope
+from .export_base import ExportViewBase, Exportform_ope, Writer_base
 from django.core.exceptions import ObjectDoesNotExist
 #django
 from .models import Cat, Ib, Compte, Ope
@@ -27,7 +27,7 @@ def convert_type2qif(type_a_transformer):
         return "Oth L"
 
 
-class QifWriter(object):
+class QifWriter(Writer_base):
     """
     A pseudofile which will write rows to file "f",
     which is encoded in the given encoding.
@@ -39,12 +39,10 @@ class QifWriter(object):
         self.queue = cStringIO.StringIO()
         self.stream = fich
         self.encoding = encoding
-        self.enregistrement = ""
 
     def writerow(self, row):
         """ecrit une ligne"""
         chaine = unicode(row).encode("utf-8")
-        self.enregistrement = "%s\n%s" % (self.enregistrement, chaine)
         self.queue.write(chaine)
         self.queue.write("\n")
         # Fetch UTF-8 output from the queue ...
@@ -69,18 +67,6 @@ class QifWriter(object):
         """ecrit la fin de l'enregistrement"""
         self.writerow("^")
         self.enregistrement = ""
-
-    def writerows(self, rows):
-        """ecrit plusieurs lignes"""
-        for row in rows:
-            self.writerow(row)
-
-    def debug(self, all=False):
-        if not all:
-            print self.enregistrement
-        else:
-            print self.stream.getvalue()
-
 
 def cat_export(ope):
     """

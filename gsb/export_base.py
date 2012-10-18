@@ -39,7 +39,50 @@ class UTF8Recoder:
         return self.reader.next().encode("utf-8")
 
 
-class UnicodeReader:
+class Reader_base(object):
+    reader=None
+    def __init__(self):
+        raise NotImplementedError("il faut initialiser")
+    def next(self):
+        if self.reader==None:
+            raise NotImplementedError("il faut initialiser self.reader")
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
+
+    def __iter__(self):
+        return self
+
+class Writer_base(object):
+    writer=None
+    stream=None
+    Encoder=None
+    def __init__(self, encoding="utf-8", fich=None, **kwds):
+        self.queue = cStringIO.StringIO()
+        self.encoder = codecs.getincrementalencoder(encoding)()
+        if fich is not None:
+            self.stream = fich
+        else:
+            self.stream = cStringIO.StringIO()
+            # Force BOM
+        #        if encoding=="utf-16":
+        #            f.write(codecs.BOM_UTF16)
+            self.encoding = encoding
+
+    def writerow(self,row):
+        raise NotImplementedError("il faut initialiser")
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+    def getvalue(self, close=True):
+        reponse = self.stream.getvalue()
+        if close:
+            self.close()
+        return reponse
+
+    def close(self):
+        self.stream.close()
+
+class Csv_unicode_reader(Reader_base):
     """
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
@@ -49,15 +92,7 @@ class UnicodeReader:
         fich = UTF8Recoder(fich, encoding)
         self.reader = csv.reader(fich, dialect=dialect, **kwds)
 
-    def next(self):
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
-
-    def __iter__(self):
-        return self
-
-
-class UnicodeWriter:
+class Csv_unicode_writer(Writer_base):
     """
     A CSV writer which will write rows to CSV file "f",
     which is encoded in the given encoding.
@@ -65,17 +100,8 @@ class UnicodeWriter:
 
     def __init__(self, encoding="utf-8", fich=None, dialect=Excel_csv, **kwds):
         # Redirect output to a queue
-        self.queue = cStringIO.StringIO()
+        super(Csv_unicode_writer,self).__init__()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
-        self.encoder = codecs.getincrementalencoder(encoding)()
-        if fich is not None:
-            self.stream = fich
-        else:
-            self.stream = cStringIO.StringIO()
-            # Force BOM
-        #        if encoding=="utf-16":
-        #            f.write(codecs.BOM_UTF16)
-        self.encoding = encoding
 
     def writerow(self, row):
         self.writer.writerow([unicode(s).encode("utf-8") for s in row])
@@ -90,21 +116,9 @@ class UnicodeWriter:
         # write to the target stream
         self.stream.write(data)
         # empty queue
-
         self.queue.truncate(0)
 
-    def writerows(self, rows):
-        for row in rows:
-            self.writerow(row)
 
-    def getvalue(self, close=True):
-        reponse = self.stream.getvalue()
-        if close:
-            self.close()
-        return reponse
-
-    def close(self):
-        self.stream.close()
 
 
 class Exportform_ope(gsb_forms.Baseform):
