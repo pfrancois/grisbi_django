@@ -7,15 +7,17 @@ Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
 from .test_base import TestCase as Tcd
-from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte,\
+from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, \
     Cat, Ib, Exercice, Moyen, Rapp
 from ..import_gsb import import_gsb_050, Import_exception
-import decimal, datetime #@Reimport
+import decimal
+import datetime
 from django.db import models
 from operator import attrgetter
 from django.conf import settings
 import os.path
 import logging
+
 
 class importtests(Tcd):
     def test_mauvais_format(self):
@@ -31,11 +33,11 @@ class importposttests(Tcd):
     def setUp(self):
         logger = logging.getLogger('gsb')
         super(importposttests, self).setUp()
-        logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
+        logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
               date=datetime.date(day=1, month=1, year=2010)).save()
-        logger.setLevel(30)#change le niveau de log (10 = debug, 20=info)
+        logger.setLevel(30)  # change le niveau de log (10 = debug, 20=info)
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)

@@ -15,6 +15,7 @@ import mock
 import datetime
 import logging
 
+
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
 
@@ -24,6 +25,9 @@ class Test_view_base(TestCase):
 
 
 class Test_urls(Test_view_base):
+    def test_import(self):
+        self.assertEqual(self.client.get('/import_csv').status_code, 200)
+
     def test_404(self):
         self.assertEqual(self.client.get('/ope/2200/').status_code, 404)
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
@@ -51,7 +55,7 @@ class Test_urls(Test_view_base):
 
     def test_normaux3(self):
         self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
-        self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1,))).status_code, 200)
+        self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1, ))).status_code, 200)
         self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
         self.assertEqual(self.client.get('/ope/new').status_code, 200)
         self.assertEqual(self.client.get('/vir/new').status_code, 200)
@@ -77,11 +81,11 @@ class Test_urls(Test_view_base):
 class Test_export(Test_view_base):
     def test_csv1(self):
         logger = logging.getLogger('gsb')
-        logger.setLevel(40)#change le niveau de log (10 = debug, 20=info)
+        logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
         self.assertEqual(rep.content,
-                         'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;0;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;0;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;1;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;0;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;0;0;moyen_rec1;(d)Op\xc3\xa9ration Ventil\xc3\xa9e;tiers2;;;;;0;;2012_09\r\n')
+                         'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;0;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;0;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;1;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;0;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;0;0;moyen_rec1;(d)Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;2012_09\r\n')
         #erreur
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 2, "date_min": "2011-01-01", "date_max": "2011-02-01"})
@@ -102,7 +106,7 @@ class Test_views_general(Test_view_base):
         #@mock.patch('gsb.utils.today')
     def test_view_cpt_detail(self):
         #today_mock.return_value=datetime.date(2012, 10, 14)
-        resp = self.client.get(reverse('gsb_cpt_detail', args=(1,)))
+        resp = self.client.get(reverse('gsb_cpt_detail', args=(1, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -115,7 +119,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [6, 7, 8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
-        resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
+        resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -128,7 +132,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [4, 5])
 
     def test_view_cpt_detail_all(self):
-        resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1,)))
+        resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -141,7 +145,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [4, 5, 6, 7, 8, 12, 13])
 
     def test_view_cpt_espece(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5,)))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['compte'].id, 5)
@@ -154,7 +158,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [2, ])
 
     def test_view_cpt_especes_all(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5,)))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Ensemble des opérations)')
@@ -168,7 +172,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [2, 3])
 
     def test_view_cpt_especes_rapp(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5,)))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5, )))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Opérations rapprochées)')

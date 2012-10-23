@@ -17,6 +17,7 @@ from django.core import exceptions as django_exceptions
 from django.views.generic import TemplateView, RedirectView
 from django.utils.decorators import method_decorator
 
+
 def has_changed(instance, field):
     if not instance.pk:
         return False
@@ -118,15 +119,15 @@ class Cpt_detail_view(Mytemplateview):
             self.type = "all"
         if self.rapp:
             self.type = "rapp"
-        if compte.type != 't' and self.cpt_titre_espece == True:#onredirige vers la vue standart
-            url = reverse("gsb_cpt_detail", args=(cpt_id,))
+        if compte.type != 't' and self.cpt_titre_espece == True:  # onredirige vers la vue standart
+            url = reverse("gsb_cpt_detail", args=(cpt_id, ))
             print url
             if self.rapp:
-                url = reverse("gsb_cpt_detail_%s" % 'rapp', args=(cpt_id,))
+                url = reverse("gsb_cpt_detail_%s" % 'rapp', args=(cpt_id, ))
             if self.all:
-                url = reverse("gsb_cpt_detail_%s" % 'all', args=(cpt_id,))
+                url = reverse("gsb_cpt_detail_%s" % 'all', args=(cpt_id, ))
             return http.HttpResponsePermanentRedirect(url)
-        if compte.type not in ('t',) or self.cpt_titre_espece == True:
+        if compte.type not in ('t', ) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             self.espece = True
@@ -180,8 +181,8 @@ class Cpt_detail_view(Mytemplateview):
     def cpt_espece_tri(self, request, q):
         """gestion du tri"""
         try:
-            sort = request.GET.get('sort')  #il y a un sort dans le get
-        except (ValueError, TypeError):  #non donc on regarde dans l'historique
+            sort = request.GET.get('sort')  # il y a un sort dans le get
+        except (ValueError, TypeError):  # non donc on regarde dans l'historique
             sort = False
             if request.session.key('sort', False):
                 sort = request.session.key('sort', False)
@@ -270,7 +271,7 @@ def ope_detail(request, pk):
         #------un virement--------------
         if ope.montant > 0:
             ope = ope.jumelle
-        if request.method == 'POST':#creation du virement
+        if request.method == 'POST':  # creation du virement
             form = gsb_forms.VirementForm(data=request.POST, ope=ope)
             if form.is_valid():
                 if not ope.rapp and not ope.jumelle.rapp:
@@ -292,9 +293,9 @@ def ope_detail(request, pk):
                        'ope': ope}
         )
     #--------ope normale----------
-    else:#sinon c'est une operation normale
+    else:  # sinon c'est une operation normale
         if request.method == 'POST':
-            if ope.filles_set.all().count() > 0: #c'est une ope mere
+            if ope.filles_set.all().count() > 0:  # c'est une ope mere
                 messages.error(request, u"attention cette operation n'est pas éditable car c'est une ope mere.")
                 http.HttpResponseRedirect(ope.compte.get_absolute_url())
             form = gsb_forms.OperationForm(request.POST, instance=ope)
@@ -601,11 +602,11 @@ def ope_titre_achat(request, cpt_id):
     try:
         titre_id = request.session['titre']
         titre = Titre.objects.get(id=titre_id)
-    except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+    except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
         messages.error(request, u"attention le titre demandé intialement n'existe pas")
         titre_id = None
         titre = None
-    except KeyError:#on est dans le cas où l'on viens d'une page sans titre defini
+    except KeyError:  # on est dans le cas où l'on viens d'une page sans titre defini
         titre_id = None
         titre = None
 
@@ -659,11 +660,11 @@ def ope_titre_vente(request, cpt_id):
     try:
         titre_id = request.session['titre']
         titre = Titre.objects.get(id=titre_id)
-    except Titre.DoesNotExist:#on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+    except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
         messages.error(request, u"attention le titre demandé intialement n'existe pas")
         titre_id = None
         titre = None
-    except AttributeError:#on est dans le cas où l'on viens d'une page sans titre defini
+    except AttributeError:  # on est dans le cas où l'on viens d'une page sans titre defini
         titre_id = None
         titre = None
 
@@ -732,7 +733,7 @@ def view_maj_cpt_titre(request, cpt_id):
                     else:
                         cpt.achat(titre_en_cours, nb, cours, date=form.cleaned_data['date'])
                 else:
-                    if not Cours.objects.filter(date=form.cleaned_data['date'], titre=titre_en_cours).exists() and\
+                    if not Cours.objects.filter(date=form.cleaned_data['date'], titre=titre_en_cours).exists() and \
                        cours:
                         Cours.objects.create(date=form.cleaned_data['date'], titre=titre_en_cours, valeur=cours)
 

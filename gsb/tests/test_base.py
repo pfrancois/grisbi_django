@@ -4,6 +4,7 @@ from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
 import logging
 
+
 @override_settings(ID_CPT_M=1)
 @override_settings(MD_CREDIT=1)
 @override_settings(MD_DEBIT=1)

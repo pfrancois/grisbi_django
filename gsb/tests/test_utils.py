@@ -69,7 +69,6 @@ class Test_utils(TestCase):
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
         self.assertRaises(ValueError, utils.strpdate, "2011-12-52")
 
-
     def test_add_month(self):
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1), datetime.date(2011, 03, 15))
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, first=True), datetime.date(2011, 03, 01))

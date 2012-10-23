@@ -10,9 +10,7 @@ greater than and less than operators. Some common case examples::
 from __future__ import absolute_import
 from django import template
 
-
 register = template.Library()
-
 
 #===============================================================================
 # Calculation objects
@@ -97,6 +95,7 @@ OPERATORS = {
     'in': (In, True),
 }
 
+
 class IfParser(object):
     error_class = ValueError
 
@@ -156,7 +155,6 @@ class IfParser(object):
             token = self.get_token()
             return Or(self.create_var(token), negate=True)
         return self.create_var(token)
-
 
 #===============================================================================
 # Actual templatetag code.
@@ -228,7 +226,7 @@ def smart_if(parser, token):
     nodelist_true = parser.parse(('else', 'endif'))
     token = parser.next_token()
     if token.contents == 'else':
-        nodelist_false = parser.parse(('endif',))
+        nodelist_false = parser.parse(('endif', ))
         parser.delete_first_token()
     else:
         nodelist_false = None

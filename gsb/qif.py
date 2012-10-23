@@ -29,6 +29,7 @@ tiers_perso = (
      "date": True},
     )
 
+
 class qifitem:
     def __init__(self):
         self.order = ['date', 'amount', 'cleared', 'num', 'payee', 'memo', 'address', 'category', 'categoryinsplit',
@@ -68,14 +69,14 @@ def parseqif(infile):
     Parse a qif file and return a list of entries.
     infile should be open file-like object (supporting readline() ).
     """
-    initem = False #@UnusedVariable
+    initem = False  # @UnusedVariable
     items = []
     current_item = qifitem()
     line = infile.readline()
     while line != '':
-        if line[0] == '\n': # blank line
+        if line[0] == '\n':  # blank line
             pass
-        elif line[0] == '^': # end of item
+        elif line[0] == '^':  # end of item
             # save the item
             items.append(current_item)
             current_item = qifitem()
@@ -86,10 +87,10 @@ def parseqif(infile):
         elif line[0] == 'C':
             current_item.cleared = line[1:-1]
         elif line[0] == 'P':
-            pass#on n'en a pas besoin
+            pass  # on n'en a pas besoin
         elif line[0] == 'M':
             current_item.payee = line[1:-1]
-        elif line[0] == 'A':#inutile mais bon
+        elif line[0] == 'A':  # inutile mais bon
             current_item.address = line[1:-1]
         elif line[0] == 'L':
             current_item.category = line[1:-1]

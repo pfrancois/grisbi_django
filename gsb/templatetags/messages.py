@@ -2,6 +2,7 @@ from django import template
 
 register = template.Library()
 
+
 class MessagesNode(template.Node):
     """ Outputs grouped Django Messages Framework messages in separate
         lists sorted by level. """

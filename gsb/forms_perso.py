@@ -22,6 +22,7 @@ urlpatterns = patterns('gsb.forms_perso',
                        url(r'^search$', 'search_opes', name='g_search_ope'),
 )
 
+
 #---------------les fields, widgets  et forms tres perso
 class SearchField(gsb_forms.Baseform):
     compte = forms.ModelChoiceField(Compte.objects.all(), required=False)

@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 ERROR_CSS_CLASS = ''
 REQUIRED_CSS_CLASS = 'required'
 
+
 class Baseform(forms.Form):
     #error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
@@ -53,7 +54,7 @@ class OperationForm(Basemodelform):
 
     class Meta:
         model = Ope
-        exclude = ('jumelle', 'mere')#car sinon c'est un virement
+        exclude = ('jumelle', 'mere')  # car sinon c'est un virement
 
     def __init__(self, *args, **kwargs):
         super(OperationForm, self).__init__(*args, **kwargs)
@@ -85,6 +86,7 @@ class VirementForm(Baseform):
     montant = gsb_field.CurField()
     notes = forms.CharField(widget=forms.Textarea, required=False)
     pointe = forms.BooleanField(required=False)
+
     #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
     #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
     #piece_comptable_compte_origine = forms.CharField(required = False)
@@ -232,4 +234,3 @@ class SearchForm(Baseform):
     compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
     date_min = forms.DateField(label='date_min', widget=forms.DateInput)
     date_max = forms.DateField(label='date_max', widget=forms.DateInput)
-

@@ -6,7 +6,6 @@ from ..templatetags.smart_if import *
 # Tests
 #===============================================================================
 
-
 class Test_SmartIf(TestCase):
     def setUp(self):
         super(Test_SmartIf, self).setUp()

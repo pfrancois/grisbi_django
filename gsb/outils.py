@@ -12,13 +12,16 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render_to_response
 from .import forms as gsb_forms
-import logging, os, time
+import logging
+import os
+import time
 from .models import Echeance
 from django.contrib.auth.decorators import login_required
 from .import_gsb import import_gsb_050
 from django.contrib import messages
 from .views import Mytemplateview, Myredirectview
 from .models import Compte, Cat, Tiers, Moyen, Echeance
+
 
 @login_required
 def import_file(request):
@@ -54,7 +57,7 @@ def import_file(request):
                     try:
                         info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
                     except KeyError:
-                        info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss") )
+                        info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
                         #-----------------------gestion des imports
                     try:
                         nomfich = request.session['nomfich']
@@ -141,7 +144,7 @@ def verif_config(request):
 
     return render_to_response(
         'generic.djhtm',
-        {'resultats': (u"vous trouverez les résultats de la verification de la config",),
+        {'resultats': (u"vous trouverez les résultats de la verification de la config", ),
          'titre_long': "verif config",
          'titre': "verif _config",
         },

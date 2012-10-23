@@ -2,13 +2,12 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
-from .import export_csv, export_qif, views, outils
-
+from .import export_csv, export_qif, views, outils, import_csv
 
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
-                       url(r'^test$', 'test.test')
+                       #url(r'^test$', 'test.test')
 )
 
 #les vues relatives aux outils
@@ -50,6 +49,9 @@ urlpatterns += patterns('gsb',
                             export_csv.Export_cours_csv.as_view(),
                             name='export_cours'
                         ),
+                        url(r'import_csv$',
+                            import_csv.Import_csv_ope.as_view(),
+                            name="import")
 )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),
@@ -113,7 +115,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^perso$', 'perso'),
 )
 #gestion de mes trucs perso
-perso = False# ya plus rien dedans
+perso = False  # ya plus rien dedans
 #form tester
 #if settings.DEBUG and perso:
 #    from gsb.form_tester import SomeModelFormPreview

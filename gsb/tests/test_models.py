@@ -18,6 +18,7 @@ from operator import attrgetter
 import mock
 from django.db import models
 
+
 class Test_models(TestCase):
     fixtures = ['test.json']
 
@@ -110,7 +111,7 @@ class Test_models(TestCase):
     def test_titre_last_cours(self):
         t = Titre.objects.get(nom="t2")
         self.assertEquals(t.last_cours(), 10)
-        self.assertEquals(t.last_cours("2001-01-01"), 0)#pas de cours possible
+        self.assertEquals(t.last_cours("2001-01-01"), 0)  # pas de cours possible
         self.assertEquals(t.last_cours("2011-11-01"), 5)
 
     def test_titre_last_date(self):
@@ -172,7 +173,6 @@ class Test_models(TestCase):
         self.assertEquals(t.investi(compte=c2, datel='2011-07-31'), 0)
         self.assertEquals(t.investi(compte=c2, exclude_id=3), 1500)
 
-
     def test_titre_nb(self):
         #definition initiale
         c1 = Compte_titre.objects.get(id=4)
@@ -189,7 +189,6 @@ class Test_models(TestCase):
         self.assertEquals(t.nb(rapp=True, datel='2011-11-01'), 20)
         self.assertEquals(t.nb(compte=c2, exclude_id=2), 20)
         self.assertEquals(t.nb(rapp=True, compte=c2), 20)
-
 
     def test_titre_encours(self):
         c1 = Compte_titre.objects.get(id=4)
@@ -208,8 +207,6 @@ class Test_models(TestCase):
         self.assertEquals(t2.encours(compte=c1, datel='2010-07-01'), 0)
         self.assertEquals(t2.encours(compte=c2, datel='2011-11-01'), 100)
         self.assertEquals(t2.encours(rapp=True, datel='2011-01-01'), 0)
-
-
     #pas de test specifique pour cours
 
     def test_banque_fusionne(self):
@@ -385,19 +382,18 @@ class Test_models(TestCase):
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom='t1')
         self.assertEqual(t.investi(c), 1)
-        self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-01-01'))#trop tot
+        self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-01-01'))  # trop tot
         self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=40,
-                                                              date='2011-11-02'))#montant trop eleve car entre les deux operations
+                                                              date='2011-11-02'))  # montant trop eleve car entre les deux operations
         self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=2000,
-                                                              date='2011-12-31'))#montant trop eleve car entre les deux operations
+                                                              date='2011-12-31'))  # montant trop eleve car entre les deux operations
         c.vente(titre=t, nombre=1, date='2011-12-25')
         a_test = t.investi(c)
         self.assertEqual(a_test, decimal.Decimal('0'))
         tall = c.liste_titre()
         self.assertEqual(len(tall), 2)
-        self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-12-26'))#a pu de titre
+        self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-12-26'))  # a pu de titre
         self.assertEqual(c.solde(), 0)
-
 
     def test_compte_titre_vente_avec_frais(self):
         #on cree le compte
@@ -411,7 +407,7 @@ class Test_models(TestCase):
         self.assertEqual(c.solde_espece(), -145)
         self.assertEqual(c.solde_titre(), 50)
         self.assertEqual(c.solde(), -95)
-        self.assertEqual(t.investi(c), 120)#attention, on prend le cmup avec les frais
+        self.assertEqual(t.investi(c), 120)  # attention, on prend le cmup avec les frais
         o = Ope.objects.filter(compte=c, date='2011-11-01', notes__icontains='frais')[0]
         self.assertEqual(o.cat_id, 68)
         self.assertEqual(o.montant, -20)
@@ -443,17 +439,17 @@ class Test_models(TestCase):
         self.assertEqual(t.nb(c), 10)
         self.assertEqual(c.solde(), -100)
         self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
-        self.assertEqual(Compte.objects.get(id=1).solde(), -70 + 25)#montant de l'operation
+        self.assertEqual(Compte.objects.get(id=1).solde(), -70 + 25)  # montant de l'operation
 
     def test_compte_titre_revenu_simple(self):
         c = Compte_titre.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
-        self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2011-01-01'))#trop tot
+        self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2011-01-01'))  # trop tot
         c.revenu(titre=t, montant=20, date='2011-12-25')
         self.assertEqual(t.investi(c), -19)
         self.assertEqual(c.solde(), 20)
         c.vente(titre=t, nombre=1, date='2011-12-25')
-        self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2012-01-01'))#a pu
+        self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2012-01-01'))  # a pu
 
     def test_compte_titre_revenu_frais(self):
         c = Compte_titre.objects.get(id=4)
@@ -514,7 +510,7 @@ class Test_models(TestCase):
         Ope_titre.objects.create(titre=t, compte=c, nombre=5, date='2011-01-02', cours=20)
         Ope_titre.objects.get(id=5)
         o2 = Ope_titre.objects.get(id=6)
-        self.assertEqual(o2.ope.montant, -100)#juste verification
+        self.assertEqual(o2.ope.montant, -100)  # juste verification
         self.assertEqual(t.nb(c), 20)
         self.assertEqual(t.investi(c), 250)
         self.assertEqual(t.encours(c), 20 * 20)
@@ -544,7 +540,6 @@ class Test_models(TestCase):
         self.assertEqual(t.investi(c), 350)
         self.assertEqual(t.encours(c), 25 * 20)
 
-
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
@@ -553,11 +548,10 @@ class Test_models(TestCase):
         Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-02', cours=5)
         o = Ope.objects.filter(compte=c).filter(date='2011-01-02')[0]
         self.assertEqual(o.id, 15)
-        self.assertEqual(o.montant, 50)#desinvestissement
+        self.assertEqual(o.montant, 50)  # desinvestissement
         o = Ope.objects.filter(compte=c).filter(date='2011-01-02')[1]
         self.assertEqual(o.id, 16)
-        self.assertEqual(o.montant, -25)#desinvest
-
+        self.assertEqual(o.montant, -25)  # desinvest
 
     def test_ope_titre_save2(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
@@ -849,6 +843,7 @@ class Test_models(TestCase):
         self.assertEquals(tab, v.init_form())
 
 from django.core.exceptions import ImproperlyConfigured
+
 
 class Test_models2(TestCase):
     def test_last_cours_date_special(self):

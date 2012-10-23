@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import csv, cStringIO, codecs
+import csv
+import cStringIO
+import codecs
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -12,85 +14,8 @@ from gsb import forms as gsb_forms
 from django.db import models as models_agg
 from django import forms
 import time
+from gsb.utils import UTF8Recoder, Writer_base, Excel_csv, Writer_base
 
-class Excel_csv(csv.Dialect):
-    """Describe the usual properties of Excel-generated CSV files."""
-    delimiter = ';'
-    quotechar = '"'
-    doublequote = True
-    skipinitialspace = False
-    lineterminator = "\r\n"
-    quoting = csv.QUOTE_MINIMAL
-
-csv.register_dialect("excel_csv", Excel_csv)
-
-class UTF8Recoder:
-    """
-    Iterator that reads an encoded stream and reencodes the input to UTF-8
-    """
-
-    def __init__(self, fich, encoding):
-        self.reader = codecs.getreader(encoding)(fich)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self.reader.next().encode("utf-8")
-
-
-class Reader_base(object):
-    reader=None
-    def __init__(self):
-        raise NotImplementedError("il faut initialiser")
-    def next(self):
-        if self.reader==None:
-            raise NotImplementedError("il faut initialiser self.reader")
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
-
-    def __iter__(self):
-        return self
-
-class Writer_base(object):
-    writer=None
-    stream=None
-    Encoder=None
-    def __init__(self, encoding="utf-8", fich=None, **kwds):
-        self.queue = cStringIO.StringIO()
-        self.encoder = codecs.getincrementalencoder(encoding)()
-        if fich is not None:
-            self.stream = fich
-        else:
-            self.stream = cStringIO.StringIO()
-            # Force BOM
-        #        if encoding=="utf-16":
-        #            f.write(codecs.BOM_UTF16)
-            self.encoding = encoding
-
-    def writerow(self,row):
-        raise NotImplementedError("il faut initialiser")
-    def writerows(self, rows):
-        for row in rows:
-            self.writerow(row)
-    def getvalue(self, close=True):
-        reponse = self.stream.getvalue()
-        if close:
-            self.close()
-        return reponse
-
-    def close(self):
-        self.stream.close()
-
-class Csv_unicode_reader(Reader_base):
-    """
-    A CSV reader which will iterate over lines in the CSV file "f",
-    which is encoded in the given encoding.
-    """
-
-    def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):
-        fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.reader(fich, dialect=dialect, **kwds)
 
 class Csv_unicode_writer(Writer_base):
     """
@@ -100,7 +25,7 @@ class Csv_unicode_writer(Writer_base):
 
     def __init__(self, encoding="utf-8", fich=None, dialect=Excel_csv, **kwds):
         # Redirect output to a queue
-        super(Csv_unicode_writer,self).__init__()
+        super(Csv_unicode_writer, self).__init__(encoding, fich)
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
 
     def writerow(self, row):
@@ -117,8 +42,6 @@ class Csv_unicode_writer(Writer_base):
         self.stream.write(data)
         # empty queue
         self.queue.truncate(0)
-
-
 
 
 class Exportform_ope(gsb_forms.Baseform):
@@ -140,7 +63,7 @@ class Exportform_ope(gsb_forms.Baseform):
         else:
             self.query = self.verif_collec(self.query, ensemble)
 
-        if self.query.count() == 0:#si des operations existent
+        if self.query.count() == 0:  # si des operations existent
             raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
         return data
 
@@ -149,12 +72,12 @@ class Exportform_ope(gsb_forms.Baseform):
 
 
 class ExportViewBase(FormView):
-    template_name = 'gsb/param_export.djhtm'#nom du template
-    model_initial = None#model d'ou on tire les dates initiales
+    template_name = 'gsb/param_export.djhtm'  # nom du template
+    model_initial = None  # model d'ou on tire les dates initiales
     extension_file = None
     nomfich = None
 
-    def export(self, query):
+    def export(self, query):  # pylint: disable=W0613
         """
         fonction principale mais abstraite
         """
@@ -177,8 +100,8 @@ class ExportViewBase(FormView):
 
     def form_valid(self, form):
         """si le form est valid"""
-        reponse = self.export(query=form.query)#comme on a verifier dans le form que c'etait ok
-        debug = False#ce debug permet d'afficher les export
+        reponse = self.export(query=form.query)  # comme on a verifier dans le form que c'etait ok
+        debug = False  # ce debug permet d'afficher les export
         if self.nomfich is None:
             raise django_exceptions.ImproperlyConfigured('nomfich non defini')
         if self.extension_file is None:

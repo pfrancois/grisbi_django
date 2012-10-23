@@ -64,4 +64,3 @@ def dev(symbol=None):
     return symbol
 
 dev.is_safe = True
-

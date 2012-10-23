@@ -22,8 +22,8 @@ ADMINS = (
 #config gsb
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
-ID_CPT_M = 1#cpt principal utlise si l'on ne rentre pas de compte
-AFFICHE_CLOT = False#affiche les comptes clos
+ID_CPT_M = 1  # cpt principal utlise si l'on ne rentre pas de compte
+AFFICHE_CLOT = False  # affiche les comptes clos
 UTILISE_EXERCICES = False
 UTILISE_IB = True
 UTILISE_PC = False
@@ -110,7 +110,7 @@ STATIC_URL = '/static/'
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/' #plus utilise car deprecated
+ADMIN_MEDIA_PREFIX = '/static/admin/'  # plus utilise car deprecated
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -187,7 +187,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     )
 if DJANGO_EXTENSION:
-    INSTALLED_APPS += ('django_extensions',)
+    INSTALLED_APPS += ('django_extensions', )
 
 #noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {

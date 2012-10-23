@@ -5,10 +5,11 @@
 #
 from django.http import HttpResponse
 
-from django.conf import settings #@Reimport
+from django.conf import settings  # @Reimport
 from django.contrib.admin.views.decorators import staff_member_required
 import os
 import gsb.utils as utils
+
 
 def _export():
     #output backup
@@ -20,7 +21,7 @@ def _export():
 
 
 @staff_member_required
-def export_database(request): #@UnusedVariable
+def export_database(request):  # @UnusedVariable
     """
     view pour export en sql
     """

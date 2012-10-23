@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte,Virement
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte, Virement
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
@@ -20,6 +20,7 @@ from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
 from django.utils import timezone
 import datetime
+
 
 ##-------------ici les class generiques------
 class date_perso_filter(DateFieldListFilter):
@@ -124,7 +125,7 @@ def fusion(request, queryset, sens):
                 obj_a)
             obj_b.fusionne(obj_a)
         messages.success(request, message)
-    except Exception as inst:#TODO mieux gerer
+    except Exception as inst:  # TODO mieux gerer
         message = inst.__unicode__()
         messages.error(request, message)
 
@@ -144,6 +145,7 @@ class Modeladmin_perso(admin.ModelAdmin):
         fusion(request, queryset, 'ba')
 
     fusionne_b_dans_a.short_description = u"Fusion de 2 dans 1"
+
     #from here http://djangosnippets.org/snippets/2531/
     def keepfilter(self, request, result):
     # Look at the referer for a query string '^.*\?.*$'
@@ -200,6 +202,7 @@ class liste_perso_inline(admin.TabularInline):
         else:
             return super(liste_perso_inline, self).queryset(request).select_related()
 
+
 ##------------defintiion des classes
 class ope_cat_admin(liste_perso_inline):
     model = Ope
@@ -212,10 +215,10 @@ class ope_cat_admin(liste_perso_inline):
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_editable = ('nom',)
+    list_editable = ('nom', )
     list_display = ('id', 'nom', 'type', 'nb_ope')
-    list_display_links = ('id',)
-    list_filter = ('type',)
+    list_display_links = ('id', )
+    list_filter = ('type', )
     radio_fields = {'type': admin.VERTICAL}
     list_select_related = True
     inlines = [ope_cat_admin]
@@ -228,10 +231,10 @@ class Cat_admin(Modeladmin_perso):
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_editable = ('nom',)
+    list_editable = ('nom', )
     list_display = ('id', 'nom', 'type', 'nb_ope')
-    list_display_links = ('id',)
-    list_filter = ('type',)
+    list_display_links = ('id', )
+    list_filter = ('type', )
     radio_fields = {'type': admin.VERTICAL}
 
 
@@ -264,9 +267,10 @@ class Compte_admin(Modeladmin_perso):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         rapp_ = forms.ModelChoiceField(Rapp.objects.all(), required=False)
         date = forms.DateField(label="date du rapprochement")
+
     def action_transformer_pointee_rapp(self, request, queryset):
         form = None
-        query_ope = Ope.objects.filter(pointe=True,compte__in=queryset).order_by('-date')
+        query_ope = Ope.objects.filter(pointe=True, compte__in=queryset).order_by('-date')
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
@@ -306,14 +310,14 @@ class Compte_admin(Modeladmin_perso):
 class Compte_titre_admin(Modeladmin_perso):
     """compte titre """
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    fields = Compte_admin.fields#on prend comme ca les meme champs
+    fields = Compte_admin.fields  # on prend comme ca les meme champs
     list_display = ('nom', 'solde_titre', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
 
 class ope_fille_admin(liste_perso_inline):
     model = Ope
-    fields = ( 'montant', 'cat', 'ib', 'notes')
+    fields = ('montant', 'cat', 'ib', 'notes')
     fk_name = 'mere'
     related = ('cat', 'ib')
 
@@ -324,7 +328,7 @@ class Ope_admin(Modeladmin_perso):
     'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
     ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    ordering = ('-date',)
+    ordering = ('-date', )
     list_display = ('id', 'compte', 'date', 'montant', 'tiers_virement', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = (
     'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
@@ -362,17 +366,16 @@ class Ope_admin(Modeladmin_perso):
         retourne le lien pour l'operation lié dans le cadre des virements entre comptes
         """
         if obj.jumelle_id:
-            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id,))
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id, ))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
         else:
             return "(aucun-e)"
 
     show_jumelle.short_description = u"Opération jumelle"
 
-
     def show_mere(self, obj):
         if obj.mere_id:
-            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id, ))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.mere))
         else:
             return "(aucun-e)"
@@ -381,7 +384,7 @@ class Ope_admin(Modeladmin_perso):
 
     def oper_titre(self, obj):
         if obj.ope:
-            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id,))
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id, ))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
         else:
             return "(aucun-e)"
@@ -412,7 +415,6 @@ class Ope_admin(Modeladmin_perso):
 
     action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
 
-
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
         #on evite que cela soit une operation rapproche
@@ -438,9 +440,9 @@ class Ope_admin(Modeladmin_perso):
 class Cours_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
-    list_editable = ('valeur',)
+    list_editable = ('valeur', )
     list_filter = ('date', 'titre')
-    ordering = ('-date',)
+    ordering = ('-date', )
 
 
 class Titre_admin(Modeladmin_perso):
@@ -449,14 +451,14 @@ class Titre_admin(Modeladmin_perso):
     list_display = ('nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
-    list_filter = ('type',)
+    list_filter = ('type', )
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
 
     def show_tiers(self, obj):
         if obj.tiers_id:
-            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id,))
+            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id, ))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.tiers))
         else:
             return "(aucun-e)"
@@ -467,7 +469,7 @@ class Titre_admin(Modeladmin_perso):
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_filter = ('type',)
+    list_filter = ('type', )
     fields = ['type', 'nom']
 
     def nb_ope(self, obj):
@@ -489,8 +491,8 @@ class Tiers_admin(Modeladmin_perso):
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_editable = ('nom', 'notes')
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
-    list_display_links = ('id',)
-    list_filter = ('is_titre',)
+    list_display_links = ('id', )
+    list_filter = ('is_titre', )
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
@@ -519,8 +521,8 @@ class Banque_admin(Modeladmin_perso):
 
 class ope_rapp_admin(liste_perso_inline):
     model = Ope
-    fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
-    readonly_fields = ( 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+    fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+    readonly_fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
     related = ('compte', 'tiers', 'moyen', 'cat')
 
@@ -541,12 +543,12 @@ class Exo_admin(Modeladmin_perso):
 class Ope_titre_admin(Modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
     readonly_fields = ('invest', 'show_ope', "show_ope_pmv")
-    list_display_links = ('id',)
-    list_filter = ('date', 'compte', 'titre',)
-    ordering = ('-date',)
+    list_display_links = ('id', )
+    list_filter = ('date', 'compte', 'titre', )
+    ordering = ('-date', )
 
     def show_ope(self, obj):
-        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id, ))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
 
     show_ope.short_description = u"opération"

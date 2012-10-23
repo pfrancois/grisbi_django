@@ -5,4 +5,3 @@ from .test_models import Test_models, Test_models2
 from .test_smart_if import Test_SmartIf
 from .test_utils import Test_utils
 from .test_view import Test_urls, Test_export, Test_views_general, Test_views_ope
-

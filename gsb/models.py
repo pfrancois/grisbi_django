@@ -15,6 +15,7 @@ from django.utils.encoding import smart_unicode
 from .model_field import CurField
 from gsb import utils
 
+
 class Gsb_exc(Exception):
     pass
 
@@ -227,7 +228,7 @@ class Titre(models.Model):
                 if date_r is None:
                     return 0
             else:
-                return 0 #comme pas d'ope, pas d'encours
+                return 0  # comme pas d'ope, pas d'encours
         else:
             if datel:
                 date_r = datel
@@ -242,7 +243,7 @@ class Titre(models.Model):
             nb = self.nb(compte=compte, rapp=rapp, datel=datel)
             return nb * cours
         else:
-            return 0 #comme pas d'ope, pas d'encours
+            return 0  # comme pas d'ope, pas d'encours
 
 
 class Cours(models.Model):
@@ -514,7 +515,6 @@ class Compte(models.Model):
             solde = decimal.Decimal(req['solde']) + decimal.Decimal(self.solde_init)
         return solde
 
-
     solde_rappro.short_description = u"solde rapproché"
 
     def date_rappro(self):
@@ -528,7 +528,7 @@ class Compte(models.Model):
             date_p = o.rapp.date
             return date_p
         else:
-            return None #comme pas de date, pas d'encours
+            return None  # comme pas de date, pas d'encours
 
     date_rappro.short_description = u"date dernier rapp"
 
@@ -558,7 +558,7 @@ class Compte_titre(Compte):
         """
         self.alters_data = True
         if isinstance(titre, Titre):
-            if decimal.Decimal(force_unicode(frais)):  #des frais bancaires existent
+            if decimal.Decimal(force_unicode(frais)):  # des frais bancaires existent
                 if not cat_frais:
                     cat_frais = Cat.objects.get_or_create(nom=u"Frais bancaires:",
                                                           defaults={'nom': u'Frais bancaires:'})[0]
@@ -750,19 +750,18 @@ class Ope_titre(models.Model):
                                editable=False,
                                null=True,
                                on_delete=models.CASCADE,
-                               related_name="ope")#null=true car j'ai des operations sans lien
+                               related_name="ope")  # null=true car j'ai des operations sans lien
     ope_pmv = models.OneToOneField('Ope',
                                    editable=False,
                                    null=True,
                                    on_delete=models.CASCADE,
-                                   related_name="ope_pmv")#null=true cr tt les operation d'achat sont null
+                                   related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null
 
     class Meta:
         db_table = 'gsb_ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opérations titres(compta_matiere)'
         ordering = ['-date']
-
 
     def save(self, *args, **kwargs):
         #definition des cat avec possibilite
@@ -789,12 +788,12 @@ class Ope_titre(models.Model):
         obj.valeur = self.cours
         obj.save()
 
-        if self.nombre >= 0:#on doit separer because gestion des plues ou moins value
+        if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if self.ope_pmv is not None:
-                self.ope_pmv.delete() #comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
+                self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
-            if not self.ope:#il faut creer l'ope sous jacente
+            if not self.ope:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
@@ -804,7 +803,7 @@ class Ope_titre(models.Model):
                                               compte=self.compte,
                 )
 
-            else:#la modifier juste
+            else:  # la modifier juste
                 self.ope.date = self.date
                 self.ope.montant = self.cours * self.nombre * -1
                 self.ope.tiers = self.titre.tiers
@@ -812,17 +811,17 @@ class Ope_titre(models.Model):
                 self.ope.compte = self.compte
                 self.ope.moyen = moyen
                 self.ope.save()
-        else:#c'est une vente
+        else:  # c'est une vente
             #calcul prealable
             #on met des plus car les chiffres sont negatif
-            if self.ope:#ope existe deja, donc il faut faire attention car les montant inv sont faux
+            if self.ope:  # ope existe deja, donc il faut faire attention car les montant inv sont faux
                 inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self.ope.id)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date)
                 #chaine car comme on a des decimal
-            ost = "{0:.2f}".format(( inv_vrai / nb_vrai ) * self.nombre)
+            ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
             #on cree les ope
@@ -875,7 +874,6 @@ class Ope_titre(models.Model):
             if self.ope_pmv.rapp is not None:
                 raise IntegrityError(u"opération jumelle rapprochée")
         super(Ope_titre, self).delete(*args, **kwargs)
-
 
     @models.permalink
     def get_absolute_url(self):
@@ -951,7 +949,7 @@ class Rapp(models.Model):
         return self.nom
 
     @property
-    def compte(self):#petit raccourci mais normalement, c'est bon. on prend le compte de la premiere ope
+    def compte(self):  # petit raccourci mais normalement, c'est bon. on prend le compte de la premiere ope
         if self.ope_set.exists():
             return self.ope_set.all()[0].compte.id
         else:
@@ -1011,7 +1009,7 @@ class Echeance(models.Model):
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True, default='')
     inscription_automatique = models.BooleanField(default=False,
-                                                  help_text=u"inutile")#tt les echeances sont automatiques
+                                                  help_text=u"inutile")  # tt les echeances sont automatiques
 
     class Meta:
         db_table = 'gsb_echeance'
@@ -1031,7 +1029,7 @@ class Echeance(models.Model):
         calcul la prochaine date d'echeance
         renvoie None si pas de prochaine date
         """
-        if not self.valide:#si c'est plus en fonction pas besoin de calcul complemnetaire
+        if not self.valide:  # si c'est plus en fonction pas besoin de calcul complemnetaire
             return None
         initial = self.date
         if self.periodicite == 'u':
@@ -1138,7 +1136,6 @@ class Ope(models.Model):
                                       help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
 
-
     class Meta:
         db_table = 'gsb_ope'
         get_latest_by = 'date'
@@ -1197,7 +1194,7 @@ class Ope(models.Model):
 
     @property
     def is_mere(self):
-        return self.filles_set.count() > 0 and self.id > 1 # on rajouter and self.id >1 afin de pouvoir creer une mere
+        return self.filles_set.count() > 0 and self.id > 1  # on rajouter and self.id >1 afin de pouvoir creer une mere
 
     @property
     def is_fille(self):
@@ -1218,10 +1215,11 @@ class Ope(models.Model):
             return True
         else:
             return False
+
     def tiers_virement(self):
         try:
             if self.jumelle_id:
-                if self.montant <0:
+                if self.montant < 0:
                     return u"virement vers %s " % self.jumelle.compte.nom
                 else:
                     return u"virement de %s " % self.jumelle.compte.nom
@@ -1231,14 +1229,16 @@ class Ope(models.Model):
             return u"inconnu"
 
     tiers_virement.short_description = "Tiers"
+
     def is_editable(self):
-        if self.is_mere or self.rapp or self.compte.ouvert==False:
+        if self.is_mere or self.rapp or self.compte.ouvert == False:
             if self.jumelle:
                 if self.jumelle.rapp:
                     return False
             return False
         else:
             return True
+
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""
@@ -1423,7 +1423,7 @@ def verif_ope_save(sender, **kwargs):
         if instance.montant != instance.tot_fille:
             if instance.rapp or instance.pointe:
                 raise IntegrityError(
-                    u"attention opération ( %s ) est pointée ou rapproché et on change le montant global"%instance.id)
+                    u"attention opération ( %s ) est pointée ou rapproché et on change le montant global" % instance.id)
             else:
                 instance.montant = instance.tot_fille
     if not instance.moyen:

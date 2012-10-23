@@ -9,15 +9,16 @@ import gsb.utils as utils
 
 input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 
+
 class Dategsbwidget(forms.DateInput):
     """ widget de gestion des dates simple marche sur n95
     """
 
     class Media:
-        js = ("js/basiccalendar.js",)
-        css = {'all': ('css/calendar.css',)}
+        js = ("js/basiccalendar.js", )
+        css = {'all': ('css/calendar.css', )}
 
-    def __init__(self, attrs=None): #@UnusedVariable
+    def __init__(self, attrs=None):  # @UnusedVariable
         super(Dategsbwidget, self).__init__(attrs)
 
     def render(self, name, value, attrs=None):
@@ -102,7 +103,7 @@ class Readonlywidget(forms.Widget):
 class ReadonlyField(forms.FileField):
     widget = Readonlywidget
 
-    def __init__(self, instance=None, attr=None, *args, **kwargs): #@UnusedVariable
+    def __init__(self, instance=None, attr=None, *args, **kwargs):  # @UnusedVariable
         self.attr = attr
         forms.Field.__init__(self, *args, **kwargs)
         if instance and instance.id:

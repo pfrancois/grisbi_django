@@ -5,6 +5,7 @@ import sys
 import django_coverage.coverage_runner as runner
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     """
     We totally want to get coverage details, but that's so slow!

@@ -4,12 +4,15 @@ from datetime import date
 from time import  mktime
 from django import forms
 import decimal
+
+
 #definition d'un moneyfield
 class CurField(models.DecimalField):
     """
     un champ decimal mais defini pour les monnaies
     """
     description = u"A Monetary value"
+
     # __metaclass__ = models.SubfieldBase # ca marche pas chez always data
     def __init__(self, verbose_name=None, name=None, max_digits=15, decimal_places=2, default=0.00,
                  **kwargs):
@@ -34,7 +37,7 @@ class UnixTimestampField(models.DateTimeField):
         # default for TIMESTAMP is NOT NULL unlike most fields, so we have to
         # cheat a little:
         self.blank, self.isnull = blank, null
-        self.null = True # To prevent the framework from shoving in "not null".
+        self.null = True  # To prevent the framework from shoving in "not null".
         self.editable = False
 
     def db_type(self, connection):

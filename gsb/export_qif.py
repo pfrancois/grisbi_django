@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from .utils import Format as fmt
 import cStringIO
 
-
 #pour les vues
 from django.http import HttpResponse
 #pour les vues
@@ -13,6 +12,7 @@ from .export_base import ExportViewBase, Exportform_ope, Writer_base
 from django.core.exceptions import ObjectDoesNotExist
 #django
 from .models import Cat, Ib, Compte, Ope
+
 
 def convert_type2qif(type_a_transformer):
     if type_a_transformer == "b":
@@ -68,27 +68,28 @@ class QifWriter(Writer_base):
         self.writerow("^")
         self.enregistrement = ""
 
+
 def cat_export(ope):
     """
     renvoie la categorie au format qif adequat avec la gestion des ib
     @param ope:
     @return:
     """
-    if not ope.jumelle:#dans ce cas la c'est une operation normale
+    if not ope.jumelle:  # dans ce cas la c'est une operation normale
         try:
-            cat_g = fmt.str(ope.cat, "", "nom")#recupere la cat de l'operation
+            cat_g = fmt.str(ope.cat, "", "nom")  # recupere la cat de l'operation
         except ObjectDoesNotExist:
             cat_g = "inconnu"
         ib = None
-        if bool(ope.ib):#gestion de l'ib
+        if bool(ope.ib):  # gestion de l'ib
             try:
                 ib = fmt.str(ope.ib, "", "nom")
             except ObjectDoesNotExist:
                 ib = None
         if ib is not None:
-            return u"/".join([cat_g, ib]) #s ib on a une cat de la forme cat/ib
+            return u"/".join([cat_g, ib])  # s ib on a une cat de la forme cat/ib
         else:
-            return u"%s" % cat_g#sinon c'est cat
+            return u"%s" % cat_g  # sinon c'est cat
     else:
         return u"[%s]" % ope.jumelle.compte.nom
 
@@ -172,7 +173,7 @@ class Export_qif(ExportViewBase):
             else:
                 qif.w('N', "")
                 #cleared status
-            qif.w("M", ope.notes)#TODO verifier si split
+            qif.w("M", ope.notes)  # TODO verifier si split
             if ope.rapp is None:
                 if ope.pointe:
                     cleared_status = "*"
@@ -186,7 +187,7 @@ class Export_qif(ExportViewBase):
             #gestion des splits
             if mere:
                 for fille in ope.filles_set.all():
-                    qif.w("S", "%s" % cat_export(fille))#on cree une nouvelle categorie a au besoin
+                    qif.w("S", "%s" % cat_export(fille))  # on cree une nouvelle categorie a au besoin
                     qif.w("E", "%s" % fille.notes)
                     qif.w('$', fille.montant)
             qif.end_record()

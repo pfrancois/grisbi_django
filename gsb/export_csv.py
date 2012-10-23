@@ -14,6 +14,7 @@ import gsb.export_base as ex
 
 from django.core import exceptions as django_exceptions
 
+
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
 
@@ -26,7 +27,7 @@ class Export_view_csv_base(ex.ExportViewBase):
         else:
             reponse = HttpResponse(csv_file.getvalue(), content_type='text/csv')
             reponse["Cache-Control"] = "no-cache, must-revalidate"
-            reponse['Pragma']="public"
+            reponse['Pragma'] = "public"
             reponse["Content-Disposition"] = "attachment; filename=%s_%s.csv" % (nomfich,
                                                                      time.strftime("%d_%m_%Y-%H_%M_%S",
                                                                                    time.localtime()
@@ -34,7 +35,6 @@ class Export_view_csv_base(ex.ExportViewBase):
                     )
 
         return reponse
-
 
 
 class Export_ope_csv(Export_view_csv_base):
@@ -51,7 +51,7 @@ class Export_ope_csv(Export_view_csv_base):
                 u'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois'.split(
                     ';')), ]
         query = query.order_by('date').filter(mere__isnull=True).select_related('cat', "compte", "tiers",
-                                                                                "ib")#on enleve les ope mere
+                                                                                "ib")  # on enleve les ope mere
         for ope in query:
             #id compte date montant
             ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
@@ -91,7 +91,7 @@ class Export_ope_csv(Export_view_csv_base):
             ligne.append(ope.date.strftime('%Y_%m'))
             data.append(ligne)
         logger.info('export ope csv')
-        return self.export_csv_view(data=data,debug=True)
+        return self.export_csv_view(data=data, debug=True)
 
 
 class Exportform_cours(ex.Exportform_ope):
