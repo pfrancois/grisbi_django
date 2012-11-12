@@ -65,3 +65,41 @@ class UnixTimestampField(models.DateTimeField):
         defaults = {'form_class': forms.DateTimeField}
         defaults.update(kwargs)
         return super(UnixTimestampField, self).formfield(**kwargs)
+
+class ExtFileField(forms.FileField):
+    """
+    http://djangosnippets.org/snippets/977/
+    Same as forms.FileField, but you can specify a file extension whitelist.
+
+    >>> from django.core.files.uploadedfile import SimpleUploadedFile
+    >>>
+    >>> t = ExtFileField(ext_whitelist=(".pdf", ".txt"))
+    >>>
+    >>> t.clean(SimpleUploadedFile('filename.pdf', 'Some File Content'))
+    >>> t.clean(SimpleUploadedFile('filename.txt', 'Some File Content'))
+    >>>
+    >>> t.clean(SimpleUploadedFile('filename.exe', 'Some File Content'))
+    Traceback (most recent call last):
+    ...
+    ValidationError: [u'Not allowed filetype!']
+    """
+    def __init__(self, *args, **kwargs):
+        ext_whitelist = kwargs.pop("ext_whitelist")
+        self.ext_whitelist = [i.lower() for i in ext_whitelist]
+
+        super(ExtFileField, self).__init__(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        if data is None:
+            if self.required:
+                raise ValidationError("This file is required")
+            else:
+                return
+        else:
+            filename = data.name
+            ext = os.path.splitext(filename)[1]
+            ext = ext.lower()
+            if ext not in self.ext_whitelist:
+                file_types = ", ".join([i for i in self.ext_whitelist])
+                error = "Only allowed file types are: %s" % file_types
+                raise forms.ValidationError(error)

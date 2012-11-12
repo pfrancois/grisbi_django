@@ -4,13 +4,14 @@ import datetime
 import time
 import decimal
 import calendar
-from django.db.models import Max
-from django.core.exceptions import ObjectDoesNotExist
 import csv
 import cStringIO
 import codecs
 
-
+from django.db.models import Max
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.decorators import method_decorator
+from django.db import transaction
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
 
@@ -213,57 +214,3 @@ class Excel_csv(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 csv.register_dialect("excel_csv", Excel_csv)
-
-
-class Reader_base(object):
-    reader = None
-
-    def __init__(self):
-        raise NotImplementedError("il faut initialiser")
-
-    def next(self):
-        if self.reader == None:
-            raise NotImplementedError("il faut initialiser self.reader")
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
-
-    def __iter__(self):
-        return self
-
-
-class Writer_base(object):
-    writer = None
-    stream = None
-    Encoder = None
-
-    def __init__(self, encoding="utf-8", fich=None, **kwds):
-        self.queue = cStringIO.StringIO()
-        self.encoder = codecs.getincrementalencoder(encoding)()
-        if fich is not None:
-            self.stream = fich
-        else:
-            self.stream = cStringIO.StringIO()
-            # Force BOM
-        #        if encoding=="utf-16":
-        #            f.write(codecs.BOM_UTF16)
-            self.encoding = encoding
-
-    def writerow(self, row):
-        raise NotImplementedError("il faut initialiser")
-
-    def writerows(self, rows):
-        for row in rows:
-            self.writerow(row)
-
-    def getvalue(self, close=True):
-        reponse = self.stream.getvalue()
-        if close:
-            self.close()
-        return reponse
-
-    def close(self):
-        self.stream.close()
-
-
-class Import_exception(Exception):
-    pass

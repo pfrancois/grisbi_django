@@ -1,7 +1,9 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% load url from future %}
+{% block title %}importation d'un fichier{% endblock title %}
+{% block titre %}<h1>importation d'un fichier</h1>{% endblock %}
 {% block content %}
-    <form enctype="multipart/form-data" action="{% url 'import_1' %}" method="post">
+    <form enctype="multipart/form-data" action="" method="post">
         <table>
             {{ form.as_table }}
         </table>
@@ -11,6 +13,6 @@
         </p>
     </form>
     <p>
-        <a href="{% url 'index' %}">retour liste comptes</a>
+        <a href="{% url 'outils_index' %}">retour options</a>
     </p>
 {% endblock content %}

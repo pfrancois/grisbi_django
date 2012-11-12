@@ -10,10 +10,14 @@ from django.core.urlresolvers import reverse
 import os.path
 from django.conf import settings
 import gsb.utils as utils
+import gsb.import_base as import_base
 import sys
 import mock
 import datetime
 import logging
+import gsb.import_csv as import_csv
+from ..models import (Tiers, Titre, Cat, Ope, Banque, Ib,
+                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
 
 
 class Test_view_base(TestCase):
@@ -23,11 +27,25 @@ class Test_view_base(TestCase):
         super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
 
+class Test_import(Test_view_base):
+    fixtures = ['test.json', 'auth.json']
+
+    def setUp(self):
+        self.cls = import_csv.Import_csv_ope()
+        self.cls.listes = dict()
+        self.cls.nb = dict()
+    def test_import_ok(self):
+        self.assertEqual(Tiers.objects.count(), 8)
+        self.assertEqual(Ope.objects.count(), 13)
+        self.assertEqual(Cat.objects.count(), 8)
+        self.cls.import_file(os.path.join(settings.PROJECT_PATH, "gsb", "test_files","import_simple.csv"))
+        self.assertEqual(Tiers.objects.count(), 11)
+        self.assertEqual(Ope.objects.count(), 17)
+        self.assertEqual(Cat.objects.count(), 9)
+    def test_import_probleme(self):
+         self.assertRaises(import_base.Import_exception, self.cls.import_file, os.path.join(settings.PROJECT_PATH, "gsb", "test_files","import_problem1.csv"))
 
 class Test_urls(Test_view_base):
-    def test_import(self):
-        self.assertEqual(self.client.get('/import_csv').status_code, 200)
-
     def test_404(self):
         self.assertEqual(self.client.get('/ope/2200/').status_code, 404)
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
@@ -40,12 +58,13 @@ class Test_urls(Test_view_base):
     def test_normaux2(self):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
-        self.assertEqual(self.client.get('/options/import').status_code, 200)
+        self.assertEqual(self.client.get('/options/import_csv_pm').status_code, 200)
+        self.assertEqual(self.client.get('/options/import_gsb').status_code, 200)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_qif')).status_code, 200)
-        self.assertEqual(self.client.get('/options/export_autres').status_code, 200)
+        self.assertEqual(self.client.get('/options/export').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_ope_titre')).status_code, 200)
 
     @mock.patch('gsb.utils.today')
@@ -85,8 +104,9 @@ class Test_export(Test_view_base):
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
         self.assertEqual(rep.content,
-                         'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;0;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;0;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;1;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;0;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;0;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;0;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;0;0;moyen_rec1;(d)Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;2012_09\r\n')
+                         'id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;ope_titre;ope_pmv;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;2;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;(d)Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;;;2012_09\r\n')
         #erreur
+    def test_csv_erreur(self):
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 2, "date_min": "2011-01-01", "date_max": "2011-02-01"})
         self.assertFormError(rep, 'form', '', u"attention pas d'opérations pour la selection demandée")

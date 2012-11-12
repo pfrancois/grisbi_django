@@ -11,16 +11,18 @@ from django.http import HttpResponse
 #from django.conf import settings
 #pour les vues
 import gsb.export_base as ex
-
+from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
+                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
 from django.core import exceptions as django_exceptions
 
 
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
-
+    fieldnames = None
     def export_csv_view(self, data, nomfich="export", debug=False):
         """machinerie commune aux classes filles"""
-        csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15')
+        csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames)
+        csv_file.writeheader()
         csv_file.writerows(data)
         if debug:
             reponse = HttpResponse(csv_file.getvalue(), mimetype="text/plain")
@@ -41,54 +43,63 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-
+    fieldnames = ('id', 'account name', 'date', 'montant', 'm', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
     def export(self, query):
         """
         fonction principale
         """
         logger = logging.getLogger('gsb.export')
-        data = [(
-                u'id;account name;date;montant;p;m;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;mois'.split(
-                    ';')), ]
+        data = []
         query = query.order_by('date').filter(mere__isnull=True).select_related('cat', "compte", "tiers",
                                                                                 "ib")  # on enleve les ope mere
         for ope in query:
             #id compte date montant
-            ligne = [ope.id, ope.compte.nom, fmt.date(ope.date), fmt.float(ope.montant)]
+            ligne = {'id':ope.id, 'account name':ope.compte.nom,
+                     'date':fmt.date(ope.date),'montant': fmt.float(ope.montant)}
             #rapp
-            if ope.rapp is None:
-                ligne.append(0)
+            if ope.rapp is not None:
+                ligne['m'] = ope.rapp.id
             else:
-                ligne.append(1)
+                ligne['m'] = ''
             #pointee
-            ligne.append(fmt.bool(ope.pointe))
+            ligne['p'] = fmt.bool(ope.pointe)
             #moyen
             try:
-                ligne.append(fmt.str(ope.moyen, '', 'nom'))
+                ligne['moyen'] = fmt.str(ope.moyen, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
-                ligne.append("")
+                ligne['moyen'] = ""
             #cat
             try:
                 cat_g = fmt.str(ope.cat, "", "nom").split(":")
                 if cat_g[0]:
-                    ligne.append("(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip()))
+                    ligne['cat'] = "(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip())
                 else:
-                    ligne.append("")
+                    ligne['cat'] = ""
             except django_exceptions.ObjectDoesNotExist:
-                ligne.append("")
+                ligne['cat'] = ""
             #tiers
-            ligne.append(fmt.str(ope.tiers, '', 'nom'))
-            ligne.append(ope.notes)
+            ligne['tiers'] = fmt.str(ope.tiers, '', 'nom')
+            ligne['notes'] = ope.notes
             try:
-                ligne.append(fmt.str(ope.ib, '', 'nom'))
+                ligne['projet'] = fmt.str(ope.ib, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
-                ligne.append("")
+                ligne['projet'] = ""
             #le reste
-            ligne.append(ope.num_cheque)
-            ligne.append(fmt.str(ope.jumelle, ''))
-            ligne.append(fmt.bool(ope.mere))
-            ligne.append(fmt.str(ope.mere, ''))
-            ligne.append(ope.date.strftime('%Y_%m'))
+            ligne['n chq'] = ope.num_cheque
+            ligne['id jumelle lie'] = fmt.str(ope.jumelle, '')
+            ligne['fille'] = fmt.bool(ope.mere)
+            ligne['num op vent m'] = fmt.str(ope.mere, '')
+            ope_t = Ope_titre.objects.filter(ope=ope)
+            if ope_t.exists():
+                ligne['ope_titre'] = ope_t[0].id
+            else:
+                ligne['ope_titre'] = ''
+            ope_t = Ope_titre.objects.filter(ope_pmv=ope)
+            if ope_t.exists():
+                ligne['ope_pmv'] = ope_t[0].id
+            else:
+                ligne['ope_pmv'] = ''
+            ligne['mois'] = ope.date.strftime('%Y_%m')
             data.append(ligne)
         logger.info('export ope csv')
         return self.export_csv_view(data=data, debug=True)
@@ -109,16 +120,20 @@ class Export_cours_csv(Export_view_csv_base):
     model_initial = models.Cours
     form_class = Exportform_cours
     nomfich = "export_cours"
-
+    fieldnames = ("id", "date", "nom", "isin", "value")
     def export(self, query):
         """
         renvoie l'ensemble des cours.
         @param query: queryset des cours filtre avec les dates
         @return: object httpreponse se composant du fichier csv
         """
-        data = [["id", "date", "nom", "isin", "value"]]
+        data = []
         for objet in query.order_by('date').select_related('titre'):
-            ligne = [objet.titre.isin, objet.date, objet.titre.nom, objet.titre.isin, objet.valeur]
+            ligne = {'id':objet.titre.isin,
+                     'date':objet.date,
+                     'nom':objet.titre.nom,
+                     'isin':objet.titre.isin,
+                     'value':objet.valeur}
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_cours")
         return reponse
@@ -139,22 +154,27 @@ class Export_ope_titre_csv(Export_view_csv_base):
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
-
+    fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
     def export(self, query):
         """
         renvoie l'ensemble des operations titres.
         @param query: filtre avec les dates
         @return: object httpreposne se composant du fichier csv
         """
-        data = [["id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant"]]
+        data = []
         for objet in query.order_by('date').select_related('compte', 'titre'):
-            ligne = [objet.id, objet.date, objet.compte.nom, objet.titre.nom, objet.titre.isin]
+            ligne = {
+                'id':objet.id,
+                'date':objet.date,
+                'nom':objet.compte.nom,
+                'compte':objet.titre.nom,
+                'isin':objet.titre.isin}
             if objet.nombre > 0:
-                ligne.append(u"achat")
+                ligne['sens'] = u"achat"
             else:
-                ligne.append(u"vente")
-            ligne.append(objet.nombre)
-            ligne.append(objet.invest)
+                ligne['sens'] = u"vente"
+            ligne['cours'] = objet.nombre
+            ligne['montant'] = objet.invest
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_ope_titre")
         return reponse

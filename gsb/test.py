@@ -4,10 +4,4 @@ from __future__ import absolute_import
 import csv
 import sys
 
-f = open(sys.argv[1], 'rt')
-try:
-    reader = csv.DictReader(f)
-    for row in reader:
-        print row
-finally:
-    f.close()
+l=[1,2,3,4,5,6,7,8,9]

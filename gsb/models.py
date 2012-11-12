@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.utils.encoding import smart_unicode
 from .model_field import CurField
 from gsb import utils
-
+from django.core.urlresolvers import reverse
 
 class Gsb_exc(Exception):
     pass
@@ -480,9 +480,8 @@ class Compte(models.Model):
             self.delete()
         return nb_change
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'gsb_cpt_detail', (), {'cpt_id': str(self.id)}
+        return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
     def save(self, *args, **kwargs):
         """verifie qu'on ne cree pas un compte avec le type 't'"""
@@ -703,9 +702,9 @@ class Compte_titre(Compte):
         self.delete()
         return nb_change
 
-    @models.permalink
+
     def get_absolute_url(self):
-        return 'gsb_cpt_detail', (), {'cpt_id': str(self.id)}
+        return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
     def save(self, *args, **kwargs):
         """verifie qu'on a pas changé le type de compte"""
@@ -875,9 +874,8 @@ class Ope_titre(models.Model):
                 raise IntegrityError(u"opération jumelle rapprochée")
         super(Ope_titre, self).delete(*args, **kwargs)
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'ope_titre_detail', (), {'pk': str(self.id)}
+        return reverse('ope_titre_detail', kwargs={'pk': str(self.id)})
 
     def __unicode__(self):
         if self.nombre > 0:
@@ -1168,10 +1166,8 @@ class Ope(models.Model):
             self.tiers,
             self.compte
             )
-
-    @models.permalink
     def get_absolute_url(self):
-        return 'gsb_ope_detail', (), {'pk': str(self.id)}
+        return reverse('gsb_ope_detail', kwargs={'pk': str(self.id)})
 
     def clean(self):
         self.alters_data = True

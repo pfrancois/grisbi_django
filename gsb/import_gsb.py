@@ -3,30 +3,87 @@ from __future__ import absolute_import
 
 from django.db import connection, transaction
 
-from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+
 import time
 import decimal
 import logging
-###from django.conf import settings #@Reimport
+import os
+from django.conf import settings #@Reimport
+from django.contrib.auth.decorators import login_required
 import django.utils.encoding as dj_encoding
-import gsb.utils as utils
-
-liste_type_cat = Cat.typesdep
-liste_type_moyen = Moyen.typesdep
-liste_type_compte = Compte.typescpt
-liste_type_period = Echeance.typesperiod
-liste_type_titre = [e[0] for e in Titre.typestitres]
-logger = logging.getLogger('gsb.import')
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.shortcuts import render
+from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
+                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+from .import_base import Import_exception, ImportForm1
+from .import forms as gsb_forms
 try:
     from lxml import etree as et
 except ImportError:
     from xml.etree import cElementTree as et
 
-from .utils import datefr2datesql, fr2decimal, Import_exception
+from . import utils
+
+@login_required
+def import_gsb_0_5_x(request):
+    logger = logging.getLogger('gsb.import')
+    nomfich = ""
+    if request.method == 'POST':
+        form = ImportForm1(request.POST, request.FILES)
+        form.extension = "gsb"
+        form.type_f = "fichier gsb 0.5.x"
+        if form.is_valid():
+            nomfich = form.cleaned_data['nom_du_fichier']
+            nomfich = nomfich[:-4]
+            nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (
+                 nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), "gsb"))
+            destination = open(nomfich, 'wb+')
+            for chunk in request.FILES['nom_du_fichier'].chunks():
+                destination.write(chunk)
+            destination.close()
+            #renomage ok
+            logger.debug("enregistrement fichier ok")
+            # on recupere les info pour le nom
+            try:
+                info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
+            except KeyError:
+                info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss") )
+                #-----------------------gestion des imports
+            try:
+                #on essaye d'ouvrir le fichier
+                destination = open(nomfich, 'r')
+                #si on peut
+                destination.close()
+                if form.cleaned_data['replace'] == 'remplacement':
+                    logger.warning(
+                        u"remplacement data par fichier %s format %s %s" % (
+                        nomfich, request.session['import_type'], info))
+                    import_gsb_050(nomfich=nomfich, efface_table=True)
+                else:
+                    logger.warning(
+                        u"fusion data par fichier %s format %s %s" % (
+                        nomfich, request.session['import_type'], info))
+                    import_gsb_050(nomfich=nomfich, efface_table=False)
+            except Exception as exp:
+                logger.warning(u"probleme d'importation à cause de %s(%s) " % (type(exp), exp))
+                messages.error(request, u"erreur dans l'import du fichier %s" % nomfich)
+            else:
+                messages.success(request, u"import du fichier %s ok" % nomfich)
+                return HttpResponseRedirect(reverse('index'))
+    else:
+        form = ImportForm1()
+        form.extension = "gsb"
+        form.type_f = "fichier gsb 0.5.x"
+        param = {'form': form}
+        return render(request, "gsb/import.djhtm", param)
 
 
 def import_gsb_050(nomfich, efface_table=True):
+    logger = logging.getLogger('gsb.import')
+    liste_type_period = Echeance.typesperiod
+    liste_type_titre = [e[0] for e in Titre.typestitres]
     tabl_correspondance_moyen = {}
     tabl_correspondance_compte = {}
     tabl_correspondance_tiers = {}
@@ -121,7 +178,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_cat in xml_tree.find('//Detail_des_categories'):
         nb_cat += 1
-        query = {'nom': "%s" % (xml_cat.get('Nom'), ), 'type': liste_type_cat[int(xml_cat.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_cat.get('Nom'), ), 'type':  Cat.typesdep[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_cat[xml_cat.get('No')] = {'0': element.id}
         if created:
@@ -130,7 +187,7 @@ def import_gsb_050(nomfich, efface_table=True):
         for xml_scat in xml_cat:
             nb_cat += 1
             query = {'nom': "%s:%s" % (xml_cat.get('Nom'), xml_scat.get('Nom')),
-                     'type': liste_type_cat[int(xml_cat.get('Type'))][0]}
+                     'type':  Cat.typesdep[int(xml_cat.get('Type'))][0]}
             element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_cat[xml_cat.get('No')][xml_scat.get('No')] = element.id
             if created:
@@ -144,7 +201,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
         nb_ib += 1
-        query = {'nom': "%s" % (xml_ib.get('Nom'), ), 'type': liste_type_cat[int(xml_ib.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_ib.get('Nom'), ), 'type':  Cat.typesdep[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_ib[xml_ib.get('No')] = {'0': element.id}
         if created:
@@ -154,7 +211,7 @@ def import_gsb_050(nomfich, efface_table=True):
             logger.debug("ib %s:sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
             nb_ib += 1
             query = {'nom': "%s:%s" % (xml_ib.get('Nom'), xml_sib.get('Nom')),
-                     'type': liste_type_cat[int(xml_ib.get('Type'))][0]}
+                     'type':  Cat.typesdep[int(xml_ib.get('Type'))][0]}
             element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_ib[xml_ib.get('No')][xml_sib.get('No')] = element.id
             if created:
@@ -181,9 +238,9 @@ def import_gsb_050(nomfich, efface_table=True):
         logger.debug("exo %s" % xml_exercice.get('No'))
         element, created = Exercice.objects.get_or_create(nom=xml_exercice.get('Nom'),
                                                           defaults={'nom': xml_exercice.get('Nom'),
-                                                                    'date_debut': datefr2datesql(
+                                                                    'date_debut': utils.datefr2datesql(
                                                                         xml_exercice.get('Date_debut')),
-                                                                    'date_fin': datefr2datesql(
+                                                                    'date_fin': utils.datefr2datesql(
                                                                         xml_exercice.get('Date_fin'))})
         tabl_correspondance_exo[xml_exercice.get('No')] = element.id
         if created:
@@ -210,7 +267,7 @@ def import_gsb_050(nomfich, efface_table=True):
     for xml_cpt in xml_tree.findall('//Compte'):
         nb += 1
         nb_moyen = 0
-        type_compte = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
+        type_compte = Compte.typescpt[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type_compte in ('t', ):
             logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
@@ -231,7 +288,7 @@ def import_gsb_050(nomfich, efface_table=True):
                 element.titulaire = ''
             else:
                 element.titulaire = xml_cpt.find('Details/Titulaire').text
-            element.type = liste_type_compte[int(xml_cpt.find('Details/Type_de_compte').text)][0]
+            element.type = Compte.typescpt[int(xml_cpt.find('Details/Type_de_compte').text)][0]
             if xml_cpt.find('Details/Banque') is None or int(xml_cpt.find('Details/Banque').text) == 0:
                 element.banque = None
             else:
@@ -248,10 +305,10 @@ def import_gsb_050(nomfich, efface_table=True):
                 element.cle_compte = int(xml_cpt.find('Details/Cle_du_compte').text)
             else:
                 element.cle_compte = None
-            element.solde_init = fr2decimal(xml_cpt.find('Details/Solde_initial').text)
-            element.solde_mini_voulu = fr2decimal(xml_cpt.find('Details/Solde_mini_voulu').text)
-            element.solde_mini_autorise = fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
-            element.solde_mini_autorise = fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
+            element.solde_init = utils.fr2decimal(xml_cpt.find('Details/Solde_initial').text)
+            element.solde_mini_voulu = utils.fr2decimal(xml_cpt.find('Details/Solde_mini_voulu').text)
+            element.solde_mini_autorise = utils.fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
+            element.solde_mini_autorise = utils.fr2decimal(xml_cpt.find('Details/Solde_mini_autorise').text)
             if xml_cpt.find('Details/Commentaires').text is not None:
                 element.notes = xml_cpt.find('Details/Commentaires').text
             else:
@@ -267,7 +324,7 @@ def import_gsb_050(nomfich, efface_table=True):
             moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
                                                          defaults={'nom': xml_moyen.get('Nom'),
                                                                    'type':
-                                                                       liste_type_moyen[int(xml_moyen.get('Signe'))][
+                                                                       Moyen.typesdep[int(xml_moyen.get('Signe'))][
                                                                        0], }
             )
             if created:
@@ -306,9 +363,9 @@ def import_gsb_050(nomfich, efface_table=True):
                 inconnu = Tiers.objects.create(nom='inconnu%s' % nb_inconnu)
                 ope_tiers = inconnu
                 tabl_correspondance_tiers[xml_ope.get('T')] = inconnu.id
-        ope_montant = fr2decimal(xml_ope.get('M'))
-        ope_date = datefr2datesql(xml_ope.get('D'))
-        ope_date_val = datefr2datesql(xml_ope.get('Db'))
+        ope_montant = utils.fr2decimal(xml_ope.get('M'))
+        ope_date = utils.datefr2datesql(xml_ope.get('D'))
+        ope_date_val = utils.datefr2datesql(xml_ope.get('Db'))
         ope_cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_ope.find('../../Details/No_de_compte').text])
         if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't':
             #compta matiere et cours en meme tps
@@ -409,8 +466,8 @@ def import_gsb_050(nomfich, efface_table=True):
         nb += 1
         logger.debug("echeance %s" % xml_ech.get('No'))
         element = Echeance(
-            date=datefr2datesql(xml_ech.get('Date')),
-            montant=fr2decimal(xml_ech.get('Montant')),
+            date=utils.datefr2datesql(xml_ech.get('Date')),
+            montant=utils.fr2decimal(xml_ech.get('Montant')),
             compte_id=tabl_correspondance_compte[xml_ech.get('Compte')],
         )
         tabl_correspondance_ech[xml_ech.get('No')] = element.id
@@ -458,6 +515,6 @@ def import_gsb_050(nomfich, efface_table=True):
             element.periodicite = liste_type_period[int(xml_ech.get('Periodicite'))][0]
             element.intervalle = 1
 
-        element.date_limite = datefr2datesql(xml_ech.get('Date_limite'))
+        element.date_limite = utils.datefr2datesql(xml_ech.get('Date_limite'))
         element.save()
     logger.warning(u'fini')

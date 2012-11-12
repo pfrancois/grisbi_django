@@ -14,7 +14,43 @@ from gsb import forms as gsb_forms
 from django.db import models as models_agg
 from django import forms
 import time
-from gsb.utils import UTF8Recoder, Writer_base, Excel_csv, Writer_base
+from gsb.utils import UTF8Recoder, Excel_csv
+
+
+class Writer_base(object):
+    writer = None
+    stream = None
+    Encoder = None
+
+    def __init__(self, encoding="utf-8", fich=None, **kwds):
+        self.queue = cStringIO.StringIO()
+        self.encoder = codecs.getincrementalencoder(encoding)()
+        if fich is not None:
+            self.stream = fich
+        else:
+            self.stream = cStringIO.StringIO()
+            # Force BOM
+        #        if encoding=="utf-16":
+        #            f.write(codecs.BOM_UTF16)
+            self.encoding = encoding
+
+    def writerow(self, row):
+        raise NotImplementedError("il faut initialiser")
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+    def getvalue(self, close=True):
+        reponse = self.stream.getvalue()
+        if close:
+            self.close()
+        return reponse
+
+    def close(self):
+        self.stream.close()
+
+
 
 
 class Csv_unicode_writer(Writer_base):
@@ -23,13 +59,13 @@ class Csv_unicode_writer(Writer_base):
     which is encoded in the given encoding.
     """
 
-    def __init__(self, encoding="utf-8", fich=None, dialect=Excel_csv, **kwds):
+    def __init__(self,  fieldnames, fich=None, encoding="utf-8", dialect=Excel_csv, **kwds):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding, fich)
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.writer = csv.DictWriter(self.queue, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
-        self.writer.writerow([unicode(s).encode("utf-8") for s in row])
+        self.writer.writerow({k:unicode(s).encode("utf-8") for k,s in row.items()})
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -42,7 +78,11 @@ class Csv_unicode_writer(Writer_base):
         self.stream.write(data)
         # empty queue
         self.queue.truncate(0)
-
+    def writeheader(self):
+        try:
+            self.writer.writeheader()
+        except AttributeError as e:
+            self.writer.writerow(dict((fn,fn) for fn in dr.fieldnames))
 
 class Exportform_ope(gsb_forms.Baseform):
     collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False, label="Comptes")

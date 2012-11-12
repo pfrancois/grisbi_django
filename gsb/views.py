@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.core import exceptions as django_exceptions
-from django.views.generic import TemplateView, RedirectView
+from django.views import generic
 from django.utils.decorators import method_decorator
 
 
@@ -34,7 +34,7 @@ def has_changed(instance, field):
     return not getattr(instance, field) == old_value
 
 
-class Mytemplateview(TemplateView):
+class Mytemplateview(generic.TemplateView):
     template_name = 'gsb/options.djhtm'
     titre = None
 
@@ -48,10 +48,30 @@ class Mytemplateview(TemplateView):
         """on a besoin pour le method decorator"""
         return super(Mytemplateview, self).dispatch(*args, **kwargs)
 
+class Myformview(generic.FormView):
+    form_class = None
+    template_name = None
 
-class Myredirectview(RedirectView):
+    def form_valid(self, form):
+        """
+        This is what's called when the form is valid.
+        """
+        return super(MyView, self).form_valid(form)
+    def form_invalid(self, form):
+        """
+        This is what's called when the form is invalid.
+        """
+        return self.render_to_response(self.get_context_data(form=form))
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """on a besoin pour le method decorator"""
+        return super(Myformview, self).dispatch(*args, **kwargs)
+
+class Myredirectview(generic.RedirectView):
     call = None
-
+    def post(self, request, *args, **kwargs):
+        pass
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         #on regarde si c'est appelle

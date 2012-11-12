@@ -129,7 +129,7 @@ STATICFILES_FINDERS = (
 
 # Make this unique, and don't share it with anybody.
 try:
-    from secret_key import *
+    from .secret_key import *
 except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
     nomfich = os.path.join(PROJECT_PATH, 'secret_key.py')

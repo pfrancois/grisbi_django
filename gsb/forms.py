@@ -19,26 +19,6 @@ class Basemodelform(forms.ModelForm):
     #error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
-
-class ImportForm2_qif(Baseform):
-    compte = forms.ModelChoiceField(Compte.objects.all(), required=False, label=u"compte de destination")
-
-
-class ImportForm2_gsb_0_5_0(Baseform):
-    replace = forms.ChoiceField(label="destination", choices=(
-        ('remplacement', 'remplacement des données par le fichier'),
-        ('fusion', 'fusion des données avec le fichier')
-        ))
-
-
-class ImportForm1(Baseform):
-    nom_du_fichier = forms.FileField()
-    type_f = forms.ChoiceField(label="type de fichier", choices=(
-        ('gsb_0_5_0', 'format grisbi version 0.5.x'),
-        ('qif', 'format qif')
-        ))
-
-
 class OperationForm(Basemodelform):
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required=False)
     compte = forms.ModelChoiceField(Compte.objects.filter(ouvert=True), empty_label=None)

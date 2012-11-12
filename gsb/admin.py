@@ -254,7 +254,7 @@ class Compte_admin(Modeladmin_perso):
         try:
             Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
             messages.success(request, u'suppression des statuts "pointé" dans les comptes %s' % queryset)
-        except Exception, err:
+        except Exception as err:
             messages.error(request, err)
 
     action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"

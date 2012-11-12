@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
-from .import export_csv, export_qif, views, outils, import_csv
+from . import export_csv, export_qif, views, outils, import_csv
 
 # les vues generales
 urlpatterns = patterns('gsb',
@@ -17,7 +17,6 @@ urlpatterns += patterns('gsb.outils',
                                                          titre="liste des outils disponible")
                             , name="outils_index"
                         ),
-                        url(r'^options/import$', 'import_file', name="import_1"),
                         url(r'^options/ech$',
                             outils.Echeance_view.as_view(),
                             name='gestion_echeances'
@@ -25,6 +24,10 @@ urlpatterns += patterns('gsb.outils',
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
 urlpatterns += patterns('gsb',
+                        url(r'^options/export$',
+                            views.Mytemplateview.as_view(template_name="gsb/export_index.djhtm"),
+                            name='export_index'
+                        ),
                         url(r'^options/export/gsb050$',
                             'export_gsb_0_5_0.export',
                             name='export_gsb_050'
@@ -33,13 +36,9 @@ urlpatterns += patterns('gsb',
                             export_csv.Export_ope_csv.as_view(),
                             name='export_csv'
                         ),
-                        url(r'^options/export/qif/ope$',
+                        url(r'^options/export/qif$',
                             export_qif.Export_qif.as_view(),
                             name='export_qif'
-                        ),
-                        url(r'^options/export_autres$',
-                            views.Mytemplateview.as_view(template_name="gsb/export_autres.djhtm"),
-                            name='export_autres'
                         ),
                         url(r'^options/export/csv/ope_titres$',
                             export_csv.Export_ope_titre_csv.as_view(),
@@ -47,11 +46,20 @@ urlpatterns += patterns('gsb',
                         ),
                         url(r'^options/export/csv/cours$',
                             export_csv.Export_cours_csv.as_view(),
-                            name='export_cours'
-                        ),
-                        url(r'import_csv$',
+                            name='export_cours')
+                        )
+urlpatterns += patterns('gsb.import_gsb',
+                        url(r'options/import_gsb$',
+                            'import_gsb_0_5_x',
+                            name="import_gsb")
+)
+urlpatterns += patterns('', url(r'options/import_csv_pm$',
                             import_csv.Import_csv_ope.as_view(),
-                            name="import")
+                            name="import_csv_ope_pm")
+)
+urlpatterns += patterns('', url(r'options/import_csv_remp$',
+                            import_csv.Import_csv_ope_remplacement.as_view(),
+                            name="import_csv_ope_remp")
 )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),
