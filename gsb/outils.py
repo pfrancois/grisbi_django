@@ -18,6 +18,8 @@ from django.contrib import messages
 from .views import Mytemplateview, Myredirectview
 from .import forms as gsb_forms
 from .models import Echeance, Compte, Cat, Tiers, Moyen, Echeance
+
+
 def gestion_echeances(request):
     """vue qui gere les echeances"""
     Echeance.check(request)

@@ -16,6 +16,7 @@ from .model_field import CurField
 from gsb import utils
 from django.core.urlresolvers import reverse
 
+
 class Gsb_exc(Exception):
     pass
 
@@ -702,7 +703,6 @@ class Compte_titre(Compte):
         self.delete()
         return nb_change
 
-
     def get_absolute_url(self):
         return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
@@ -1166,6 +1166,7 @@ class Ope(models.Model):
             self.tiers,
             self.compte
             )
+
     def get_absolute_url(self):
         return reverse('gsb_ope_detail', kwargs={'pk': str(self.id)})
 

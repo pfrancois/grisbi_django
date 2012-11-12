@@ -51,21 +51,20 @@ class Writer_base(object):
         self.stream.close()
 
 
-
-
 class Csv_unicode_writer(Writer_base):
     """
     A CSV writer which will write rows to CSV file "f",
     which is encoded in the given encoding.
     """
 
-    def __init__(self,  fieldnames, fich=None, encoding="utf-8", dialect=Excel_csv, **kwds):
+    def __init__(self, fieldnames, fich=None, encoding="utf-8", dialect=Excel_csv, **kwds):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding, fich)
+        self.fieldnames=fieldnames
         self.writer = csv.DictWriter(self.queue, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
-        self.writer.writerow({k:unicode(s).encode("utf-8") for k,s in row.items()})
+        self.writer.writerow({k: unicode(s).encode("utf-8") for k, s in row.items()})
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -78,11 +77,13 @@ class Csv_unicode_writer(Writer_base):
         self.stream.write(data)
         # empty queue
         self.queue.truncate(0)
+
     def writeheader(self):
         try:
             self.writer.writeheader()
         except AttributeError as e:
-            self.writer.writerow(dict((fn,fn) for fn in dr.fieldnames))
+            self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
+
 
 class Exportform_ope(gsb_forms.Baseform):
     collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False, label="Comptes")

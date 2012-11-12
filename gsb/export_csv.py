@@ -19,6 +19,7 @@ from django.core import exceptions as django_exceptions
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
     fieldnames = None
+
     def export_csv_view(self, data, nomfich="export", debug=False):
         """machinerie commune aux classes filles"""
         csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames)
@@ -44,6 +45,7 @@ class Export_ope_csv(Export_view_csv_base):
     model_initial = models.Ope
     nomfich = "export_ope"
     fieldnames = ('id', 'account name', 'date', 'montant', 'm', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+
     def export(self, query):
         """
         fonction principale
@@ -54,8 +56,8 @@ class Export_ope_csv(Export_view_csv_base):
                                                                                 "ib")  # on enleve les ope mere
         for ope in query:
             #id compte date montant
-            ligne = {'id':ope.id, 'account name':ope.compte.nom,
-                     'date':fmt.date(ope.date),'montant': fmt.float(ope.montant)}
+            ligne = {'id': ope.id, 'account name': ope.compte.nom,
+                     'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
             #rapp
             if ope.rapp is not None:
                 ligne['m'] = ope.rapp.id
@@ -121,6 +123,7 @@ class Export_cours_csv(Export_view_csv_base):
     form_class = Exportform_cours
     nomfich = "export_cours"
     fieldnames = ("id", "date", "nom", "isin", "value")
+
     def export(self, query):
         """
         renvoie l'ensemble des cours.
@@ -129,11 +132,11 @@ class Export_cours_csv(Export_view_csv_base):
         """
         data = []
         for objet in query.order_by('date').select_related('titre'):
-            ligne = {'id':objet.titre.isin,
-                     'date':objet.date,
-                     'nom':objet.titre.nom,
-                     'isin':objet.titre.isin,
-                     'value':objet.valeur}
+            ligne = {'id': objet.titre.isin,
+                     'date': objet.date,
+                     'nom': objet.titre.nom,
+                     'isin': objet.titre.isin,
+                     'value': objet.valeur}
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_cours")
         return reponse
@@ -155,6 +158,7 @@ class Export_ope_titre_csv(Export_view_csv_base):
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
     fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
+
     def export(self, query):
         """
         renvoie l'ensemble des operations titres.
@@ -164,11 +168,11 @@ class Export_ope_titre_csv(Export_view_csv_base):
         data = []
         for objet in query.order_by('date').select_related('compte', 'titre'):
             ligne = {
-                'id':objet.id,
-                'date':objet.date,
-                'nom':objet.compte.nom,
-                'compte':objet.titre.nom,
-                'isin':objet.titre.isin}
+                'id': objet.id,
+                'date': objet.date,
+                'nom': objet.compte.nom,
+                'compte': objet.titre.nom,
+                'isin': objet.titre.isin}
             if objet.nombre > 0:
                 ligne['sens'] = u"achat"
             else:

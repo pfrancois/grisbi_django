@@ -5,7 +5,7 @@ import time
 import decimal
 import logging
 import os
-from django.conf import settings #@Reimport
+from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
 
 from django.utils.decorators import method_decorator
@@ -23,6 +23,7 @@ from django.contrib import messages
 class Import_exception(Exception):
     pass
 
+
 class ImportForm1(gsb_forms.Baseform):
     nom_du_fichier = gsb_forms.forms.FileField()
     #attention les entete des choices doivent exister dans le tableau liste_import
@@ -34,72 +35,95 @@ class ImportForm1(gsb_forms.Baseform):
 
 class property_ope_base(object):
     """defini toutes le proprietes d'ope"""
+
     @property
     def pk(self):
         return None
+
     @property
     def cat(self):
         return None
+
     @property
     def automatique(self):
         return False
+
     @property
     def cpt(self):
         return None
+
     @property
     def date(self):
         return None
+
     @property
     def date_val(self):
         return None
+
     @property
     def exercice(self):
         return None
+
     @property
     def ib(self):
         return None
+
     @property
     def jumelle(self):
         return None
+
     @property
     def mere(self):
         return None
+
     @property
     def mt(self):
         return 0
+
     @property
     def moyen(self):
         return None
+
     @property
     def notes(self):
         return ''
+
     @property
     def num_cheque(self):
         return None
+
     @property
     def piece_comptable(self):
         return ''
+
     @property
     def pointe(self):
         return False
+
     @property
     def rapp(self):
         return None
+
     @property
     def tiers(self):
         return None
+
     @property
     def monnaie(self):
         return None
+
     @property
     def ope_titre(self):
         return None
+
     @property
     def ope_pmv(self):
         return False
+
     @property
     def ligne(self):
         return 0
+
 
 class Import_base(views.Myformview):
     #chemin du template
@@ -107,7 +131,7 @@ class Import_base(views.Myformview):
     #classe du reader
     reader = None
     #extension du fichier
-    extension = (None,)
+    extension = (None, )
     #nom du type de fichier
     type_f = None
     #formulaire utilise
@@ -115,6 +139,7 @@ class Import_base(views.Myformview):
     url = "outils_index"
     test = False
     remplacement = False
+
     def form_valid(self, form):
         logger = logging.getLogger('gsb.import')
         self.test = False
@@ -128,7 +153,7 @@ class Import_base(views.Myformview):
         destination.close()
         #renomage ok
         logger.debug(u"enregistrement fichier ok")
-        if self.import_file(nomfich)==False:
+        if self.import_file(nomfich) == False:
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
@@ -143,7 +168,7 @@ class Import_base(views.Myformview):
         try:
             with transaction.commit_on_success():
                 opes = self.tableau_import(nomfich)
-                if self.remplacement:#utilise uniquement si remplacement
+                if self.remplacement:  # utilise uniquement si remplacement
                     for ope in opes:
                         try:
                             obj = Ope.objects.get(pk=ope['pk'])
@@ -155,9 +180,9 @@ class Import_base(views.Myformview):
                                 try:
                                     obj.mere_id = None
                                     obj.save()
-                                    ope_mere=Ope.objects.get(pk=obj.mere_id)
+                                    ope_mere = Ope.objects.get(pk=obj.mere_id)
                                     ope_mere.delete()
-                                    ope_soeurs=Ope.objects.filter(mere=obj.mere_id).delete()
+                                    ope_soeurs = Ope.objects.filter(mere=obj.mere_id).delete()
                                 except Ope.DoesNotExist:
                                     pass
                             if ope.jumelle is not None:
@@ -171,82 +196,82 @@ class Import_base(views.Myformview):
                         except Ope.DoesNotExist:
                             pass
                 #troisieme tour pour gerer les ope_titres
-                opes_apres_titre=list()
+                opes_apres_titre = list()
                 for ope in opes:
-                    nb_titre=0
+                    nb_titre = 0
                     if self.remplacement:
-                        id=ope['pk']
+                        id = ope['pk']
                         #on efface effacer les ope_titre (et donc les ope et op_pmv)
                         try:
-                            op_t=Ope_titre.objects.get(ope_id=id)
+                            op_t = Ope_titre.objects.get(ope_id=id)
                             op_t.delete()
                         except Ope_titre.DoesNotExist:
                             pass
-                    if ope['ope_titre'] is not None:#pas besoin de prendre en compte les pmv car c'est pris en compte de base
+                    if ope['ope_titre'] is not None:  # pas besoin de prendre en compte les pmv car c'est pris en compte de base
                         #gestion des ope_titre
                         nb_titre += 1
                         try:
-                            titre = self.listes['titre']['nom']# pylint: disable=W0622
+                            titre = self.listes['titre']['nom']  # pylint: disable=W0622
                         except KeyError:
-                            tiers=Tiers.object(get=ope['tiers_id'])
+                            tiers = Tiers.object(get=ope['tiers_id'])
                             name = tiers.nom[7:]
-                            if name=='' or name is None or name==0:
+                            if name == '' or name is None or name == 0:
                                 raise Import_exception('probleme import operation %s:un titre ne peut etre vide' % ope.ligne)
-                            isin="ZZ%s%s" % (utils.today().strftime('%d%m%Y'),nbttitre)
-                            titre=self.element('titre', nom_titre, Titre,
-                                               {'nom':name, 'type':'ZZZ','isin':isin,'tiers':tiers})
-                            self.listes['titre']['nom']=titre
+                            isin = "ZZ%s%s" % (utils.today().strftime('%d%m%Y'), nbttitre)
+                            titre = self.element('titre', nom_titre, Titre,
+                                               {'nom': name, 'type': 'ZZZ', 'isin': isin, 'tiers': tiers})
+                            self.listes['titre']['nom'] = titre
                         #on recupere le reste
-                        s=ope['notes']
+                        s = ope['notes']
                         s = s.partition('@')
                         try:
-                            nombre=s[0]
-                            cours=s[2]
+                            nombre = s[0]
+                            cours = s[2]
                         except KeyError:
                             raise Import_exception('probleme import operation %s:pas bon format des notes pour importation' % ope.ligne)
                         try:
-                            cpt_titre=Compte_titre.objects.get(id=ope['compte_id'])
+                            cpt_titre = Compte_titre.objects.get(id=ope['compte_id'])
                         except Compte.DoesNotExist:
                             raise Import_exception('probleme import operation %s:pas de compte titre' % ope.ligne)
-                        if nombre>0:
-                            ope_titre=cpt_titre.achat(titre,nombre,cours,ope['date'])
+                        if nombre > 0:
+                            ope_titre = cpt_titre.achat(titre, nombre, cours, ope['date'])
                         else:
-                            ope_titre=cpt_titre.vente(titre,nombre,cours,ope['date'])
-                        self.listes['id'][ope['pk']]=ope_titre.ope.id
+                            ope_titre = cpt_titre.vente(titre, nombre, cours, ope['date'])
+                        self.listes['id'][ope['pk']] = ope_titre.ope.id
                     else:
-                        if ope['ope_pmv']==False:
+                        if ope['ope_pmv'] == False:
                             opes_apres_titre.append(ope)
                 for ope in opes_apres_titre:
                     try:
                         if self.remplacement:
-                            obj=Ope.objects.get(pk=ope['pk'])
-                            obj.automatique=ope['automatique']
-                            obj.cat_id=ope['cat_id']
-                            obj.compte_id=ope['compte']
-                            obj.date=ope['date']
-                            obj.date_val=ope['date_val']
-                            obj.exercice=ope['exercice']
-                            obj.ib_id=ope['ib_id']
+                            obj = Ope.objects.get(pk=ope['pk'])
+                            obj.automatique = ope['automatique']
+                            obj.cat_id = ope['cat_id']
+                            obj.compte_id = ope['compte']
+                            obj.date = ope['date']
+                            obj.date_val = ope['date_val']
+                            obj.exercice = ope['exercice']
+                            obj.ib_id = ope['ib_id']
                             #supprime car gere en dessous
                             #obj.jumelle_id=ope['jumelle_id']
                             #obj.mere_id=ope['mere_id']
-                            obj.montant=ope['montant']
-                            obj.moyen_id=ope['moyen_id']
-                            obj.notes=ope['notes']
-                            obj.num_cheque=ope['num_cheque']
-                            obj.piece_comptable=ope['piece_comptable']
-                            obj.pointe=ope['pointe']
+                            obj.montant = ope['montant']
+                            obj.moyen_id = ope['moyen_id']
+                            obj.notes = ope['notes']
+                            obj.num_cheque = ope['num_cheque']
+                            obj.piece_comptable = ope['piece_comptable']
+                            obj.pointe = ope['pointe']
                             #gere aussi en dessous
                             #obj.rapp_id=ope['rapp_id']
-                            obj.tiers_id=ope['tiers_id']
+                            obj.tiers_id = ope['tiers_id']
                             obj.save()
-                            self.listes['id'][ope['pk']]=obj.id
+                            self.listes['id'][ope['pk']] = obj.id
                         else:
                             raise Ope.DoesNotExist
                     except Ope.DoesNotExist:
-                            #on a enlevé les id
-                            ope_db=Ope.objects.create(automatique=ope['automatique'], cat_id=ope['cat_id'], compte_id=ope['compte_id'], date=ope['date'], date_val=ope['date_val'], exercice_id=ope['exercice_id'], ib_id=ope['ib_id'], montant=ope['montant'], moyen_id=ope['moyen_id'], notes=ope['notes'],  num_cheque=ope['num_cheque'], piece_comptable=ope['piece_comptable'], pointe=ope['pointe'], tiers_id=ope['tiers_id'] )
-                            self.listes['id'][ope['pk']]=ope_db.id
+                        #on a enlevé les id
+                        ope_db = Ope.objects.create(automatique=ope['automatique'], cat_id=ope['cat_id'], compte_id=ope['compte_id'], date=ope['date'], date_val=ope['date_val'], exercice_id=ope['exercice_id'], ib_id=ope['ib_id'], montant=ope['montant'], moyen_id=ope['moyen_id'], notes=ope['notes'], num_cheque=ope['num_cheque'], piece_comptable=ope['piece_comptable'], pointe=ope['pointe'], tiers_id=ope['tiers_id'])
+                        self.listes['id'][ope['pk']] = ope_db.id
                     try:
                         self.nb['ope'] += 1
                     except KeyError:
@@ -255,13 +280,13 @@ class Import_base(views.Myformview):
                 #second tour pour gerer les mere et virements et le rapp
                 for ope in opes_apres_titre:
                     if ope['jumelle_id'] is not None or ope['mere_id'] is not None or ope['rapp_id'] is not None:
-                        id=self.listes['id'][ope['pk']]
-                        ope_db=Ope.objects.get(id=id)
+                        id = self.listes['id'][ope['pk']]
+                        ope_db = Ope.objects.get(id=id)
                         if ope['jumelle_id'] is not None:
-                            id_jumelle=self.listes['id'][ope['jumelle']]
+                            id_jumelle = self.listes['id'][ope['jumelle']]
                             ope_db.jumelle_id = id_jumelle
                         if ope['mere_id'] is not None:
-                            id_mere=self.listes['id'][ope['mere']]
+                            id_mere = self.listes['id'][ope['mere']]
                             ope_db.mere_id = id_mere
                         if ope['rapp_id'] is not None:
                             ope_db.rapp_id = ope['rapp_id']
@@ -273,7 +298,7 @@ class Import_base(views.Myformview):
             else:
                 raise e
         resultats = list()
-        for key, value in self.nb.iteritems() :
+        for key, value in self.nb.iteritems():
             if self.test == False:
                 messages.success(self.request, (u"%s %s ajoutés" % (value, key)))
 
@@ -304,6 +329,7 @@ class Import_base(views.Myformview):
     def dispatch(self, *args, **kwargs):
         """on a besoin pour le method decorator"""
         return super(Import_base, self).dispatch(*args, **kwargs)
+
     def element(self, liste, name, model, nouveau):
         """
         permet d'avoir un get_or_create avec gestion des erreurs
@@ -314,7 +340,7 @@ class Import_base(views.Myformview):
         """
         logger = logging.getLogger('gsb.import')
         try:
-            id = self.listes[liste][name]# pylint: disable=W0622
+            id = self.listes[liste][name]  # pylint: disable=W0622
         except KeyError:
             logger = logging.getLogger('gsb.import')
             #si c'est un nom vide pas besoin de creer
@@ -325,7 +351,7 @@ class Import_base(views.Myformview):
             try:
                 self.listes[liste][name] = obj.id
             except KeyError:
-                self.listes[liste] = {name:obj.id}
+                self.listes[liste] = {name: obj.id}
 
             if created:
                 try:

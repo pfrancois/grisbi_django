@@ -66,6 +66,7 @@ class UnixTimestampField(models.DateTimeField):
         defaults.update(kwargs)
         return super(UnixTimestampField, self).formfield(**kwargs)
 
+
 class ExtFileField(forms.FileField):
     """
     http://djangosnippets.org/snippets/977/
@@ -83,6 +84,7 @@ class ExtFileField(forms.FileField):
     ...
     ValidationError: [u'Not allowed filetype!']
     """
+
     def __init__(self, *args, **kwargs):
         ext_whitelist = kwargs.pop("ext_whitelist")
         self.ext_whitelist = [i.lower() for i in ext_whitelist]

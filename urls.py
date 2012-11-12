@@ -9,8 +9,8 @@ urlpatterns = patterns('',
                        # Common stuff... files, admin...
     (r'^gestion_bdd/doc/', include('django.contrib.admindocs.urls')),
     (r'^gestion_bdd/', include(admin.site.urls)),
-    url(r'^login$', 'django.contrib.auth.views.login', {'template_name':'login.djhtm'}),
-    (r'^logout$', 'django.contrib.auth.views.logout', {'next_page':'/'}),
+    url(r'^login$', 'django.contrib.auth.views.login', {'template_name': 'login.djhtm'}),
+    (r'^logout$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     #reset pass word
     url(r'^admin/password_reset/$', 'django.contrib.auth.views.password_reset', name='admin_password_reset'),
     (r'^admin/password_reset/done/$', 'django.contrib.auth.views.password_reset_done'),

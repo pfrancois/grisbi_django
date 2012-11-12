@@ -3,12 +3,11 @@ from __future__ import absolute_import
 
 from django.db import connection, transaction
 
-
 import time
 import decimal
 import logging
 import os
-from django.conf import settings #@Reimport
+from django.conf import settings  # @Reimport
 from django.contrib.auth.decorators import login_required
 import django.utils.encoding as dj_encoding
 from django.contrib import messages
@@ -25,6 +24,7 @@ except ImportError:
     from xml.etree import cElementTree as et
 
 from . import utils
+
 
 @login_required
 def import_gsb_0_5_x(request):
@@ -49,7 +49,7 @@ def import_gsb_0_5_x(request):
             try:
                 info = u"%s le %s" % (request.META['REMOTE_ADDR'], time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
             except KeyError:
-                info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss") )
+                info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
                 #-----------------------gestion des imports
             try:
                 #on essaye d'ouvrir le fichier
@@ -178,7 +178,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_cat in xml_tree.find('//Detail_des_categories'):
         nb_cat += 1
-        query = {'nom': "%s" % (xml_cat.get('Nom'), ), 'type':  Cat.typesdep[int(xml_cat.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_cat.get('Nom'), ), 'type': Cat.typesdep[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_cat[xml_cat.get('No')] = {'0': element.id}
         if created:
@@ -187,7 +187,7 @@ def import_gsb_050(nomfich, efface_table=True):
         for xml_scat in xml_cat:
             nb_cat += 1
             query = {'nom': "%s:%s" % (xml_cat.get('Nom'), xml_scat.get('Nom')),
-                     'type':  Cat.typesdep[int(xml_cat.get('Type'))][0]}
+                     'type': Cat.typesdep[int(xml_cat.get('Type'))][0]}
             element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_cat[xml_cat.get('No')][xml_scat.get('No')] = element.id
             if created:
@@ -201,7 +201,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
         nb_ib += 1
-        query = {'nom': "%s" % (xml_ib.get('Nom'), ), 'type':  Cat.typesdep[int(xml_ib.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_ib.get('Nom'), ), 'type': Cat.typesdep[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_ib[xml_ib.get('No')] = {'0': element.id}
         if created:
@@ -211,7 +211,7 @@ def import_gsb_050(nomfich, efface_table=True):
             logger.debug("ib %s:sib %s" % (xml_ib.get('No'), xml_sib.get('No')))
             nb_ib += 1
             query = {'nom': "%s:%s" % (xml_ib.get('Nom'), xml_sib.get('Nom')),
-                     'type':  Cat.typesdep[int(xml_ib.get('Type'))][0]}
+                     'type': Cat.typesdep[int(xml_ib.get('Type'))][0]}
             element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_ib[xml_ib.get('No')][xml_sib.get('No')] = element.id
             if created:

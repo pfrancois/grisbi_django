@@ -12,6 +12,8 @@ from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.db import transaction
+
+
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
 

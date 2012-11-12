@@ -48,6 +48,7 @@ class Mytemplateview(generic.TemplateView):
         """on a besoin pour le method decorator"""
         return super(Mytemplateview, self).dispatch(*args, **kwargs)
 
+
 class Myformview(generic.FormView):
     form_class = None
     template_name = None
@@ -57,6 +58,7 @@ class Myformview(generic.FormView):
         This is what's called when the form is valid.
         """
         return super(MyView, self).form_valid(form)
+
     def form_invalid(self, form):
         """
         This is what's called when the form is invalid.
@@ -68,10 +70,13 @@ class Myformview(generic.FormView):
         """on a besoin pour le method decorator"""
         return super(Myformview, self).dispatch(*args, **kwargs)
 
+
 class Myredirectview(generic.RedirectView):
     call = None
+
     def post(self, request, *args, **kwargs):
         pass
+
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         #on regarde si c'est appelle

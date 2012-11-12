@@ -19,6 +19,7 @@ class Basemodelform(forms.ModelForm):
     #error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
+
 class OperationForm(Basemodelform):
     tiers = forms.ModelChoiceField(Tiers.objects.all(), required=False)
     compte = forms.ModelChoiceField(Compte.objects.filter(ouvert=True), empty_label=None)
