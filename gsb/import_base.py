@@ -2,7 +2,6 @@
 """"import_file : vue qui gere les import"""
 from __future__ import absolute_import
 import time
-import decimal
 import logging
 import os
 from django.conf import settings  # @Reimport
@@ -11,14 +10,13 @@ from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 
 from . import forms as gsb_forms
-from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+from .models import (Tiers, Titre, Ope, Compte, Compte_titre, Ope_titre)
 from django.db import transaction
 from . import views
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-
+from . import utils
 
 class Import_exception(Exception):
     pass
@@ -160,7 +158,7 @@ class Import_base(views.Myformview):
             return HttpResponseRedirect(self.get_success_url())
 
     def import_file(self, nomfich):
-        logger = logging.getLogger('gsb.import')
+        logger = logging.getLogger('gsb.import') #@UnusedVariable
         #definition du nom du fichier
         self.listes = dict()
         self.nb = dict()
@@ -182,7 +180,7 @@ class Import_base(views.Myformview):
                                     obj.save()
                                     ope_mere = Ope.objects.get(pk=obj.mere_id)
                                     ope_mere.delete()
-                                    ope_soeurs = Ope.objects.filter(mere=obj.mere_id).delete()
+                                    Ope.objects.filter(mere=obj.mere_id).delete()
                                 except Ope.DoesNotExist:
                                     pass
                             if ope.jumelle is not None:
@@ -200,7 +198,7 @@ class Import_base(views.Myformview):
                 for ope in opes:
                     nb_titre = 0
                     if self.remplacement:
-                        id = ope['pk']
+                        id = ope['pk'] 
                         #on efface effacer les ope_titre (et donc les ope et op_pmv)
                         try:
                             op_t = Ope_titre.objects.get(ope_id=id)
@@ -213,12 +211,12 @@ class Import_base(views.Myformview):
                         try:
                             titre = self.listes['titre']['nom']  # pylint: disable=W0622
                         except KeyError:
-                            tiers = Tiers.object(get=ope['tiers_id'])
+                            tiers = Tiers.objects.get(id=['tiers_id'])
                             name = tiers.nom[7:]
                             if name == '' or name is None or name == 0:
                                 raise Import_exception('probleme import operation %s:un titre ne peut etre vide' % ope.ligne)
-                            isin = "ZZ%s%s" % (utils.today().strftime('%d%m%Y'), nbttitre)
-                            titre = self.element('titre', nom_titre, Titre,
+                            isin = "ZZ%s%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
+                            titre = self.element('titre', name, Titre,
                                                {'nom': name, 'type': 'ZZZ', 'isin': isin, 'tiers': tiers})
                             self.listes['titre']['nom'] = titre
                         #on recupere le reste
@@ -297,7 +295,6 @@ class Import_base(views.Myformview):
                 return False
             else:
                 raise e
-        resultats = list()
         for key, value in self.nb.iteritems():
             if self.test == False:
                 messages.success(self.request, (u"%s %s ajoutés" % (value, key)))

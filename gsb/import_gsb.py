@@ -17,7 +17,6 @@ from django.shortcuts import render
 from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
                      Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
 from .import_base import Import_exception, ImportForm1
-from .import forms as gsb_forms
 try:
     from lxml import etree as et
 except ImportError:

@@ -160,10 +160,6 @@ class Export_qif(ExportViewBase):
                 mere = True
             else:
                 mere = False
-            if ope.jumelle:
-                virement = True
-            else:
-                virement = True
                 #montant
             qif.w("T", fmt.float(ope.montant))
             #tiers

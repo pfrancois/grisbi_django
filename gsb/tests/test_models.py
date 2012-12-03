@@ -3,20 +3,17 @@
 test models
 """
 from __future__ import absolute_import
-import os
 from .test_base import TestCase
 from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
-from ..models import Rapp, Echeance, Gsb_exc, Ex_jumelle_neant
+from ..models import Rapp, Echeance, Gsb_exc
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 import datetime
 import decimal
-from django.conf import settings
 from ..utils import strpdate
 from operator import attrgetter
 import mock
-from django.db import models
 
 
 class Test_models(TestCase):
@@ -680,16 +677,16 @@ class Test_models(TestCase):
         t = Tiers.objects.get(id=1)
         #test pas defaut
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
-        id = o.id
+        ide = o.id
         self.assertEquals(o.pr, False)
         o.pointe = True
         o.save()
-        self.assertEquals(Ope.objects.get(id=id).pr, True)
-        o = Ope.objects.get(id=id)
+        self.assertEquals(Ope.objects.get(id=ide).pr, True)
+        o = Ope.objects.get(id=ide)
         o.rapp_id = 1
         o.pointe = False
         o.save()
-        self.assertEquals(Ope.objects.get(id=id).pr, True)
+        self.assertEquals(Ope.objects.get(id=ide).pr, True)
 
     def test_ope_save(self):
         c = Compte.objects.get(id=1)
@@ -743,7 +740,7 @@ class Test_models(TestCase):
         o.save()
         self.assertRaises(IntegrityError, Ope.objects.get(id=8).delete)
 
-    def test_pre_delete_ope_mere(self):
+    def test_pre_delete_ope_mere_erreur(self):
         self.assertRaises(IntegrityError, Ope.objects.get(id=11).delete)
 
     def test_pre_delete_ope_titre_rapp(self):

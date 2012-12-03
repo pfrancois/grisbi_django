@@ -5,14 +5,10 @@ import time
 import decimal
 import calendar
 import csv
-import cStringIO
 import codecs
 
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.decorators import method_decorator
-from django.db import transaction
-
 
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
@@ -152,22 +148,28 @@ def datefr2datesql(chaine):
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    if s == "0,0000000":
-        return decimal.Decimal('0')
     if s is not None:
         return decimal.Decimal(str(s).replace(',', '.'))
     else:
         return decimal.Decimal('0')
 
 
-def strpdate(s):
+def strpdate(end_date,fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD
     attention si s est None ou impossible renvoie None"""
-    if s:
-        return datetime.date(*time.strptime(s, "%Y-%m-%d")[0:3])
+    if end_date is not None:
+        try:
+            end_date = time.strptime(end_date, fmt)
+        except ValueError as  v:
+            raise Exception("toto")
+            if len(v.args) > 0 and v.args[0][:26] == 'unconverted data remains: ':
+                end_date = end_date[:-(len(v.args[0])-26)]
+                end_date = time.strptime(end_date, fmt)
+            else:
+                raise v
+        return datetime.date(*end_date[0:3])
     else:
         return datetime.date(1, 1, 1)
-
 
 def today():
     return datetime.date.today()

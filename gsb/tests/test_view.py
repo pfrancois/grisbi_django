@@ -11,13 +11,11 @@ import os.path
 from django.conf import settings
 import gsb.utils as utils
 import gsb.import_base as import_base
-import sys
 import mock
 import datetime
 import logging
 import gsb.import_csv as import_csv
-from ..models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+from ..models import (Tiers, Cat, Ope)
 
 
 class Test_view_base(TestCase):
@@ -35,6 +33,7 @@ class Test_import(Test_view_base):
         self.cls = import_csv.Import_csv_ope()
         self.cls.listes = dict()
         self.cls.nb = dict()
+        self.cls.test=True
 
     def test_import_ok(self):
         self.assertEqual(Tiers.objects.count(), 8)
@@ -108,7 +107,7 @@ class Test_export(Test_view_base):
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
         self.assertEqual(rep.content,
-                         'id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;ope_titre;ope_pmv;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;(r)cat1;tiers1;;;;;0;;;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;(r)cat2;tiers1;;;;;0;;;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;(r)cat1;tiers1;;ib1;;;0;;;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;(r)cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;2;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;(d)Virement;Virement;;;;9;0;;;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;(d)Virement;Virement;;;;8;0;;;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;(d)Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;(d)Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;(d)Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;(d)Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;;;2012_09\r\n')
+                         'id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;fille;num op vent m;ope_titre;ope_pmv;mois\r\n4;cpte1;11/8/2011;-100,0000000;1;0;moyen_dep1;cat1;tiers1;;;;;0;;;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;1;0;moyen_rec1;cat2;tiers1;;;;;0;;;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;2;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;Virement;Virement;;;;9;0;;;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;Virement;Virement;;;;8;0;;;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;Op\xe9ration Ventil\xe9e;tiers2;;;;;0;;;;2012_09\r\n')
 
         #erreur
     def test_csv_erreur(self):
@@ -121,8 +120,8 @@ class Test_views_general(Test_view_base):
     def test_view_index(self):
         resp = self.client.get('/')
         self.assertEqual(resp.context['titre'], 'liste des comptes')
-        self.assertQueryset(resp.context['liste_cpt_bq'], [1, 2, 3])
-        self.assertQueryset(resp.context['liste_cpt_pl'], [4, 5])
+        self.assertEqual(len(resp.context['liste_cpt_bq']), 3)
+        self.assertEqual(len(resp.context['liste_cpt_pl']), 2)
         self.assertEqual(resp.context['total_bq'], 30)
         self.assertEqual(resp.context['total_pla'], 100)
         self.assertEqual(resp.context['total'], 130)

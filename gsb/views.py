@@ -57,7 +57,7 @@ class Myformview(generic.FormView):
         """
         This is what's called when the form is valid.
         """
-        return super(MyView, self).form_valid(form)
+        return super(Myformview, self).form_valid(form)
 
     def form_invalid(self, form):
         """
@@ -93,7 +93,7 @@ class Index_view(Mytemplateview):
             self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
             self.pl = Compte_titre.objects.all()
         else:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True)
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope','tiers')
             self.pl = Compte_titre.objects.filter(ouvert=True)
             #calcul du solde des bq
         self.total_bq = Ope.objects.filter(mere__exact=None,
@@ -101,23 +101,40 @@ class Index_view(Mytemplateview):
                         'solde']
         if self.total_bq is None:
             self.total_bq = decimal.Decimal()
-            #calcul du solde des pla
+        self.bqe=[]
+        self.total_bq = decimal.Decimal('0')
+        #self.bq.annotate(solde=model.Sum('Ope__montant'))
+        for p in self.bq.filter(ope__filles_set__isnull=True).annotate(solde_a=models.Sum('ope__montant')):
+            cpt={'solde':p.solde_a,
+                 'nom':p.nom,
+                 'url':p.get_absolute_url(),
+                 'ouvert':p.ouvert}
+            self.bqe.append(cpt)
+            if cpt['solde'] is not None:
+                self.total_bq += cpt['solde']
+        #calcul du solde des pla
         self.total_pla = decimal.Decimal('0')
-        id_pla = Compte_titre.objects.all().values_list("id", flat=True)
-        solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(
-            solde=models.Sum('montant'))
-        if solde_espece['solde']:
-            self.total_pla += solde_espece['solde']
-        for p in self.pl:
-            self.total_pla += p.solde_titre()
+        #id_pla = Compte_titre.objects.all().values_list("id", flat=True)
+        #solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
+        #if solde_espece['solde']:
+            #self.total_pla += solde_espece['solde']
+        solde_espece =0
+        self.pla=[]
+        for p in self.pl.filter(ope__filles_set__isnull=True).annotate(solde_e=models.Sum('ope__montant')):
+            cpt={'solde':p.solde_e+p.solde_titre(),
+                 'nom':p.nom,
+                 'url':p.get_absolute_url(),
+                 'ouvert':p.ouvert}
+            self.pla.append(cpt)
+            self.total_pla += cpt['solde']
         self.nb_clos = Compte.objects.filter(ouvert=False).count()
         return super(Index_view, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         return  {
             'titre': 'liste des comptes',
-            'liste_cpt_bq': self.bq,
-            'liste_cpt_pl': self.pl,
+            'liste_cpt_bq': self.bqe,
+            'liste_cpt_pl': self.pla,
             'total_bq': self.total_bq,
             'total_pla': self.total_pla,
             'total': self.total_bq + self.total_pla,
@@ -138,7 +155,11 @@ class Cpt_detail_view(Mytemplateview):
         @param request:
         @param cpt_id: id du compte demande
         """
-        compte = get_object_or_404(Compte, pk=cpt_id)
+        #compte = get_object_or_404(Compte, pk=cpt_id)
+        try:
+            compte=Compte.objects.select_related('ope_self').get(pk=cpt_id)
+        except Compte.DoesNotExist:
+            raise http.Http404('No compte matches the given query.')
         self.type = "nrapp"
         if self.all:
             self.type = "all"
@@ -146,11 +167,10 @@ class Cpt_detail_view(Mytemplateview):
             self.type = "rapp"
         if compte.type != 't' and self.cpt_titre_espece == True:  # onredirige vers la vue standart
             url = reverse("gsb_cpt_detail", args=(cpt_id, ))
-            print url
             if self.rapp:
-                url = reverse("gsb_cpt_detail_%s" % 'rapp', args=(cpt_id, ))
+                url = reverse("gsb_cpt_detail_rapp", args=(cpt_id, ))
             if self.all:
-                url = reverse("gsb_cpt_detail_%s" % 'all', args=(cpt_id, ))
+                url = reverse("gsb_cpt_detail_all", args=(cpt_id, ))
             return http.HttpResponsePermanentRedirect(url)
         if compte.type not in ('t', ) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:

@@ -1,29 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import csv
-import cStringIO
-import codecs
-import sys
 import datetime
-import time
-import os
 
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.core import exceptions as django_exceptions
-from django.db import models as models_agg
-from django import forms
 from django.conf import settings  # @Reimport
-from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.decorators import method_decorator
 
-from gsb.utils import UTF8Recoder, Excel_csv
-from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
-from . import forms as gsb_forms
+
+from gsb.utils import UTF8Recoder
+from .models import (Tiers,  Cat, Ope, Ib,
+                     Exercice,  Moyen,  Compte, )
 from . import import_base
-from .views import Mytemplateview
 from . import utils
 
 
@@ -33,7 +19,7 @@ class Csv_unicode_reader(object):
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, dialect=csv.excel, encoding="utf-8", **kwds):  # pylint: disable=W0231
+    def __init__(self, fich, dialect=utils.Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
         self.line_num = 0
         fich = UTF8Recoder(fich, encoding)
         self.reader = csv.DictReader(fich, dialect=dialect, **kwds)
@@ -71,7 +57,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
     def date(self):
         date_s = self.row['Date']
-        return datetime.date(*time.strptime(date_s, "%d/%m/%y")[0:3])
+        return utils.strpdate(date_s, "%d/%m/%y")
 
     @property
     def ib(self):
@@ -214,8 +200,8 @@ class Csv_unicode_reader_ope_remp(Csv_unicode_reader_ope_base):
 
     @property
     def date(self):
-        date_s = self.row['Date']
-        return datetime.date(*time.strptime(date_s, "%d/%m/%y")[0:3])
+        date_s = self.row['date']
+        return utils.strpdate(date_s, "%d/%m/%y")
 
     @property
     def ib(self):
@@ -277,6 +263,6 @@ class Csv_unicode_reader_ope_remp(Csv_unicode_reader_ope_base):
 
 
 class Import_csv_ope_remplacement(Import_csv_ope):
-    reader = Csv_unicode_reader_ope_remp  # TODO
+    reader = Csv_unicode_reader_ope_remp
     type_f = "csv_version_gsb"
     remplacement = True

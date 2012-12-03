@@ -14,7 +14,7 @@ from gsb import forms as gsb_forms
 from django.db import models as models_agg
 from django import forms
 import time
-from gsb.utils import UTF8Recoder, Excel_csv
+from gsb.utils import Excel_csv
 
 
 class Writer_base(object):
@@ -60,7 +60,7 @@ class Csv_unicode_writer(Writer_base):
     def __init__(self, fieldnames, fich=None, encoding="utf-8", dialect=Excel_csv, **kwds):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding, fich)
-        self.fieldnames=fieldnames
+        self.fieldnames = fieldnames
         self.writer = csv.DictWriter(self.queue, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
@@ -81,7 +81,7 @@ class Csv_unicode_writer(Writer_base):
     def writeheader(self):
         try:
             self.writer.writeheader()
-        except AttributeError as e:
+        except AttributeError:
             self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
 
 

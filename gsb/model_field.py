@@ -1,9 +1,12 @@
 # -*- coding: utf-8
-from django.db import models
 from datetime import date
 from time import  mktime
-from django import forms
 import decimal
+import os
+from django.db import models
+
+from django import forms
+
 
 
 #definition d'un moneyfield
@@ -92,9 +95,10 @@ class ExtFileField(forms.FileField):
         super(ExtFileField, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
+        data = super(ExtFileField, self).clean(*args, **kwargs)
         if data is None:
             if self.required:
-                raise ValidationError("This file is required")
+                raise forms.ValidationError("This file is required")
             else:
                 return
         else:

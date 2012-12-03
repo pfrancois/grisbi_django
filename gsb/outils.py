@@ -5,19 +5,12 @@ gestion_echeances:vue qui gere les echeances
 """
 
 from __future__ import absolute_import
-import logging
-import os
-import time
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render_to_response
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .views import Mytemplateview, Myredirectview
-from .import forms as gsb_forms
-from .models import Echeance, Compte, Cat, Tiers, Moyen, Echeance
+from .views import Mytemplateview
+from .models import Compte, Cat, Tiers, Moyen, Echeance
 
 
 def gestion_echeances(request):

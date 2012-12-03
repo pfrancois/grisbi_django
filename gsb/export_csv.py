@@ -11,8 +11,7 @@ from django.http import HttpResponse
 #from django.conf import settings
 #pour les vues
 import gsb.export_base as ex
-from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+from .models import Ope_titre
 from django.core import exceptions as django_exceptions
 
 
@@ -25,7 +24,7 @@ class Export_view_csv_base(ex.ExportViewBase):
         csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames)
         csv_file.writeheader()
         csv_file.writerows(data)
-        if debug:
+        if self.debug:
             reponse = HttpResponse(csv_file.getvalue(), mimetype="text/plain")
         else:
             reponse = HttpResponse(csv_file.getvalue(), content_type='text/csv')
@@ -71,14 +70,7 @@ class Export_ope_csv(Export_view_csv_base):
             except django_exceptions.ObjectDoesNotExist:
                 ligne['moyen'] = ""
             #cat
-            try:
-                cat_g = fmt.str(ope.cat, "", "nom").split(":")
-                if cat_g[0]:
-                    ligne['cat'] = "(%s)%s" % (fmt.str(ope.cat, "", "type"), cat_g[0].strip())
-                else:
-                    ligne['cat'] = ""
-            except django_exceptions.ObjectDoesNotExist:
-                ligne['cat'] = ""
+            ligne['cat'] = fmt.str(ope.cat, "", "nom")
             #tiers
             ligne['tiers'] = fmt.str(ope.tiers, '', 'nom')
             ligne['notes'] = ope.notes

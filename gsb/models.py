@@ -7,7 +7,7 @@ from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.encoding import force_unicode
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -32,7 +32,7 @@ class Tiers(models.Model):
     pour les titres, c'est remplis dans le champ note avec TYPE@ISIN
     """
 
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
     is_titre = models.BooleanField(default=False)
 
@@ -42,7 +42,7 @@ class Tiers(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return self.nom
+        return u"%s"%self.nom
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -75,8 +75,8 @@ class Titre(models.Model):
         ('OBL', u'obligation'),
         ('ZZZ', u'autre')
         )
-    nom = models.CharField(max_length=40, unique=True)
-    isin = models.CharField(max_length=12, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
+    isin = models.CharField(max_length=12, unique=True, db_index=True)
     tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False)
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
 
@@ -269,7 +269,7 @@ class Cours(models.Model):
 class Banque(models.Model):
     """banques"""
     cib = models.CharField(max_length=5, blank=True)
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
 
     class Meta:
@@ -302,7 +302,7 @@ class Cat(models.Model):
         ('d', u'dépense'),
         ('v', u'virement')
         )
-    nom = models.CharField(max_length=50, unique=True, verbose_name=u"nom de la catégorie")
+    nom = models.CharField(max_length=50, unique=True, verbose_name=u"nom de la catégorie", db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name=u"type de la catégorie")
 
     class Meta:
@@ -335,7 +335,7 @@ class Cat(models.Model):
 class Ib(models.Model):
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
 
     class Meta:
@@ -372,7 +372,7 @@ class Exercice(models.Model):
     """
     date_debut = models.DateField(default=utils.today)
     date_fin = models.DateField(null=True, blank=True)
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
 
     class Meta:
         db_table = 'gsb_exercice'
@@ -415,7 +415,7 @@ class Compte(models.Model):
         ('t', u'titre'),
         ('a', u'autre actif')
         )
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     titulaire = models.CharField(max_length=40, blank=True, default='')
     type = models.CharField(max_length=1, choices=typescpt, default='b')
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
@@ -454,8 +454,13 @@ class Compte(models.Model):
             query = query.filter(rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
-        req = Ope.solde_set(query)
-        solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
+        req = query.aggregate(total=models.Sum('montant'))['total']
+        if req is None:
+            req = 0
+        if self.solde_init is not None:
+            solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
+        else:
+            solde = decimal.Decimal(req)
         return solde
 
     @transaction.commit_on_success
@@ -782,7 +787,7 @@ class Ope_titre(models.Model):
             obj.delete()
         else:
             old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur': 0})
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur': 0}) #@UnusedVariable
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
@@ -934,7 +939,7 @@ class Moyen(models.Model):
 
 class Rapp(models.Model):
     """rapprochement d'un compte"""
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     date = models.DateField(null=True, blank=True, default=utils.today)
 
     class Meta:
@@ -1149,7 +1154,7 @@ class Ope(models.Model):
     def non_meres():
         """ renvoie uniquement les opération non mere
         """
-        return Ope.objects.filter(filles_set__isnull=True)
+        return Ope.objects.all().prefetch_related('filles_set').filter(filles_set__isnull=True)
 
     @staticmethod
     def solde_set(q):
@@ -1383,7 +1388,7 @@ class Virement(object):
         return tab
 
     def __unicode__(self):
-        return "%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
+        return u"%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
 
 
 @receiver(pre_delete, sender=Ope)
@@ -1402,7 +1407,7 @@ def verif_ope_rapp(sender, **kwargs):
         raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
 
 
-@receiver(pre_save, sender=Ope)
+#@receiver(pre_save, sender=Ope)
 def verif_ope_save(sender, **kwargs):
     """
     verifie que l'operation ventile n'est pas pointe ni rapproche
