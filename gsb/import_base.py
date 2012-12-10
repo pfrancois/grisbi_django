@@ -4,22 +4,25 @@ from __future__ import absolute_import
 import time
 import logging
 import os
+import decimal
+
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
-
-from django.utils.decorators import method_decorator
-
-from . import forms as gsb_forms
-from .models import (Tiers, Titre, Ope, Compte, Compte_titre, Ope_titre)
 from django.db import transaction
-from . import views
+from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from . import utils
+from django.utils.decorators import method_decorator
+
+from . import forms as gsb_forms
+from .models import Tiers, Titre, Cat, Ib, Exercice, Compte, Compte_titre, Moyen, Rapp, Ope
+from . import views
+from .utils import fr2decimal, strpdate
 
 class Import_exception(Exception):
     pass
+
 
 
 class ImportForm1(gsb_forms.Baseform):
@@ -33,9 +36,9 @@ class ImportForm1(gsb_forms.Baseform):
 
 class property_ope_base(object):
     """defini toutes le proprietes d'ope"""
-
+        
     @property
-    def pk(self):
+    def id(self):
         return None
 
     @property
@@ -112,7 +115,7 @@ class property_ope_base(object):
 
     @property
     def ope_titre(self):
-        return None
+        return False
 
     @property
     def ope_pmv(self):
@@ -121,6 +124,53 @@ class property_ope_base(object):
     @property
     def ligne(self):
         return 0
+    
+    @property
+    def has_fille(self):
+        return False
+    
+    def to_str(self, var, retour=None):
+        if var == "" or var == 0:
+            return retour
+        else:
+            return var
+   
+    def to_id(self, var):
+        if var == "" or var == 0:
+            return None
+        else:
+            try:
+                if var is not None:
+                    return int(var)
+                else:
+                    return None
+            except ValueError:
+                self.erreur.append('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
+                return None 
+    
+    def to_bool(self, var):
+        try:
+            if var == "" or var is None or int(var) == 0 :
+                return False
+            else:
+                return True
+        except ValueError:
+            return False
+        
+    def to_decimal(self, var):
+        try:
+            return fr2decimal(var)
+        except decimal.InvalidOperation:
+            self.erreur.append('probleme de montant a la ligne %s' % self.ligne)
+            return 0
+        
+    def to_date(self, var, format_date):
+        try:
+            date_s = var
+            return strpdate(date_s, format_date)
+        except ValueError:
+            self.erreur.append('probleme de date a la ligne %s' % self.ligne)
+
 
 
 class Import_base(views.Myformview):
@@ -129,182 +179,156 @@ class Import_base(views.Myformview):
     #classe du reader
     reader = None
     #extension du fichier
-    extension = (None, )
+    extension = (None,)
     #nom du type de fichier
     type_f = None
     #formulaire utilise
     form_class = ImportForm1
     url = "outils_index"
     test = False
-    remplacement = False
+    creation_de_compte = False
 
     def form_valid(self, form):
-        logger = logging.getLogger('gsb.import')
+        #logger = logging.getLogger('gsb.import')
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
         nomfich = nomfich[:-4]
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (
-            nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), self.extension))
-        destination = open(nomfich, 'wb+')
+            nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), self.extension[0]))
+        #commme on peut avoir plusieurs extension on prend par defaut la premiere
+        #si le repertoire n'existe pas on le crée
+        try:
+            destination = open(nomfich, 'wb+')
+        except IOError :
+            os.makedirs(os.path.join(settings.PROJECT_PATH, 'upload'))
+            destination = open(nomfich, 'wb+')
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
             destination.write(chunk)
         destination.close()
         #renomage ok
-        logger.debug(u"enregistrement fichier ok")
-        if self.import_file(nomfich) == False:
+        #logger.debug(u"enregistrement fichier ok")
+        if  self.import_file(nomfich) == False:#importation bien effectue
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
+            #return self.render_to_response(self.get_context_data(form=form))
             return HttpResponseRedirect(self.get_success_url())
+            
 
     def import_file(self, nomfich):
         logger = logging.getLogger('gsb.import') #@UnusedVariable
+        self.erreur = list()
         #definition du nom du fichier
-        self.listes = dict()
         self.nb = dict()
-        self.listes['id'] = dict()
+        self.id = dict()
+        self.listes = { 'titre':dict(), 'cat':dict(), 'ib':dict(), 'tiers':dict(), 'moyen':dict(), 'rapp':dict(), 'compte':dict(), 'ope':dict()                    , 'exercice':dict(), 'compte_titre':dict(), }
+        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(), 'ope':list(), "ope_titre":list(), 'exercice':list()}
+        #personalisation avec ajout de compte
+        if self.creation_de_compte:
+            self.ajouter['compte'] = list()
+            self.ajouter['compte_titre'] = list()
+        #on ajoute les moyens par defaut
         try:
-            with transaction.commit_on_success():
-                opes = self.tableau_import(nomfich)
-                if self.remplacement:  # utilise uniquement si remplacement
-                    for ope in opes:
-                        try:
-                            obj = Ope.objects.get(pk=ope['pk'])
-                            #on supprime les risques d'integrité referentielle
-                            if obj.rapp is not None:
-                                obj.rapp = None
-                                obj.save()
-                            if obj.mere_id is not None:
-                                try:
-                                    obj.mere_id = None
-                                    obj.save()
-                                    ope_mere = Ope.objects.get(pk=obj.mere_id)
-                                    ope_mere.delete()
-                                    Ope.objects.filter(mere=obj.mere_id).delete()
-                                except Ope.DoesNotExist:
-                                    pass
-                            if ope.jumelle is not None:
-                                try:
-                                    obj.jumelle = None
-                                    obj.save()
-                                    ope_jumelle = Ope.objects.get(pk=obj.mere_id)
-                                    ope_jumelle.delete()
-                                except Ope.DoesNotExist:
-                                    pass
-                        except Ope.DoesNotExist:
-                            pass
-                #troisieme tour pour gerer les ope_titres
-                opes_apres_titre = list()
-                for ope in opes:
-                    nb_titre = 0
-                    if self.remplacement:
-                        id = ope['pk'] 
-                        #on efface effacer les ope_titre (et donc les ope et op_pmv)
-                        try:
-                            op_t = Ope_titre.objects.get(ope_id=id)
-                            op_t.delete()
-                        except Ope_titre.DoesNotExist:
-                            pass
-                    if ope['ope_titre'] is not None:  # pas besoin de prendre en compte les pmv car c'est pris en compte de base
-                        #gestion des ope_titre
-                        nb_titre += 1
-                        try:
-                            titre = self.listes['titre']['nom']  # pylint: disable=W0622
-                        except KeyError:
-                            tiers = Tiers.objects.get(id=['tiers_id'])
-                            name = tiers.nom[7:]
-                            if name == '' or name is None or name == 0:
-                                raise Import_exception('probleme import operation %s:un titre ne peut etre vide' % ope.ligne)
-                            isin = "ZZ%s%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
-                            titre = self.element('titre', name, Titre,
-                                               {'nom': name, 'type': 'ZZZ', 'isin': isin, 'tiers': tiers})
-                            self.listes['titre']['nom'] = titre
-                        #on recupere le reste
-                        s = ope['notes']
-                        s = s.partition('@')
-                        try:
-                            nombre = s[0]
-                            cours = s[2]
-                        except KeyError:
-                            raise Import_exception('probleme import operation %s:pas bon format des notes pour importation' % ope.ligne)
-                        try:
-                            cpt_titre = Compte_titre.objects.get(id=ope['compte_id'])
-                        except Compte.DoesNotExist:
-                            raise Import_exception('probleme import operation %s:pas de compte titre' % ope.ligne)
-                        if nombre > 0:
-                            ope_titre = cpt_titre.achat(titre, nombre, cours, ope['date'])
-                        else:
-                            ope_titre = cpt_titre.vente(titre, nombre, cours, ope['date'])
-                        self.listes['id'][ope['pk']] = ope_titre.ope.id
-                    else:
-                        if ope['ope_pmv'] == False:
-                            opes_apres_titre.append(ope)
-                for ope in opes_apres_titre:
-                    try:
-                        if self.remplacement:
-                            obj = Ope.objects.get(pk=ope['pk'])
-                            obj.automatique = ope['automatique']
-                            obj.cat_id = ope['cat_id']
-                            obj.compte_id = ope['compte']
-                            obj.date = ope['date']
-                            obj.date_val = ope['date_val']
-                            obj.exercice = ope['exercice']
-                            obj.ib_id = ope['ib_id']
-                            #supprime car gere en dessous
-                            #obj.jumelle_id=ope['jumelle_id']
-                            #obj.mere_id=ope['mere_id']
-                            obj.montant = ope['montant']
-                            obj.moyen_id = ope['moyen_id']
-                            obj.notes = ope['notes']
-                            obj.num_cheque = ope['num_cheque']
-                            obj.piece_comptable = ope['piece_comptable']
-                            obj.pointe = ope['pointe']
-                            #gere aussi en dessous
-                            #obj.rapp_id=ope['rapp_id']
-                            obj.tiers_id = ope['tiers_id']
-                            obj.save()
-                            self.listes['id'][ope['pk']] = obj.id
-                        else:
-                            raise Ope.DoesNotExist
-                    except Ope.DoesNotExist:
-                        #on a enlevé les id
-                        ope_db = Ope.objects.create(automatique=ope['automatique'], cat_id=ope['cat_id'], compte_id=ope['compte_id'], date=ope['date'], date_val=ope['date_val'], exercice_id=ope['exercice_id'], ib_id=ope['ib_id'], montant=ope['montant'], moyen_id=ope['moyen_id'], notes=ope['notes'], num_cheque=ope['num_cheque'], piece_comptable=ope['piece_comptable'], pointe=ope['pointe'], tiers_id=ope['tiers_id'])
-                        self.listes['id'][ope['pk']] = ope_db.id
-                    try:
-                        self.nb['ope'] += 1
-                    except KeyError:
-                        self.nb['ope'] = 1
-
-                #second tour pour gerer les mere et virements et le rapp
-                for ope in opes_apres_titre:
-                    if ope['jumelle_id'] is not None or ope['mere_id'] is not None or ope['rapp_id'] is not None:
-                        id = self.listes['id'][ope['pk']]
-                        ope_db = Ope.objects.get(id=id)
-                        if ope['jumelle_id'] is not None:
-                            id_jumelle = self.listes['id'][ope['jumelle']]
-                            ope_db.jumelle_id = id_jumelle
-                        if ope['mere_id'] is not None:
-                            id_mere = self.listes['id'][ope['mere']]
-                            ope_db.mere_id = id_mere
-                        if ope['rapp_id'] is not None:
-                            ope_db.rapp_id = ope['rapp_id']
-                        ope_db.save()
+            self.listes['moyen'][Moyen.objects.get(id=settings.MD_DEBIT).nom] = settings.MD_DEBIT
+        except Moyen.DoesNotExist:
+            self.listes['moyen']['DEBIT'] = settings.MD_DEBIT
+            Moyen.objects.create(id=settings.MD_DEBIT, nom='DEBIT', type="d")
+        try:
+            self.listes['moyen'][Moyen.objects.get(id=settings.MD_CREDIT).nom] = settings.MD_CREDIT
+        except Moyen.DoesNotExist:
+            self.listes['moyen']['CREDIT'] = settings.MD_CREDIT
+            Moyen.objects.create(id=settings.MD_CREDIT, nom='CREDIT', type="c")
+        #on ajoute le moyen pour le virement
+        moyen_virement = Moyen.objects.filter(type='v')
+        if moyen_virement.exists():
+            self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
+        else:
+            self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
+        try:
+            self.tableau_import(nomfich)
+            if len(self.erreur):
+                for err in self.erreur:
+                    messages.warning(self.request, err)
+                return False
         except Import_exception as e:
             if self.test == False:
+                for err in self.erreur:
+                    messages.warning(self.request, err)
                 messages.error(self.request, e)
                 return False
             else:
                 raise e
-        for key, value in self.nb.iteritems():
-            if self.test == False:
-                messages.success(self.request, (u"%s %s ajoutés" % (value, key)))
+        messages.info(self.request, "vous pouvez continuer")
+    
+        with transaction.commit_on_success():
+            #import final
+            #les comptes
+            nb_ajout = 0
+            if self.creation_de_compte:
+                for obj in self.ajouter['compte']:
+                    if obj['type'] != 't':
+                        Compte.objects.create(id=obj['id'], nom=obj['nom'], type=obj['type'])
+                        nb_ajout += 1
+                    else:
+                        Compte_titre.objects.create(id=obj['id'], nom=obj['nom'], type='t')
+                        nb_ajout += 1       
+                messages.info(self.request, "%s compte ajoutes" % nb_ajout)
+            else:
+                if 'compte' in self.ajouter:
+                    raise Import_exception("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
+            #les tiers
+            self.create('tiers', Tiers)
+            #les titres
+            nb_ajout = 0
+            for titre in self.ajouter['titre']:
+                Titre.objects.create(id=titre['id'], nom=titre['nom'], type='ZZZ', isin=titre['isin'], tiers_id=titre['tiers_id'])
+                nb_ajout += 1
+            messages.info(self.request, "%s titres ajoutes" % nb_ajout)
 
+            #les categories
+            self.create('cat', Cat)
+            #les ib
+            self.create('ib', Ib)
+            #les moyens
+            self.create('moyen', Moyen)
+            #les exercices
+            self.create('exercice', Exercice)
+            #les rapp
+            self.create('rapp', Rapp)
+            for ope in self.ajouter['ope']:
+                Ope.objects.create(
+                        id=ope['id'],
+                        automatique=ope['automatique'],
+                        cat_id=ope['cat_id'],
+                        compte_id=ope['compte_id'],
+                        date=ope['date'],
+                        date_val=ope['date_val'],
+                        exercice_id=ope['exercice_id'],
+                        ib_id=ope['ib_id'],
+                        jumelle_id=ope['jumelle_id'],
+                        mere_id=ope['mere_id'],
+                        montant=ope['montant'],
+                        moyen_id=ope['moyen_id'],
+                        notes=ope['notes'],
+                        num_cheque=ope['num_cheque'],
+                        piece_comptable=ope['piece_comptable'],
+                        pointe=ope['pointe'],
+                        rapp_id=ope['rapp_id'],
+                        tiers_id=ope['tiers_id'])
+            #les ope_titres
+            for obj in self.ajouter['ope_titre']:
+                cpt = Compte_titre.objects.get(id=obj["compte_id"])
+                if obj['nombre'] > 0:
+                    cpt.achat(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                else:
+                    cpt.vente(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                              
     def get_success_url(self):
         return reverse(self.url)
 
     def get_form(self, form_class):
         form = super(Import_base, self).get_form(form_class)
-        form.fields['nom_du_fichier'].label = "nom_du_fichier %s" % self.type_f
+        form.fields['nom_du_fichier'].label = u"nom_du_fichier %s" % self.type_f
         del form.fields['replace']
         return form
 
@@ -335,28 +359,44 @@ class Import_base(views.Myformview):
         @param model: classe model a chercher
         @param nouveau: dic pour creer un nouveau objet
         """
-        logger = logging.getLogger('gsb.import')
         try:
-            id = self.listes[liste][name]  # pylint: disable=W0622
+            obj_id = self.listes[liste][name]  # pylint: disable=W0622
         except KeyError:
-            logger = logging.getLogger('gsb.import')
             #si c'est un nom vide pas besoin de creer
             if name == '' or name is None or name == 0:
                 return None
-            obj, created = model.objects.get_or_create(nom=name, defaults=nouveau)
-            logger.info(u'element %s cree: %s' % (model._meta.verbose_name, name))
-            try:
-                self.listes[liste][name] = obj.id
-            except KeyError:
-                self.listes[liste] = {name: obj.id}
-
-            if created:
-                try:
-                    self.nb[liste] += 1
-                except KeyError:
-                    self.nb[liste] = 1
-            id = obj.id
-        return id
-
+            try:#on regarde si ca existe
+                obj_id = model.objects.get(nom=name).id
+            except model.DoesNotExist:#on demande la creation plus tard
+                obj_id = self.ajout(obj=liste, model=model, nouveau=nouveau)
+            self.listes[liste][name] = obj_id
+        return obj_id
+            
+    def ajout(self, obj, model, nouveau):
+        try:
+            last_id = self.id[obj]
+        except KeyError:
+            last_id = model.objects.aggregate(id_max=Max('id'))['id_max']
+            if last_id is None:
+                last_id = 1
+        if 'id' not in nouveau or nouveau['id'] < last_id:#on cree un operation
+            last_id += 1
+            self.id[obj] = last_id
+            nouveau['id'] = last_id
+        self.ajouter[obj].append(nouveau)
+        return last_id
+    
     def tableau_import(self, nomfich):
-        raise NotImplementedError("il faut definir comment on importe")
+        raise NotImplementedError(u"il faut definir comment on importe")
+    def create(self, obj, model):
+        nb_ajout = 0
+        nom_ajoute = [objet['nom'] for objet in self.ajouter[obj]] 
+        try:
+            for objet in self.ajouter[obj]:
+                model.objects.create(**objet)
+                nb_ajout += 1
+            messages.info(self.request, "%s %s ajoutes (%s)" % (nb_ajout, obj, nom_ajoute))
+        except KeyError as e:
+            messages.error(self.request, e)
+
+        

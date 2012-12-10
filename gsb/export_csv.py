@@ -19,31 +19,22 @@ class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
     fieldnames = None
 
-    def export_csv_view(self, data, nomfich="export", debug=False):
+    def export_csv_view(self, data, nomfich="export"):
         """machinerie commune aux classes filles"""
         csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames)
         csv_file.writeheader()
         csv_file.writerows(data)
         if self.debug:
-            reponse = HttpResponse(csv_file.getvalue(), mimetype="text/plain")
+            return HttpResponse(csv_file.getvalue(), mimetype="text/plain")
         else:
-            reponse = HttpResponse(csv_file.getvalue(), content_type='text/csv')
-            reponse["Cache-Control"] = "no-cache, must-revalidate"
-            reponse['Pragma'] = "public"
-            reponse["Content-Disposition"] = "attachment; filename=%s_%s.csv" % (nomfich,
-                                                                     time.strftime("%d_%m_%Y-%H_%M_%S",
-                                                                                   time.localtime()
-                                                                     )
-                    )
-
-        return reponse
+            return HttpResponse(csv_file.getvalue(), content_type='text/csv')
 
 
 class Export_ope_csv(Export_view_csv_base):
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'account name', 'date', 'montant', 'm', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = ('id', 'account name', 'date', 'montant', 'm', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has_fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
 
     def export(self, query):
         """
@@ -51,12 +42,11 @@ class Export_ope_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date').filter(mere__isnull=True).select_related('cat', "compte", "tiers",
-                                                                                "ib")  # on enleve les ope mere
+        query = query.order_by('date').select_related('cat', "compte", "tiers", "ib")  # on enleve les ope mere
         for ope in query:
             #id compte date montant
-            ligne = {'id': ope.id, 'account name': ope.compte.nom,
-                     'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
+            #print ope
+            ligne = {'id': ope.id, 'account name': ope.compte.nom, 'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
             #rapp
             if ope.rapp is not None:
                 ligne['m'] = ope.rapp.id
@@ -81,7 +71,8 @@ class Export_ope_csv(Export_view_csv_base):
             #le reste
             ligne['n chq'] = ope.num_cheque
             ligne['id jumelle lie'] = fmt.str(ope.jumelle, '')
-            ligne['fille'] = fmt.bool(ope.mere)
+            toto = ope.filles_set.exists()
+            ligne['has_fille'] = fmt.bool(toto)
             ligne['num op vent m'] = fmt.str(ope.mere, '')
             ope_t = Ope_titre.objects.filter(ope=ope)
             if ope_t.exists():
@@ -96,7 +87,8 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['mois'] = ope.date.strftime('%Y_%m')
             data.append(ligne)
         logger.info('export ope csv')
-        return self.export_csv_view(data=data, debug=True)
+        #self.debug=True
+        return self.export_csv_view(data=data)
 
 
 class Exportform_cours(ex.Exportform_ope):

@@ -177,7 +177,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_cat in xml_tree.find('//Detail_des_categories'):
         nb_cat += 1
-        query = {'nom': "%s" % (xml_cat.get('Nom'), ), 'type': Cat.typesdep[int(xml_cat.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_cat.get('Nom'),), 'type': Cat.typesdep[int(xml_cat.get('Type'))][0]}
         element, created = Cat.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_cat[xml_cat.get('No')] = {'0': element.id}
         if created:
@@ -200,7 +200,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     for xml_ib in xml_tree.find('//Detail_des_imputations'):
         nb_ib += 1
-        query = {'nom': "%s" % (xml_ib.get('Nom'), ), 'type': Cat.typesdep[int(xml_ib.get('Type'))][0]}
+        query = {'nom': "%s" % (xml_ib.get('Nom'),), 'type': Cat.typesdep[int(xml_ib.get('Type'))][0]}
         element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
         tabl_correspondance_ib[xml_ib.get('No')] = {'0': element.id}
         if created:
@@ -267,7 +267,7 @@ def import_gsb_050(nomfich, efface_table=True):
         nb += 1
         nb_moyen = 0
         type_compte = Compte.typescpt[int(xml_cpt.find('Details/Type_de_compte').text)][0]
-        if type_compte in ('t', ):
+        if type_compte in ('t',):
             logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
                 'nom': xml_cpt.find('Details/Nom').text,

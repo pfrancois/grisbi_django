@@ -3,8 +3,7 @@
 {% block content %}
     <a href="{% url 'export_index' %}" class="progress"> exporter </a><br/>
     <a href="{% url 'import_gsb' %}" class="progress"> import de fichiers gsb dans l'application</a><br/>
-    <a href="{% url 'import_csv_ope_pm' %}" class="progress"> import de fichiers csv d'operations dans l'application</a><br/>
-    <a href="{% url 'import_csv_ope_remp' %}" class="progress"> import de fichiers csv d'operations avec remplacement</a><br/>
+    <a href="{% url 'import_csv_ope_all' %}" class="progress"> import de fichiers csv d'operations dans l'application</a><br/>
     <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les &eacute;ch&eacute;ances qui sont
         &eacute;chues</a><br/>
     <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'op&eacute;rations </a><br/>

@@ -509,7 +509,7 @@ def export(request):
                                   {
                                       'titre': 'import gsb',
                                       'resultats': (
-                                      u"attention, il n'y a pas de comptes donc pas de possibilité d'export.", )
+                                      u"attention, il n'y a pas de comptes donc pas de possibilité d'export.",)
                                   },
                                   context_instance=RequestContext(request)
         )

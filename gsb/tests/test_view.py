@@ -33,7 +33,7 @@ class Test_import(Test_view_base):
         self.cls = import_csv.Import_csv_ope()
         self.cls.listes = dict()
         self.cls.nb = dict()
-        self.cls.test=True
+        self.cls.test = True
 
     def test_import_ok(self):
         self.assertEqual(Tiers.objects.count(), 8)
@@ -77,7 +77,7 @@ class Test_urls(Test_view_base):
 
     def test_normaux3(self):
         self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
-        self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1, ))).status_code, 200)
+        self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1,))).status_code, 200)
         self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
         self.assertEqual(self.client.get('/ope/new').status_code, 200)
         self.assertEqual(self.client.get('/vir/new').status_code, 200)
@@ -130,7 +130,7 @@ class Test_views_general(Test_view_base):
         #@mock.patch('gsb.utils.today')
     def test_view_cpt_detail(self):
         #today_mock.return_value=datetime.date(2012, 10, 14)
-        resp = self.client.get(reverse('gsb_cpt_detail', args=(1, )))
+        resp = self.client.get(reverse('gsb_cpt_detail', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -143,7 +143,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [6, 7, 8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
-        resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1, )))
+        resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -156,7 +156,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [4, 5])
 
     def test_view_cpt_detail_all(self):
-        resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1, )))
+        resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
         self.assertEqual(resp.context['compte'].id, 1)
@@ -169,7 +169,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [4, 5, 6, 7, 8, 12, 13])
 
     def test_view_cpt_espece(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5, )))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['compte'].id, 5)
@@ -182,7 +182,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [2, ])
 
     def test_view_cpt_especes_all(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5, )))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Ensemble des opérations)')
@@ -196,7 +196,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset(resp.context['list_ope'], [2, 3])
 
     def test_view_cpt_especes_rapp(self):
-        resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5, )))
+        resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
         self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Opérations rapprochées)')

@@ -30,7 +30,7 @@ dist
 bdd.sqlite
 settings.py
 *.lnk
-grisbi*.db
+*.db*
 .idea
 grisbi-manuel-txt-0.4.0.pdf
 secret_key.py
@@ -44,4 +44,5 @@ coverage
 *.wpu
 test.py
 sqlite2mysql.py
-test_db.db
+*.winmerge
+reset.bat

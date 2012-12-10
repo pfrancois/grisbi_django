@@ -53,13 +53,9 @@ urlpatterns += patterns('gsb.import_gsb',
                             'import_gsb_0_5_x',
                             name="import_gsb")
 )
-urlpatterns += patterns('', url(r'options/import_csv_pm$',
+urlpatterns += patterns('', url(r'options/import_csv_all$',
                             import_csv.Import_csv_ope.as_view(),
-                            name="import_csv_ope_pm")
-)
-urlpatterns += patterns('', url(r'options/import_csv_remp$',
-                            import_csv.Import_csv_ope_remplacement.as_view(),
-                            name="import_csv_ope_remp")
+                            name="import_csv_ope_all")
 )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),

@@ -226,7 +226,7 @@ def smart_if(parser, token):
     nodelist_true = parser.parse(('else', 'endif'))
     token = parser.next_token()
     if token.contents == 'else':
-        nodelist_false = parser.parse(('endif', ))
+        nodelist_false = parser.parse(('endif',))
         parser.delete_first_token()
     else:
         nodelist_false = None

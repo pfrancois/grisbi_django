@@ -6,12 +6,11 @@ import decimal
 from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.utils.encoding import force_unicode
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_unicode, force_unicode
 from .model_field import CurField
 from gsb import utils
 from django.core.urlresolvers import reverse
@@ -42,7 +41,7 @@ class Tiers(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return u"%s"%self.nom
+        return u"%s" % self.nom
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -66,7 +65,7 @@ class Titre(models.Model):
     afin de pouvoir faire le lien dans les operations, il y a un ligne vers les tiers
     :model:`gsb.tiers`
     le set_null est mis afin de pouvoir faire du menage dans les titres plus utilise
-     sans que cela ne pose trop de problème dans les opérations.
+    sans que cela ne pose trop de problème dans les opérations.
     """
     typestitres = (
         ('ACT', u'action'),
@@ -446,8 +445,8 @@ class Compte(models.Model):
             @param rapp boolean faut il prendre uniquement les opération rapproches
         """
         #il n'y a pas d'operation
-        #if self.ope_set.order_by('date')[0]>datel:
-        #    return 0
+        if self.ope_set.order_by('date')[0] > datel:
+            return 0
 
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
@@ -548,10 +547,10 @@ class Compte_titre(Compte):
     class Meta:
         db_table = 'gsb_cpt_titre'
         ordering = ['nom']
-        verbose_name_plural = "Comptes Titre"
+        verbose_name_plural = u"Comptes Titre"
 
     #@transaction.commit_on_success
-    def achat(self, titre, nombre, prix=1, date=utils.today(), frais=0, virement_de=None, cat_frais=None,
+    def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None,
               tiers_frais=None):
         """fonction pour achat de titre:
         @param titre:object titre
@@ -561,6 +560,8 @@ class Compte_titre(Compte):
         @param frais:decimal
         @param virement_de: object compte
         """
+        if date is None:
+            date = utils.today()
         self.alters_data = True
         if isinstance(titre, Titre):
             if decimal.Decimal(force_unicode(frais)):  # des frais bancaires existent
@@ -569,14 +570,16 @@ class Compte_titre(Compte):
                                                           defaults={'nom': u'Frais bancaires:'})[0]
                 if not tiers_frais:
                     tiers_frais = titre.tiers
-                self.ope_set.create(date=date,
+                    self.ope_set.create(
+                                    date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes=u"Frais %s@%s" % (nombre, prix),
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
-                )
+                                    )
+                    
                 #gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
@@ -768,6 +771,8 @@ class Ope_titre(models.Model):
         ordering = ['-date']
 
     def save(self, *args, **kwargs):
+        self.cours = decimal.Decimal(self.cours)
+        self.nombre = decimal.Decimal(self.nombre)
         #definition des cat avec possibilite
         try:
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre'})[0]
@@ -791,7 +796,6 @@ class Ope_titre(models.Model):
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
-
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if self.ope_pmv is not None:
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
@@ -876,7 +880,8 @@ class Ope_titre(models.Model):
                 raise IntegrityError(u"opération espèce rapprochée")
         if  self.ope_pmv is not None:
             if self.ope_pmv.rapp is not None:
-                raise IntegrityError(u"opération jumelle rapprochée")
+                raise IntegrityError(u"opération pmv rapprochée")
+            self.ope_pmv.delete()
         super(Ope_titre, self).delete(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -1417,17 +1422,6 @@ def verif_ope_save(sender, **kwargs):
     @return:
     """
     instance = kwargs['instance']
-    if instance.is_mere:
-        instance.cat = Cat.objects.get_or_create(
-            nom=u"Opération Ventilée",
-            defaults={'type': "d", 'nom': u"Opération Ventilée"}
-        )[0]
-        if instance.montant != instance.tot_fille:
-            if instance.rapp or instance.pointe:
-                raise IntegrityError(
-                    u"attention opération ( %s ) est pointée ou rapproché et on change le montant global" % instance.id)
-            else:
-                instance.montant = instance.tot_fille
     if not instance.moyen:
         if instance.montant >= 0:
             if instance.compte.moyen_credit_defaut:
@@ -1436,7 +1430,7 @@ def verif_ope_save(sender, **kwargs):
                 moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit",
                                                                                      "id": settings.MD_CREDIT})[0]
                 instance.moyen = moyen
-        if  instance.montant <= 0:
+        if  instance.montant < 0:
             if instance.compte.moyen_debit_defaut:
                 instance.moyen = instance.compte.moyen_debit_defaut
             else:

@@ -215,10 +215,10 @@ class ope_cat_admin(liste_perso_inline):
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_editable = ('nom', )
+    list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
-    list_display_links = ('id', )
-    list_filter = ('type', )
+    list_display_links = ('id',)
+    list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
     list_select_related = True
     inlines = [ope_cat_admin]
@@ -231,10 +231,10 @@ class Cat_admin(Modeladmin_perso):
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_editable = ('nom', )
+    list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
-    list_display_links = ('id', )
-    list_filter = ('type', )
+    list_display_links = ('id',)
+    list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
 
 
@@ -328,7 +328,7 @@ class Ope_admin(Modeladmin_perso):
     'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
     ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    ordering = ('-date', )
+    ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers_virement', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = (
     'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
@@ -340,7 +340,7 @@ class Ope_admin(Modeladmin_perso):
     search_fields = ['tiers__nom']
     ordering = ['date']
     inlines = [ope_fille_admin]
-    raw_id_fields = ('mere', )
+    raw_id_fields = ('mere',)
 
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
@@ -366,7 +366,7 @@ class Ope_admin(Modeladmin_perso):
         retourne le lien pour l'operation lié dans le cadre des virements entre comptes
         """
         if obj.jumelle_id:
-            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id, ))
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
         else:
             return "(aucun-e)"
@@ -375,7 +375,7 @@ class Ope_admin(Modeladmin_perso):
 
     def show_mere(self, obj):
         if obj.mere_id:
-            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id, ))
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.mere))
         else:
             return "(aucun-e)"
@@ -384,7 +384,7 @@ class Ope_admin(Modeladmin_perso):
 
     def oper_titre(self, obj):
         if obj.ope:
-            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id, ))
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
         else:
             return "(aucun-e)"
@@ -440,9 +440,9 @@ class Ope_admin(Modeladmin_perso):
 class Cours_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
-    list_editable = ('valeur', )
+    list_editable = ('valeur',)
     list_filter = ('date', 'titre')
-    ordering = ('-date', )
+    ordering = ('-date',)
 
 
 class Titre_admin(Modeladmin_perso):
@@ -451,14 +451,14 @@ class Titre_admin(Modeladmin_perso):
     list_display = ('nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
-    list_filter = ('type', )
+    list_filter = ('type',)
     formfield_overrides = {
         models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
     }
 
     def show_tiers(self, obj):
         if obj.tiers_id:
-            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id, ))
+            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.tiers))
         else:
             return "(aucun-e)"
@@ -469,7 +469,7 @@ class Titre_admin(Modeladmin_perso):
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_filter = ('type', )
+    list_filter = ('type',)
     fields = ['type', 'nom']
 
     def nb_ope(self, obj):
@@ -491,8 +491,8 @@ class Tiers_admin(Modeladmin_perso):
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_editable = ('nom', 'notes')
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
-    list_display_links = ('id', )
-    list_filter = ('is_titre', )
+    list_display_links = ('id',)
+    list_filter = ('is_titre',)
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
@@ -543,18 +543,18 @@ class Exo_admin(Modeladmin_perso):
 class Ope_titre_admin(Modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
     readonly_fields = ('invest', 'show_ope', "show_ope_pmv")
-    list_display_links = ('id', )
-    list_filter = ('date', 'compte', 'titre', )
-    ordering = ('-date', )
+    list_display_links = ('id',)
+    list_filter = ('date', 'compte', 'titre',)
+    ordering = ('-date',)
 
     def show_ope(self, obj):
-        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id, ))
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
 
     show_ope.short_description = u"opération"
 
     def show_ope_pmv(self, obj):
-        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id, ))
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
 
     show_ope_pmv.short_description = u"opération relative aux plus ou moins values"

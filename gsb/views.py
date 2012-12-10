@@ -93,7 +93,7 @@ class Index_view(Mytemplateview):
             self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
             self.pl = Compte_titre.objects.all()
         else:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope','tiers')
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope', 'tiers')
             self.pl = Compte_titre.objects.filter(ouvert=True)
             #calcul du solde des bq
         self.total_bq = Ope.objects.filter(mere__exact=None,
@@ -101,11 +101,11 @@ class Index_view(Mytemplateview):
                         'solde']
         if self.total_bq is None:
             self.total_bq = decimal.Decimal()
-        self.bqe=[]
+        self.bqe = []
         self.total_bq = decimal.Decimal('0')
         #self.bq.annotate(solde=model.Sum('Ope__montant'))
         for p in self.bq.filter(ope__filles_set__isnull=True).annotate(solde_a=models.Sum('ope__montant')):
-            cpt={'solde':p.solde_a,
+            cpt = {'solde':p.solde_a,
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
@@ -118,10 +118,10 @@ class Index_view(Mytemplateview):
         #solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
         #if solde_espece['solde']:
             #self.total_pla += solde_espece['solde']
-        solde_espece =0
-        self.pla=[]
+        solde_espece = 0
+        self.pla = []
         for p in self.pl.filter(ope__filles_set__isnull=True).annotate(solde_e=models.Sum('ope__montant')):
-            cpt={'solde':p.solde_e+p.solde_titre(),
+            cpt = {'solde':p.solde_e + p.solde_titre(),
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
@@ -157,7 +157,7 @@ class Cpt_detail_view(Mytemplateview):
         """
         #compte = get_object_or_404(Compte, pk=cpt_id)
         try:
-            compte=Compte.objects.select_related('ope_self').get(pk=cpt_id)
+            compte = Compte.objects.select_related('ope_self').get(pk=cpt_id)
         except Compte.DoesNotExist:
             raise http.Http404('No compte matches the given query.')
         self.type = "nrapp"
@@ -166,13 +166,13 @@ class Cpt_detail_view(Mytemplateview):
         if self.rapp:
             self.type = "rapp"
         if compte.type != 't' and self.cpt_titre_espece == True:  # onredirige vers la vue standart
-            url = reverse("gsb_cpt_detail", args=(cpt_id, ))
+            url = reverse("gsb_cpt_detail", args=(cpt_id,))
             if self.rapp:
-                url = reverse("gsb_cpt_detail_rapp", args=(cpt_id, ))
+                url = reverse("gsb_cpt_detail_rapp", args=(cpt_id,))
             if self.all:
-                url = reverse("gsb_cpt_detail_all", args=(cpt_id, ))
+                url = reverse("gsb_cpt_detail_all", args=(cpt_id,))
             return http.HttpResponsePermanentRedirect(url)
-        if compte.type not in ('t', ) or self.cpt_titre_espece == True:
+        if compte.type not in ('t',) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             self.espece = True
@@ -774,7 +774,7 @@ def view_maj_cpt_titre(request, cpt_id):
                     if form.cleaned_data['sociaux']:
                         frais = nb * cours * decimal.Decimal(str(settings.TAUX_VERSEMENT))
                         cpt.achat(titre_en_cours, nb, cours, date=form.cleaned_data['date'], frais=frais,
-                                  cat_frais=Cat.objects.get(id=settings.ID_CAT_COTISATION), )
+                                  cat_frais=Cat.objects.get(id=settings.ID_CAT_COTISATION),)
                     else:
                         cpt.achat(titre_en_cours, nb, cours, date=form.cleaned_data['date'])
                 else:

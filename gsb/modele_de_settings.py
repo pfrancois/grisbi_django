@@ -187,7 +187,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     )
 if DJANGO_EXTENSION:
-    INSTALLED_APPS += ('django_extensions', )
+    INSTALLED_APPS += ('django_extensions',)
 
 #noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {

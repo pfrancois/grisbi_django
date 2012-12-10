@@ -15,8 +15,8 @@ class Dategsbwidget(forms.DateInput):
     """
 
     class Media:
-        js = ("js/basiccalendar.js", )
-        css = {'all': ('css/calendar.css', )}
+        js = ("js/basiccalendar.js",)
+        css = {'all': ('css/calendar.css',)}
 
     def __init__(self, attrs=None):  # @UnusedVariable
         super(Dategsbwidget, self).__init__(attrs)
@@ -49,8 +49,8 @@ class Titrewidget(forms.MultiWidget):
     """widget utilise pour la maj des titres"""
 
     def __init__(self, attrs=None):
-        widgets = (Curwidget(attrs=attrs, ),
-                   forms.TextInput(attrs=attrs, ))
+        widgets = (Curwidget(attrs=attrs,),
+                   forms.TextInput(attrs=attrs,))
         super(Titrewidget, self).__init__(widgets, attrs)
 
     def decompress(self, value):

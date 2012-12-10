@@ -71,7 +71,7 @@ class Format:
         liste = [str(b[0]) for b in liste]
         try:
             s = str(liste.index(s) + 1)
-        except ValueError:  # #on en un ca par defaut
+        except ValueError:  #on en un ca par defaut
             s = defaut
         return s
 
@@ -145,25 +145,35 @@ def datefr2datesql(chaine):
     except ValueError:
         return None
 
+def is_number(s):
+    """fonction qui verifie si ca a l'apparence d'un nombre"""
+    try:
+        n = float(s) # for int, long and float
+        if n == "nan" or n == "inf" or n == "-inf" :
+            return False
+    except ValueError:
+        try:
+            complex(s) # for complex
+        except ValueError:
+            return False
+    return True
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    if s is not None:
+    if is_number(s):
         return decimal.Decimal(str(s).replace(',', '.'))
     else:
         return decimal.Decimal('0')
 
-
-def strpdate(end_date,fmt="%Y-%m-%d"):
+def strpdate(end_date, fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD
     attention si s est None ou impossible renvoie None"""
     if end_date is not None:
         try:
             end_date = time.strptime(end_date, fmt)
         except ValueError as  v:
-            raise Exception("toto")
             if len(v.args) > 0 and v.args[0][:26] == 'unconverted data remains: ':
-                end_date = end_date[:-(len(v.args[0])-26)]
+                end_date = end_date[:-(len(v.args[0]) - 26)]
                 end_date = time.strptime(end_date, fmt)
             else:
                 raise v
@@ -171,12 +181,13 @@ def strpdate(end_date,fmt="%Y-%m-%d"):
     else:
         return datetime.date(1, 1, 1)
 
+#utilise pour mock et les test
 def today():
     return datetime.date.today()
 
-
+#utilise pour mock et les test
 def now():
-    return datetime.date.now()
+    return datetime.datetime.now()
 
 
 def addmonths(sourcedate, months, last=False, first=False):
@@ -218,3 +229,6 @@ class Excel_csv(csv.Dialect):
     quoting = csv.QUOTE_MINIMAL
 
 csv.register_dialect("excel_csv", Excel_csv)
+
+
+    

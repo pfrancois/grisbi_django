@@ -47,7 +47,7 @@ def verif_config(request):
 
     return render_to_response(
         'generic.djhtm',
-        {'resultats': (u"vous trouverez les résultats de la verification de la config", ),
+        {'resultats': (u"vous trouverez les résultats de la verification de la config",),
          'titre_long': "verif config",
          'titre': "verif _config",
         },

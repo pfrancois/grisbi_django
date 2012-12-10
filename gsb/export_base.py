@@ -117,6 +117,7 @@ class ExportViewBase(FormView):
     model_initial = None  # model d'ou on tire les dates initiales
     extension_file = None
     nomfich = None
+    debug = False
 
     def export(self, query):  # pylint: disable=W0613
         """
@@ -142,14 +143,14 @@ class ExportViewBase(FormView):
     def form_valid(self, form):
         """si le form est valid"""
         reponse = self.export(query=form.query)  # comme on a verifier dans le form que c'etait ok
-        debug = False  # ce debug permet d'afficher les export
         if self.nomfich is None:
             raise django_exceptions.ImproperlyConfigured('nomfich non defini')
         if self.extension_file is None:
             raise django_exceptions.ImproperlyConfigured('extension_file non defini')
 
-        if not debug:
+        if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"
+            reponse['Pragma'] = "public"
             reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
                                                                                 time.strftime("%d_%m_%Y-%H_%M_%S",
                                                                                               time.localtime())
