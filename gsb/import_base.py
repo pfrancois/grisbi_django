@@ -145,8 +145,7 @@ class property_ope_base(object):
                 else:
                     return None
             except ValueError:
-                self.erreur.append('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
-                return None 
+                raise Import_exception('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
     
     def to_bool(self, var):
         try:
@@ -161,7 +160,7 @@ class property_ope_base(object):
         try:
             return fr2decimal(var)
         except decimal.InvalidOperation:
-            self.erreur.append('probleme de montant a la ligne %s' % self.ligne)
+            raise Import_exception('probleme de montant a la ligne %s' % self.ligne)
             return 0
         
     def to_date(self, var, format_date):
@@ -169,7 +168,7 @@ class property_ope_base(object):
             date_s = var
             return strpdate(date_s, format_date)
         except ValueError:
-            self.erreur.append('probleme de date a la ligne %s' % self.ligne)
+            raise Import_exception('probleme de date a la ligne %s' % self.ligne)
 
 
 
@@ -208,6 +207,9 @@ class Import_base(views.Myformview):
         #renomage ok
         #logger.debug(u"enregistrement fichier ok")
         if  self.import_file(nomfich) == False:#importation bien effectue
+            import pprint
+            raise Exception
+            messages.info(self.request, "<pre>%s</pre>" % pprint.pprint(self.ajouter['ope']))
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
@@ -269,7 +271,7 @@ class Import_base(views.Myformview):
                 return False
             else:
                 raise e
-        messages.info(self.request, "vous pouvez continuer")
+        return False
     
         with transaction.commit_on_success():
             #import final

@@ -87,7 +87,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def rapp(self):
-        return self.to_id(self.row['m'])
+        return self.to_str(self.row['m'])
 
     @property
     def tiers(self):
@@ -164,8 +164,9 @@ class Import_csv_ope(import_base.Import_base):
                 #cat
                 type_cat = 'd' if row.mt < 0 else 'r'
                 if row.jumelle is not None:
-                    type_cat = 'v'
-                ope['cat_id'] = self.element('cat', row.cat, Cat, {'nom': row.cat, 'type': type_cat})
+                    ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type': 'v'})
+                else:
+                    ope['cat_id'] = self.element('cat', row.cat, Cat, {'nom': row.cat, 'type': type_cat})
                 #tiers
                 ope['tiers_id'] = self.element('tiers', row.tiers, Tiers, {'nom': row.tiers, 'notes': "", 'is_titre': False})
                 #date
@@ -211,7 +212,8 @@ class Import_csv_ope(import_base.Import_base):
                             ope['moyen_id'] = settings.MD_CREDIT
                         else:
                             ope['moyen_id'] = Moyen.objects.filter(type='v')[0].id
-                ope['notes'] = row.notes
+                if row.ope_titre != True:
+                    ope['notes'] = "%s %s"%(row.id,row.notes)
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
                 ope['pointe'] = row.pointe
@@ -228,7 +230,7 @@ class Import_csv_ope(import_base.Import_base):
                                 n_rapp[row.cpt] += 1
                             except KeyError:
                                 n_rapp[row.cpt] = 1
-                            name = u"rapp n°%s  compte %s " % (n_rapp[row.cpt], row.cpt)
+                            name = u"compte %s #%s " % (row.cpt, n_rapp[row.cpt])
                             try:
                                 q=Rapp.objects.get(nom=name)
                                 rapp=q.id
@@ -279,7 +281,7 @@ class Import_csv_ope(import_base.Import_base):
                         self.listes['titre'][ope['tiers_id']] = titre_id
                         ope['titre_id'] = titre_id
                         #on recupere le reste
-                        s = ope['notes'].partition('@')
+                        s = row.notes.partition('@')
                         try:
                             nombre = decimal.Decimal(s[0])
                             cours = decimal.Decimal(s[2])
