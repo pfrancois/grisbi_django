@@ -63,7 +63,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def date(self):
-        return self.to_date(self.row['date'], "%d/%m/%y")
+        return self.to_date(self.row['date'], "%d/%m/%Y")
 
     @property
     def ib(self):
@@ -119,7 +119,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def has_fille(self):
-        return self.to_bool(self.row['fille'])
+        return self.to_bool(self.row['has_fille'])
 
 
 class Import_csv_ope(import_base.Import_base):
@@ -131,7 +131,7 @@ class Import_csv_ope(import_base.Import_base):
     def tableau_import(self, nomfich):
         """renvoi un tableau complet de l'import"""
         nb_titre = 0 #nb de nouveaux titres
-        n_rapp = 0
+        n_rapp = dict()
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
             for row in fich:
@@ -175,7 +175,7 @@ class Import_csv_ope(import_base.Import_base):
                 #date_val
                 ope['date_val'] = row.date_val
                 #exercice
-                if row.exercice is None and 1 == 0:
+                if row.exercice is None and settings.UTILISE_EXERCICES == True:
                     d = row.date
                     q = Exercice.objects.filter(date_debut__lte=d, date_fin__gte=d)
                     if q.exists():
@@ -183,14 +183,17 @@ class Import_csv_ope(import_base.Import_base):
                     else:
                         #on cree un exercice d'un an
                         date_debut = datetime.date(d.year, 1, 1)
-                        date_fin = datetime.date(d.year, 1, 1)
+                        date_fin = datetime.date(d.year, 12, 31)
                         name = "du %s au %s" % (date_debut.strftime("%d/%m/%Y"), date_fin.strftime("%d/%m/%Y"))
                         exo = self.ajout('exercice', Exercice, {"nom":name, "date_debut":date_debut, "date_fin":date_fin})
                     ope['exercice_id'] = exo
                 else:
                     ope['exercice_id'] = None
                 #ib
-                ope['ib_id'] = self.element('ib', row.ib, Ib, {'nom': row.ib, 'type': type_cat})
+                if settings.UTILISE_IB == True:
+                    ope['ib_id'] = self.element('ib', row.ib, Ib, {'nom': row.ib, 'type': type_cat})
+                else:
+                    ope['ib_id']=None
                 #jumelle et mere
                 #attention on prend juste les id toute la creation d'eventuelles operations est plus tard
                 ope['jumelle_id'] = row.jumelle
@@ -216,14 +219,22 @@ class Import_csv_ope(import_base.Import_base):
                     try:
                         ope['rapp_id'] = self.listes['rapp'][row.rapp]
                     except KeyError:
-                        q = Rapp.objects.filter(id=row.rapp)
+                        q = Rapp.objects.filter(nom=row.rapp)
                         if q.exists():
                             rapp = q[0].id
                         else:
                             #creation d'un rapprochement
-                            name = u"rappprochement n°%s effectué le %s sur le compte %s " % (n_rapp, utils.today(), row.cpt)
-                            n_rapp += 1
-                            rapp = self.ajout('rapp', Rapp, {"nom":name, "date":utils.today()})
+                            try:
+                                n_rapp[row.cpt] += 1
+                            except KeyError:
+                                n_rapp[row.cpt] = 1
+                            name = u"rapp n°%s  compte %s " % (n_rapp[row.cpt], row.cpt)
+                            try:
+                                q=Rapp.objects.get(nom=name)
+                                rapp=q.id
+                            except Rapp.DoesNotExist:
+                                rapp = self.ajout('rapp', Rapp, {"nom":name, "date":utils.today()})
+                            #rapp=Rapp.objects.get(id=row.rapp).id
                         self.listes['rapp'][row.rapp] = rapp
                         ope['rapp_id'] = rapp
                 else:

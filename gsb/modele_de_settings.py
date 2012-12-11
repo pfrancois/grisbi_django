@@ -139,7 +139,7 @@ except ImportError:
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
     fichier.write("SECRET_KEY=%s" % secret)
-    from secret_key import *
+    from secret_key import *  #@UnusedWildImport
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

@@ -244,6 +244,17 @@ class Import_base(views.Myformview):
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
         else:
             self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
+        #on gere la categorie operation sur titre
+        try:
+            self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_OST).nom] = settings.ID_CAT_OST
+        except Cat.DoesNotExist:
+            self.listes['moyen']['operation sur titre'] = settings.ID_CAT_OST
+            Cat.objects.create(id=settings.ID_CAT_OST, nom='operation sur titre', type="d")
+        try:
+            self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_PMV).nom] = settings.ID_CAT_PMV
+        except Cat.DoesNotExist:
+            self.listes['moyen']['Revenus de placement:Plus-values'] = settings.ID_CAT_PMV
+            Cat.objects.create(id=settings.ID_CAT_PMV, nom='Revenus de placement:Plus-values', type="d")   
         try:
             self.tableau_import(nomfich)
             if len(self.erreur):
@@ -288,11 +299,13 @@ class Import_base(views.Myformview):
             #les categories
             self.create('cat', Cat)
             #les ib
-            self.create('ib', Ib)
+            if settings.UTILISE_IB == True:
+                self.create('ib', Ib)
             #les moyens
             self.create('moyen', Moyen)
             #les exercices
-            self.create('exercice', Exercice)
+            if settings.UTILISE_EXERCICES == True:
+                self.create('exercice', Exercice)
             #les rapp
             self.create('rapp', Rapp)
             for ope in self.ajouter['ope']:
@@ -395,7 +408,7 @@ class Import_base(views.Myformview):
             for objet in self.ajouter[obj]:
                 model.objects.create(**objet)
                 nb_ajout += 1
-            messages.info(self.request, "%s %s ajoutes (%s)" % (nb_ajout, obj, nom_ajoute))
+            messages.info(self.request, u"%s %s ajoutés (%s)" % (nb_ajout, obj, nom_ajoute))
         except KeyError as e:
             messages.error(self.request, e)
 

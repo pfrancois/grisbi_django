@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 from gsb import models
 from .utils import Format as fmt
-import time
 #from .utils import strpdate
 
 import logging
@@ -49,7 +48,7 @@ class Export_ope_csv(Export_view_csv_base):
             ligne = {'id': ope.id, 'account name': ope.compte.nom, 'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
             #rapp
             if ope.rapp is not None:
-                ligne['m'] = ope.rapp.id
+                ligne['m'] = ope.rapp.nom
             else:
                 ligne['m'] = ''
             #pointee
@@ -70,9 +69,8 @@ class Export_ope_csv(Export_view_csv_base):
                 ligne['projet'] = ""
             #le reste
             ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = fmt.str(ope.jumelle, '')
-            toto = ope.filles_set.exists()
-            ligne['has_fille'] = fmt.bool(toto)
+            ligne['id jumelle lie'] = fmt.str(ope.jumelle, '') 
+            ligne['has_fille'] = fmt.bool(ope.filles_set.exists())
             ligne['num op vent m'] = fmt.str(ope.mere, '')
             ope_t = Ope_titre.objects.filter(ope=ope)
             if ope_t.exists():

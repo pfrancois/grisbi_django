@@ -21,11 +21,11 @@ def gestion_echeances(request):
 
 
 def verif_element_config(element, request, collection=None):
-    id = getattr(settings, element, None)
-    if id is None:
+    id_elem = getattr(settings, element, None)
+    if id_elem is None:
         messages.error(request, "%s non definit dans setting.py" % element)
     if collection is not None:
-        objet = collection.objects.filter(id=id)
+        objet = collection.objects.filter(id=id_elem)
         if not objet.exists():
             messages.error(request, u"%s n'existe pas" % element)
 

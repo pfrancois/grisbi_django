@@ -160,8 +160,10 @@ def is_number(s):
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
+    s=str(s)
+    s=s.replace(',', '.')
     if is_number(s):
-        return decimal.Decimal(str(s).replace(',', '.'))
+        return decimal.Decimal(s)
     else:
         return decimal.Decimal('0')
 

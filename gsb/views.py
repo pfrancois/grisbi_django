@@ -118,7 +118,6 @@ class Index_view(Mytemplateview):
         #solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
         #if solde_espece['solde']:
             #self.total_pla += solde_espece['solde']
-        solde_espece = 0
         self.pla = []
         for p in self.pl.filter(ope__filles_set__isnull=True).annotate(solde_e=models.Sum('ope__montant')):
             cpt = {'solde':p.solde_e + p.solde_titre(),
@@ -516,7 +515,7 @@ def maj_cours(request, pk):
 
 
 @login_required
-def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
+def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False): 
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si rapp affiche uniquement les rapp
     si all affiche toute les ope
@@ -846,8 +845,6 @@ def search_opes(request):
 
 def perso(request):
     resultat = []
-    sg = Compte.objects.get(id=12)
-    visa = Compte.objects.get(id=19)
     for r in Rapp.objects.filter(nom__startswith="Sg"):
         solde_visa = r.ope_set.filter(compte__nom="Visa").aggregate(total=models.Sum('montant'))['total']
         if solde_visa:
