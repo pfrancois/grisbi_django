@@ -131,7 +131,6 @@ class Import_csv_ope(import_base.Import_base):
     def tableau_import(self, nomfich):
         """renvoi un tableau complet de l'import"""
         nb_titre = 0 #nb de nouveaux titres
-        n_rapp = dict()
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
             for row in fich:

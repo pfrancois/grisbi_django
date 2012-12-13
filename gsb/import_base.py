@@ -204,8 +204,9 @@ class Import_base(views.Myformview):
         #renomage ok
         #logger.debug(u"enregistrement fichier ok")
         if  self.import_file(nomfich) == False:#probleme importation
-            import pprint
-            messages.info(self.request, "<pre>%s</pre>" % pprint.pprint(self.ajouter['ope']))
+            if self.ajouter['ope'] is not None:
+                import pprint
+                messages.info(self.request, "<pre>%s</pre>" % pprint.pprint(self.ajouter['ope']))
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
@@ -328,15 +329,16 @@ class Import_base(views.Myformview):
             #les ope_titres
             for obj in self.ajouter['ope_titre']:
                 cpt = Compte_titre.objects.get(id=obj["compte_id"])
+                titre=Titre.objects.get(id=obj['titre_id'])
                 if obj['nombre'] > 0:
-                    ope_titre=cpt.achat(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope_titre=cpt.achat(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
                     ope=ope_titre.ope
                     ope.rapp_id=obj['rapp_id']
                     ope.pointe=obj['pointe']
                     ope.exercice_id=obj['exercice_id']
                     ope.save()
                 else:
-                    ope_titre=cpt.vente(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope_titre=cpt.vente(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
                     ope=ope_titre.ope_pmv
                     ope.rapp_id=obj['rapp_id']
                     ope.pointe=obj['pointe']
@@ -420,7 +422,8 @@ class Import_base(views.Myformview):
             for objet in self.ajouter[obj]:
                 model.objects.create(**objet)
                 nb_ajout += 1
-            messages.info(self.request, u"%s %s ajoutés (%s)" % (nb_ajout, obj, nom_ajoute))
+            if nb_ajout > 0:
+                messages.info(self.request, u"%s %s ajoutés (%s)" % (nb_ajout, obj, nom_ajoute))
         except KeyError as e:
             messages.error(self.request, e)
 
