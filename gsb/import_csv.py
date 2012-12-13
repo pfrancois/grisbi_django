@@ -130,7 +130,8 @@ class Import_csv_ope(import_base.Import_base):
 
     def tableau_import(self, nomfich):
         """renvoi un tableau complet de l'import"""
-        nb_titre = 0 #nb de nouveaux titres
+        titre_nb = 0 #nb de nouveaux titres
+        nb_titres=dict()
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
             for row in fich:
@@ -246,15 +247,15 @@ class Import_csv_ope(import_base.Import_base):
                         titre_id = self.listes['titre'][ope['tiers_id']]  # pylint: disable=W0622
                         ope['titre_id'] = titre_id
                     except KeyError:
-                        nb_titre += 1
+                        titre_nb += 1
                         #reflechir si on met des fetch related
                         name = row.tiers[7:]
                         try:
                             titre_id = Titre.objects.get(nom=name).id
                         except Titre.DoesNotExist:
                             if name == '' or name is None or name == 0:
-                                name = u"titre %s inconnu cree le %s" % (nb_titre, utils.now().strftime("%d/%m/%Y a %H:%M:%S"))
-                            isin = u"ZZ%s%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
+                                name = u"titre %s inconnu cree le %s" % (titre_nb, utils.now().strftime("%d/%m/%Y a %H:%M:%S"))
+                            isin = u"ZZ%s%s" % (utils.today().strftime('%d%m%Y'), titre_nb)
                         #on cree en lazy un titre
                             titre_id = self.ajout('titre', Titre, {'nom': name, 'type': 'ZZZ', 'isin': isin, 'tiers_id': ope['tiers_id']})
                         self.listes['titre'][ope['tiers_id']] = titre_id
@@ -272,6 +273,13 @@ class Import_csv_ope(import_base.Import_base):
                         if s[1] == '':
                             messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
                             cours = 1
+                    try:
+                        nb_titres[titre_id]=nb_titres[titre_id]+nombre
+                    except KeyError:
+                        nb_titres[titre_id]=nombre
+                    if nb_titres[titre_id] <0:
+                        raise import_base.Import_exception('attention il ne peut avoir un solde de titre negatif pour le titre %s a la ligne %s' % (row.tiers[7:],row.ligne))
+                        
                     nouveau = {"titre_id":ope['titre_id'],
                              "compte_id":ope['compte_id'],
                              "nombre":nombre,

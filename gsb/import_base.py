@@ -204,9 +204,6 @@ class Import_base(views.Myformview):
         #renomage ok
         #logger.debug(u"enregistrement fichier ok")
         if  self.import_file(nomfich) == False:#probleme importation
-            if self.ajouter['ope'] is not None:
-                import pprint
-                messages.info(self.request, "<pre>%s</pre>" % pprint.pprint(self.ajouter['ope']))
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
