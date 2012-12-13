@@ -260,19 +260,19 @@ class Import_csv_ope(import_base.Import_base):
                             titre_id = self.ajout('titre', Titre, {'nom': name, 'type': 'ZZZ', 'isin': isin, 'tiers_id': ope['tiers_id']})
                         self.listes['titre'][ope['tiers_id']] = titre_id
                         ope['titre_id'] = titre_id
-                        #on recupere le reste
-                        s = row.notes.partition('@')
-                        try:
-                            nombre = decimal.Decimal(s[0])
-                            cours = decimal.Decimal(s[2])
-                        except KeyError:
-                            self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation, il doit etre de la forme nombre@montant' % (row.ligne, row.id))
-                        except  decimal.InvalidOperation:
-                            if s[0] == '':
-                                self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation' % (row.ligne, row.id))
-                            if s[1] == '':
-                                messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
-                                cours = 1
+                    #on recupere le reste
+                    s = row.notes.partition('@')
+                    try:
+                        nombre = decimal.Decimal(s[0])
+                        cours = decimal.Decimal(s[2])
+                    except KeyError:
+                        self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation, il doit etre de la forme nombre@montant' % (row.ligne, row.id))
+                    except  decimal.InvalidOperation:
+                        if s[0] == '':
+                            self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation' % (row.ligne, row.id))
+                        if s[1] == '':
+                            messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
+                            cours = 1
                     nouveau = {"titre_id":ope['titre_id'],
                              "compte_id":ope['compte_id'],
                              "nombre":nombre,
