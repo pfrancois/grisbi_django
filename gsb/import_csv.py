@@ -278,7 +278,7 @@ class Import_csv_ope(import_base.Import_base):
                              "nombre":nombre,
                              "cours":cours,
                              "date":ope['date'],
-                             "rapp_id":row.rapp, #on le met ici car comme les opes
+                             "rapp_id":ope['rapp_id'], #on le met ici car comme les opes
                              'pointe':ope['pointe'],
                              "exercice_id":ope["exercice_id"],
                              "ligne":row.ligne}

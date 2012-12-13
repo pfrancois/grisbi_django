@@ -332,9 +332,24 @@ class Import_base(views.Myformview):
             for obj in self.ajouter['ope_titre']:
                 cpt = Compte_titre.objects.get(id=obj["compte_id"])
                 if obj['nombre'] > 0:
-                    cpt.achat(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope_titre=cpt.achat(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope=ope_titre.ope
+                    ope.rapp_id=obj['rapp_id']
+                    ope.pointe=obj['pointe']
+                    ope.exercice_id=obj['exercice_id']
+                    ope.save()
                 else:
-                    cpt.vente(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope_titre=cpt.vente(titre=Titre.objects.get(id=obj['titre_id']), nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope=ope_titre.ope_pmv
+                    ope.rapp_id=obj['rapp_id']
+                    ope.pointe=obj['pointe']
+                    ope.exercice_id=obj['exercice_id']
+                    ope.save()
+                    ope=ope_titre.ope
+                    ope.rapp_id=obj['rapp_id']
+                    ope.pointe=obj['pointe']
+                    ope.exercice_id=obj['exercice_id']
+                    ope.save()
                               
     def get_success_url(self):
         return reverse(self.url)

@@ -801,6 +801,8 @@ class Ope_titre(models.Model):
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
+            if moyen is None:
+                moyen=Moyen.objects.get(id=settings.MD_DEBIT)
             if not self.ope:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
@@ -835,7 +837,8 @@ class Ope_titre(models.Model):
             #on cree les ope
             self.invest = ost
             moyen = self.compte.moyen_credit_defaut
-
+            if moyen is None:
+                moyen=Moyen.objects.get(id=settings.MD_CREDIT)
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
