@@ -130,22 +130,19 @@ class property_ope_base(object):
         return False
     
     def to_str(self, var, retour=None):
-        if var == "" or var == 0:
+        if var == "" or var == '0':
             return retour
         else:
             return var
    
     def to_id(self, var):
-        if var == "" or var == 0:
-            return None
-        else:
-            try:
-                if var is not None:
-                    return int(var)
-                else:
-                    return None
-            except ValueError:
-                raise Import_exception('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
+        try:
+            if var == "" or var is None or int(var) == 0 :
+                return None
+            else:
+                return int(var)
+        except ValueError:
+            raise Import_exception('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
     
     def to_bool(self, var):
         try:
