@@ -606,6 +606,7 @@ class Compte_titre(Compte):
         @param frais
         @param virement_vers
         """
+        nombre = abs(nombre)
         self.alters_data = True
         if isinstance(titre, Titre):
             #extraction des titres dans portefeuille
