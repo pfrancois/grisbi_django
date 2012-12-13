@@ -212,33 +212,13 @@ class Import_csv_ope(import_base.Import_base):
                             ope['moyen_id'] = settings.MD_CREDIT
                         else:
                             ope['moyen_id'] = Moyen.objects.filter(type='v')[0].id
-                if row.ope_titre != True:
-                    ope['notes'] = "%s %s"%(row.id,row.notes)
+                ope['notes'] = row.notes
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
                 ope['pointe'] = row.pointe
+                
                 if row.rapp is not None:
-                    try:
-                        ope['rapp_id'] = self.listes['rapp'][row.rapp]
-                    except KeyError:
-                        q = Rapp.objects.filter(nom=row.rapp)
-                        if q.exists():
-                            rapp = q[0].id
-                        else:
-                            #creation d'un rapprochement
-                            try:
-                                n_rapp[row.cpt] += 1
-                            except KeyError:
-                                n_rapp[row.cpt] = 1
-                            name = u"compte %s #%s " % (row.cpt, n_rapp[row.cpt])
-                            try:
-                                q=Rapp.objects.get(nom=name)
-                                rapp=q.id
-                            except Rapp.DoesNotExist:
-                                rapp = self.ajout('rapp', Rapp, {"nom":name, "date":utils.today()})
-                            #rapp=Rapp.objects.get(id=row.rapp).id
-                        self.listes['rapp'][row.rapp] = rapp
-                        ope['rapp_id'] = rapp
+                    ope['rapp_id'] = self.element('rapp', row.rapp, Rapp, {'nom': row.rapp, 'date': utils.today()})
                 else:
                     ope['rapp_id'] = None
                 ope['ligne'] = row.ligne

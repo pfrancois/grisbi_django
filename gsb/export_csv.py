@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 from gsb import models
 from .utils import Format as fmt
-#from .utils import strpdate
 
 import logging
 from django.http import HttpResponse
@@ -12,7 +11,6 @@ from django.http import HttpResponse
 import gsb.export_base as ex
 from .models import Ope_titre
 from django.core import exceptions as django_exceptions
-
 
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"

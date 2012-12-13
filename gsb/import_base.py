@@ -206,9 +206,8 @@ class Import_base(views.Myformview):
         destination.close()
         #renomage ok
         #logger.debug(u"enregistrement fichier ok")
-        if  self.import_file(nomfich) == False:#importation bien effectue
+        if  self.import_file(nomfich) == False:#probleme importation
             import pprint
-            raise Exception
             messages.info(self.request, "<pre>%s</pre>" % pprint.pprint(self.ajouter['ope']))
             os.remove(nomfich)
             return self.form_invalid(form)
@@ -271,7 +270,6 @@ class Import_base(views.Myformview):
                 return False
             else:
                 raise e
-        return False
     
         with transaction.commit_on_success():
             #import final
@@ -393,7 +391,7 @@ class Import_base(views.Myformview):
         except KeyError:
             last_id = model.objects.aggregate(id_max=Max('id'))['id_max']
             if last_id is None:
-                last_id = 1
+                last_id = 0
         if 'id' not in nouveau or nouveau['id'] < last_id:#on cree un operation
             last_id += 1
             self.id[obj] = last_id
