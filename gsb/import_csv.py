@@ -276,7 +276,10 @@ class Import_csv_ope(import_base.Import_base):
                     try:
                         nb_titres[titre_id]=nb_titres[titre_id]+nombre
                     except KeyError:
-                        nb_titres[titre_id]=nombre
+                        try: 
+                            nb_titres[titre_id]=nombre+Titre.objects.get(id=titre_id).nb()
+                        except Titre.DoesNotExist:
+                            nb_titres[titre_id]=nombre
                     if nb_titres[titre_id] <0:
                         raise import_base.Import_exception('attention il ne peut avoir un solde de titre negatif pour le titre %s a la ligne %s' % (row.tiers[7:],row.ligne))
                         
