@@ -445,6 +445,9 @@ class Compte(models.Model):
             @param rapp boolean faut il prendre uniquement les opération rapproches
         """
         #il n'y a pas d'operation
+        if not self.ope_set.exists():
+            return 0
+        #il n'y a pas d'operation a cette date 
         if self.ope_set.order_by('date')[0] > datel:
             return 0
 
