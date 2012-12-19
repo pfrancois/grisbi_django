@@ -2,8 +2,7 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 #from django.conf.urls import include #non utilise actuellement
-from . import export_csv, export_qif, views, outils, import_csv
-
+from . import export_csv, export_qif, views, outils, import_csv, import_csv_perso
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -56,6 +55,10 @@ urlpatterns += patterns('gsb.import_gsb',
 urlpatterns += patterns('', url(r'options/import_csv_all$',
                             import_csv.Import_csv_ope.as_view(),
                             name="import_csv_ope_all")
+)
+urlpatterns += patterns('', url(r'options/import_perso$',
+                            import_csv_perso.Import_csv_perso.as_view(),
+                            name="import_csv_perso")
 )
 urlpatterns += patterns('',
                         (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),

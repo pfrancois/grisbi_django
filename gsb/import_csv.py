@@ -63,7 +63,10 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def date(self):
-        return self.to_date(self.row['date'], "%d/%m/%Y")
+        try:
+            return self.to_date(self.row['date'], "%d/%m/%Y")
+        except ValueError:
+            return None
 
     @property
     def ib(self):
@@ -135,7 +138,7 @@ class Import_csv_ope(import_base.Import_base):
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
             for row in fich:
-                if row.row['date'] == "":
+                if row.date is None:
                     continue
                 ope = dict()
                 ope['ligne'] = row.ligne
@@ -295,9 +298,14 @@ class Import_csv_ope(import_base.Import_base):
                     self.ajout('ope_titre', Ope_titre, nouveau)
 
         print "-----------second tour-----"
+        ope_jumelle=list()
         for ope in self.ajouter['ope']:
             print 2, ope['ligne']
             if ope['jumelle_id'] is not None:
+                if ope['jumelle_id'] not in ope_jumelle:
+                    ope_jumelle.append(ope['jumelle_id']) 
+                else:
+                    raise import_base.Import_exception("attention un virement ne peut se faire qu'entre deux opes pas plus. ligne %s" % ope['ligne'])
                 try:
                     ope['jumelle_id'] = self.listes['ope'][ope['jumelle_id']]
                 except KeyError:
@@ -316,8 +324,7 @@ class Import_csv_ope(import_base.Import_base):
                         if jumelle['date'] != ope['date']:
                             ope['date'] = jumelle['date']
                             messages.info(self.request, "attention la date corrige. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
-
-                    
+                
             if ope['mere_id'] is not None:
                 ope['mere_id'] = self.listes['ope'][ope['mere_id']]
             if ope['has_fille'] == True:

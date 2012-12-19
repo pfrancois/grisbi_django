@@ -254,6 +254,7 @@ class Import_base(views.Myformview):
         try:
             self.tableau_import(nomfich)
             if len(self.erreur):
+                messages.warning(self.request, "attention traitement interrompu")
                 for err in self.erreur:
                     messages.warning(self.request, err)
                 return False
