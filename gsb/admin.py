@@ -305,7 +305,16 @@ class Compte_admin(Modeladmin_perso):
         return render(request, 'admin/add_rapp.djhtm', {'opes': query_ope, 'rapp_form': form, })
 
     action_transformer_pointee_rapp.short_description = "Rapprocher un compte"
-
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'moyen_debit_defaut':
+            kwargs['queryset'] = Moyen.objects.filter(type='d')
+        else:
+            if db_field.name == 'moyen_credit_defaut':
+                kwargs['queryset'] = Moyen.objects.filter(type='r')
+        return super(Compte_admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+                
+        
 
 class Compte_titre_admin(Modeladmin_perso):
     """compte titre """
