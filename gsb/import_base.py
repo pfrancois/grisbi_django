@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 
 from . import forms as gsb_forms
-from .models import Tiers, Titre, Cat, Ib, Exercice, Compte, Compte_titre, Moyen, Rapp, Ope
+from .models import Tiers, Titre, Cat, Ib, Exercice, Compte, Moyen, Rapp, Ope
 from . import views
 from .utils import fr2decimal, strpdate
 
@@ -217,12 +217,11 @@ class Import_base(views.Myformview):
         #definition du nom du fichier
         self.nb = dict()
         self.id = dict()
-        self.listes = { 'titre':dict(), 'cat':dict(), 'ib':dict(), 'tiers':dict(), 'moyen':dict(), 'rapp':dict(), 'compte':dict(), 'ope':dict()                    , 'exercice':dict(), 'compte_titre':dict(), }
-        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(), 'ope':list(), "ope_titre":list(), 'exercice':list()}
+        self.listes = { 'titre':dict(), 'cat':dict(), 'ib':dict(), 'tiers':dict(), 'moyen':dict(), 'rapp':dict(), 'compte':dict(), 'ope':dict(), 'exercice':dict() }
+        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(),                  'ope':list(), 'exercice':list(), "ope_titre":list()}
         #personalisation avec ajout de compte
         if self.creation_de_compte:
             self.ajouter['compte'] = list()
-            self.ajouter['compte_titre'] = list()
         #on ajoute les moyens par defaut
         try:
             self.listes['moyen'][Moyen.objects.get(id=settings.MD_DEBIT).nom] = settings.MD_DEBIT
@@ -273,13 +272,10 @@ class Import_base(views.Myformview):
             nb_ajout = 0
             if self.creation_de_compte:
                 for obj in self.ajouter['compte']:
-                    if obj['type'] != 't':
                         Compte.objects.create(id=obj['id'], nom=obj['nom'], type=obj['type'])
                         nb_ajout += 1
-                    else:
-                        Compte_titre.objects.create(id=obj['id'], nom=obj['nom'], type='t')
-                        nb_ajout += 1       
-                messages.info(self.request, "%s compte ajoutes" % nb_ajout)
+                if not self.test:
+                    messages.info(self.request, "%s compte ajoutes" % nb_ajout)
             else:
                 if 'compte' in self.ajouter:
                     raise Import_exception("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
@@ -290,7 +286,8 @@ class Import_base(views.Myformview):
             for titre in self.ajouter['titre']:
                 Titre.objects.create(id=titre['id'], nom=titre['nom'], type='ZZZ', isin=titre['isin'], tiers_id=titre['tiers_id'])
                 nb_ajout += 1
-            messages.info(self.request, "%s titres ajoutes" % nb_ajout)
+            if not self.test:
+                messages.info(self.request, "%s titres ajoutes" % nb_ajout)
 
             #les categories
             self.create('cat', Cat)
@@ -326,7 +323,7 @@ class Import_base(views.Myformview):
                         tiers_id=ope['tiers_id'])
             #les ope_titres
             for obj in self.ajouter['ope_titre']:
-                cpt = Compte_titre.objects.get(id=obj["compte_id"])
+                cpt = Compte.objects.get(id=obj["compte_id"])
                 titre=Titre.objects.get(id=obj['titre_id'])
                 if obj['nombre'] > 0:
                     ope_titre=cpt.achat(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
@@ -420,7 +417,7 @@ class Import_base(views.Myformview):
             for objet in self.ajouter[obj]:
                 model.objects.create(**objet)
                 nb_ajout += 1
-            if nb_ajout > 0:
+            if nb_ajout > 0 and not self.test:
                 messages.info(self.request, u"%s %s ajoutés (%s)" % (nb_ajout, obj, nom_ajoute))
         except KeyError as e:
             messages.error(self.request, e)

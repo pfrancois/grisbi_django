@@ -15,7 +15,6 @@ from .model_field import CurField
 from gsb import utils
 from django.core.urlresolvers import reverse
 
-
 class Gsb_exc(Exception):
     pass
 
@@ -431,6 +430,7 @@ class Compte(models.Model):
                                             related_name="compte_moyen_credit_set", default=None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
                                            related_name="compte_moyen_debit_set", default=None)
+    titre = models.ManyToManyField('Titre', through="Ope_titre")
 
     class Meta:
         db_table = 'gsb_compte'
@@ -439,7 +439,7 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
 
-    def solde(self, datel=None, rapp=False):
+    def solde(self, datel=None, rapp=False, espece=False):
         """renvoie le solde du compte
             @param datel date date limite de calcul du solde
             @param rapp boolean faut il prendre uniquement les opération rapproches
@@ -448,13 +448,13 @@ class Compte(models.Model):
         if not self.ope_set.exists():
             return 0
         #il n'y a pas d'operation a cette date 
-        if self.ope_set.order_by('date')[0] > datel:
+        if datel is not None and self.ope_set.order_by('date')[0].date > datel:
             return 0
 
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
             query = query.filter(rapp__isnull=False)
-        if datel:
+        if datel is not None:
             query = query.filter(date__lte=datel)
         req = query.aggregate(total=models.Sum('montant'))['total']
         if req is None:
@@ -463,6 +463,8 @@ class Compte(models.Model):
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
+        if self.type == 't' and espece==False:
+            solde = solde + self.solde_titre(datel, rapp)
         return solde
 
     @transaction.commit_on_success
@@ -479,39 +481,21 @@ class Compte(models.Model):
             raise Gsb_exc(u"attention ce ne sont pas deux compte de même type")
         if not(self.ouvert and new.ouvert):
             raise Gsb_exc(u"attention un des deux comptes est fermé")
-        if self.type == 't':
-            nb_change = Compte_titre.objects.get(id=self.id).fusionne(Compte_titre.objects.get(id=new.id))
-        else:
-            nb_change = Echeance.objects.filter(compte=self).update(compte=new)
-            nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
-            nb_change += Ope.objects.filter(compte=self).update(compte=new)
-            self.delete()
+        nb_change = Echeance.objects.filter(compte=self).update(compte=new)
+        nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
+        nb_change += Ope.objects.filter(compte=self).update(compte=new)
+        if self.type=="t":
+            nb_change += Ope_titre.objects.filter(compte=self).update(compte=new)
+        self.delete()
         return nb_change
 
     def get_absolute_url(self):
         return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
-    def save(self, *args, **kwargs):
-        """verifie qu'on ne cree pas un compte avec le type 't'"""
-        self.alters_data = True
-        if self.type == 't' and not isinstance(self, Compte_titre) and not self.id:
-            cpt = Compte_titre.objects.create(nom=self.nom, titulaire=self.titulaire, type=self.type,
-                                              banque=self.banque,
-                                              guichet=self.guichet, num_compte=self.num_compte,
-                                              cle_compte=self.cle_compte,
-                                              solde_init=self.solde_init, solde_mini_voulu=self.solde_mini_voulu,
-                                              solde_mini_autorise=self.solde_mini_autorise, ouvert=self.ouvert,
-                                              notes=self.notes, moyen_credit_defaut=self.moyen_credit_defaut,
-                                              moyen_debit_defaut=self.moyen_credit_defaut
-            )
-        else:
-            cpt = super(Compte, self).save(*args, **kwargs)
-        return cpt
-
-    def solde_rappro(self):
+    def solde_rappro(self,espece=False):
         return self.solde(rapp=True)
 
-    def solde_pointe(self):
+    def solde_pointe(self,espece=False):
         """renvoie le solde du compte pour les operations pointees
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id).filter(pointe=True)
@@ -539,19 +523,6 @@ class Compte(models.Model):
 
     date_rappro.short_description = u"date dernier rapp"
 
-
-class Compte_titre(Compte):
-    """
-    comptes titres
-    compte de classe "t" avec des fonctions en plus. une compta matiere
-    """
-    titre = models.ManyToManyField('Titre', through="Ope_titre")
-
-    class Meta:
-        db_table = 'gsb_cpt_titre'
-        ordering = ['nom']
-        verbose_name_plural = u"Comptes Titre"
-
     #@transaction.commit_on_success
     def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None,
               tiers_frais=None):
@@ -573,7 +544,7 @@ class Compte_titre(Compte):
                                                           defaults={'nom': u'Frais bancaires:'})[0]
                 if not tiers_frais:
                     tiers_frais = titre.tiers
-                    self.ope_set.create(
+                self.ope_set.create(
                                     date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -686,48 +657,6 @@ class Compte_titre(Compte):
         else:
             raise TypeError("pas un titre")
 
-    def solde(self, datel=None, rapp=False):
-        """renvoie le solde"""
-        #date de la premiere operation
-        solde_titre = self.solde_titre(datel, rapp)
-        solde_espece = self.solde_espece(datel, rapp)
-        return solde_espece + solde_titre
-
-    def solde_rappro(self, datel=None):
-        return self.solde(datel=datel, rapp=True)
-
-    solde_rappro.short_description = u"solde titre rapproché"
-
-    @transaction.commit_on_success
-    def fusionne(self, new):
-        """fusionnne ce titre avec le titre new
-        @param new: Titre
-        """
-        if new == self:
-            raise ValueError(u"un objet ne peut etre fusionné sur lui même")
-        self.alters_data = True
-        if type(new) != type(self):
-            raise TypeError(u"pas la même classe d'objet")
-        nb_change = Echeance.objects.filter(compte=self).update(compte=new)
-        nb_change += Ope_titre.objects.filter(compte=self).update(compte=new)
-        nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
-        nb_change += Ope.objects.filter(compte=self).update(compte=new)
-        self.delete()
-        return nb_change
-
-    def get_absolute_url(self):
-        return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
-
-    def save(self, *args, **kwargs):
-        """verifie qu'on a pas changé le type de compte"""
-        self.alters_data = True
-        if self.type != 't':
-            self.type = 't'
-        super(Compte_titre, self).save(*args, **kwargs)
-
-    def solde_espece(self, datel=None, rapp=False):
-        return super(Compte_titre, self).solde(datel=datel, rapp=rapp)
-
     def solde_titre(self, datel=None, rapp=False):
         """
         renvoie le solde titre pour le compte titre
@@ -752,7 +681,7 @@ class Compte_titre(Compte):
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
-    compte = models.ForeignKey(Compte_titre, verbose_name=u"compte titre")
+    compte = models.ForeignKey(Compte, verbose_name=u"compte titre")
     nombre = CurField(default=0, decimal_places=5)
     date = models.DateField()
     cours = CurField(default=1, decimal_places=5)
@@ -806,7 +735,10 @@ class Ope_titre(models.Model):
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
             moyen = self.compte.moyen_debit_defaut
             if moyen is None:
-                moyen=Moyen.objects.get(id=settings.MD_DEBIT)
+                try:
+                    moyen=Moyen.objects.get(id=settings.MD_DEBIT)
+                except Moyen.DoesNotExist:
+                    moyen=Moyen.objects.create(id=settings.MD_DEBIT,nom="debit par defaut",type='d')
             if not self.ope:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
@@ -842,7 +774,10 @@ class Ope_titre(models.Model):
             self.invest = ost
             moyen = self.compte.moyen_credit_defaut
             if moyen is None:
-                moyen=Moyen.objects.get(id=settings.MD_CREDIT)
+                try:
+                    moyen=Moyen.objects.get(id=settings.MD_CREDIT)
+                except Moyen.DoesNotExist:
+                    moyen=Moyen.objects.create(id=settings.MD_CREDIT,nom="credit par defaut",type='r')
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
@@ -1246,13 +1181,41 @@ class Ope(models.Model):
 
     def is_editable(self):
         if self.is_mere or self.rapp or self.compte.ouvert == False:
+            return False
+        else:
             if self.jumelle:
                 if self.jumelle.rapp:
                     return False
-            return False
-        else:
             return True
-
+        
+    def save(self,*args, **kwargs):
+        if not self.moyen:
+            if self.montant >= 0:
+                if self.compte.moyen_credit_defaut:
+                    self.moyen = self.compte.moyen_credit_defaut
+                else:
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit",
+                                                                                         "id": settings.MD_CREDIT, 'type':"r"})[0]
+                    self.moyen = moyen
+            if  self.montant < 0:
+                if self.compte.moyen_debit_defaut:
+                    self.moyen = self.compte.moyen_debit_defaut
+                else:
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
+                                                                                        "id": settings.MD_DEBIT,"type":"d"})[0]
+                    self.moyen = moyen
+        if self.is_mere:
+            self.cat=Cat.objects.get_or_create(nom=u"Opération Ventilée",defaults= {'nom':u"Opération Ventilée",'type':"c"})[0]
+            ope_orig=Ope.objects.get(id=self.id)
+            if self.montant != ope_orig.montant:
+            #comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
+                self.montant=Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
+                if self.pointe == True:
+                    raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est pointee")
+                if self.rapp is not None:
+                    print self.rapp
+                    raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est rapprochee")
+        super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""
@@ -1418,29 +1381,3 @@ def verif_ope_rapp(sender, **kwargs):
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
 
-
-#@receiver(pre_save, sender=Ope)
-def verif_ope_save(sender, **kwargs):
-    """
-    verifie que l'operation ventile n'est pas pointe ni rapproche
-
-    @param sender:
-    @param kwargs:
-    @return:
-    """
-    instance = kwargs['instance']
-    if not instance.moyen:
-        if instance.montant >= 0:
-            if instance.compte.moyen_credit_defaut:
-                instance.moyen = instance.compte.moyen_credit_defaut
-            else:
-                moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit",
-                                                                                     "id": settings.MD_CREDIT})[0]
-                instance.moyen = moyen
-        if  instance.montant < 0:
-            if instance.compte.moyen_debit_defaut:
-                instance.moyen = instance.compte.moyen_debit_defaut
-            else:
-                moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
-                                                                                    "id": settings.MD_DEBIT})[0]
-                instance.moyen = moyen

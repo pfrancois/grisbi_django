@@ -55,7 +55,7 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        depense={"sg":"prelevement","Caisse":"depense","cb":"visa"}
+        depense={"sg":"Prelevement","Caisse":"Depense","cb":"Visa"}
         if self.mt<0:
             try:
                 return depense[self.cpt]

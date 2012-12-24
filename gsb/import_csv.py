@@ -11,7 +11,7 @@ from django.contrib import messages
 from gsb.utils import UTF8Recoder
 from .models import (Tiers, Cat, Ib,
                      Exercice, Moyen, Compte, Titre,
-                      Compte_titre, Ope_titre, Rapp, Ope)
+                       Ope_titre, Rapp, Ope)
 from . import import_base
 from . import utils
 
@@ -142,7 +142,8 @@ class Import_csv_ope(import_base.Import_base):
                     continue
                 ope = dict()
                 ope['ligne'] = row.ligne
-                print row.ligne
+                if not self.test:
+                    print row.ligne
                 #verification pour les lignes
                 if row.monnaie != settings.DEVISE_GENERALE:
                     raise import_base.Import_exception(u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
@@ -155,9 +156,10 @@ class Import_csv_ope(import_base.Import_base):
                         self.listes['compte'][row.cpt] = ope['compte_id']
                     except Compte.DoesNotExist:
                         if self.creation_de_compte:
-                            nouveau = {"nom":row.cpt, "type":"b"}
-                            self.listes['compte'][row.cpt] = self.ajout(obj='compte', model=Compte, nouveau=nouveau)
-                            ope['compte_id'] = self.listes['compte'][row.cpt] 
+                            if row.ope_titre == False:
+                                nouveau = {"nom":row.cpt, "type":"b"}
+                                self.listes['compte'][row.cpt] = self.ajout(obj='compte', model=Compte, nouveau=nouveau)
+                                ope['compte_id'] = self.listes['compte'][row.cpt]                              
                         else:
                             liste_compte = "'"
                             for cpt in Compte.objects.all():
@@ -230,21 +232,8 @@ class Import_csv_ope(import_base.Import_base):
                     self.listes['ope'][row.id] = ope_id
                 
                 if row.ope_titre == True:
-                    #on verifie que le compte_titre existe et au besoin on l'ajoute
-                    try:
-                        self.listes['compte_titre'][row.cpt]
-                    except KeyError:  
-                        try:
-                            self.listes['compte_titre'][row.cpt] = Compte_titre.objects.get(nom=ope['compte_id'])
-                        except Compte_titre.DoesNotExist:
-                            if Compte.objects.filter(nom=ope['compte_id']).exists():
-                                raise import_base.Import_exception('probleme import operation ligne %s # %s:le compte n\'est pas un compte titre' % (row.ligne, row.id))
-                            else:
-                                for cpt in self.ajouter['compte']:
-                                    if cpt['id'] == ope['compte_id']:
-                                        self.ajouter['compte_titre'].append({'id':ope['compte_id'], 'nom':row.cpt, 'type':'t'})
-                                        cpt['type'] = 't'
-                                        self.listes['compte_titre'][row.cpt] = ope['compte_id']
+                    cpt_titre=self.listes['compte'][row.cpt]
+                    cpt_titre['type']="t"
                     #gestion des ope_titre
                     try:
                         titre_id = self.listes['titre'][ope['tiers_id']]  # pylint: disable=W0622
@@ -274,7 +263,8 @@ class Import_csv_ope(import_base.Import_base):
                         if s[0] == '':
                             self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation' % (row.ligne, row.id))
                         if s[1] == '':
-                            messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
+                            if not self.test:
+                                messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
                             cours = 1
                     try:
                         nb_titres[titre_id]=nb_titres[titre_id]+nombre
@@ -297,10 +287,12 @@ class Import_csv_ope(import_base.Import_base):
                              "ligne":row.ligne}
                     self.ajout('ope_titre', Ope_titre, nouveau)
 
-        print "-----------second tour-----"
+        if not self.test:
+            print "-----------second tour-----"
         ope_jumelle=list()
         for ope in self.ajouter['ope']:
-            print 2, ope['ligne']
+            if not self.test: 
+                print 2, ope['ligne']
             if ope['jumelle_id'] is not None:
                 if ope['jumelle_id'] not in ope_jumelle:
                     ope_jumelle.append(ope['jumelle_id']) 
@@ -315,7 +307,8 @@ class Import_csv_ope(import_base.Import_base):
                 if ope['moyen_id'] == self.listes['moyen']['Virement']:
                     pass
                 else:
-                    messages.info(self.request, u"harmonisation de la cat en 'Virement' de l'ope à la ligne %s " % ope['ligne']) 
+                    if not self.test:
+                        messages.info(self.request, u"harmonisation de la cat en 'Virement' de l'ope à la ligne %s " % ope['ligne']) 
                     ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type':'v'})
                 for jumelle in self.ajouter['ope']:
                     if jumelle['id'] == ope['jumelle_id']:#jumelle trouve
@@ -323,7 +316,8 @@ class Import_csv_ope(import_base.Import_base):
                             self.erreur.append("attention le montant entre les deux partie du virement n'est pas le meme. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
                         if jumelle['date'] != ope['date']:
                             ope['date'] = jumelle['date']
-                            messages.info(self.request, "attention la date corrige. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
+                            if not self.test:
+                                messages.info(self.request, "attention la date corrige. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
                 
             if ope['mere_id'] is not None:
                 ope['mere_id'] = self.listes['ope'][ope['mere_id']]

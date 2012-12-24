@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 from __future__ import absolute_import
 from django import forms
-from .models import (Compte, Cat, Moyen, Ope, Virement, Compte_titre, Titre, Tiers, Ope_titre, Ib, Rapp)
+from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre, Ib, Rapp)
 from .import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
@@ -124,7 +124,7 @@ class VirementForm(Baseform):
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all(), required=True, empty_label=None)
-    compte_titre = forms.ModelChoiceField(Compte_titre.objects.all(), empty_label=None, required=True)
+    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
     nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField(initial='1')
@@ -158,7 +158,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
-        if cpt and isinstance(cpt, Compte_titre):
+        if cpt and cpt.type=='t':
             self.fields['titre'].queryset = cpt.liste_titre()
 
     def clean(self):

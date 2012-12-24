@@ -9,7 +9,7 @@ from django.http import HttpResponse
 #from django.conf import settings
 #pour les vues
 import gsb.export_base as ex
-from .models import Ope_titre
+from .models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
 
 class Export_view_csv_base(ex.ExportViewBase):
@@ -123,11 +123,11 @@ class Export_cours_csv(Export_view_csv_base):
 
 
 class Exportform_Compte_titre(ex.Exportform_ope):
-    collection = ex.forms.ModelMultipleChoiceField(models.Compte_titre.objects.all(), required=False)
+    collection = ex.forms.ModelMultipleChoiceField(Compte.objects.filter(type='t'), required=False)
     date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
     date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
-    model_initial = models.Ope_titre
-    model_collec = models.Compte_titre
+    model_initial = Ope_titre
+    model_collec = Compte
 
     def verif_collec(self, query, ensemble):
         return query.filter(compte__pk__in=ensemble)

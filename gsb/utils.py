@@ -171,14 +171,7 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD
     attention si s est None ou impossible renvoie None"""
     if end_date is not None:
-        try:
-            end_date = time.strptime(end_date, fmt)
-        except ValueError as  v:
-            if len(v.args) > 0 and v.args[0][:26] == 'unconverted data remains: ':
-                end_date = end_date[:-(len(v.args[0]) - 26)]
-                end_date = time.strptime(end_date, fmt)
-            else:
-                raise v
+        end_date = time.strptime(end_date, fmt)
         return datetime.date(*end_date[0:3])
     else:
         return datetime.date(1, 1, 1)

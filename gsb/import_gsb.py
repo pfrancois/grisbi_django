@@ -15,7 +15,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
-                     Exercice, Rapp, Moyen, Echeance, Compte, Compte_titre, Ope_titre)
+                     Exercice, Rapp, Moyen, Echeance, Compte, Ope_titre)
 from .import_base import Import_exception, ImportForm1
 try:
     from lxml import etree as et
@@ -95,7 +95,7 @@ def import_gsb_050(nomfich, efface_table=True):
     tabl_correspondance_ope = {}
     if efface_table:
         for table in (
-            'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cpt_titre', 'cat', 'exercice', 'ib', 'banque',
+            'ope', 'echeance', 'rapp', 'moyen', 'compte',  'cat', 'exercice', 'ib', 'banque',
             'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from gsb_%s;" % table)  # @UndefinedVariable
             transaction.commit_unless_managed()
@@ -269,7 +269,7 @@ def import_gsb_050(nomfich, efface_table=True):
         type_compte = Compte.typescpt[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type_compte in ('t',):
             logger.debug("cpt_titre %s" % xml_cpt.find('Details/Nom').text)
-            element, created = Compte_titre.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
+            element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text, defaults={
                 'nom': xml_cpt.find('Details/Nom').text,
                 'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
             })
@@ -368,7 +368,7 @@ def import_gsb_050(nomfich, efface_table=True):
         ope_cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_ope.find('../../Details/No_de_compte').text])
         if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't':
             #compta matiere et cours en meme tps
-            ope_cpt_titre = Compte_titre.objects.get(id=ope_cpt.id)
+            ope_cpt_titre = Compte.objects.get(id=ope_cpt.id)
             ope_notes = dj_encoding.smart_unicode(xml_ope.get('N'))
             s = ope_notes.partition('@')
             if s[1]:  # TODO gestion des csl

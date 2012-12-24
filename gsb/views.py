@@ -6,7 +6,7 @@ from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Compte_titre, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
+from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
 from .import forms as gsb_forms
 from django.db import models
 import decimal
@@ -90,42 +90,34 @@ class Index_view(Mytemplateview):
 
     def get(self, request, *args, **kwargs):
         if settings.AFFICHE_CLOT:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'))
-            self.pl = Compte_titre.objects.all()
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related('ope', 'tiers')
+            self.pl = Compte.objects.exclude(type__in=('b', 'e', 'p')).select_related('ope', 'tiers')
         else:
             self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope', 'tiers')
-            self.pl = Compte_titre.objects.filter(ouvert=True)
+            self.pl = Compte.objects.filter(type='t', ouvert=True).select_related('ope', 'tiers')
             #calcul du solde des bq
-        self.total_bq = Ope.objects.filter(mere__exact=None,
-                                           compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))[
-                        'solde']
-        if self.total_bq is None:
-            self.total_bq = decimal.Decimal()
+        #self.total_bq =  Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
-        #self.bq.annotate(solde=model.Sum('Ope__montant'))
-        for p in self.bq.filter(ope__filles_set__isnull=True).annotate(solde_a=models.Sum('ope__montant')):
-            cpt = {'solde':p.solde_a,
+        
+        for p in self.bq:
+            cpt = {'solde':p.solde(),
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
+            self.total_bq += cpt['solde']
             self.bqe.append(cpt)
-            if cpt['solde'] is not None:
-                self.total_bq += cpt['solde']
         #calcul du solde des pla
         self.total_pla = decimal.Decimal('0')
-        #id_pla = Compte_titre.objects.all().values_list("id", flat=True)
-        #solde_espece = Ope.objects.filter(compte__id__in=list(id_pla), mere__exact=None).aggregate(solde=models.Sum('montant'))
-        #if solde_espece['solde']:
-            #self.total_pla += solde_espece['solde']
         self.pla = []
-        for p in self.pl.filter(ope__filles_set__isnull=True).annotate(solde_e=models.Sum('ope__montant')):
-            cpt = {'solde':p.solde_e + p.solde_titre(),
+        for p in self.pl:
+            cpt = {'solde':p.solde(),
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
             self.pla.append(cpt)
-            self.total_pla += cpt['solde']
+            if cpt['solde'] is not None:
+                self.total_pla += cpt['solde']
         self.nb_clos = Compte.objects.filter(ouvert=False).count()
         return super(Index_view, self).get(request, *args, **kwargs)
 
@@ -154,11 +146,10 @@ class Cpt_detail_view(Mytemplateview):
         @param request:
         @param cpt_id: id du compte demande
         """
-        #compte = get_object_or_404(Compte, pk=cpt_id)
         try:
             compte = Compte.objects.select_related('ope_self').get(pk=cpt_id)
         except Compte.DoesNotExist:
-            raise http.Http404('No compte matches the given query.')
+            raise http.Http404('pas de compte correspondant.')
         self.type = "nrapp"
         if self.all:
             self.type = "all"
@@ -175,6 +166,7 @@ class Cpt_detail_view(Mytemplateview):
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             self.espece = True
+            
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
@@ -189,7 +181,9 @@ class Cpt_detail_view(Mytemplateview):
             self.espece = False
             self.template_name = 'gsb/cpt_placement.djhtm'
             #recupere la liste des titres qui sont utilise dans ce compte
-            compte_titre = get_object_or_404(Compte_titre, pk=cpt_id)
+            compte_titre = get_object_or_404(Compte, pk=cpt_id)
+            if compte_titre.type != 't':
+                return http.HttpResponseRedirect(reverse("index"))
             titre_sans_sum = compte_titre.titre.all().distinct()
             titres = []
             for t in titre_sans_sum:
@@ -274,16 +268,15 @@ class Cpt_detail_view(Mytemplateview):
         }
         c = kwargs[0]
         if self.espece:
-            solde = c.solde()
             context = {'compte': c,
                        'list_ope': kwargs[1],
                        'nbrapp': kwargs[2],
                        'titre': c.nom,
-                       'solde': solde,
+                       'solde': c.solde(espece=True),
                        "date_r": c.date_rappro(),
-                       "solde_r": c.solde(rapp=True),
-                       "solde_p": c.solde_pointe(),
-                       "solde_pr": c.solde(rapp=True) + c.solde_pointe(),
+                       "solde_r": c.solde(rapp=True,espece=True),
+                       "solde_p": c.solde_pointe(espece=True),
+                       "solde_pr": c.solde(rapp=True,espece=True) + c.solde_pointe(espece=True),
                        "sort_tab": kwargs[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
@@ -292,10 +285,10 @@ class Cpt_detail_view(Mytemplateview):
             context = {
                 'compte': c,
                 'titre': c.nom,
-                'solde': c.solde_espece(),
+                'solde': c.solde(),
                 'titres': kwargs[1],
-                'especes': c.solde_espece(),
-                'especes_rapp': c.solde_espece(rapp=True),
+                'especes': c.solde(espece=True),
+                'especes_rapp': c.solde(rapp=True, espece=True),
                 'solde_rapp': c.solde(rapp=True),
                 'solde_titre_rapp': c.solde_titre(rapp=True),
             }
@@ -507,8 +500,8 @@ def maj_cours(request, pk):
         form = gsb_forms.MajCoursform(
             initial={'titre': titre, 'cours': titre.last_cours(), 'date': titre.last_cours_date()})
         #petit bidoullage afin recuperer le compte d'origine
-    if titre.compte_titre_set.all().distinct().count() == 1:
-        url = titre.compte_titre_set.all().distinct()[0].get_absolute_url()
+    if titre.compte_set.all().distinct().count() == 1:
+        url = titre.compte_set.all().distinct()[0].get_absolute_url()
     else:
         url = reverse("gsb.views.index")
     return render(request, "gsb/maj_cours.djhtm", {"titre": u"maj du titre '%s'" % titre.nom, "form": form, "url": url})
@@ -521,7 +514,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     si all affiche toute les ope
     sinon affiche uniquement les non rapp"""
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
-    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     request.session['titre'] = titre_id
 
     date_rappro = compte.date_rappro()
@@ -642,12 +635,15 @@ def ope_titre_delete(request, pk):
 
 @login_required
 def ope_titre_achat(request, cpt_id):
-    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
+        messages.error(request,"ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
     try:
         titre_id = request.session['titre']
         titre = Titre.objects.get(id=titre_id)
     except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
-        messages.error(request, u"attention le titre demandé intialement n'existe pas")
+        messages.error(request, u"attention le titre demandé initialement n'existe pas")
         titre_id = None
         titre = None
     except KeyError:  # on est dans le cas où l'on viens d'une page sans titre defini
@@ -700,7 +696,11 @@ def ope_titre_achat(request, cpt_id):
 
 @login_required
 def ope_titre_vente(request, cpt_id):
-    compte = get_object_or_404(Compte_titre.objects.select_related(), pk=cpt_id)
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
+        messages.error(request,"ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
+
     try:
         titre_id = request.session['titre']
         titre = Titre.objects.get(id=titre_id)
@@ -752,7 +752,11 @@ def ope_titre_vente(request, cpt_id):
 @login_required
 def view_maj_cpt_titre(request, cpt_id):
     """mise a jour global d'un portefeuille"""
-    cpt = Compte_titre.objects.get(id=cpt_id)
+    cpt = Compte.objects.get(id=cpt_id)
+    if cpt.type != 't':
+        messages.error(request,"ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
+
     liste_titre_original = cpt.titre.all().distinct()
     liste_titre = []
     if liste_titre_original.count() < 1:

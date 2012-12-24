@@ -5,16 +5,16 @@ test models
 from __future__ import absolute_import
 from .test_base import TestCase
 from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
-from ..models import Compte_titre, Virement, Ope_titre, Ib, Exercice, Cours
+from ..models import Virement, Ope_titre, Ib, Exercice, Cours
 from ..models import Rapp, Echeance, Gsb_exc
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.core.exceptions import ImproperlyConfigured
 import datetime
 import decimal
 from ..utils import strpdate
 from operator import attrgetter
 import mock
-
 
 class Test_models(TestCase):
     fixtures = ['test.json']
@@ -76,9 +76,9 @@ class Test_models(TestCase):
         #fusion entre deux compte de type difference
         self.assertRaises(Gsb_exc, Compte.objects.get(id=1).fusionne, Compte.objects.get(id=2))
         #fusion avec un autre type
-        self.assertRaises(TypeError, Compte_titre.objects.get(id=4).fusionne, Banque.objects.get(id=1))
+        self.assertRaises(TypeError, Compte.objects.get(id=4).fusionne, Banque.objects.get(id=1))
         #fusion sur lui meme
-        self.assertRaises(ValueError, Compte_titre.objects.get(id=4).fusionne, Compte_titre.objects.get(id=4))
+        self.assertRaises(ValueError, Compte.objects.get(id=4).fusionne, Compte.objects.get(id=4))
         #fusion avec un autre type
         self.assertRaises(TypeError, Moyen.objects.get(id=1).fusionne, Banque.objects.get(id=1))
         #fusion avec un autre type
@@ -153,8 +153,8 @@ class Test_models(TestCase):
         self.assertRaises(Gsb_exc, Titre.objects.get(nom="autre").fusionne, Titre.objects.get(nom="autre 2"))
 
     def test_titre_investi(self):
-        c1 = Compte_titre.objects.get(id=4)
-        c2 = Compte_titre.objects.get(id=5)
+        c1 = Compte.objects.get(id=4)
+        c2 = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t2")
         self.assertEquals(t.investi(), 1600)
         self.assertEquals(t.investi(rapp=True), 100)
@@ -172,8 +172,8 @@ class Test_models(TestCase):
 
     def test_titre_nb(self):
         #definition initiale
-        c1 = Compte_titre.objects.get(id=4)
-        c2 = Compte_titre.objects.get(id=5)
+        c1 = Compte.objects.get(id=4)
+        c2 = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t2")
         self.assertEquals(t.nb(), 170)
         self.assertEquals(t.nb(c1), 0)
@@ -188,8 +188,8 @@ class Test_models(TestCase):
         self.assertEquals(t.nb(rapp=True, compte=c2), 20)
 
     def test_titre_encours(self):
-        c1 = Compte_titre.objects.get(id=4)
-        c2 = Compte_titre.objects.get(id=5)
+        c1 = Compte.objects.get(id=4)
+        c2 = Compte.objects.get(id=5)
         t2 = Titre.objects.get(nom="t2")
         self.assertEquals(t2.encours(datel='1900-01-01'), 0)
         self.assertEquals(t2.encours(), 1700)
@@ -266,21 +266,10 @@ class Test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde_pointe(), 20)
         self.assertEqual(Compte.objects.get(id=2).solde_pointe(), 0)
 
-    def test_compte_titre_creation(self):
-        #on cree un compte titre via compte
-        Compte.objects.create(nom="toto", type="t")
-        self.assertIsInstance(Compte_titre.objects.get(nom="toto"), Compte_titre)
-        #on cree un compte normal
-        Compte.objects.create(nom="hjhghj", type="b")
-        self.assertIsInstance(Compte.objects.get(nom="hjhghj"), Compte)
-
     def test_compte_absolute_url(self):
         c = Compte.objects.get(id=1)
         absolute = c.get_absolute_url()
         self.assertEqual(absolute, '/compte/1/')
-
-    def test_compte_titre_absolute_url(self):
-        self.assertEqual(Compte_titre.objects.get(id=4).get_absolute_url(), '/compte/4/')
 
     def test_compte_fusion(self):
         n = Compte.objects.get(id=3)
@@ -296,22 +285,22 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Ope.objects.filter(compte__id=2).order_by('id'), [9, ], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(compte__id=2).order_by('id'), [2, 8], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(compte_virement__id=2).order_by('id'), [1], attrgetter("id"))
-        #fusion de compte_titre
+        #fusion de compte titre
         Compte.objects.get(id=4).fusionne(Compte.objects.get(id=5))
         self.assertEquals(Ope.objects.get(id=1).compte_id, 5)
         self.assertEquals(Ope_titre.objects.get(id=1).compte_id, 5)
 
-    def test_compte_titre_achat_vente_error(self):
-        c1 = Compte_titre.objects.get(id=4)
-        c2 = Compte_titre.objects.get(id=5)
+    def test_compte_achat_vente_error(self):
+        c1 = Compte.objects.get(id=4)
+        c2 = Compte.objects.get(id=5)
         #probleme si on utilise pas un titre dans le param titre
         self.assertRaises(TypeError, c1.achat, c2, 20, '2011-01-01')
         self.assertRaises(TypeError, c1.vente, c2, 20, '2011-01-01')
         self.assertRaises(TypeError, c1.revenu, c2, 20, '2011-01-01')
 
-    def test_compte_titre_solde(self):
-        c = Compte_titre.objects.get(id=4)
-        c2 = Compte_titre.objects.get(id=5)
+    def test_compte_solde(self):
+        c = Compte.objects.get(id=4)
+        c2 = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t1")
         self.assertEqual(c.solde(), 0)
         #variation des cours (et donc du solde)
@@ -324,8 +313,8 @@ class Test_models(TestCase):
         self.assertEqual(teston, 0)
         self.assertEqual(c.solde_titre(rapp=True), 0)
 
-    def test_compte_titre_achat_sans_virement(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_achat_sans_virement(self):
+        c = Compte.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom="t1")
         self.assertEqual(t.investi(c), 1)
@@ -338,8 +327,8 @@ class Test_models(TestCase):
         c.achat(titre=t, nombre=20, prix=2, date='2011-01-01')
         self.assertEqual(c.solde(), -20)
 
-    def test_compte_titre_achat_avec_frais(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_achat_avec_frais(self):
+        c = Compte.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
         #utilisation des cat et tiers par defaut
         self.assertEqual(t.investi(c), 1)
@@ -365,8 +354,8 @@ class Test_models(TestCase):
         self.assertEquals(o.notes, u"Frais 20@1")
         self.assertEquals(o.moyen_id, 1)
 
-    def test_compte_titre_achat_avec_virement(self):
-        c = Compte_titre.objects.get(id=5)
+    def test_compte_achat_avec_virement(self):
+        c = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t1")
         c.achat(titre=t, nombre=20, date='2011-01-01', virement_de=Compte.objects.get(id=1))
         self.assertEqual(t.investi(c), 20)
@@ -374,8 +363,8 @@ class Test_models(TestCase):
         self.assertEquals(Ope.objects.filter(compte__id=c.id).count(), 4)
         self.assertEqual(Compte.objects.get(id=1).solde(), -90)
 
-    def test_compte_titre_vente_simple(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_vente_simple(self):
+        c = Compte.objects.get(id=4)
         self.assertEqual(c.nom, u'cpt_titre1')
         t = Titre.objects.get(nom='t1')
         self.assertEqual(t.investi(c), 1)
@@ -392,16 +381,16 @@ class Test_models(TestCase):
         self.assertRaises(Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-12-26'))  # a pu de titre
         self.assertEqual(c.solde(), 0)
 
-    def test_compte_titre_vente_avec_frais(self):
+    def test_compte_vente_avec_frais(self):
         #on cree le compte
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         #on cree le titre
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         #utilisation des cat et tiers par defaut
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
         c.vente(titre=t, nombre=5, frais=20, date='2011-11-01', prix=5)
-        self.assertEqual(c.solde_espece(), -145)
+        self.assertEqual(c.solde()-c.solde_titre(), -145)
         self.assertEqual(c.solde_titre(), 50)
         self.assertEqual(c.solde(), -95)
         self.assertEqual(t.investi(c), 120)  # attention, on prend le cmup avec les frais
@@ -424,9 +413,9 @@ class Test_models(TestCase):
         self.assertEquals(o.notes, u"frais -10@10")
         self.assertEquals(o.moyen_id, 1)
 
-    def test_compte_titre_vente_avec_virement(self):
+    def test_compte_vente_avec_virement(self):
     #on cree le compte
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         #on cree le titre
         t = Titre.objects.create(nom="t_test", isin="xxxxxxx")
@@ -438,8 +427,8 @@ class Test_models(TestCase):
         self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
         self.assertEqual(Compte.objects.get(id=1).solde(), -70 + 25)  # montant de l'operation
 
-    def test_compte_titre_revenu_simple(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_revenu_simple(self):
+        c = Compte.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
         self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2011-01-01'))  # trop tot
         c.revenu(titre=t, montant=20, date='2011-12-25')
@@ -448,8 +437,8 @@ class Test_models(TestCase):
         c.vente(titre=t, nombre=1, date='2011-12-25')
         self.assertRaises(Titre.DoesNotExist, lambda: c.revenu(titre=t, montant=20, date='2012-01-01'))  # a pu
 
-    def test_compte_titre_revenu_frais(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_revenu_frais(self):
+        c = Compte.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
         #on cree un revenu avec des frais
         c.revenu(titre=t, montant=20, date='2011-12-20', frais=10)
@@ -466,41 +455,35 @@ class Test_models(TestCase):
         self.assertEqual(c.solde(), 10)
         self.assertEquals(Ope.objects.filter(compte=c).count(), 6)
 
-    def test_compte_titre_revenu_virement(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_revenu_virement(self):
+        c = Compte.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
         c.revenu(titre=t, montant=20, date='2011-12-25', virement_vers=Compte.objects.get(id=1))
         self.assertEqual(c.solde(), 0)
         self.assertEquals(Ope.objects.filter(compte=c).count(), 4)
         self.assertEqual(Compte.objects.get(id=1).solde(), -50)
 
-    def test_compte_titre_liste_titre(self):
-        c = Compte_titre.objects.get(id=4)
+    def test_compte_liste_titre(self):
+        c = Compte.objects.get(id=4)
         self.assertQuerysetEqual(c.liste_titre(), [u'autre', u't1'], attrgetter("nom"))
 
-    def test_compte_titre_save(self):
-        c = Compte_titre.objects.get(id=4)
-        c.type = 'b'
-        c.save()
-        self.assertEqual(Compte_titre.objects.get(id=4).type, 't')
+    def test_compte_date_rappro(self):
+        self.assertEqual(Compte.objects.get(id=5).date_rappro(), strpdate('2011-10-30'))
+        self.assertEqual(Compte.objects.get(id=4).date_rappro(), None)
 
-    def test_compte_titre_date_rappro(self):
-        self.assertEqual(Compte_titre.objects.get(id=5).date_rappro(), strpdate('2011-10-30'))
-        self.assertEqual(Compte_titre.objects.get(id=4).date_rappro(), None)
-
-    def test_compte_titre_solde_rappro(self):
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+    def test_compte_t_solde_rappro(self):
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         self.assertEqual(c.solde_rappro(), 0)
-        self.assertEqual(Compte_titre.objects.get(id=4).solde_rappro(), 0)
+        self.assertEqual(Compte.objects.get(id=4).solde_rappro(), 0)
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=5), 20)
         v.dest.rapp = Rapp.objects.get(id=1)
         v.save()
-        self.assertEqual(Compte_titre.objects.get(id=5).solde_rappro(), 20)
+        self.assertEqual(Compte.objects.get(id=5).solde_rappro(), 20)
 
     def test_ope_titre_save(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         #creation d'une nouvelle operation
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
@@ -539,7 +522,7 @@ class Test_models(TestCase):
 
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
         Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-02', cours=5)
@@ -552,7 +535,7 @@ class Test_models(TestCase):
 
     def test_ope_titre_save2(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         #creation d'une nouvelle operation
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
@@ -584,7 +567,7 @@ class Test_models(TestCase):
 
     def test_ope_titre_delete(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
-        c = Compte_titre.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         #on cree l'ope
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
@@ -744,8 +727,8 @@ class Test_models(TestCase):
         self.assertRaises(IntegrityError, Ope.objects.get(id=11).delete)
 
     def test_pre_delete_ope_titre_rapp(self):
-        Compte_titre.objects.get(id=5).achat(titre=Titre.objects.get(id=1), nombre=20, date='2011-01-01')
-        o = Ope.objects.filter(compte=Compte_titre.objects.get(id=5), date='2011-01-01')[0]
+        Compte.objects.get(id=5).achat(titre=Titre.objects.get(id=1), nombre=20, date='2011-01-01')
+        o = Ope.objects.filter(compte=Compte.objects.get(id=5), date='2011-01-01')[0]
         o.rapp = Rapp.objects.get(id=1)
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope.id).delete)
@@ -839,13 +822,12 @@ class Test_models(TestCase):
         }
         self.assertEquals(tab, v.init_form())
 
-from django.core.exceptions import ImproperlyConfigured
 
 
 class Test_models2(TestCase):
     def test_last_cours_date_special(self):
         #on cree les elements indiepensables
-        c = Compte_titre.objects.create(nom="cpt_titre1")
+        c = Compte.objects.create(nom="cpt_titre1")
         t = Titre.objects.create(isin="0000", nom="titre1")
         self.assertEqual(t.encours(), 0)
         c.achat(t, 10, date=strpdate('2012-01-01'))
@@ -859,7 +841,7 @@ class Test_models2(TestCase):
     def test_ope_titre_special(self):
         """si une categorie "operation sur titre" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
-        c = Compte_titre.objects.create(nom="cpt_titre1")
+        c = Compte.objects.create(nom="cpt_titre1")
         Cat.objects.create(nom=u'Operation Sur Titre')
         self.assertRaises(ImproperlyConfigured,
                           lambda: Ope_titre.objects.create(titre=t, compte=c, date=datetime.date.today()))
@@ -867,14 +849,14 @@ class Test_models2(TestCase):
     def test_ope_titre_special2(self):
         """si une categorie "revenue de placement" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
-        c = Compte_titre.objects.create(nom="cpt_titre1")
+        c = Compte.objects.create(nom="cpt_titre1")
         Cat.objects.create(nom=u'Revenus de placement:Plus-values')
         self.assertRaises(ImproperlyConfigured,
                           lambda: Ope_titre.objects.create(titre=t, compte=c, date=datetime.date.today()))
 
     def test_ope_titre_special3(self):
         t = Titre.objects.create(isin="0000", nom="titre1")
-        c = Compte_titre.objects.create(nom="cpt_titre1")
+        c = Compte.objects.create(nom="cpt_titre1")
         o = Ope_titre.objects.create(titre=t, compte=c, date=strpdate('2011-01-01'), nombre=10)
         o.cours = 3
         o.save()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Compte_titre, Ope_titre, Compte
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
@@ -315,15 +315,6 @@ class Compte_admin(Modeladmin_perso):
         return super(Compte_admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
                 
         
-
-class Compte_titre_admin(Modeladmin_perso):
-    """compte titre """
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    fields = Compte_admin.fields  # on prend comme ca les meme champs
-    list_display = ('nom', 'solde_titre', 'solde_rappro', 'date_rappro', 'nb_ope')
-    list_filter = ('type', 'banque', 'ouvert')
-
-
 class ope_fille_admin(liste_perso_inline):
     model = Ope
     fields = ('montant', 'cat', 'ib', 'notes')
@@ -580,5 +571,4 @@ admin.site.register(Exercice, Exo_admin)
 admin.site.register(Rapp, Rapp_admin)
 admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
-admin.site.register(Compte_titre, Compte_titre_admin)
 admin.site.register(Ope_titre, Ope_titre_admin)

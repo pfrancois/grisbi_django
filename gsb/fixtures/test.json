@@ -412,16 +412,6 @@
     },
     {
         "pk":4,
-        "model":"gsb.compte_titre",
-        "fields":{}
-    },
-    {
-        "pk":5,
-        "model":"gsb.compte_titre",
-        "fields":{}
-    },
-    {
-        "pk":4,
         "model":"gsb.ope_titre",
         "fields":{
             "cours":"1",

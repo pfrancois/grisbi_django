@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import permission_required
 
 from .models import (Compte, Ope, Tiers, Cat, Moyen,
                      Echeance, Ib, Banque, Exercice, Rapp, Titre)
-# Compte_titre, Virement,
 from django.http import HttpResponse
 #from django.core.exceptions import ObjectDoesNotExist
 #import decimal
