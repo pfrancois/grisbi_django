@@ -101,7 +101,21 @@ class Test_export(Test_view_base):
         logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
-        # self.assertEqual(rep.content,'id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has_fille;num op vent m;ope_titre;ope_pmv;mois\r\n4;cpte1;11/8/2011;-100,0000000;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;2011_08\r\n5;cpte1;11/8/2011;10,0000000;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;2011_08\r\n7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;2011_08\r\n6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r\n3;cpt_titre2;29/10/2011;-100,0000000;cpt_titre2201101;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r\n8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;Virement;Virement;;;;9;0;;;;2011_10\r\n9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;Virement;Virement;;;;8;0;;;;2011_10\r\n2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r\n1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r\n10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r\n11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;Op\xe9ration Ventil\xe9e;tiers2;;;;;1;;;;2012_09\r\n')
+        self.assertEqual(rep.content,"""id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has_fille;num op vent m;ope_titre;ope_pmv;mois\r
+4;cpte1;11/8/2011;-100,0000000;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;2011_08\r
+5;cpte1;11/8/2011;10,0000000;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;2011_08\r
+7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;2011_08\r
+6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r
+3;cpt_titre2;29/10/2011;-100,0000000;cpt_titre2201101;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r
+8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;Virement;Virement;;;;9;0;;;;2011_10\r
+9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;Virement;Virement;;;;8;0;;;;2011_10\r
+2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r
+1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r
+10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r
+11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;Op\xe9ration Ventil\xe9e;tiers2;;;;;1;;;;2012_09\r
+12;cpte1;24/9/2012;99,0000000;;0;moyen_rec1;cat1;tiers2;;;;;0;11;;;2012_09\r
+13;cpte1;24/9/2012;1,0000000;;0;moyen_rec1;cat2;tiers2;;;;;0;11;;;2012_09\r
+""")
 
         # erreur
     def test_csv_erreur(self):
