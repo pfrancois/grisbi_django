@@ -6,8 +6,8 @@ from .utils import Format as fmt
 
 import logging
 from django.http import HttpResponse
-#from django.conf import settings
-#pour les vues
+# from django.conf import settings
+# pour les vues
 import gsb.export_base as ex
 from .models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
@@ -41,31 +41,31 @@ class Export_ope_csv(Export_view_csv_base):
         data = []
         query = query.order_by('date').select_related('cat', "compte", "tiers", "ib")  # on enleve les ope mere
         for ope in query:
-            #id compte date montant
-            #print ope
+            # id compte date montant
+            # print ope
             ligne = {'id': ope.id, 'account name': ope.compte.nom, 'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
-            #rapp
+            # rapp
             if ope.rapp is not None:
                 ligne['m'] = ope.rapp.nom
             else:
                 ligne['m'] = ''
-            #pointee
+            # pointee
             ligne['p'] = fmt.bool(ope.pointe)
-            #moyen
+            # moyen
             try:
                 ligne['moyen'] = fmt.str(ope.moyen, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
                 ligne['moyen'] = ""
-            #cat
+            # cat
             ligne['cat'] = fmt.str(ope.cat, "", "nom")
-            #tiers
+            # tiers
             ligne['tiers'] = fmt.str(ope.tiers, '', 'nom')
             ligne['notes'] = ope.notes
             try:
                 ligne['projet'] = fmt.str(ope.ib, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
-            #le reste
+            # le reste
             ligne['n chq'] = ope.num_cheque
             ligne['id jumelle lie'] = fmt.str(ope.jumelle, '') 
             ligne['has_fille'] = fmt.bool(ope.filles_set.exists())
@@ -83,7 +83,7 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['mois'] = ope.date.strftime('%Y_%m')
             data.append(ligne)
         logger.info('export ope csv')
-        #self.debug=True
+        # self.debug=True
         return self.export_csv_view(data=data)
 
 

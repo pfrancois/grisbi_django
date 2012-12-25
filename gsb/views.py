@@ -79,8 +79,8 @@ class Myredirectview(generic.RedirectView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        #on regarde si c'est appelle
-        #if self.call is not None and callable(self.call):
+        # on regarde si c'est appelle
+        # if self.call is not None and callable(self.call):
         #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
@@ -95,8 +95,8 @@ class Index_view(Mytemplateview):
         else:
             self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope', 'tiers')
             self.pl = Compte.objects.filter(type='t', ouvert=True).select_related('ope', 'tiers')
-            #calcul du solde des bq
-        #self.total_bq =  Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
+            # calcul du solde des bq
+        # self.total_bq =  Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
         
@@ -107,7 +107,7 @@ class Index_view(Mytemplateview):
                  'ouvert':p.ouvert}
             self.total_bq += cpt['solde']
             self.bqe.append(cpt)
-        #calcul du solde des pla
+        # calcul du solde des pla
         self.total_pla = decimal.Decimal('0')
         self.pla = []
         for p in self.pl:
@@ -180,7 +180,7 @@ class Cpt_detail_view(Mytemplateview):
         else:
             self.espece = False
             self.template_name = 'gsb/cpt_placement.djhtm'
-            #recupere la liste des titres qui sont utilise dans ce compte
+            # recupere la liste des titres qui sont utilise dans ce compte
             compte_titre = get_object_or_404(Compte, pk=cpt_id)
             if compte_titre.type != 't':
                 return http.HttpResponseRedirect(reverse("index"))
@@ -250,7 +250,7 @@ class Cpt_detail_view(Mytemplateview):
         return [sort_t, q]
 
     def cpt_espece_pagination(self, request, q):
-        #gestion pagination
+        # gestion pagination
         paginator = Paginator(q, self.nb_ope_par_pages)
         try:
             page = int(request.GET.get('page'))
@@ -274,9 +274,9 @@ class Cpt_detail_view(Mytemplateview):
                        'titre': c.nom,
                        'solde': c.solde(espece=True),
                        "date_r": c.date_rappro(),
-                       "solde_r": c.solde(rapp=True,espece=True),
+                       "solde_r": c.solde(rapp=True, espece=True),
                        "solde_p": c.solde_pointe(espece=True),
-                       "solde_pr": c.solde(rapp=True,espece=True) + c.solde_pointe(espece=True),
+                       "solde_pr": c.solde(rapp=True, espece=True) + c.solde_pointe(espece=True),
                        "sort_tab": kwargs[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
@@ -303,7 +303,7 @@ def ope_detail(request, pk):
     @param pk: id de l'ope
     """
     ope = get_object_or_404(Ope.objects.select_related(), pk=pk)
-    #logger = logging.getLogger('gsb')
+    # logger = logging.getLogger('gsb')
     if ope.jumelle is not None:
         #------un virement--------------
         if ope.montant > 0:
@@ -348,7 +348,7 @@ def ope_detail(request, pk):
                     messages.success(request, u"opération modifiée")
                     ope = form.save()
                 else:
-                    #verification que les données essentielles ne sont pas modifiés
+                    # verification que les données essentielles ne sont pas modifiés
                     if has_changed(ope, 'montant') or  has_changed(ope, 'compte') or has_changed(ope,
                                                                                                  'pointe') or has_changed(
                         ope, 'jumelle') or has_changed(ope, 'mere'):
@@ -376,7 +376,7 @@ def ope_new(request, cpt_id=None):
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
         cpt = None
-        #logger = logging.getLogger('gsb')
+        # logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
@@ -388,10 +388,10 @@ def ope_new(request, cpt_id=None):
             ope = form.save()
 
             messages.success(request, u"Opération '%s' crée" % ope)
-            #retour vers
+            # retour vers
             return http.HttpResponseRedirect(ope.compte.get_absolute_url())
         else:
-            #TODO message
+            # TODO message
             return render(request, 'gsb/ope.djhtm',
                           {'titre': u'création',
                            'titre_long': u'création opération',
@@ -425,7 +425,7 @@ def vir_new(request, cpt_id=None):
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
         cpt = cpt_origine
-        #logger = logging.getLogger('gsb')
+        # logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
@@ -477,7 +477,7 @@ def ope_delete(request, pk):
                 messages.success(request, u"opération effacé")
     else:
         return http.HttpResponseRedirect(ope.get_absolute_url())
-        #si pas de formulaire, c'est que c'est une tentative d'intrusion
+        # si pas de formulaire, c'est que c'est une tentative d'intrusion
     return http.HttpResponseRedirect(ope.compte.get_absolute_url())
 
 
@@ -499,7 +499,7 @@ def maj_cours(request, pk):
     else:
         form = gsb_forms.MajCoursform(
             initial={'titre': titre, 'cours': titre.last_cours(), 'date': titre.last_cours_date()})
-        #petit bidoullage afin recuperer le compte d'origine
+        # petit bidoullage afin recuperer le compte d'origine
     if titre.compte_set.all().distinct().count() == 1:
         url = titre.compte_set.all().distinct()[0].get_absolute_url()
     else:
@@ -523,7 +523,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     if all:
         pass
     else:
-        #on prend comme reference les ope especes
+        # on prend comme reference les ope especes
         if rapp:
             q = q.filter(ope__rapp__isnull=False)
         else:
@@ -573,7 +573,7 @@ def ope_titre_detail(request, pk):
     """
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
-        #date_initial = ope.date#inutile
+        # date_initial = ope.date#inutile
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
             if ope.ope.rapp is None:
@@ -613,7 +613,7 @@ def ope_titre_delete(request, pk):
             return http.HttpResponseRedirect(ope.get_absolute_url())
         compte_id = ope.compte.id
         titre_id = ope.titre.id
-        #gestion des cours inutiles
+        # gestion des cours inutiles
         cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
         if cours.exists():
             s = u'%s' % cours
@@ -637,7 +637,7 @@ def ope_titre_delete(request, pk):
 def ope_titre_achat(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
-        messages.error(request,"ce n'est pas un compte titre")
+        messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
     try:
         titre_id = request.session['titre']
@@ -698,7 +698,7 @@ def ope_titre_achat(request, cpt_id):
 def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
-        messages.error(request,"ce n'est pas un compte titre")
+        messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
 
     try:
@@ -754,7 +754,7 @@ def view_maj_cpt_titre(request, cpt_id):
     """mise a jour global d'un portefeuille"""
     cpt = Compte.objects.get(id=cpt_id)
     if cpt.type != 't':
-        messages.error(request,"ce n'est pas un compte titre")
+        messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
 
     liste_titre_original = cpt.titre.all().distinct()
@@ -854,7 +854,7 @@ def perso(request):
         if solde_visa:
             resultat.append(r.nom)
             resultat.append(solde_visa)
-            #r.save()
+            # r.save()
     return render(request, 'generic.djhtm',
                   {'resultats': resultat,
                    'titre_long': "traitement personalise",

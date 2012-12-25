@@ -26,7 +26,7 @@ class Command(BaseCommand):
         """
         verbosity = int(options.get('verbosity', 1))
         interactive = options.get('interactive', True)
-        #failfast=options.get("failfast",False)
+        # failfast=options.get("failfast",False)
         mod = runner.CoverageRunner()
         failures = mod.run_tests(tests, verbosity=verbosity,
                                  interactive=interactive)

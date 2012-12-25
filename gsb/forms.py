@@ -5,18 +5,18 @@ from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre,
 from .import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
-#import decimal
+# import decimal
 ERROR_CSS_CLASS = ''
 REQUIRED_CSS_CLASS = 'required'
 
 
 class Baseform(forms.Form):
-    #error_css_class = ERROR_CSS_CLASS
+    # error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
 
 class Basemodelform(forms.ModelForm):
-    #error_css_class = ERROR_CSS_CLASS
+    # error_css_class = ERROR_CSS_CLASS
     required_css_class = REQUIRED_CSS_CLASS
 
 
@@ -68,10 +68,10 @@ class VirementForm(Baseform):
     notes = forms.CharField(widget=forms.Textarea, required=False)
     pointe = forms.BooleanField(required=False)
 
-    #rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
-    #rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
-    #piece_comptable_compte_origine = forms.CharField(required = False)
-    #piece_comptable_compte_destination = forms.CharField(required = False)
+    # rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
+    # rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
+    # piece_comptable_compte_origine = forms.CharField(required = False)
+    # piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
         super(VirementForm, self).clean()
         data = self.cleaned_data
@@ -115,8 +115,8 @@ class VirementForm(Baseform):
         virement_objet.montant = self.cleaned_data['montant']
         virement_objet.notes = self.cleaned_data['notes']
         virement_objet.date = self.cleaned_data['date']
-        #virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
-        #virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
+        # virement_objet.origine.piece_comptable = self.cleaned_data['piece_comptable_compte_origine']
+        # virement_objet.dest.piece_comptable = self.cleaned_data['piece_comptable_compte_destination']
         virement_objet.save()
         return virement_objet.origine
 
@@ -145,7 +145,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
     def clean(self):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
-        #on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
+        # on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
         if not(not(data['titre'] is None) or data['nouveau_titre']):
             self._errors['nouveau_titre'] = self.error_class(
                 ["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
@@ -158,13 +158,13 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
-        if cpt and cpt.type=='t':
+        if cpt and cpt.type == 't':
             self.fields['titre'].queryset = cpt.liste_titre()
 
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
         data = self.cleaned_data
-        #on verifie qu'il est portfeuille
+        # on verifie qu'il est portfeuille
         if not data['titre'].nb(compte=data['compte_titre'], datel=data['date']):
             msg = u"titre pas en portefeuille"
             self._errors['titre'] = self.error_class([msg, ])
@@ -179,8 +179,8 @@ class Ope_titreForm(Basemodelform):
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
 
-    #nombre = forms.DecimalField(localize=True, initial='0')
-    #cours = gsb_field.CurField(initial='1')
+    # nombre = forms.DecimalField(localize=True, initial='0')
+    # cours = gsb_field.CurField(initial='1')
     date = gsb_field.DateFieldgsb()
 
     def clean(self):

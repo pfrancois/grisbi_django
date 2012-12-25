@@ -27,7 +27,7 @@ class Import_exception(Exception):
 
 class ImportForm1(gsb_forms.Baseform):
     nom_du_fichier = gsb_forms.forms.FileField()
-    #attention les entete des choices doivent exister dans le tableau liste_import
+    # attention les entete des choices doivent exister dans le tableau liste_import
     replace = gsb_forms.forms.ChoiceField(label="destination", choices=(
         ('remplacement', 'remplacement des données par le fichier'),
         ('fusion', 'fusion des données avec le fichier')
@@ -170,29 +170,29 @@ class property_ope_base(object):
 
 
 class Import_base(views.Myformview):
-    #chemin du template
+    # chemin du template
     template_name = "gsb/import.djhtm"
-    #classe du reader
+    # classe du reader
     reader = None
-    #extension du fichier
+    # extension du fichier
     extension = (None,)
-    #nom du type de fichier
+    # nom du type de fichier
     type_f = None
-    #formulaire utilise
+    # formulaire utilise
     form_class = ImportForm1
     url = "outils_index"
     test = False
     creation_de_compte = False
 
     def form_valid(self, form):
-        #logger = logging.getLogger('gsb.import')
+        # logger = logging.getLogger('gsb.import')
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
         nomfich = nomfich[:-4]
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (
             nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), self.extension[0]))
-        #commme on peut avoir plusieurs extension on prend par defaut la premiere
-        #si le repertoire n'existe pas on le crée
+        # commme on peut avoir plusieurs extension on prend par defaut la premiere
+        # si le repertoire n'existe pas on le crée
         try:
             destination = open(nomfich, 'wb+')
         except IOError :
@@ -201,28 +201,28 @@ class Import_base(views.Myformview):
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
             destination.write(chunk)
         destination.close()
-        #renomage ok
-        #logger.debug(u"enregistrement fichier ok")
-        if  self.import_file(nomfich) == False:#probleme importation
+        # renomage ok
+        # logger.debug(u"enregistrement fichier ok")
+        if  self.import_file(nomfich) == False:  # probleme importation
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
-            #return self.render_to_response(self.get_context_data(form=form))
+            # return self.render_to_response(self.get_context_data(form=form))
             return HttpResponseRedirect(self.get_success_url())
             
 
     def import_file(self, nomfich):
-        logger = logging.getLogger('gsb.import') #@UnusedVariable
+        logger = logging.getLogger('gsb.import')  # @UnusedVariable
         self.erreur = list()
-        #definition du nom du fichier
+        # definition du nom du fichier
         self.nb = dict()
         self.id = dict()
         self.listes = { 'titre':dict(), 'cat':dict(), 'ib':dict(), 'tiers':dict(), 'moyen':dict(), 'rapp':dict(), 'compte':dict(), 'ope':dict(), 'exercice':dict() }
-        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(),                  'ope':list(), 'exercice':list(), "ope_titre":list()}
-        #personalisation avec ajout de compte
+        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(), 'ope':list(), 'exercice':list(), "ope_titre":list()}
+        # personalisation avec ajout de compte
         if self.creation_de_compte:
             self.ajouter['compte'] = list()
-        #on ajoute les moyens par defaut
+        # on ajoute les moyens par defaut
         try:
             self.listes['moyen'][Moyen.objects.get(id=settings.MD_DEBIT).nom] = settings.MD_DEBIT
         except Moyen.DoesNotExist:
@@ -233,13 +233,13 @@ class Import_base(views.Myformview):
         except Moyen.DoesNotExist:
             self.listes['moyen']['CREDIT'] = settings.MD_CREDIT
             Moyen.objects.create(id=settings.MD_CREDIT, nom='CREDIT', type="c")
-        #on ajoute le moyen pour le virement
+        # on ajoute le moyen pour le virement
         moyen_virement = Moyen.objects.filter(type='v')
         if moyen_virement.exists():
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
         else:
             self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
-        #on gere la categorie operation sur titre
+        # on gere la categorie operation sur titre
         try:
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_OST).nom] = settings.ID_CAT_OST
         except Cat.DoesNotExist:
@@ -267,8 +267,8 @@ class Import_base(views.Myformview):
                 raise e
     
         with transaction.commit_on_success():
-            #import final
-            #les comptes
+            # import final
+            # les comptes
             nb_ajout = 0
             if self.creation_de_compte:
                 for obj in self.ajouter['compte']:
@@ -279,9 +279,9 @@ class Import_base(views.Myformview):
             else:
                 if 'compte' in self.ajouter:
                     raise Import_exception("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
-            #les tiers
+            # les tiers
             self.create('tiers', Tiers)
-            #les titres
+            # les titres
             nb_ajout = 0
             for titre in self.ajouter['titre']:
                 Titre.objects.create(id=titre['id'], nom=titre['nom'], type='ZZZ', isin=titre['isin'], tiers_id=titre['tiers_id'])
@@ -289,17 +289,17 @@ class Import_base(views.Myformview):
             if not self.test:
                 messages.info(self.request, "%s titres ajoutes" % nb_ajout)
 
-            #les categories
+            # les categories
             self.create('cat', Cat)
-            #les ib
+            # les ib
             if settings.UTILISE_IB == True:
                 self.create('ib', Ib)
-            #les moyens
+            # les moyens
             self.create('moyen', Moyen)
-            #les exercices
+            # les exercices
             if settings.UTILISE_EXERCICES == True:
                 self.create('exercice', Exercice)
-            #les rapp
+            # les rapp
             self.create('rapp', Rapp)
             for ope in self.ajouter['ope']:
                 Ope.objects.create(
@@ -321,28 +321,28 @@ class Import_base(views.Myformview):
                         pointe=ope['pointe'],
                         rapp_id=ope['rapp_id'],
                         tiers_id=ope['tiers_id'])
-            #les ope_titres
+            # les ope_titres
             for obj in self.ajouter['ope_titre']:
                 cpt = Compte.objects.get(id=obj["compte_id"])
-                titre=Titre.objects.get(id=obj['titre_id'])
+                titre = Titre.objects.get(id=obj['titre_id'])
                 if obj['nombre'] > 0:
-                    ope_titre=cpt.achat(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
-                    ope=ope_titre.ope
-                    ope.rapp_id=obj['rapp_id']
-                    ope.pointe=obj['pointe']
-                    ope.exercice_id=obj['exercice_id']
+                    ope_titre = cpt.achat(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope = ope_titre.ope
+                    ope.rapp_id = obj['rapp_id']
+                    ope.pointe = obj['pointe']
+                    ope.exercice_id = obj['exercice_id']
                     ope.save()
                 else:
-                    ope_titre=cpt.vente(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
-                    ope=ope_titre.ope_pmv
-                    ope.rapp_id=obj['rapp_id']
-                    ope.pointe=obj['pointe']
-                    ope.exercice_id=obj['exercice_id']
+                    ope_titre = cpt.vente(titre=titre, nombre=obj['nombre'], prix=obj['cours'], date=obj['date'])
+                    ope = ope_titre.ope_pmv
+                    ope.rapp_id = obj['rapp_id']
+                    ope.pointe = obj['pointe']
+                    ope.exercice_id = obj['exercice_id']
                     ope.save()
-                    ope=ope_titre.ope
-                    ope.rapp_id=obj['rapp_id']
-                    ope.pointe=obj['pointe']
-                    ope.exercice_id=obj['exercice_id']
+                    ope = ope_titre.ope
+                    ope.rapp_id = obj['rapp_id']
+                    ope.pointe = obj['pointe']
+                    ope.exercice_id = obj['exercice_id']
                     ope.save()
                               
     def get_success_url(self):
@@ -384,12 +384,12 @@ class Import_base(views.Myformview):
         try:
             obj_id = self.listes[liste][name]  # pylint: disable=W0622
         except KeyError:
-            #si c'est un nom vide pas besoin de creer
+            # si c'est un nom vide pas besoin de creer
             if name == '' or name is None or name == 0:
                 return None
-            try:#on regarde si ca existe
+            try:  # on regarde si ca existe
                 obj_id = model.objects.get(nom=name).id
-            except model.DoesNotExist:#on demande la creation plus tard
+            except model.DoesNotExist:  # on demande la creation plus tard
                 obj_id = self.ajout(obj=liste, model=model, nouveau=nouveau)
             self.listes[liste][name] = obj_id
         return obj_id
@@ -401,7 +401,7 @@ class Import_base(views.Myformview):
             last_id = model.objects.aggregate(id_max=Max('id'))['id_max']
             if last_id is None:
                 last_id = 0
-        if 'id' not in nouveau or nouveau['id'] < last_id:#on cree un operation
+        if 'id' not in nouveau or nouveau['id'] < last_id:  # on cree un operation
             last_id += 1
             self.id[obj] = last_id
             nouveau['id'] = last_id

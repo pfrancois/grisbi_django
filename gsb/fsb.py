@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-#from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, ope_titres, Virement, Cours
+# from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, ope_titres, Virement, Cours
 #
 from django.http import HttpResponse
 
@@ -12,7 +12,7 @@ import gsb.utils as utils
 
 
 def _export():
-    #output backup
+    # output backup
     cmd = settings.MYSQLDUMP_BIN + ' --opt --compact --skip-add-locks -u %s -p%s %s | gzip -c' % (
         settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
     stdin, stdout = os.popen2(cmd)

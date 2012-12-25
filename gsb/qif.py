@@ -16,10 +16,10 @@ version SG:
 import sys
 import decimal
 from .utils import datefr2datesql, strpdate
-#definition
-#expression reg
-#id des moyens,tiers,cat et ib, si None, on ne change pas
-#int de la colonne a commencer pour le tiers
+# definition
+# expression reg
+# id des moyens,tiers,cat et ib, si None, on ne change pas
+# int de la colonne a commencer pour le tiers
 tiers_perso = (
     {"reg": r"PRELEVEMENT \d*  TRESOR PUBLIC", "def": {"moyen": 4, "tiers": 15, "cat": 24, "ib": None}, "decal": None,
      "date": False},

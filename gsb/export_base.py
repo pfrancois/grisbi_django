@@ -127,11 +127,11 @@ class ExportViewBase(FormView):
 
     def get_initial(self):
         """gestion des donnees initiales"""
-        #prend la date de la premiere operation de l'ensemble des compte
+        # prend la date de la premiere operation de l'ensemble des compte
         if self.model_initial is None:
             raise django_exceptions.ImproperlyConfigured("un modele d'ou on tire les dates initiales doit etre defini")
         date_min = self.model_initial.objects.aggregate(element=models_agg.Min('date'))['element']
-        #la derniere operation
+        # la derniere operation
         date_max = self.model_initial.objects.aggregate(element=models_agg.Max('date'))['element']
         return {'date_min': date_min, 'date_max': date_max}
 

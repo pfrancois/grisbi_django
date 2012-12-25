@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
-#from django.conf.urls import include #non utilise actuellement
+# from django.conf.urls import include #non utilise actuellement
 from . import export_csv, export_qif, views, outils, import_csv, import_csv_perso
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
-                       #url(r'^test$', 'test.test')
+                       # url(r'^test$', 'test.test')
 )
 
-#les vues relatives aux outils
+# les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
                             views.Mytemplateview.as_view(template_name="gsb/options.djhtm",
@@ -65,7 +65,7 @@ urlpatterns += patterns('',
                         url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
 )
 
-#les vues relatives aux operations
+# les vues relatives aux operations
 urlpatterns += patterns('gsb.views',
                         url(r'^ope/(?P<pk>\d+)/delete', 'ope_delete', name='gsb_ope_delete'),
                         url(r'^ope/(?P<pk>\d+)/$', 'ope_detail', name='gsb_ope_detail'),
@@ -76,7 +76,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^search$', 'search_opes', name='g_search_ope')
 )
 
-#les vues relatives aux comptes
+# les vues relatives aux comptes
 urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/$', views.Cpt_detail_view.as_view(), name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$',
@@ -121,16 +121,16 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/maj$', 'view_maj_cpt_titre', name="cpt_titre_maj"),
                         url(r'^perso$', 'perso'),
 )
-#gestion de mes trucs perso
+# gestion de mes trucs perso
 perso = False  # ya plus rien dedans
-#form tester
-#if settings.DEBUG and perso:
+# form tester
+# if settings.DEBUG and perso:
 #    from gsb.form_tester import SomeModelFormPreview
 
-#urlpatterns += patterns('gsb',
+# urlpatterns += patterns('gsb',
 #    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
 #                        url(r'^test$', 'test.test')
-#)
-#import gsb.forms_perso
+# )
+# import gsb.forms_perso
 
-#urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )
+# urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )

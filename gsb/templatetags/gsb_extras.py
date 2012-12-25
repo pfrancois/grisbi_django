@@ -6,9 +6,9 @@ from decimal import Decimal, InvalidOperation
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-#from django.utils.http import urlquote
+# from django.utils.http import urlquote
 from django.conf import settings
-#import logging
+# import logging
 
 register = template.Library()
 

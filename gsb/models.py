@@ -22,7 +22,7 @@ class Gsb_exc(Exception):
 class Ex_jumelle_neant(Exception):
     pass
 
-#import logging
+# import logging
 
 class Tiers(models.Model):
     """
@@ -136,7 +136,7 @@ class Titre(models.Model):
                 new.cours_set.create(date=cours.date, valeur=cours.valeur)
         nb_change = 0
         nb_change += Ope_titre.objects.filter(titre=self).update(titre=new)
-        #on doit aussi reaffecter le tiers associe
+        # on doit aussi reaffecter le tiers associe
         self.tiers.fusionne(new.tiers)
         self.delete()
         return nb_change
@@ -204,26 +204,26 @@ class Titre(models.Model):
         @param datel: chaine au format "aaaa-mm-dd" ou date
         @param rapp: boolean, renvoie les operation rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
         """
-        #si pas d'operation existante
+        # si pas d'operation existante
         if datel and (not self.cours_set.filter(date__lte=datel).exists()):
             return 0
-            #definition de la population des ope
+            # definition de la population des ope
         opes = Ope.objects.filter(tiers=self.tiers)
-        #si on a defini sur seulement un compte
+        # si on a defini sur seulement un compte
         if compte:
             opes = opes.filter(compte=compte)
-            #si on veut juste l'encours des ope rapp
+            # si on veut juste l'encours des ope rapp
         if rapp:
-            #on prend uniquement les ope rapp
+            # on prend uniquement les ope rapp
             opes = opes.filter(rapp__isnull=False)
-            #gestion de la date
+            # gestion de la date
             if opes.exists():
                 liste = []
                 if datel:
                     liste.append(utils.strpdate(datel))
                 liste.append(self.last_cours_date(rapp=rapp))
                 date_r = min(liste)
-                #ca veut dire pas d"ope
+                # ca veut dire pas d"ope
                 if date_r is None:
                     return 0
             else:
@@ -233,12 +233,12 @@ class Titre(models.Model):
                 date_r = datel
             else:
                 date_r = utils.today()
-                #maintenant que l'on a la date max, on peut filtrer
+                # maintenant que l'on a la date max, on peut filtrer
         opes = opes.filter(date__lte=date_r)
         if opes.exists():
-            #recupere le dernier cours
+            # recupere le dernier cours
             cours = self.last_cours(datel=date_r)
-            #renvoie la gestion des param de nb
+            # renvoie la gestion des param de nb
             nb = self.nb(compte=compte, rapp=rapp, datel=datel)
             return nb * cours
         else:
@@ -418,7 +418,7 @@ class Compte(models.Model):
     type = models.CharField(max_length=1, choices=typescpt, default='b')
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     guichet = models.CharField(max_length=15, blank=True, default='')
-    #il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
+    # il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length=20, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
     solde_init = CurField(default=decimal.Decimal('0.00'))
@@ -444,10 +444,10 @@ class Compte(models.Model):
             @param datel date date limite de calcul du solde
             @param rapp boolean faut il prendre uniquement les opération rapproches
         """
-        #il n'y a pas d'operation
+        # il n'y a pas d'operation
         if not self.ope_set.exists():
             return 0
-        #il n'y a pas d'operation a cette date 
+        # il n'y a pas d'operation a cette date 
         if datel is not None and self.ope_set.order_by('date')[0].date > datel:
             return 0
 
@@ -463,7 +463,7 @@ class Compte(models.Model):
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
-        if self.type == 't' and espece==False:
+        if self.type == 't' and espece == False:
             solde = solde + self.solde_titre(datel, rapp)
         return solde
 
@@ -484,7 +484,7 @@ class Compte(models.Model):
         nb_change = Echeance.objects.filter(compte=self).update(compte=new)
         nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
         nb_change += Ope.objects.filter(compte=self).update(compte=new)
-        if self.type=="t":
+        if self.type == "t":
             nb_change += Ope_titre.objects.filter(compte=self).update(compte=new)
         self.delete()
         return nb_change
@@ -492,10 +492,10 @@ class Compte(models.Model):
     def get_absolute_url(self):
         return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
-    def solde_rappro(self,espece=False):
+    def solde_rappro(self, espece=False):
         return self.solde(rapp=True)
 
-    def solde_pointe(self,espece=False):
+    def solde_pointe(self, espece=False):
         """renvoie le solde du compte pour les operations pointees
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id).filter(pointe=True)
@@ -523,7 +523,7 @@ class Compte(models.Model):
 
     date_rappro.short_description = u"date dernier rapp"
 
-    #@transaction.commit_on_success
+    # @transaction.commit_on_success
     def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None,
               tiers_frais=None):
         """fonction pour achat de titre:
@@ -554,13 +554,13 @@ class Compte(models.Model):
                                     automatique=True
                                     )
                     
-                #gestion compta matiere (et donc opération sous jacente et cours)
+                # gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
                                                  nombre=decimal.Decimal(force_unicode(nombre)),
                                                  date=date,
                                                  cours=prix)
-            #virement
+            # virement
             if virement_de:
                 vir = Virement()
                 vir.create(virement_de, self,
@@ -583,11 +583,11 @@ class Compte(models.Model):
         nombre = abs(nombre)
         self.alters_data = True
         if isinstance(titre, Titre):
-            #extraction des titres dans portefeuille
+            # extraction des titres dans portefeuille
             nb_titre_avant = titre.nb(compte=self, datel=date)
             if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
-                #compta matiere
+                # compta matiere
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
                                                  nombre=decimal.Decimal(force_unicode(nombre)) * -1,
@@ -623,19 +623,19 @@ class Compte(models.Model):
         """fonction pour ost de titre:"""
         self.alters_data = True
         if isinstance(titre, Titre):
-            #extraction des titres dans portefeuille
+            # extraction des titres dans portefeuille
             nb_titre_avant = titre.nb(compte=self, datel=date)
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation sur titre'})[0]
             if not nb_titre_avant:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
-                #ajout du revenu proprement dit
+                # ajout du revenu proprement dit
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(force_unicode(montant)),
                                 tiers=titre.tiers,
                                 cat=cat_ost,
                                 notes="revenu",
                                 moyen=Moyen.objects.get(id=settings.MD_CREDIT),
-                                #on ne prend le moyen par defaut car ce n'est pas une OST
+                                # on ne prend le moyen par defaut car ce n'est pas une OST
                                 automatique=True)
             if decimal.Decimal(force_unicode(frais)):
                 if not tiers_frais:
@@ -666,7 +666,7 @@ class Compte(models.Model):
         @return: int
         """
         solde_titre = 0
-        #il n'y a pas d'operation
+        # il n'y a pas d'operation
         if not self.ope_set.exists() or (datel is not None and self.ope_set.order_by('date')[0].date > datel):
             return 0
         for titre in self.titre.all().distinct():
@@ -706,7 +706,7 @@ class Ope_titre(models.Model):
     def save(self, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
         self.nombre = decimal.Decimal(self.nombre)
-        #definition des cat avec possibilite
+        # definition des cat avec possibilite
         try:
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre'})[0]
         except IntegrityError:
@@ -718,14 +718,14 @@ class Ope_titre(models.Model):
         except IntegrityError:
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
-            #gestion des cours
+            # gestion des cours
         if self.ope:
             old_date = self.ope.date
             obj = Cours.objects.get(titre=self.titre, date=old_date)
             obj.delete()
         else:
             old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur': 0}) #@UnusedVariable
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur': 0})  # @UnusedVariable
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
@@ -736,9 +736,9 @@ class Ope_titre(models.Model):
             moyen = self.compte.moyen_debit_defaut
             if moyen is None:
                 try:
-                    moyen=Moyen.objects.get(id=settings.MD_DEBIT)
+                    moyen = Moyen.objects.get(id=settings.MD_DEBIT)
                 except Moyen.DoesNotExist:
-                    moyen=Moyen.objects.create(id=settings.MD_DEBIT,nom="debit par defaut",type='d')
+                    moyen = Moyen.objects.create(id=settings.MD_DEBIT, nom="debit par defaut", type='d')
             if not self.ope:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
@@ -758,26 +758,26 @@ class Ope_titre(models.Model):
                 self.ope.moyen = moyen
                 self.ope.save()
         else:  # c'est une vente
-            #calcul prealable
-            #on met des plus car les chiffres sont negatif
+            # calcul prealable
+            # on met des plus car les chiffres sont negatif
             if self.ope:  # ope existe deja, donc il faut faire attention car les montant inv sont faux
                 inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self.ope.id)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date)
-                #chaine car comme on a des decimal
+                # chaine car comme on a des decimal
             ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
             ost = decimal.Decimal(ost)
             pmv = self.nombre * self.cours - ost
-            #on cree les ope
+            # on cree les ope
             self.invest = ost
             moyen = self.compte.moyen_credit_defaut
             if moyen is None:
                 try:
-                    moyen=Moyen.objects.get(id=settings.MD_CREDIT)
+                    moyen = Moyen.objects.get(id=settings.MD_CREDIT)
                 except Moyen.DoesNotExist:
-                    moyen=Moyen.objects.create(id=settings.MD_CREDIT,nom="credit par defaut",type='r')
+                    moyen = Moyen.objects.create(id=settings.MD_CREDIT, nom="credit par defaut", type='r')
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
@@ -804,7 +804,7 @@ class Ope_titre(models.Model):
                                                   compte=self.compte,
                 )
             else:
-                #on modifie tout
+                # on modifie tout
                 self.ope_pmv.date = self.date
                 self.ope_pmv.montant = pmv * -1
                 self.ope_pmv.tiers = self.titre.tiers
@@ -844,7 +844,7 @@ class Moyen(models.Model):
     commun à l'ensembles des comptes
     actuellement, les comptes ont tous les moyens sans possiblite de faire le tri
     """
-    #on le garde pour l'instant car ce n'est pas dans le même ordre que pour les categories
+    # on le garde pour l'instant car ce n'est pas dans le même ordre que pour les categories
     typesdep = (
         ('v', u'virement'),
         ('d', u'depense'),
@@ -993,7 +993,7 @@ class Echeance(models.Model):
             finale = initial + relativedelta(months=self.intervalle)
         if self.periodicite == 'a':
             finale = initial + relativedelta(years=self.intervalle)
-            #on verifie que la date limite n'est pas dépasséee
+            # on verifie que la date limite n'est pas dépasséee
         if self.date_limite is not None and finale > self.date_limite:
             finale = None
         return finale
@@ -1128,7 +1128,7 @@ class Ope(models.Model):
         super(Ope, self).clean()
         if not self.compte_id:
             raise ValidationError(u"vous devez mettre un compte")
-            #verification qu'il n'y pas pointe et rapprochee
+            # verification qu'il n'y pas pointe et rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
@@ -1188,7 +1188,7 @@ class Ope(models.Model):
                     return False
             return True
         
-    def save(self,*args, **kwargs):
+    def save(self, *args, **kwargs):
         if not self.moyen:
             if self.montant >= 0:
                 if self.compte.moyen_credit_defaut:
@@ -1202,14 +1202,14 @@ class Ope(models.Model):
                     self.moyen = self.compte.moyen_debit_defaut
                 else:
                     moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
-                                                                                        "id": settings.MD_DEBIT,"type":"d"})[0]
+                                                                                        "id": settings.MD_DEBIT, "type":"d"})[0]
                     self.moyen = moyen
         if self.is_mere:
-            self.cat=Cat.objects.get_or_create(nom=u"Opération Ventilée",defaults= {'nom':u"Opération Ventilée",'type':"c"})[0]
-            ope_orig=Ope.objects.get(id=self.id)
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom':u"Opération Ventilée", 'type':"c"})[0]
+            ope_orig = Ope.objects.get(id=self.id)
             if self.montant != ope_orig.montant:
-            #comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
-                self.montant=Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
+            # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
+                self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
                 if self.pointe == True:
                     raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est pointee")
                 if self.rapp is not None:
@@ -1369,7 +1369,7 @@ class Virement(object):
 @receiver(pre_delete, sender=Ope)
 def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
-    #on evite que cela soit une opération rapproche
+    # on evite que cela soit une opération rapproche
     if instance.rapp:
         raise IntegrityError(u"opération rapprochee")
     if instance.jumelle:

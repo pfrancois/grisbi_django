@@ -8,14 +8,14 @@ import django.forms as forms
 from django.utils.safestring import mark_safe
 from django.core import urlresolvers
 from django.db import IntegrityError
-#from django.core.exceptions import PermissionDenied
+# from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-#from django import forms
+# from django import forms
 
 from django.utils.translation import ugettext_lazy as _
-#from django.db.models import Q
-#import decimal
+# from django.db.models import Q
+# import decimal
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
 from django.utils import timezone
@@ -146,7 +146,7 @@ class Modeladmin_perso(admin.ModelAdmin):
 
     fusionne_b_dans_a.short_description = u"Fusion de 2 dans 1"
 
-    #from here http://djangosnippets.org/snippets/2531/
+    # from here http://djangosnippets.org/snippets/2531/
     def keepfilter(self, request, result):
     # Look at the referer for a query string '^.*\?.*$'
         ref = request.META.get('HTTP_REFERER', '')
@@ -203,7 +203,7 @@ class liste_perso_inline(admin.TabularInline):
             return super(liste_perso_inline, self).queryset(request).select_related()
 
 
-##------------defintiion des classes
+# #------------defintiion des classes
 class ope_cat_admin(liste_perso_inline):
     model = Ope
     fields = ('date', 'compte', 'montant', 'tiers', 'ib', 'notes')
@@ -335,7 +335,7 @@ class Ope_admin(Modeladmin_perso):
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
-    #save_on_top = True
+    # save_on_top = True
     save_as = True
     search_fields = ['tiers__nom']
     ordering = ['date']
@@ -392,7 +392,7 @@ class Ope_admin(Modeladmin_perso):
     oper_titre.short_description = u"compta matiere"
 
     def mul(self, request, queryset):
-        #queryset.update(montant=models.F('montant') * -1)  #ca serait optimal de faire mais because virement pas facile
+        # queryset.update(montant=models.F('montant') * -1)  #ca serait optimal de faire mais because virement pas facile
         for o in queryset:
             if o.jumelle:
                 o.montant *= -1
@@ -417,7 +417,7 @@ class Ope_admin(Modeladmin_perso):
 
     def delete_view(self, request, object_id, extra_context=None):
         instance = self.get_object(request, admin.util.unquote(object_id))
-        #on evite que cela soit une operation rapproche
+        # on evite que cela soit une operation rapproche
         error = False
         if instance.rapp:
             messages.error(request, u'ope rapprochee')

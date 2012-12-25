@@ -9,7 +9,7 @@ from django import forms
 
 
 
-#definition d'un moneyfield
+# definition d'un moneyfield
 class CurField(models.DecimalField):
     """
     un champ decimal mais defini pour les monnaies

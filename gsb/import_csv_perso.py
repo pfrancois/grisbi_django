@@ -13,8 +13,8 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
     @property
     def cat(self):
         cat = self.to_str(self.row['cat'], "Divers:Inconnu")
-        if cat[-1]==':':#si le dernier caractere est ":" on l'enleve
-            cat=cat[:-1]
+        if cat[-1] == ':':  # si le dernier caractere est ":" on l'enleve
+            cat = cat[:-1]
         return cat 
 
     @property
@@ -55,8 +55,8 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        depense={"sg":"Prelevement","Caisse":"Depense","cb":"Visa"}
-        if self.mt<0:
+        depense = {"sg":"Prelevement", "Caisse":"Depense", "cb":"Visa"}
+        if self.mt < 0:
             try:
                 return depense[self.cpt]
             except KeyError:

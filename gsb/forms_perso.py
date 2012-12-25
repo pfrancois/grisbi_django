@@ -1,18 +1,18 @@
 # -*- coding: utf-8
 from __future__ import absolute_import
-#import relatif views
+# import relatif views
 from django.shortcuts import  render
 
-#import relatif urls
+# import relatif urls
 from django.conf.urls import patterns, url
 
-#import relatif forms
+# import relatif forms
 from .import forms as gsb_forms
 from django import forms
-#models
+# models
 from .models import Compte, Ope
 from django.db import models
-#divers
+# divers
 from django.contrib.auth.decorators import login_required
 #-----------les urls.py
 

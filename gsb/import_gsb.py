@@ -42,7 +42,7 @@ def import_gsb_0_5_x(request):
             for chunk in request.FILES['nom_du_fichier'].chunks():
                 destination.write(chunk)
             destination.close()
-            #renomage ok
+            # renomage ok
             logger.debug("enregistrement fichier ok")
             # on recupere les info pour le nom
             try:
@@ -51,9 +51,9 @@ def import_gsb_0_5_x(request):
                 info = u"%s le %s" % ('0.0.0.0', time.strftime(u"%d/%m/%Y a %Hh%Mm%Ss"))
                 #-----------------------gestion des imports
             try:
-                #on essaye d'ouvrir le fichier
+                # on essaye d'ouvrir le fichier
                 destination = open(nomfich, 'r')
-                #si on peut
+                # si on peut
                 destination.close()
                 if form.cleaned_data['replace'] == 'remplacement':
                     logger.warning(
@@ -95,7 +95,7 @@ def import_gsb_050(nomfich, efface_table=True):
     tabl_correspondance_ope = {}
     if efface_table:
         for table in (
-            'ope', 'echeance', 'rapp', 'moyen', 'compte',  'cat', 'exercice', 'ib', 'banque',
+            'ope', 'echeance', 'rapp', 'moyen', 'compte', 'cat', 'exercice', 'ib', 'banque',
             'titre', 'tiers', 'Ope_titre'):
             connection.cursor().execute("delete from gsb_%s;" % table)  # @UndefinedVariable
             transaction.commit_unless_managed()
@@ -103,14 +103,14 @@ def import_gsb_050(nomfich, efface_table=True):
     time.clock()
     xml_tree = et.parse(nomfich)
     xml_tree.getroot()
-    #verification du format
+    # verification du format
     xml_generalite = str(xml_tree.find('Generalites/Version_fichier').text)
     if xml_generalite != '0.5.0':
-        #logger.critical("le format n'est pas reconnu")
+        # logger.critical("le format n'est pas reconnu")
         raise Import_exception(u"le format n'est pas reconnu")
     percent = 1
     #------------------------------generalites#------------------------------
-    #les generalités sont maintenant dans setting.py
+    # les generalités sont maintenant dans setting.py
     #------------------------------devises---------------------------
     nb = 0
     nb_nx = 0
@@ -131,7 +131,7 @@ def import_gsb_050(nomfich, efface_table=True):
         if xml_tiers.get('Nom')[:6] != 'titre_':  # creation du tiers titre
             element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
         else:
-            #test puis creation du titre (et donc du tiers automatiquement)
+            # test puis creation du titre (et donc du tiers automatiquement)
             try:
                 Tiers.objects.get(nom=xml_tiers.get('Nom'))
             except Tiers.DoesNotExist:
@@ -139,10 +139,10 @@ def import_gsb_050(nomfich, efface_table=True):
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
                 s = s.partition('@')
-                #on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
-                #comme le tiers est sous la forme titre_ nomtiers
+                # on utilise partition et non split car c'est pas sur et pas envie de mettre une usine a gaz
+                # comme le tiers est sous la forme titre_ nomtiers
                 titre = Titre(nom=nom[7:])
-                #dans les notes ISIN@TYPE
+                # dans les notes ISIN@TYPE
                 if not s[1]:  # pas de @ et donc pas de type
                     if s[0] == '':
                         titre.isin = "ZZ%sN%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
@@ -367,7 +367,7 @@ def import_gsb_050(nomfich, efface_table=True):
         ope_date_val = utils.datefr2datesql(xml_ope.get('Db'))
         ope_cpt = Compte.objects.get(id=tabl_correspondance_compte[xml_ope.find('../../Details/No_de_compte').text])
         if ope_tiers and ope_tiers.is_titre and ope_cpt.type == 't':
-            #compta matiere et cours en meme tps
+            # compta matiere et cours en meme tps
             ope_cpt_titre = Compte.objects.get(id=ope_cpt.id)
             ope_notes = dj_encoding.smart_unicode(xml_ope.get('N'))
             s = ope_notes.partition('@')
@@ -377,7 +377,7 @@ def import_gsb_050(nomfich, efface_table=True):
                 Ope_titre.objects.create(titre=ope_tiers.titre, compte=ope_cpt_titre, nombre=ope_nb, date=ope_date,
                                          cours=ope_cours)
                 ope_tiers.titre.cours_set.get_or_create(date=ope_date, defaults={'date': ope_date, 'valeur': ope_cours})
-                #on cree de toute facon l'operation
+                # on cree de toute facon l'operation
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             logger.info(
@@ -385,20 +385,20 @@ def import_gsb_050(nomfich, efface_table=True):
             percent += 1
         ope = Ope(compte=ope_cpt,
                   date=ope_date,
-                  date_val=ope_date_val, #date de valeur
-                  montant=ope_montant, #montant
+                  date_val=ope_date_val,  # date de valeur
+                  montant=ope_montant,  # montant
         )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         ope.save()
         tabl_correspondance_ope[xml_ope.get('No')] = ope.id
         logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
-        #numero du moyen de paiment
+        # numero du moyen de paiment
         ope.num_cheque = xml_ope.get('Ct')
-        #statut de pointage
+        # statut de pointage
         if int(xml_ope.get('P')) == 1:
             ope.pointe = True
         if int(xml_ope.get('A')) == 1:
             ope.automatique = True
-            #gestion des tiers
+            # gestion des tiers
         if ope_tiers:
             ope.tiers_id = ope_tiers
         try:
@@ -421,7 +421,7 @@ def import_gsb_050(nomfich, efface_table=True):
             ope.moyen = None
         try:  # gestion des rapprochements
             ope.rapp_id = tabl_correspondance_rapp[xml_ope.get('R')]
-            #gestion de la date du rapprochement
+            # gestion de la date du rapprochement
             if ope.rapp.date > utils.strpdate(ope.date):
                 ope.rapp.date = utils.strpdate(ope.date)
                 ope.rapp.save()
@@ -429,7 +429,7 @@ def import_gsb_050(nomfich, efface_table=True):
             ope.rapp = None
         ope.notes = xml_ope.get('N')
         ope.piece_comptable = xml_ope.get('Pc')
-        #exercices
+        # exercices
         try:
             ope.exercice_id = tabl_correspondance_exo[xml_ope.get('E')]
         except KeyError:
@@ -443,14 +443,14 @@ def import_gsb_050(nomfich, efface_table=True):
             logger.info(
                 "2*ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
             percent += 1
-            #gestion des virements
+            # gestion des virements
         if int(xml_ope.get('Ro')):
             logger.debug('virement vers %s' % xml_ope.get('Ro'))
             ope = Ope.objects.get(id=tabl_correspondance_ope[xml_ope.get('No')])
             ope.jumelle_id = tabl_correspondance_ope[xml_ope.get('Ro')]
             ope.save()
-            #gestion des ventilations
-        #bool(int(xml_ope.get('Ov'))) pas besoin car on regarde avec des requetes sql
+            # gestion des ventilations
+        # bool(int(xml_ope.get('Ov'))) pas besoin car on regarde avec des requetes sql
         if int(xml_ope.get('Va')):
             logger.debug('ventilation de %s' % tabl_correspondance_ope[xml_ope.get('Va')])
             ope = Ope.objects.get(id=tabl_correspondance_ope[xml_ope.get('No')])

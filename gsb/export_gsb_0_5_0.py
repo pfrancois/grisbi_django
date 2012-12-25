@@ -5,9 +5,9 @@ from django.contrib.auth.decorators import permission_required
 from .models import (Compte, Ope, Tiers, Cat, Moyen,
                      Echeance, Ib, Banque, Exercice, Rapp, Titre)
 from django.http import HttpResponse
-#from django.core.exceptions import ObjectDoesNotExist
-#import decimal
-#import datetime
+# from django.core.exceptions import ObjectDoesNotExist
+# import decimal
+# import datetime
 from django.conf import settings  # @Reimport
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -18,7 +18,7 @@ except ImportError:
     from xml.etree import cElementTree as et
 import logging
 from .import utils
-#definitions des listes
+# definitions des listes
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
@@ -27,7 +27,7 @@ liste_type_compte = Compte.typescpt
 def _export():
     logger = logging.getLogger('gsb.export')
     fmt = utils.Format()
-    #creation des id pour cat et sact
+    # creation des id pour cat et sact
     list_cats = {}
     for cat_en_cours in Cat.objects.all().order_by('id'):
         try:
@@ -42,7 +42,7 @@ def _export():
             list_cats[cat_en_cours.id] = {
             'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}
                 , 'scat': None}
-            #creation des id pour cat et sact
+            # creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
         try:
@@ -159,7 +159,7 @@ def _export():
         et.SubElement(xml_detail, "Tri_par_type").text = '0'  # NOT IN BDD
         et.SubElement(xml_detail, "Neutres_inclus").text = '0'  # NOT IN BDD
         et.SubElement(xml_detail, "Ordre_du_tri").text = '/'.join([str(o.id) for o in Moyen.objects.order_by('id')])
-        ##types:
+        # #types:
         xml_types = et.SubElement(xml_compte, "Detail_de_Types")
         for m_pai in Moyen.objects.all().order_by('id'):
             logger.debug('moyen %s' % m_pai.id)
@@ -171,16 +171,16 @@ def _export():
             xml_element.set('Numerotation_auto', "0")  # NOT IN BDD
             xml_element.set('No_en_cours', "0")  # NOT IN BDD
         xml_opes = et.SubElement(xml_compte, "Detail_des_operations")
-        ##operations
+        # #operations
         for ope in Ope.objects.filter(compte=cpt.id).order_by('id'):
             logger.debug('ope %s' % ope.id)
             xml_element = et.SubElement(xml_opes, 'Operation')
-            #numero de l'operation
+            # numero de l'operation
             xml_element.set('No', str(ope.id))
             xml_element.set('Id', '')  # NOT IN BDD
-            #date de l'operation
+            # date de l'operation
             xml_element.set('D', fmt.date(ope.date))
-            #date de valeur
+            # date de valeur
             if ope.date_val is None:
                 xml_element.set('Db', "0/0/0")
             else:
@@ -249,8 +249,8 @@ def _export():
                 xml_element.set('Va', "0")
             else:
                 xml_element.set('Va', str(ope.mere.id))
-                #raison pour lesquelles il y a des attributs non modifiables
-                #Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
+                # raison pour lesquelles il y a des attributs non modifiables
+                # Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
                 ###Echeances###
 
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
@@ -355,7 +355,7 @@ def _export():
         else:
             xml_sub.set("Informations", tier.notes)
         xml_sub.set("Liaison", "0")
-        ##categories##
+        # #categories##
     xml_cat_root = et.SubElement(xml_root, "Categories")
     xml_generalite = et.SubElement(xml_cat_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_categories").text = str(Cat.objects.count())
@@ -383,7 +383,7 @@ def _export():
             xml_sub.set('Nom', unicode(cat['scat']['nom']))
         last_cat = str(cat['cat']['id'])
     xml_cate.set('No_derniere_sous_cagegorie', last_cat)
-    ##imputation
+    # #imputation
     xml_ib_root = et.SubElement(xml_root, "Imputations")
     xml_generalite = et.SubElement(xml_ib_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_imputations").text = str(Ib.objects.count())
@@ -408,7 +408,7 @@ def _export():
             xml_sub = et.SubElement(xml_ibe, 'Sous-imputation')
             xml_sub.set('No', str(imp['ib']['id']))
             xml_sub.set('Nom', unicode(imp['sib']['nom']))
-            ##devises##
+            # #devises##
     xml_devises = et.SubElement(xml_root, "Devises")
     xml_generalite = et.SubElement(xml_devises, "Generalites")
     et.SubElement(xml_generalite, "Nb_devises").text = "1"
@@ -425,12 +425,12 @@ def _export():
     xml_sub.set('Devise_en_rapport', '0')  # NOT IN BDD
     xml_sub.set('Change', fmt.float(0))
 
-    #raison pour lesquelles il y a des attributs non modifiables
-    #isocode est par construction egale à code
-    #Passage_euro: plus besoin
-    #Rapport_entre_devises plus besoin
+    # raison pour lesquelles il y a des attributs non modifiables
+    # isocode est par construction egale à code
+    # Passage_euro: plus besoin
+    # Rapport_entre_devises plus besoin
 
-    ##BANQUES##
+    # #BANQUES##
     xml_banques = et.SubElement(xml_root, "Banques")
     xml_generalite = et.SubElement(xml_banques, "Generalites")
     et.SubElement(xml_generalite, "Nb_banques").text = str(Banque.objects.count())
@@ -451,13 +451,13 @@ def _export():
             xml_sub.set('Tel_correspondant', "")  # NOT IN BDD
             xml_sub.set('Mail_correspondant', "")  # NOT IN BDD
             xml_sub.set('Remarques', bq.notes)
-            #raison pour lesquelles il y a des attributs non modifiables
-            #Adresse pas ds BDD
-            #Tel,mail, web, Nom_correspondant: pas ds bdd
-            #Fax_correspondant: pas ds bdd
-            #Tel_correspondant: pas ds bdd
-            #Mail_correspondant: pas ds bdd
-            ##exercices##
+            # raison pour lesquelles il y a des attributs non modifiables
+            # Adresse pas ds BDD
+            # Tel,mail, web, Nom_correspondant: pas ds bdd
+            # Fax_correspondant: pas ds bdd
+            # Tel_correspondant: pas ds bdd
+            # Mail_correspondant: pas ds bdd
+            # #exercices##
     xml_exo = et.SubElement(xml_root, "Exercices")
     xml_generalite = et.SubElement(xml_exo, "Generalites")
     et.SubElement(xml_generalite, "Nb_exercices").text = str(Exercice.objects.count())
@@ -471,7 +471,7 @@ def _export():
             xml_sub.set('Date_debut', fmt.date(exo.date_debut))
             xml_sub.set('Date_fin', fmt.date(exo.date_fin))
             xml_sub.set('Affiche', "1")
-            ##rapprochement##
+            # #rapprochement##
     xml_rapp = et.SubElement(xml_root, "Rapprochements")
     xml_detail = et.SubElement(xml_rapp, 'Detail_des_rapprochements')
     for rappro in Rapp.objects.all().order_by('id'):
@@ -483,7 +483,7 @@ def _export():
     xml_generalite = et.SubElement(xml_etats, "Generalites")
     et.SubElement(xml_generalite, "No_dernier_etat").text = "0"
     et.SubElement(xml_etats, 'Detail_des_etats')
-    #final
+    # final
     xml = et.tostring(xml_root, method="xml", xml_declaration=True, pretty_print=True)
     avant = ['&#232', '&#233', '&#234', '&#244']
     apres = ['&#xE8', '&#xE9', '&#xEA', '&#xF4']
@@ -498,7 +498,7 @@ def export(request):
     nb_compte = Compte.objects.count()
     if nb_compte:
         xml_django = _export()
-        #h=HttpResponse(xml,mimetype="application/xml")
+        # h=HttpResponse(xml,mimetype="application/xml")
         reponse = HttpResponse(xml_django, mimetype="application/x-grisbi-gsb")
         reponse["Cache-Control"] = "no-cache, must-revalidate"
         reponse["Content-Disposition"] = "attachment; filename=%s" % settings.TITRE

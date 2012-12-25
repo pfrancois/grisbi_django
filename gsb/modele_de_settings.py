@@ -2,7 +2,7 @@
 import os
 import decimal
 import sys
-#on change le context par defaut
+# on change le context par defaut
 decimal.getcontext().rouding = decimal.ROUND_HALF_UP
 decimal.getcontext().precision = 3
 PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -11,7 +11,7 @@ DEFAULT_CHARSET = 'utf-8'
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 DJANGO_EXTENSION = True
-#TEMPLATE_STRING_IF_INVALID="INVALID"
+# TEMPLATE_STRING_IF_INVALID="INVALID"
 
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
@@ -19,7 +19,7 @@ ADMINS = (
 # ('toto', 'your_email@domain.com'),
 )
 #####################################
-#config gsb
+# config gsb
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
 ID_CPT_M = 1  # cpt principal utlise si l'on ne rentre pas de compte
@@ -28,11 +28,11 @@ UTILISE_EXERCICES = False
 UTILISE_IB = True
 UTILISE_PC = False
 
-#taux de cotisations sociales
-#attention c'est un taux special estime
+# taux de cotisations sociales
+# attention c'est un taux special estime
 __TAUX_VERSEMENT_legal = 0.08 * 0.97
 TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal))
-#id et cat des operation speciales
+# id et cat des operation speciales
 ID_CAT_COTISATION = 23
 ID_TIERS_COTISATION = 727
 ID_CAT_OST = 64
@@ -47,11 +47,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, 'grisbi.db'), # Or path to database file if using sqlite3.
-        'USER': 'root', # Not used with sqlite3.
-        'PASSWORD': '', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        'NAME': os.path.join(PROJECT_PATH, 'grisbi.db'),  # Or path to database file if using sqlite3.
+        'USER': 'root',  # Not used with sqlite3.
+        'PASSWORD': '',  # Not used with sqlite3.
+        'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
     }
 }
 if 'testserver' in sys.argv:
@@ -124,7 +124,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
     )
 
 # Make this unique, and don't share it with anybody.
@@ -139,7 +139,7 @@ except ImportError:
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
     fichier.write("SECRET_KEY=%s" % secret)
-    from secret_key import *  #@UnusedWildImport
+    from secret_key import *  # @UnusedWildImport
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -174,7 +174,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gsb',
-    #gestion admin
+    # gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs'
     )
@@ -189,7 +189,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 
-#noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -212,11 +212,11 @@ LOGGING = {
             'level': 'WARNING',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'formatter': 'verbose',
-            #consider: 'filename': '/var/log/<myapp>/app.log',
-            #will need perms at location below:
+            # consider: 'filename': '/var/log/<myapp>/app.log',
+            # will need perms at location below:
             'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
             'when': 'D',
-            'backupCount': '30', #approx 1 month worth
+            'backupCount': '30',  # approx 1 month worth
         },
     },
     'loggers': {

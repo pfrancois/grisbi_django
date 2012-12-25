@@ -45,7 +45,7 @@ class Format:
             return defaut
         else:
             if isinstance(s, bool):
-                #c'est ici le principe
+                # c'est ici le principe
                 return str(int(s))
             try:
                 i = int("%s" % s)
@@ -71,7 +71,7 @@ class Format:
         liste = [str(b[0]) for b in liste]
         try:
             s = str(liste.index(s) + 1)
-        except ValueError:  #on en un ca par defaut
+        except ValueError:  # on en un ca par defaut
             s = defaut
         return s
 
@@ -148,20 +148,20 @@ def datefr2datesql(chaine):
 def is_number(s):
     """fonction qui verifie si ca a l'apparence d'un nombre"""
     try:
-        n = float(s) # for int, long and float
+        n = float(s)  # for int, long and float
         if n == "nan" or n == "inf" or n == "-inf" :
             return False
     except ValueError:
         try:
-            complex(s) # for complex
+            complex(s)  # for complex
         except ValueError:
             return False
     return True
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    s=str(s)
-    s=s.replace(',', '.')
+    s = str(s)
+    s = s.replace(',', '.')
     if is_number(s):
         return decimal.Decimal(s)
     else:
@@ -176,11 +176,11 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
     else:
         return datetime.date(1, 1, 1)
 
-#utilise pour mock et les test
+# utilise pour mock et les test
 def today():
     return datetime.date.today()
 
-#utilise pour mock et les test
+# utilise pour mock et les test
 def now():
     return datetime.datetime.now()
 
