@@ -298,6 +298,12 @@ class Test_models(TestCase):
         self.assertRaises(TypeError, c1.vente, c2, 20, '2011-01-01')
         self.assertRaises(TypeError, c1.revenu, c2, 20, '2011-01-01')
 
+    def test_solde_titre_nul(self):
+        c = Compte.objects.get(id=4)
+        self.assertEquals(c.solde_titre(),6)
+        self.assertEquals(c.solde_titre(datel='2001-01-01'),0)
+        self.assertEquals(c.solde_titre(datel=datetime.date(2001,1,1)),0)
+
     def test_compte_solde(self):
         c = Compte.objects.get(id=4)
         c2 = Compte.objects.get(id=5)
@@ -362,6 +368,22 @@ class Test_models(TestCase):
         self.assertEqual(c.solde(), 120)
         self.assertEquals(Ope.objects.filter(compte__id=c.id).count(), 4)
         self.assertEqual(Compte.objects.get(id=1).solde(), -90)
+
+    def test_operation_titre_avec_moyen_defaut(self):
+        c=Compte.objects.create(nom="cpt6",type='t')
+        t = Titre.objects.get(nom="t1")
+        c.achat(titre=t, nombre=20, date='2011-01-01')
+        self.assertEqual(t.investi(c), 20)
+        self.assertEqual(c.solde(), 0)
+        o=Ope.objects.filter(compte__id=c.id)[0]
+        self.assertEqual(o.id, 14)
+        self.assertEqual(o.moyen.nom, 'moyen_dep1')
+        c.vente(titre=t, nombre=20, date='2011-01-02')
+        self.assertEqual(t.investi(c), 0)
+        self.assertEqual(c.solde(), 0)
+        o=Ope.objects.filter(compte__id=c.id)[1]
+        self.assertEqual(o.id, 15)
+        self.assertEqual(o.moyen.nom, 'moyen_rec1')
 
     def test_compte_vente_simple(self):
         c = Compte.objects.get(id=4)

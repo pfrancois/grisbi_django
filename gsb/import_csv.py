@@ -90,7 +90,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def rapp(self):
-        return self.to_str(self.row['m'])
+        return self.to_str(self.row['r'])
 
     @property
     def tiers(self):
@@ -122,7 +122,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def has_fille(self):
-        return self.to_bool(self.row['has_fille'])
+        return self.to_bool(self.row['has fille'])
 
 
 class Import_csv_ope(import_base.Import_base):
@@ -137,9 +137,36 @@ class Import_csv_ope(import_base.Import_base):
         nb_titres = dict()
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
+            verif_format=False
             for row in fich:
-                if row.date is None:
-                    continue
+                if not verif_format:
+                    try:
+                        row.id
+                        row.automatique
+                        row.cat
+                        row.cpt
+                        row.date
+                        if settings.UTILISE_EXERCICES == True:
+                            row.exercice
+                        row.has_fille
+                        row.ib
+                        row.jumelle
+                        row.ligne
+                        row.mere
+                        row.monnaie
+                        row.moyen
+                        row.mt
+                        row.notes
+                        row.num_cheque
+                        row.ope_pmv
+                        #row.ope_titre
+                        #row.piece_comptable
+                        row.rapp
+                        row.tiers
+                    except KeyError as excp:
+                        raise import_base.Import_exception(u"il manque la colonne '%s'" % excp.message)
+                    else:
+                        verif_format=True                        
                 ope = dict()
                 ope['ligne'] = row.ligne
                 if not self.test:

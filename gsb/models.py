@@ -523,7 +523,7 @@ class Compte(models.Model):
 
     date_rappro.short_description = u"date dernier rapp"
 
-    # @transaction.commit_on_success
+    @transaction.commit_on_success
     def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None,
               tiers_frais=None):
         """fonction pour achat de titre:
@@ -667,6 +667,11 @@ class Compte(models.Model):
         """
         solde_titre = 0
         # il n'y a pas d'operation
+        if datel is not None:
+            try:
+                test=datel>utils.today()# @UnusedVariable
+            except TypeError:
+                datel=utils.strpdate(datel)
         if not self.ope_set.exists() or (datel is not None and self.ope_set.order_by('date')[0].date > datel):
             return 0
         for titre in self.titre.all().distinct():

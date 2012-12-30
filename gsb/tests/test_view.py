@@ -24,17 +24,28 @@ class Test_view_base(TestCase):
         super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
 
-
-class Test_import(Test_view_base):
-    fixtures = ['test.json', 'auth.json']
+class Test_import_csv(TestCase):
+    fixtures = ['auth.json',]
 
     def setUp(self):
+        super(TestCase, self).setUp()
+        self.client.login(username='admin', password='mdp')
+        self.path=os.path.join(settings.PROJECT_PATH, "gsb", "test_files")
+
+    def test_cpt_none(self):
+        imp=import_csv.Import_csv_ope()
+        imp.test=True
+        result=imp.import_file(os.path.join(self.path, "test_cpt_null.csv"))
+        print result
+        
+
+class Test_import(Test_view_base):
+    
+    def test_import_ok(self):
         self.cls = import_csv.Import_csv_ope()
         self.cls.listes = dict()
         self.cls.nb = dict()
         self.cls.test = True
-
-    def test_import_ok(self):
         self.assertEqual(Tiers.objects.count(), 8)
         self.assertEqual(Ope.objects.count(), 13)
         self.assertEqual(Cat.objects.count(), 8)
@@ -42,6 +53,31 @@ class Test_import(Test_view_base):
         self.assertEqual(Tiers.objects.count(), 11)
         self.assertEqual(Ope.objects.count(), 17)
         self.assertEqual(Cat.objects.count(), 9)
+    def test_to_something(self):
+        import gsb.import_base as imp
+        obj=imp.property_ope_base()
+        self.assertEquals(obj.to_id("3"),3)
+        self.assertEquals(obj.to_id(""),None)
+        self.assertEquals(obj.to_id(None),None)
+        self.assertEquals(obj.to_id("0"),None)
+        self.assertEquals(obj.to_id(0),None)
+        self.assertRaises(imp.Import_exception, obj.to_id,"toto")
+        self.assertEquals(obj.to_str(""),None)
+        self.assertEquals(obj.to_str("0"),None)
+        self.assertEquals(obj.to_str("toto"),"toto")
+        self.assertEquals(obj.to_str("",'toto'),"toto")
+        self.assertEquals(obj.to_bool(""),False)
+        self.assertEquals(obj.to_bool("0"),False)
+        self.assertEquals(obj.to_bool(None),False)
+        self.assertEquals(obj.to_bool("34"),True)
+        self.assertEquals(obj.to_bool("toto"),False)
+        self.assertEquals(obj.to_decimal("13,54"),decimal.Decimal("13.54"))
+        self.assertEquals(obj.to_decimal(""),decimal.Decimal("0"))
+        self.assertEquals(obj.to_decimal("toto"),decimal.Decimal("0"))
+        self.assertEquals(obj.to_date("31/12/2012","%d/%m/%Y"), datetime.date(2012,12,31))
+        self.assertEquals(obj.to_date("31/12/12","%d/%m/%y"), datetime.date(2012,12,31))
+        self.assertRaises(imp.Import_exception, obj.to_date,"31/13/2012","%d/%m/%Y")
+        
 
 class Test_urls(Test_view_base):
     def test_404(self):
@@ -93,6 +129,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/maj').status_code, 200)
+        
 
 
 class Test_export(Test_view_base):

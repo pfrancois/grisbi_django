@@ -130,12 +130,14 @@ class property_ope_base(object):
         return False
     
     def to_str(self, var, retour=None):
+        var=var.strip()
         if var == "" or var == '0':
             return retour
         else:
             return var
    
     def to_id(self, var):
+        var=var.strip()
         try:
             if var == "" or var is None or int(var) == 0 :
                 return None
@@ -145,6 +147,7 @@ class property_ope_base(object):
             raise Import_exception('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
     
     def to_bool(self, var):
+        var=var.strip()
         try:
             if var == "" or var is None or int(var) == 0 :
                 return False
@@ -154,18 +157,16 @@ class property_ope_base(object):
             return False
         
     def to_decimal(self, var):
-        try:
-            return fr2decimal(var)
-        except decimal.InvalidOperation:
-            raise Import_exception('probleme de montant a la ligne %s' % self.ligne)
-            return 0
+        var=var.strip()
+        return fr2decimal(var)#si il y a une exception il est renvoyé 0
         
     def to_date(self, var, format_date):
+        var=var.strip()
         try:
             date_s = var
             return strpdate(date_s, format_date)
         except ValueError:
-            raise Import_exception('probleme de date a la ligne %s' % self.ligne)
+            raise Import_exception('probleme de format de date a la ligne %s' % self.ligne)
 
 
 
