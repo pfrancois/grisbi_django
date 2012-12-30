@@ -716,7 +716,7 @@ class Ope_titre(models.Model):
             cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre'})[0]
         except IntegrityError:
             raise ImproperlyConfigured(
-                u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'operation sur titre'" % settings.ID_CAT_OST)
+                u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
         try:
             cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV,
                                                 defaults={'nom': u'Revenus de placement:Plus-values'})[0]

@@ -240,12 +240,12 @@ class Import_base(views.Myformview):
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
         else:
             self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
-        # on gere la categorie operation sur titre
+        # on gere la categorie Operation sur titre
         try:
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_OST).nom] = settings.ID_CAT_OST
         except Cat.DoesNotExist:
-            self.listes['moyen']['operation sur titre'] = settings.ID_CAT_OST
-            Cat.objects.create(id=settings.ID_CAT_OST, nom='operation sur titre', type="d")
+            self.listes['moyen']['Operation sur titre'] = settings.ID_CAT_OST
+            Cat.objects.create(id=settings.ID_CAT_OST, nom='Operation sur titre', type="d")
         try:
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_PMV).nom] = settings.ID_CAT_PMV
         except Cat.DoesNotExist:

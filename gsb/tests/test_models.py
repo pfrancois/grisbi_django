@@ -861,7 +861,7 @@ class Test_models2(TestCase):
         self.assertEquals(t.last_cours_date(rapp=True), None)
 
     def test_ope_titre_special(self):
-        """si une categorie "operation sur titre" existe deja mais que l'id ost est definie autrement"""
+        """si une categorie "Operation sur titre" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
         c = Compte.objects.create(nom="cpt_titre1")
         Cat.objects.create(nom=u'Operation Sur Titre')

@@ -109,17 +109,17 @@ def fusion(request, queryset, sens):
     obj_a = queryset[0]
     obj_b = queryset[1]
     if type(obj_a) != type(obj_b):
-        messages.error(request, u"attention vous devez selectionner deux item du meme type")
+        messages.error(request, u"attention vous devez selectionner deux item du même type")
         return
     try:
         if sens == 'ab':
-            message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (
+            message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
                 nom_module,
                 obj_a,
                 obj_b)
             obj_a.fusionne(obj_b)
         else:
-            message = u"fusion effectuée, dans la type \"%s\", \"%s\" a été fusionnée dans \"%s\"" % (
+            message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
                 nom_module,
                 obj_b,
                 obj_a)
