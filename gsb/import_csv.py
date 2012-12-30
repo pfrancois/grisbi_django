@@ -325,6 +325,8 @@ class Import_csv_ope(import_base.Import_base):
                     ope_jumelle.append(ope['jumelle_id']) 
                 else:
                     raise import_base.Import_exception("attention un virement ne peut se faire qu'entre deux opes pas plus. ligne %s" % ope['ligne'])
+                if ope['jumelle_id'] == ope['id']:
+                    raise import_base.Import_exception("attention une ope ne peut etre jumelle avec elle . ligne %s" % ope['ligne'])
                 try:
                     ope['jumelle_id'] = self.listes['ope'][ope['jumelle_id']]
                 except KeyError:
