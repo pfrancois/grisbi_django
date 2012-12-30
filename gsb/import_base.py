@@ -233,7 +233,7 @@ class Import_base(views.Myformview):
             self.listes['moyen'][Moyen.objects.get(id=settings.MD_CREDIT).nom] = settings.MD_CREDIT
         except Moyen.DoesNotExist:
             self.listes['moyen']['CREDIT'] = settings.MD_CREDIT
-            Moyen.objects.create(id=settings.MD_CREDIT, nom='CREDIT', type="c")
+            Moyen.objects.create(id=settings.MD_CREDIT, nom='CREDIT', type="r")
         # on ajoute le moyen pour le virement
         moyen_virement = Moyen.objects.filter(type='v')
         if moyen_virement.exists():
