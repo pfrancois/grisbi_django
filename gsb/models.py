@@ -887,7 +887,11 @@ class Moyen(models.Model):
             nb_change += Ope.objects.filter(moyen=self).update(moyen=new)
             self.delete()
         return nb_change
-
+    
+    def delete(self, *args, **kwargs):
+        if self.id == settings.MD_CREDIT or self.id == settings.MD_CREDIT:
+            raise IntegrityError(u"moyen par defaut")
+        super(Moyen, self).delete(*args, **kwargs)
 
 class Rapp(models.Model):
     """rapprochement d'un compte"""
