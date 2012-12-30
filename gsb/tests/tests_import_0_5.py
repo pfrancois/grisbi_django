@@ -145,7 +145,7 @@ class importposttests(Tcd):
 
     def test_moyen(self):
         obj = Moyen.objects.get(id=1)
-        self.assertEqual(obj.nom, u'Virement')
+        self.assertEqual(obj.nom, u'virement')
         self.assertEqual(obj.type, 'v')
 
     def test_rapp(self):

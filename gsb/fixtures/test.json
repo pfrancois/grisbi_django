@@ -3,7 +3,7 @@
         "pk":7,
         "model":"gsb.tiers",
         "fields":{
-            "nom":"Virement",
+            "nom":"virement",
             "notes":"",
             "is_titre":false
         }
@@ -212,7 +212,7 @@
         "pk":65,
         "model":"gsb.cat",
         "fields":{
-            "nom":"Virement",
+            "nom":"virement",
             "type":"d"
         }
     },

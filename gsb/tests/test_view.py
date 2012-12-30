@@ -144,8 +144,8 @@ class Test_export(Test_view_base):
 7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;2011_08\r
 6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r
 3;cpt_titre2;29/10/2011;-100,0000000;cpt_titre2201101;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r
-8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;Virement;Virement;;;;9;0;;;;2011_10\r
-9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;Virement;Virement;;;;8;0;;;;2011_10\r
+8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;virement;virement;;;;9;0;;;;2011_10\r
+9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;virement;virement;;;;8;0;;;;2011_10\r
 2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r
 1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r
 10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r

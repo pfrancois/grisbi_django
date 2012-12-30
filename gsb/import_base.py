@@ -239,7 +239,7 @@ class Import_base(views.Myformview):
         if moyen_virement.exists():
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
         else:
-            self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
+            self.listes['moyen']['virement'] = Moyen.objects.create(nom='virement', type="v").id
         # on gere la categorie Operation sur titre
         try:
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_OST).nom] = settings.ID_CAT_OST
