@@ -196,6 +196,7 @@ class Import_csv_ope(import_base.Import_base):
                 # cat
                 type_cat = 'd' if row.mt < 0 else 'r'
                 if row.jumelle is not None:
+                    type_cat='v'
                     ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type': 'v'})
                 else:
                     ope['cat_id'] = self.element('cat', row.cat, Cat, {'nom': row.cat, 'type': type_cat})
