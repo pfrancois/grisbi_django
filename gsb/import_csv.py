@@ -334,11 +334,11 @@ class Import_csv_ope(import_base.Import_base):
                     self.erreur.append("attention il y a une des deux branches qui n'existe pas. id %s ligne %s " % (ope['jumelle_id'], ope['ligne']))
                 # on ecrase le nom du tiers et la cat afin d'homogeneiser
                 ope['tiers_id'] = self.element('tiers', "virement", Tiers, {'nom': "virement", 'notes': "", 'is_titre': False})
-                if ope['moyen_id'] == self.listes['moyen']['Virement']:
+                if ope['moyen_id'] == self.listes['moyen']["virement"]:
                     pass
                 else:
                     if not self.test:
-                        messages.info(self.request, u"harmonisation de la cat en 'Virement' de l'ope à la ligne %s " % ope['ligne']) 
+                        messages.info(self.request, u"harmonisation de la cat en 'virement' de l'ope à la ligne %s " % ope['ligne']) 
                     ope['cat_id'] = self.element('cat', "virement", Cat, {'nom': "virement", 'type':'v'})
                 for jumelle in self.ajouter['ope']:
                     if jumelle['id'] == ope['jumelle_id']:  # jumelle trouve

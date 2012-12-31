@@ -354,7 +354,7 @@ def import_gsb_050(nomfich, efface_table=True):
             ope_tiers = Tiers.objects.get(id=tabl_correspondance_tiers[xml_ope.get('T')])
         except KeyError:
             if int(xml_ope.get('Ro')):
-                ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='Virement', defaults={'nom': 'Virement'})
+                ope_tiers, tiers_created = Tiers.objects.get_or_create(nom='virement', defaults={'nom': 'virement'})
                 if tiers_created:
                     tabl_correspondance_tiers[xml_ope.get('T')] = ope_tiers.id
             else:
