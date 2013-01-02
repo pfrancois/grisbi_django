@@ -246,7 +246,7 @@ class Compte_admin(Modeladmin_perso):
     fields = (
         'nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
-    list_display = ('nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
+    list_display = ('id','nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
     def action_supprimer_pointe(self, request, queryset):
@@ -489,8 +489,8 @@ class ope_tiers_admin(liste_perso_inline):
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
-    list_editable = ('nom', 'notes')
-    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
+    list_editable = ('nom',)
+    list_display = ('id','nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('is_titre',)
     search_fields = ['nom']
