@@ -32,6 +32,7 @@ class date_perso_filter(DateFieldListFilter):
         now = timezone.now()
         today = now.date()
         tomorrow = today + datetime.timedelta(days=1)
+        mois_ref=(10,11,12,1,2,3,4,5,6,7,8,9)
 
         self.links = (
             (_('Any date'), {}),
@@ -44,8 +45,8 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(today.replace(day=1, month=today.month - 3)),
-                self.lookup_kwarg_until: str(today.replace(day=1) - datetime.timedelta(days=1)),
+                self.lookup_kwarg_since: str(today.replace(day=1, month=mois_ref[today.month])),
+                self.lookup_kwarg_until: str(today.replace(day=1) - datetime.timedelta(days=1)),#fin du mois precedent
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
