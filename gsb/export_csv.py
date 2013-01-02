@@ -31,7 +31,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'account name', 'date', 'montant', 'm', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has_fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = ('id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has_fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
 
     def export(self, query):
         """
@@ -46,9 +46,9 @@ class Export_ope_csv(Export_view_csv_base):
             ligne = {'id': ope.id, 'account name': ope.compte.nom, 'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
             # rapp
             if ope.rapp is not None:
-                ligne['m'] = ope.rapp.nom
+                ligne['r'] = ope.rapp.nom
             else:
-                ligne['m'] = ''
+                ligne['r'] = ''
             # pointee
             ligne['p'] = fmt.bool(ope.pointe)
             # moyen
@@ -83,7 +83,6 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['mois'] = ope.date.strftime('%Y_%m')
             data.append(ligne)
         logger.info('export ope csv')
-        # self.debug=True
         return self.export_csv_view(data=data)
 
 
