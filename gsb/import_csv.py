@@ -194,7 +194,9 @@ class Import_csv_ope(import_base.Import_base):
                             liste_compte = "%s%s" % (liste_compte, "'")
                             raise import_base.Import_exception("attention, le compte %s est demande a la ligne %s alors qu'il n'existe pas, les comptes sont %s" % (row.cpt, row.line_num, liste_compte))
                 # cat
-                type_cat = 'd' if row.mt < 0 else 'r'
+                type_cat = 'd' if row.mt <= 0 else 'r'
+                if row.has_fille:
+                    type_cat='d'#par convention les ovm sont des depenses
                 if row.jumelle is not None:
                     type_cat='v'
                     ope['cat_id'] = self.element('cat', "virement", Cat, {'nom': "virement", 'type': 'v'})
@@ -352,7 +354,7 @@ class Import_csv_ope(import_base.Import_base):
             if ope['mere_id'] is not None:
                 ope['mere_id'] = self.listes['ope'][ope['mere_id']]
             if ope['has_fille'] == True:
-                ope['cat_id'] = self.element('cat', "Opération Ventilée", Cat, {'nom': "virement", 'type':'v'})
+                ope['cat_id'] = self.element('cat', "Opération Ventilée", Cat, {'nom': u"opération ventilée", 'type':'d'})
                 
 
 class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
