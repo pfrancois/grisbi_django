@@ -10,6 +10,7 @@ import codecs
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 
+
 class Format:
     """ classe compose de methodes de classes qui permet le formatage des donnees"""
 
@@ -139,11 +140,8 @@ def datefr2datesql(chaine):
     """fonction qui transforme une date fr en date sql
     si la date est invalide renvoie none
     """
-    try:
-        temps = time.strptime(str(chaine), "%d/%m/%Y")
-        return "{annee}-{mois}-{jour}".format(annee=temps[0], mois=temps[1], jour=temps[2])
-    except ValueError:
-        return None
+    temps = time.strptime(str(chaine), "%d/%m/%Y")
+    return "{annee}-{mois}-{jour}".format(annee=temps[0], mois=temps[1], jour=temps[2])
 
 def is_number(s):
     """fonction qui verifie si ca a l'apparence d'un nombre"""
@@ -162,10 +160,8 @@ def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
     s = str(s)
     s = s.replace(',', '.')
-    if is_number(s):
-        return decimal.Decimal(s)
-    else:
-        return decimal.Decimal('0')
+    s = s.replace(' ', '')
+    return decimal.Decimal(s)
 
 def strpdate(end_date, fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD

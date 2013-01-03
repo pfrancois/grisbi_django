@@ -57,7 +57,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def cpt(self):
         cpt = self.to_str(self.row['account name'])
         if cpt is None:
-            raise self.erreur.append('probleme: il faut un compte a la ligne %s' % self.ligne)
+            raise import_base.Import_exception('probleme: il faut un compte a la ligne %s' % self.ligne)
         else:
             return cpt
 
@@ -372,7 +372,7 @@ class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
 
     @property
     def date(self):
-        return self.to_date(self.row['Date'], "%d/%m/%y")
+        return self.to_date(self.row['Date'], "%d/%m/%Y")
 
     @property
     def ib(self):
@@ -380,7 +380,16 @@ class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
 
     @property
     def mt(self):
-        return self.to_decimal(self.row['Amount'])
+        s=self.row['Amount'].strip()
+        if s[0]=="(":
+            neg=True
+            s=s[1:-1]
+        s = s.replace(',', '.')
+        s = s.replace(' ', '')
+        dec=decimal.Decimal(s)
+        if neg:
+            dec=dec*-1
+        return dec 
 
     @property
     def notes(self):
