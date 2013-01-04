@@ -7,3 +7,5 @@ django
 lxml
 dateutils http://labix.org/python-dateutil#head-de
 
+les controles a faire:
+verifier qu'il n'y a pas d'operation virement solitaire

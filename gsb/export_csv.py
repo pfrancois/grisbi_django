@@ -31,7 +31,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has_fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = ('id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
 
     def export(self, query):
         """
@@ -39,11 +39,18 @@ class Export_ope_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date').select_related('cat', "compte", "tiers", "ib")  # on enleve les ope mere
+        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib")  # on enleve les ope mere
         for ope in query:
             # id compte date montant
             # print ope
-            ligne = {'id': ope.id, 'account name': ope.compte.nom, 'date': fmt.date(ope.date), 'montant': fmt.float(ope.montant)}
+            ligne = {'id': ope.id, 'account name': ope.compte.nom}
+            #date
+            ligne['date']=ope.date.strftime('%d/%m/%Y')
+            
+            #montant
+            montant = "%10.2f" % ope.montant
+            montant = montant.replace('.', ',').strip()
+            ligne['montant'] = montant
             # rapp
             if ope.rapp is not None:
                 ligne['r'] = ope.rapp.nom
@@ -68,7 +75,7 @@ class Export_ope_csv(Export_view_csv_base):
             # le reste
             ligne['n chq'] = ope.num_cheque
             ligne['id jumelle lie'] = fmt.str(ope.jumelle, '') 
-            ligne['has_fille'] = fmt.bool(ope.filles_set.exists())
+            ligne['has fille'] = fmt.bool(ope.filles_set.exists())
             ligne['num op vent m'] = fmt.str(ope.mere, '')
             ope_t = Ope_titre.objects.filter(ope=ope)
             if ope_t.exists():
@@ -80,7 +87,7 @@ class Export_ope_csv(Export_view_csv_base):
                 ligne['ope_pmv'] = ope_t[0].id
             else:
                 ligne['ope_pmv'] = ''
-            ligne['mois'] = ope.date.strftime('%Y_%m')
+            ligne['mois'] = ope.date.strftime('%m')
             data.append(ligne)
         logger.info('export ope csv')
         return self.export_csv_view(data=data)

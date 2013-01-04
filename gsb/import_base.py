@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import time
 import logging
 import os
-import decimal
 
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
@@ -238,8 +237,9 @@ class Import_base(views.Myformview):
         moyen_virement = Moyen.objects.filter(type='v')
         if moyen_virement.exists():
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
+            self.listes['moyen']['Virement']=moyen_virement[0].id
         else:
-            self.listes['moyen']['virement'] = Moyen.objects.create(nom='virement', type="v").id
+            self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
         # on gere la categorie Operation sur titre
         try:
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_OST).nom] = settings.ID_CAT_OST
@@ -282,6 +282,7 @@ class Import_base(views.Myformview):
                     raise Import_exception("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
             # les tiers
             self.create('tiers', Tiers)
+            
             # les titres
             nb_ajout = 0
             for titre in self.ajouter['titre']:
@@ -302,6 +303,7 @@ class Import_base(views.Myformview):
                 self.create('exercice', Exercice)
             # les rapp
             self.create('rapp', Rapp)
+            #les opes
             for ope in self.ajouter['ope']:
                 Ope.objects.create(
                         id=ope['id'],
@@ -345,7 +347,14 @@ class Import_base(views.Myformview):
                     ope.pointe = obj['pointe']
                     ope.exercice_id = obj['exercice_id']
                     ope.save()
-                              
+            print "troisieme tour"
+            for obj in Ope.objects.filter(cat__nom="Virement"):
+                if obj.montant<0:
+                    nom= u"%s => %s"%(obj.compte.nom, obj.jumelle.compte.nom)
+                else:
+                    nom= u"%s => %s"%(obj.jumelle.compte.nom, obj.compte.nom)
+                obj.tiers=Tiers.objects.get_or_create(nom=nom,defaults={"nom":nom})[0]
+                obj.save()
     def get_success_url(self):
         return reverse(self.url)
 

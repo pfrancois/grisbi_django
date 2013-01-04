@@ -1233,8 +1233,12 @@ class Virement(object):
         if ope:
             if type(ope) != type(Ope()):
                 raise TypeError('pas ope')
-            self.origine = ope
-            self.dest = self.origine.jumelle
+            if ope.montant<=0:
+                self.origine = ope
+                self.dest = self.origine.jumelle
+            else:
+                self.dest = ope
+                self.origine = self.origine.jumelle
             self._init = True
         else:
             self._init = False
@@ -1304,7 +1308,7 @@ class Virement(object):
 
     def save(self):
         if self._init:
-            tier = Tiers.objects.get_or_create(nom="virement", defaults={'nom': "virement"})[0]
+            tier = Tiers.objects.get_or_create(nom=self.__unicode__, defaults={'nom': self.__unicode__})[0]
             self.origine.tiers = tier
             self.dest.tiers = tier
             self.origine.cat = Cat.objects.get_or_create(nom="virement", defaults={'nom': u'virement'})[0]

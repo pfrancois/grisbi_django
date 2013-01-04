@@ -130,7 +130,7 @@ class Import_csv_ope(import_base.Import_base):
     extension = ("csv",)
     type_f = "csv_version_totale"
     creation_de_compte = True
-
+    
     def tableau_import(self, nomfich):
         """renvoi un tableau complet de l'import"""
         titre_nb = 0  # nb de nouveaux titres
@@ -169,8 +169,6 @@ class Import_csv_ope(import_base.Import_base):
                         verif_format=True                        
                 ope = dict()
                 ope['ligne'] = row.ligne
-                if not self.test:
-                    print row.ligne
                 # verification pour les lignes
                 if row.monnaie != settings.DEVISE_GENERALE:
                     raise import_base.Import_exception(u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
@@ -199,7 +197,9 @@ class Import_csv_ope(import_base.Import_base):
                     type_cat='d'#par convention les ovm sont des depenses
                 if row.jumelle is not None:
                     type_cat='v'
-                    ope['cat_id'] = self.element('cat', "virement", Cat, {'nom': "virement", 'type': 'v'})
+                    ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type': 'v'})
+                    if row.jumelle is None: 
+                        raise import_base.Import_exception("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
                 else:
                     ope['cat_id'] = self.element('cat', row.cat, Cat, {'nom': row.cat, 'type': type_cat})
                 # tiers
@@ -238,7 +238,9 @@ class Import_csv_ope(import_base.Import_base):
                 # montant
                 ope['montant'] = row.mt
                 if row.moyen is not None:
-                    ope['moyen_id'] = self.element('moyen', row.moyen, Moyen, {'nom': row.moyen, 'type': type_cat})      
+                    ope['moyen_id'] = self.element('moyen', row.moyen, Moyen, {'nom': row.moyen, 'type': type_cat})
+                    if ope['moyen_id'] == self.listes['moyen']['Virement'] and row.jumelle is None: 
+                        raise import_base.Import_exception("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
                 else:
                     if type_cat == 'd':
                         ope['moyen_id'] = settings.MD_DEBIT
@@ -246,7 +248,9 @@ class Import_csv_ope(import_base.Import_base):
                         if type_cat == 'r':
                             ope['moyen_id'] = settings.MD_CREDIT
                         else:
-                            ope['moyen_id'] = Moyen.objects.filter(type='v')[0].id
+                            ope['moyen_id'] = self.listes['moyen']['Virement']
+                            if row.jumelle is None:
+                                raise import_base.Import_exception("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
                 ope['notes'] = row.notes
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
@@ -320,9 +324,8 @@ class Import_csv_ope(import_base.Import_base):
         if not self.test:
             print "-----------second tour-----"
         ope_jumelle = list()
+        self.flag=True
         for ope in self.ajouter['ope']:
-            if not self.test: 
-                print 2, ope['ligne']
             if ope['jumelle_id'] is not None:
                 if ope['jumelle_id'] not in ope_jumelle:
                     ope_jumelle.append(ope['jumelle_id']) 
@@ -335,17 +338,21 @@ class Import_csv_ope(import_base.Import_base):
                 except KeyError:
                     self.erreur.append("attention il y a une des deux branches qui n'existe pas. id %s ligne %s " % (ope['jumelle_id'], ope['ligne']))
                 # on ecrase le nom du tiers et la cat afin d'homogeneiser
-                ope['tiers_id'] = self.element('tiers', "virement", Tiers, {'nom': "virement", 'notes': "", 'is_titre': False})
-                if ope['moyen_id'] == self.listes['moyen']["virement"]:
+                ope['tiers_id'] = self.element('tiers', "Virement", Tiers, {'nom': "Virement", 'notes': "", 'is_titre': False})
+                if ope['moyen_id'] == self.listes['moyen']["Virement"]:
                     pass
                 else:
                     if not self.test:
                         messages.info(self.request, u"harmonisation de la cat en 'virement' de l'ope à la ligne %s " % ope['ligne']) 
-                    ope['cat_id'] = self.element('cat', "virement", Cat, {'nom': "virement", 'type':'v'})
+                    ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type':'v'})
                 for jumelle in self.ajouter['ope']:
                     if jumelle['id'] == ope['jumelle_id']:  # jumelle trouve
                         if jumelle['montant'] != ope['montant'] * -1:
-                            self.erreur.append("attention le montant entre les deux partie du virement n'est pas le meme. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
+                            if  self.flag==True:
+                                self.erreur.append("attention le montant entre les deux partie du virement n'est pas le meme. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
+                                self.flag=False
+                            else:
+                                self.flag=True
                         if jumelle['date'] != ope['date']:
                             ope['date'] = jumelle['date']
                             if not self.test:
