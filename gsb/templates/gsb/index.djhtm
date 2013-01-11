@@ -31,7 +31,7 @@
             </tr>
         {% empty %}
             <tr class="item padding">
-                <td class="cptLabel" colspan="2"> aucun Compte Comptes titres</td>
+                <td class="cptLabel" colspan="2"> aucun Compte titre</td>
             </tr>
         {% endfor %}
         <tr class="bar">
