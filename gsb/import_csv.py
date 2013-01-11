@@ -135,6 +135,7 @@ class Import_csv_ope(import_base.Import_base):
         """renvoi un tableau complet de l'import"""
         titre_nb = 0  # nb de nouveaux titres
         nb_titres = dict()
+        ope_jumelle = list()
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
             verif_format=False
@@ -233,7 +234,11 @@ class Import_csv_ope(import_base.Import_base):
                 # jumelle et mere
                 # attention on prend juste les id toute la creation d'eventuelles operations est plus tard
                 ope['jumelle_id'] = row.jumelle
+                if row.jumelle == row.id:
+                    raise import_base.Import_exception("attention une ope ne peut etre jumelle avec elle meme. ligne %s" % ope['ligne'])
                 ope['mere_id'] = row.mere
+                
+
                 ope['has_fille'] = row.has_fille
                 # montant
                 ope['montant'] = row.mt
@@ -255,7 +260,7 @@ class Import_csv_ope(import_base.Import_base):
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
                 ope['pointe'] = row.pointe
-                
+                if row.jumelle == row.id: raise Exception()
                 if row.rapp is not None:
                     ope['rapp_id'] = self.element('rapp', row.rapp, Rapp, {'nom': row.rapp, 'date': utils.today()})
                 else:
@@ -267,7 +272,19 @@ class Import_csv_ope(import_base.Import_base):
                 
                 if row.ope_titre == True:
                     cpt_titre = self.listes['compte'][row.cpt]
-                    cpt_titre['type'] = "t"
+                    ok=False
+                    if self.creation_de_compte:
+                        for cptr_boucle in self.ajouter['compte']:
+                            if cptr_boucle['id'] == cpt_titre :
+                                cptr_boucle['type'] = "t"
+                                ok=True
+                            if not ok:
+                                Cpt=Compte.objects.filter(id=cpt_titre)
+                                if Cpt.exists():
+                                        cpt[0].type='t'
+                                else:
+                                    raise import_base.Import_exception('attention un compte a été change en cpt titre ligne %s'%row.ligne)
+
                     # gestion des ope_titre
                     try:
                         titre_id = self.listes['titre'][ope['tiers_id']]  # pylint: disable=W0622
@@ -323,20 +340,18 @@ class Import_csv_ope(import_base.Import_base):
 
         if not self.test:
             print "-----------second tour-----"
-        ope_jumelle = list()
+        
         self.flag=True
         for ope in self.ajouter['ope']:
             if ope['jumelle_id'] is not None:
-                if ope['jumelle_id'] not in ope_jumelle:
-                    ope_jumelle.append(ope['jumelle_id']) 
-                else:
-                    raise import_base.Import_exception("attention un virement ne peut se faire qu'entre deux opes pas plus. ligne %s" % ope['ligne'])
-                if ope['jumelle_id'] == ope['id']:
-                    raise import_base.Import_exception("attention une ope ne peut etre jumelle avec elle . ligne %s" % ope['ligne'])
                 try:
                     ope['jumelle_id'] = self.listes['ope'][ope['jumelle_id']]
                 except KeyError:
                     self.erreur.append("attention il y a une des deux branches qui n'existe pas. id %s ligne %s " % (ope['jumelle_id'], ope['ligne']))
+                if ope['jumelle_id'] not in ope_jumelle:
+                    ope_jumelle.append(ope['jumelle_id']) 
+                else:
+                    raise import_base.Import_exception("attention un virement ne peut se faire qu'entre deux opes pas plus. ligne %s" % ope['ligne'])
                 # on ecrase le nom du tiers et la cat afin d'homogeneiser
                 ope['tiers_id'] = self.element('tiers', "Virement", Tiers, {'nom': "Virement", 'notes': "", 'is_titre': False})
                 if ope['moyen_id'] == self.listes['moyen']["Virement"]:
@@ -357,9 +372,11 @@ class Import_csv_ope(import_base.Import_base):
                             ope['date'] = jumelle['date']
                             if not self.test:
                                 messages.info(self.request, "attention la date corrige. ligne %s et %s" % (ope['ligne'], jumelle['ligne']))
-                
             if ope['mere_id'] is not None:
-                ope['mere_id'] = self.listes['ope'][ope['mere_id']]
+                try:
+                    ope['mere_id'] = self.listes['ope'][ope['mere_id']]
+                except KeyError:
+                    self.erreur.append("attention opemere n'existe pas.  ligne %s " %  ope['ligne'])
             if ope['has_fille'] == True:
                 ope['cat_id'] = self.element('cat', "Opération Ventilée", Cat, {'nom': u"opération ventilée", 'type':'d'})
                 

@@ -1110,7 +1110,7 @@ class Ope(models.Model):
     def non_meres():
         """ renvoie uniquement les opération non mere
         """
-        return Ope.objects.all().prefetch_related('filles_set').filter(filles_set__isnull=True)
+        return Ope.objects.all().filter(filles_set__isnull=True)
 
     @staticmethod
     def solde_set(q):
@@ -1215,15 +1215,17 @@ class Ope(models.Model):
                     self.moyen = moyen
         if self.is_mere:
             self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom':u"Opération Ventilée", 'type':"c"})[0]
-            ope_orig = Ope.objects.get(id=self.id)
-            if self.montant != ope_orig.montant:
-            # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
-                self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
-                if self.pointe == True:
-                    raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est pointee")
-                if self.rapp is not None:
-                    print self.rapp
-                    raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est rapprochee")
+            ope_orig = Ope.objects.filter(id=self.id)
+            if ope_orig.exists():
+                ope_orig=ope_orig[0]
+                if self.montant != ope_orig.montant:
+                # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
+                    self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
+                    if self.pointe == True:
+                        raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est pointee")
+                    if self.rapp is not None:
+                        print self.rapp
+                        raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est rapprochee")
         super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):

@@ -166,7 +166,6 @@ class Cpt_detail_view(Mytemplateview):
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             self.espece = True
-            
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
@@ -177,6 +176,7 @@ class Cpt_detail_view(Mytemplateview):
             sort_tab, opes = self.cpt_espece_tri(request, q)
             opes = opes.select_related('tiers', 'cat', 'rapp')
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_tab)
+            
         else:
             self.espece = False
             self.template_name = 'gsb/cpt_placement.djhtm'
