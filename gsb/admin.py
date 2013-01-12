@@ -284,7 +284,7 @@ class Compte_admin(Modeladmin_perso):
                         rapp_id = int(last.nom[-2:]) + 1
                     else:
                         rapp_id = 1
-                    nomrapp = "%s%s%02d" % (queryset[0].nom, rapp_date, rapp_id)
+                    nomrapp = "%s%s_%02d" % (queryset[0].nom, rapp_date, rapp_id)
                     rapp = Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
                 count = 0
                 for article in query_ope:
