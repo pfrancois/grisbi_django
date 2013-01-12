@@ -1313,7 +1313,7 @@ class Virement(object):
             tier = Tiers.objects.get_or_create(nom=self.__unicode__, defaults={'nom': self.__unicode__})[0]
             self.origine.tiers = tier
             self.dest.tiers = tier
-            self.origine.cat = Cat.objects.get_or_create(nom="virement", defaults={'nom': u'virement'})[0]
+            self.origine.cat = Cat.objects.get_or_create(nom="Virement", defaults={'nom': u'Virement'})[0]
             self.dest.cat = self.origine.cat
             self.origine.save()
             self.dest.save()
