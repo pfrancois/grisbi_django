@@ -39,14 +39,16 @@ class Export_ope_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib")  # on enleve les ope mere
+        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen") 
+        liste_ope=query.values_list('id')
+        ope_mere=query.filter(mere_id__in=liste_ope).values_list('id')
         for ope in query:
             # id compte date montant
             # print ope
             ligne = {'id': ope.id, 'account name': ope.compte.nom}
             #date
             ligne['date']=ope.date.strftime('%d/%m/%Y')
-            
+
             #montant
             montant = "%10.2f" % ope.montant
             montant = montant.replace('.', ',').strip()
@@ -58,6 +60,7 @@ class Export_ope_csv(Export_view_csv_base):
                 ligne['r'] = ''
             # pointee
             ligne['p'] = fmt.bool(ope.pointe)
+
             # moyen
             try:
                 ligne['moyen'] = fmt.str(ope.moyen, '', 'nom')
@@ -72,23 +75,23 @@ class Export_ope_csv(Export_view_csv_base):
                 ligne['projet'] = fmt.str(ope.ib, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
+
             # le reste
             ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = fmt.str(ope.jumelle, '') 
-            ligne['has fille'] = fmt.bool(ope.filles_set.exists())
-            ligne['num op vent m'] = fmt.str(ope.mere, '')
-            ope_t = Ope_titre.objects.filter(ope=ope)
-            if ope_t.exists():
-                ligne['ope_titre'] = ope_t[0].id
+            ligne['id jumelle lie'] = fmt.str(ope.jumelle_id, '') 
+            ligne['has fille'] = fmt.bool(ope.id in ope_mere)
+            ligne['num op vent m'] = fmt.str(ope.mere_id, '')
+            if ope.ope is not None:
+                ligne['ope_titre'] = ope.ope.id
             else:
                 ligne['ope_titre'] = ''
-            ope_t = Ope_titre.objects.filter(ope_pmv=ope)
-            if ope_t.exists():
-                ligne['ope_pmv'] = ope_t[0].id
+            if ope.ope_pmv is not None:
+                ligne['ope_pmv'] = ope.ope_pmv.id
             else:
                 ligne['ope_pmv'] = ''
             ligne['mois'] = ope.date.strftime('%m')
             data.append(ligne)
+
         logger.info('export ope csv')
         return self.export_csv_view(data=data)
 

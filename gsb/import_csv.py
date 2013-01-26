@@ -255,7 +255,7 @@ class Import_csv_ope(import_base.Import_base):
                         else:
                             ope['moyen_id'] = self.listes['moyen']['Virement']
                             if row.jumelle is None:
-                                raise import_base.Import_exception("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
+                                raise import_base.Import_exception(u"attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
                 ope['notes'] = row.notes
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
@@ -283,7 +283,7 @@ class Import_csv_ope(import_base.Import_base):
                                 if Cpt.exists():
                                         cpt[0].type='t'
                                 else:
-                                    raise import_base.Import_exception('attention un compte a été change en cpt titre ligne %s'%row.ligne)
+                                    raise import_base.Import_exception(u'attention un compte a été change en cpt titre ligne %s'%row.ligne)
 
                     # gestion des ope_titre
                     try:

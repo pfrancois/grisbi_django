@@ -103,9 +103,8 @@ class Exportform_ope(gsb_forms.Baseform):
             pass
         else:
             self.query = self.verif_collec(self.query, ensemble)
-
-        if self.query.count() == 0:  # si des operations existent
-            raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
+            if self.query.count() == 0:  # si des operations n'existent pas
+                raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
         return data
 
     def verif_collec(self, query, ensemble):
