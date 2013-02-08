@@ -67,18 +67,22 @@
                     </td>
                     <td class="opTier">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
-                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom|escape }} {% else %}
-                                {{ ope.tiers_virement|escape }}{% endif %}</a>
+                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom|escape }}
+                            {% else %} {{ ope.tiers.nom|escape }} {% endif %}
+                        </a>
                     </td>
                     <td class="opTier">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>{{ ope.cat.nom|default:"aucune catégorie"|escape }}</a>
                     </td>
                     <td class="opCredit">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
-                            {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+                            {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}
+                        </a>
                     <td class="opDebit">
                         <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {% endif %}>
-                            {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}</a></td>
+                            {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}
+                        </a>
+                    </td>
                 </tr>
             {% endblock ope %}
         {% empty %}

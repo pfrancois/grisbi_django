@@ -16,7 +16,7 @@
 <body {% block body_js %}{% endblock body_js %}>
 {% block titre %}<h1>
     <a href="{% url 'index' %}">{% if titre_long %}{{ titre_long|escape }}{% else %}{{ titre|escape }}{% endif %}</a>
-    </h1>{% endblock %}
+    </h1>{% endblock titre %}
 {% block messages %}{% if messages %}{% render_messages messages %}{% endif %}{% endblock messages %}
 {% block result %}{% for resultat in resultats %}
     <div>{{ resultat|escape }}</div>

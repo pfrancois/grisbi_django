@@ -60,10 +60,6 @@ urlpatterns += patterns('', url(r'options/import_perso$',
                             import_csv_perso.Import_csv_perso.as_view(),
                             name="import_csv_perso")
 )
-urlpatterns += patterns('',
-                        (r'^favicon\.ico$', views.Myredirectview.as_view(url='/static/img/favicon.ico')),
-                        url(r'^maj_cours/(?P<pk>\d+)$', 'gsb.views.maj_cours', name='maj_cours')
-)
 
 # les vues relatives aux operations
 urlpatterns += patterns('gsb.views',

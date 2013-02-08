@@ -16,6 +16,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnIn
 from django.core import exceptions as django_exceptions
 from django.views import generic
 from django.utils.decorators import method_decorator
+import datetime
 
 
 def has_changed(instance, field):
@@ -79,9 +80,6 @@ class Myredirectview(generic.RedirectView):
 
     @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
-        # on regarde si c'est appelle
-        # if self.call is not None and callable(self.call):
-        #    self.call()
         return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
 
@@ -90,18 +88,17 @@ class Index_view(Mytemplateview):
 
     def get(self, request, *args, **kwargs):
         if settings.AFFICHE_CLOT:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related('ope', 'tiers')
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related('ope')
             self.pl = Compte.objects.exclude(type__in=('b', 'e', 'p')).select_related('ope', 'tiers')
         else:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope', 'tiers')
+            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope')
             self.pl = Compte.objects.filter(type='t', ouvert=True).select_related('ope', 'tiers')
             # calcul du solde des bq
-        # self.total_bq =  Ope.objects.filter(mere__exact=None, compte__type__in=('b', 'e', 'p')).aggregate(solde=models.Sum('montant'))['solde']
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
-        
-        for p in self.bq:
-            cpt = {'solde':p.solde(),
+        soldes=self.bq.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models.Sum('ope__montant'))
+        for p in soldes:
+            cpt = {'solde':p.solde,
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
@@ -138,7 +135,7 @@ class Cpt_detail_view(Mytemplateview):
     cpt_titre_espece = False
     rapp = False
     all = False
-    nb_ope_par_pages = 50
+    nb_ope_par_pages = 100
 
     def get(self, request, cpt_id):
         """
@@ -147,7 +144,7 @@ class Cpt_detail_view(Mytemplateview):
         @param cpt_id: id du compte demande
         """
         try:
-            compte = Compte.objects.select_related('ope_self').get(pk=cpt_id)
+            compte = Compte.objects.get(pk=cpt_id)
         except Compte.DoesNotExist:
             raise http.Http404('pas de compte correspondant.')
         self.type = "nrapp"
@@ -155,27 +152,62 @@ class Cpt_detail_view(Mytemplateview):
             self.type = "all"
         if self.rapp:
             self.type = "rapp"
-        if compte.type != 't' and self.cpt_titre_espece == True:  # onredirige vers la vue standart
-            url = reverse("gsb_cpt_detail", args=(cpt_id,))
-            if self.rapp:
-                url = reverse("gsb_cpt_detail_rapp", args=(cpt_id,))
-            if self.all:
-                url = reverse("gsb_cpt_detail_all", args=(cpt_id,))
-            return http.HttpResponsePermanentRedirect(url)
+
         if compte.type not in ('t',) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
+            #sinon on prend le nom du template par defaut
             self.espece = True
+
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
-            nb_ope_rapp = self.cpt_espece_nb(compte)
-            sort_tab, opes = self.cpt_espece_tri(request, q)
-            opes = opes.select_related('tiers', 'cat', 'rapp')
-            context = self.get_context_data(compte, opes, nb_ope_rapp, sort_tab)
+            if self.all:
+                nb_ope_rapp = 0
+            else:
+                nb_ope_rapp = 0
+                if self.all:
+                    nb_ope_rapp = 0
+                if self.rapp:
+                    nb_ope_rapp = 0
+                if not self.all and not self.rapp:
+                    nb_ope_rapp = Ope.objects.filter(compte=compte, rapp__isnull=False).count()
+            try:
+                sort = request.GET.get('sort')  # il y a un sort dans le get
+            except (ValueError, TypeError):  # non donc on regarde dans l'historique
+                sort = False
+                if request.session.key('sort', False):
+                    sort = request.session.key('sort', False)
+            if sort:
+                sort = unicode(sort)
+                q = q.order_by(sort)
+            else:
+                q = q.order_by('-date')
+            sort_t = {}
+            if sort == "date":
+                sort_t['date'] = "-date"
+            else:
+                sort_t['date'] = "date"
+            if sort == "tiers":
+                sort_t['tiers'] = "-tiers"
+            else:
+                sort_t['tiers'] = "tiers"
+            if sort == "cat":
+                sort_t['cat'] = "-cat"
+            else:
+                sort_t['cat'] = "cat"
+            if sort == "montant":
+                sort_t['montant'] = "-montant"
+            else:
+                sort_t['montant'] = "montant"
+            sort_t['actuel'] = "?sort=%s" % sort
+            if not self.all:
+                q=q.filter(date__year=datetime.date.today().year)
+            opes = q.select_related('tiers', 'cat', 'rapp')
+            context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
             
         else:
             self.espece = False
@@ -203,51 +235,8 @@ class Cpt_detail_view(Mytemplateview):
                          'rapp': t.encours(rapp=True, compte=compte_titre)
                         })
             context = self.get_context_data(compte_titre, titres)
+
         return self.render_to_response(context)
-
-    def cpt_espece_nb(self, c):
-        """calcul les nombres d'operation"""
-        nb_ope_rapp = 0
-        if self.all:
-            nb_ope_rapp = 0
-        if self.rapp:
-            nb_ope_rapp = 0
-        if not self.all and not self.rapp:
-            nb_ope_rapp = Ope.objects.filter(compte=c, rapp__isnull=False).count()
-        return nb_ope_rapp
-
-    def cpt_espece_tri(self, request, q):
-        """gestion du tri"""
-        try:
-            sort = request.GET.get('sort')  # il y a un sort dans le get
-        except (ValueError, TypeError):  # non donc on regarde dans l'historique
-            sort = False
-            if request.session.key('sort', False):
-                sort = request.session.key('sort', False)
-        if sort:
-            sort = unicode(sort)
-            q = q.order_by(sort)
-        else:
-            q = q.order_by('-date')
-        sort_t = {}
-        if sort == "date":
-            sort_t['date'] = "-date"
-        else:
-            sort_t['date'] = "date"
-        if sort == "tiers":
-            sort_t['tiers'] = "-tiers"
-        else:
-            sort_t['tiers'] = "tiers"
-        if sort == "cat":
-            sort_t['cat'] = "-cat"
-        else:
-            sort_t['cat'] = "cat"
-        if sort == "montant":
-            sort_t['montant'] = "-montant"
-        else:
-            sort_t['montant'] = "montant"
-        sort_t['actuel'] = "?sort=%s" % sort
-        return [sort_t, q]
 
     def cpt_espece_pagination(self, request, q):
         # gestion pagination
@@ -267,31 +256,37 @@ class Cpt_detail_view(Mytemplateview):
             "all": u"Ensemble des opérations"
         }
         c = kwargs[0]
+        solde_espece=c.solde(espece=True)
+        solde_r_esp=c.solde(rapp=True, espece=True)
+        solde_p=c.solde_pointe(espece=True)
         if self.espece:
+
             context = {'compte': c,
                        'list_ope': kwargs[1],
                        'nbrapp': kwargs[2],
                        'titre': c.nom,
-                       'solde': c.solde(espece=True),
+                       'solde': solde_espece,
                        "date_r": c.date_rappro(),
-                       "solde_r": c.solde(rapp=True, espece=True),
-                       "solde_p": c.solde_pointe(espece=True),
-                       "solde_pr": c.solde(rapp=True, espece=True) + c.solde_pointe(espece=True),
+                       "solde_r": solde_r_esp,
+                       "solde_p": solde_p,
+                       "solde_pr": solde_r_esp + solde_p,
                        "sort_tab": kwargs[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
             }
         else:
+            solde_r=c.solde(rapp=True)
             context = {
                 'compte': c,
                 'titre': c.nom,
                 'solde': c.solde(),
                 'titres': kwargs[1],
-                'especes': c.solde(espece=True),
-                'especes_rapp': c.solde(rapp=True, espece=True),
-                'solde_rapp': c.solde(rapp=True),
-                'solde_titre_rapp': c.solde_titre(rapp=True),
+                'especes': solde_espece,
+                'especes_rapp': solde_r_esp,
+                'solde_rapp': solde_r,
+                'solde_titre_rapp': solde_r-solde_r_esp,
             }
+        
         return context
 
 

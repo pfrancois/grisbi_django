@@ -441,19 +441,13 @@ class Compte(models.Model):
 
     def solde(self, datel=None, rapp=False, espece=False):
         """renvoie le solde du compte
-            @param datel date date limite de calcul du solde
-            @param rapp boolean faut il prendre uniquement les opération rapproches
+            @param datel : date date limite de calcul du solde
+            @param rapp : boolean faut il prendre uniquement les opération rapproches
+            @param espece : si c'est un compte espece d'un compte titre 
         """
-        # il n'y a pas d'operation
-        if not self.ope_set.exists():
-            return 0
-        # il n'y a pas d'operation a cette date 
-        if datel is not None and self.ope_set.order_by('date')[0].date > datel:
-            return 0
-
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
-            query = query.filter(rapp__isnull=False)
+            query = query.filter(rapp__id__exact=None)
         if datel is not None:
             query = query.filter(date__lte=datel)
         req = query.aggregate(total=models.Sum('montant'))['total']
@@ -513,13 +507,11 @@ class Compte(models.Model):
         date de rapprochement cad date du rapprochement de la plus recente des ope rapproches
         @return: date or None
         """
-        opes = Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False)
-        if opes.exists():
-            o = opes.latest('date')
-            date_p = o.rapp.date
-            return date_p
-        else:
-            return None  # comme pas de date, pas d'encours
+        try:
+            opes = Ope.objects.filter(compte__id=self.id).filter(rapp__isnull=False).select_related('rapp').latest('date')
+            return opes.rapp.date
+        except Ope.DoesNotExist:
+            return None
 
     date_rappro.short_description = u"date dernier rapp"
 
@@ -1173,20 +1165,6 @@ class Ope(models.Model):
             return True
         else:
             return False
-
-    def tiers_virement(self):
-        try:
-            if self.jumelle_id:
-                if self.montant < 0:
-                    return u"virement vers %s " % self.jumelle.compte.nom
-                else:
-                    return u"virement de %s " % self.jumelle.compte.nom
-            else:
-                return u"%s" % self.tiers.nom
-        except Tiers.DoesNotExist:
-            return u"inconnu"
-
-    tiers_virement.short_description = "Tiers"
 
     def is_editable(self):
         if self.is_mere or self.rapp or self.compte.ouvert == False:

@@ -330,7 +330,7 @@ class Ope_admin(Modeladmin_perso):
     ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     ordering = ('-date',)
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers_virement', 'moyen', 'cat', 'rapp', 'pointe')
+    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = (
     'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
