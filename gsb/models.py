@@ -447,7 +447,7 @@ class Compte(models.Model):
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
-            query = query.filter(rapp__id__exact=None)
+            query = query.filter(rapp__id__isnull=False)
         if datel is not None:
             query = query.filter(date__lte=datel)
         req = query.aggregate(total=models.Sum('montant'))['total']
