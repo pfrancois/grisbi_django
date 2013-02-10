@@ -204,7 +204,7 @@ class Cpt_detail_view(Mytemplateview):
             else:
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
-            if not self.all:
+            if not (self.all  or self.rapp):
                 q=q.filter(date__year=datetime.date.today().year)
             opes = q.select_related('tiers', 'cat', 'rapp')
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
