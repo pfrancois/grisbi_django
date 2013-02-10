@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
 from django.utils import timezone
+from django.forms.models import BaseInlineFormSet
 import datetime
 
 
@@ -33,7 +34,10 @@ class date_perso_filter(DateFieldListFilter):
         today = now.date()
         tomorrow = today + datetime.timedelta(days=1)
         mois_ref=(10,11,12,1,2,3,4,5,6,7,8,9)
-
+        if today.month<=4:
+            since3mois=today.replace(day=1,month=mois_ref[today.month],year=today.year-1)
+        else:
+            since3mois=today.replace(day=1,month=mois_ref[today.month],year=today.year)
         self.links = (
             (_('Any date'), {}),
             (_('Past 7 days'), {
@@ -45,8 +49,8 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(today.replace(day=1, month=mois_ref[today.month])),
-                self.lookup_kwarg_until: str(today.replace(day=1) - datetime.timedelta(days=1)),#fin du mois precedent
+                self.lookup_kwarg_since: str(since3mois),
+                self.lookup_kwarg_until: str(today.replace(day=7)),#fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
@@ -179,16 +183,22 @@ class Modeladmin_perso(admin.ModelAdmin):
         result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
 
+class formestligne_limit(BaseInlineFormSet):
+    def get_queryset(self):
+        sup = super(formestligne_limit, self).get_queryset()
+        return sup.order_by('-id')[:10]
 
 class liste_perso_inline(admin.TabularInline):
-    can_delete = False
+    can_delete = True
     extra = 0
     formfield_overrides = {
         models.TextField: {'widget': forms.TextInput, },
     }
     related = None
     readonly = False
-
+    orderby=None
+    formset = formestligne_limit
+#afin de pouvoir avoir des inline readonly
     def __init__(self, parent_model, admin_site):
         if self.readonly:
             self.readonly_fields = self.fields
@@ -196,12 +206,16 @@ class liste_perso_inline(admin.TabularInline):
         super(liste_perso_inline, self).__init__(parent_model, admin_site)
 
     def queryset(self, request):
+        qs = super(liste_perso_inline, self).queryset(request)
+#on related pour les inlines
         if self.related is not None:
             args = self.related
-            qs = super(liste_perso_inline, self).queryset(request)
-            return qs.select_related(*args)
-        else:
-            return super(liste_perso_inline, self).queryset(request).select_related()
+            qs=qs.select_related(*args)
+#gestion du orderby
+        if self.orderby is not None:
+            args = self.orderby
+            qs=qs.order_by(*args)
+        return qs
 
 
 # #------------defintiion des classes
@@ -211,7 +225,8 @@ class ope_cat_admin(liste_perso_inline):
     readonly = True
     fk_name = 'cat'
     related = ('compte', 'tiers', 'ib')
-
+    orderby=('-date',)
+    max_num=10
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -329,7 +344,6 @@ class Ope_admin(Modeladmin_perso):
     'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
     ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    ordering = ('-date',)
     list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
     list_filter = (
     'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
@@ -339,7 +353,7 @@ class Ope_admin(Modeladmin_perso):
     # save_on_top = True
     save_as = True
     search_fields = ['tiers__nom']
-    ordering = ['date']
+    ordering = ['-date']
     inlines = [ope_fille_admin]
     raw_id_fields = ('mere',)
 
@@ -526,7 +540,7 @@ class ope_rapp_admin(liste_perso_inline):
     readonly_fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
     related = ('compte', 'tiers', 'moyen', 'cat')
-
+    formset = BaseInlineFormSet
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
