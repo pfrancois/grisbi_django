@@ -41,7 +41,8 @@ class Export_ope_csv(Export_view_csv_base):
         data = []
         query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen") 
         liste_ope=query.values_list('id')
-        ope_mere=query.filter(mere_id__in=liste_ope).values_list('id')
+        ope_mere=query.filter(mere_id__in=liste_ope).values_list('id',flat=True)
+        
         for ope in query:
             # id compte date montant
             # print ope
