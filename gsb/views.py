@@ -16,7 +16,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnIn
 from django.core import exceptions as django_exceptions
 from django.views import generic
 from django.utils.decorators import method_decorator
-import datetime
+import gsb.utils
 
 
 def has_changed(instance, field):
@@ -205,7 +205,7 @@ class Cpt_detail_view(Mytemplateview):
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
             if not (self.all  or self.rapp):
-                q=q.filter(date__year=datetime.date.today().year)
+                q=q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year-1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
             

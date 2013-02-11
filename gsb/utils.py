@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import datetime
+from datetime import timedelta
 import time
 import decimal
 import calendar
 import csv
 import codecs
+from django.utils import timezone
 
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
@@ -178,7 +180,7 @@ def today():
 
 # utilise pour mock et les test
 def now():
-    return datetime.datetime.now()
+    return timezone.now()
 
 
 def addmonths(sourcedate, months, last=False, first=False):
