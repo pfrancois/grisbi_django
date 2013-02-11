@@ -18,9 +18,9 @@ from django.utils.translation import ugettext_lazy as _
 # import decimal
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
-from django.utils import timezone
+
 from django.forms.models import BaseInlineFormSet
-import datetime
+import gsb.utils as utils
 
 
 ##-------------ici les class generiques------
@@ -30,9 +30,8 @@ class date_perso_filter(DateFieldListFilter):
 
     def __init__(self, field, request, params, model, model_admin, field_path):
         super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
-        now = timezone.now()
-        today = now.date()
-        tomorrow = today + datetime.timedelta(days=1)
+        today = utils.today()
+        tomorrow = today + utils.timedelta(days=1)
         mois_ref=(10,11,12,1,2,3,4,5,6,7,8,9)
         if today.month<=4:
             since3mois=today.replace(day=1,month=mois_ref[today.month],year=today.year-1)
@@ -41,7 +40,7 @@ class date_perso_filter(DateFieldListFilter):
         self.links = (
             (_('Any date'), {}),
             (_('Past 7 days'), {
-                self.lookup_kwarg_since: str(today - datetime.timedelta(days=7)),
+                self.lookup_kwarg_since: str(today - utils.timedelta(days=7)),
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             (_('This month'), {
@@ -139,7 +138,7 @@ class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
 
     def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
+        return '%s' % (obj.ope_set.filter(filles_set__isnull=True).count())
 
     def fusionne_a_dans_b(self, request, queryset):
         fusion(request, queryset, 'ab')
@@ -182,6 +181,8 @@ class Modeladmin_perso(admin.ModelAdmin):
     def delete_view(self, request, object_id, extra_context=None):
         result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
+    
+
 
 class formestligne_limit(BaseInlineFormSet):
     def get_queryset(self):
@@ -350,7 +351,7 @@ class Ope_admin(Modeladmin_perso):
     search_fields = ['tiers__nom']
     list_editable = ('pointe', 'montant')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
-    # save_on_top = True
+    save_on_top = True
     save_as = True
     search_fields = ['tiers__nom']
     ordering = ['-date']
@@ -487,8 +488,6 @@ class Moyen_admin(Modeladmin_perso):
     list_filter = ('type',)
     fields = ['type', 'nom']
 
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
 
     list_display = ('nom', 'type', 'nb_ope')
 
@@ -511,9 +510,6 @@ class Tiers_admin(Modeladmin_perso):
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
-
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.count())
 
 
 class Ech_admin(Modeladmin_perso):
