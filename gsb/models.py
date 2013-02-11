@@ -893,7 +893,7 @@ class Rapp(models.Model):
     class Meta:
         db_table = 'gsb_rapp'
         verbose_name = u"rapprochement"
-        ordering = ['nom']
+        ordering = ['-date']
         get_latest_by = 'date'
 
     def __unicode__(self):
@@ -1133,7 +1133,7 @@ class Ope(models.Model):
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
-            raise ValidationError(u"cette opération ne peut pas être modifie car le compte est fermé")
+            raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
             if self.montant != self.tot_fille:
                 if self.rapp or self.pointe:
@@ -1141,6 +1141,19 @@ class Ope(models.Model):
                         u"attention cette opération est pointée ou rapproché et on change le montant global")
                 else:
                     self.montant = self.tot_fille
+        if self.is_mere:
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom':u"Opération Ventilée", 'type':"c"})[0]
+            ope_orig = Ope.objects.filter(id=self.id)
+            if ope_orig.exists():
+                ope_orig=ope_orig[0]
+                if self.montant != ope_orig.montant:
+                # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
+                    self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
+                    if self.pointe == True:
+                        raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est pointée")
+                    if self.rapp is not None:
+                        print self.rapp
+                        raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est rapprochée")
 
     @property
     def is_mere(self):
@@ -1191,19 +1204,6 @@ class Ope(models.Model):
                     moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
                                                                                         "id": settings.MD_DEBIT, "type":"d"})[0]
                     self.moyen = moyen
-        if self.is_mere:
-            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom':u"Opération Ventilée", 'type':"c"})[0]
-            ope_orig = Ope.objects.filter(id=self.id)
-            if ope_orig.exists():
-                ope_orig=ope_orig[0]
-                if self.montant != ope_orig.montant:
-                # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
-                    self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
-                    if self.pointe == True:
-                        raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est pointee")
-                    if self.rapp is not None:
-                        print self.rapp
-                        raise IntegrityError("impossible de modifier l'operation car vous modifiez le montant alors qu'elle est rapprochee")
         super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):
