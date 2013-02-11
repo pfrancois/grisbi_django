@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 from gsb import models
-from .utils import Format as fmt
+from . import utils
 
 import logging
 from django.http import HttpResponse
@@ -60,28 +60,28 @@ class Export_ope_csv(Export_view_csv_base):
             else:
                 ligne['r'] = ''
             # pointee
-            ligne['p'] = fmt.bool(ope.pointe)
+            ligne['p'] = utils.booltostr(ope.pointe)
 
             # moyen
             try:
-                ligne['moyen'] = fmt.str(ope.moyen, '', 'nom')
+                ligne['moyen'] = utils.idtostr(ope.moyen, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
                 ligne['moyen'] = ""
             # cat
-            ligne['cat'] = fmt.str(ope.cat, "", "nom")
+            ligne['cat'] = utils.idtostr(ope.cat, "", "nom")
             # tiers
-            ligne['tiers'] = fmt.str(ope.tiers, '', 'nom')
+            ligne['tiers'] = utils.idtostr(ope.tiers, '', 'nom')
             ligne['notes'] = ope.notes
             try:
-                ligne['projet'] = fmt.str(ope.ib, '', 'nom')
+                ligne['projet'] = utils.idtostr(ope.ib, '', 'nom')
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
 
             # le reste
             ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = fmt.str(ope.jumelle_id, '') 
-            ligne['has fille'] = fmt.bool(ope.id in ope_mere)
-            ligne['num op vent m'] = fmt.str(ope.mere_id, '')
+            ligne['id jumelle lie'] = utils.idtostr(ope.jumelle_id, '') 
+            ligne['has fille'] = utils.booltostr(ope.id in ope_mere)
+            ligne['num op vent m'] = utils.idtostr(ope.mere_id, '')
             if ope.ope is not None:
                 ligne['ope_titre'] = ope.ope.id
             else:

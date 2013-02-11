@@ -17,11 +17,10 @@ from django.utils.decorators import method_decorator
 from . import forms as gsb_forms
 from .models import Tiers, Titre, Cat, Ib, Exercice, Compte, Moyen, Rapp, Ope
 from . import views
-from .utils import fr2decimal, strpdate
+from .utils import FormatException
 
-class Import_exception(Exception):
+class ImportException(Exception):
     pass
-
 
 
 class ImportForm1(gsb_forms.Baseform):
@@ -128,46 +127,6 @@ class property_ope_base(object):
     def has_fille(self):
         return False
     
-    def to_str(self, var, retour=None):
-        var=var.strip()
-        if var == "" or var == '0':
-            return retour
-        else:
-            return var
-   
-    def to_id(self, var):
-        var=var.strip()
-        try:
-            if var == "" or var is None or int(var) == 0 :
-                return None
-            else:
-                return int(var)
-        except ValueError:
-            raise Import_exception('probleme: "%s" n\'est pas un nombre a la ligne %s' % (var, self.ligne))
-    
-    def to_bool(self, var):
-        var=var.strip()
-        try:
-            if var == "" or var is None or int(var) == 0 :
-                return False
-            else:
-                return True
-        except ValueError:
-            return False
-        
-    def to_decimal(self, var):
-        var=var.strip()
-        return fr2decimal(var)#si il y a une exception il est renvoyé 0
-        
-    def to_date(self, var, format_date):
-        var=var.strip()
-        try:
-            date_s = var
-            return strpdate(date_s, format_date)
-        except ValueError:
-            raise Import_exception('probleme de format de date a la ligne %s' % self.ligne)
-
-
 
 class Import_base(views.Myformview):
     # chemin du template
@@ -258,7 +217,7 @@ class Import_base(views.Myformview):
                 for err in self.erreur:
                     messages.warning(self.request, err)
                 return False
-        except Import_exception as e:
+        except (FormatException,ImportException) as e:
             if self.test == False:
                 for err in self.erreur:
                     messages.warning(self.request, err)
@@ -279,7 +238,7 @@ class Import_base(views.Myformview):
                     messages.info(self.request, "%s compte ajoutes" % nb_ajout)
             else:
                 if 'compte' in self.ajouter:
-                    raise Import_exception("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
+                    raise ImportException("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
             # les tiers
             self.create('tiers', Tiers)
             

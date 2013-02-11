@@ -17,7 +17,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 import logging
-from .import utils
+from . import utils
 # definitions des listes
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -26,7 +26,6 @@ liste_type_compte = Compte.typescpt
 
 def _export():
     logger = logging.getLogger('gsb.export')
-    fmt = utils.Format()
     # creation des id pour cat et sact
     list_cats = {}
     for cat_en_cours in Cat.objects.all().order_by('id'):
@@ -67,9 +66,9 @@ def _export():
     et.SubElement(xml_generalites, "Titre").text = str(settings.TITRE)  # NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_commune").text = ''  # NOT IN BDD
     et.SubElement(xml_generalites, "Adresse_secondaire").text = ''  # NOT IN BDD
-    et.SubElement(xml_generalites, "Utilise_exercices").text = fmt.bool(settings.UTILISE_EXERCICES)
-    et.SubElement(xml_generalites, "Utilise_IB").text = fmt.bool(settings.UTILISE_IB)
-    et.SubElement(xml_generalites, "Utilise_PC").text = fmt.bool(settings.UTILISE_PC)
+    et.SubElement(xml_generalites, "Utilise_exercices").text = utils.booltostr(settings.UTILISE_EXERCICES)
+    et.SubElement(xml_generalites, "Utilise_IB").text = utils.booltostr(settings.UTILISE_IB)
+    et.SubElement(xml_generalites, "Utilise_PC").text = utils.booltostr(settings.UTILISE_PC)
     et.SubElement(xml_generalites, "Utilise_info_BG").text = "0"  # NOT IN BDD
     et.SubElement(xml_generalites, "Numero_devise_totaux_tiers").text = "1"
     et.SubElement(xml_generalites, "Numero_devise_totaux_categ").text = "1"
@@ -77,7 +76,7 @@ def _export():
     et.SubElement(xml_generalites, "Type_affichage_des_echeances").text = "3"  # NOT IN BDD
     et.SubElement(xml_generalites, "Affichage_echeances_perso_nb_libre").text = "0"  # NOT IN BDD
     et.SubElement(xml_generalites, "Type_affichage_perso_echeances").text = "0"  # NOT IN BDD
-    et.SubElement(xml_generalites, "Numero_derniere_operation").text = fmt.max(Ope.objects)
+    et.SubElement(xml_generalites, "Numero_derniere_operation").text = utils.maxtostr(Ope.objects)
     et.SubElement(xml_generalites, "Echelle_date_import").text = "2"  # NOT IN BDD
     et.SubElement(xml_generalites, "Utilise_logo").text = "1"  # NOT IN BDD
     et.SubElement(xml_generalites, "Chemin_logo").text = "g:/Program Files/Grisbi/pixmaps/grisbi-logo.png"  # NOT IN BDD
@@ -105,7 +104,7 @@ def _export():
         et.SubElement(xml_detail, "Id_compte")  # NOT IN BDD
         et.SubElement(xml_detail, "No_de_compte").text = str(cpt.id)
         et.SubElement(xml_detail, "Titulaire").text = ''  # NOT IN BDD
-        et.SubElement(xml_detail, "Type_de_compte").text = fmt.type(liste_type_compte, cpt.type)
+        et.SubElement(xml_detail, "Type_de_compte").text = utils.typetostr(liste_type_compte, cpt.type)
         et.SubElement(xml_detail, "Nb_operations").text = str(Ope.objects.filter(compte=cpt.id).count())
         et.SubElement(xml_detail, "Devise").text = "1"
         if cpt.banque is None:
@@ -126,22 +125,22 @@ def _export():
         else:
             cle_du_compte = cpt.cle_compte
         et.SubElement(xml_detail, "Cle_du_compte").text = str(cle_du_compte)
-        et.SubElement(xml_detail, "Solde_initial").text = fmt.float(cpt.solde_init)
-        et.SubElement(xml_detail, "Solde_mini_voulu").text = fmt.float(cpt.solde_mini_voulu)
-        et.SubElement(xml_detail, "Solde_mini_autorise").text = fmt.float(cpt.solde_mini_autorise)
-        et.SubElement(xml_detail, "Solde_courant").text = fmt.float(cpt.solde())
+        et.SubElement(xml_detail, "Solde_initial").text = utils.floattostr(cpt.solde_init)
+        et.SubElement(xml_detail, "Solde_mini_voulu").text = utils.floattostr(cpt.solde_mini_voulu)
+        et.SubElement(xml_detail, "Solde_mini_autorise").text = utils.floattostr(cpt.solde_mini_autorise)
+        et.SubElement(xml_detail, "Solde_courant").text = utils.floattostr(cpt.solde())
         try:
-            et.SubElement(xml_detail, "Date_dernier_releve").text = fmt.date(
+            et.SubElement(xml_detail, "Date_dernier_releve").text = utils.datetostr(
                 Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(
                 Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(
                 Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
         except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = fmt.float(0)
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
-        et.SubElement(xml_detail, "Compte_cloture").text = fmt.bool(
+        et.SubElement(xml_detail, "Compte_cloture").text = utils.booltostr(
             not cpt.ouvert)  # attention, on gere les comptes ouverts et non les comptes clotures
         et.SubElement(xml_detail, "Affichage_r").text = "1"  # NOT IN BDD
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3"  # NOT IN BDD
@@ -166,7 +165,7 @@ def _export():
             xml_element = et.SubElement(xml_types, "Type")
             xml_element.set('No', str(m_pai.id))
             xml_element.set('Nom', m_pai.nom)
-            xml_element.set('Signe', fmt.type(liste_type_moyen, m_pai.type))
+            xml_element.set('Signe', utils.typetostr(liste_type_moyen, m_pai.type))
             xml_element.set('Affiche_entree', "0")  # NOT IN BDD
             xml_element.set('Numerotation_auto', "0")  # NOT IN BDD
             xml_element.set('No_en_cours', "0")  # NOT IN BDD
@@ -179,17 +178,17 @@ def _export():
             xml_element.set('No', str(ope.id))
             xml_element.set('Id', '')  # NOT IN BDD
             # date de l'operation
-            xml_element.set('D', fmt.date(ope.date))
+            xml_element.set('D', utils.datetostr(ope.date))
             # date de valeur
             if ope.date_val is None:
                 xml_element.set('Db', "0/0/0")
             else:
-                xml_element.set('Db', fmt.date(ope.date_val))
-            xml_element.set('M', fmt.float(ope.montant))
+                xml_element.set('Db', utils.datetostr(ope.date_val))
+            xml_element.set('M', utils.floattostr(ope.montant))
             xml_element.set('De', str(1))
             xml_element.set('Rdc', '0')  # NOT IN BDD
-            xml_element.set('Tc', fmt.float(0))  # comme pas de devise pas besoin
-            xml_element.set('Fc', fmt.float(0))  # NOT IN BDD mais inutile selon moi
+            xml_element.set('Tc', utils.floattostr(0))  # comme pas de devise pas besoin
+            xml_element.set('Fc', utils.floattostr(0))  # NOT IN BDD mais inutile selon moi
             if ope.tiers:
                 xml_element.set('T', str(ope.tiers.id))
             else:
@@ -203,7 +202,7 @@ def _export():
             else:
                 xml_element.set('m_pai', str(0))
                 xml_element.set('Sc', str(0))
-            xml_element.set('Ov', fmt.bool(ope.filles_set.all()))
+            xml_element.set('Ov', utils.booltostr(ope.filles_set.all()))
             xml_element.set('N', ope.notes)
             if ope.moyen is None:
                 xml_element.set('Ty', str(0))
@@ -217,7 +216,7 @@ def _export():
                     xml_element.set('P', str(0))
                 else:
                     xml_element.set('P', str(2))
-            xml_element.set('A', fmt.bool(ope.automatique))
+            xml_element.set('A', utils.booltostr(ope.automatique))
             if ope.rapp is None:
                 xml_element.set('R', str(0))
             else:
@@ -256,13 +255,13 @@ def _export():
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_echeances").text = str(Echeance.objects.count())
-    et.SubElement(xml_generalite, "No_derniere_echeance").text = fmt.max(Echeance.objects)
+    et.SubElement(xml_generalite, "No_derniere_echeance").text = utils.maxtostr(Echeance.objects)
     xml_echeances = et.SubElement(xml_echeances_root, 'Detail_des_echeances')
     for ech in Echeance.objects.all().order_by('id'):
         xml_element = et.SubElement(xml_echeances, 'Echeance', No=str(ech.id))
-        xml_element.set('Date', fmt.date(ech.date))
+        xml_element.set('Date', utils.datetostr(ech.date))
         xml_element.set('Compte', str(ech.compte.id))
-        xml_element.set('Montant', fmt.float(ech.montant))
+        xml_element.set('Montant', utils.floattostr(ech.montant))
         xml_element.set('Devise', str(1))
         if ech.tiers is None:
             xml_element.set('Tiers', "0")
@@ -304,7 +303,7 @@ def _export():
             else:
                 xml_element.set('Sous-imputation', str(0))
         xml_element.set('Notes', ech.notes)
-        xml_element.set('Automatique', fmt.bool(False))  # not in bdd
+        xml_element.set('Automatique', utils.booltostr(False))  # not in bdd
         xml_element.set('Notes', str(ech.notes))
         if ech.periodicite is None or ech.periodicite == 'u':
             xml_element.set('Periodicite', str(0))
@@ -334,14 +333,14 @@ def _export():
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
                     xml_element.set('Periodicite_personnalisee', '3')
 
-        xml_element.set('Date_limite', fmt.date(ech.date_limite, defaut=''))
+        xml_element.set('Date_limite', utils.datetostr(ech.date_limite, defaut=''))
         xml_element.set('Ech_ventilee', '0')
         xml_element.set('No_ech_associee', '0')
         ###Tiers###
     xml_tiers_root = et.SubElement(xml_root, "Tiers")
     xml_generalite = et.SubElement(xml_tiers_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_tiers").text = str(Tiers.objects.count())
-    et.SubElement(xml_generalite, "No_dernier_tiers").text = fmt.max(Tiers.objects)
+    et.SubElement(xml_generalite, "No_dernier_tiers").text = utils.maxtostr(Tiers.objects)
     xml_detail = et.SubElement(xml_tiers_root, 'Detail_des_tiers')
     for tier in Tiers.objects.all().order_by('id'):
         xml_sub = et.SubElement(xml_detail, 'Tiers')
@@ -359,7 +358,7 @@ def _export():
     xml_cat_root = et.SubElement(xml_root, "Categories")
     xml_generalite = et.SubElement(xml_cat_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_categories").text = str(Cat.objects.count())
-    et.SubElement(xml_generalite, "No_derniere_categorie").text = fmt.max(Cat.objects)
+    et.SubElement(xml_generalite, "No_derniere_categorie").text = utils.maxtostr(Cat.objects)
     xml_detail = et.SubElement(xml_cat_root, 'Detail_des_categories')
     old_cat = ''
     xml_cate = et.SubElement(xml_detail, 'Categorie')
@@ -369,13 +368,13 @@ def _export():
             if old_cat == '':
                 xml_cate.set('No', str(cat['cat']['id']))
                 xml_cate.set('Nom', cat['cat']['nom'])
-                xml_cate.set('Type', fmt.type(liste_type_cat, cat['cat']['type']))
+                xml_cate.set('Type', utils.typetostr(liste_type_cat, cat['cat']['type']))
             else:
                 xml_cate.set('No_derniere_sous_cagegorie', str(cat['cat']['id'] - 1))
                 xml_cate = et.SubElement(xml_detail, 'Categorie')
                 xml_cate.set('No', str(cat['cat']['id']))
                 xml_cate.set('Nom', unicode(cat['cat']['nom']))
-                xml_cate.set('Type', fmt.type(liste_type_cat, cat['cat']['type']))
+                xml_cate.set('Type', utils.typetostr(liste_type_cat, cat['cat']['type']))
             old_cat = cat['cat']['nom']
         if cat['scat']:
             xml_sub = et.SubElement(xml_cate, 'Sous-categorie')
@@ -387,7 +386,7 @@ def _export():
     xml_ib_root = et.SubElement(xml_root, "Imputations")
     xml_generalite = et.SubElement(xml_ib_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_imputations").text = str(Ib.objects.count())
-    et.SubElement(xml_generalite, "No_derniere_imputation").text = fmt.max(Ib.objects)
+    et.SubElement(xml_generalite, "No_derniere_imputation").text = utils.maxtostr(Ib.objects)
     xml_detail = et.SubElement(xml_ib_root, 'Detail_des_imputations')
     old_ib = ''
     xml_ibe = et.SubElement(xml_detail, 'Imputation')
@@ -396,13 +395,13 @@ def _export():
             if old_ib == '':
                 xml_ibe.set('No', str(imp['ib']['id']))
                 xml_ibe.set('Nom', imp['ib']['nom'])
-                xml_ibe.set('Type', fmt.type(liste_type_cat, imp['ib']['type']))
+                xml_ibe.set('Type', utils.typetostr(liste_type_cat, imp['ib']['type']))
             else:
                 xml_ibe.set('No_derniere_sous_imputation', str(imp['ib']['id'] - 1))
                 xml_ibe = et.SubElement(xml_detail, 'Imputation')
                 xml_ibe.set('No', str(imp['ib']['id']))
                 xml_ibe.set('Nom', unicode(imp['ib']['nom']))
-                xml_ibe.set('Type', fmt.type(liste_type_cat, imp['ib']['type']))
+                xml_ibe.set('Type', utils.typetostr(liste_type_cat, imp['ib']['type']))
             old_ib = imp['ib']['nom']
         if imp['sib']:
             xml_sub = et.SubElement(xml_ibe, 'Sous-imputation')
@@ -423,7 +422,7 @@ def _export():
     xml_sub.set('Date_dernier_change', "")
     xml_sub.set('Rapport_entre_devises', "0")  # NOT IN BDD
     xml_sub.set('Devise_en_rapport', '0')  # NOT IN BDD
-    xml_sub.set('Change', fmt.float(0))
+    xml_sub.set('Change', utils.floattostr(0))
 
     # raison pour lesquelles il y a des attributs non modifiables
     # isocode est par construction egale à code
@@ -434,7 +433,7 @@ def _export():
     xml_banques = et.SubElement(xml_root, "Banques")
     xml_generalite = et.SubElement(xml_banques, "Generalites")
     et.SubElement(xml_generalite, "Nb_banques").text = str(Banque.objects.count())
-    et.SubElement(xml_generalite, "No_derniere_banque").text = fmt.max(Banque.objects)
+    et.SubElement(xml_generalite, "No_derniere_banque").text = utils.maxtostr(Banque.objects)
     xml_detail = et.SubElement(xml_banques, 'Detail_des_banques')
     for bq in Banque.objects.all().order_by('id'):
         if bq is not None:
@@ -461,15 +460,15 @@ def _export():
     xml_exo = et.SubElement(xml_root, "Exercices")
     xml_generalite = et.SubElement(xml_exo, "Generalites")
     et.SubElement(xml_generalite, "Nb_exercices").text = str(Exercice.objects.count())
-    et.SubElement(xml_generalite, "No_dernier_exercice").text = fmt.max(Exercice.objects)
+    et.SubElement(xml_generalite, "No_dernier_exercice").text = utils.maxtostr(Exercice.objects)
     xml_detail = et.SubElement(xml_exo, 'Detail_des_exercices')
     for exo in Exercice.objects.all().order_by('id'):
         if exo is not None:
             xml_sub = et.SubElement(xml_detail, 'Exercice')
             xml_sub.set('No', str(exo.id))
             xml_sub.set('Nom', exo.nom)
-            xml_sub.set('Date_debut', fmt.date(exo.date_debut))
-            xml_sub.set('Date_fin', fmt.date(exo.date_fin))
+            xml_sub.set('Date_debut', utils.datetostr(exo.date_debut))
+            xml_sub.set('Date_fin', utils.datetostr(exo.date_fin))
             xml_sub.set('Affiche', "1")
             # #rapprochement##
     xml_rapp = et.SubElement(xml_root, "Rapprochements")

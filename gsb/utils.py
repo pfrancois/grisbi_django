@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import datetime
-from datetime import timedelta
 import time
 import decimal
 import calendar
@@ -12,95 +11,9 @@ from django.utils import timezone
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 
+class FormatException(Exception):
+    pass
 
-class Format:
-    """ classe compose de methodes de classes qui permet le formatage des donnees"""
-
-    @staticmethod
-    def date(s, defaut="0/0/0"):
-        """
-        fonction qui transforme un object date en une chaine AA/MM/JJJJ
-        @param s:objet datetime
-        @param defaut: format a transformer, par defaut c'est AA/MM/JJJ
-        """
-        if s is None:
-            return defaut
-        else:
-            if isinstance(s, datetime.date):
-                s = s.strftime('%d/%m/%Y')
-                result = []
-                tab = s.split("/")
-                for partie in tab:
-                    if partie[0] == '0':  # transform 01/01/2010 en 1/1/2010
-                        partie = partie[1:]
-                    result.append(partie)
-                return "/".join(result)
-            else:
-                raise TypeError('attention ce ne peut pas etre qu\'un objet date')
-
-    @staticmethod
-    def bool(s, defaut='0'):
-        """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
-        @param s:objet bool
-        @param defaut: format a transformer, par defaut c'est 0
-        """
-        if s is None:
-            return defaut
-        else:
-            if isinstance(s, bool):
-                # c'est ici le principe
-                return str(int(s))
-            try:
-                i = int("%s" % s)
-                if not i:
-                    return '0'
-                else:
-                    return '1'
-            except ValueError:
-                return str(int(bool(s)))
-
-    @staticmethod
-    def float(s):
-        """ convertit un float en string 10,7"""
-        s = "%10.7f" % s
-        return s.replace('.', ',').strip()
-
-    @staticmethod
-    def type(liste, s, defaut='0'):
-        """convertit un indice d'une liste par une string
-        @param liste: liste a utiliser
-        @param s: string comprenand le truc a chercher dans la liste
-        @param defaut: reponse par defaut"""
-        liste = [str(b[0]) for b in liste]
-        try:
-            s = str(liste.index(s) + 1)
-        except ValueError:  # on en un ca par defaut
-            s = defaut
-        return s
-
-    @staticmethod
-    def max(query, defaut='0', champ='id'):
-        """recupere le max d'un queryset"""
-        agg = query.aggregate(id=Max(champ))['id']
-        if agg is None:
-            return defaut
-        else:
-            return str(agg)
-
-    @staticmethod
-    def str(obj, defaut='0', membre='id'):
-        """renvoie id d'un objet avec la gestion des null
-        @param obj: l'objet a interroger
-        @param defaut: la reponse si neant ou inexistant
-        @param membre: l'attribut a demander si pas neant"""
-        try:
-            retour = unicode(getattr(obj, membre))
-            if retour[-1] == ":":
-                retour = retour[0:-1]
-        except (AttributeError, ObjectDoesNotExist):
-            retour = unicode(defaut)
-        retour = retour.strip()
-        return retour
 
 
 def validrib(banque, guichet, compte, cle):
@@ -197,6 +110,133 @@ def addmonths(sourcedate, months, last=False, first=False):
     return datetime.date(year, month, day)
 
 
+
+
+"""------------------------------------format d'entree---------------------------------"""
+def to_str(var, retour=None):
+    var=var.strip()
+    if var == "" or var == '0':
+        return retour
+    else:
+        return var
+
+def to_id(var):
+    var=var.strip()
+    try:
+        if var == "" or var is None or int(var) == 0 :
+            return None
+        else:
+            return int(var)
+    except ValueError:
+        raise FormatException('probleme: "%s" n\'est pas un nombre ' % var)
+
+def to_bool(var):
+    var=var.strip()
+    try:
+        if var == "" or var is None or int(var) == 0 :
+            return False
+        else:
+            return True
+    except ValueError:
+        return False
+    
+def to_decimal(var):
+    var=var.strip()
+    return fr2decimal(var)#si il y a une exception il est renvoyé 0
+    
+def to_date(var, format_date):
+    var=var.strip()
+    try:
+        date_s = var
+        return strpdate(date_s, format_date)
+    except ValueError:
+        raise FormatException('la date "%s" n\'en est pas une' % var)
+
+"""-------------------------------format de sortie-----------------------------"""
+
+def datetostr(s, defaut="0/0/0"):
+    """
+    fonction qui transforme un object date en une chaine AA/MM/JJJJ
+    @param s:objet datetime
+    @param defaut: format a transformer, par defaut c'est AA/MM/JJJ
+    """
+    if s is None:
+        return defaut
+    else:
+        if isinstance(s, datetime.date):
+            s = s.strftime('%d/%m/%Y')
+            result = []
+            tab = s.split("/")
+            for partie in tab:
+                if partie[0] == '0':  # transform 01/01/2010 en 1/1/2010
+                    partie = partie[1:]
+                result.append(partie)
+            return "/".join(result)
+        else:
+            raise FormatException('attention ce ne peut pas etre qu\'un objet date')
+
+def booltostr(s, defaut='0'):
+    """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
+    @param s:objet bool
+    @param defaut: format a transformer, par defaut c'est 0
+    """
+    if s is None:
+        return defaut
+    else:
+        if isinstance(s, bool):
+            # c'est ici le principe
+            return str(int(s))
+        try:
+            i = int("%s" % s)
+            if not i:
+                return '0'
+            else:
+                return '1'
+        except ValueError:
+            return str(int(bool(s)))
+
+
+def floattostr(s):
+    """ convertit un float en string 10,7"""
+    s = "%10.7f" % s
+    return s.replace('.', ',').strip()
+
+def typetostr(liste, s, defaut='0'):
+    """convertit un indice d'une liste par une string
+    @param liste: liste a utiliser
+    @param s: string comprenand le truc a chercher dans la liste
+    @param defaut: reponse par defaut"""
+    liste = [str(b[0]) for b in liste]
+    try:
+        s = str(liste.index(s) + 1)
+    except ValueError:  # on en un ca par defaut
+        s = defaut
+    return s
+
+def maxtostr(query, defaut='0', champ='id'):
+    """recupere le max d'un queryset"""
+    agg = query.aggregate(id=Max(champ))['id']
+    if agg is None:
+        return defaut
+    else:
+        return str(agg)
+
+def idtostr(obj, defaut='0', membre='id'):
+    """renvoie id d'un objet avec la gestion des null
+    @param obj: l'objet a interroger
+    @param defaut: la reponse si neant ou inexistant
+    @param membre: l'attribut a demander si pas neant"""
+    try:
+        retour = unicode(getattr(obj, membre))
+        if retour[-1] == ":":
+            retour = retour[0:-1]
+    except (AttributeError, ObjectDoesNotExist):
+        retour = unicode(defaut)
+    retour = retour.strip()
+    return retour
+
+
+"""------------------fonction basiques pour lecture ecriture------"""
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
@@ -223,5 +263,3 @@ class Excel_csv(csv.Dialect):
 
 csv.register_dialect("excel_csv", Excel_csv)
 
-
-    

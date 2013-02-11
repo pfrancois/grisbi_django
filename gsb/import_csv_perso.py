@@ -2,24 +2,24 @@
 from __future__ import absolute_import
 
 from . import import_csv
-
+from . import utils
 
 
 class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
     @property
     def id(self):
-        return self.to_id(self.row['id'])
+        return utils.to_id(self.row['id'])
 
     @property
     def cat(self):
-        cat = self.to_str(self.row['cat'], "Divers:Inconnu")
+        cat = utils.to_str(self.row['cat'], "Divers:Inconnu")
         if cat[-1] == ':':  # si le dernier caractere est ":" on l'enleve
             cat = cat[:-1]
         return cat 
 
     @property
     def cpt(self):
-        cpt = self.to_str(self.row['cpt'])
+        cpt = utils.to_str(self.row['cpt'])
         if cpt is None:
             raise self.erreur.append('probleme: il faut un compte a la ligne %s' % self.ligne)
         else:
@@ -27,11 +27,11 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def date(self):
-        return self.to_date(self.row['Date'], "%d/%m/%Y")
+        return utils.to_date(self.row['Date'], "%d/%m/%Y")
 
     @property
     def mt(self):
-        return self.to_decimal(self.row['Montant'])
+        return utils.to_decimal(self.row['Montant'])
     
     @property
     def notes(self):
@@ -39,11 +39,11 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def num_cheque(self):
-        return self.to_str(self.row['Num_chq'], "")
+        return utils.to_str(self.row['Num_chq'], "")
 
     @property
     def tiers(self):
-        return self.to_str(self.row['Tiers'], "tiers inconnu")
+        return utils.to_str(self.row['Tiers'], "tiers inconnu")
 
     @property
     def monnaie(self):
@@ -51,7 +51,7 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def jumelle(self):
-        return self.to_id(self.row['jumelle'])
+        return utils.to_id(self.row['jumelle'])
 
     @property
     def moyen(self):
