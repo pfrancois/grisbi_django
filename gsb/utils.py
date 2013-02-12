@@ -99,7 +99,7 @@ def now():
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
     month = sourcedate.month - 1 + months
-    year = sourcedate.year + month / 12
+    year = int(sourcedate.year + month / 12)
     month = month % 12 + 1
     if last:
         day = calendar.monthrange(year, month)[1]
@@ -150,7 +150,7 @@ def to_date(var, format_date):
         date_s = var
         return strpdate(date_s, format_date)
     except ValueError:
-        raise FormatException('la date "%s" n\'en est pas une' % var)
+        raise FormatException('"%s" n\'en pas est une date' % var)
 
 """-------------------------------format de sortie-----------------------------"""
 

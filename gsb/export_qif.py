@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .utils import Format as fmt
 import cStringIO
 
 # pour les vues
@@ -12,7 +11,7 @@ from .export_base import ExportViewBase, Exportform_ope, Writer_base
 from django.core.exceptions import ObjectDoesNotExist
 # django
 from .models import Cat, Ib, Compte, Ope
-
+from . import utils
 
 def convert_type2qif(type_a_transformer):
     if type_a_transformer == "b":
@@ -77,13 +76,13 @@ def cat_export(ope):
     """
     if not ope.jumelle:  # dans ce cas la c'est une operation normale
         try:
-            cat_g = fmt.str(ope.cat, "", "nom")  # recupere la cat de l'operation
+            cat_g = utils.idtostr(ope.cat, "", "nom")  # recupere la cat de l'operation
         except ObjectDoesNotExist:
             cat_g = "inconnu"
         ib = None
         if bool(ope.ib):  # gestion de l'ib
             try:
-                ib = fmt.str(ope.ib, "", "nom")
+                ib = utils.idtostr(ope.ib, "", "nom")
             except ObjectDoesNotExist:
                 ib = None
         if ib is not None:
@@ -131,7 +130,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Cat")
                 # export des categories
             for cat in Cat.objects.all().order_by('nom').iterator():
-                qif.w("N", fmt.str(cat.nom))
+                qif.w("N", utils.idtostr(cat.nom))
                 qif.w('D', '')
                 if cat.type == 'r':
                     qif.w('I', '')
@@ -142,7 +141,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Class")
                 # export des classes
             for ib in Ib.objects.all().order_by('nom').iterator():
-                qif.w("N", fmt.str(ib.nom))
+                qif.w("N", utils.idtostr(ib.nom))
                 qif.w('D', '')
                 qif.end_record()
             # boucle export ope
@@ -161,9 +160,9 @@ class Export_qif(ExportViewBase):
             else:
                 mere = False
                 # montant
-            qif.w("T", fmt.float(ope.montant))
+            qif.w("T", utils.floattostr(ope.montant))
             # tiers
-            qif.w("P", fmt.str(ope.tiers, '', "nom"))
+            qif.w("P", utils.idtostr(ope.tiers, '', "nom"))
             if ope.moyen:
                 qif.w('N', ope.moyen.nom)
             else:

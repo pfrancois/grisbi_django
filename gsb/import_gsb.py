@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
                      Exercice, Rapp, Moyen, Echeance, Compte, Ope_titre)
-from .import_base import Import_exception, ImportForm1
+from .import_base import ImportException, ImportForm1
 try:
     from lxml import etree as et
 except ImportError:
@@ -107,7 +107,7 @@ def import_gsb_050(nomfich, efface_table=True):
     xml_generalite = str(xml_tree.find('Generalites/Version_fichier').text)
     if xml_generalite != '0.5.0':
         # logger.critical("le format n'est pas reconnu")
-        raise Import_exception(u"le format n'est pas reconnu")
+        raise ImportException(u"le format n'est pas reconnu")
     percent = 1
     #------------------------------generalites#------------------------------
     # les generalités sont maintenant dans setting.py
@@ -116,7 +116,7 @@ def import_gsb_050(nomfich, efface_table=True):
     nb_nx = 0
     nb_titre = 0
     if len(xml_tree.find('//Detail_des_devises')) > 1:
-        raise Import_exception(u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
+        raise ImportException(u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
         #------------ TIERS et titres -------------------
     nb_tiers_final = len(xml_tree.find('//Detail_des_tiers'))
     for xml_tiers in xml_tree.find('//Detail_des_tiers'):

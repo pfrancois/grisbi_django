@@ -21,7 +21,7 @@ from django.contrib.admin import SimpleListFilter
 
 from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
-
+from datetime import timedelta
 
 ##-------------ici les class generiques------
 class date_perso_filter(DateFieldListFilter):
@@ -31,16 +31,12 @@ class date_perso_filter(DateFieldListFilter):
     def __init__(self, field, request, params, model, model_admin, field_path):
         super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
         today = utils.today()
-        tomorrow = today + utils.timedelta(days=1)
-        mois_ref=(10,11,12,1,2,3,4,5,6,7,8,9)
-        if today.month<=4:
-            since3mois=today.replace(day=1,month=mois_ref[today.month],year=today.year-1)
-        else:
-            since3mois=today.replace(day=1,month=mois_ref[today.month],year=today.year)
+        tomorrow = today + timedelta(days=1)
+
         self.links = (
             (_('Any date'), {}),
             (_('Past 7 days'), {
-                self.lookup_kwarg_since: str(today - utils.timedelta(days=7)),
+                self.lookup_kwarg_since: str(today - timedelta(days=7)),
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             (_('This month'), {
@@ -48,7 +44,7 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(since3mois),
+                self.lookup_kwarg_since: str(utils.addmonths(today, -3,  first=True)),
                 self.lookup_kwarg_until: str(today.replace(day=7)),#fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
