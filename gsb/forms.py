@@ -123,7 +123,7 @@ class VirementForm(Baseform):
 
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
-    titre = forms.ModelChoiceField(Titre.objects.all(), required=True, empty_label=None)
+    titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
     compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
     nombre = forms.DecimalField(localize=True, initial='0')
@@ -146,7 +146,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
         # on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
-        if not(not(data['titre'] is None) or data['nouveau_titre']):
+        if (data.get('titre',None) is None and data.get('nouveau_titre',None) is None):
             self._errors['nouveau_titre'] = self.error_class(
                 ["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
             del data['nouveau_titre']
