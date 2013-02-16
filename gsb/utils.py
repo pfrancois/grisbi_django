@@ -7,9 +7,11 @@ import calendar
 import csv
 import codecs
 from django.utils import timezone
-
-from django.db.models import Max
-from django.core.exceptions import ObjectDoesNotExist
+try:
+    from django.db.models import Max
+    from django.core.exceptions import ObjectDoesNotExist
+except ImportError:
+    pass
 
 class FormatException(Exception):
     pass
