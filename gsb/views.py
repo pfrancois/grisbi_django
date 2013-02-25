@@ -258,7 +258,15 @@ class Cpt_detail_view(Mytemplateview):
         c = kwargs[0]
         solde_espece=c.solde(espece=True)
         solde_r_esp=c.solde(rapp=True, espece=True)
-        solde_p=c.solde_pointe(espece=True)
+        try:
+            solde_p_pos=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
+        except TypeError:
+            solde_p_pos=0
+        try:
+            solde_p_neg=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
+        except TypeError:
+            solde_p_neg=0
+
         if self.espece:
 
             context = {'compte': c,
@@ -268,8 +276,9 @@ class Cpt_detail_view(Mytemplateview):
                        'solde': solde_espece,
                        "date_r": c.date_rappro(),
                        "solde_r": solde_r_esp,
-                       "solde_p": solde_p,
-                       "solde_pr": solde_r_esp + solde_p,
+                       "solde_p_pos": solde_p_pos,
+                       "solde_p_neg": solde_p_neg,
+                       "solde_pr": solde_r_esp + solde_p_pos+solde_p_neg,
                        "sort_tab": kwargs[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),

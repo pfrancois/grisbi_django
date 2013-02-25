@@ -44,8 +44,12 @@
                     <td colspan="2" class="cptSolde">{{ solde_r|cur }}</td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="cptLabel">Solde pointé :</td>
-                    <td colspan="2" class="cptSolde">{{ solde_p|cur }}</td>
+                    <td colspan="3" class="cptLabel">Somme des ope pointée >0 :</td>
+                    <td colspan="2" class="cptSolde">{{ solde_p_pos|cur }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="cptLabel">Somme des ope pointée <0 :</td>
+                    <td colspan="2" class="cptSolde">{{ solde_p_neg|cur }}</td>
                 </tr>
                 <tr>
                     <td colspan="3" class="cptLabel">Solde p&amp;r:</td>
