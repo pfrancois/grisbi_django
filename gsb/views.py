@@ -262,9 +262,14 @@ class Cpt_detail_view(Mytemplateview):
             solde_p_pos=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
             solde_p_pos=0
+        if solde_p_pos is None:
+            solde_p_pos=0
+
         try:
             solde_p_neg=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
+            solde_p_neg=0
+        if solde_p_neg is None:
             solde_p_neg=0
 
         if self.espece:
