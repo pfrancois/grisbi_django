@@ -670,7 +670,7 @@ def ope_titre_achat(request, cpt_id):
                          virement_de=virement,
                          frais=form.cleaned_data['frais'])
             messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                          form.cleaned_data['titre'],
+                                                                          titre.nom,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
