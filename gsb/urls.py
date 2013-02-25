@@ -2,11 +2,11 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 # from django.conf.urls import include #non utilise actuellement
-from . import export_csv, export_qif, views, outils, import_csv, import_csv_perso
+from . import export_csv, export_qif, views, outils, import_csv#, import_sg
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
-                       # url(r'^test$', 'test.test')
+                       #url(r'^test$',import_sg.testimport_view.as_view() )
 )
 
 # les vues relatives aux outils
@@ -56,10 +56,7 @@ urlpatterns += patterns('', url(r'options/import_csv_all$',
                             import_csv.Import_csv_ope.as_view(),
                             name="import_csv_ope_all")
 )
-urlpatterns += patterns('', url(r'options/import_perso$',
-                            import_csv_perso.Import_csv_perso.as_view(),
-                            name="import_csv_perso")
-)
+
 
 # les vues relatives aux operations
 urlpatterns += patterns('gsb.views',
@@ -69,7 +66,9 @@ urlpatterns += patterns('gsb.views',
                         url(r'^vir/new$', 'vir_new', name="gsb_vir_new"),
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
-                        url(r'^search$', 'search_opes', name='g_search_ope')
+                        url(r'^search$', 'search_opes', name='g_search_ope'),
+                        url(r'^majtitre/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
+                        
 )
 
 # les vues relatives aux comptes
