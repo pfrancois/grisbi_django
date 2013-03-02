@@ -13,6 +13,9 @@ try:
 except ImportError:
     pass
 
+__all__=['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
+         'strpdate', 'today','now','timestamp', 'addmonths', 'to_str', 'to_id', 'to_bool', 'to_decimal',
+         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv','Csv_unicode_reader']
 class FormatException(Exception):
     pass
 
@@ -96,7 +99,8 @@ def today():
 # utilise pour mock et les test
 def now():
     return timezone.now()
-
+def timestamp():
+    return time.time()
 
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
@@ -265,3 +269,21 @@ class Excel_csv(csv.Dialect):
 
 csv.register_dialect("excel_csv", Excel_csv)
 
+class Csv_unicode_reader(object):
+    """
+    A CSV reader which will iterate over lines in the CSV file "f",
+    which is encoded in the given encoding.
+    """
+
+    def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
+        self.line_num = 1
+        fich = UTF8Recoder(fich, encoding)
+        self.reader = csv.DictReader(fich, dialect=dialect, **kwds)
+
+    def next(self):
+        self.line_num += 1
+        self.row = self.reader.next()
+        return self
+
+    def __iter__(self):
+        return self
