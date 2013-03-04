@@ -11,20 +11,25 @@ from django.http import HttpResponse
 import gsb.export_base as ex
 from .models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
+from gsb.utils import Excel_csv
+import csv
 
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
     fieldnames = None
+    csv_dialect=None
+    class_csv_dialect=Excel_csv
 
     def export_csv_view(self, data, nomfich="export"):
         """machinerie commune aux classes filles"""
-        csv_file = ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames)
+        csv_file =  ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames,dialect=self.class_csv_dialect)
         csv_file.writeheader()
         csv_file.writerows(data)
         if self.debug:
             return HttpResponse(csv_file.getvalue(), mimetype="text/plain")
         else:
             return HttpResponse(csv_file.getvalue(), content_type='text/csv')
+    
 
 
 class Export_ope_csv(Export_view_csv_base):
@@ -96,6 +101,62 @@ class Export_ope_csv(Export_view_csv_base):
         logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
+class pocket_csv(csv.Dialect):
+    """Describe the usual properties of Excel-generated CSV files."""
+    delimiter = ','
+    quotechar = '"'
+    doublequote = True
+    skipinitialspace = False
+    lineterminator = "\r\n"
+    quoting = csv.QUOTE_NONNUMERIC
+    
+class Export_ope_pocket_money_csv(Export_view_csv_base):
+    form_class = ex.Exportform_ope
+    model_initial = models.Ope
+    nomfich = "export_ope"
+    fieldnames = ("account name","date","ChkNum","Payee","Category","Class","Memo","Amount","Cleared","CurrencyCode","ExchangeRate")
+    class_csv_dialect=pocket_csv
+
+    def export(self, query):
+        """
+        fonction principale
+        """
+        logger = logging.getLogger('gsb.export')
+        data = []
+        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen","jumelle")         
+        for ope in query:
+            # id compte date montant
+            # print ope
+            ligne = {'account name': ope.compte.nom}
+            #date
+            ligne['date']=ope.date.strftime('%d/%m/%y')
+            #checknum
+            ligne['ChkNum'] = ope.num_cheque
+            # tiers
+            tiers=utils.idtostr(ope.tiers, '', 'nom')
+            if utils.idtostr(ope.cat, "", "nom")=="Virement":
+                tiers="<%s>"%ope.jumelle.compte
+            ligne['Payee'] = tiers
+            # cat
+            ligne['Category'] = utils.idtostr(ope.cat, "", "nom")
+            try:
+                ligne['Class'] = utils.idtostr(ope.ib, '', 'nom')
+            except django_exceptions.ObjectDoesNotExist:
+                ligne['Class'] = ""
+            ligne['Memo'] = ope.notes
+            #montant
+            ligne['Amount'] = str.strip("%10.2f" % ope.montant)
+            # rapp
+            if ope.rapp is not None:
+                ligne['Cleared'] = '*'
+            else:
+                ligne['Cleared'] = ''
+            ligne["CurrencyCode"]="EUR"
+            ligne["ExchangeRate"]="1"
+            data.append(ligne)
+
+        logger.info('export ope csv')
+        return self.export_csv_view(data=data)
 
 class Exportform_cours(ex.Exportform_ope):
     collection = ex.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False)
@@ -172,3 +233,4 @@ class Export_ope_titre_csv(Export_view_csv_base):
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_ope_titre")
         return reponse
+    

@@ -12,14 +12,15 @@ try:
     from django.core.exceptions import ObjectDoesNotExist
 except ImportError:
     pass
-
+from uuid import uuid4
 __all__=['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
          'strpdate', 'today','now','timestamp', 'addmonths', 'to_str', 'to_id', 'to_bool', 'to_decimal',
-         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv','Csv_unicode_reader']
+         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv','Csv_unicode_reader','uuid','Excel_csv']
 class FormatException(Exception):
     pass
 
-
+def uuid():
+    return str(uuid4())
 
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
