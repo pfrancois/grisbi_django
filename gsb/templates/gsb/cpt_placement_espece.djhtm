@@ -19,9 +19,6 @@
                 </td>
             </tr>
         {% endif %}
-        <tr class="boutton">
-            <td width="100%" colspan="2"><a href="{% url 'index' %}">retour liste des comptes</a></td>
-        </tr>
     </table>
 {% endblock bouton_haut %}
 
