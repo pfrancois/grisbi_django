@@ -68,10 +68,6 @@ class VirementForm(Baseform):
     notes = forms.CharField(widget=forms.Textarea, required=False)
     pointe = forms.BooleanField(required=False)
 
-    # rapp_origine = forms.CharField(widget=forms.HiddenInput, required=False)
-    # rapp_destination = forms.CharField(widget=forms.HiddenInput, required=False)
-    # piece_comptable_compte_origine = forms.CharField(required = False)
-    # piece_comptable_compte_destination = forms.CharField(required = False)
     def clean(self):
         super(VirementForm, self).clean()
         data = self.cleaned_data
@@ -125,7 +121,7 @@ class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
     compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
-    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')), required=False)
+    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     nombre = forms.DecimalField(localize=True, initial='0')
     cours = gsb_field.CurField(initial='1')
     frais = forms.DecimalField(initial='0', required=False)
