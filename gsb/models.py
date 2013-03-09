@@ -1266,7 +1266,10 @@ class Virement(object):
         self.dest.pointe = pointe
 
     def getpointe(self):
-        return self.origine.pointe
+        if self.origine.pointe or self.dest.pointe:
+            return True
+        else:
+            return False
 
     pointe = property(getpointe, setpointe)
 
