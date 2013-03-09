@@ -152,7 +152,7 @@ class Cpt_detail_view(Mytemplateview):
             self.type = "all"
         if self.rapp:
             self.type = "rapp"
-
+        #-----------pour les comptes especes
         if compte.type not in ('t',) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
@@ -210,6 +210,7 @@ class Cpt_detail_view(Mytemplateview):
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
             
         else:
+            #---------pour le compte titre
             self.espece = False
             self.template_name = 'gsb/cpt_placement.djhtm'
             # recupere la liste des titres qui sont utilise dans ce compte
@@ -231,8 +232,7 @@ class Cpt_detail_view(Mytemplateview):
                          'pmv': total - invest,
                          'total': total,
                          'id': t.id,
-                         't': t,
-                         'rapp': t.encours(rapp=True, compte=compte_titre)
+                         't': t
                         })
             context = self.get_context_data(compte_titre, titres)
 
@@ -273,7 +273,6 @@ class Cpt_detail_view(Mytemplateview):
             solde_p_neg=0
 
         if self.espece:
-
             context = {'compte': c,
                        'list_ope': kwargs[1],
                        'nbrapp': kwargs[2],
@@ -289,16 +288,12 @@ class Cpt_detail_view(Mytemplateview):
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
             }
         else:
-            solde_r=c.solde(rapp=True)
             context = {
                 'compte': c,
                 'titre': c.nom,
                 'solde': c.solde(),
                 'titres': kwargs[1],
-                'especes': solde_espece,
-                'especes_rapp': solde_r_esp,
-                'solde_rapp': solde_r,
-                'solde_titre_rapp': solde_r-solde_r_esp,
+                'especes': solde_espece
             }
         
         return context
@@ -757,7 +752,7 @@ def ope_titre_vente(request, cpt_id):
     )
 
 @login_required
-def reinvestissement(request, cpt_id):
+def dividende(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
@@ -775,41 +770,7 @@ def reinvestissement(request, cpt_id):
     if compte.titre.all().distinct().count() == 0:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas réinvestir')
         return http.HttpResponseRedirect(compte.get_absolute_url())
-
-    if request.method == 'POST':
-        form = gsb_forms.Ope_titre_add_venteForm(request.POST)
-        
-        if form.is_valid():
-            compte = form.cleaned_data['compte_titre']
-
-            compte.achat(titre=form.cleaned_data['titre'],
-                         nombre=form.cleaned_data['nombre'],
-                         prix=form.cleaned_data['cours'],
-                         date=form.cleaned_data['date'])
-            messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
-                                                                          form.cleaned_data['titre'],
-                                                                          form.cleaned_data['cours'],
-                                                                          form.cleaned_data['date']))
-            Ope.objects.create(compte=compte,
-                               date=form.cleaned_data['date'],
-                               montant=form.cleaned_data['nombre']*form.cleaned_data['cours'],
-                               tiers=form.cleaned_data['titre'].tiers,
-                               cat=Cat.objects.get_or_create(nom="Revenus de plus-values"))
-            return http.HttpResponseRedirect(compte.get_absolute_url())
-    else:
-        if titre_id:
-            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte, 'titre': titre}, cpt=compte)
-        else:
-            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte}, cpt=compte)
-        del form.fields['compte_espece']
-    titre = u' nouvelle vente sur %s' % compte.nom
-    return render(request, 'gsb/ope_titre_create.djhtm',
-                  {'titre_long': titre,
-                   'titre': u'modification',
-                   'form': form,
-                   'cpt': compte,
-                   'sens': 'vente'}
-    )
+    #a finir avec un form specifique
     
     
 @login_required
