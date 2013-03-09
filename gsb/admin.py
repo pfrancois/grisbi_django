@@ -341,11 +341,11 @@ class Ope_admin(Modeladmin_perso):
     'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
     ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'rapp', 'pointe')
+    list_display = ('id', 'pointe','compte', 'date', 'montant', 'tiers', 'moyen', 'cat','num_cheque', 'rapp')
     list_filter = (
     'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('pointe', 'montant')
+    list_editable = ('montant','pointe')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     save_on_top = True
     save_as = True
