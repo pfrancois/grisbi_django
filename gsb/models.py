@@ -259,9 +259,10 @@ class Cours(models.Model):
         get_latest_by = 'date'
 
     def __unicode__(self):
-        return u"le %(date)s, 1 %(titre)s : %(valeur)s" % {'titre': self.titre.nom,
-                                                           'date': self.date,
-                                                           'valeur': self.valeur}
+        return u"le %(date)s, 1 %(titre)s : %(valeur)s %(monnaie)s" % {'titre': self.titre.nom,
+                                                           'date': self.date.strftime('%d/%m/%Y'),
+                                                           'valeur': self.valeur,
+                                                           'monnaie':settings.DEVISE_GENERALE}
 
 
 class Banque(models.Model):
@@ -309,7 +310,7 @@ class Cat(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return "%s(%s)" % (self.nom, self.type)
+        return u"%s(%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -439,7 +440,7 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
 
-    def solde(self, datel=None, rapp=False, espece=False):
+    def solde(self, datel=None, rapp=False, espece=False,pointe=False):
         """renvoie le solde du compte
             @param datel : date date limite de calcul du solde
             @param rapp : boolean faut il prendre uniquement les opération rapproches
@@ -448,6 +449,8 @@ class Compte(models.Model):
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
             query = query.filter(rapp__id__isnull=False)
+        if pointe:
+            query = query.filter(pointe=True)
         if datel is not None:
             query = query.filter(date__lte=datel)
         req = query.aggregate(total=models.Sum('montant'))['total']
@@ -492,12 +495,7 @@ class Compte(models.Model):
     def solde_pointe(self, espece=False):
         """renvoie le solde du compte pour les operations pointees
         """
-        query = Ope.non_meres().filter(compte__id__exact=self.id).filter(pointe=True)
-        req = query.aggregate(solde=models.Sum('montant'))
-        if req['solde'] is None:
-            solde = decimal.Decimal(0) + decimal.Decimal(self.solde_init)
-        else:
-            solde = decimal.Decimal(req['solde']) + decimal.Decimal(self.solde_init)
+        solde=self.solde(espece=espece, pointe=True)
         return solde
 
     solde_rappro.short_description = u"solde rapproché"
@@ -831,8 +829,8 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s EUR le %s cpt:%s" % (
-            self.id, sens, self.nombre, self.titre, self.cours, self.date, self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (
+            self.id, sens, self.nombre, self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
 
@@ -857,7 +855,7 @@ class Moyen(models.Model):
         ordering = ['nom']
 
     def __unicode__(self):
-        return "%s (%s)" % (self.nom, self.type)
+        return u"%s (%s)" % (self.nom, self.type)
 
     @transaction.commit_on_success
     def fusionne(self, new):
@@ -971,8 +969,12 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         if self.compte_virement:
-            return "({0.id}) {0.compte}=>{0.compte_virement} de {0.montant} (ech:{0.date})".format(self)
-        else:
+            return u"(%s) %s=>%s de %s (ech:%s)"%(self.id,
+                                                    self.compte,
+                                                    self.compte_virement,
+                                                    self.montant,
+                                                    self.date.strftime('%d/%m/%Y'))
+    else:
             return u"({0.id}) {0.compte} à {0.tiers} de {0.montant} (ech:{0.date})".format(self)
 
     def calcul_next(self):
@@ -1113,7 +1115,7 @@ class Ope(models.Model):
     def __unicode__(self):
         return u"(%s) le %s : %s %s a %s cpt: %s" % (
             self.id,
-            self.date,
+            self.date.strftime('%d/%m/%Y'),
             self.montant,
             settings.DEVISE_GENERALE,
             self.tiers,
@@ -1288,7 +1290,7 @@ class Virement(object):
 
     def save(self):
         if self._init:
-            tier = Tiers.objects.get_or_create(nom=self.__unicode__, defaults={'nom': self.__unicode__})[0]
+            tier = Tiers.objects.get_or_create(nom=self.__unicode__(), defaults={'nom': self.__unicode__()})[0]
             self.origine.tiers = tier
             self.dest.tiers = tier
             self.origine.cat = Cat.objects.get_or_create(nom="Virement", defaults={'nom': u'Virement'})[0]

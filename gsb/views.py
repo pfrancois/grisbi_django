@@ -323,7 +323,7 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
-                    return http.HttpResponseRedirect(ope.compte.get_absolute_url())
+                    return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
                 else:
                     if ope.rapp:
                         compte = ope.compte
@@ -365,7 +365,7 @@ def ope_detail(request, pk):
                     else:
                         messages.success(request, u"opération modifiée")
                         ope = form.save()
-                return http.HttpResponseRedirect(ope.compte.get_absolute_url())
+                return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
         else:
             form = gsb_forms.OperationForm(instance=ope)
         return render(request, 'gsb/ope.djhtm',
@@ -398,7 +398,7 @@ def ope_new(request, cpt_id=None):
 
             messages.success(request, u"Opération '%s' crée" % ope)
             # retour vers
-            return http.HttpResponseRedirect(ope.compte.get_absolute_url())
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
         else:
             # TODO message
             return render(request, 'gsb/ope.djhtm',
@@ -440,8 +440,8 @@ def vir_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (
-            ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date))
-            return http.HttpResponseRedirect(ope.compte.get_absolute_url())
+            ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date.strftime('%d/%m/%Y')))
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/vir.djhtm',
                           {'titre_long': u'création virement interne ',
@@ -709,7 +709,6 @@ def ope_titre_vente(request, cpt_id):
     if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
-
     try:
         titre_id = request.session['titre']
         titre = Titre.objects.get(id=titre_id)
@@ -721,7 +720,7 @@ def ope_titre_vente(request, cpt_id):
         titre_id = None
         titre = None
 
-    if compte.titre.all().distinct().count() < 1:
+    if compte.titre.all().distinct().count() == 0:
         messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas vendre')
         return http.HttpResponseRedirect(compte.get_absolute_url())
 
@@ -757,55 +756,62 @@ def ope_titre_vente(request, cpt_id):
                    'sens': 'vente'}
     )
 
-
 @login_required
-def view_maj_cpt_titre(request, cpt_id):
-    """mise a jour global d'un portefeuille"""
-    cpt = Compte.objects.get(id=cpt_id)
-    if cpt.type != 't':
+def reinvestissement(request, cpt_id):
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
+    try:
+        titre_id = request.session['titre']
+        titre = Titre.objects.get(id=titre_id)
+    except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request, u"attention le titre demandé intialement n'existe pas")
+        titre_id = None
+        titre = None
+    except AttributeError:  # on est dans le cas où l'on viens d'une page sans titre defini
+        titre_id = None
+        titre = None
+    if compte.titre.all().distinct().count() == 0:
+        messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas réinvestir')
+        return http.HttpResponseRedirect(compte.get_absolute_url())
 
-    liste_titre_original = cpt.titre.all().distinct()
-    liste_titre = []
-    if liste_titre_original.count() < 1:
-        messages.error(request, u'attention, ce compte ne possède aucun titre. donc vous ne pouvez mettre a jour')
-        return http.HttpResponseRedirect(cpt.get_absolute_url())
-    for l in liste_titre_original:
-        liste_titre.append(l)
     if request.method == 'POST':
-        form = gsb_forms.Majtitre(data=request.POST, titres=liste_titre)
+        form = gsb_forms.Ope_titre_add_venteForm(request.POST)
+        
         if form.is_valid():
-            for titre_en_cours in liste_titre:
-                if form.cleaned_data[titre_en_cours.isin] is None:
-                    continue
-                tab = form.cleaned_data[titre_en_cours.isin].partition('@')
-                nb = decimal.Decimal(tab[0])
-                cours = decimal.Decimal(tab[2])
-                if nb != '0' and nb:
-                    if form.cleaned_data['sociaux']:
-                        frais = nb * cours * decimal.Decimal(str(settings.TAUX_VERSEMENT))
-                        cpt.achat(titre_en_cours, nb, cours, date=form.cleaned_data['date'], frais=frais,
-                                  cat_frais=Cat.objects.get(id=settings.ID_CAT_COTISATION),)
-                    else:
-                        cpt.achat(titre_en_cours, nb, cours, date=form.cleaned_data['date'])
-                else:
-                    if not Cours.objects.filter(date=form.cleaned_data['date'], titre=titre_en_cours).exists() and \
-                       cours:
-                        Cours.objects.create(date=form.cleaned_data['date'], titre=titre_en_cours, valeur=cours)
+            compte = form.cleaned_data['compte_titre']
 
-            return http.HttpResponseRedirect(cpt.get_absolute_url())
+            compte.achat(titre=form.cleaned_data['titre'],
+                         nombre=form.cleaned_data['nombre'],
+                         prix=form.cleaned_data['cours'],
+                         date=form.cleaned_data['date'])
+            messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                                                                          form.cleaned_data['titre'],
+                                                                          form.cleaned_data['cours'],
+                                                                          form.cleaned_data['date']))
+            Ope.objects.create(compte=compte,
+                               date=form.cleaned_data['date'],
+                               montant=form.cleaned_data['nombre']*form.cleaned_data['cours'],
+                               tiers=form.cleaned_data['titre'].tiers,
+                               cat=Cat.objects.get_or_create(nom="Revenus de plus-values"))
+            return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
-        form = gsb_forms.Majtitre(titres=liste_titre)
-    return render(request, 'gsb/maj_cpt_titre.djhtm',
-                  {'titre_long': u'operations sur le %s' % cpt.nom,
-                   'titre': u'ope',
+        if titre_id:
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte, 'titre': titre}, cpt=compte)
+        else:
+            form = gsb_forms.Ope_titre_add_venteForm(initial={'compte_titre': compte}, cpt=compte)
+        del form.fields['compte_espece']
+    titre = u' nouvelle vente sur %s' % compte.nom
+    return render(request, 'gsb/ope_titre_create.djhtm',
+                  {'titre_long': titre,
+                   'titre': u'modification',
                    'form': form,
-                   'titres': liste_titre,
-                   'compte': cpt}
+                   'cpt': compte,
+                   'sens': 'vente'}
     )
-
-
+    
+    
 @login_required
 def search_opes(request):
     if request.method == 'POST':
