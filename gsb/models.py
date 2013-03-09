@@ -974,7 +974,7 @@ class Echeance(models.Model):
                                                     self.compte_virement,
                                                     self.montant,
                                                     self.date.strftime('%d/%m/%Y'))
-    else:
+        else:
             return u"({0.id}) {0.compte} à {0.tiers} de {0.montant} (ech:{0.date})".format(self)
 
     def calcul_next(self):
