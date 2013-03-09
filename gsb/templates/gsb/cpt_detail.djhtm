@@ -53,7 +53,7 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="cptLabel">Somme des opés pointées :</td>
-                    <td colspan="2" class="cptSolde">{{ solde_p_neg|add:solde_p_pos|cur }}</td>
+                    <td colspan="2" class="cptSolde">{{ solde_p_neg|somme:solde_p_pos|cur }}</td>
                 </tr>
                 <tr>
                     <td colspan="3" class="cptLabel">Solde p&amp;r:</td>
