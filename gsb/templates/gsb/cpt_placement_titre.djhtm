@@ -63,13 +63,4 @@
         <td class="opCredit">encours rapproch&eacute; ou point&eacute;:{{ solde_rappro|cur }}</td>
     </tr>{% endblock footer %}
 {% block boutons_bas %}
-    <table width="100%" id="boutons_bas" class="table">
-        <tr class="boutton">
-            <td width="50%"><a href="{% url 'gsb_cpt_titre_detail_all' compte.id titre_id %}">voir toutes les op&eacute;rations</a>
-            </td>
-            <td width="50%"><a href="{% url 'gsb_cpt_titre_detail_rapp' compte.id titre_id %}">voir uniquement les op&eacute;rations
-                rapproch&eacute;es</a></td>
-        </tr>
-    </table>
-    <p></p>
 {% endblock boutons_bas %}
