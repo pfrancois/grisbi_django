@@ -1,0 +1,3 @@
+faire que la colonne encours pointe et rapproche marche ou al supprimer.
+mettre un truc dans le setting qui permette le all par dafaut
+tester dividende
