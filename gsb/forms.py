@@ -133,6 +133,26 @@ class Ope_titre_addForm(Baseform):
             del self.cleaned_data['nombre']
         return self.cleaned_data
 
+class Ope_titre_dividendeForm(Baseform):
+    date = gsb_field.DateFieldgsb(localize=True)
+    titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
+    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
+    compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
+    montant = forms.DecimalField(localize=True, initial='0')
+
+    def clean(self):
+        super(Ope_titre_addForm, self).clean()
+        if not self.cleaned_data['montant']:
+            self._errors['montant'] = self.error_class([u'le montant ne peut être nul', ])
+            del self.cleaned_data['montant']
+        return self.cleaned_data
+    def __init__(self, cpt=None, *args, **kwargs):
+        super(Ope_titre_dividendeForm, self).__init__(*args, **kwargs)
+        self.fields['titre'].empty_label = None
+        self.fields['titre'].required = True
+        if cpt and cpt.type == 't':
+            self.fields['titre'].queryset = cpt.liste_titre()
+
 
 class Ope_titre_add_achatForm(Ope_titre_addForm):
     nouveau_titre = forms.CharField(required=False)
@@ -175,8 +195,6 @@ class Ope_titreForm(Basemodelform):
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
 
-    # nombre = forms.DecimalField(localize=True, initial='0')
-    # cours = gsb_field.CurField(initial='1')
     date = gsb_field.DateFieldgsb()
 
     def clean(self):

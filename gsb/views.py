@@ -6,7 +6,7 @@ from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp
+from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
 from .import forms as gsb_forms
 from django.db import models
 import decimal
@@ -697,6 +697,68 @@ def ope_titre_achat(request, cpt_id):
                    'sens': 'achat'}
     )
 
+@login_required
+def dividende(request, cpt_id):
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
+        messages.error(request, "ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
+    try:
+        titre_id = request.session['titre']
+        titre = Titre.objects.get(id=titre_id)
+    except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
+        messages.error(request, u"attention le titre demandé intialement n'existe pas")
+        titre_id = None
+        titre = None
+    except AttributeError:  # on est dans le cas où l'on viens d'une page sans titre defini
+        titre_id = None
+        titre = None
+    if compte.titre.all().distinct().count() == 0:
+        messages.error(request, 'attention, ce compte ne possède aucun titre. donc pas de dividende possible')
+        return http.HttpResponseRedirect(compte.get_absolute_url())
+
+    if request.method == 'POST':
+        form = gsb_forms.Ope_titre_dividendeForm(data=request.POST, cpt=compte)
+        if form.is_valid():
+            compte = form.cleaned_data['compte_titre']
+            if form.cleaned_data['compte_espece']:
+                virement = form.cleaned_data['compte_espece']
+            else:
+                virement = None
+            tiers=form.cleaned_data['titre'].tiers
+            Ope.objects.create(date=form.cleaned_data['date'],
+                               compte=form.cleaned_data['compte'],
+                               montant=form.cleaned_data['montant'],
+                               tiers=tiers,
+                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC,defaults={'nom':settings.REV_PLAC,'type':'r'}))
+            if form.cleaned_data['compte_espece']:
+                #creation du virement
+                vir = Virement()
+                vir.create(compte_origine=form.cleaned_data['compte_titre'],
+                           compte_dest=form.cleaned_data['compte_espece'],
+                           montant=form.cleaned_data['montant'],
+                           date=form.cleaned_data['date'])
+
+            messages.info(request, u"nouveau dividende de %s%s pour %s le %s" % (form.cleaned_data['montant'],
+                                                                                 settings.DEVISE_GENERALE,
+                                                                          form.cleaned_data['titre'],
+                                                                          form.cleaned_data['date']))
+            #TODO gerer le virement
+            return http.HttpResponseRedirect(compte.get_absolute_url())
+    else:
+        if titre_id:
+            form = gsb_forms.Ope_titre_dividendeForm(initial={'compte_titre': compte, 'titre': titre}, cpt=compte)
+        else:
+            form = gsb_forms.Ope_titre_dividendeForm(initial={'compte_titre': compte}, cpt=compte)
+    titre = u' nouveau dividende sur %s' % compte.nom
+    return render(request, 'gsb/ope_titre_create.djhtm',
+                  {'titre_long': titre,
+                   'titre': u'modification',
+                   'form': form,
+                   'cpt': compte,
+                   'sens': 'vente'}
+    )
+    
 
 @login_required
 def ope_titre_vente(request, cpt_id):
@@ -732,8 +794,9 @@ def ope_titre_vente(request, cpt_id):
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
                          virement_vers=virement)
-            messages.info(request, u"nouvel vente de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s" % (form.cleaned_data['nombre'],
                                                                           form.cleaned_data['titre'],
+                                                                          settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
@@ -750,28 +813,7 @@ def ope_titre_vente(request, cpt_id):
                    'cpt': compte,
                    'sens': 'vente'}
     )
-
-@login_required
-def dividende(request, cpt_id):
-    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
-    if compte.type != 't':
-        messages.error(request, "ce n'est pas un compte titre")
-        return http.HttpResponseRedirect(reverse("index"))
-    try:
-        titre_id = request.session['titre']
-        titre = Titre.objects.get(id=titre_id)
-    except Titre.DoesNotExist:  # on est dans le cas où l'on viens d'une page avec un titre qui n'existe pas
-        messages.error(request, u"attention le titre demandé intialement n'existe pas")
-        titre_id = None
-        titre = None
-    except AttributeError:  # on est dans le cas où l'on viens d'une page sans titre defini
-        titre_id = None
-        titre = None
-    if compte.titre.all().distinct().count() == 0:
-        messages.error(request, 'attention, ce compte ne possède aucun titre. donc vous ne pouvez pas réinvestir')
-        return http.HttpResponseRedirect(compte.get_absolute_url())
-    #a finir avec un form specifique
-    
+   
     
 @login_required
 def search_opes(request):

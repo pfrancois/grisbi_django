@@ -553,8 +553,10 @@ class Compte(models.Model):
             # virement
             if virement_de:
                 vir = Virement()
-                vir.create(virement_de, self,
-                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais, date)
+                vir.create(compte_origine = virement_de,
+                           compte_dest = self,
+                           montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais,
+                           date = date)
             return ope_titre
         else:
             raise TypeError("pas un titre")
@@ -599,10 +601,10 @@ class Compte(models.Model):
                 )
             if virement_vers:
                 vir = Virement()
-                vir.create(self,
-                           virement_vers,
-                           decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
-                           date)
+                vir.create(compte_origine = self,
+                           compte_dest = virement_vers,
+                           montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
+                           date = date)
             return ope_titre
         else:
             raise TypeError("pas un titre")
