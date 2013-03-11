@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import csv
 import datetime
 import decimal
 
@@ -8,7 +7,6 @@ from django.conf import settings  # @Reimport
 
 from django.contrib import messages
 
-from gsb.utils import UTF8Recoder
 from .models import (Tiers, Cat, Ib,
                      Exercice, Moyen, Compte, Titre,
                        Ope_titre, Rapp, Ope)
@@ -16,31 +14,8 @@ from . import import_base
 from . import utils
 
 
-class Csv_unicode_reader(object):
-    """
-    A CSV reader which will iterate over lines in the CSV file "f",
-    which is encoded in the given encoding.
-    """
-
-    def __init__(self, fich, dialect=utils.Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
-        self.line_num = 1
-        fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.DictReader(fich, dialect=dialect, **kwds)
-
-    def next(self):
-        self.line_num += 1
-        self.row = self.reader.next()
-        return self
-
-    def __iter__(self):
-        return self
-
-
-class Csv_unicode_reader_ope_base(import_base.property_ope_base, Csv_unicode_reader):
-    @property
-    def ligne(self):
-        return self.line_num
-
+class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
+    pass
 
 
 class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
@@ -57,7 +32,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def cpt(self):
         cpt = utils.to_str(self.row['account name'])
         if cpt is None:
-            raise import_base.ImportException('probleme: il faut un compte a la ligne %s' % self.ligne)
+            raise import_base.ImportException('probleme: il faut un compte a la ligne %s' % self.line_num)
         else:
             return cpt
 
@@ -152,7 +127,7 @@ class Import_csv_ope(import_base.Import_base):
                         row.has_fille
                         row.ib
                         row.jumelle
-                        row.ligne
+                        row.line_num
                         row.mere
                         row.monnaie
                         row.moyen
@@ -169,7 +144,7 @@ class Import_csv_ope(import_base.Import_base):
                     else:
                         verif_format=True                        
                 ope = dict()
-                ope['ligne'] = row.ligne
+                ope['ligne'] = row.line_num
                 # verification pour les lignes
                 if row.monnaie != settings.DEVISE_GENERALE:
                     raise import_base.ImportException(u"attention ce ne sera pas possible d'importer car il y a plusieurs devises")
@@ -191,7 +166,7 @@ class Import_csv_ope(import_base.Import_base):
                             for cpt in Compte.objects.all():
                                 liste_compte = "%s%s," % (liste_compte, cpt.nom)
                             liste_compte = "%s%s" % (liste_compte, "'")
-                            raise import_base.ImportException("attention, le compte %s est demande a la ligne %s alors qu'il n'existe pas, les comptes sont %s" % (row.cpt, row.line_num, liste_compte))
+                            raise import_base.ImportException("attention, le compte %s est demande a la ligne %s alors qu'il n'existe pas, les comptes sont %s" % (row.cpt, ope['ligne'], liste_compte))
                 # cat
                 type_cat = 'd' if row.mt <= 0 else 'r'
                 if row.has_fille:
@@ -200,7 +175,7 @@ class Import_csv_ope(import_base.Import_base):
                     type_cat='v'
                     ope['cat_id'] = self.element('cat', "Virement", Cat, {'nom': "Virement", 'type': 'v'})
                     if row.jumelle is None: 
-                        raise import_base.ImportException("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
+                        raise import_base.ImportException("attention pas d'operation jumelle pour un virement a la ligne %s"%ope['ligne'])
                 else:
                     ope['cat_id'] = self.element('cat', row.cat, Cat, {'nom': row.cat, 'type': type_cat})
                 # tiers
@@ -245,7 +220,7 @@ class Import_csv_ope(import_base.Import_base):
                 if row.moyen is not None:
                     ope['moyen_id'] = self.element('moyen', row.moyen, Moyen, {'nom': row.moyen, 'type': type_cat})
                     if ope['moyen_id'] == self.listes['moyen']['Virement'] and row.jumelle is None: 
-                        raise import_base.ImportException("attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
+                        raise import_base.ImportException("attention pas d'operation jumelle pour un virement a la ligne %s"%ope['ligne'])
                 else:
                     if type_cat == 'd':
                         ope['moyen_id'] = settings.MD_DEBIT
@@ -255,7 +230,7 @@ class Import_csv_ope(import_base.Import_base):
                         else:
                             ope['moyen_id'] = self.listes['moyen']['Virement']
                             if row.jumelle is None:
-                                raise import_base.ImportException(u"attention pas d'operation jumelle pour un virement a la ligne %s"%row.ligne)
+                                raise import_base.ImportException(u"attention pas d'operation jumelle pour un virement a la ligne %s"%ope['ligne'])
                 ope['notes'] = row.notes
                 ope['num_cheque'] = row.num_cheque
                 ope['piece_comptable'] = row.piece_comptable
@@ -265,7 +240,7 @@ class Import_csv_ope(import_base.Import_base):
                     ope['rapp_id'] = self.element('rapp', row.rapp, Rapp, {'nom': row.rapp, 'date': utils.today()})
                 else:
                     ope['rapp_id'] = None
-                ope['ligne'] = row.ligne
+                ope['ligne'] = row.line_num
                 if row.ope_titre == False and row.ope_pmv == False:  # on elimine les ope_pmv et les ope_titre sont gere en dessous
                     ope_id = self.ajout('ope', Ope, ope)
                     self.listes['ope'][row.id] = ope_id
@@ -283,7 +258,7 @@ class Import_csv_ope(import_base.Import_base):
                                 if Cpt.exists():
                                         cpt[0].type='t'
                                 else:
-                                    raise import_base.ImportException(u'attention un compte a été change en cpt titre ligne %s'%row.ligne)
+                                    raise import_base.ImportException(u'attention un compte a été change en cpt titre ligne %s'%row.line_num)
 
                     # gestion des ope_titre
                     try:
@@ -309,13 +284,13 @@ class Import_csv_ope(import_base.Import_base):
                         nombre = decimal.Decimal(s[0])
                         cours = decimal.Decimal(s[2])
                     except KeyError:
-                        self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation, il doit etre de la forme nombre@montant' % (row.ligne, row.id))
+                        self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation, il doit etre de la forme nombre@montant' % (row.line_num, row.id))
                     except  decimal.InvalidOperation:
                         if s[0] == '':
-                            self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation' % (row.ligne, row.id))
+                            self.erreur.append('probleme import operation ligne %s # %s:pas bon format des notes pour importation' % (row.line_num, row.id))
                         if s[1] == '':
                             if not self.test:
-                                messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.ligne))
+                                messages.info(self.request, "le cours de l'ope_titre %s à ligne %s etait de 1" % (row.id, row.line_num))
                             cours = 1
                     try:
                         nb_titres[titre_id] = nb_titres[titre_id] + nombre
@@ -325,7 +300,7 @@ class Import_csv_ope(import_base.Import_base):
                         except Titre.DoesNotExist:
                             nb_titres[titre_id] = nombre
                     if nb_titres[titre_id] < 0:
-                        raise import_base.ImportException('attention il ne peut avoir un solde de titre negatif pour le titre %s a la ligne %s' % (row.tiers[7:], row.ligne))
+                        raise import_base.ImportException('attention il ne peut avoir un solde de titre negatif pour le titre %s a la ligne %s' % (row.tiers[7:], row.line_num))
                         
                     nouveau = {"titre_id":ope['titre_id'],
                              "compte_id":ope['compte_id'],
@@ -335,7 +310,7 @@ class Import_csv_ope(import_base.Import_base):
                              "rapp_id":ope['rapp_id'],  # on le met ici car comme les opes
                              'pointe':ope['pointe'],
                              "exercice_id":ope["exercice_id"],
-                             "ligne":row.ligne}
+                             "ligne":row.line_num}
                     self.ajout('ope_titre', Ope_titre, nouveau)
 
         if not self.test:
