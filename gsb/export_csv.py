@@ -123,7 +123,7 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen","jumelle")         
+        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen","jumelle")         
         for ope in query:
             # id compte date montant
             # print ope
@@ -154,7 +154,6 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             ligne["CurrencyCode"]="EUR"
             ligne["ExchangeRate"]="1"
             data.append(ligne)
-
         logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
