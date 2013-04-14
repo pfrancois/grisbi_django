@@ -88,10 +88,10 @@ class Index_view(Mytemplateview):
 
     def get(self, request, *args, **kwargs):
         if settings.AFFICHE_CLOT:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p')).select_related('ope')
-            self.pl = Compte.objects.exclude(type__in=('b', 'e', 'p')).select_related('ope', 'tiers')
+            self.bq = Compte.objects.exclude(type='t').select_related('ope')
+            self.pl = Compte.objects.filter(type='t').select_related('ope', 'tiers')
         else:
-            self.bq = Compte.objects.filter(type__in=('b', 'e', 'p'), ouvert=True).select_related('ope')
+            self.bq = Compte.objects.exclude(type='t').filter(ouvert=True).select_related('ope')
             self.pl = Compte.objects.filter(type='t', ouvert=True).select_related('ope', 'tiers')
             # calcul du solde des bq
         self.bqe = []
@@ -127,6 +127,7 @@ class Index_view(Mytemplateview):
             'total_pla': self.total_pla,
             'total': self.total_bq + self.total_pla,
             'nb_clos': self.nb_clos,
+            'clos_caches': not settings.AFFICHE_CLOT
         }
 
 
@@ -721,10 +722,6 @@ def dividende(request, cpt_id):
         form = gsb_forms.Ope_titre_dividendeForm(data=request.POST, cpt=compte)
         if form.is_valid():
             compte = form.cleaned_data['compte_titre']
-            if form.cleaned_data['compte_espece']:
-                virement = form.cleaned_data['compte_espece']
-            else:
-                virement = None
             tiers=form.cleaned_data['titre'].tiers
             Ope.objects.create(date=form.cleaned_data['date'],
                                compte=form.cleaned_data['compte'],
@@ -743,7 +740,6 @@ def dividende(request, cpt_id):
                                                                                  settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['titre'],
                                                                           form.cleaned_data['date']))
-            #TODO gerer le virement
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
