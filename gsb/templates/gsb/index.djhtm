@@ -47,7 +47,7 @@
     </table>
     {% if nb_clos > 0 %}
         <p>
-            PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos. </p>
+            PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos{% if clos_caches %} non affich&eacute;s{% endif %}. </p>
     {% endif %}
 
 {% endblock content %}
