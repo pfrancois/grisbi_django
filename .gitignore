@@ -46,3 +46,4 @@ test.py
 sqlite2mysql.py
 *.winmerge
 reset.bat
+*.sublim*
