@@ -7,15 +7,18 @@ import calendar
 import csv
 import codecs
 from django.utils import timezone
+import math
 try:
     from django.db.models import Max
     from django.core.exceptions import ObjectDoesNotExist
+    from django.utils.encoding import force_unicode
 except ImportError:
     pass
 from uuid import uuid4
 __all__=['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
          'strpdate', 'today','now','timestamp', 'addmonths', 'to_str', 'to_id', 'to_bool', 'to_decimal',
-         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv','Csv_unicode_reader','uuid','Excel_csv']
+         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv',
+         'Csv_unicode_reader','uuid','Excel_csv']
 class FormatException(Exception):
     pass
 
@@ -59,16 +62,19 @@ def validinsee(insee, cle):
 
 def datefr2datesql(chaine):
     """fonction qui transforme une date fr en date sql
-    si la date est invalide renvoie none
+    si la date est invalide renvoie None
     """
-    temps = time.strptime(str(chaine), "%d/%m/%Y")
-    return "{annee}-{mois}-{jour}".format(annee=temps[0], mois=temps[1], jour=temps[2])
+    try:
+        temps = time.strptime(str(chaine), "%d/%m/%Y")
+        return "{annee}-{mois}-{jour}".format(annee=temps[0], mois=temps[1], jour=temps[2])
+    except ValueError:
+        return None
 
 def is_number(s):
     """fonction qui verifie si ca a l'apparence d'un nombre"""
     try:
         n = float(s)  # for int, long and float
-        if n == "nan" or n == "inf" or n == "-inf" :
+        if math.isnan(n) or math.isinf(n) :
             return False
     except ValueError:
         try:
@@ -117,30 +123,34 @@ def addmonths(sourcedate, months, last=False, first=False):
     return datetime.date(year, month, day)
 
 
-
-
 """------------------------------------format d'entree---------------------------------"""
-def to_str(var, retour=None):
-    var=var.strip()
-    if var == "" or var == '0':
-        return retour
-    else:
-        return var
+def to_unicode(var):
+    if var is None:
+        return u''
+    var=force_unicode(var).strip()
+    return var
 
 def to_id(var):
-    var=var.strip()
+    if var is None:
+        return None
+    var=force_unicode(var).strip()
     try:
-        if var == "" or var is None or int(var) == 0 :
+        if var == ""  or int(var) == 0  or var=="False":
             return None
         else:
             return int(var)
     except ValueError:
-        raise FormatException('probleme: "%s" n\'est pas un nombre ' % var)
+        raise FormatException('probleme: "%s" n\'est pas un nombre entier' % var)
 
 def to_bool(var):
-    var=var.strip()
+    if var is None:
+        return False
+    if var == True or var == False :
+        return var
+
+    var=force_unicode(var).strip()
     try:
-        if var == "" or var is None or int(var) == 0 :
+        if var == ""  or var == 0 or var == "0" or bool(var)==False:
             return False
         else:
             return True
@@ -148,14 +158,17 @@ def to_bool(var):
         return False
     
 def to_decimal(var):
-    var=var.strip()
-    return fr2decimal(var)#si il y a une exception il est renvoyé 0
-    
-def to_date(var, format_date):
-    var=var.strip()
+    if var is None:
+        return 0
+    var=force_unicode(var).strip()
     try:
-        date_s = var
-        return strpdate(date_s, format_date)
+        return fr2decimal(var)#si il y a une exception il est renvoyé 0
+    except decimal.InvalidOperation:
+        return 0
+    
+def to_date(var, format_date="%d/%m/%Y"):
+    try:
+        return strpdate(var, format_date)
     except ValueError:
         raise FormatException('"%s" n\'en pas est une date' % var)
 
@@ -192,7 +205,7 @@ def booltostr(s, defaut='0'):
     else:
         if isinstance(s, bool):
             # c'est ici le principe
-            return str(int(s))
+            return force_unicode(int(s))
         try:
             i = int("%s" % s)
             if not i:
@@ -200,7 +213,7 @@ def booltostr(s, defaut='0'):
             else:
                 return '1'
         except ValueError:
-            return str(int(bool(s)))
+            return force_unicode(int(bool(s)))
 
 
 def floattostr(s):
@@ -213,10 +226,10 @@ def typetostr(liste, s, defaut='0'):
     @param liste: liste a utiliser
     @param s: string comprenand le truc a chercher dans la liste
     @param defaut: reponse par defaut"""
-    liste = [str(b[0]) for b in liste]
+    liste = [force_unicode(b[0]) for b in liste]
     try:
-        s = str(liste.index(s) + 1)
-    except ValueError:  # on en un ca par defaut
+        s = force_unicode(liste.index(s) + 1)
+    except ValueError:  # on a un cas à defaut
         s = defaut
     return s
 
