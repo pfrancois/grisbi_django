@@ -24,19 +24,19 @@ class Test_models(TestCase):
         self.assertEquals(Tiers.objects.get(nom="tiers1").__unicode__(), u"tiers1")
         self.assertEquals(Titre.objects.get(nom="t1").__unicode__(), u"t1 (1)")
         self.assertEquals(Banque.objects.get(nom="banque1").__unicode__(), u"banque1")
-        self.assertEquals(Cours.objects.get(id=1).__unicode__(), u"le 2011-12-18, 1 t1 : 1")
+        self.assertEquals(Cours.objects.get(id=1).__unicode__(), u"le 18/12/2011, 1 t1 : 1 EUR")
         self.assertEquals(Cat.objects.get(nom="cat1").__unicode__(), u"cat1(r)")
         self.assertEquals(Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
         self.assertEquals(Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
         self.assertEquals(Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
         self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(),
-                          u"(1) achat de 1 t1 (1) à 1 EUR le 2011-12-18 cpt:cpt_titre1")
+                          u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
-        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:2011-10-30)")
-        self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:2011-10-30)")
+        self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:30/10/2011)")
+        self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:30/10/2011)")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(),
-                          u"(1) le 2011-12-18 : -1 EUR a titre_ t1 cpt: cpt_titre1")
+                          u"(1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1")
 
     def test_fusionne_error(self):
         # fusion avec un autre type

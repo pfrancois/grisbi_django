@@ -977,7 +977,11 @@ class Echeance(models.Model):
                                                     self.montant,
                                                     self.date.strftime('%d/%m/%Y'))
         else:
-            return u"({0.id}) {0.compte} à {0.tiers} de {0.montant} (ech:{0.date})".format(self)
+            return u"(%s) %s à %s de %s (ech:%s)"%(self.id,
+                                                        self.compte,
+                                                        self.tiers,
+                                                        self.montant,
+                                                        self.date.strftime('%d/%m/%Y'))
 
     def calcul_next(self):
         """
@@ -1208,6 +1212,19 @@ class Ope(models.Model):
                     moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
                                                                                         "id": settings.MD_DEBIT, "type":"d"})[0]
                     self.moyen = moyen
+        if self.is_mere:
+            self.cat = Cat.objects.get_or_create(
+                nom=u"Opération Ventilée",
+                defaults={'type': "d", 'nom': u"Opération Ventilée"}
+            )[0]
+            if self.montant != self.tot_fille:
+                if self.rapp or self.pointe:
+
+                    raise IntegrityError(
+                        u"attention opération ( %s ) est pointée ou rapproché et on change le montant global" % self.id)
+                else:
+                    self.montant = self.tot_fille
+
         super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):
@@ -1380,4 +1397,3 @@ def verif_ope_rapp(sender, **kwargs):
             raise IntegrityError(u"opération mere rapprochée")
     if instance.filles_set.count() > 0:
         raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
-
