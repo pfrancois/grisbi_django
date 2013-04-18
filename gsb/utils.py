@@ -16,7 +16,7 @@ except ImportError:
     pass
 from uuid import uuid4
 __all__=['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
-         'strpdate', 'today','now','timestamp', 'addmonths', 'to_str', 'to_id', 'to_bool', 'to_decimal',
+         'strpdate', 'today','now','timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
          'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv',
          'Csv_unicode_reader','uuid','Excel_csv']
 class FormatException(Exception):
@@ -124,11 +124,19 @@ def addmonths(sourcedate, months, last=False, first=False):
 
 
 """------------------------------------format d'entree---------------------------------"""
-def to_unicode(var):
+def to_unicode(var,defaut=''):
     if var is None:
-        return u''
+        return defaut
     var=force_unicode(var).strip()
-    return var
+    if var == "":
+        return defaut
+    try:
+        if float(var) == 0:
+            return defaut
+        else:
+            return var
+    except ValueError:
+        return var
 
 def to_id(var):
     if var is None:

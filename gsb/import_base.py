@@ -142,6 +142,9 @@ class Import_base(views.Myformview):
     url = "outils_index"
     test = False
     creation_de_compte = False
+    #affiche les resultats plutot qu'une importation
+    resultat=False
+    debug=False
 
     def form_valid(self, form):
         # logger = logging.getLogger('gsb.import')
@@ -162,12 +165,17 @@ class Import_base(views.Myformview):
         destination.close()
         # renomage ok
         # logger.debug(u"enregistrement fichier ok")
-        if  self.import_file(nomfich) == False:  # probleme importation
+        result=self.import_file(nomfich)
+        if  result == False:  # probleme importation
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
-            # return self.render_to_response(self.get_context_data(form=form))
-            return HttpResponseRedirect(self.get_success_url())
+            if self.debug:
+                os.remove(nomfich)
+            if self.resultat:
+                return self.render_to_response(self.get_context_data(form=form,resultat=self.resultat))
+            else:
+                return HttpResponseRedirect(self.get_success_url())
             
 
     def import_file(self, nomfich):

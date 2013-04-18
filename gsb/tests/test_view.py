@@ -15,7 +15,7 @@ import datetime
 import logging
 import gsb.import_csv as import_csv
 from ..models import (Tiers, Cat, Ope)
-
+from gsb.import_base import ImportException 
 
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
@@ -53,31 +53,6 @@ class Test_import(Test_view_base):
         self.assertEqual(Tiers.objects.count(), 11)
         self.assertEqual(Ope.objects.count(), 17)
         self.assertEqual(Cat.objects.count(), 9)
-    def test_to_something(self):
-        import gsb.import_base as imp
-        obj=imp.property_ope_base()
-        self.assertEquals(obj.to_id("3"),3)
-        self.assertEquals(obj.to_id(""),None)
-        self.assertEquals(obj.to_id(None),None)
-        self.assertEquals(obj.to_id("0"),None)
-        self.assertEquals(obj.to_id(0),None)
-        self.assertRaises(imp.Import_exception, obj.to_id,"toto")
-        self.assertEquals(obj.to_str(""),None)
-        self.assertEquals(obj.to_str("0"),None)
-        self.assertEquals(obj.to_str("toto"),"toto")
-        self.assertEquals(obj.to_str("",'toto'),"toto")
-        self.assertEquals(obj.to_bool(""),False)
-        self.assertEquals(obj.to_bool("0"),False)
-        self.assertEquals(obj.to_bool(None),False)
-        self.assertEquals(obj.to_bool("34"),True)
-        self.assertEquals(obj.to_bool("toto"),False)
-        self.assertEquals(obj.to_decimal("13,54"),decimal.Decimal("13.54"))
-        self.assertEquals(obj.to_decimal(""),decimal.Decimal("0"))
-        self.assertEquals(obj.to_decimal("toto"),decimal.Decimal("0"))
-        self.assertEquals(obj.to_date("31/12/2012","%d/%m/%Y"), datetime.date(2012,12,31))
-        self.assertEquals(obj.to_date("31/12/12","%d/%m/%y"), datetime.date(2012,12,31))
-        self.assertRaises(imp.Import_exception, obj.to_date,"31/13/2012","%d/%m/%Y")
-        
 
 class Test_urls(Test_view_base):
     def test_404(self):
@@ -107,7 +82,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/options/ech').status_code, 200)
 
     def test_normaux3(self):
-        self.assertEqual(self.client.get('/maj_cours/1').status_code, 200)
+        self.assertEqual(self.client.get('/majcours/1/').status_code, 200)
         self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1,))).status_code, 200)
         self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
         self.assertEqual(self.client.get('/ope/new').status_code, 200)
@@ -128,39 +103,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/titre/1/rapp').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
-        self.assertEqual(self.client.get('/compte/4/maj').status_code, 200)
         
-
-
-class Test_export(Test_view_base):
-    def test_csv1(self):
-        logger = logging.getLogger('gsb')
-        logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
-        rep = self.client.post(reverse('export_csv'),
-                               data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
-        self.assertEqual(rep.content,"""id;account name;date;montant;m;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has_fille;num op vent m;ope_titre;ope_pmv;mois\r
-4;cpte1;11/8/2011;-100,0000000;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;2011_08\r
-5;cpte1;11/8/2011;10,0000000;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;2011_08\r
-7;cpte1;11/8/2011;10,0000000;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;2011_08\r
-6;cpte1;21/8/2011;10,0000000;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;2011_08\r
-3;cpt_titre2;29/10/2011;-100,0000000;cpt_titre2201101;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;2011_10\r
-8;cpte1;30/10/2011;-100,0000000;;0;moyen_vir4;Virement;cpte1=>cptb3;;;;9;0;;;;2011_10\r
-9;cptb3;30/10/2011;100,0000000;;0;moyen_vir4;Virement;cpte1=>cptb3;;;;8;0;;;;2011_10\r
-2;cpt_titre2;30/11/2011;-1500,0000000;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;2011_11\r
-1;cpt_titre1;18/12/2011;-1,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;2011_12\r
-10;cpt_titre1;24/9/2012;-5,0000000;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;2012_09\r
-11;cpte1;24/9/2012;100,0000000;;0;moyen_rec1;Op\xe9ration Ventil\xe9e;tiers2;;;;;1;;;;2012_09\r
-12;cpte1;24/9/2012;99,0000000;;0;moyen_rec1;cat1;tiers2;;;;;0;11;;;2012_09\r
-13;cpte1;24/9/2012;1,0000000;;0;moyen_rec1;cat2;tiers2;;;;;0;11;;;2012_09\r
-""")
-
-        # erreur
-    def test_csv_erreur(self):
-        rep = self.client.post(reverse('export_csv'),
-                               data={"compte": 2, "date_min": "2011-01-01", "date_max": "2011-02-01"})
-        self.assertFormError(rep, 'form', '', u"attention pas d'opérations pour la selection demandée")
-
-
 class Test_views_general(Test_view_base):
     def test_view_index(self):
         resp = self.client.get('/')
@@ -172,9 +115,9 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['total'], 130)
         self.assertEqual(resp.context['nb_clos'], 1)
 
-        # @mock.patch('gsb.utils.today')
-    def test_view_cpt_detail(self):
-        # today_mock.return_value=datetime.date(2012, 10, 14)
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_detail(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_detail', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
@@ -183,9 +126,10 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -70)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-08-12'))
         self.assertEqual(resp.context['solde_r'], -90)
-        self.assertEqual(resp.context['solde_p'], 10)
+        self.assertEqual(resp.context['solde_p_pos'], 10)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
-        self.assertQueryset(resp.context['list_ope'], [6, 7, 8, 12, 13])
+        self.assertQueryset(resp.context['list_ope'], [ 8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
         resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
@@ -196,7 +140,8 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -70)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-08-12'))
         self.assertEqual(resp.context['solde_r'], -90)
-        self.assertEqual(resp.context['solde_p'], 10)
+        self.assertEqual(resp.context['solde_p_pos'], 10)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
         self.assertQueryset(resp.context['list_ope'], [4, 5])
 
@@ -209,11 +154,14 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -70)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-08-12'))
         self.assertEqual(resp.context['solde_r'], -90)
-        self.assertEqual(resp.context['solde_p'], 10)
+        self.assertEqual(resp.context['solde_p_pos'], 10)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
         self.assertQueryset(resp.context['list_ope'], [4, 5, 6, 7, 8, 12, 13])
 
-    def test_view_cpt_espece(self):
+    @mock.patch('gsb.utils.today')
+    def test_view_cpt_espece(self, today_mock):
+        today_mock.return_value=datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
@@ -222,7 +170,8 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -1600)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-10-30'))
         self.assertEqual(resp.context['solde_r'], -100)
-        self.assertEqual(resp.context['solde_p'], 0)
+        self.assertEqual(resp.context['solde_p_pos'], 0)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
         self.assertQueryset(resp.context['list_ope'], [2, ])
 
@@ -236,7 +185,8 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -1600)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-10-30'))
         self.assertEqual(resp.context['solde_r'], -100)
-        self.assertEqual(resp.context['solde_p'], 0)
+        self.assertEqual(resp.context['solde_p_pos'], 0)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
         self.assertQueryset(resp.context['list_ope'], [2, 3])
 
@@ -250,7 +200,8 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde'], -1600)
         self.assertEqual(resp.context['date_r'], utils.strpdate('2011-10-30'))
         self.assertEqual(resp.context['solde_r'], -100)
-        self.assertEqual(resp.context['solde_p'], 0)
+        self.assertEqual(resp.context['solde_p_pos'], 0)
+        self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
         self.assertQueryset(resp.context['list_ope'], [3, ])
 

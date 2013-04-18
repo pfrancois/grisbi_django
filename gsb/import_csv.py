@@ -25,12 +25,12 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def cat(self):
-        cat = utils.to_str(self.row['cat'], "Divers:Inconnu")
+        cat = utils.to_unicode(self.row['cat'], "Divers:Inconnu")
         return cat 
 
     @property
     def cpt(self):
-        cpt = utils.to_str(self.row['account name'])
+        cpt = utils.to_unicode(self.row['account name'])
         if cpt is None:
             raise import_base.ImportException('probleme: il faut un compte a la ligne %s' % self.line_num)
         else:
@@ -45,7 +45,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def ib(self):
-        return utils.to_str(self.row['projet'])
+        return utils.to_unicode(self.row['projet'],None)
 
     @property
     def mt(self):
@@ -57,7 +57,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def num_cheque(self):
-        return utils.to_str(self.row['n chq'], "")
+        return utils.to_unicode(self.row['n chq'], "")
 
     @property
     def pointe(self):
@@ -65,11 +65,11 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def rapp(self):
-        return utils.to_str(self.row['r'])
+        return utils.to_unicode(self.row['r'])
 
     @property
     def tiers(self):
-        return utils.to_str(self.row['tiers'], "tiers inconnu")
+        return utils.to_unicode(self.row['tiers'], "tiers inconnu")
 
     @property
     def monnaie(self):
@@ -85,7 +85,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        return utils.to_str(self.row['moyen'])
+        return utils.to_unicode(self.row['moyen'])
 
     @property
     def ope_titre(self):
@@ -363,7 +363,7 @@ class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
 
     @property
     def cpt(self):
-        cpt = utils.to_str(self.row['Account'])
+        cpt = utils.to_unicode(self.row['Account'])
         if cpt is None:
             raise self.erreur.append('probleme: il faut un compte a la ligne %s' % self.ligne)
         else:
@@ -392,15 +392,15 @@ class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
 
     @property
     def notes(self):
-        return utils.to_str(self.row['Memo'], "")
+        return utils.to_unicode(self.row['Memo'], "")
 
     @property
     def num_cheque(self):
-        return utils.to_str(self.row['ChkNum'], '')
+        return utils.to_unicode(self.row['ChkNum'], '')
 
     @property
     def pointe(self):
-        if utils.to_str(self.row['Cleared']) == "*":
+        if utils.to_unicode(self.row['Cleared']) == "*":
             return True
         else:
             return False
@@ -411,5 +411,5 @@ class Csv_unicode_reader_pocket_money(Csv_unicode_reader_ope_base):
 
     @property
     def monnaie(self):
-        return utils.to_str(self.row['CurrencyCode'])
+        return utils.to_unicode(self.row['CurrencyCode'])
 

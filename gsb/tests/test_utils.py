@@ -120,6 +120,9 @@ class Test_utils(TestCase):
         self.assertEquals(utils.to_unicode(3), u'3')
         self.assertEquals(utils.to_unicode(u'ceci est éssai'), u'ceci est éssai')
         self.assertEquals(utils.to_unicode(u'    ceci est éssai'), u'ceci est éssai')
+        self.assertEquals(utils.to_unicode(None,u'ceci est éssai'), u'ceci est éssai')
+        self.assertEquals(utils.to_unicode(0,u'ceci est éssai'), u'ceci est éssai')
+        self.assertEquals(utils.to_unicode("",defaut=u'ceci est éssai'), u'ceci est éssai')
 
     def test_to_id(self):
         self.assertEquals(utils.to_id(None), None)

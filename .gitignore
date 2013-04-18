@@ -47,3 +47,4 @@ sqlite2mysql.py
 *.winmerge
 reset.bat
 *.sublim*
+sql

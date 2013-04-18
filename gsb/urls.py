@@ -88,7 +88,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
                         url(r'^search$', 'search_opes', name='g_search_ope'),
-                        url(r'^majtitre/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
+                        url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
                         
 )
 
@@ -137,6 +137,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
                         url(r'^perso$', 'perso'),
 )
+
 # gestion de mes trucs perso
 perso = False  # ya plus rien dedans
 # form tester

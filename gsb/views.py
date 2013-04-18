@@ -102,7 +102,8 @@ class Index_view(Mytemplateview):
                  'nom':p.nom,
                  'url':p.get_absolute_url(),
                  'ouvert':p.ouvert}
-            self.total_bq += cpt['solde']
+            if cpt['solde'] is not None:
+                self.total_bq += cpt['solde']
             self.bqe.append(cpt)
         # calcul du solde des pla
         self.total_pla = decimal.Decimal('0')
@@ -159,13 +160,15 @@ class Cpt_detail_view(Mytemplateview):
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             #sinon on prend le nom du template par defaut
             self.espece = True
-
+            #selection initiale
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
+            #en fonction du rapprochement ou non
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
+            #nb ope rapp
             if self.all:
                 nb_ope_rapp = 0
             else:
@@ -176,6 +179,7 @@ class Cpt_detail_view(Mytemplateview):
                     nb_ope_rapp = 0
                 if not self.all and not self.rapp:
                     nb_ope_rapp = Ope.objects.filter(compte=compte, rapp__isnull=False).count()
+            #gestion du tri
             try:
                 sort = request.GET.get('sort')  # il y a un sort dans le get
             except (ValueError, TypeError):  # non donc on regarde dans l'historique
@@ -205,6 +209,7 @@ class Cpt_detail_view(Mytemplateview):
             else:
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
+            #gestion des ope anciennes
             if not (self.all  or self.rapp):
                 q=q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year-1))
             opes = q.select_related('tiers', 'cat', 'rapp')
@@ -250,13 +255,13 @@ class Cpt_detail_view(Mytemplateview):
         except (EmptyPage, InvalidPage):
             return paginator.page(paginator.num_pages)
 
-    def get_context_data(self, *kwargs):
+    def get_context_data(self, *args):
         type_long = {
             "nrapp": u"Opérations non rapprochées",
             "rapp": u"Opérations rapprochées",
             "all": u"Ensemble des opérations"
         }
-        c = kwargs[0]
+        c = args[0]
         solde_espece=c.solde(espece=True)
         solde_r_esp=c.solde(rapp=True, espece=True)
         try:
@@ -275,8 +280,8 @@ class Cpt_detail_view(Mytemplateview):
 
         if self.espece:
             context = {'compte': c,
-                       'list_ope': kwargs[1],
-                       'nbrapp': kwargs[2],
+                       'list_ope': args[1],
+                       'nbrapp': args[2],
                        'titre': c.nom,
                        'solde': solde_espece,
                        "date_r": c.date_rappro(),
@@ -284,16 +289,17 @@ class Cpt_detail_view(Mytemplateview):
                        "solde_p_pos": solde_p_pos,
                        "solde_p_neg": solde_p_neg,
                        "solde_pr": solde_r_esp + solde_p_pos+solde_p_neg,
-                       "sort_tab": kwargs[3],
+                       "sort_tab": args[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
+                       "nb":args[1].count()
             }
         else:
             context = {
                 'compte': c,
                 'titre': c.nom,
                 'solde': c.solde(),
-                'titres': kwargs[1],
+                'titres': args[1],
                 'especes': solde_espece
             }
         
@@ -354,9 +360,10 @@ def ope_detail(request, pk):
                     ope = form.save()
                 else:
                     # verification que les données essentielles ne sont pas modifiés
-                    if has_changed(ope, 'montant') or  has_changed(ope, 'compte') or has_changed(ope,
-                                                                                                 'pointe') or has_changed(
-                        ope, 'jumelle') or has_changed(ope, 'mere'):
+                    if has_changed(ope, 'montant') or  has_changed(ope, 'compte'
+                                                ) or has_changed(ope,'pointe'
+                                                ) or has_changed(ope, 'jumelle'
+                                                ) or has_changed(ope, 'mere'):
                         messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
                     else:
                         messages.success(request, u"opération modifiée")
@@ -875,3 +882,17 @@ def perso(request):
                    'titre': "perso",
                   }
     )
+
+
+class Titre_view(generic.ListView):
+    model=Cours
+    template_name='gsb/liste_titre.djhtm'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """on a besoin pour le method decorator"""
+        return super(Titre_view, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        self.titre = get_object_or_404(Titre, id=self.kwargs['pk'])
+        return Cours.objects.filter(titre=self.titre).order_by('date')

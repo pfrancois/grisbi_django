@@ -9,7 +9,8 @@ from __future__ import absolute_import
 from .test_base import TestCase as Tcd
 from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, \
     Cat, Ib, Exercice, Moyen, Rapp
-from ..import_gsb import import_gsb_050, Import_exception
+from ..import_gsb import import_gsb_050
+from gsb.import_base import ImportException
 import decimal
 import datetime
 from django.db import models
@@ -23,9 +24,9 @@ class importtests(Tcd):
     def test_mauvais_format(self):
         logger = logging.getLogger('gsb')
         logger.setLevel(50)
-        self.assertRaises(Import_exception, import_gsb_050,
+        self.assertRaises(ImportException, import_gsb_050,
                           os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"))
-        self.assertRaises(Import_exception, import_gsb_050,
+        self.assertRaises(ImportException, import_gsb_050,
                           os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"))
 
 
@@ -145,7 +146,7 @@ class importposttests(Tcd):
 
     def test_moyen(self):
         obj = Moyen.objects.get(id=1)
-        self.assertEqual(obj.nom, u'virement')
+        self.assertEqual(obj.nom, u'Virement')
         self.assertEqual(obj.type, 'v')
 
     def test_rapp(self):
