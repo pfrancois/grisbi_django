@@ -7,7 +7,7 @@ import codecs
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
-from .models import  Compte, Ope
+from .models import Compte, Ope
 
 from django.views.generic.edit import FormView
 from gsb import forms as gsb_forms
@@ -52,6 +52,7 @@ class Writer_base(object):
 
 
 class Csv_unicode_writer(Writer_base):
+
     """
     A CSV writer which will write rows to CSV file "f",
     which is encoded in the given encoding.
@@ -61,7 +62,8 @@ class Csv_unicode_writer(Writer_base):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding, fich)
         self.fieldnames = fieldnames
-        self.writer = csv.DictWriter(self.queue, fieldnames, dialect=dialect, **kwds)
+        self.writer = csv.DictWriter(
+            self.queue, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
         self.writer.writerow({k: unicode(s).encode("utf-8") for k, s in row.items()})
@@ -86,7 +88,8 @@ class Csv_unicode_writer(Writer_base):
 
 
 class Exportform_ope(gsb_forms.Baseform):
-    collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False, label="Comptes")
+    collection = forms.ModelMultipleChoiceField(
+        Compte.objects.all(), required=False, label="Comptes")
     date_min = forms.DateField(label='date minimum', widget=forms.DateInput)
     date_max = forms.DateField(label='date maximum', widget=forms.DateInput)
     model_initial = Ope
@@ -94,17 +97,20 @@ class Exportform_ope(gsb_forms.Baseform):
 
     def clean(self):
         if self.model_collec is None:
-            raise django_exceptions.ImproperlyConfigured("model_collec non defini")
+            raise django_exceptions.ImproperlyConfigured(
+                "model_collec non defini")
         super(Exportform_ope, self).clean()
         data = self.cleaned_data
         ensemble = [objet.id for objet in data["collection"]]
-        self.query = self.model_initial.objects.filter(date__gte=data['date_min'], date__lte=data['date_max'])
+        self.query = self.model_initial.objects.filter(
+            date__gte=data['date_min'], date__lte=data['date_max'])
         if ensemble == [] or len(ensemble) == self.model_collec.objects.count():
             pass
         else:
             self.query = self.verif_collec(self.query, ensemble)
             if self.query.count() == 0:  # si des operations n'existent pas
-                raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
+                raise forms.ValidationError(
+                    u"attention pas d'opérations pour la selection demandée")
         return data
 
     def verif_collec(self, query, ensemble):
@@ -122,16 +128,20 @@ class ExportViewBase(FormView):
         """
         fonction principale mais abstraite
         """
-        raise django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
+        raise django_exceptions.ImproperlyConfigured(
+            "attention, il doit y avoir une methode qui extrait effectivement")
 
     def get_initial(self):
         """gestion des donnees initiales"""
         # prend la date de la premiere operation de l'ensemble des compte
         if self.model_initial is None:
-            raise django_exceptions.ImproperlyConfigured("un modele d'ou on tire les dates initiales doit etre defini")
-        date_min = self.model_initial.objects.aggregate(element=models_agg.Min('date'))['element']
+            raise django_exceptions.ImproperlyConfigured(
+                "un modele d'ou on tire les dates initiales doit etre defini")
+        date_min = self.model_initial.objects.aggregate(
+            element=models_agg.Min('date'))['element']
         # la derniere operation
-        date_max = self.model_initial.objects.aggregate(element=models_agg.Max('date'))['element']
+        date_max = self.model_initial.objects.aggregate(
+            element=models_agg.Max('date'))['element']
         return {'date_min': date_min, 'date_max': date_max}
 
     @method_decorator(login_required)
@@ -141,20 +151,23 @@ class ExportViewBase(FormView):
 
     def form_valid(self, form):
         """si le form est valid"""
-        reponse = self.export(query=form.query)  # comme on a verifier dans le form que c'etait ok
+        reponse = self.export(
+            query=form.query)  # comme on a verifier dans le form que c'etait ok
         if self.nomfich is None:
             raise django_exceptions.ImproperlyConfigured('nomfich non defini')
         if self.extension_file is None:
-            raise django_exceptions.ImproperlyConfigured('extension_file non defini')
+            raise django_exceptions.ImproperlyConfigured(
+                'extension_file non defini')
 
         if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"
-            reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                                time.strftime("%d_%m_%Y-%H_%M_%S",
-                                                                                              time.localtime())
-                                                                                , self.extension_file
-                )
+            reponse[
+                "Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
+                                                                            time.strftime(
+                                                                            "%d_%m_%Y-%H_%M_%S",
+                                                                            time.localtime()), self.extension_file
+                                                                            )
         return reponse
 
     def form_invalid(self, form):

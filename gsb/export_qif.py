@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import Cat, Ib, Compte, Ope
 from . import utils
 
+
 def convert_type2qif(type_a_transformer):
     if type_a_transformer == "b":
         return "Bank"
@@ -27,6 +28,7 @@ def convert_type2qif(type_a_transformer):
 
 
 class QifWriter(Writer_base):
+
     """
     A pseudofile which will write rows to file "f",
     which is encoded in the given encoding.
@@ -76,7 +78,8 @@ def cat_export(ope):
     """
     if not ope.jumelle:  # dans ce cas la c'est une operation normale
         try:
-            cat_g = utils.idtostr(ope.cat, defaut='', membre="nom")  # recupere la cat de l'operation
+            cat_g = utils.idtostr(
+                ope.cat, defaut='', membre="nom")  # recupere la cat de l'operation
         except ObjectDoesNotExist:
             cat_g = "inconnu"
         ib = None
@@ -108,7 +111,8 @@ class Export_qif(ExportViewBase):
         # recuperation des requete
         opes = query.order_by('compte', 'date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(
             mere__isnull=False)
-        comptes = Compte.objects.filter(pk__in=set(opes.values_list('compte__id', flat=True)))
+        comptes = Compte.objects.filter(pk__in=set(
+            opes.values_list('compte__id', flat=True)))
 
         # initialisation
         # nb_ope = 0
@@ -130,7 +134,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Cat")
                 # export des categories
             for cat in Cat.objects.all().order_by('nom').iterator():
-                qif.w("N", utils.idtostr(cat,defaut='', membre="nom"))
+                qif.w("N", utils.idtostr(cat, defaut='', membre="nom"))
                 qif.w('D', '')
                 if cat.type == 'r':
                     qif.w('I', '')
@@ -141,7 +145,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Class")
                 # export des classes
             for ib in Ib.objects.all().order_by('nom').iterator():
-                qif.w("N", utils.idtostr(ib,defaut='', membre="nom"))
+                qif.w("N", utils.idtostr(ib, defaut='', membre="nom"))
                 qif.w('D', '')
                 qif.end_record()
             # boucle export ope
@@ -182,7 +186,8 @@ class Export_qif(ExportViewBase):
             # gestion des splits
             if mere:
                 for fille in ope.filles_set.all():
-                    qif.w("S", "%s" % cat_export(fille))  # on cree une nouvelle categorie a au besoin
+                    qif.w("S", "%s" % cat_export(
+                        fille))  # on cree une nouvelle categorie a au besoin
                     qif.w("E", "%s" % fille.notes)
                     qif.w('$', fille.montant)
             qif.end_record()

@@ -14,30 +14,33 @@ from django.core import exceptions as django_exceptions
 from gsb.utils import Excel_csv
 import csv
 
+
 class Export_view_csv_base(ex.ExportViewBase):
     extension_file = "csv"
     fieldnames = None
-    csv_dialect=None
-    class_csv_dialect=Excel_csv
+    csv_dialect = None
+    class_csv_dialect = Excel_csv
 
     def export_csv_view(self, data, nomfich="export"):
         """machinerie commune aux classes filles"""
-        csv_file =  ex.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames,dialect=self.class_csv_dialect)
+        csv_file = ex.Csv_unicode_writer(
+            encoding='iso-8859-15', fieldnames=self.fieldnames, dialect=self.class_csv_dialect)
         csv_file.writeheader()
         csv_file.writerows(data)
         if self.debug:
             return HttpResponse(csv_file.getvalue(), mimetype="text/plain")
         else:
             return HttpResponse(csv_file.getvalue(), content_type='text/csv')
-    
 
 
 class Export_ope_csv(Export_view_csv_base):
-    debug=True
+    debug = True
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'n chq', 'id jumelle lie', 'has fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = (
+        'id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes',
+        'projet', 'n chq', 'id jumelle lie', 'has fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
 
     def export(self, query):
         """
@@ -45,17 +48,19 @@ class Export_ope_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen") 
-        liste_ope=query.values_list('id')
-        ope_mere=query.filter(id__in=liste_ope).exclude(filles_set__isnull=True).values_list('id',flat=True)
-        
+        query = query.order_by('date', 'id').select_related(
+            'cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
+        liste_ope = query.values_list('id')
+        ope_mere = query.filter(id__in=liste_ope).exclude(
+            filles_set__isnull=True).values_list('id', flat=True)
+
         for ope in query:
             # id compte date montant
             ligne = {'id': ope.id, 'account name': ope.compte.nom}
-            #date
-            ligne['date']=ope.date.strftime('%d/%m/%Y')
+            # date
+            ligne['date'] = ope.date.strftime('%d/%m/%Y')
 
-            #montant
+            # montant
             montant = "%10.2f" % ope.montant
             montant = montant.replace('.', ',').strip()
             ligne['montant'] = montant
@@ -69,7 +74,8 @@ class Export_ope_csv(Export_view_csv_base):
 
             # moyen
             try:
-                ligne['moyen'] = utils.idtostr(ope.moyen, defaut='', membre="nom")
+                ligne['moyen'] = utils.idtostr(
+                    ope.moyen, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['moyen'] = ""
             # cat
@@ -78,15 +84,18 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
             try:
-                ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
+                ligne['projet'] = utils.idtostr(
+                    ope.ib, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
 
             # le reste
             ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = utils.idtostr(ope, defaut='',membre='jumelle_id') 
+            ligne['id jumelle lie'] = utils.idtostr(
+                ope, defaut='', membre='jumelle_id')
             ligne['has fille'] = utils.booltostr(ope.id in ope_mere)
-            ligne['num op vent m'] = utils.idtostr(ope, defaut='',membre='mere_id')
+            ligne['num op vent m'] = utils.idtostr(
+                ope, defaut='', membre='mere_id')
             if ope.ope is not None:
                 ligne['ope_titre'] = ope.ope.id
             else:
@@ -101,7 +110,9 @@ class Export_ope_csv(Export_view_csv_base):
         logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
+
 class pocket_csv(csv.Dialect):
+
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ','
     quotechar = '"'
@@ -109,13 +120,15 @@ class pocket_csv(csv.Dialect):
     skipinitialspace = False
     lineterminator = "\r\n"
     quoting = csv.QUOTE_NONNUMERIC
-    
+
+
 class Export_ope_pocket_money_csv(Export_view_csv_base):
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ("account name","date","ChkNum","Payee","Category","Class","Memo","Amount","Cleared","CurrencyCode","ExchangeRate")
-    class_csv_dialect=pocket_csv
+    fieldnames = ("account name", "date", "ChkNum", "Payee", "Category",
+                  "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
+    class_csv_dialect = pocket_csv
 
     def export(self, query):
         """
@@ -123,19 +136,20 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen","jumelle")         
+        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related(
+            'cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
         for ope in query:
             # id compte date montant
             # print ope
             ligne = {'account name': ope.compte.nom}
-            #date
-            ligne['date']=ope.date.strftime('%d/%m/%y')
-            #checknum
+            # date
+            ligne['date'] = ope.date.strftime('%d/%m/%y')
+            # checknum
             ligne['ChkNum'] = ope.num_cheque
             # tiers
-            tiers=utils.idtostr(ope.tiers,defaut='', membre="nom")
-            if utils.idtostr(ope.cat, defaut='', membre="nom")=="Virement":
-                tiers="<%s>"%ope.jumelle.compte
+            tiers = utils.idtostr(ope.tiers, defaut='', membre="nom")
+            if utils.idtostr(ope.cat, defaut='', membre="nom") == "Virement":
+                tiers = "<%s>" % ope.jumelle.compte
             ligne['Payee'] = tiers
             # cat
             ligne['Category'] = utils.idtostr(ope.cat, defaut='', membre="nom")
@@ -144,23 +158,27 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             except django_exceptions.ObjectDoesNotExist:
                 ligne['Class'] = ""
             ligne['Memo'] = ope.notes
-            #montant
+            # montant
             ligne['Amount'] = str.strip("%10.2f" % ope.montant)
             # rapp
             if ope.rapp is not None:
                 ligne['Cleared'] = '*'
             else:
                 ligne['Cleared'] = ''
-            ligne["CurrencyCode"]="EUR"
-            ligne["ExchangeRate"]="1"
+            ligne["CurrencyCode"] = "EUR"
+            ligne["ExchangeRate"] = "1"
             data.append(ligne)
         logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
+
 class Exportform_cours(ex.Exportform_ope):
-    collection = ex.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False)
-    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
-    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
+    collection = ex.forms.ModelMultipleChoiceField(
+        models.Titre.objects.all(), required=False)
+    date_min = ex.forms.DateField(
+        label='date minimum', widget=ex.forms.DateInput)
+    date_max = ex.forms.DateField(
+        label='date maximum', widget=ex.forms.DateInput)
     model_initial = models.Cours
     model_collec = models.Titre
 
@@ -193,9 +211,12 @@ class Export_cours_csv(Export_view_csv_base):
 
 
 class Exportform_Compte_titre(ex.Exportform_ope):
-    collection = ex.forms.ModelMultipleChoiceField(Compte.objects.filter(type='t'), required=False)
-    date_min = ex.forms.DateField(label='date minimum', widget=ex.forms.DateInput)
-    date_max = ex.forms.DateField(label='date maximum', widget=ex.forms.DateInput)
+    collection = ex.forms.ModelMultipleChoiceField(
+        Compte.objects.filter(type='t'), required=False)
+    date_min = ex.forms.DateField(
+        label='date minimum', widget=ex.forms.DateInput)
+    date_max = ex.forms.DateField(
+        label='date maximum', widget=ex.forms.DateInput)
     model_initial = Ope_titre
     model_collec = Compte
 
@@ -207,7 +228,8 @@ class Export_ope_titre_csv(Export_view_csv_base):
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
-    fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
+    fieldnames = ("id", "date", "compte", "nom",
+                  "isin", "sens", "cours", "nombre", "montant")
 
     def export(self, query):
         """
@@ -232,4 +254,3 @@ class Export_ope_titre_csv(Export_view_csv_base):
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_ope_titre")
         return reponse
-    
