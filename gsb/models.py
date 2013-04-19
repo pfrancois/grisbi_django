@@ -1160,7 +1160,6 @@ class Ope(models.Model):
                     if self.pointe == True:
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est pointée")
                     if self.rapp is not None:
-                        print self.rapp
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est rapprochée")
 
     @property

@@ -1,5 +1,5 @@
-id;n chq;date;account name;tiers;p;m;montant;cat;projet;jumelle;notes;num op vent m;id jumelle lie;moyen;ope_titre;ope_pmv;has_fille
-1;;03/04/2012;cptb2;Franprix;1;;-17,16;Alim:Supermarche;;;;;;;;;
-2;;09/04/2012;cptb2;leaderprice;1;;-23,8;Alim:Supermarche;;;;;;;;;
-3;;30/04/2012;cptb2;Picard;1;;-13,05;Alim:Supermarche;;;;;;;;;
-4;;01/05/2012;cpte1;leaderprice;;;-4;Alim:Supermarche;;;;;;;;;
+id;account name;date;montant;r;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has fille;num op vent m;ope_titre;ope_pmv
+1;cptb2;03/04/2012;1;;-17,16;;Alim:Supermarche;Franprix;;;;;;;;
+2;cptb2;09/04/2012;1;;-23,8;;Alim:Supermarche;leaderprice;;;;;;;;
+3;cptb2;30/04/2012;1;;-13,05;;Alim:Supermarche;Picard;;;;;;;;
+4;cpte1;01/05/2012;;;-4;;Alim:Supermarche;leaderprice;;;;;;;;

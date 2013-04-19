@@ -36,7 +36,6 @@ class Test_import_csv(TestCase):
         imp=import_csv.Import_csv_ope()
         imp.test=True
         result=imp.import_file(os.path.join(self.path, "test_cpt_null.csv"))
-        print result
         
 
 class Test_import(Test_view_base):

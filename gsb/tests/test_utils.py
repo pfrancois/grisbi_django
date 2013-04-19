@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .test_base import TestCase
 from ..import utils
 import datetime
-from ..models import Exercice, Cat
+from ..models import Exercice, Cat, Ope
 import decimal
 import mock
 import time
@@ -114,7 +114,11 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
         Cat.objects.create(nom="test:",id=999)
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=9)), "9")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='',membre='jumelle_id') , "")
 
+#test des formats d'entree
     def test_tostr(self):
         self.assertEquals(utils.to_unicode(None), u'')
         self.assertEquals(utils.to_unicode(3), u'3')
@@ -128,6 +132,8 @@ class Test_utils(TestCase):
         self.assertEquals(utils.to_id(None), None)
         self.assertEquals(utils.to_id(0), None)
         self.assertEquals(utils.to_id(""), None)
+        self.assertEquals(utils.to_id(250), 250)
+        self.assertEquals(utils.to_id("250"), 250)
         self.assertRaises(utils.FormatException, utils.to_id, 'toto')
         self.assertRaises(utils.FormatException, utils.to_id, '3.245')
 

@@ -218,21 +218,21 @@ class Import_base(views.Myformview):
         except Cat.DoesNotExist:
             self.listes['moyen']['Revenus de placement:Plus-values'] = settings.ID_CAT_PMV
             Cat.objects.create(id=settings.ID_CAT_PMV, nom='Revenus de placement:Plus-values', type="d")   
-        try:
-            self.tableau_import(nomfich)
-            if len(self.erreur):
-                messages.warning(self.request, "attention traitement interrompu")
-                for err in self.erreur:
-                    messages.warning(self.request, err)
-                return False
-        except (FormatException,ImportException) as e:
+        """        try:"""
+        self.tableau_import(nomfich)
+        if len(self.erreur):
+            messages.warning(self.request, "attention traitement interrompu")
+            for err in self.erreur:
+                messages.warning(self.request, err)
+            return False
+        """        except (FormatException,ImportException) as e:
             if self.test == False:
                 for err in self.erreur:
                     messages.warning(self.request, err)
                 messages.error(self.request, e)
                 return False
             else:
-                raise e
+                raise e"""
     
         with transaction.commit_on_success():
             # import final
@@ -314,7 +314,8 @@ class Import_base(views.Myformview):
                     ope.pointe = obj['pointe']
                     ope.exercice_id = obj['exercice_id']
                     ope.save()
-            print "troisieme tour"
+            if not self.test:
+                print "troisieme tour"
             for obj in Ope.objects.filter(cat__nom="Virement"):
                 if obj.montant<0:
                     nom= u"%s => %s"%(obj.compte.nom, obj.jumelle.compte.nom)

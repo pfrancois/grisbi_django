@@ -35,8 +35,8 @@ class Test_export_csv(Test_view_base):
 1;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;12\r
 10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;09\r
 11;cpte1;24/09/2012;100,00;;0;moyen_rec1;Op\xe9ration Ventil\xe9e;tiers2;;;;;1;;;;09\r
-12;cpte1;24/09/2012;99,00;;0;moyen_rec1;cat1;tiers2;;;;;;11;;;09\r
-13;cpte1;24/09/2012;1,00;;0;moyen_rec1;cat2;tiers2;;;;;;11;;;09\r
+12;cpte1;24/09/2012;99,00;;0;moyen_rec1;cat1;tiers2;;;;;0;11;;;09\r
+13;cpte1;24/09/2012;1,00;;0;moyen_rec1;cat2;tiers2;;;;;0;11;;;09\r
 """)
 
         # erreur

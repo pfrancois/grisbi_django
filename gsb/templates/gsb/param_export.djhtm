@@ -2,7 +2,6 @@
 {% load url from future %}
 {% load gsb_extras %}
 {% block content %}
-
     {% if form.errors %}<h1>Merci de corriger les erreurs suivantes</h1>
         {% else %}<h1>Remplissez les champs suivants</h1>{% endif %}
     <form id='form1' action="" method="post">
@@ -13,7 +12,6 @@
             </table>
             <input type="submit" value="export"/>
         </fieldset>
-
     </form>
     <a href="{% url 'outils_index' %}" class="progress">retour vers le menu des options</a><br/>
 {% endblock %}

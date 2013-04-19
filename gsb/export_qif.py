@@ -76,13 +76,13 @@ def cat_export(ope):
     """
     if not ope.jumelle:  # dans ce cas la c'est une operation normale
         try:
-            cat_g = utils.idtostr(ope.cat, "", "nom")  # recupere la cat de l'operation
+            cat_g = utils.idtostr(ope.cat, defaut='', membre="nom")  # recupere la cat de l'operation
         except ObjectDoesNotExist:
             cat_g = "inconnu"
         ib = None
         if bool(ope.ib):  # gestion de l'ib
             try:
-                ib = utils.idtostr(ope.ib, "", "nom")
+                ib = utils.idtostr(ope.ib, defaut='', membre="nom")
             except ObjectDoesNotExist:
                 ib = None
         if ib is not None:
@@ -130,7 +130,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Cat")
                 # export des categories
             for cat in Cat.objects.all().order_by('nom').iterator():
-                qif.w("N", utils.idtostr(cat.nom))
+                qif.w("N", utils.idtostr(cat,defaut='', membre="nom"))
                 qif.w('D', '')
                 if cat.type == 'r':
                     qif.w('I', '')
@@ -141,7 +141,7 @@ class Export_qif(ExportViewBase):
                 qif.writerow("!Type:Class")
                 # export des classes
             for ib in Ib.objects.all().order_by('nom').iterator():
-                qif.w("N", utils.idtostr(ib.nom))
+                qif.w("N", utils.idtostr(ib,defaut='', membre="nom"))
                 qif.w('D', '')
                 qif.end_record()
             # boucle export ope
@@ -162,7 +162,7 @@ class Export_qif(ExportViewBase):
                 # montant
             qif.w("T", utils.floattostr(ope.montant))
             # tiers
-            qif.w("P", utils.idtostr(ope.tiers, '', "nom"))
+            qif.w("P", utils.idtostr(ope.tiers, defaut='', membre="nom"))
             if ope.moyen:
                 qif.w('N', ope.moyen.nom)
             else:

@@ -33,6 +33,7 @@ class Export_view_csv_base(ex.ExportViewBase):
 
 
 class Export_ope_csv(Export_view_csv_base):
+    debug=True
     form_class = ex.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
@@ -46,11 +47,10 @@ class Export_ope_csv(Export_view_csv_base):
         data = []
         query = query.order_by('date','id').select_related('cat', "compte", "tiers", "ib","rapp","ope","ope_pmv","moyen") 
         liste_ope=query.values_list('id')
-        ope_mere=query.filter(mere_id__in=liste_ope).values_list('id',flat=True)
+        ope_mere=query.filter(id__in=liste_ope).exclude(filles_set__isnull=True).values_list('id',flat=True)
         
         for ope in query:
             # id compte date montant
-            # print ope
             ligne = {'id': ope.id, 'account name': ope.compte.nom}
             #date
             ligne['date']=ope.date.strftime('%d/%m/%Y')
@@ -69,24 +69,24 @@ class Export_ope_csv(Export_view_csv_base):
 
             # moyen
             try:
-                ligne['moyen'] = utils.idtostr(ope.moyen, '', 'nom')
+                ligne['moyen'] = utils.idtostr(ope.moyen, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['moyen'] = ""
             # cat
-            ligne['cat'] = utils.idtostr(ope.cat, "", "nom")
+            ligne['cat'] = utils.idtostr(ope.cat, defaut='', membre="nom")
             # tiers
-            ligne['tiers'] = utils.idtostr(ope.tiers, '', 'nom')
+            ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
             try:
-                ligne['projet'] = utils.idtostr(ope.ib, '', 'nom')
+                ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
 
             # le reste
             ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = utils.idtostr(ope.jumelle_id, '') 
+            ligne['id jumelle lie'] = utils.idtostr(ope, defaut='',membre='jumelle_id') 
             ligne['has fille'] = utils.booltostr(ope.id in ope_mere)
-            ligne['num op vent m'] = utils.idtostr(ope.mere_id, '')
+            ligne['num op vent m'] = utils.idtostr(ope, defaut='',membre='mere_id')
             if ope.ope is not None:
                 ligne['ope_titre'] = ope.ope.id
             else:
@@ -133,14 +133,14 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             #checknum
             ligne['ChkNum'] = ope.num_cheque
             # tiers
-            tiers=utils.idtostr(ope.tiers, '', 'nom')
-            if utils.idtostr(ope.cat, "", "nom")=="Virement":
+            tiers=utils.idtostr(ope.tiers,defaut='', membre="nom")
+            if utils.idtostr(ope.cat, defaut='', membre="nom")=="Virement":
                 tiers="<%s>"%ope.jumelle.compte
             ligne['Payee'] = tiers
             # cat
-            ligne['Category'] = utils.idtostr(ope.cat, "", "nom")
+            ligne['Category'] = utils.idtostr(ope.cat, defaut='', membre="nom")
             try:
-                ligne['Class'] = utils.idtostr(ope.ib, '', 'nom')
+                ligne['Class'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['Class'] = ""
             ligne['Memo'] = ope.notes

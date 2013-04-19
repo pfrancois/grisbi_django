@@ -12,7 +12,7 @@ class Csv_perso(import_csv.Csv_unicode_reader_ope_base):
 
     @property
     def cat(self):
-        cat = utils.to_str(self.row['cat'], "Divers:Inconnu")
+        cat = utils.to_unicode(self.row['cat'], "Divers:Inconnu")
         if cat[-1] == ':':  # si le dernier caractere est ":" on l'enleve
             cat = cat[:-1]
         return cat 
