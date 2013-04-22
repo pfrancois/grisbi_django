@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .test_base import TestCase
 from ..import utils
 import datetime
-from ..models import Exercice, Cat, Ope
+from ..models import Exercice, Cat, Ope,Compte
 import decimal
 import mock
 import time
@@ -117,6 +117,9 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=9)), "9")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='',membre='jumelle_id') , "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='',membre='id') , "1")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='',membre='nom') , "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='',membre='nom') , "cpt_titre2201101")
 
 #test des formats d'entree
     def test_tostr(self):

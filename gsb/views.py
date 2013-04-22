@@ -53,6 +53,7 @@ class Mytemplateview(generic.TemplateView):
 class Myformview(generic.FormView):
     form_class = None
     template_name = None
+    titre=None
 
     def form_valid(self, form):
         """
@@ -71,6 +72,14 @@ class Myformview(generic.FormView):
         """on a besoin pour le method decorator"""
         return super(Myformview, self).dispatch(*args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        return self.render_to_response(self.get_context_data(form=form))
+    def get_context_data(self, *args, **kwargs):
+        context= super(Myformview, self).get_context_data(*args, **kwargs)
+        context.update({'titre':self.titre})
+        return context
 
 class Myredirectview(generic.RedirectView):
     call = None

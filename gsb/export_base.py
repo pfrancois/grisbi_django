@@ -9,8 +9,10 @@ from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
 from .models import Compte, Ope
 
-from django.views.generic.edit import FormView
+#from django.views.generic.edit import FormView
+from gsb.views import Myformview as FormView
 from gsb import forms as gsb_forms
+from gsb import models
 from django.db import models as models_agg
 from django import forms
 import time
@@ -123,8 +125,9 @@ class ExportViewBase(FormView):
     extension_file = None
     nomfich = None
     debug = False
+    form_class = None
 
-    def export(self, query):  # pylint: disable=W0613
+    def export(self, query): # pylint: disable=W0613
         """
         fonction principale mais abstraite
         """
@@ -169,6 +172,3 @@ class ExportViewBase(FormView):
                                                                             time.localtime()), self.extension_file
                                                                             )
         return reponse
-
-    def form_invalid(self, form):
-        return self.render_to_response({'form': form, })

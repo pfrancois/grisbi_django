@@ -249,7 +249,7 @@ def maxtostr(query, defaut='0', champ='id'):
     else:
         return str(agg)
 
-def idtostr(obj,  membre='id', defaut='0',):
+def idtostr(obj,  membre='id', defaut='0'):
     """renvoie id d'un objet avec la gestion des null
     @param obj: l'objet a interroger
     @param defaut: la reponse si neant ou inexistant
@@ -257,8 +257,11 @@ def idtostr(obj,  membre='id', defaut='0',):
     try:
         if getattr(obj, membre) is not None:
             retour = unicode(getattr(obj, membre))
-            if retour[-1] == ":":
-                retour = retour[0:-1]
+            if retour =='':
+                retour=defaut
+            else:
+                if retour[-1] == ":":
+                    retour = retour[0:-1]
         else:
             retour=unicode(defaut)
     except (AttributeError, ObjectDoesNotExist):
