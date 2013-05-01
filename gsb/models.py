@@ -11,9 +11,10 @@ from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode, force_unicode
-from .model_field import CurField
+import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
+
 
 class Gsb_exc(Exception):
     pass
@@ -33,6 +34,8 @@ class Tiers(models.Model):
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
     is_titre = models.BooleanField(default=False)
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_tiers'
@@ -71,12 +74,13 @@ class Titre(models.Model):
         ('OPC', u'opcvm'),
         ('CSL', u'compte sur livret'),
         ('OBL', u'obligation'),
-        ('ZZZ', u'autre')
-        )
+        ('ZZZ', u'autre'))
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     isin = models.CharField(max_length=12, unique=True, db_index=True)
     tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False)
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = u'gsb_titre'
@@ -247,9 +251,12 @@ class Titre(models.Model):
 
 class Cours(models.Model):
     """cours des titres"""
-    valeur = CurField(default=1.000, decimal_places=3)
+    valeur = models_gsb.CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre)
     date = models.DateField(default=utils.today)
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
+
 
     class Meta:
         db_table = 'gsb_cours'
@@ -260,9 +267,9 @@ class Cours(models.Model):
 
     def __unicode__(self):
         return u"le %(date)s, 1 %(titre)s : %(valeur)s %(monnaie)s" % {'titre': self.titre.nom,
-                                                           'date': self.date.strftime('%d/%m/%Y'),
-                                                           'valeur': self.valeur,
-                                                           'monnaie':settings.DEVISE_GENERALE}
+                                                                       'date': self.date.strftime('%d/%m/%Y'),
+                                                                       'valeur': self.valeur,
+                                                                       'monnaie': settings.DEVISE_GENERALE}
 
 
 class Banque(models.Model):
@@ -270,6 +277,9 @@ class Banque(models.Model):
     cib = models.CharField(max_length=5, blank=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
+
 
     class Meta:
         db_table = 'gsb_banque'
@@ -299,10 +309,12 @@ class Cat(models.Model):
     typesdep = (
         ('r', u'recette'),
         ('d', u'dépense'),
-        ('v', u'virement')
-        )
+        ('v', u'virement'))
     nom = models.CharField(max_length=50, unique=True, verbose_name=u"nom de la catégorie", db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name=u"type de la catégorie")
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
+
 
     class Meta:
         db_table = 'gsb_cat'
@@ -336,6 +348,9 @@ class Ib(models.Model):
      c'est juste un deuxieme type de categories ou apparentes"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
+
 
     class Meta:
         db_table = 'gsb_ib'
@@ -372,6 +387,8 @@ class Exercice(models.Model):
     date_debut = models.DateField(default=utils.today)
     date_fin = models.DateField(null=True, blank=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_exercice'
@@ -412,8 +429,7 @@ class Compte(models.Model):
         ('e', u'espece'),
         ('p', u'passif'),
         ('t', u'titre'),
-        ('a', u'autre actif')
-        )
+        ('a', u'autre actif'))
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     titulaire = models.CharField(max_length=40, blank=True, default='')
     type = models.CharField(max_length=1, choices=typescpt, default='b')
@@ -422,9 +438,9 @@ class Compte(models.Model):
     # il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
     num_compte = models.CharField(max_length=20, blank=True, default='')
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
-    solde_init = CurField(default=decimal.Decimal('0.00'))
-    solde_mini_voulu = CurField(null=True, blank=True)
-    solde_mini_autorise = CurField(null=True, blank=True)
+    solde_init = models_gsb.CurField(default=decimal.Decimal('0.00'))
+    solde_mini_voulu = models_gsb.CurField(null=True, blank=True)
+    solde_mini_autorise = models_gsb.CurField(null=True, blank=True)
     ouvert = models.BooleanField(default=True)
     notes = models.TextField(blank=True, default='')
     moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
@@ -432,6 +448,8 @@ class Compte(models.Model):
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
                                            related_name="compte_moyen_debit_set", default=None)
     titre = models.ManyToManyField('Titre', through="Ope_titre")
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_compte'
@@ -440,11 +458,11 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
 
-    def solde(self, datel=None, rapp=False, espece=False,pointe=False):
+    def solde(self, datel=None, rapp=False, espece=False, pointe=False):
         """renvoie le solde du compte
             @param datel : date date limite de calcul du solde
             @param rapp : boolean faut il prendre uniquement les opération rapproches
-            @param espece : si c'est un compte espece d'un compte titre 
+            @param espece : si c'est un compte espece d'un compte titre
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
@@ -460,7 +478,7 @@ class Compte(models.Model):
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
-        if self.type == 't' and espece == False:
+        if self.type == 't' and espece is False:
             solde = solde + self.solde_titre(datel, rapp)
         return solde
 
@@ -495,7 +513,7 @@ class Compte(models.Model):
     def solde_pointe(self, espece=False):
         """renvoie le solde du compte pour les operations pointees
         """
-        solde=self.solde(espece=espece, pointe=True)
+        solde = self.solde(espece=espece, pointe=True)
         return solde
 
     solde_rappro.short_description = u"solde rapproché"
@@ -534,8 +552,7 @@ class Compte(models.Model):
                                                           defaults={'nom': u'Frais bancaires:'})[0]
                 if not tiers_frais:
                     tiers_frais = titre.tiers
-                self.ope_set.create(
-                                    date=date,
+                self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
@@ -543,7 +560,6 @@ class Compte(models.Model):
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
                                     )
-                    
                 # gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
@@ -553,10 +569,10 @@ class Compte(models.Model):
             # virement
             if virement_de:
                 vir = Virement()
-                vir.create(compte_origine = virement_de,
-                           compte_dest = self,
-                           montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais,
-                           date = date)
+                vir.create(compte_origine=virement_de,
+                           compte_dest=self,
+                           montant=decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) + frais,
+                           date=date)
             return ope_titre
         else:
             raise TypeError("pas un titre")
@@ -598,13 +614,13 @@ class Compte(models.Model):
                                     notes="frais -%s@%s" % (nombre, prix),
                                     moyen=Moyen.objects.get(id=settings.MD_DEBIT),
                                     automatique=True
-                )
+                                    )
             if virement_vers:
                 vir = Virement()
-                vir.create(compte_origine = self,
-                           compte_dest = virement_vers,
-                           montant = decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
-                           date = date)
+                vir.create(compte_origine=self,
+                           compte_dest=virement_vers,
+                           montant=decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
+                           date=date)
             return ope_titre
         else:
             raise TypeError("pas un titre")
@@ -661,9 +677,11 @@ class Compte(models.Model):
         # il n'y a pas d'operation
         if datel is not None:
             try:
-                test=datel>utils.today()# @UnusedVariable
+                datel > utils.today()  # @UnusedVariable
             except TypeError:
-                datel=utils.strpdate(datel)
+                datel = utils.strpdate(datel)
+        else:
+            return 0
         if not self.ope_set.exists() or (datel is not None and self.ope_set.order_by('date')[0].date > datel):
             return 0
         for titre in self.titre.all().distinct():
@@ -679,10 +697,10 @@ class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
     compte = models.ForeignKey(Compte, verbose_name=u"compte titre")
-    nombre = CurField(default=0, decimal_places=5)
+    nombre = models_gsb.CurField(default=0, decimal_places=5)
     date = models.DateField()
-    cours = CurField(default=1, decimal_places=5)
-    invest = CurField(default=0, editable=False, decimal_places=2)
+    cours = models_gsb.CurField(default=1, decimal_places=5)
+    invest = models_gsb.CurField(default=0, editable=False, decimal_places=2)
     ope = models.OneToOneField('Ope',
                                editable=False,
                                null=True,
@@ -693,6 +711,8 @@ class Ope_titre(models.Model):
                                    null=True,
                                    on_delete=models.CASCADE,
                                    related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_ope_titre'
@@ -817,7 +837,7 @@ class Ope_titre(models.Model):
         if self.ope is not None:
             if self.ope.rapp is not None:
                 raise IntegrityError(u"opération espèce rapprochée")
-        if  self.ope_pmv is not None:
+        if self.ope_pmv is not None:
             if self.ope_pmv.rapp is not None:
                 raise IntegrityError(u"opération pmv rapprochée")
             self.ope_pmv.delete()
@@ -842,13 +862,14 @@ class Moyen(models.Model):
     actuellement, les comptes ont tous les moyens sans possiblite de faire le tri
     """
     # on le garde pour l'instant car ce n'est pas dans le même ordre que pour les categories
-    typesdep = (
-        ('v', u'virement'),
-        ('d', u'depense'),
-        ('r', u'recette'),
-        )
+    typesdep = (('v', u'virement'),
+                ('d', u'depense'),
+                ('r', u'recette'),
+                )
     nom = models.CharField(max_length=40, unique=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d')
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_moyen'
@@ -879,7 +900,7 @@ class Moyen(models.Model):
             nb_change += Ope.objects.filter(moyen=self).update(moyen=new)
             self.delete()
         return nb_change
-    
+
     def delete(self, *args, **kwargs):
         if self.id == settings.MD_CREDIT or self.id == settings.MD_CREDIT:
             raise IntegrityError(u"moyen par defaut")
@@ -948,7 +969,7 @@ class Echeance(models.Model):
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     valide = models.BooleanField(default=True)
     compte = models.ForeignKey(Compte)
-    montant = CurField()
+    montant = models_gsb.CurField()
     tiers = models.ForeignKey(Tiers, on_delete=models.PROTECT)
     cat = models.ForeignKey(Cat, on_delete=models.PROTECT, verbose_name=u"catégorie")
     moyen = models.ForeignKey(Moyen, blank=False, on_delete=models.PROTECT, default=None)
@@ -961,6 +982,8 @@ class Echeance(models.Model):
     notes = models.TextField(blank=True, default='')
     inscription_automatique = models.BooleanField(default=False,
                                                   help_text=u"inutile")  # tt les echeances sont automatiques
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_echeance'
@@ -971,17 +994,13 @@ class Echeance(models.Model):
 
     def __unicode__(self):
         if self.compte_virement:
-            return u"(%s) %s=>%s de %s (ech:%s)"%(self.id,
+            return u"(%s) %s=>%s de %s (ech:%s)" % (self.id,
                                                     self.compte,
                                                     self.compte_virement,
                                                     self.montant,
                                                     self.date.strftime('%d/%m/%Y'))
         else:
-            return u"(%s) %s à %s de %s (ech:%s)"%(self.id,
-                                                        self.compte,
-                                                        self.tiers,
-                                                        self.montant,
-                                                        self.date.strftime('%d/%m/%Y'))
+            return u"(%s) %s à %s de %s (ech:%s)" % (self.id, self.compte, self.tiers, self.montant, self.date.strftime('%d/%m/%Y'))
 
     def calcul_next(self):
         """
@@ -1019,7 +1038,7 @@ class Echeance(models.Model):
         """
         if to is None:
             to = utils.today()
-        if  queryset is None:
+        if queryset is None:
             liste_ech = Echeance.objects.filter(valide=True, date__lte=to)
         else:
             liste_ech = queryset
@@ -1074,7 +1093,7 @@ class Ope(models.Model):
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=utils.today)
     date_val = models.DateField(null=True, blank=True, default=None)
-    montant = CurField()
+    montant = models_gsb.CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.PROTECT, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.PROTECT, default=None,
                             verbose_name=u"Catégorie")
@@ -1094,6 +1113,8 @@ class Ope(models.Model):
     automatique = models.BooleanField(default=False,
                                       help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_ope'
@@ -1150,14 +1171,14 @@ class Ope(models.Model):
                 else:
                     self.montant = self.tot_fille
         if self.is_mere:
-            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom':u"Opération Ventilée", 'type':"c"})[0]
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom': u"Opération Ventilée", 'type': "c"})[0]
             ope_orig = Ope.objects.filter(id=self.id)
             if ope_orig.exists():
-                ope_orig=ope_orig[0]
+                ope_orig = ope_orig[0]
                 if self.montant != ope_orig.montant:
                 # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
                     self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
-                    if self.pointe == True:
+                    if self.pointe is True:
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est pointée")
                     if self.rapp is not None:
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est rapprochée")
@@ -1172,7 +1193,7 @@ class Ope(models.Model):
         est elle une operation sous ventile
         @return: Boolean
         """
-        return self.mere != None
+        return self.mere is not None
 
     @property
     def tot_fille(self):
@@ -1187,14 +1208,14 @@ class Ope(models.Model):
             return False
 
     def is_editable(self):
-        if self.is_mere or self.rapp or self.compte.ouvert == False:
+        if self.is_mere or self.rapp or self.compte.ouvert is not False:
             return False
         else:
             if self.jumelle:
                 if self.jumelle.rapp:
                     return False
             return True
-        
+
     def save(self, *args, **kwargs):
         if not self.moyen:
             if self.montant >= 0:
@@ -1202,14 +1223,14 @@ class Ope(models.Model):
                     self.moyen = self.compte.moyen_credit_defaut
                 else:
                     moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit",
-                                                                                         "id": settings.MD_CREDIT, 'type':"r"})[0]
+                                                                                         "id": settings.MD_CREDIT, 'type': "r"})[0]
                     self.moyen = moyen
-            if  self.montant < 0:
+            if self.montant < 0:
                 if self.compte.moyen_debit_defaut:
                     self.moyen = self.compte.moyen_debit_defaut
                 else:
                     moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
-                                                                                        "id": settings.MD_DEBIT, "type":"d"})[0]
+                                                                                        "id": settings.MD_DEBIT, "type": "d"})[0]
                     self.moyen = moyen
         if self.is_mere:
             self.cat = Cat.objects.get_or_create(
@@ -1233,7 +1254,7 @@ class Virement(object):
         if ope:
             if type(ope) != type(Ope()):
                 raise TypeError('pas ope')
-            if ope.montant<=0:
+            if ope.montant <= 0:
                 self.origine = ope
                 self.dest = self.origine.jumelle
             else:

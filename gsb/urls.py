@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 # from django.conf.urls import include #non utilise actuellement
-from . import export_csv, export_qif, views, outils, import_csv#, import_sg
+from . import export_csv, export_qif, views, outils, import_csv, export_sql_money
 from . import import_titre_csv as import_titres
 # les vues generales
 urlpatterns = patterns('gsb',
@@ -14,8 +14,8 @@ urlpatterns = patterns('gsb',
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
                             views.Mytemplateview.as_view(template_name="gsb/options.djhtm",
-                                                         titre="liste des outils disponible")
-                            , name="outils_index"
+                                                         titre="liste des outils disponible"),
+                            name="outils_index"
                         ),
                         #echeances echues
                         url(r'^options/ech$',
@@ -41,11 +41,6 @@ urlpatterns += patterns('gsb',
                             export_csv.Export_ope_csv.as_view(),
                             name='export_csv'
                         ),
-                        #export au format general en csv
-                        url(r'^options/export/pocket$',
-                            export_csv.Export_ope_pocket_money_csv.as_view(),
-                            name='export_csv_pocket'
-                        ),
                         #export en qif
                         url(r'^options/export/qif$',
                             export_qif.Export_qif.as_view(),
@@ -59,8 +54,13 @@ urlpatterns += patterns('gsb',
                         #export des cours
                         url(r'^options/export/csv/cours$',
                             export_csv.Export_cours_csv.as_view(),
-                            name='export_cours')
+                            name='export_cours'
+                        ),
+                        url(r'^options/export/sql/pm$',
+                            export_sql_money.Export_view_sql.as_view(),
+                            name='export_sql_pm'
                         )
+)
 #impor gsb 0_5_0
 urlpatterns += patterns('gsb.import_gsb',
                         url(r'options/import_gsb$',
@@ -68,12 +68,14 @@ urlpatterns += patterns('gsb.import_gsb',
                             name="import_gsb")
 )
 #import csv format general
-urlpatterns += patterns('', url(r'options/import_csv_all$',
+urlpatterns += patterns('',
+                        url(r'options/import_csv_all$',
                             import_csv.Import_csv_ope.as_view(),
                             name="import_csv_ope_all")
 )
 #import csv ope titre
-urlpatterns += patterns('', url(r'import_titre$',
+urlpatterns += patterns('',
+                        url(r'import_titre$',
                             import_titres.Import_csv_ope_titre.as_view(),
                             name="import_csv_ope_all")
 )
@@ -89,7 +91,6 @@ urlpatterns += patterns('gsb.views',
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
                         url(r'^search$', 'search_opes', name='g_search_ope'),
                         url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
-                        
 )
 
 # les vues relatives aux comptes

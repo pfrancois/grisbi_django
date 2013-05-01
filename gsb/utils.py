@@ -15,10 +15,10 @@ try:
 except ImportError:
     pass
 from uuid import uuid4
-__all__=['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
-         'strpdate', 'today','now','timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
-         'to_date','datetostr', 'booltostr','floattostr', 'typetostr','idtostr','UTF8Recoder','Excel_csv',
-         'Csv_unicode_reader','uuid','Excel_csv']
+__all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
+           'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
+           'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr']
 class FormatException(Exception):
     pass
 
@@ -74,7 +74,7 @@ def is_number(s):
     """fonction qui verifie si ca a l'apparence d'un nombre"""
     try:
         n = float(s)  # for int, long and float
-        if math.isnan(n) or math.isinf(n) :
+        if math.isnan(n) or math.isinf(n):
             return False
     except ValueError:
         try:
@@ -122,12 +122,15 @@ def addmonths(sourcedate, months, last=False, first=False):
         day = min(sourcedate.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
 
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + datetime.timedelta(n)
 
 """------------------------------------format d'entree---------------------------------"""
-def to_unicode(var,defaut=''):
+def to_unicode(var, defaut=''):
     if var is None:
         return defaut
-    var=force_unicode(var).strip()
+    var = force_unicode(var).strip()
     if var == "":
         return defaut
     try:
@@ -141,9 +144,9 @@ def to_unicode(var,defaut=''):
 def to_id(var):
     if var is None:
         return None
-    var=force_unicode(var).strip()
+    var = force_unicode(var).strip()
     try:
-        if var == ""  or int(var) == 0  or var=="False":
+        if var == "" or int(var) == 0 or var == "False":
             return None
         else:
             return int(var)
@@ -153,27 +156,27 @@ def to_id(var):
 def to_bool(var):
     if var is None:
         return False
-    if var == True or var == False :
+    if var == True or var == False:
         return var
 
-    var=force_unicode(var).strip()
+    var = force_unicode(var).strip()
     try:
-        if var == ""  or var == 0 or var == "0" or bool(var)==False:
+        if var == "" or var == 0 or var == "0" or bool(var) == False:
             return False
         else:
             return True
     except ValueError:
         return False
-    
+
 def to_decimal(var):
     if var is None:
         return 0
-    var=force_unicode(var).strip()
+    var = force_unicode(var).strip()
     try:
-        return fr2decimal(var)#si il y a une exception il est renvoyé 0
+        return fr2decimal(var)  # si il y a une exception il est renvoyé 0
     except decimal.InvalidOperation:
         return 0
-    
+
 def to_date(var, format_date="%d/%m/%Y"):
     try:
         return strpdate(var, format_date)
@@ -186,7 +189,7 @@ def datetostr(s, defaut="0/0/0"):
     """
     fonction qui transforme un object date en une chaine AA/MM/JJJJ
     @param s:objet datetime
-    @param defaut: format a transformer, par defaut c'est AA/MM/JJJ
+    @param defaut: format a transformer, par defaut c'est AA/MM/JJJJ
     """
     if s is None:
         return defaut
@@ -257,19 +260,24 @@ def idtostr(obj,  membre='id', defaut='0'):
     try:
         if getattr(obj, membre) is not None:
             retour = unicode(getattr(obj, membre))
-            if retour =='':
-                retour=defaut
+            if retour == '':
+                retour = defaut
             else:
                 if retour[-1] == ":":
                     retour = retour[0:-1]
         else:
-            retour=unicode(defaut)
+            retour = unicode(defaut)
     except (AttributeError, ObjectDoesNotExist):
         retour = unicode(defaut)
 
     retour = retour.strip()
     return retour
 
+def nulltostr(s):
+    if s == '':
+        return null
+    else:
+        return s
 
 """------------------fonction basiques pour lecture ecriture------"""
 class UTF8Recoder:

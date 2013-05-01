@@ -12,7 +12,7 @@ from .models import Compte, Ope
 #from django.views.generic.edit import FormView
 from gsb.views import Myformview as FormView
 from gsb import forms as gsb_forms
-from gsb import models
+#from gsb import models
 from django.db import models as models_agg
 from django import forms
 import time
@@ -68,7 +68,8 @@ class Csv_unicode_writer(Writer_base):
             self.queue, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
-        self.writer.writerow({k: unicode(s).encode("utf-8") for k, s in row.items()})
+        d = dict((k, unicode(s).encode("utf-8")) for (k, s) in row.items())
+        self.writer.writerow(d)
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -127,7 +128,7 @@ class ExportViewBase(FormView):
     debug = False
     form_class = None
 
-    def export(self, query): # pylint: disable=W0613
+    def export(self, query):  # pylint: disable=W0613
         """
         fonction principale mais abstraite
         """

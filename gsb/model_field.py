@@ -1,13 +1,11 @@
 # -*- coding: utf-8
 from datetime import date
-from time import  mktime
+from time import mktime
 import decimal
 import os
 from django.db import models
-
 from django import forms
-
-
+import gsb.utils as utils
 
 # definition d'un moneyfield
 class CurField(models.DecimalField):
@@ -109,3 +107,31 @@ class ExtFileField(forms.FileField):
                 file_types = ", ".join([i for i in self.ext_whitelist])
                 error = "Only allowed file types are: %s" % file_types
                 raise forms.ValidationError(error)
+
+class uuidfield(models.CharField):
+    """tire de la
+    https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
+    """
+    def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):
+        kwargs['max_length'] = 36
+        self.auto = auto
+        self.add = add
+        if auto:
+            kwargs['blank'] = True
+            kwargs['editable'] = kwargs.get('editable', False)
+        super(uuidfield, self).__init__(**kwargs)
+
+    def get_internal_type(self):
+        return models.CharField.__name__
+
+    def pre_save(self, model_instance, add):
+        if self.auto and add:
+            value = unicode(utils.uuid())
+            setattr(model_instance, self.attname, value)
+            return value
+        else:
+            value = super(uuidfield, self).pre_save(model_instance, add)
+            if self.auto and not value:
+                value = unicode(utils.uuid())
+                setattr(model_instance, self.attname, value)
+        return value

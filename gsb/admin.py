@@ -45,7 +45,7 @@ class date_perso_filter(DateFieldListFilter):
             }),
             ('Les trois derniers mois', {
                 self.lookup_kwarg_since: str(utils.addmonths(today, -3,  first=True)),
-                self.lookup_kwarg_until: str(today.replace(day=7)),#fin du mois precedent car pour la sg c'est jusqu'au 6
+                self.lookup_kwarg_until: str(today.replace(day=7)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
@@ -153,7 +153,7 @@ class Modeladmin_perso(admin.ModelAdmin):
         if ref.find('?') != -1:
             # We've got a query string, set the session value
             request.session['filtered'] = ref
-        if request.POST.has_key('_save'):
+        if '_save' in request.POST:
             try:
                 if request.session['filtered'] is not None:
                     result['Location'] = request.session['filtered']
@@ -177,7 +177,6 @@ class Modeladmin_perso(admin.ModelAdmin):
     def delete_view(self, request, object_id, extra_context=None):
         result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
-    
 
 
 class formestligne_limit(BaseInlineFormSet):
@@ -193,9 +192,9 @@ class liste_perso_inline(admin.TabularInline):
     }
     related = None
     readonly = False
-    orderby=None
+    orderby = None
     formset = formestligne_limit
-#afin de pouvoir avoir des inline readonly
+    #afin de pouvoir avoir des inline readonly
     def __init__(self, parent_model, admin_site):
         if self.readonly:
             self.readonly_fields = self.fields
@@ -204,14 +203,14 @@ class liste_perso_inline(admin.TabularInline):
 
     def queryset(self, request):
         qs = super(liste_perso_inline, self).queryset(request)
-#on related pour les inlines
+        #on related pour les inlines
         if self.related is not None:
             args = self.related
-            qs=qs.select_related(*args)
-#gestion du orderby
+            qs = qs.select_related(*args)
+    #gestion du orderby
         if self.orderby is not None:
             args = self.orderby
-            qs=qs.order_by(*args)
+            qs = qs.order_by(*args)
         return qs
 
 
@@ -222,8 +221,8 @@ class ope_cat_admin(liste_perso_inline):
     readonly = True
     fk_name = 'cat'
     related = ('compte', 'tiers', 'ib')
-    orderby=('-date',)
-    max_num=10
+    orderby = ('-date',)
+    max_num = 10
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -259,7 +258,7 @@ class Compte_admin(Modeladmin_perso):
     fields = (
         'nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
         'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
-    list_display = ('id','nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
+    list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
 
     def action_supprimer_pointe(self, request, queryset):
@@ -310,7 +309,7 @@ class Compte_admin(Modeladmin_perso):
                 rapp.date = form.cleaned_data['date']
                 rapp.save()
                 self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
-                queryset[0], count, plural, plural))
+                    queryset[0], count, plural, plural))
                 return HttpResponseRedirect(request.get_full_path())
 
         if not form:
@@ -318,7 +317,7 @@ class Compte_admin(Modeladmin_perso):
         return render(request, 'admin/add_rapp.djhtm', {'opes': query_ope, 'rapp_form': form, })
 
     action_transformer_pointee_rapp.short_description = "Rapprocher un compte"
-    
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'moyen_debit_defaut':
             kwargs['queryset'] = Moyen.objects.filter(type='d')
@@ -326,8 +325,8 @@ class Compte_admin(Modeladmin_perso):
             if db_field.name == 'moyen_credit_defaut':
                 kwargs['queryset'] = Moyen.objects.filter(type='r')
         return super(Compte_admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-                
-        
+
+
 class ope_fille_admin(liste_perso_inline):
     model = Ope
     fields = ('montant', 'cat', 'ib', 'notes')
@@ -338,14 +337,14 @@ class ope_fille_admin(liste_perso_inline):
 class Ope_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les opes"""
     fields = (
-    'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
-    ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
+        'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
+        ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'pointe','compte', 'date', 'montant', 'tiers', 'moyen', 'cat','num_cheque', 'rapp')
+    list_display = ('id', 'pointe', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'num_cheque', 'rapp')
     list_filter = (
-    'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
+        'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('montant','pointe')
+    list_editable = ('montant', 'pointe')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     save_on_top = True
     save_as = True
@@ -483,8 +482,6 @@ class Moyen_admin(Modeladmin_perso):
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_filter = ('type',)
     fields = ['type', 'nom']
-
-
     list_display = ('nom', 'type', 'nb_ope')
 
 
@@ -500,7 +497,7 @@ class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_editable = ('nom',)
-    list_display = ('id','nom', 'notes', 'is_titre', 'nb_ope')
+    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('is_titre',)
     search_fields = ['nom']
@@ -511,7 +508,7 @@ class Tiers_admin(Modeladmin_perso):
 class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = (
-    'id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
+        'id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
     actions = ['check_ech']
 
