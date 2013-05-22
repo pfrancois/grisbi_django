@@ -15,7 +15,7 @@ import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
 
-
+__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement']
 class Gsb_exc(Exception):
     pass
 
@@ -251,9 +251,9 @@ class Titre(models.Model):
 
 class Cours(models.Model):
     """cours des titres"""
+    date = models.DateField(default=utils.today)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre)
-    date = models.DateField(default=utils.today)
     lastupdate = models.DateTimeField(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
@@ -279,7 +279,6 @@ class Banque(models.Model):
     notes = models.TextField(blank=True, default='')
     lastupdate = models.DateTimeField(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
-
 
     class Meta:
         db_table = 'gsb_banque'
@@ -910,6 +909,8 @@ class Rapp(models.Model):
     """rapprochement d'un compte"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     date = models.DateField(null=True, blank=True, default=utils.today)
+    lastupdate = models.DateTimeField(auto_now=True)
+    uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_rapp'
