@@ -128,60 +128,78 @@ def daterange(start_date, end_date):
 
 """------------------------------------format d'entree---------------------------------"""
 def to_unicode(var, defaut=''):
-    if var is None:
-        return defaut
-    var = force_unicode(var).strip()
-    if var == "":
-        return defaut
     try:
-        if float(var) == 0:
+        if var is None:
             return defaut
-        else:
+        var = force_unicode(var).strip()
+        if var == "":
+            return defaut
+        try:
+            if float(var) == 0:
+                return defaut
+            else:
+                return var
+        except ValueError:
             return var
-    except ValueError:
-        return var
+    except KeyError:
+        return defaut
 
 def to_id(var):
-    if var is None:
-        return None
-    var = force_unicode(var).strip()
     try:
-        if var == "" or int(var) == 0 or var == "False":
+        if var is None:
             return None
-        else:
-            return int(var)
-    except ValueError:
-        raise FormatException('probleme: "%s" n\'est pas un nombre entier' % var)
+        var = force_unicode(var).strip()
+        try:
+            if var == "" or int(var) == 0 or var == "False":
+                return None
+            else:
+                return int(var)
+        except ValueError:
+            raise FormatException('probleme: "%s" n\'est pas un nombre entier' % var)
+    except KeyError:
+        return None
+
 
 def to_bool(var):
-    if var is None:
-        return False
-    if var == True or var == False:
-        return var
-
-    var = force_unicode(var).strip()
     try:
-        if var == "" or var == 0 or var == "0" or bool(var) == False:
+        if var is None:
             return False
-        else:
-            return True
-    except ValueError:
+        if var == True or var == False:
+            return var
+
+        var = force_unicode(var).strip()
+        try:
+            if var == "" or var == 0 or var == "0" or bool(var) == False:
+                return False
+            else:
+                return True
+        except ValueError:
+            return False
+    except KeyError:
         return False
+
 
 def to_decimal(var):
-    if var is None:
-        return 0
-    var = force_unicode(var).strip()
     try:
-        return fr2decimal(var)  # si il y a une exception il est renvoyé 0
-    except decimal.InvalidOperation:
+        if var is None:
+            return 0
+        var = force_unicode(var).strip()
+        try:
+            return fr2decimal(var)  # si il y a une exception il est renvoyé 0
+        except decimal.InvalidOperation:
+            return 0
+    except KeyError:
         return 0
+
 
 def to_date(var, format_date="%d/%m/%Y"):
     try:
         return strpdate(var, format_date)
     except ValueError:
         raise FormatException('"%s" n\'en pas est une date' % var)
+    except KeyError:
+        return None
+
 
 """-------------------------------format de sortie-----------------------------"""
 

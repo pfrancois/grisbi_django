@@ -257,7 +257,6 @@ class Cours(models.Model):
     lastupdate = models.DateTimeField(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-
     class Meta:
         db_table = 'gsb_cours'
         verbose_name_plural = u'cours'
@@ -314,7 +313,6 @@ class Cat(models.Model):
     lastupdate = models.DateTimeField(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-
     class Meta:
         db_table = 'gsb_cat'
         verbose_name = u"catégorie"
@@ -349,7 +347,6 @@ class Ib(models.Model):
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
     lastupdate = models.DateTimeField(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
-
 
     class Meta:
         db_table = 'gsb_ib'
@@ -447,7 +444,7 @@ class Compte(models.Model):
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
                                            related_name="compte_moyen_debit_set", default=None)
     titre = models.ManyToManyField('Titre', through="Ope_titre")
-    lastupdate = models.DateTimeField(auto_now=True)
+    lastupdate = models_gsb.dtfield(auto_now=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:

@@ -2,7 +2,7 @@
 """"import_file : vue qui gere les import"""
 from __future__ import absolute_import
 import time
-import logging
+#import logging
 import os
 
 from django.conf import settings  # @Reimport
@@ -14,10 +14,10 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
-from . import forms as gsb_forms
-from .models import Tiers, Titre, Cat, Ib, Exercice, Compte, Moyen, Rapp, Ope
-from . import views
-from .utils import FormatException
+from .. import forms as gsb_forms
+from ..models import Tiers, Titre, Cat, Ib, Exercice, Compte, Moyen, Rapp, Ope
+from .. import views
+#from . import utils
 
 class ImportException(Exception):
     pass
@@ -34,7 +34,7 @@ class ImportForm1(gsb_forms.Baseform):
 
 class property_ope_base(object):
     """defini toutes le proprietes d'ope"""
-        
+
     @property
     def id(self):
         return None
@@ -122,11 +122,11 @@ class property_ope_base(object):
     @property
     def ligne(self):
         return 0
-    
+
     @property
     def has_fille(self):
         return False
-    
+
 
 class Import_base(views.Myformview):
     # chemin du template
@@ -143,8 +143,8 @@ class Import_base(views.Myformview):
     test = False
     creation_de_compte = False
     #affiche les resultats plutot qu'une importation
-    resultat=False
-    debug=False
+    resultat = False
+    debug = False
 
     def form_valid(self, form):
         # logger = logging.getLogger('gsb.import')
@@ -157,7 +157,7 @@ class Import_base(views.Myformview):
         # si le repertoire n'existe pas on le crée
         try:
             destination = open(nomfich, 'wb+')
-        except IOError :
+        except IOError:
             os.makedirs(os.path.join(settings.PROJECT_PATH, 'upload'))
             destination = open(nomfich, 'wb+')
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
@@ -165,27 +165,25 @@ class Import_base(views.Myformview):
         destination.close()
         # renomage ok
         # logger.debug(u"enregistrement fichier ok")
-        result=self.import_file(nomfich)
-        if  result == False:  # probleme importation
+        result = self.import_file(nomfich)
+        if result == False:  # probleme importation
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
             if self.debug:
                 os.remove(nomfich)
             if self.resultat:
-                return self.render_to_response(self.get_context_data(form=form,resultat=self.resultat))
+                return self.render_to_response(self.get_context_data(form=form, resultat=self.resultat))
             else:
                 return HttpResponseRedirect(self.get_success_url())
-            
 
     def import_file(self, nomfich):
-        logger = logging.getLogger('gsb.import')  # @UnusedVariable
         self.erreur = list()
         # definition du nom du fichier
         self.nb = dict()
         self.id = dict()
-        self.listes = { 'titre':dict(), 'cat':dict(), 'ib':dict(), 'tiers':dict(), 'moyen':dict(), 'rapp':dict(), 'compte':dict(), 'ope':dict(), 'exercice':dict() }
-        self.ajouter = {'titre':list(), 'cat':list(), 'ib':list(), 'tiers':list(), 'moyen':list(), 'rapp':list(), 'ope':list(), 'exercice':list(), "ope_titre":list()}
+        self.listes = {'titre': dict(), 'cat': dict(), 'ib': dict(), 'tiers': dict(), 'moyen': dict(), 'rapp': dict(), 'compte': dict(), 'ope': dict(), 'exercice': dict()}
+        self.ajouter = {'titre': list(), 'cat': list(), 'ib': list(), 'tiers': list(), 'moyen': list(), 'rapp': list(), 'ope': list(), 'exercice': list(), "ope_titre": list()}
         # personalisation avec ajout de compte
         if self.creation_de_compte:
             self.ajouter['compte'] = list()
@@ -204,7 +202,7 @@ class Import_base(views.Myformview):
         moyen_virement = Moyen.objects.filter(type='v')
         if moyen_virement.exists():
             self.listes['moyen'][moyen_virement[0].nom] = moyen_virement[0].id
-            self.listes['moyen']['Virement']=moyen_virement[0].id
+            self.listes['moyen']['Virement'] = moyen_virement[0].id
         else:
             self.listes['moyen']['Virement'] = Moyen.objects.create(nom='Virement', type="v").id
         # on gere la categorie Operation sur titre
@@ -217,7 +215,7 @@ class Import_base(views.Myformview):
             self.listes['cat'][Cat.objects.get(id=settings.ID_CAT_PMV).nom] = settings.ID_CAT_PMV
         except Cat.DoesNotExist:
             self.listes['moyen']['Revenus de placement:Plus-values'] = settings.ID_CAT_PMV
-            Cat.objects.create(id=settings.ID_CAT_PMV, nom='Revenus de placement:Plus-values', type="d")   
+            Cat.objects.create(id=settings.ID_CAT_PMV, nom='Revenus de placement:Plus-values', type="d")
         """        try:"""
         self.tableau_import(nomfich)
         if len(self.erreur):
@@ -233,7 +231,7 @@ class Import_base(views.Myformview):
                 return False
             else:
                 raise e"""
-    
+
         with transaction.commit_on_success():
             # import final
             # les comptes
@@ -249,7 +247,7 @@ class Import_base(views.Myformview):
                     raise ImportException("probleme alors que les comptes ne doivent pas etre cree, il y a en attente d'etre cree")
             # les tiers
             self.create('tiers', Tiers)
-            
+
             # les titres
             nb_ajout = 0
             for titre in self.ajouter['titre']:
@@ -317,11 +315,11 @@ class Import_base(views.Myformview):
             if not self.test:
                 print "troisieme tour"
             for obj in Ope.objects.filter(cat__nom="Virement"):
-                if obj.montant<0:
-                    nom= u"%s => %s"%(obj.compte.nom, obj.jumelle.compte.nom)
+                if obj.montant < 0:
+                    nom = u"%s => %s" % (obj.compte.nom, obj.jumelle.compte.nom)
                 else:
-                    nom= u"%s => %s"%(obj.jumelle.compte.nom, obj.compte.nom)
-                obj.tiers=Tiers.objects.get_or_create(nom=nom,defaults={"nom":nom})[0]
+                    nom = u"%s => %s" % (obj.jumelle.compte.nom, obj.compte.nom)
+                obj.tiers = Tiers.objects.get_or_create(nom=nom, defaults={"nom": nom})[0]
                 obj.save()
     def get_success_url(self):
         return reverse(self.url)
@@ -371,7 +369,7 @@ class Import_base(views.Myformview):
                 obj_id = self.ajout(obj=liste, model=model, nouveau=nouveau)
             self.listes[liste][name] = obj_id
         return obj_id
-            
+
     def ajout(self, obj, model, nouveau):
         try:
             last_id = self.id[obj]
@@ -385,12 +383,12 @@ class Import_base(views.Myformview):
             nouveau['id'] = last_id
         self.ajouter[obj].append(nouveau)
         return last_id
-    
+
     def tableau_import(self, nomfich):
         raise NotImplementedError(u"il faut definir comment on importe")
     def create(self, obj, model):
         nb_ajout = 0
-        nom_ajoute = [objet['nom'] for objet in self.ajouter[obj]] 
+        nom_ajoute = [objet['nom'] for objet in self.ajouter[obj]]
         try:
             for objet in self.ajouter[obj]:
                 model.objects.create(**objet)
@@ -400,4 +398,3 @@ class Import_base(views.Myformview):
         except KeyError as e:
             messages.error(self.request, e)
 
-        

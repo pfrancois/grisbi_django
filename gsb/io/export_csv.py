@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from gsb import models
-from . import utils
+from .. import models
+from .. import utils
 
 import logging
 from django.http import HttpResponse
 # from django.conf import settings
 # pour les vues
-import gsb.export_base as ex
-from .models import Ope_titre, Compte
+from . import export_base as ex
+from ..models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
-from gsb.utils import Excel_csv
+from ..utils import Excel_csv
 import csv
 
 
@@ -140,7 +140,6 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             'cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
         for ope in query:
             # id compte date montant
-            # print ope
             ligne = {'account name': ope.compte.nom}
             # date
             ligne['date'] = ope.date.strftime('%d/%m/%y')

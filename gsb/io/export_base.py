@@ -7,16 +7,17 @@ import codecs
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
-from .models import Compte, Ope
+from gsb.models import Compte, Ope
 
 #from django.views.generic.edit import FormView
-from gsb.views import Myformview as FormView
-from gsb import forms as gsb_forms
+from ..views import Myformview as FormView
+from .. import forms as gsb_forms
 #from gsb import models
 from django.db import models as models_agg
 from django import forms
 import time
-from gsb.utils import Excel_csv
+from ..utils import Excel_csv
+from .. import utils as utils
 
 
 class Writer_base(object):
@@ -89,7 +90,6 @@ class Csv_unicode_writer(Writer_base):
         except AttributeError:
             self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
 
-
 class Exportform_ope(gsb_forms.Baseform):
     collection = forms.ModelMultipleChoiceField(
         Compte.objects.all(), required=False, label="Comptes")
@@ -106,7 +106,8 @@ class Exportform_ope(gsb_forms.Baseform):
         data = self.cleaned_data
         ensemble = [objet.id for objet in data["collection"]]
         self.query = self.model_initial.objects.filter(
-            date__gte=data['date_min'], date__lte=data['date_max'])
+            date__gte=getattr(data, 'date_min', utils.now()),
+            date__lte=getattr(data, 'date_max', utils.now()))
         if ensemble == [] or len(ensemble) == self.model_collec.objects.count():
             pass
         else:

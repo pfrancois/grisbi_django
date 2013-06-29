@@ -2,22 +2,22 @@
 from __future__ import absolute_import
 
 
-from .models import Titre,Compte
+from ..models import Titre, Compte
 from . import import_base
-from . import utils
+from .. import utils
 
 def mot(var):
     return var.partition(' ')[0].strip()
 def reste(var):
     return var.partition(' ')[2].strip()
 def mots(var):
-    tour=var.split(' ')
-    tour1=[]
+    tour = var.split(' ')
+    tour1 = []
     for i in tour:
-        if i.strip() !='':
+        if i.strip() != '':
             tour1.append(i.strip())
     return tour1
-    
+
 
 class csv_sg_reader(utils.Csv_unicode_reader):
     @property
@@ -28,20 +28,20 @@ class csv_sg_reader(utils.Csv_unicode_reader):
         return self.row['detail'].strip()
     @property
     def det(self):
-        tour1=mots(self.detail)
-        retour=None
+        tour1 = mots(self.detail)
+        retour = None
         try:
-            if tour1[1]=="EUROPEEN":
-                tour1=' '.join(tour1[4:])
-                retour=tour1
-            if self.moyen=="VIR RECU":
-                retour=' '.join(tour1[3:])
+            if tour1[1] == "EUROPEEN":
+                tour1 = ' '.join(tour1[4:])
+                retour = tour1
+            if self.moyen == "VIR RECU":
+                retour = ' '.join(tour1[3:])
             if retour is None:
-                retour=' '.join(tour1[2:])
+                retour = ' '.join(tour1[2:])
         except IndexError:
-            retour=' '.join(tour1[1:])
+            retour = ' '.join(tour1[1:])
         return retour.strip()
-    
+
     @property
     def id(self):
         return None
@@ -62,26 +62,25 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     def date(self):
         if self.moyen != "visa":
             try:
-                if mots(self.detail)[2]=="RETRAIT":
-                    annee=utils.to_date(self.row['date'], "%d/%m/%Y").year
+                if mots(self.detail)[2] == "RETRAIT":
+                    annee = utils.to_date(self.row['date'], "%d/%m/%Y").year
                     if mots(self.detail)[4] != "SG":
-                        return utils.to_date("%s/%s"%(mots(self.detail)[4],annee), "%d/%m/%Y")
+                        return utils.to_date("%s/%s" % (mots(self.detail)[4], annee), "%d/%m/%Y")
                     else:
-                        return utils.to_date("%s/%s"%(mots(self.detail)[5],annee), "%d/%m/%Y")
+                        return utils.to_date("%s/%s" % (mots(self.detail)[5], annee), "%d/%m/%Y")
             except IndexError:
                 return utils.to_date(self.row['date'], "%d/%m/%Y")
         else:
             #paiment visa
-            annee=utils.to_date(self.row['date'], "%d/%m/%Y").year
-            return utils.to_date("%s/%s"%(mots(self.detail)[2],annee), "%d/%m/%Y")
-                
+            annee = utils.to_date(self.row['date'], "%d/%m/%Y").year
+            return utils.to_date("%s/%s" % (mots(self.detail)[2], annee), "%d/%m/%Y")
 
     @property
     def date_val(self):
-        if self.moyen=="visa":
+        if self.moyen == "visa":
             return utils.to_date(self.row['date'].strip(), "%d/%m/%Y")
         else:
-            return None 
+            return None
 
     @property
     def exercice(self):
@@ -94,12 +93,12 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     @property
     def jumelle(self):
         #un retrait
-        if self.detail[:19]==u"CARTE X4983 RETRAIT":
+        if self.detail[:19] == u"CARTE X4983 RETRAIT":
             return "caisse"
-        if self.det[:14]=="GENERATION VIE":
+        if self.det[:14] == "GENERATION VIE":
             return "generation vie"
-        if self.det[:16]=="Gr Bque - Banque":
-            return "BDF PEE"  
+        if self.det[:16] == "Gr Bque - Banque":
+            return "BDF PEE"
         return None
 
     @property
@@ -112,18 +111,18 @@ class csv_sg_reader(utils.Csv_unicode_reader):
 
     @property
     def moyen(self):
-        m=mots(self.detail)
-        if mots(self.detail)[0]=="CARTE":
-            if mots(self.detail)[2] !="RETRAIT":
-                moyen="visa" 
+        m = mots(self.detail)
+        if mots(self.detail)[0] == "CARTE":
+            if mots(self.detail)[2] != "RETRAIT":
+                moyen = "visa"
             else:
-                moyen="virement"
-        elif m[0]=="VIR" and m[1]=="RECU":
-            moyen="recette"
-        elif m[0]=="CHEQUE":
-            moyen="cheque"
+                moyen = "virement"
+        elif m[0] == "VIR" and m[1] == "RECU":
+            moyen = "recette"
+        elif m[0] == "CHEQUE":
+            moyen = "cheque"
         else:
-            moyen="prelevement"
+            moyen = "prelevement"
         return moyen
 
     @property
@@ -132,7 +131,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
 
     @property
     def num_cheque(self):
-        if self.moyen=="CHEQUE":
+        if self.moyen == "CHEQUE":
             return int(self.detail.partition(' ')[2].strip())
         else:
             return None
@@ -151,15 +150,15 @@ class csv_sg_reader(utils.Csv_unicode_reader):
 
     @property
     def tiers(self):
-        if self.moyen=="cheque":
+        if self.moyen == "cheque":
             return "inconnu"
-        if self.moyen=="virement" and self.mt<0:
-            return "%s=>%s"%(self.cpt,self.jumelle)
-        if self.moyen=="virement" and self.mt>0:
-            return "%s=>%s"%(self.jumelle,self.cpt)
-        if self.moyen=="visa":
+        if self.moyen == "virement" and self.mt < 0:
+            return "%s=>%s" % (self.cpt, self.jumelle)
+        if self.moyen == "virement" and self.mt > 0:
+            return "%s=>%s" % (self.jumelle, self.cpt)
+        if self.moyen == "visa":
             return " ".join(mots(self.detail)[3:])
-        if "%s %s"%(mots(self.detail)[0],mots(self.detail)[1])=="VIR RECU":
+        if "%s %s" % (mots(self.detail)[0], mots(self.detail)[1]) == "VIR RECU":
             return " ".join(mots(self.detail)[4:6])
         return self.det.lower()
 
@@ -178,11 +177,10 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     @property
     def ligne(self):
         return self.line_num
-    
+
     @property
     def has_fille(self):
         return False
-
 
 
 class Import_csv_ope_titre(import_base.Import_base):
@@ -190,22 +188,22 @@ class Import_csv_ope_titre(import_base.Import_base):
     extension = ("csv",)
     type_f = "csv_ope_titres"
     creation_de_compte = False
-    
+
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
         self.erreur = list()
         self.nb = dict()
         self.id = dict()
-        liste={'titre':dict(),'compte':dict()}
+        liste = {'titre': dict(), 'compte': dict()}
         for titre in Titre.objects.all():
-            liste['titre'][titre.nom]=titre.id
+            liste['titre'][titre.nom] = titre.id
         for compte in Compte.objects.all():
-            liste['compte'][compte.nom]=compte.id
+            liste['compte'][compte.nom] = compte.id
 
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1")
-            verif_format=False
-            opes=list()
+            verif_format = False
+            opes = list()
             for row in fich:
                 if not verif_format:
                     try:
@@ -218,16 +216,16 @@ class Import_csv_ope_titre(import_base.Import_base):
                     except KeyError as excp:
                         raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
                     else:
-                        verif_format=True                        
+                        verif_format = True
                 ope = dict()
                 ope['ligne'] = row.ligne
-                ope['date']=row.date
-                ope['compte']=liste['compte'][row.compte]
-                ope["titre"]=liste['titre'][row.titre]
-                ope['nombre']=row.nombre
-                ope['cours']=row.cours
-                ope['taxes']=row.taxes
+                ope['date'] = row.date
+                ope['compte'] = liste['compte'][row.compte]
+                ope["titre"] = liste['titre'][row.titre]
+                ope['nombre'] = row.nombre
+                ope['cours'] = row.cours
+                ope['taxes'] = row.taxes
                 opes.append(ope)
-        self.resultat=opes
+        self.resultat = opes
         return True
-    
+

@@ -20,53 +20,10 @@ class CurField(models.DecimalField):
         super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
 
     def get_internal_type(self):
-        return "DecimalField"
+        return models.DecimalField.__name__
 
     def __mul__(self, other):
         return decimal.Decimal(self) * decimal.Decimal(other)
-
-
-class UnixTimestampField(models.DateTimeField):
-    """UnixTimestampField: creates a DateTimeField that is represented on the
-    database as a TIMESTAMP field rather than the usual DATETIME field.
-    """
-    description = "utilisation des timestamp"
-    __metaclass__ = models.SubfieldBase
-
-    def __init__(self, null=False, blank=False, **kwargs):
-        super(UnixTimestampField, self).__init__(**kwargs)
-        # default for TIMESTAMP is NOT NULL unlike most fields, so we have to
-        # cheat a little:
-        self.blank, self.isnull = blank, null
-        self.null = True  # To prevent the framework from shoving in "not null".
-        self.editable = False
-
-    def db_type(self, connection):
-        typ = ['TIMESTAMP']
-        # See above!
-        if self.isnull:
-            typ += ['NULL']
-        return ' '.join(typ)
-
-    def to_python(self, value):
-        if value is None:
-            return None
-        elif value == "":
-            return date.fromtimestamp(1)
-        else:
-            value = u"%s" % value
-            return date.fromtimestamp(float(value.replace(",", ".")))
-
-    def get_db_prep_value(self, value, connection, prepared=False):
-        if value is None:
-            return None
-        return mktime(value.timetuple())
-
-    def formfield(self, **kwargs):
-        defaults = {'form_class': forms.DateTimeField}
-        defaults.update(kwargs)
-        return super(UnixTimestampField, self).formfield(**kwargs)
-
 
 class ExtFileField(forms.FileField):
     """
@@ -135,3 +92,11 @@ class uuidfield(models.CharField):
                 value = unicode(utils.uuid())
                 setattr(model_instance, self.attname, value)
         return value
+
+class dtfield(models.DateTimeField):
+    def __init(self):
+        super(dtfield, self).__init__(auto_now=True)
+    def get_internal_type(self):
+        return models.DateTimeField.__name__
+    def time(self):
+        return mktime(self.timetuple())

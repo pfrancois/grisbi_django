@@ -2,8 +2,9 @@
 from __future__ import absolute_import
 from django.conf.urls import patterns, url
 # from django.conf.urls import include #non utilise actuellement
-from . import export_csv, export_qif, views, outils, import_csv, export_sql_money
-from . import import_titre_csv as import_titres
+from . import views, outils
+from .io import import_csv, export_sql_money, export_csv, export_qif
+from .io import import_titre_csv as import_titres
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -33,7 +34,7 @@ urlpatterns += patterns('gsb',
                         ),
                         #export au format 0_5_0 grisbi
                         url(r'^options/export/gsb050$',
-                            'export_gsb_0_5_0.export',
+                            'io.export_gsb_0_5_0.export',
                             name='export_gsb_050'
                         ),
                         #export au format general en csv
@@ -62,7 +63,7 @@ urlpatterns += patterns('gsb',
                         )
 )
 #impor gsb 0_5_0
-urlpatterns += patterns('gsb.import_gsb',
+urlpatterns += patterns('gsb.io.import_gsb',
                         url(r'options/import_gsb$',
                             'import_gsb_0_5_x',
                             name="import_gsb")

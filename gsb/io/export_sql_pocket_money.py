@@ -1,34 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import csv
 from . import models
 from django.db import models as models_agg
 import time
 from . import utils
-from cStringIO import StringIO
-import codecs
 
 from gsb import export_base
 from django.core import exceptions as django_exceptions
 from django.http import HttpResponse
-
-
-class Writer_sql(export_base.Writer_base):
-    def __init__(self, encoding="utf-8", fich=None, **kwds):
-        self.queue = StringIO()
-        codecinfo = codecs.lookup("utf8")
-        wrapper = codecs.StreamReaderWriter(self.queue, codecinfo.streamreader, codecinfo.streamwriter)
-        if fich is not None:
-            self.stream = fich
-        else:
-            self.stream = wrapper
-        self.encoding = encoding
-    def writerow(self, row):
-        self.stream.write(row)
-        self.stream.write('\n')
-    def w(self, row):
-        self.writerow(row)
-
+from sql.pg import sqlite_db as db
 
 class Export_view_sql(export_base.ExportViewBase):
     extension_file = "sql"
@@ -38,9 +18,102 @@ class Export_view_sql(export_base.ExportViewBase):
     form_class = export_base.Exportform_ope
     titre = "export sql pocket money"
     def export(self, query):
+        self.debug = True
+        sql = db()
+        sql.query("""CREATE TABLE preferences
+    (
+    'databaseVersion'       INTEGER,
+    'databaseID'            INTEGER,
+    'multipleCurrencies'        BOOLEAN,
+    'nextServerID'          INTEGER                                 -- db version 20
+    );""")
+        sql.query("INSERT INTO preferences VALUES(33, -6085268008074527042, NULL, NULL);")
+        sql.query("""CREATE TABLE accounts(
+    'deleted'           BOOLEAN DEFAULT 0,
+    'timestamp'         INTEGER,
+    'accountID'         INTEGER PRIMARY KEY AUTOINCREMENT,
+    'displayOrder'          INTEGER,
+    'account'           TEXT,
+    'balanceOverall'        REAL,                                   -- not used
+    'balanceCleared'        REAL,                                   -- not used
+    'type'              INTEGER,
+    'accountNumber'         TEXT,
+    'institution'           TEXT,
+    'phone'             TEXT,
+    'expirationDate'        TEXT,
+    'checkNumber'           TEXT,
+    'notes'             TEXT,
+    'iconFileName'          TEXT,
+    'url'               TEXT,
+    'ofxid'             TEXT,
+    'ofxurl'            TEXT,
+    'password'          TEXT,
+    'fee'               REAL,
+    'fixedPercent'          INTEGER,
+    'limitAmount'           REAL,
+    'noLimit'           BOOLEAN DEFAULT 1,
+    'totalWorth'            BOOLEAN DEFAULT 1,
+    'exchangeRate'          REAL,
+    'currencyCode'          TEXT,
+    'lastSyncTime'          INTEGER DEFAULT 0,
+    'routingNumber'         TEXT,                                   -- db version 14
+    'overdraftAccountID'        INTEGER,                                -- db version 17
+    'keepTheChangeAccountID'    INTEGER,                                -- db version 22
+    'keepChangeRoundTo'     REAL,                                   -- db version 26
+    'serverID'          TEXT                                    -- db version 20
+    );""")
+        i = 0
+        soldes = models.Compte.objects.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models_agg.Sum('ope__montant')).order_by('id')
+        table_de_passage_type_compte = {"b": 0, "e": 1, "p": 6, "t": 7, "a": 3}
+        for cpt in soldes:
+            i = i + 1
+            param = {}
+            param['deleted'] = 0
+            param['timestamp'] = utils.timestamp()
+            param['accountID'] = utils.idtostr(cpt, defaut='0', membre='id')
+            param['displayOrder'] = i
+            param['account'] = utils.idtostr(cpt, membre='nom', defaut='')
+            param['balanceOverall'] = utils.idtostr(cpt, membre='solde', defaut=0.0)
+            param['balanceCleared'] = 0.0
+            param['type'] = table_de_passage_type_compte[cpt.type]
+            param['accountNumber'] = utils.idtostr(cpt, membre='nom', defaut='')
+            param['institution'] = utils.idtostr(cpt.banque, membre='nom', defaut='')
+            param['phone'] = ''
+            param['expirationDate'] = ''
+            param['checkNumber'] = ''
+            param['notes'] = utils.idtostr(cpt, membre='notes', defaut='')
+            param['iconFileName'] = ''
+            param['url'] = ''
+            param['ofxid'] = ''
+            param['ofxurl'] = ""
+            param['password'] = ''
+            param['fee'] = 0.0
+            param['fixedPercent'] = 0
+            param['limitAmount'] = '0, '
+            param['noLimit'] = 0
+            param['totalWorth'] = 1
+            param['exchangeRate'] = 1
+            param['currencyCode'] = 'EUR'
+            param['lastSyncTime'] = 0
+            param['routingNumber'] = ''
+            param['overdraftAccountID'] = ''
+            param['keepTheChangeAccountID'] = ''
+            param['keepChangeRoundTo'] = ''
+            param['serverID'] = utils.idtostr(cpt)
+
+        return HttpResponse(sql.dump(), mimetype="text/plain")
+
+class Export_view_sql2(export_base.ExportViewBase):
+    extension_file = "sql"
+    debug = True
+    nomfich = "export_full"
+    model_initial = models.Ope
+    form_class = export_base.Exportform_ope
+    titre = "export sql pocket money"
+    def export(self, query):
         self.titre = "export sql pocket money"
         self.debug = True
-        sql = Writer_sql()
+        sql = db()
         s = ("""BEGIN TRANSACTION;
 CREATE TABLE preferences
     (

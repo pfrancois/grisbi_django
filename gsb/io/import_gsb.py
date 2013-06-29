@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from django.db import connection, transaction
 
 import time
 import decimal
 import logging
 import os
+try:
+    from lxml import etree as et
+except ImportError:
+    from xml.etree import cElementTree as et
+from django.db import connection, transaction
+
 from django.conf import settings  # @Reimport
 from django.contrib.auth.decorators import login_required
 import django.utils.encoding as dj_encoding
@@ -14,15 +19,11 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
-from .models import (Tiers, Titre, Cat, Ope, Banque, Ib,
+from ..models import (Tiers, Titre, Cat, Ope, Banque, Ib,
                      Exercice, Rapp, Moyen, Echeance, Compte, Ope_titre)
 from .import_base import ImportException, ImportForm1
-try:
-    from lxml import etree as et
-except ImportError:
-    from xml.etree import cElementTree as et
 
-from . import utils
+from .. import utils
 
 
 @login_required

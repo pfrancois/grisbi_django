@@ -10,8 +10,8 @@ from django.http import HttpResponse
 from .export_base import ExportViewBase, Exportform_ope, Writer_base
 from django.core.exceptions import ObjectDoesNotExist
 # django
-from .models import Cat, Ib, Compte, Ope
-from . import utils
+from ..models import Cat, Ib, Compte, Ope
+from .. import utils
 
 
 def convert_type2qif(type_a_transformer):

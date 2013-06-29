@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 
-from .models import (Compte, Ope, Tiers, Cat, Moyen,
+from ..models import (Compte, Ope, Tiers, Cat, Moyen,
                      Echeance, Ib, Banque, Exercice, Rapp, Titre)
 from django.http import HttpResponse
 # from django.core.exceptions import ObjectDoesNotExist
@@ -17,7 +17,7 @@ try:
 except ImportError:
     from xml.etree import cElementTree as et
 import logging
-from . import utils
+from .. import utils
 # definitions des listes
 liste_type_cat = Cat.typesdep
 liste_type_moyen = Moyen.typesdep
@@ -38,9 +38,7 @@ def _export():
                 list_cats[cat_en_cours.id] = {
                     'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}, 'scat': None}
         except ValueError:
-            list_cats[cat_en_cours.id] = {
-            'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}
-                , 'scat': None}
+            list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}, 'scat': None}
             # creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
