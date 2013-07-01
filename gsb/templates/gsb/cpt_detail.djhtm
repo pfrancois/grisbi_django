@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
     {% block bouton_haut %}
         <table width="100%" id="boutons_haut" class="table">

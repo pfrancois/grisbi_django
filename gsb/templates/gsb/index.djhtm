@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block titre %}<h1 class="survol"><a href="{% url 'outils_index' %}">Comptes</a>
     </h1>{% endblock titre %}
 {% block content %} <h2>comptes esp&egrave;ces ou bancaires</h2>

@@ -1,4 +1,4 @@
-{% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load url from future %}
+{% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block bouton_haut %}
     <table width="100%" id="boutons" class="table">
         <tr class="boutton">

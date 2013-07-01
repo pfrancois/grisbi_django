@@ -1,5 +1,4 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
-{% load url from future %}
 {% block title %}importation d'un fichier{% endblock title %}
 {% block titre %}<h1>importation d'un fichier</h1>{% endblock %}
 {% block content %}

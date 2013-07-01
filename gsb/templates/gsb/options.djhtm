@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block titre %}<h1>Outils</h1>{% endblock titre %}
 {% block content %}
     <a href="{% url 'export_index' %}" class="progress"> exporter </a><br/>

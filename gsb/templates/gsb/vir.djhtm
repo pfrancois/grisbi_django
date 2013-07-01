@@ -1,4 +1,4 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load url from future %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
     {% load gsb_extras %}
     {% if ope %}

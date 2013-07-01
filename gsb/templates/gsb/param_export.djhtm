@@ -1,5 +1,4 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
-{% load url from future %}
 {% load gsb_extras %}
 {% block content %}
     {% if form.errors %}<h1>Merci de corriger les erreurs suivantes</h1>
