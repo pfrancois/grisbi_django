@@ -105,12 +105,12 @@ class Index_view(Mytemplateview):
             # calcul du solde des bq
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
-        soldes=self.bq.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models.Sum('ope__montant'))
+        soldes = self.bq.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models.Sum('ope__montant'))
         for p in soldes:
-            cpt = {'solde':p.solde,
-                 'nom':p.nom,
-                 'url':p.get_absolute_url(),
-                 'ouvert':p.ouvert}
+            cpt = {'solde': p.solde,
+                 'nom': p.nom,
+                 'url': p.get_absolute_url(),
+                 'ouvert': p.ouvert}
             if cpt['solde'] is not None:
                 self.total_bq += cpt['solde']
             self.bqe.append(cpt)
@@ -118,10 +118,10 @@ class Index_view(Mytemplateview):
         self.total_pla = decimal.Decimal('0')
         self.pla = []
         for p in self.pl:
-            cpt = {'solde':p.solde(),
-                 'nom':p.nom,
-                 'url':p.get_absolute_url(),
-                 'ouvert':p.ouvert}
+            cpt = {'solde': p.solde(),
+                 'nom': p.nom,
+                 'url': p.get_absolute_url(),
+                 'ouvert': p.ouvert}
             self.pla.append(cpt)
             if cpt['solde'] is not None:
                 self.total_pla += cpt['solde']
@@ -129,7 +129,7 @@ class Index_view(Mytemplateview):
         return super(Index_view, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return  {
+        return {
             'titre': 'liste des comptes',
             'liste_cpt_bq': self.bqe,
             'liste_cpt_pl': self.pla,
@@ -219,11 +219,11 @@ class Cpt_detail_view(Mytemplateview):
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
             #gestion des ope anciennes
-            if not (self.all  or self.rapp):
-                q=q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year-1))
+            if not (self.all or self.rapp):
+                q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year-1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
-            
+
         else:
             #---------pour le compte titre
             self.espece = False
@@ -271,21 +271,21 @@ class Cpt_detail_view(Mytemplateview):
             "all": u"Ensemble des opérations"
         }
         c = args[0]
-        solde_espece=c.solde(espece=True)
-        solde_r_esp=c.solde(rapp=True, espece=True)
+        solde_espece = c.solde(espece=True)
+        solde_r_esp = c.solde(rapp=True, espece=True)
         try:
-            solde_p_pos=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
+            solde_p_pos = Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
-            solde_p_pos=0
+            solde_p_pos = 0
         if solde_p_pos is None:
-            solde_p_pos=0
+            solde_p_pos = 0
 
         try:
-            solde_p_neg=Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
+            solde_p_neg = Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
-            solde_p_neg=0
+            solde_p_neg = 0
         if solde_p_neg is None:
-            solde_p_neg=0
+            solde_p_neg = 0
 
         if self.espece:
             context = {'compte': c,
@@ -311,7 +311,7 @@ class Cpt_detail_view(Mytemplateview):
                 'titres': args[1],
                 'especes': solde_espece
             }
-        
+
         return context
 
 
@@ -360,8 +360,8 @@ def ope_detail(request, pk):
                 if not form.cleaned_data['tiers']:
                     form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
                                                                       defaults={
-                                                                      'nom': form.cleaned_data['nouveau_tiers']
-                                                                          , }
+                                                                      'nom': form.cleaned_data['nouveau_tiers'],
+                                                                      }
                     )[0]
                     messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
                 if not ope.rapp:
@@ -369,7 +369,7 @@ def ope_detail(request, pk):
                     ope = form.save()
                 else:
                     # verification que les données essentielles ne sont pas modifiés
-                    if has_changed(ope, 'montant') or  has_changed(ope, 'compte'
+                    if has_changed(ope, 'montant') or has_changed(ope, 'compte'
                                                 ) or has_changed(ope,'pointe'
                                                 ) or has_changed(ope, 'jumelle'
                                                 ) or has_changed(ope, 'mere'):
@@ -412,7 +412,6 @@ def ope_new(request, cpt_id=None):
             # retour vers
             return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
         else:
-            # TODO message
             return render(request, 'gsb/ope.djhtm',
                           {'titre': u'création',
                            'titre_long': u'création opération',
@@ -452,7 +451,12 @@ def vir_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (
-            ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date.strftime('%d/%m/%Y')))
+                ope.compte,
+                ope.jumelle.compte,
+                ope.jumelle.montant,
+                ope.date.strftime('%d/%m/%Y')
+                )
+            )
             return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/vir.djhtm',
@@ -529,7 +533,7 @@ def maj_cours(request, pk):
 
 
 @login_required
-def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False): 
+def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si rapp affiche uniquement les rapp
     si all affiche toute les ope
@@ -738,7 +742,7 @@ def dividende(request, cpt_id):
         form = gsb_forms.Ope_titre_dividendeForm(data=request.POST, cpt=compte)
         if form.is_valid():
             compte = form.cleaned_data['compte_titre']
-            tiers=form.cleaned_data['titre'].tiers
+            tiers = form.cleaned_data['titre'].tiers
             Ope.objects.create(date=form.cleaned_data['date'],
                                compte=form.cleaned_data['compte'],
                                montant=form.cleaned_data['montant'],
@@ -825,8 +829,7 @@ def ope_titre_vente(request, cpt_id):
                    'cpt': compte,
                    'sens': 'vente'}
     )
-   
-    
+
 @login_required
 def search_opes(request):
     if request.method == 'POST':
@@ -894,8 +897,8 @@ def perso(request):
 
 
 class Titre_view(generic.ListView):
-    model=Cours
-    template_name='gsb/liste_titre.djhtm'
+    model = Cours
+    template_name = 'gsb/liste_titre.djhtm'
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
