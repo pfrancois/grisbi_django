@@ -7,6 +7,7 @@ from django.db import models
 from django import forms
 import gsb.utils as utils
 
+
 # definition d'un moneyfield
 class CurField(models.DecimalField):
     """
@@ -92,11 +93,3 @@ class uuidfield(models.CharField):
                 value = unicode(utils.uuid())
                 setattr(model_instance, self.attname, value)
         return value
-
-class dtfield(models.DateTimeField):
-    def __init(self):
-        super(dtfield, self).__init__(auto_now=True)
-    def get_internal_type(self):
-        return models.DateTimeField.__name__
-    def time(self):
-        return mktime(self.timetuple())
