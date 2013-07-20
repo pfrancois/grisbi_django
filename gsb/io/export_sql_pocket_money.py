@@ -27,6 +27,7 @@ class Export_view_sql(export_base.ExportViewBase):
     'multipleCurrencies'        BOOLEAN,
     'nextServerID'          INTEGER                                 -- db version 20
     );""")
+
         sql.query("INSERT INTO preferences VALUES(33, -6085268008074527042, NULL, NULL);")
         sql.query("""CREATE TABLE accounts(
     'deleted'           BOOLEAN DEFAULT 0,
@@ -100,6 +101,11 @@ class Export_view_sql(export_base.ExportViewBase):
             param['keepTheChangeAccountID'] = ''
             param['keepChangeRoundTo'] = ''
             param['serverID'] = utils.idtostr(cpt)
+            sql.query("""insert into category VALUES(:deleted,:timestamp,:accountID,:displayOrder,:account,:balanceOverall,:type,
+                                                     :accountNumber,:institution,:phone,:expirationDate,:checkNumber,:notes,
+                                                     :iconFileName,:url, :ofxid, :ofxurl,:password, :fee, :fixedPercent,
+                                                     :limitAmount, :noLimit, :totalWorth, :exchangeRate, :currencyCode, :lastSyncTime,
+                                                     :routingNumber, :overdraftAccountID, :keepTheChangeAccountID, :keepChangeRoundTo, :serverID);""", param)
 
         return HttpResponse(sql.dump(), mimetype="text/plain")
 
