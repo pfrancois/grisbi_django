@@ -225,8 +225,11 @@ class Titre(models.Model):
             # gestion de la date
             if opes.exists():
                 liste = []
-                if datel:
-                    liste.append(utils.strpdate(datel))
+                if datel is not None:
+                    try:
+                        liste.append(utils.strpdate(datel))
+                    except TypeError:
+                        liste.append(datel)
                 liste.append(self.last_cours_date(rapp=rapp))
                 date_r = min(liste)
                 # ca veut dire pas d"ope
@@ -446,7 +449,7 @@ class Compte(models.Model):
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL,
                                            related_name="compte_moyen_debit_set", default=None)
     titre = models.ManyToManyField('Titre', through="Ope_titre")
-    lastupdate = models_gsb.dtfield(auto_now=True)
+    lastupdate = ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -675,12 +678,16 @@ class Compte(models.Model):
         # il n'y a pas d'operation
         if datel is not None:
             try:
-                datel > utils.today()  # @UnusedVariable
+                datel = min(datel, utils.today())  # @UnusedVariable
             except TypeError:
-                datel = utils.strpdate(datel)
+                datel = min(utils.strpdate(datel), utils.today())
         else:
-            return 0
-        if not self.ope_set.exists() or (datel is not None and self.ope_set.order_by('date')[0].date > datel):
+            datel = utils.today()
+        # si il n'y a pas d'operations
+        try:
+            if self.ope_set.latest('date').date > datel:
+                return 0
+        except Ope.DoesNotExist:
             return 0
         for titre in self.titre.all().distinct():
             solde_titre = solde_titre + titre.encours(compte=self, rapp=rapp, datel=datel)
@@ -728,8 +735,7 @@ class Ope_titre(models.Model):
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
         try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV,
-                                                defaults={'nom': u'Revenus de placement:Plus-values'})[0]
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values'})[0]
         except IntegrityError:
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
@@ -828,7 +834,6 @@ class Ope_titre(models.Model):
                 self.ope_pmv.moyen = moyen
                 self.ope_pmv.compte = self.compte
                 self.ope_pmv.save()
-
         super(Ope_titre, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

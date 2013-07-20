@@ -20,8 +20,11 @@ from .. import views
 #from . import utils
 
 class ImportException(Exception):
-    pass
+    def __init__(self, message):
+        self.msg = message
 
+    def __str__(self):
+        return repr(self.msg)
 
 class ImportForm1(gsb_forms.Baseform):
     nom_du_fichier = gsb_forms.forms.FileField()
@@ -331,6 +334,7 @@ class Import_base(views.Myformview):
         return form
 
     def post(self, request, *args, **kwargs):
+        self.request=request
         form = self.get_form(self.form_class)
         if form.is_valid():
             nomfich = form.cleaned_data['nom_du_fichier'].name
