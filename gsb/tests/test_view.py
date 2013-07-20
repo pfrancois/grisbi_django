@@ -12,10 +12,8 @@ from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
-import logging
-import gsb.import_csv as import_csv
+from ..io import import_csv as import_csv
 from ..models import (Tiers, Cat, Ope)
-from gsb.import_base import ImportException 
 
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
@@ -30,16 +28,15 @@ class Test_import_csv(TestCase):
     def setUp(self):
         super(TestCase, self).setUp()
         self.client.login(username='admin', password='mdp')
-        self.path=os.path.join(settings.PROJECT_PATH, "gsb", "test_files")
+        self.path = os.path.join(settings.PROJECT_PATH, "gsb", "test_files")
 
     def test_cpt_none(self):
-        imp=import_csv.Import_csv_ope()
-        imp.test=True
-        result=imp.import_file(os.path.join(self.path, "test_cpt_null.csv"))
-        
+        imp = import_csv.Import_csv_ope()
+        imp.test = True
+        #result = imp.import_file(os.path.join(self.path, "test_cpt_null.csv"))
+
 
 class Test_import(Test_view_base):
-    
     def test_import_ok(self):
         self.cls = import_csv.Import_csv_ope()
         self.cls.listes = dict()
@@ -102,7 +99,7 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/titre/1/rapp').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
-        
+
 class Test_views_general(Test_view_base):
     def test_view_index(self):
         resp = self.client.get('/')
@@ -116,7 +113,7 @@ class Test_views_general(Test_view_base):
 
     @mock.patch('gsb.utils.today')
     def test_view_cpt_detail(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+        today_mock.return_value = datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_detail', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
@@ -128,7 +125,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 10)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
-        self.assertQueryset(resp.context['list_ope'], [ 8, 12, 13])
+        self.assertQueryset(resp.context['list_ope'], [8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
         resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
@@ -160,7 +157,7 @@ class Test_views_general(Test_view_base):
 
     @mock.patch('gsb.utils.today')
     def test_view_cpt_espece(self, today_mock):
-        today_mock.return_value=datetime.date(2012, 10, 14)
+        today_mock.return_value = datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')

@@ -185,10 +185,9 @@ CREATE TABLE payment (
         if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"
-            reponse[
-                "Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                            time.strftime(
-                                                                            "%d_%m_%Y-%H_%M_%S",
-                                                                            utils.timestamp()), self.extension_file
-                                                                            )
+            reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
+                                                                                time.strftime(
+                                                                                "%d_%m_%Y-%H_%M_%S",
+                                                                                utils.timestamp()), self.extension_file
+                                                                                )
         return reponse

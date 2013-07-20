@@ -293,7 +293,7 @@ def idtostr(obj,  membre='id', defaut='0'):
 
 def nulltostr(s):
     if s == '':
-        return null
+        return 'NULL'
     else:
         return s
 

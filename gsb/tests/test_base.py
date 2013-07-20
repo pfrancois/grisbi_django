@@ -6,7 +6,6 @@ import logging
 
 
 @override_settings(ID_CPT_M=1)
-@override_settings(MD_CREDIT=1)
 @override_settings(MD_DEBIT=1)
 @override_settings(MD_CREDIT=4)
 @override_settings(ID_CAT_COTISATION=3)

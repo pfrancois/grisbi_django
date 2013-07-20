@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .test_base import TestCase
 from ..import utils
 import datetime
-from ..models import Exercice, Cat, Ope,Compte
+from ..models import Exercice, Cat, Ope
 import decimal
 import mock
 import time

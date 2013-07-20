@@ -9,8 +9,8 @@ from __future__ import absolute_import
 from .test_base import TestCase as Tcd
 from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, \
     Cat, Ib, Exercice, Moyen, Rapp
-from ..import_gsb import import_gsb_050
-from gsb.import_base import ImportException
+from ..io.import_gsb import import_gsb_050
+from ..io.import_base import ImportException
 import decimal
 import datetime
 from django.db import models

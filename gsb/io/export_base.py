@@ -7,7 +7,7 @@ import codecs
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
-from gsb.models import Compte, Ope
+from ..models import Compte, Ope
 
 #from django.views.generic.edit import FormView
 from ..views import Myformview as FormView

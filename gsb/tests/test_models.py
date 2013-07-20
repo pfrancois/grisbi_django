@@ -313,7 +313,7 @@ class Test_models(TestCase):
         t.cours_set.create(date='2012-07-18', valeur=2)
         self.assertEqual(c.solde(), 1)
         # solde a une date anterieur
-        teston = c.solde(datel=strpdate('2012-01-01'))
+        teston = c.solde(datel=strpdate('2010-01-01'))
         self.assertEqual(teston, 0)
         teston = c2.solde(rapp=True)
         self.assertEqual(teston, 0)
@@ -337,6 +337,7 @@ class Test_models(TestCase):
         c = Compte.objects.get(id=4)
         t = Titre.objects.get(nom="t1")
         # utilisation des cat et tiers par defaut
+        self.assertEqual(c.solde(), 0)
         self.assertEqual(t.investi(c), 1)
         c.achat(titre=t, nombre=20, frais=20, date='2011-07-01')
         self.assertEqual(c.solde(), -20)
@@ -370,18 +371,18 @@ class Test_models(TestCase):
         self.assertEqual(Compte.objects.get(id=1).solde(), -90)
 
     def test_operation_titre_avec_moyen_defaut(self):
-        c=Compte.objects.create(nom="cpt6",type='t')
+        c = Compte.objects.create(nom="cpt6", type='t')
         t = Titre.objects.get(nom="t1")
         c.achat(titre=t, nombre=20, date='2011-01-01')
         self.assertEqual(t.investi(c), 20)
         self.assertEqual(c.solde(), 0)
-        o=Ope.objects.filter(compte__id=c.id)[0]
+        o = Ope.objects.filter(compte__id=c.id)[0]
         self.assertEqual(o.id, 14)
         self.assertEqual(o.moyen.nom, 'moyen_dep1')
         c.vente(titre=t, nombre=20, date='2011-01-02')
         self.assertEqual(t.investi(c), 0)
         self.assertEqual(c.solde(), 0)
-        o=Ope.objects.filter(compte__id=c.id)[1]
+        o = Ope.objects.filter(compte__id=c.id)[1]
         self.assertEqual(o.id, 15)
         self.assertEqual(o.moyen.nom, 'moyen_rec1')
 
@@ -547,7 +548,7 @@ class Test_models(TestCase):
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
                                         moyen_debit_defaut=Moyen.objects.get(id=2))
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
-        Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-02', cours=5)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-02', cours=5)
         o = Ope.objects.filter(compte=c).filter(date='2011-01-02')[0]
         self.assertEqual(o.id, 15)
         self.assertEqual(o.montant, 50)  # desinvestissement
@@ -569,7 +570,7 @@ class Test_models(TestCase):
         # on verifie qu'il creer bien un cours a la date
         self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 10)
         # on vend
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -10, date='2011-01-02', cours=15)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-10, date='2011-01-02', cours=15)
         self.assertEqual(o.ope.id, 15)
         self.assertEqual(o.ope.montant, 100)
         self.assertEqual(o.ope.moyen_id, 1)
@@ -581,7 +582,7 @@ class Test_models(TestCase):
         self.assertEqual(t.investi(c), 50)
         self.assertEqual(t.encours(c), 5 * 15)
         # on vend ce qui reste
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-03', cours=20)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-03', cours=20)
         self.assertEqual(t.investi(c), 0)
         self.assertEqual(o.ope.montant, 50)
         self.assertEqual(o.ope_pmv.montant, 50)
@@ -606,7 +607,7 @@ class Test_models(TestCase):
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
         # on la recree mais avec une vente comme ca il y a des plus values
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
         r = Rapp.objects.get(id=1)
@@ -700,17 +701,17 @@ class Test_models(TestCase):
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
         self.assertEquals(o.moyen_id, 4)
         # test avecmoyen par defaut debit
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
         # test avec moyen defini
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t, moyen=Moyen.objects.get(id=2))
         self.assertEquals(o.moyen_id, 2)
         # test avec les moyens par defaut
         c.moyen_credit_defaut = None
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
         self.assertEquals(o.moyen_id, 4)
         c.moyen_debit_defaut = None
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
 
     def test_pre_delete_ope_rapp(self):
@@ -843,7 +844,6 @@ class Test_models(TestCase):
                'moyen_destination': 5
         }
         self.assertEquals(tab, v.init_form())
-
 
 
 class Test_models2(TestCase):

@@ -41,7 +41,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def date(self):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
-        except import_base.FormatException:
+        except utils.FormatException:
             return None
 
     @property
@@ -113,33 +113,36 @@ class Import_csv_ope(import_base.Import_base):
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
         self.erreur = list()
-        self.init_class(self.request)
+        self.request=getattr(self,'request',None)
+        if self.request is None:
+            debug=True
+        self.init_class()
         nb = {"moyen": list(), 'cat': list(), 'compte': [], 'ib': []}
         nb['moyen'] = 0
         #les moyens par defaut
-        obj, created = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={"id": settings.MD_DEBIT, "nom": 'DEBIT', "type": "d"})
+        created = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={"id": settings.MD_DEBIT, "nom": 'DEBIT', "type": "d"})[1]
         if created:
-            messages.info(self.request, "ajout moyen debit par defaut")
+            if not debug: messages.info(self.request, "ajout moyen debit par defaut")
             nb['moyen'] += 1
-        obj, created = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={"id": settings.MD_CREDIT, "nom": 'CREDIT', "type": "r"})
+        created = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={"id": settings.MD_CREDIT, "nom": 'CREDIT', "type": "r"})[1]
         if created:
-            messages.info(self.request, "ajout moyen credit par defaut")
+            if not debug: messages.info(self.request, "ajout moyen credit par defaut")
             nb['moyen'] += 1
         moyen = models.Moyen.objects.filter(type='v')
         if moyen.exists():
             moyen_virement_id = models.Moyen.objects.create(nom='Virement', type="v").id
-            messages.info(self.request, "ajout moyen virement par defaut")
+            if not debug: messages.info(self.request, "ajout moyen virement par defaut")
             nb['moyen'] += 1
         #les cat
-        obj, created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_OST, defaults={"id": settings.ID_CAT_OST, "nom": 'Operation sur titre', "type": "d"})
+        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_OST, defaults={"id": settings.ID_CAT_OST, "nom": 'Operation sur titre', "type": "d"})[1]
         if created:
-            messages.info(self.request, "ajout cat OST")
+            if not debug: messages.info(self.request, "ajout cat OST")
             nb['cat'] = 1
         else:
             nb['cat'] = 0
-        obj, created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})
+        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
         if created:
-            messages.info(self.request, "ajout cat PMV")
+            if not debug: messages.info(self.request, "ajout cat PMV")
             nb['cat'] += 1
         #lecture effective du fichier
         with open(nomfich, 'rt') as f_non_encode:
@@ -181,22 +184,22 @@ class Import_csv_ope(import_base.Import_base):
                     self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
                 # compte
                 try:
-                    ope['compte'] = self.comptes(row.cpt)
+                    ope['compte'] = self.comptes.goc(row.cpt)
                 except import_base.ImportException:
                     self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.line_num))
                 # cat
                 if row.jumelle is not None:
                     try:
-                        ope['cat_id'] = self.cats('Virement')
+                        ope['cat_id'] = self.cats.goc('Virement')
                     except import_base.ImportException:
                         self.erreur.append(u"la cat 'virement' est inconnu à la ligne %s" % row.line_num)
                 else:
                     try:
-                        ope['cat_id'] = self.cats(row.cat)
+                        ope['cat_id'] = self.cats.goc(row.cat)
                     except import_base.ImportException:
                         self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.line_num))
                 # tiers
-                ope['tiers_id'] = self.tiers(row.tiers)
+                ope['tiers_id'] = self.tiers.goc(row.tiers)
                 # date
                 ope['date'] = row.date
                 # auto
@@ -205,7 +208,7 @@ class Import_csv_ope(import_base.Import_base):
                 ope['date_val'] = row.date_val
                 # ib
                 if settings.UTILISE_IB == True:
-                    ope['ib_id'] = self.ibs(row.ib)
+                    ope['ib_id'] = self.ibs.goc(row.ib)
                 else:
                     ope['ib_id'] = None
                 # jumelle et mere
@@ -222,7 +225,6 @@ class Import_csv_ope(import_base.Import_base):
                 ope['piece_comptable'] = row.piece_comptable
                 ope['pointe'] = row.pointe
                 self.opes.create(ope)
-            raise import_base.ImportException()
 
     def init_class(self):
         self.moyens = Moyen_cache(self.request)
@@ -262,7 +264,7 @@ class Table(object):
                     self.create_item.append(nom)
                     self.id[nom] = self.create_item.index(nom)+self.last_id
                 else:
-                    raise import_base.ImportException()
+                    raise import_base.ImportException("%s non defini alors que c'est read only" % self.element.__class__.__name__)
     def save(self):
         for el in self.create_item:
             id = self.id[el]
@@ -323,7 +325,7 @@ class Tiers_cache(Table):
     element = models.Tiers
     def save_(self, id, el):
         self.element.objects.create(id=id, nom=el)
-        messages.info('creation du tiers "%s"' % el)
+        if not self.request: messages.info('creation du tiers "%s"' % el)
 
 class Titre_cache(Table):
     element = models.Titre
