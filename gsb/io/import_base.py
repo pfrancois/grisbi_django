@@ -2,7 +2,7 @@
 """"import_file : vue qui gere les import"""
 from __future__ import absolute_import
 import time
-#import logging
+# import logging
 import os
 
 from django.conf import settings  # @Reimport
@@ -17,7 +17,7 @@ from django.utils.decorators import method_decorator
 from .. import forms as gsb_forms
 from ..models import Tiers, Titre, Cat, Ib, Exercice, Compte, Moyen, Rapp, Ope
 from .. import views
-#from . import utils
+from .. import utils
 
 class ImportException(Exception):
     def __init__(self, message):
@@ -145,9 +145,10 @@ class Import_base(views.Myformview):
     url = "outils_index"
     test = False
     creation_de_compte = False
-    #affiche les resultats plutot qu'une importation
+    # affiche les resultats plutot qu'une importation
     resultat = False
     debug = False
+
 
     def form_valid(self, form):
         # logger = logging.getLogger('gsb.import')
@@ -219,21 +220,23 @@ class Import_base(views.Myformview):
         except Cat.DoesNotExist:
             self.listes['moyen']['Revenus de placement:Plus-values'] = settings.ID_CAT_PMV
             Cat.objects.create(id=settings.ID_CAT_PMV, nom='Revenus de placement:Plus-values', type="d")
-        """        try:"""
-        self.tableau_import(nomfich)
-        if len(self.erreur):
-            messages.warning(self.request, "attention traitement interrompu")
-            for err in self.erreur:
-                messages.warning(self.request, err)
-            return False
-        """        except (FormatException,ImportException) as e:
+        try:
+            self.tableau_import(nomfich)
+            if len(self.erreur):
+                messages.warning(self.request, "attention traitement interrompu")
+                for err in self.erreur:
+                    messages.warning(self.request, err)
+                return False
+            else:
+                return True
+        except (utils.FormatException, ImportException) as e:
             if self.test == False:
                 for err in self.erreur:
                     messages.warning(self.request, err)
                 messages.error(self.request, e)
                 return False
             else:
-                raise e"""
+                raise e
 
         with transaction.commit_on_success():
             # import final
@@ -271,7 +274,7 @@ class Import_base(views.Myformview):
                 self.create('exercice', Exercice)
             # les rapp
             self.create('rapp', Rapp)
-            #les opes
+            # les opes
             for ope in self.ajouter['ope']:
                 Ope.objects.create(
                         id=ope['id'],
@@ -334,7 +337,7 @@ class Import_base(views.Myformview):
         return form
 
     def post(self, request, *args, **kwargs):
-        self.request=request
+        self.request = request
         form = self.get_form(self.form_class)
         if form.is_valid():
             nomfich = form.cleaned_data['nom_du_fichier'].name

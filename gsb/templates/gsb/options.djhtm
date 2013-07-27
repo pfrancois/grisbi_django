@@ -4,6 +4,7 @@
     <a href="{% url 'export_index' %}" class="progress"> exporter </a><br/>
     <a href="{% url 'import_gsb' %}" class="progress"> import de fichiers gsb dans l'application</a><br/>
     <a href="{% url 'import_csv_ope_all' %}" class="progress"> import de fichiers csv d'opérations dans l'application</a><br/>
+    <a href="{% url 'import_csv_ope_titre_all' %}" class="progress"> import de fichiers csv d'opérations titres dans l'application</a><br/>
     <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les échéances qui sont échues</a><br/>
     <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'opérations </a><br/>
     <a href="{% url 'index' %}" class="progress">retour vers le menu général</a><br/>

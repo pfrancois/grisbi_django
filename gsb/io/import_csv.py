@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import datetime
-import decimal
 
 from django.conf import settings  # @Reimport
 
@@ -11,11 +9,13 @@ from .. import models
 from . import import_base
 from .. import utils
 from django.db.models import Max
-
+from django.db import IntegrityError 
 
 class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
     pass
 
+class Exception_created(Exception):
+    pass
 
 class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
@@ -42,15 +42,16 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            return None
+            raise utils.FormatException ("%s" % self.row['date'])
 
     @property
     def ib(self):
             return utils.to_unicode(self.row['projet'], None)
 
     @property
-    def mt(self):
+    def montant(self):
         return utils.to_decimal(self.row['montant'])
+
 
     @property
     def notes(self):
@@ -88,7 +89,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        return None
+        return utils.to_unicode(self.row['moyen'], None)
 
     @property
     def ope_titre(self):
@@ -110,123 +111,9 @@ class Import_csv_ope(import_base.Import_base):
     creation_de_compte = True
     titre = "import csv"
 
+   
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
-        self.erreur = list()
-        self.request=getattr(self,'request',None)
-        if self.request is None:
-            debug=True
-        self.init_class()
-        nb = {"moyen": list(), 'cat': list(), 'compte': [], 'ib': []}
-        nb['moyen'] = 0
-        #les moyens par defaut
-        created = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={"id": settings.MD_DEBIT, "nom": 'DEBIT', "type": "d"})[1]
-        if created:
-            if not debug: messages.info(self.request, "ajout moyen debit par defaut")
-            nb['moyen'] += 1
-        created = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={"id": settings.MD_CREDIT, "nom": 'CREDIT', "type": "r"})[1]
-        if created:
-            if not debug: messages.info(self.request, "ajout moyen credit par defaut")
-            nb['moyen'] += 1
-        moyen = models.Moyen.objects.filter(type='v')
-        if moyen.exists():
-            moyen_virement_id = models.Moyen.objects.create(nom='Virement', type="v").id
-            if not debug: messages.info(self.request, "ajout moyen virement par defaut")
-            nb['moyen'] += 1
-        #les cat
-        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_OST, defaults={"id": settings.ID_CAT_OST, "nom": 'Operation sur titre', "type": "d"})[1]
-        if created:
-            if not debug: messages.info(self.request, "ajout cat OST")
-            nb['cat'] = 1
-        else:
-            nb['cat'] = 0
-        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
-        if created:
-            if not debug: messages.info(self.request, "ajout cat PMV")
-            nb['cat'] += 1
-        #lecture effective du fichier
-        with open(nomfich, 'rt') as f_non_encode:
-            fich = self.reader(f_non_encode, encoding="iso-8859-1")
-            verif_format = False
-            for row in fich:
-                if not verif_format:  # on verifie a la premiere ligne
-                    try:
-                        row.id
-                        row.automatique
-                        row.cat
-                        row.cpt
-                        row.date
-                        if settings.UTILISE_EXERCICES == True:
-                            row.exercice
-                        row.has_fille
-                        row.ib
-                        row.jumelle
-                        row.line_num
-                        row.mere
-                        row.monnaie
-                        row.moyen
-                        row.mt
-                        row.notes
-                        row.num_cheque
-                        row.ope_pmv
-                        #row.ope_titre
-                        #row.piece_comptable
-                        row.rapp
-                        row.tiers
-                    except KeyError as excp:
-                        raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
-                    else:
-                        verif_format = True
-                ope = dict()
-                ope['ligne'] = row.line_num
-                # verification pour les lignes
-                if row.monnaie != settings.DEVISE_GENERALE:
-                    self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
-                # compte
-                try:
-                    ope['compte'] = self.comptes.goc(row.cpt)
-                except import_base.ImportException:
-                    self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.line_num))
-                # cat
-                if row.jumelle is not None:
-                    try:
-                        ope['cat_id'] = self.cats.goc('Virement')
-                    except import_base.ImportException:
-                        self.erreur.append(u"la cat 'virement' est inconnu à la ligne %s" % row.line_num)
-                else:
-                    try:
-                        ope['cat_id'] = self.cats.goc(row.cat)
-                    except import_base.ImportException:
-                        self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.line_num))
-                # tiers
-                ope['tiers_id'] = self.tiers.goc(row.tiers)
-                # date
-                ope['date'] = row.date
-                # auto
-                ope['automatique'] = row.automatique
-                # date_val
-                ope['date_val'] = row.date_val
-                # ib
-                if settings.UTILISE_IB == True:
-                    ope['ib_id'] = self.ibs.goc(row.ib)
-                else:
-                    ope['ib_id'] = None
-                # jumelle et mere
-                # attention on prend juste les id toute la creation d'eventuelles operations est plus tard
-                ope['jumelle_id'] = row.jumelle
-                if row.jumelle == row.id:
-                    raise import_base.ImportException("attention une ope ne peut etre jumelle avec elle meme. ligne %s" % ope['ligne'])
-                ope['mere_id'] = row.mere
-                ope['has_fille'] = row.has_fille
-                # montant
-                ope['montant'] = row.mt
-                ope['notes'] = row.notes
-                ope['num_cheque'] = row.num_cheque
-                ope['piece_comptable'] = row.piece_comptable
-                ope['pointe'] = row.pointe
-                self.opes.create(ope)
-
-    def init_class(self):
         self.moyens = Moyen_cache(self.request)
         self.cats = Cat_cache(self.request)
         self.ibs = IB_cache(self.request)
@@ -236,45 +123,226 @@ class Import_csv_ope(import_base.Import_base):
         self.exos = Exercice_cache(self.request)
         self.tiers = Tiers_cache(self.request)
         self.opes = Ope_cache(self.request)
+        self.titres = Titre_cache(self.request)
+        self.erreur = list()
 
+        # les moyens par defaut
+        created = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={"id": settings.MD_DEBIT, "nom": 'DEBIT', "type": "d"})[1]
+        if created:  messages.info(self.request, "ajout moyen debit par defaut")
+        created = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={"id": settings.MD_CREDIT, "nom": 'CREDIT', "type": "r"})[1]
+        if created: messages.info(self.request, "ajout moyen credit par defaut")
+        moyen_virement, created = models.Moyen.objects.get_or_create(nom='Virement', type="v", defaults={"nom":'Virement', "type":"v"})
+        if created: messages.info(self.request, "ajout moyen virement par defaut")
+        # les cat
+        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_OST, defaults={"id": settings.ID_CAT_OST, "nom": 'Operation sur titre', "type": "d"})[1]
+        if created: messages.info(self.request, "ajout cat OST")
+        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
+        if created: messages.info(self.request, "ajout cat PMV")
+        # lecture effective du fichier
+        retour = True
+        try:
+            with open(nomfich, 'rt') as f_non_encode:
+                fich = self.reader(f_non_encode, encoding="iso-8859-1")
+                verif_format = False
+                for row in fich:
+                    if not verif_format:  # on verifie a la premiere ligne
+                        try:
+                            row.id
+                            row.automatique
+                            row.cat
+                            row.cpt
+                            row.date
+                            if settings.UTILISE_EXERCICES == True:
+                                row.exercice
+                            row.has_fille
+                            row.ib
+                            row.line_num
+                            row.mere
+                            row.monnaie
+                            row.moyen
+                            row.mt
+                            row.notes
+                            row.num_cheque
+                            row.ope_pmv
+                            # row.ope_titre
+                            # row.piece_comptable
+                            row.rapp
+                            row.tiers
+                        except KeyError as excp:
+                            raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
+                        else:
+                            verif_format = True
+                    ope = dict()
+                    ope['ligne'] = row.line_num
+                    # verification pour les lignes
+                    if row.monnaie != settings.DEVISE_GENERALE:
+                        self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
+                        continue
+                    # compte
+                    try:
+                        ope['compte_id'] = self.comptes.goc(row.cpt)
+                    except import_base.ImportException:
+                        self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.line_num))
+                        continue
+                    # virement (cat, moyen)
+                    if "=>" in row.tiers:
+                        virement = True
+                        ope['cat_id'] = self.cats.goc('Virement')
+                        ope['moyen_id'] = moyen_virement
+                        origine = row.tiers.split("=>")[0]
+                        origine = origine.strip()
+                        dest = row.tiers.split("=>")[2]
+                        dest = dest.strip()
+                        ope['dest_id'] = self.comptes.goc(dest)
+                        if origine  and dest:
+                            if self.comptes.goc(origine) != ope['compte']:
+                                if self.comptes.goc(dest) != ope['compte']:
+                                    self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.compte))
+                                else:
+                                    self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.compte))
+                                continue
+                        else:
+                            self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.line_num)
+                            continue
+                    else:
+                        virement = False
+                        try:
+                            ope['cat_id'] = self.cats.goc(row.cat)
+                        except import_base.ImportException:
+                            self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.line_num))
+                            continue
+                        try:
+                            if row.moyen:
+                                ope['moyen_id'] = self.moyens.goc(row.moyen)
+                            else:
+                                if row.montant > 0:
+                                    ope['moyen_id'] = settings.MD_CREDIT
+                                else:
+                                    ope['moyen_id'] = settings.MD_DEBIT
+                        except import_base.ImportException:
+                            self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.line_num))
+                            continue
+                    ope['virement'] = virement
+                    # tiers
+                    ope['tiers_id'] = self.tiers.goc(row.tiers)
+                    # date
+                    try:
+                        ope['date'] = row.date
+                        if ope['date'] is None:
+                            ope['date'] = utils.today()
+                    except utils.FormatException as e:
+                        self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.line_num))
+                    # auto
+                    ope['automatique'] = row.automatique
+                    # date_val
+                    ope['date_val'] = row.date_val
+                    # ib
+                    if settings.UTILISE_IB == True:
+                        ope['ib_id'] = self.ibs.goc(row.ib)
+                    else:
+                        ope['ib_id'] = None
+                    # jumelle et mere
+                    ope['mere_id'] = row.mere
+                    ope['has_fille'] = row.has_fille
+                    # montant
+                    ope['montant'] = row.montant
+                    ope['notes'] = row.notes
+                    ope['num_cheque'] = row.num_cheque
+                    ope['piece_comptable'] = row.piece_comptable
+                    ope['pointe'] = row.pointe
+                    self.opes.create(ope)
+        except (utils.FormatException, import_base.ImportException) as e:
+            messages.error(self.request, "attention traitement interrompu parce que %s" % e)
+            retour = False
+
+        # gestion des erreurs
+        if len(self.erreur) or retour == False:
+            for err in self.erreur:
+                    messages.warning(self.request, err)
+            return False
+        # on gere le nombre de truc annex crée
+        for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres):
+            messages.info(self.request, "%s %s crées" % (obj.nb, obj.element.__name__))
+        # maintenant on sauvegarde les operations
+        for ope in self.opes.create_item:
+            ligne = ope.pop('ligne')
+            ope.pop('mere_id')  # on efface ca comme pour l'instant je gere pas
+            if ope.get('has_fille', True):
+                messages.warning(self.request, "ope ligne %s efface car ope mere " % ligne)
+                continue
+            ope.pop('has_fille', False)
+            virement = ope.pop('virement', False)
+            if virement:
+                # on cree deux operation
+                ope_origine = models.Ope.objects.create(**ope)
+                dest = ope.pop('dest_id')
+                ope['compte'] = dest
+                ope['montant'] = ope['montant'] * -1
+                ope.pop('ib_id', None)
+                ope_dest = models.Ope.objects.create(**ope)
+                ope_origine.jumelle = ope_dest
+                ope_origine.save()
+                ope_dest.jumelle = ope_origine
+                ope_dest.save()
+            else:
+                models.Ope.objects.create(**ope)
+        return True 
+    
 
 class Table(object):
     """Moyen avec cache"""
     element = None
     readonly = False
-    def __init__(self, request, cle='nom'):
+    def __init__(self, request):
         self.id = dict()
         self.create_item = list()
         self.request = request
-        self.cle = cle
         if self.element is None:
             raise NotImplementedError("table de l'element non choisi")
         else:
-            self.last_id = self.element.objects.aggregate(id_max=Max('id'))['id_max']
-    def goc(self, nom):
+            self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
+
+    def goc(self, nom, obj=None):
+        if nom == "" or nom is None:
+            return None
         try:
-            id = self.id[nom]
+            pk = self.id[nom]
         except KeyError:
             try:
-                arguments = {self.cle: nom}
-                id = self.element.objects.get(**arguments).id
-                self.id[nom] = id
+                if obj is None:
+                    arguments = {"nom": nom}
+                else:
+                    arguments = obj
+                pk = self.element.objects.get(**arguments).id
+                self.id[nom] = pk
             except self.element.DoesNotExist:
-                if not self.readonly:
-                    self.create_item.append(nom)
-                    self.id[nom] = self.create_item.index(nom)+self.last_id
+                if not self.readonly:  # on cree donc l'operation
+                    argument_def = self.arg_def(nom, obj)
+                    try:
+                        created = self.element.objects.create(**argument_def)
+                    except IntegrityError as e:
+                        raise import_base.ImportException("%s" % e)
+                    pk = created.pk
+                    self.id[nom] = pk 
+                    self.create_item.append(created)
+                    messages.info(self.request, 'creation du %s "%s"' % (self.element.__class__.__name__, created))
                 else:
                     raise import_base.ImportException("%s non defini alors que c'est read only" % self.element.__class__.__name__)
-    def save(self):
-        for el in self.create_item:
-            id = self.id[el]
-            self.save_(id, el)
-    def save_(self, id, el):
-        raise NotImplementedError("methode save non defini")
+        return pk
+    
+    def arg_def(self, nom, obj):
+        raise NotImplementedError("methode arg_def non defini")
+
+    
+    @property
+    def nb(self):
+        return len(self.id)
+
 
 class Cat_cache(Table):
     element = models.Cat
     readonly = True
+
 
 class Moyen_cache(Table):
     element = models.Moyen
@@ -282,9 +350,9 @@ class Moyen_cache(Table):
 
 class IB_cache(Table):
     element = models.Ib
-    def save_(self, id, el):
-        self.element.objects.create(id=id, nom=el, type='d')
-        messages.info('creation de l\'ib "%s"' % el)
+    def arg_def(self, nom, obj):
+        if obj is None:
+            return {"nom":nom, "type":'d'}
 
 class Compte_cache(Table):
     element = models.Compte
@@ -299,23 +367,25 @@ class Cours_cache(Table):
     def goc(self, date, titre, montant):
         try:
             titre_id = self.id[titre]
-            id = titre_id[date]
+            pk = titre_id[date]
         except KeyError:
             try:
                 el = self.element.objects.get(date=date, titre_id=titre)
-                id = el.id
+                pk = el.id
                 if el.montant != montant:
                     raise import_base.ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (el.montant, montant, el.titre.nom, date))
             except self.element.DoesNotExist:
                 self.create_item.append({'titre': titre, 'date': date, "montant": montant})
-                id = self.create_item.index({'titre': titre, 'date': date, "montant": montant}) + self.last_id
+                pk = self.create_item.index({'titre': titre, 'date': date, "montant": montant}) + self.last_id
             finally:
                 if self.id.get(titre) is not None:
-                    self.id[titre][date] = id
+                    self.id[titre][date] = pk
                 else:
                     self.id[titre] = titre
-                    self.id[titre][date] = id
-                id = self.id[titre][date]
+                    self.id[titre][date] = pk
+                pk = self.id[titre][date]
+        finally:
+            return pk
 
 class Exercice_cache(Table):
     element = models.Exercice
@@ -323,20 +393,19 @@ class Exercice_cache(Table):
 
 class Tiers_cache(Table):
     element = models.Tiers
-    def save_(self, id, el):
-        self.element.objects.create(id=id, nom=el)
-        if not self.request: messages.info('creation du tiers "%s"' % el)
+    def arg_def(self, nom, obj):
+        if obj is None:
+            return {"nom":nom}
 
 class Titre_cache(Table):
     element = models.Titre
-    def save_(self, id, el):
-        self.element.objects.create(id=id, isin="XX00000%s" % id, type="XXX")
+    def goc(self, pk, obj):
+        self.element.objects.create(id=pk, isin="XX00000%s" % pk, type="XXX")
+        messages.info(self.request, 'creation du titre "%s"' % obj)
+
 class Ope_cache(Table):
     element = models.Ope
     def goc(self, nom):
         raise NotImplementedError("methode goc non defini")
     def create(self, ope):
         self.create_item.append(ope)
-    def save(self):
-        for ope in self.create_item:
-            self.element.objects.create(**ope)

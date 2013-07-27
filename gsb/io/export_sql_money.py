@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-#import csv
+
 from .. import models
 from django.db import models as models_agg
 import time
 from .. import utils
-#from datetime import date
+
 import dateutil.rrule as rrule
 from dateutil.relativedelta import relativedelta
 
 from . import export_base
-#from django.core import exceptions as django_exceptions
+
 from django.http import HttpResponse
 from sql.pg import sqlite_db
 
 class Export_view_sql(export_base.ExportViewBase):
     extension_file = "sql"
-    debug = True
+    debug = False
     nomfich = "export_full"
     model_initial = models.Ope
     form_class = export_base.Exportform_ope
@@ -24,6 +24,7 @@ class Export_view_sql(export_base.ExportViewBase):
 
     def export(self, query):
         sql = sqlite_db()
+        # attention ce n'est les comptes
         s = ("""DROP TABLE IF EXISTS account;
 CREATE TABLE account (id INTEGER PRIMARY KEY,
                     name TEXT,
@@ -40,6 +41,7 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
             """)
         sql.conn.cursor().executescript(s)
         sql.conn.commit()
+        # calcul des budgets
         nb_bud = 0
         date_min = self.model_initial.objects.aggregate(element=models_agg.Min('date'))['element']
         date_max = self.model_initial.objects.aggregate(element=models_agg.Max('date'))['element']
@@ -50,7 +52,7 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
                                                                                            'year': dt.year,
                                                                                            'amount': 0,
                                                                                            'lastupdate': time.mktime(dt.timetuple())})
-
+# les categories
         sql.query("""CREATE TABLE category (
     id INTEGER PRIMARY KEY,
     name TEXT,
@@ -59,9 +61,17 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
     place INTEGER,
     lastupdate DOUBLE);
             """)
+        sql.query("""CREATE TABLE subcategory (
+    id INTEGER PRIMARY KEY,
+    category INTEGER,
+    name TEXT,
+    place INTEGER,
+    lastupdate DOUBLE);
+            """)
 
         param = {}
         nbcat = 0
+        # comme il ne gere pas les virements
         for cat in models.Cat.objects.exclude(type='v').order_by('nom'):
             nbcat = nbcat + 1
             param['id'] = cat.id
@@ -74,23 +84,22 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
                 param['color'] = 13369344
             param['place'] = nbcat
             param['lastupdate'] = time.mktime(cat.lastupdate.timetuple())
-
             sql.query(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
         try:
             id_placement = utils.idtostr(models.Cat.objects.get(nom='placement'))
             if id_placement == 0:
                 raise models.Cat.DoesNotExist
         except models.Cat.DoesNotExist:
-            id_placement = models.Cat.objects.exclude(type='v').aggregate(id=models_agg.Max('id'))['id']+1
+            id_placement = models.Cat.objects.exclude(type='v').aggregate(id=models_agg.Max('id'))['id'] + 1
             sql.query(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);",
                     {'id': id_placement,
                      'name': 'placement',
                      'type': 2,
                      'color': 13369344,
-                     'place': nbcat+1,
+                     'place': nbcat + 1,
                      'lastupdate': utils.timestamp()}
             )
-
+# les devises
         chaine = """DROP TABLE IF EXISTS  currency;
             CREATE TABLE currency (
     id INTEGER PRIMARY KEY,
@@ -100,7 +109,11 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
     lastupdate DOUBLE);
 insert into currency VALUES(1,'Dollar','$',2,'');
 insert into currency VALUES(2,'Euro','EUR',2,'');
-DROP TABLE IF EXISTS payment;
+"""
+        sql.conn.cursor().executescript(chaine)
+        sql.conn.commit()
+# les comptes
+        chaine = """DROP TABLE IF EXISTS payment;
 CREATE TABLE payment (
     id INTEGER PRIMARY KEY,
     name TEXT,
@@ -112,10 +125,10 @@ CREATE TABLE payment (
         sql.conn.cursor().executescript(chaine)
         sql.conn.commit()
         param = {}
-        soldes = models.Compte.objects.select_related('ope').filter(
-            ope__filles_set__isnull=True).annotate(solde=models_agg.Sum('ope__montant')).order_by('id')
+        # on ne prend que les comptes bancaire ou cash
+        liste_compte = models.Compte.objects.filter(type__in=['b', 'e'])
         i = 0
-        for cpt in soldes:
+        for cpt in liste_compte:
             if cpt.type == "b" or cpt.type == "e":
                 i = i + 1
                 param['id'] = cpt.id
@@ -125,6 +138,7 @@ CREATE TABLE payment (
                 param['place'] = i
                 param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
                 sql.query(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
+# operation
         sql.query("""CREATE TABLE record (
     id INTEGER PRIMARY KEY,
     payment INTEGER,
@@ -146,18 +160,21 @@ CREATE TABLE payment (
     day INTEGER);""")
         param = {}
         nbope = 0
-        #on elimine les ope mere ou les ope dans les compte non bq ni especes ou les virement interne
+        # on elimine les ope mere ou les ope dans les compte non bq ni especes ou les virement interne
         for ope in models.Ope.objects.filter(compte__type__in=['b', 'e'],
                                              filles_set__isnull=True
-                                    ).exclude(jumelle__compte__type__in=['b', 'e'],
                                     ).select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen"):
             nbope += 1
             param['id'] = ope.id
-            #gestion des paiments on recupere l'id qui va bien
+            # gestion des paiments on recupere l'id qui va bien
             param['payment'] = ope.compte.id
             if ope.cat == "Virement":
-                param['category'] = id_placement
-                param['memo'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
+                if ope.jumelle.compte.type not in ('b', 'e'):
+                    param['category'] = id_placement
+                    param['memo'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
+                else:
+                    # on ne gere pas les virement internes
+                    continue
             else:
                 param['category'] = utils.nulltostr(ope.cat.id)
                 param['memo'] = ope.tiers.nom
@@ -180,7 +197,12 @@ CREATE TABLE payment (
             param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
             sql.query(u"""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
                 :amount,:date,:photo,:voice,:payee,:note,:account,:type,:repeat,:place,:day,:lastupdate);""", param)
-
+            sql.query('DROP INDEX IF EXISTS budget_month_index;')
+            sql.query('CREATE INDEX budget_month_index on budget(month);')
+            sql.query('DROP INDEX IF EXISTS record_day_index;')
+            sql.query('CREATE INDEX record_day_index on record(day);')
+            sql.query('DROP INDEX IF EXISTS record_repeat_index;')
+            sql.query('CREATE INDEX record_repeat_index on record(repeat);')
         reponse = HttpResponse(sql.dump(), mimetype="text/plain")
         if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"

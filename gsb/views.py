@@ -53,7 +53,7 @@ class Mytemplateview(generic.TemplateView):
 class Myformview(generic.FormView):
     form_class = None
     template_name = None
-    titre=None
+    titre = None
 
     def form_valid(self, form):
         """
@@ -77,7 +77,7 @@ class Myformview(generic.FormView):
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
     def get_context_data(self, *args, **kwargs):
-        context= super(Myformview, self).get_context_data(*args, **kwargs)
+        context = super(Myformview, self).get_context_data(*args, **kwargs)
         context.update({'titre':self.titre})
         return context
 
@@ -167,17 +167,17 @@ class Cpt_detail_view(Mytemplateview):
         if compte.type not in ('t',) or self.cpt_titre_espece == True:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
-            #sinon on prend le nom du template par defaut
+            # sinon on prend le nom du template par defaut
             self.espece = True
-            #selection initiale
+            # selection initiale
             q = Ope.non_meres().filter(compte=compte).order_by('-date')
-            #en fonction du rapprochement ou non
+            # en fonction du rapprochement ou non
             if self.rapp:
                 q = q.filter(rapp__isnull=False)
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
-            #nb ope rapp
+            # nb ope rapp
             if self.all:
                 nb_ope_rapp = 0
             else:
@@ -188,7 +188,7 @@ class Cpt_detail_view(Mytemplateview):
                     nb_ope_rapp = 0
                 if not self.all and not self.rapp:
                     nb_ope_rapp = Ope.objects.filter(compte=compte, rapp__isnull=False).count()
-            #gestion du tri
+            # gestion du tri
             try:
                 sort = request.GET.get('sort')  # il y a un sort dans le get
             except (ValueError, TypeError):  # non donc on regarde dans l'historique
@@ -218,9 +218,9 @@ class Cpt_detail_view(Mytemplateview):
             else:
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
-            #gestion des ope anciennes
+            # gestion des ope anciennes
             if not (self.all or self.rapp):
-                q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year-1))
+                q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
 
@@ -297,7 +297,7 @@ class Cpt_detail_view(Mytemplateview):
                        "solde_r": solde_r_esp,
                        "solde_p_pos": solde_p_pos,
                        "solde_p_neg": solde_p_neg,
-                       "solde_pr": solde_r_esp + solde_p_pos+solde_p_neg,
+                       "solde_pr": solde_r_esp + solde_p_pos + solde_p_neg,
                        "sort_tab": args[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
@@ -334,7 +334,7 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
-                    return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
+                    return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
                 else:
                     if ope.rapp:
                         compte = ope.compte
@@ -370,14 +370,14 @@ def ope_detail(request, pk):
                 else:
                     # verification que les données essentielles ne sont pas modifiés
                     if has_changed(ope, 'montant') or has_changed(ope, 'compte'
-                                                ) or has_changed(ope,'pointe'
+                                                ) or has_changed(ope, 'pointe'
                                                 ) or has_changed(ope, 'jumelle'
                                                 ) or has_changed(ope, 'mere'):
                         messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
                     else:
                         messages.success(request, u"opération modifiée")
                         ope = form.save()
-                return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
+                return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
         else:
             form = gsb_forms.OperationForm(instance=ope)
         return render(request, 'gsb/ope.djhtm',
@@ -410,7 +410,7 @@ def ope_new(request, cpt_id=None):
 
             messages.success(request, u"Opération '%s' crée" % ope)
             # retour vers
-            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/ope.djhtm',
                           {'titre': u'création',
@@ -457,7 +457,7 @@ def vir_new(request, cpt_id=None):
                 ope.date.strftime('%d/%m/%Y')
                 )
             )
-            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all',args=(ope.compte.id,)))
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/vir.djhtm',
                           {'titre_long': u'création virement interne ',
@@ -747,9 +747,9 @@ def dividende(request, cpt_id):
                                compte=form.cleaned_data['compte'],
                                montant=form.cleaned_data['montant'],
                                tiers=tiers,
-                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC,defaults={'nom':settings.REV_PLAC,'type':'r'}))
+                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom':settings.REV_PLAC, 'type':'r'}))
             if form.cleaned_data['compte_espece']:
-                #creation du virement
+                # creation du virement
                 vir = Virement()
                 vir.create(compte_origine=form.cleaned_data['compte_titre'],
                            compte_dest=form.cleaned_data['compte_espece'],
