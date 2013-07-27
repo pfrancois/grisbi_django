@@ -162,7 +162,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
         # on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
-        if (data.get('titre',None) is None and data.get('nouveau_titre',None) is None):
+        if (data.get('titre', None) is None and data.get('nouveau_titre', None) is None):
             self._errors['nouveau_titre'] = self.error_class(
                 ["si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
             del data['nouveau_titre']

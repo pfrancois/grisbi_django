@@ -8,14 +8,14 @@ import logging
 from django.http import HttpResponse
 # from django.conf import settings
 # pour les vues
-from . import export_base as ex
+from . import export_base
 from ..models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
 from ..utils import Excel_csv
 import csv
 
 
-class Export_view_csv_base(ex.ExportViewBase):
+class Export_view_csv_base(export_base.ExportViewBase):
     extension_file = "csv"
     fieldnames = None
     csv_dialect = None
@@ -23,8 +23,7 @@ class Export_view_csv_base(ex.ExportViewBase):
 
     def export_csv_view(self, data, nomfich="export"):
         """machinerie commune aux classes filles"""
-        csv_file = ex.Csv_unicode_writer(
-            encoding='iso-8859-15', fieldnames=self.fieldnames, dialect=self.class_csv_dialect)
+        csv_file = export_base.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames, dialect=self.class_csv_dialect)
         csv_file.writeheader()
         csv_file.writerows(data)
         if self.debug:
@@ -34,8 +33,8 @@ class Export_view_csv_base(ex.ExportViewBase):
 
 
 class Export_ope_csv(Export_view_csv_base):
-    debug = True
-    form_class = ex.Exportform_ope
+    debug = False
+    form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
     fieldnames = (
@@ -123,11 +122,10 @@ class pocket_csv(csv.Dialect):
 
 
 class Export_ope_pocket_money_csv(Export_view_csv_base):
-    form_class = ex.Exportform_ope
+    form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ("account name", "date", "ChkNum", "Payee", "Category",
-                  "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
+    fieldnames = ("account name", "date", "ChkNum", "Payee", "Category", "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
     class_csv_dialect = pocket_csv
 
     def export(self, query):
@@ -171,13 +169,10 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
         return self.export_csv_view(data=data)
 
 
-class Exportform_cours(ex.Exportform_ope):
-    collection = ex.forms.ModelMultipleChoiceField(
-        models.Titre.objects.all(), required=False)
-    date_min = ex.forms.DateField(
-        label='date minimum', widget=ex.forms.DateInput)
-    date_max = ex.forms.DateField(
-        label='date maximum', widget=ex.forms.DateInput)
+class Exportform_cours(export_base.Exportform_ope):
+    collection = export_base.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False)
+    date_min = export_base.forms.DateField(label='date minimum', widget=export_base.forms.DateInput)
+    date_max = export_base.forms.DateField(label='date maximum', widget=export_base.forms.DateInput)
     model_initial = models.Cours
     model_collec = models.Titre
 
@@ -209,13 +204,10 @@ class Export_cours_csv(Export_view_csv_base):
         return reponse
 
 
-class Exportform_Compte_titre(ex.Exportform_ope):
-    collection = ex.forms.ModelMultipleChoiceField(
-        Compte.objects.filter(type='t'), required=False)
-    date_min = ex.forms.DateField(
-        label='date minimum', widget=ex.forms.DateInput)
-    date_max = ex.forms.DateField(
-        label='date maximum', widget=ex.forms.DateInput)
+class Exportform_Compte_titre(export_base.Exportform_ope):
+    collection = export_base.forms.ModelMultipleChoiceField(Compte.objects.filter(type='t'), required=False)
+    date_min = export_base.forms.DateField(label='date minimum', widget=export_base.forms.DateInput)
+    date_max = export_base.forms.DateField(label='date maximum', widget=export_base.forms.DateInput)
     model_initial = Ope_titre
     model_collec = Compte
 
@@ -227,8 +219,7 @@ class Export_ope_titre_csv(Export_view_csv_base):
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
-    fieldnames = ("id", "date", "compte", "nom",
-                  "isin", "sens", "cours", "nombre", "montant")
+    fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
 
     def export(self, query):
         """

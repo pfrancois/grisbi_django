@@ -23,7 +23,7 @@ class Test_export_csv(Test_view_base):
         logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
         rep = self.client.post(reverse('export_csv'),
                                data={"compte": 1, "date_min": "2011-01-01", "date_max": "2012-09-24"})
-        self.assertEqual(rep.content,"""id;account name;date;montant;r;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has fille;num op vent m;ope_titre;ope_pmv;mois\r
+        self.assertEqual(rep.content, """id;account name;date;montant;r;p;moyen;cat;tiers;notes;projet;n chq;id jumelle lie;has fille;num op vent m;ope_titre;ope_pmv;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08\r
 5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;08\r
 7;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;08\r

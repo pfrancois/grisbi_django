@@ -12,8 +12,9 @@ from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
-from ..io import import_csv as import_csv
 from ..models import (Tiers, Cat, Ope)
+
+
 
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
@@ -22,33 +23,18 @@ class Test_view_base(TestCase):
         super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
 
-class Test_import_csv(TestCase):
-    fixtures = ['auth.json',]
-
-    def setUp(self):
-        super(TestCase, self).setUp()
-        self.client.login(username='admin', password='mdp')
-        self.path = os.path.join(settings.PROJECT_PATH, "gsb", "test_files")
-
-    def test_cpt_none(self):
-        imp = import_csv.Import_csv_ope()
-        imp.test = True
-        #result = imp.import_file(os.path.join(self.path, "test_cpt_null.csv"))
-
 
 class Test_import(Test_view_base):
     def test_import_ok(self):
-        self.cls = import_csv.Import_csv_ope()
-        self.cls.listes = dict()
-        self.cls.nb = dict()
-        self.cls.test = True
         self.assertEqual(Tiers.objects.count(), 8)
         self.assertEqual(Ope.objects.count(), 13)
         self.assertEqual(Cat.objects.count(), 8)
-        self.cls.import_file(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_simple.csv"))
-        self.assertEqual(Tiers.objects.count(), 11)
-        self.assertEqual(Ope.objects.count(), 17)
-        self.assertEqual(Cat.objects.count(), 9)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_simple.csv"))  as file_test:
+            r = self.client.post('/options/import/csv/all', { 'nom_du_fichier': file_test})
+            self.assertEqual(r.status_code, 302)
+            self.assertEqual(Tiers.objects.count(), 11)
+            self.assertEqual(Ope.objects.count(), 17)
+            self.assertEqual(Cat.objects.count(), 8)
 
 class Test_urls(Test_view_base):
     def test_404(self):

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from . import models
+from .. import models
 from django.db import models as models_agg
 import time
-from . import utils
+from .. import utils
 
-from gsb import export_base
+from . import export_base
 from django.core import exceptions as django_exceptions
 from django.http import HttpResponse
 from sql.pg import sqlite_db as db
@@ -206,7 +206,7 @@ CREATE TABLE accounts
             param['serverID'] = utils.uuid()
             s = u"INSERT INTO 'accounts' VALUES({deleted}, {timestamp}, {accountID}, {displayOrder}, '{account}', {balanceOverall}, {balanceCleared}, {type}, '{accountNumber}', '{institution}', '{phone}', '{expirationDate}', '{checkNumber}', '{notes}', '{iconFileName}', '{url}', '{ofxid}', '{ofxurl}', '{password}', {fee}, {fixedPercent}, {limitAmount}, {noLimit}, {totalWorth}, {exchangeRate}, '{currencyCode}', {lastSyncTime}, '{routingNumber}', {overdraftAccountID}, {keepTheChangeAccountID}, {keepChangeRoundTo}, '{serverID}');".format(**param)
             sql.w(s)
-        #TODO gerer les splits
+        # TODO gerer les splits
         s = ("""CREATE TABLE splits
     (
     'splitID'           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -221,7 +221,7 @@ CREATE TABLE accounts
     'ofxid'             TEXT
     );
 """)
-        #gestion des categories
+        # gestion des categories
         sql.w(s)
         s = ("""CREATE TABLE categories
     (
@@ -240,7 +240,7 @@ CREATE TABLE accounts
         sql.w(s)
         i = 0
         for cat in models.Cat.objects.exclude(type='v').order_by('id'):
-            i = i+1
+            i = i + 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['categoryID'] = cat.id
@@ -269,7 +269,7 @@ CREATE TABLE payees
     );""")
         i = 0
         for tiers in models.Tiers.objects.order_by('id'):
-            i = i+1
+            i = i + 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['payeeID'] = tiers.id
@@ -299,7 +299,7 @@ CREATE TABLE payees
     );""")
         i = 0
         for ib in models.Ib.objects.order_by('id'):
-            i = i+1
+            i = i + 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['classID'] = ib.id

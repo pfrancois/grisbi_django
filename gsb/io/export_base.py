@@ -9,10 +9,8 @@ from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
 from ..models import Compte, Ope
 
-#from django.views.generic.edit import FormView
 from ..views import Myformview as FormView
 from .. import forms as gsb_forms
-#from gsb import models
 from django.db import models as models_agg
 from django import forms
 import time

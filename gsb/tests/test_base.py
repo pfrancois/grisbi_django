@@ -25,3 +25,11 @@ class TestCase(Test_Case_django):
             sorted(list(pk)),
             sorted(list(list1))
         )
+    def setup_view(self, view, request, *args, **kwargs):
+        """Mimic as_view() returned callable, but returns view instance.
+        args and kwargs are the same you would pass to ``reverse()``
+        """
+        view.request = request
+        view.args = args
+        view.kwargs = kwargs
+        return view

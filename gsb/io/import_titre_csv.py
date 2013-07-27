@@ -71,7 +71,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
             except IndexError:
                 return utils.to_date(self.row['date'], "%d/%m/%Y")
         else:
-            #paiment visa
+            # paiment visa
             annee = utils.to_date(self.row['date'], "%d/%m/%Y").year
             return utils.to_date("%s/%s" % (mots(self.detail)[2], annee), "%d/%m/%Y")
 
@@ -92,7 +92,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
 
     @property
     def jumelle(self):
-        #un retrait
+        # un retrait
         if self.detail[:19] == u"CARTE X4983 RETRAIT":
             return "caisse"
         if self.det[:14] == "GENERATION VIE":

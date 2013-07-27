@@ -85,7 +85,7 @@ def is_number(s):
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    s = str(s)
+    s = str(s).strip()
     s = s.replace(',', '.')
     s = s.replace(' ', '')
     return decimal.Decimal(s)
@@ -270,7 +270,7 @@ def maxtostr(query, defaut='0', champ='id'):
     else:
         return str(agg)
 
-def idtostr(obj,  membre='id', defaut='0'):
+def idtostr(obj, membre='id', defaut='0'):
     """renvoie id d'un objet avec la gestion des null
     @param obj: l'objet a interroger
     @param defaut: la reponse si neant ou inexistant

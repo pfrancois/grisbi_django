@@ -2,9 +2,9 @@
 from __future__ import absolute_import
 from django.conf import settings  # @Reimport
 
-#from django.contrib import messages
+# from django.contrib import messages
 from django.http import HttpResponse
-#from .models import (Tiers, Cat, Ib, Exercice, Moyen, Compte, Titre, Ope_titre, Rapp, Ope)
+# from .models import (Tiers, Cat, Ib, Exercice, Moyen, Compte, Titre, Ope_titre, Rapp, Ope)
 from . import import_base
 from .. import utils
 
@@ -94,7 +94,7 @@ class csv_sg_reader(import_csv.Csv_unicode_reader):
 
     @property
     def jumelle(self):
-        #un retrait
+        # un retrait
         if self.detail[:19] == u"CARTE X4983 RETRAIT":
             return "caisse"
         if self.det[:14] == "GENERATION VIE":
@@ -216,7 +216,7 @@ class testimport_view(import_base.Import_base):
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding="iso-8859-1", fieldnames=['date', 'lib', 'detail', 'montant', 'devise'])
             data = []
-            #on passe trois ligne
+            # on passe trois ligne
             fich.next()
             fich.next()
             fich.next()
@@ -224,6 +224,6 @@ class testimport_view(import_base.Import_base):
                 r = inspect.getmembers(row)
                 raise
                 data.append(r)
-                #data.append({'initial':[row.lib,row.detail],'date':row.date,'montant':row.mt,'jumelle':row.jumelle, 'moyen':row.moyen,'numcheque':row.num_cheque,'tiers':row.tiers})
+                # data.append({'initial':[row.lib,row.detail],'date':row.date,'montant':row.mt,'jumelle':row.jumelle, 'moyen':row.moyen,'numcheque':row.num_cheque,'tiers':row.tiers})
             import pprint
             return pprint.pformat(data)

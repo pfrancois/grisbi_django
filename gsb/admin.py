@@ -44,7 +44,7 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(utils.addmonths(today, -3,  first=True)),
+                self.lookup_kwarg_since: str(utils.addmonths(today, -3, first=True)),
                 self.lookup_kwarg_until: str(today.replace(day=7)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
@@ -194,7 +194,7 @@ class liste_perso_inline(admin.TabularInline):
     readonly = False
     orderby = None
     formset = formestligne_limit
-    #afin de pouvoir avoir des inline readonly
+    # afin de pouvoir avoir des inline readonly
     def __init__(self, parent_model, admin_site):
         if self.readonly:
             self.readonly_fields = self.fields
@@ -203,11 +203,11 @@ class liste_perso_inline(admin.TabularInline):
 
     def queryset(self, request):
         qs = super(liste_perso_inline, self).queryset(request)
-        #on related pour les inlines
+        # on related pour les inlines
         if self.related is not None:
             args = self.related
             qs = qs.select_related(*args)
-    #gestion du orderby
+    # gestion du orderby
         if self.orderby is not None:
             args = self.orderby
             qs = qs.order_by(*args)

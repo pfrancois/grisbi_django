@@ -136,8 +136,8 @@ class Import_csv_ope(import_base.Import_base):
                         row.notes
                         row.num_cheque
                         row.ope_pmv
-                        #row.ope_titre
-                        #row.piece_comptable
+                        # row.ope_titre
+                        # row.piece_comptable
                         row.rapp
                         row.tiers
                     except KeyError as excp:

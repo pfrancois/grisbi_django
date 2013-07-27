@@ -8,51 +8,50 @@ from .io import import_titre_csv as import_titres
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
-                       #url(r'^test$',import_sg.testimport_view.as_view() )
+                       # url(r'^test$',import_sg.testimport_view.as_view() )
 )
 
 # les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
-                            views.Mytemplateview.as_view(template_name="gsb/options.djhtm",
-                                                         titre="liste des outils disponible"),
+                            views.Mytemplateview.as_view(template_name="gsb/options.djhtm", titre="liste des outils disponible"),
                             name="outils_index"
                         ),
-                        #echeances echues
+                        # echeances echues
                         url(r'^options/ech$',
                             outils.Echeance_view.as_view(),
                             name='gestion_echeances'
                         ),
-                        #affiche config
+                        # affiche config
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
-#export index
+# export index
 urlpatterns += patterns('gsb',
                         url(r'^options/export$',
                             views.Mytemplateview.as_view(template_name="gsb/export_index.djhtm"),
                             name='export_index'
                         ),
-                        #export au format 0_5_0 grisbi
+                        # export au format 0_5_0 grisbi
                         url(r'^options/export/gsb050$',
                             'io.export_gsb_0_5_0.export',
                             name='export_gsb_050'
                         ),
-                        #export au format general en csv
+                        # export au format general en csv
                         url(r'^options/export/csv/ope$',
                             export_csv.Export_ope_csv.as_view(),
                             name='export_csv'
                         ),
-                        #export en qif
+                        # export en qif
                         url(r'^options/export/qif$',
                             export_qif.Export_qif.as_view(),
                             name='export_qif'
                         ),
-                        #export des ope titres
+                        # export des ope titres
                         url(r'^options/export/csv/ope_titres$',
                             export_csv.Export_ope_titre_csv.as_view(),
                             name='export_ope_titre'
                         ),
-                        #export des cours
+                        # export des cours
                         url(r'^options/export/csv/cours$',
                             export_csv.Export_cours_csv.as_view(),
                             name='export_cours'
@@ -62,23 +61,23 @@ urlpatterns += patterns('gsb',
                             name='export_sql_pm'
                         )
 )
-#impor gsb 0_5_0
+# impor gsb 0_5_0
 urlpatterns += patterns('gsb.io.import_gsb',
                         url(r'options/import_gsb$',
                             'import_gsb_0_5_x',
                             name="import_gsb")
 )
-#import csv format general
+# import csv format general
 urlpatterns += patterns('',
-                        url(r'options/import_csv_all$',
+                        url(r'options/import/csv/all$',
                             import_csv.Import_csv_ope.as_view(),
                             name="import_csv_ope_all")
 )
-#import csv ope titre
+# import csv ope titre
 urlpatterns += patterns('',
                         url(r'import_titre$',
                             import_titres.Import_csv_ope_titre.as_view(),
-                            name="import_csv_ope_all")
+                            name="import_csv_ope_titre_all")
 )
 
 
