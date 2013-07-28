@@ -1,6 +1,5 @@
 # -*- coding: utf-8
-from datetime import date
-from time import mktime
+
 import decimal
 import os
 from django.db import models
@@ -21,7 +20,7 @@ class CurField(models.DecimalField):
         super(CurField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
 
     def get_internal_type(self):
-        return models.DecimalField.__name__
+        return "DecimalField"
 
     def __mul__(self, other):
         return decimal.Decimal(self) * decimal.Decimal(other)
@@ -80,7 +79,7 @@ class uuidfield(models.CharField):
         super(uuidfield, self).__init__(**kwargs)
 
     def get_internal_type(self):
-        return models.CharField.__name__
+        return "CharField"
 
     def pre_save(self, model_instance, add):
         if self.auto and add:

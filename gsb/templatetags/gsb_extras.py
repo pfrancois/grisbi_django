@@ -32,7 +32,7 @@ def cur(value, symbol=None):
     try:
         val_decim = Decimal(input_val)
     except UnicodeEncodeError:
-       val_decim = Decimal(0)
+        val_decim = Decimal(0)
     except InvalidOperation:
         if input_val in special_floats:
             val_decim = Decimal(0)
