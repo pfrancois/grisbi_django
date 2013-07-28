@@ -106,7 +106,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
         return None
 
     @property
-    def mt(self):
+    def montant(self):
         return utils.to_decimal(self.row['montant'])
 
     @property
@@ -152,9 +152,9 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     def tiers(self):
         if self.moyen == "cheque":
             return "inconnu"
-        if self.moyen == "virement" and self.mt < 0:
+        if self.moyen == "virement" and self.montant < 0:
             return "%s=>%s" % (self.cpt, self.jumelle)
-        if self.moyen == "virement" and self.mt > 0:
+        if self.moyen == "virement" and self.montant > 0:
             return "%s=>%s" % (self.jumelle, self.cpt)
         if self.moyen == "visa":
             return " ".join(mots(self.detail)[3:])

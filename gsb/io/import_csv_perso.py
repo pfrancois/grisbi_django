@@ -48,7 +48,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
         return utils.to_unicode(self.row['projet'], None)
 
     @property
-    def mt(self):
+    def montant(self):
         return utils.to_decimal(self.row['montant'])
 
     @property
@@ -132,7 +132,7 @@ class Import_csv_ope(import_base.Import_base):
                         row.mere
                         row.monnaie
                         row.moyen
-                        row.mt
+                        row.montant
                         row.notes
                         row.num_cheque
                         row.ope_pmv
@@ -169,7 +169,7 @@ class Import_csv_ope(import_base.Import_base):
                             liste_compte = "%s%s" % (liste_compte, "'")
                             raise import_base.ImportException("attention, le compte %s est demande a la ligne %s alors qu'il n'existe pas, les comptes sont %s" % (row.cpt, ope['ligne'], liste_compte))
                 # cat
-                type_cat = 'd' if row.mt <= 0 else 'r'
+                type_cat = 'd' if row.montant <= 0 else 'r'
                 if row.has_fille:
                     type_cat = 'd'  # par convention les ovm sont des depenses
                 if row.jumelle is not None:
@@ -215,7 +215,7 @@ class Import_csv_ope(import_base.Import_base):
                 ope['mere_id'] = row.mere
                 ope['has_fille'] = row.has_fille
                 # montant
-                ope['montant'] = row.mt
+                ope['montant'] = row.montant
                 if row.moyen is not None:
                     ope['moyen_id'] = self.element('moyen', row.moyen, Moyen, {'nom': row.moyen, 'type': type_cat})
                     if ope['moyen_id'] == self.listes['moyen']['Virement'] and row.jumelle is None:

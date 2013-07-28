@@ -14,9 +14,6 @@ from django.db import IntegrityError
 class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
     pass
 
-class Exception_created(Exception):
-    pass
-
 class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
     def id(self):
@@ -160,7 +157,7 @@ class Import_csv_ope(import_base.Import_base):
                             row.mere
                             row.monnaie
                             row.moyen
-                            row.mt
+                            row.montant
                             row.notes
                             row.num_cheque
                             row.ope_pmv
