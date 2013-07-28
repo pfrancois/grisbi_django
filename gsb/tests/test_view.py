@@ -12,7 +12,7 @@ from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
-from ..models import (Tiers, Cat, Ope)
+from ..models import (Tiers, Cat, Ope,Compte)
 
 
 
@@ -35,6 +35,8 @@ class Test_import(Test_view_base):
             self.assertEqual(Tiers.objects.count(), 11)
             self.assertEqual(Ope.objects.count(), 17)
             self.assertEqual(Cat.objects.count(), 8)
+            self.assertEqual(Compte.objects.get(nom="cpte1").solde(),-74)
+            self.assertEqual(Compte.objects.get(nom="cptb2").solde(),-54)
 
 class Test_urls(Test_view_base):
     def test_404(self):
@@ -233,8 +235,7 @@ class Test_views_ope(Test_view_base):
         form = gsb_forms.OperationForm(data=form_data)
         self.assertEqual(form.is_valid(), False)
         form.is_valid()
-        self.assertEqual(form._errors, {'nouveau_tiers':
-                                            [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
-                                        'tiers':
-                                            [
-                                                u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]})
+        self.assertEqual(form._errors, {'nouveau_tiers': [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
+                                        'tiers': [u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]
+                                        }
+                         )

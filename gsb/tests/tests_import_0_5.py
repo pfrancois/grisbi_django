@@ -24,10 +24,8 @@ class importtests(Tcd):
     def test_mauvais_format(self):
         logger = logging.getLogger('gsb')
         logger.setLevel(50)
-        self.assertRaises(ImportException, import_gsb_050,
-                          os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"))
-        self.assertRaises(ImportException, import_gsb_050,
-                          os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"))
 
 
 class importposttests(Tcd):
@@ -36,8 +34,7 @@ class importposttests(Tcd):
         super(importposttests, self).setUp()
         logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
-        Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'),
-              date=datetime.date(day=1, month=1, year=2010)).save()
+        Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)  # change le niveau de log (10 = debug, 20=info)
 
     def test_tiers_properties(self):
@@ -48,8 +45,7 @@ class importposttests(Tcd):
         self.assertEqual(Tiers.objects.count(), 9)
         self.assertEqual(9, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
         self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9], attrgetter("id"))
-        self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9],
-                                 attrgetter("id"))
+        self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9], attrgetter("id"))
 
     def test_titre_normal(self):
         obj = Titre.objects.get(id=1)
