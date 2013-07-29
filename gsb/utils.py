@@ -18,7 +18,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr','switch']
 class FormatException(Exception):
     pass
 
@@ -342,3 +342,24 @@ class Csv_unicode_reader(object):
 
     def __iter__(self):
         return self
+
+class switch(object):
+    """http://code.activestate.com/recipes/410692/"""
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
+
+    def __iter__(self):
+        """Return the match method once, then stop"""
+        yield self.match
+        raise StopIteration
+
+    def match(self, *args):
+        """Indicate whether or not to enter a case suite"""
+        if self.fall or not args:
+            return True
+        elif self.value in args: # changed for v1.5, see below
+            self.fall = True
+            return True
+        else:
+            return False

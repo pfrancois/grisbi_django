@@ -5,6 +5,11 @@ from django.conf.urls import patterns, url
 from . import views, outils
 from .io import import_csv, export_sql_money, export_csv, export_qif
 from .io import import_titre_csv as import_titres
+try:
+    import perso
+    rep_perso=True
+except ImportError:
+    rep_perso=False
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -61,21 +66,16 @@ urlpatterns += patterns('gsb',
                             name='export_sql_pm'
                         )
 )
-# impor gsb 0_5_0
+# import
 urlpatterns += patterns('gsb.io.import_gsb',
-                        url(r'options/import_gsb$',
+                        url(r'options/import/gsb$',
                             'import_gsb_0_5_x',
-                            name="import_gsb")
-)
-# import csv format general
+                            name="import_gsb"))
 urlpatterns += patterns('',
                         url(r'options/import/csv/all$',
                             import_csv.Import_csv_ope.as_view(),
-                            name="import_csv_ope_all")
-)
-# import csv ope titre
-urlpatterns += patterns('',
-                        url(r'import_titre$',
+                            name="import_csv_ope_all"),
+                        url(r'options/import/csv/titres$',
                             import_titres.Import_csv_ope_titre.as_view(),
                             name="import_csv_ope_titre_all")
 )
@@ -135,12 +135,10 @@ urlpatterns += patterns('gsb.views',
                         ),
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
-                        url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
-                        url(r'^perso$', 'perso'),
+                        url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende")
 )
 
 # gestion de mes trucs perso
-perso = False  # ya plus rien dedans
 # form tester
 # if settings.DEBUG and perso:
 #    from gsb.form_tester import SomeModelFormPreview
@@ -150,5 +148,7 @@ perso = False  # ya plus rien dedans
 #                        url(r'^test$', 'test.test')
 # )
 # import gsb.forms_perso
-
-# urlpatterns += patterns('', (r'^perso/', include(gsb.forms_perso)) )
+if perso:
+    urlpatterns += patterns('', url(r'options/import/csv/sg$',
+                            perso.sg.Import_view.as_view(),
+                            name="import_csv_ope_sg") )

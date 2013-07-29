@@ -100,6 +100,10 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def has_fille(self):
         return utils.to_bool(self.row['has_fille'])
 
+    @property
+    def ligne(self):
+        return self.line_num
+
 
 class Import_csv_ope(import_base.Import_base):
     reader = Csv_unicode_reader_ope
@@ -108,9 +112,7 @@ class Import_csv_ope(import_base.Import_base):
     creation_de_compte = True
     titre = "import csv"
 
-   
-    def import_file(self, nomfich):
-        """renvoi un tableau complet de l'import"""
+    def init_cache(self):
         self.moyens = Moyen_cache(self.request)
         self.cats = Cat_cache(self.request)
         self.ibs = IB_cache(self.request)
@@ -121,6 +123,10 @@ class Import_csv_ope(import_base.Import_base):
         self.tiers = Tiers_cache(self.request)
         self.opes = Ope_cache(self.request)
         self.titres = Titre_cache(self.request)
+
+    def import_file(self, nomfich):
+        """renvoi un tableau complet de l'import"""
+        self.init_cache()
         self.erreur = list()
 
         # les moyens par defaut
@@ -135,123 +141,14 @@ class Import_csv_ope(import_base.Import_base):
         if created: messages.info(self.request, "ajout cat OST")
         created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
         if created: messages.info(self.request, "ajout cat PMV")
-        # lecture effective du fichier
-        retour = True
+        retour=False
         try:
             with open(nomfich, 'rt') as f_non_encode:
                 fich = self.reader(f_non_encode, encoding="iso-8859-1")
-                verif_format = False
-                for row in fich:
-                    if not verif_format:  # on verifie a la premiere ligne
-                        try:
-                            row.id
-                            row.automatique
-                            row.cat
-                            row.cpt
-                            row.date
-                            if settings.UTILISE_EXERCICES == True:
-                                row.exercice
-                            row.has_fille
-                            row.ib
-                            row.line_num
-                            row.mere
-                            row.monnaie
-                            row.moyen
-                            row.montant
-                            row.notes
-                            row.num_cheque
-                            row.ope_pmv
-                            # row.ope_titre
-                            # row.piece_comptable
-                            row.rapp
-                            row.tiers
-                        except KeyError as excp:
-                            raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
-                        else:
-                            verif_format = True
-                    ope = dict()
-                    ope['ligne'] = row.line_num
-                    # verification pour les lignes
-                    if row.monnaie != settings.DEVISE_GENERALE:
-                        self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
-                        continue
-                    # compte
-                    try:
-                        ope['compte_id'] = self.comptes.goc(row.cpt)
-                    except import_base.ImportException:
-                        self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.line_num))
-                        continue
-                    # virement (cat, moyen)
-                    if "=>" in row.tiers:
-                        virement = True
-                        ope['cat_id'] = self.cats.goc('Virement')
-                        ope['moyen_id'] = moyen_virement
-                        origine = row.tiers.split("=>")[0]
-                        origine = origine.strip()
-                        dest = row.tiers.split("=>")[2]
-                        dest = dest.strip()
-                        ope['dest_id'] = self.comptes.goc(dest)
-                        if origine  and dest:
-                            if self.comptes.goc(origine) != ope['compte']:
-                                if self.comptes.goc(dest) != ope['compte']:
-                                    self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.compte))
-                                else:
-                                    self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.compte))
-                                continue
-                        else:
-                            self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.line_num)
-                            continue
-                    else:
-                        virement = False
-                        try:
-                            ope['cat_id'] = self.cats.goc(row.cat)
-                        except import_base.ImportException:
-                            self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.line_num))
-                            continue
-                        try:
-                            if row.moyen:
-                                ope['moyen_id'] = self.moyens.goc(row.moyen)
-                            else:
-                                if row.montant > 0:
-                                    ope['moyen_id'] = settings.MD_CREDIT
-                                else:
-                                    ope['moyen_id'] = settings.MD_DEBIT
-                        except import_base.ImportException:
-                            self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.line_num))
-                            continue
-                    ope['virement'] = virement
-                    # tiers
-                    ope['tiers_id'] = self.tiers.goc(row.tiers)
-                    # date
-                    try:
-                        ope['date'] = row.date
-                        if ope['date'] is None:
-                            ope['date'] = utils.today()
-                    except utils.FormatException as e:
-                        self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.line_num))
-                    # auto
-                    ope['automatique'] = row.automatique
-                    # date_val
-                    ope['date_val'] = row.date_val
-                    # ib
-                    if settings.UTILISE_IB == True:
-                        ope['ib_id'] = self.ibs.goc(row.ib)
-                    else:
-                        ope['ib_id'] = None
-                    # jumelle et mere
-                    ope['mere_id'] = row.mere
-                    ope['has_fille'] = row.has_fille
-                    # montant
-                    ope['montant'] = row.montant
-                    ope['notes'] = row.notes
-                    ope['num_cheque'] = row.num_cheque
-                    ope['piece_comptable'] = row.piece_comptable
-                    ope['pointe'] = row.pointe
-                    self.opes.create(ope)
+                retour=self.tableau(fich,moyen_virement)
         except (utils.FormatException, import_base.ImportException) as e:
             messages.error(self.request, "attention traitement interrompu parce que %s" % e)
             retour = False
-
         # gestion des erreurs
         if len(self.erreur) or retour == False:
             for err in self.erreur:
@@ -259,13 +156,14 @@ class Import_csv_ope(import_base.Import_base):
             return False
         # on gere le nombre de truc annex crée
         for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres):
-            messages.info(self.request, "%s %s crées" % (obj.nb, obj.element.__name__))
+            if obj.nb_created > 0:
+                messages.info(self.request, u"%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
         # maintenant on sauvegarde les operations
         for ope in self.opes.create_item:
             ligne = ope.pop('ligne')
             ope.pop('mere_id')  # on efface ca comme pour l'instant je gere pas
             if ope.get('has_fille', True):
-                messages.warning(self.request, "ope ligne %s efface car ope mere " % ligne)
+                messages.warning(self.request, u"opé ligne %s efface car ope mere " % ligne)
                 continue
             ope.pop('has_fille', False)
             virement = ope.pop('virement', False)
@@ -283,8 +181,130 @@ class Import_csv_ope(import_base.Import_base):
                 ope_dest.save()
             else:
                 models.Ope.objects.create(**ope)
+        if self.opes.nb_created > 0:
+            messages.info(self.request, u"%s opés crées" % (self.opes.nb_created))
+
         return True 
     
+    def tableau(self,fich,moyen_virement):
+        # lecture effective du fichier
+        verif_format = False
+        for row in fich:
+            try:
+                if row.date:
+                    pass
+            except utils.FormatException:
+                self.erreur.append(u"Ligne numero %x saute" % row.ligne)
+                continue
+            if not verif_format:  # on verifie a la premiere ligne
+                try:
+                    row.id
+                    row.automatique
+                    row.cat
+                    row.cpt
+                    row.date
+                    if settings.UTILISE_EXERCICES == True:
+                        row.exercice
+                    row.has_fille
+                    row.ib
+                    row.ligne
+                    row.mere
+                    row.monnaie
+                    row.moyen
+                    row.montant
+                    row.notes
+                    row.num_cheque
+                    row.ope_pmv
+                    # row.ope_titre
+                    # row.piece_comptable
+                    row.rapp
+                    row.tiers
+                except KeyError as excp:
+                    raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
+                else:
+                    verif_format = True
+            ope = dict()
+            ope['ligne'] = row.ligne
+            # verification pour les lignes
+            if row.monnaie != settings.DEVISE_GENERALE:
+                self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
+                continue
+            # compte
+            try:
+                ope['compte_id'] = self.comptes.goc(row.cpt)
+            except import_base.ImportException:
+                self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.ligne))
+                continue
+            # virement (cat, moyen)
+            if "=>" in row.tiers:
+                virement = True
+                ope['cat_id'] = self.cats.goc('Virement')
+                ope['moyen_id'] = moyen_virement
+                origine = row.tiers.split("=>")[0]
+                origine = origine.strip()
+                dest = row.tiers.split("=>")[2]
+                dest = dest.strip()
+                ope['dest_id'] = self.comptes.goc(dest)
+                if origine  and dest:
+                    if self.comptes.goc(origine) != ope['compte']:
+                        if self.comptes.goc(dest) != ope['compte']:
+                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.compte))
+                        else:
+                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.compte))
+                        continue
+                else:
+                    self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.ligne)
+                    continue
+            else:
+                virement = False
+                try:
+                    ope['cat_id'] = self.cats.goc(row.cat)
+                except import_base.ImportException:
+                    self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.ligne))
+                    continue
+                try:
+                    if row.moyen:
+                        ope['moyen_id'] = self.moyens.goc(row.moyen)
+                    else:
+                        if row.montant > 0:
+                            ope['moyen_id'] = settings.MD_CREDIT
+                        else:
+                            ope['moyen_id'] = settings.MD_DEBIT
+                except import_base.ImportException:
+                    self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.ligne))
+                    continue
+            ope['virement'] = virement
+            # tiers
+            ope['tiers_id'] = self.tiers.goc(row.tiers)
+            # date
+            try:
+                ope['date'] = row.date
+                if ope['date'] is None:
+                    ope['date'] = utils.today()
+            except utils.FormatException as e:
+                self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
+            # auto
+            ope['automatique'] = row.automatique
+            # date_val
+            ope['date_val'] = row.date_val
+            # ib
+            if settings.UTILISE_IB == True:
+                ope['ib_id'] = self.ibs.goc(row.ib)
+            else:
+                ope['ib_id'] = None
+            # jumelle et mere
+            ope['mere_id'] = row.mere
+            ope['has_fille'] = row.has_fille
+            # montant
+            ope['montant'] = row.montant
+            ope['notes'] = row.notes
+            ope['num_cheque'] = row.num_cheque
+            ope['piece_comptable'] = row.piece_comptable
+            ope['pointe'] = row.pointe
+            self.opes.create(ope)
+        retour=True
+        return retour
+
 
 class Table(object):
     """Moyen avec cache"""
@@ -298,6 +318,7 @@ class Table(object):
             raise NotImplementedError("table de l'element non choisi")
         else:
             self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
+        self.nb_created=0
 
     def goc(self, nom, obj=None):
         if nom == "" or nom is None:
@@ -317,12 +338,13 @@ class Table(object):
                     argument_def = self.arg_def(nom, obj)
                     try:
                         created = self.element.objects.create(**argument_def)
+                        self.nb_created += 1
                     except IntegrityError as e:
                         raise import_base.ImportException("%s" % e)
                     pk = created.pk
                     self.id[nom] = pk 
                     self.create_item.append(created)
-                    messages.info(self.request, 'creation du %s "%s"' % (self.element.__class__.__name__, created))
+                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
                     raise import_base.ImportException("%s non defini alors que c'est read only" % self.element.__class__.__name__)
         return pk
@@ -331,10 +353,6 @@ class Table(object):
         raise NotImplementedError("methode arg_def non defini")
 
     
-    @property
-    def nb(self):
-        return len(self.id)
-
 
 class Cat_cache(Table):
     element = models.Cat
@@ -406,3 +424,4 @@ class Ope_cache(Table):
         raise NotImplementedError("methode goc non defini")
     def create(self, ope):
         self.create_item.append(ope)
+        self.nb_created += 1

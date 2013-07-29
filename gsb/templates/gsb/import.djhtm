@@ -2,7 +2,7 @@
 {% block title %}importation d'un fichier{% endblock title %}
 {% block titre %}<h1>importation d'un fichier</h1>{% endblock %}
 {% block content %}
-{% comment %}<div>{{ resultat|pprint }}</div>{% endcomment %}
+{% if resultat %}<div title="resultat"><pre>{{ resultat|pprint }}</pre></div>{% endif %}
     <form enctype="multipart/form-data" action="" method="post">
         <table>
             {{ form.as_table }}

@@ -27,7 +27,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     def detail(self):
         return self.row['detail'].strip()
     @property
-    def det(self):
+    def liste_detail(self):
         tour1 = mots(self.detail)
         retour = None
         try:
@@ -95,9 +95,9 @@ class csv_sg_reader(utils.Csv_unicode_reader):
         # un retrait
         if self.detail[:19] == u"CARTE X4983 RETRAIT":
             return "caisse"
-        if self.det[:14] == "GENERATION VIE":
+        if self.liste_detail[:14] == "GENERATION VIE":
             return "generation vie"
-        if self.det[:16] == "Gr Bque - Banque":
+        if self.liste_detail[:16] == "Gr Bque - Banque":
             return "BDF PEE"
         return None
 
@@ -160,7 +160,7 @@ class csv_sg_reader(utils.Csv_unicode_reader):
             return " ".join(mots(self.detail)[3:])
         if "%s %s" % (mots(self.detail)[0], mots(self.detail)[1]) == "VIR RECU":
             return " ".join(mots(self.detail)[4:6])
-        return self.det.lower()
+        return self.liste_detail.lower()
 
     @property
     def monnaie(self):

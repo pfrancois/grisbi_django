@@ -72,6 +72,7 @@ class property_ope_base(object):
 
     @property
     def jumelle(self):
+        """renvoie le nom du compte jumelle"""
         return None
 
     @property
