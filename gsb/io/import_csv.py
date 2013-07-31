@@ -104,6 +104,13 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def ligne(self):
         return self.line_num
 
+    @property
+    def ligne_a_lire(self):
+        if self.row['date'] != '' and self.row['montant']:
+            return True
+        else:
+            return False
+
 
 class Import_csv_ope(import_base.Import_base):
     reader = Csv_unicode_reader_ope
@@ -111,6 +118,7 @@ class Import_csv_ope(import_base.Import_base):
     type_f = "csv_version_totale"
     creation_de_compte = True
     titre = "import csv"
+    encoding = "iso-8859-1"
 
     def init_cache(self):
         self.moyens = Moyen_cache(self.request)
@@ -141,11 +149,11 @@ class Import_csv_ope(import_base.Import_base):
         if created: messages.info(self.request, "ajout cat OST")
         created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
         if created: messages.info(self.request, "ajout cat PMV")
-        retour=False
+        retour = False
         try:
             with open(nomfich, 'rt') as f_non_encode:
-                fich = self.reader(f_non_encode, encoding="iso-8859-1")
-                retour=self.tableau(fich,moyen_virement)
+                fich = self.reader(f_non_encode, encoding=self.encoding)
+                retour = self.tableau(fich, moyen_virement)
         except (utils.FormatException, import_base.ImportException) as e:
             messages.error(self.request, "attention traitement interrompu parce que %s" % e)
             retour = False
@@ -186,14 +194,11 @@ class Import_csv_ope(import_base.Import_base):
 
         return True 
     
-    def tableau(self,fich,moyen_virement):
+    def tableau(self, fich, moyen_virement):
         # lecture effective du fichier
         verif_format = False
         for row in fich:
-            try:
-                if row.date:
-                    pass
-            except utils.FormatException:
+            if row.ligne < 1:
                 self.erreur.append(u"Ligne numero %x saute" % row.ligne)
                 continue
             if not verif_format:  # on verifie a la premiere ligne
@@ -242,12 +247,12 @@ class Import_csv_ope(import_base.Import_base):
                 ope['moyen_id'] = moyen_virement
                 origine = row.tiers.split("=>")[0]
                 origine = origine.strip()
-                dest = row.tiers.split("=>")[2]
+                dest = row.tiers.split("=>")[1]
                 dest = dest.strip()
                 ope['dest_id'] = self.comptes.goc(dest)
                 if origine  and dest:
-                    if self.comptes.goc(origine) != ope['compte']:
-                        if self.comptes.goc(dest) != ope['compte']:
+                    if self.comptes.goc(origine) != ope['compte_id']:
+                        if self.comptes.goc(dest) != ope['compte_id']:
                             self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.compte))
                         else:
                             self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.compte))
@@ -302,7 +307,7 @@ class Import_csv_ope(import_base.Import_base):
             ope['piece_comptable'] = row.piece_comptable
             ope['pointe'] = row.pointe
             self.opes.create(ope)
-        retour=True
+        retour = True
         return retour
 
 
@@ -318,7 +323,7 @@ class Table(object):
             raise NotImplementedError("table de l'element non choisi")
         else:
             self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
-        self.nb_created=0
+        self.nb_created = 0
 
     def goc(self, nom, obj=None):
         if nom == "" or nom is None:
@@ -346,7 +351,7 @@ class Table(object):
                     self.create_item.append(created)
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
-                    raise import_base.ImportException("%s non defini alors que c'est read only" % self.element.__class__.__name__)
+                    raise import_base.ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
         return pk
     
     def arg_def(self, nom, obj):
