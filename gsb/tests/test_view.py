@@ -12,7 +12,7 @@ from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
-from ..models import (Tiers, Cat, Ope,Compte)
+from ..models import (Tiers, Cat, Ope, Compte)
 
 
 
@@ -35,8 +35,8 @@ class Test_import(Test_view_base):
             self.assertEqual(Tiers.objects.count(), 11)
             self.assertEqual(Ope.objects.count(), 17)
             self.assertEqual(Cat.objects.count(), 8)
-            self.assertEqual(Compte.objects.get(nom="cpte1").solde(),-74)
-            self.assertEqual(Compte.objects.get(nom="cptb2").solde(),-54)
+            self.assertEqual(Compte.objects.get(nom="cpte1").solde(), -74)
+            self.assertEqual(Compte.objects.get(nom="cptb2").solde(), -54)
 
 class Test_urls(Test_view_base):
     def test_404(self):

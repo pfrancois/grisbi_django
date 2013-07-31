@@ -85,7 +85,7 @@ def is_number(s):
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    s = str(s).strip()
+    s = force_unicode(s).strip()
     s = s.replace(',', '.')
     s = s.replace(' ', '')
     return decimal.Decimal(s)
@@ -329,11 +329,11 @@ class Csv_unicode_reader(object):
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
     """
-
+    champs=None
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
         self.line_num = 1
         fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.DictReader(fich, dialect=dialect, **kwds)
+        self.reader = csv.DictReader(fich, dialect=dialect,fieldnames=self.champs, **kwds)
 
     def next(self):
         self.line_num += 1

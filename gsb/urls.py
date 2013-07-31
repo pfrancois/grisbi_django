@@ -7,9 +7,9 @@ from .io import import_csv, export_sql_money, export_csv, export_qif
 from .io import import_titre_csv as import_titres
 try:
     import perso
-    rep_perso=True
+    rep_perso = True
 except ImportError:
-    rep_perso=False
+    rep_perso = False
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -151,4 +151,4 @@ urlpatterns += patterns('gsb.views',
 if perso:
     urlpatterns += patterns('', url(r'options/import/csv/sg$',
                             perso.sg.Import_view.as_view(),
-                            name="import_csv_ope_sg") )
+                            name="import_csv_ope_sg"))
