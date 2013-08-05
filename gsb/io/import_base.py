@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 import time
 # import logging
-import os,sys
+import os, sys
 
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
@@ -184,22 +184,22 @@ class Table(object):
 class Cat_cache(Table):
     element = models.Cat
     def __init__(self, request):
-        super(Cat_cache,self).__init__(request)
-        if self.readonly==True: 
-            self.readonly=False
-            readonly=True
+        super(Cat_cache, self).__init__(request)
+        if self.readonly == True: 
+            self.readonly = False
+            readonly = True
         else:
-            readonly=False
-        self.goc("", {'nom':'Operation sur titre','id':settings.ID_CAT_OST,'type':'d'})
-        self.goc("", {'nom':'Revenus de placement:Plus-values','id':settings.ID_CAT_PMV,'type':'r'})
-        self.goc("", {'nom': settings.REV_PLAC,'type':'r'})
-        self.goc("",{'nom':u'Impôts:Cotisations sociales','id':settings.ID_CAT_COTISATION,'type':'d'})
+            readonly = False
+        self.goc("", {'nom':'Operation sur titre', 'id':settings.ID_CAT_OST, 'type':'d'})
+        self.goc("", {'nom':'Revenus de placement:Plus-values', 'id':settings.ID_CAT_PMV, 'type':'r'})
+        self.goc("", {'nom': settings.REV_PLAC, 'type':'r'})
+        self.goc("", {'nom':u'Impôts:Cotisations sociales', 'id':settings.ID_CAT_COTISATION, 'type':'d'})
         self.goc(u'Non affecté')
         self.goc(u'Opération Ventilée')
         self.goc("Frais bancaires")
-        self.goc('',{'nom':'Virement','type':"v"})
-        if readonly==True:
-            self.readonly=True
+        self.goc('', {'nom':'Virement', 'type':"v"})
+        if readonly == True:
+            self.readonly = True
     def arg_def(self, nom, obj):
         if obj is None:
             return {"nom":nom, "type":'d'}
@@ -209,16 +209,16 @@ class Cat_cache(Table):
 class Moyen_cache(Table):
     element = models.Moyen
     def __init__(self, request):
-        super(Moyen_cache,self).__init__(request)
-        if self.readonly==True: 
-            self.readonly=False
-            readonly=True
+        super(Moyen_cache, self).__init__(request)
+        if self.readonly == True: 
+            self.readonly = False
+            readonly = True
         else:
-            readonly=False
-        self.goc("", {'nom':'CREDIT','id':settings.MD_CREDIT,'type':'r'})
-        self.goc("", {'nom':'DEBIT','id':settings.MD_DEBIT,'type':'d'})
-        if readonly==True:
-            self.readonly=True
+            readonly = False
+        self.goc("", {'nom':'CREDIT', 'id':settings.MD_CREDIT, 'type':'r'})
+        self.goc("", {'nom':'DEBIT', 'id':settings.MD_DEBIT, 'type':'d'})
+        if readonly == True:
+            self.readonly = True
 
     def arg_def(self, nom, obj):
         if obj is None:
@@ -240,7 +240,7 @@ class Compte_cache(Table):
     element = models.Compte
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, "type":'b','moyen_credit_defaut_id':settings.MD_CREDIT,'moyen_debit_defaut_id':settings.MD_DEBIT}
+            return {"nom":nom, "type":'b', 'moyen_credit_defaut_id':settings.MD_CREDIT, 'moyen_debit_defaut_id':settings.MD_DEBIT}
         else:
             return obj
 
@@ -290,7 +290,7 @@ class Exercice_cache(Table):
     element = models.Exercice
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom,'date_debut':utils.today(),'date_fin':utils.today()}
+            return {"nom":nom, 'date_debut':utils.today(), 'date_fin':utils.today()}
         else:
             return obj
 
@@ -299,8 +299,8 @@ class Exercice_cache(Table):
 class Tiers_cache(Table):
     element = models.Tiers
     def __init__(self, request):
-        super(Tiers_cache,self).__init__(request)
-        self.goc("",{'nom':'Secu','id':settings.ID_TIERS_COTISATION})
+        super(Tiers_cache, self).__init__(request)
+        self.goc("", {'nom':'Secu', 'id':settings.ID_TIERS_COTISATION})
 
     def arg_def(self, nom, obj):
         if obj is None:
@@ -312,7 +312,7 @@ class Tiers_cache(Table):
 class Titre_cache(Table):
     element = models.Titre
     def __init__(self, request):
-        self.id = {"nom":dict(),"isin":dict()}
+        self.id = {"nom":dict(), "isin":dict()}
         self.create_item = list()
         self.request = request
         if self.element is None:
@@ -321,10 +321,10 @@ class Titre_cache(Table):
             self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
         self.nb_created = 0
 
-    def goc(self,nom=None,isin=None,obj=None):
-        if nom[:6]=="titre_":
-            nom=nom[7:]
-            nom=nom.strip()
+    def goc(self, nom=None, isin=None, obj=None):
+        if nom[:6] == "titre_":
+            nom = nom[7:]
+            nom = nom.strip()
         if (nom == "" or nom is None) and (isin == "" or isin is None):
             return None
         try:
@@ -364,13 +364,13 @@ class Titre_cache(Table):
     def arg_def(self, nom, isin, obj):
         if obj is None:
             if nom:
-                arg_nom=nom
+                arg_nom = nom
             else:
-                arg_nom="inconnu"
+                arg_nom = "inconnu"
             if isin:
-                arg_isin=isin
+                arg_isin = isin
             else:
-                arg_isin="XX00000%s" % self.nb_created
+                arg_isin = "XX00000%s" % self.nb_created
             return {"nom":arg_nom, "isin":arg_isin, "type":"XXX"}
         else:
             return obj
@@ -385,13 +385,13 @@ class Ope_cache(Table):
         self.nb_created += 1
 
 class Rapp_cache(Table):
-    element=models.Rapp
+    element = models.Rapp
     def goc(self, nom, date, obj=None):
         if nom:
-            pk=super(Rapp_cache,self).goc(nom,obj)
-            rapp=models.Rapp.objects.filter(id=pk)
+            pk = super(Rapp_cache, self).goc(nom, obj)
+            rapp = models.Rapp.objects.filter(id=pk)
             if rapp.date > date:
-                rapp.date=date
+                rapp.date = date
                 rapp.save()
         else:
             return None

@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from django import forms
 from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre, Ib, Rapp)
-from .import widgets as gsb_field
+from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
 # import decimal
@@ -119,16 +119,16 @@ class Ope_titre_addForm(Baseform):
     compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     nombre = forms.DecimalField(localize=True, required=True)
-    cours = forms.DecimalField(initial='1', required=True,localize=True,min_value=0)
-    frais = forms.DecimalField(initial='0', required=False,localize=True,)
+    cours = forms.DecimalField(initial='1', required=True, localize=True, min_value=0)
+    frais = forms.DecimalField(initial='0', required=False, localize=True,)
 
     def clean(self):
         super(Ope_titre_addForm, self).clean()
-        if 'nombre' in self.cleaned_data and self.cleaned_data['nombre']==0:
+        if 'nombre' in self.cleaned_data and self.cleaned_data['nombre'] == 0:
             self._errors['nombre'] = self.error_class([u'le nombre de titre ne peut être nul', ])
             del self.cleaned_data['nombre']
         if self.cleaned_data['frais'] > 0:
-            self.cleaned_data['frais'] = self.cleaned_data['frais'] *-1
+            self.cleaned_data['frais'] = self.cleaned_data['frais'] * -1
         return self.cleaned_data
 
 class Ope_titre_dividendeForm(Baseform):
@@ -136,16 +136,16 @@ class Ope_titre_dividendeForm(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
     compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
-    montant = forms.DecimalField(localize=True, initial='0', required=True,min_value=0)
+    montant = forms.DecimalField(localize=True, initial='0', required=True, min_value=0)
     def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_dividendeForm, self).__init__(*args, **kwargs)
-        self.cpt=cpt
+        self.cpt = cpt
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
         if cpt and cpt.type == 't':
             self.fields['titre'].queryset = cpt.liste_titre()
         else:
-            self.cpt=None
+            self.cpt = None
 
 
 class Ope_titre_add_achatForm(Ope_titre_addForm):
@@ -156,10 +156,10 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
         super(Ope_titre_add_achatForm, self).clean()
         data = self.cleaned_data
         # on verifie qu'il y a soit un nouveau titre soit qu'un titre a été tapé
-        if data.get('titre', None) is None and data.get('nouveau_titre')=="":
+        if data.get('titre', None) is None and data.get('nouveau_titre') == "":
             self._errors['nouveau_titre'] = self.error_class([u"si vous ne choisissez pas un titre, vous devez taper le nom du nouveau", ])
             del data['nouveau_titre']
-        if data.get('nouveau_titre',None)=="" and data.get('nouveau_isin', None) !="":
+        if data.get('nouveau_titre', None) == "" and data.get('nouveau_isin', None) != "":
             del data['nouvel_isin']
         return data
 
@@ -170,10 +170,10 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
         self.fields['titre'].empty_label = None
         self.fields['titre'].required = True
         if cpt and cpt.type == 't':
-            self.cpt=cpt
+            self.cpt = cpt
             self.fields['titre'].queryset = cpt.liste_titre()
         else:
-            self.cpt=None
+            self.cpt = None
 
     def clean(self):
         super(Ope_titre_add_venteForm, self).clean()
@@ -191,7 +191,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
 
 
 class Ope_titreForm(Basemodelform):
-    fields=['titre','compte','nombre','date','cours']
+    fields = ['titre', 'compte', 'nombre', 'date', 'cours']
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)

@@ -128,7 +128,7 @@ class Import_csv_ope(import_base.Import_base):
         self.erreur = list()
 
         # les moyens par defaut
-        moyen_virement=self.moyens.goc('',{'nom':"virement",'type':'v'})
+        moyen_virement = self.moyens.goc('', {'nom':"virement", 'type':'v'})
         retour = False
         try:
             with open(nomfich, 'rt') as f_non_encode:

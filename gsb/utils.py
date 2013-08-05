@@ -18,7 +18,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr','switch']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'switch']
 class FormatException(Exception):
     pass
 
@@ -329,11 +329,11 @@ class Csv_unicode_reader(object):
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
     """
-    champs=None
+    champs = None
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
         self.line_num = 1
         fich = UTF8Recoder(fich, encoding)
-        self.reader = csv.DictReader(fich, dialect=dialect,fieldnames=self.champs, **kwds)
+        self.reader = csv.DictReader(fich, dialect=dialect, fieldnames=self.champs, **kwds)
 
     def next(self):
         self.line_num += 1
@@ -358,7 +358,7 @@ class switch(object):
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
             return True
-        elif self.value in args: # changed for v1.5, see below
+        elif self.value in args:  # changed for v1.5, see below
             self.fall = True
             return True
         else:

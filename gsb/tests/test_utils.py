@@ -157,3 +157,4 @@ class Test_utils(TestCase):
         self.assertEquals(utils.to_date(None), datetime.date(1, 1, 1))
         self.assertRaises(utils.FormatException, utils.to_date, 'toto')
 
+                

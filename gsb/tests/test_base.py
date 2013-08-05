@@ -39,30 +39,30 @@ class TestCase(Test_Case_django):
         view.args = args
         view.kwargs = kwargs
         return view
-    def request_get(self,url):
-        factory=RequestFactory()
-        request=factory.get(url)
+    def request_get(self, url):
+        factory = RequestFactory()
+        request = factory.get(url)
         setattr(request, 'session', 'session')
         messages = FallbackStorage(request)
         setattr(request, '_messages', messages)
         return request
     
-    def request_post(self,url):
-        factory=RequestFactory()
-        request=factory.post(url)
+    def request_post(self, url):
+        factory = RequestFactory()
+        request = factory.post(url)
         setattr(request, 'session', 'session')
         messages = FallbackStorage(request)
         setattr(request, '_messages', messages)
         return request
     
-    def assertcountmessage(self,request,nb):
-        actual=len([e.message for e in request._messages])
+    def assertcountmessage(self, request, nb):
+        actual = len([e.message for e in request._messages])
         if actual != nb:
             self.fail('Message count was %d, expected %d' % (actual, nb))
 
-    def assertmessagecontains(self,request,text,level=None):
-        messages=request._messages
-        matches=[m for m in messages if text in m.message]
+    def assertmessagecontains(self, request, text, level=None):
+        messages = request._messages
+        matches = [m for m in messages if text in m.message]
         if len(matches) > 0:
             msg = matches[0]
             if level is not None and msg.level != level:

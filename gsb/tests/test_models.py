@@ -648,8 +648,8 @@ class Test_models(TestCase):
         self.assertEquals(Echeance.objects.get(id=7).calcul_next(), None)
 
     def test_echeance_check1(self):
-        request=self.request_get('/options/check')
-        Echeance.check(to=utils.strpdate('2011-12-31'),request=request)
+        request = self.request_get('/options/check')
+        Echeance.check(to=utils.strpdate('2011-12-31'), request=request)
         self.assertcountmessage(request, 57)
         self.assertEqual(Ope.objects.count(), 71)
 
@@ -710,45 +710,45 @@ class Test_models(TestCase):
         t = Tiers.objects.get(id=1)
         c = Cat.objects.get(id=1)
         m = Moyen.objects.get(id=1)
-        cpt=Compte.objects.get(id=1)
-        r=Rapp.objects.get(id=1)
-        ensemble_a_tester=(({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now()},True,o),# normal
-                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'pointe':True, 'rapp':r.id,'date':utils.now()},False,o),# poitne et rapproche
-                           ({'tiers':t.id, 'compte':None, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()},False,o),# pas de compte
-                           ({'tiers':t.id, 'compte':Ope.objects.get(id=6).id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()},False,o),
-                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now()},True,Ope.objects.get(pk=11)),
-                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now(),'pointe':True},False,Ope.objects.get(pk=11)),
-                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now(),'rapp':r.id},False,Ope.objects.get(pk=11)),
+        cpt = Compte.objects.get(id=1)
+        r = Rapp.objects.get(id=1)
+        ensemble_a_tester = (({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()}, True, o),  # normal
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'pointe':True, 'rapp':r.id, 'date':utils.now()}, False, o),  # poitne et rapproche
+                           ({'tiers':t.id, 'compte':None, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()}, False, o),  # pas de compte
+                           ({'tiers':t.id, 'compte':Ope.objects.get(id=6).id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()}, False, o),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()}, True, Ope.objects.get(pk=11)),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now(), 'pointe':True}, False, Ope.objects.get(pk=11)),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now(), 'rapp':r.id}, False, Ope.objects.get(pk=11)),
                            )
         for ens in ensemble_a_tester:
-            form=forms.OperationForm(ens[0], instance=ens[2])
-            self.assertEqual(form.is_valid(),ens[1])
+            form = forms.OperationForm(ens[0], instance=ens[2])
+            self.assertEqual(form.is_valid(), ens[1])
         
     def test_solde_set_nul(self):
         self.assertEqual(Ope.solde_set(Ope.objects.none()), 0)
         self.assertEqual(Ope.solde_set(Ope.objects.all()), -1476)
 
     def test_iseditable(self):
-        self.assertEqual(Ope.objects.get(pk=4).is_editable(), False)#ope rapp
-        self.assertEqual(Ope.objects.get(pk=12).is_editable(), True)#ope normale
-        self.assertEqual(Ope.objects.get(pk=11).is_editable(), False)#ope mere
+        self.assertEqual(Ope.objects.get(pk=4).is_editable(), False)  # ope rapp
+        self.assertEqual(Ope.objects.get(pk=12).is_editable(), True)  # ope normale
+        self.assertEqual(Ope.objects.get(pk=11).is_editable(), False)  # ope mere
         
-        #rajout d'une operation dans un compte ferme
-        c=Compte.objects.get(id=6)
+        # rajout d'une operation dans un compte ferme
+        c = Compte.objects.get(id=6)
         t = Tiers.objects.get(id=1)
-        c.ouvert=True
+        c.ouvert = True
         c.save()
-        o=Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
-        c.ouvert=False
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
+        c.ouvert = False
         c.save()
         self.assertEqual(o.is_editable(), False)
-        c.ouvert=False
+        c.ouvert = False
         
-        #ajout d'un virement rapproche
-        o=Ope.objects.get(pk=9)
-        o.rapp=Rapp.objects.get(id=1)
+        # ajout d'un virement rapproche
+        o = Ope.objects.get(pk=9)
+        o.rapp = Rapp.objects.get(id=1)
         o.save()
-        o=Ope.objects.get(pk=8)
+        o = Ope.objects.get(pk=8)
         self.assertEqual(o.is_editable(), False)
         
 
@@ -908,7 +908,7 @@ class Test_models(TestCase):
 
 
 class Test_models2(TestCase):
-    #sans fixtures
+    # sans fixtures
     def test_last_cours_date_special(self):
         # on cree les elements indiepensables
         c = Compte.objects.create(nom="cpt_titre1")
@@ -919,11 +919,11 @@ class Test_models2(TestCase):
         o = Ope.objects.get(id=1)
         o.rapp = r
         o.save()
-        #Cours.objects.get(id=1).delete()
-        cours=t.last_cours_date(rapp=True)
+        # Cours.objects.get(id=1).delete()
+        cours = t.last_cours_date(rapp=True)
         self.assertEquals(cours, utils.strpdate('2012-01-01'))
         Cours.objects.get(id=1).delete()
-        cours=t.last_cours_date(rapp=True)
+        cours = t.last_cours_date(rapp=True)
         self.assertEquals(cours, None)
     def test_ope_titre_special(self):
         """si une categorie "Operation sur titre" existe deja mais que l'id ost est definie autrement"""

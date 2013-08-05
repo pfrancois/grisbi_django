@@ -389,13 +389,13 @@ def import_gsb_050(nomfich, efface_table=True):
                   date_val=ope_date_val,  # date de valeur
                   montant=ope_montant,  # montant
         )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
-        compte_ferme= not ope.compte.ouvert
+        compte_ferme = not ope.compte.ouvert
         if compte_ferme:
-            ope.compte.ouvert=True
+            ope.compte.ouvert = True
             ope.compte.save() 
         ope.save()
         if compte_ferme:
-            ope.compte.ouvert=False
+            ope.compte.ouvert = False
             ope.compte.save() 
 
         tabl_correspondance_ope[xml_ope.get('No')] = ope.id
@@ -443,13 +443,13 @@ def import_gsb_050(nomfich, efface_table=True):
             ope.exercice_id = tabl_correspondance_exo[xml_ope.get('E')]
         except KeyError:
             ope.exercice = None
-        compte_ferme=not ope.compte.ouvert
+        compte_ferme = not ope.compte.ouvert
         if compte_ferme:
-            ope.compte.ouvert=True
+            ope.compte.ouvert = True
             ope.compte.save() 
         ope.save()
         if compte_ferme:
-            ope.compte.ouvert=False
+            ope.compte.ouvert = False
             ope.compte.save()
     nb_tot_ope = 0
     percent = 1

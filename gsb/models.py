@@ -727,14 +727,14 @@ class Ope_titre(models.Model):
         self.nombre = decimal.Decimal(self.nombre)
         # definition des cat avec possibilite
         try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre','id':settings.ID_CAT_OST})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre', 'id':settings.ID_CAT_OST})[0]
         except IntegrityError:
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
         try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values','id':settings.ID_CAT_PMV})[0]
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values', 'id':settings.ID_CAT_PMV})[0]
         except IntegrityError:
-            raise ImproperlyConfigured( u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
+            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
             # gestion des cours
         if self.ope:
             old_date = self.ope.date
@@ -742,7 +742,7 @@ class Ope_titre(models.Model):
             obj.delete()
         else:
             old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre':self.titre,'date':old_date,'valeur': 0})  # @UnusedVariable
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre':self.titre, 'date':old_date, 'valeur': 0})  # @UnusedVariable
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
@@ -1176,7 +1176,7 @@ class Ope(models.Model):
                 if self.compte.moyen_credit_defaut:
                     self.moyen = self.compte.moyen_credit_defaut
                 else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit","id": settings.MD_CREDIT, 'type': "r"})[0]
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit", "id": settings.MD_CREDIT, 'type': "r"})[0]
                     self.moyen = moyen
             if self.montant < 0:
                 if self.compte.moyen_debit_defaut:
@@ -1229,7 +1229,7 @@ class Ope(models.Model):
         try:
             self.clean()
         except ValidationError as e:
-            raise IntegrityError("%s"%e)
+            raise IntegrityError("%s" % e)
         super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):

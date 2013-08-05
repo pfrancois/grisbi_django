@@ -13,6 +13,7 @@ from ..models import Ope_titre, Compte
 from django.core import exceptions as django_exceptions
 from ..utils import Excel_csv
 import csv
+from .. import widgets as gsb_field
 
 
 class Export_view_csv_base(export_base.ExportViewBase):
@@ -39,7 +40,7 @@ class Export_ope_csv(Export_view_csv_base):
     nomfich = "export_ope"
     fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes',
                   'projet', 'numchq', 'id jumelle lie', 'has_fille', 'id_ope_m', 'ope_titre', 'ope_pmv', 'mois')
-    titre="Export des operations au format csv"
+    titre = "Export des operations au format csv"
 
     def export(self, query):
         """
@@ -72,21 +73,12 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['p'] = utils.booltostr(ope.pointe)
 
             # moyen
-            try:
-                ligne['moyen'] = utils.idtostr(
-                    ope.moyen, defaut='', membre="nom")
-            except django_exceptions.ObjectDoesNotExist:
-                ligne['moyen'] = ""
-            # cat
+            ligne['moyen'] = utils.idtostr(ope.moyen, defaut='', membre="nom")
             ligne['cat'] = utils.idtostr(ope.cat, defaut='', membre="nom")
             # tiers
             ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
-            try:
-                ligne['projet'] = utils.idtostr( ope.ib, defaut='', membre="nom")
-            except django_exceptions.ObjectDoesNotExist:
-                ligne['projet'] = ""
-
+            ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['numchq'] = ope.num_cheque
             ligne['id jumelle lie'] = utils.idtostr(ope, defaut='', membre='jumelle_id')
@@ -124,6 +116,7 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
     nomfich = "export_ope"
     fieldnames = ("account name", "date", "ChkNum", "Payee", "Category", "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
     class_csv_dialect = pocket_csv
+    titre = "export_pocketmoney"
 
     def export(self, query):
         """
@@ -166,9 +159,9 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
 
 
 class Exportform_cours(export_base.Exportform_ope):
-    collection = export_base.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False)
-    date_min = export_base.forms.DateField(label='date minimum', widget=export_base.forms.DateInput)
-    date_max = export_base.forms.DateField(label='date maximum', widget=export_base.forms.DateInput)
+    collection = export_base.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False, label="Titres")
+    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True,)
+    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True,)
     model_initial = models.Cours
     model_collec = models.Titre
 
@@ -181,6 +174,8 @@ class Export_cours_csv(Export_view_csv_base):
     form_class = Exportform_cours
     nomfich = "export_cours"
     fieldnames = ("id", "date", "nom", "isin", "value")
+    titre = u"Export des cours pour des titres determinés"
+    debug = True
 
     def export(self, query):
         """
@@ -202,8 +197,8 @@ class Export_cours_csv(Export_view_csv_base):
 
 class Exportform_Compte_titre(export_base.Exportform_ope):
     collection = export_base.forms.ModelMultipleChoiceField(Compte.objects.filter(type='t'), required=False)
-    date_min = export_base.forms.DateField(label='date minimum', widget=export_base.forms.DateInput)
-    date_max = export_base.forms.DateField(label='date maximum', widget=export_base.forms.DateInput)
+    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True,)
+    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True,)
     model_initial = Ope_titre
     model_collec = Compte
 
@@ -215,13 +210,14 @@ class Export_ope_titre_csv(Export_view_csv_base):
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
+    titre = u"export des opération-titres"
     fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
 
     def export(self, query):
         """
         renvoie l'ensemble des operations titres.
         @param query: filtre avec les dates
-        @return: object httpreposne se composant du fichier csv
+        @return: object httpreponse se composant du fichier csv
         """
         data = []
         for objet in query.order_by('date').select_related('compte', 'titre'):
