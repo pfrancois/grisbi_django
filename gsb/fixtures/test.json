@@ -3,7 +3,7 @@
         "pk":7,
         "model":"gsb.tiers",
         "fields":{
-            "nom":"Virement",
+            "nom":"virement",
             "notes":"",
             "is_titre":false,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
@@ -258,7 +258,7 @@
         "pk":65,
         "model":"gsb.cat",
         "fields":{
-            "nom":"virement",
+            "nom":"Virement",
             "type":"d",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571Z"

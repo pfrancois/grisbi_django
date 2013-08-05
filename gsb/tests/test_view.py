@@ -34,7 +34,7 @@ class Test_import(Test_view_base):
             self.assertEqual(r.status_code, 302)
             self.assertEqual(Tiers.objects.count(), 11)
             self.assertEqual(Ope.objects.count(), 17)
-            self.assertEqual(Cat.objects.count(), 8)
+            self.assertEqual(Cat.objects.count(), 10)
             self.assertEqual(Compte.objects.get(nom="cpte1").solde(), -74)
             self.assertEqual(Compte.objects.get(nom="cptb2").solde(), -54)
 
@@ -51,8 +51,8 @@ class Test_urls(Test_view_base):
     def test_normaux2(self):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
-        self.assertEqual(self.client.get('/options/import_csv_all').status_code, 200)
-        self.assertEqual(self.client.get('/options/import_gsb').status_code, 200)
+        self.assertEqual(self.client.get('/options/import/csv/all').status_code, 200)
+        self.assertEqual(self.client.get('/options/import/gsb').status_code, 200)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)

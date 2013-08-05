@@ -105,7 +105,7 @@ class Titre(models.Model):
 
     def last_cours_date(self, rapp=False):
         """renvoie la date du dernier cours
-        @rtype : datetime ou None
+        @return : datetime ou None
         """
         if not rapp:
             return self.cours_set.latest('date').date
@@ -648,8 +648,7 @@ class Compte(models.Model):
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"Frais bancaires",
-                                                          defaults={'nom': u'Frais bancaires'})[0]
+                    cat_frais = Cat.objects.get_or_create(nom=u"Frais bancaires", defaults={'nom': u'Frais bancaires'})[0]
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -728,15 +727,14 @@ class Ope_titre(models.Model):
         self.nombre = decimal.Decimal(self.nombre)
         # definition des cat avec possibilite
         try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre'})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre','id':settings.ID_CAT_OST})[0]
         except IntegrityError:
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
         try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values'})[0]
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values','id':settings.ID_CAT_PMV})[0]
         except IntegrityError:
-            raise ImproperlyConfigured(
-                u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
+            raise ImproperlyConfigured( u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
             # gestion des cours
         if self.ope:
             old_date = self.ope.date
@@ -744,7 +742,7 @@ class Ope_titre(models.Model):
             obj.delete()
         else:
             old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'valeur': 0})  # @UnusedVariable
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre':self.titre,'date':old_date,'valeur': 0})  # @UnusedVariable
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
@@ -1153,25 +1151,17 @@ class Ope(models.Model):
         self.alters_data = True
         self.deja_clean = True
         super(Ope, self).clean()
-        if not self.compte_id:
+        if not self.compte:
             raise ValidationError(u"vous devez mettre un compte")
             # verification qu'il n'y pas pointe et rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
-            raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
+            raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")            
         if self.is_mere:
-            if self.montant != self.tot_fille:
-                if self.rapp or self.pointe:
-                    raise ValidationError(
-                        u"attention cette opération est pointée ou rapproché et on change le montant global")
-                else:
-                    self.montant = self.tot_fille
-        if self.is_mere:
-            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom': u"Opération Ventilée", 'type': "c"})[0]
-            ope_orig = Ope.objects.filter(id=self.id)
-            if ope_orig.exists():
-                ope_orig = ope_orig[0]
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom': u"Opération Ventilée", 'type': "r"})[0]
+            try:
+                ope_orig = Ope.objects.get(id=self.id)
                 if self.montant != ope_orig.montant:
                 # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
                     self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
@@ -1179,6 +1169,24 @@ class Ope(models.Model):
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est pointée")
                     if self.rapp is not None:
                         raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est rapprochée")
+            except Ope.DoesNotExist:
+                self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
+        if not self.moyen:
+            if self.montant >= 0:
+                if self.compte.moyen_credit_defaut:
+                    self.moyen = self.compte.moyen_credit_defaut
+                else:
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit","id": settings.MD_CREDIT, 'type': "r"})[0]
+                    self.moyen = moyen
+            if self.montant < 0:
+                if self.compte.moyen_debit_defaut:
+                    self.moyen = self.compte.moyen_debit_defaut
+                else:
+                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit", "id": settings.MD_DEBIT, "type": "d"})[0]
+                    self.moyen = moyen
+        if self.is_mere:
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
+
 
     @property
     def is_mere(self):
@@ -1205,7 +1213,11 @@ class Ope(models.Model):
             return False
 
     def is_editable(self):
-        if self.is_mere or self.rapp or self.compte.ouvert is not False:
+        if self.is_mere:
+            return False
+        if self.rapp:
+            return False
+        if self.compte.ouvert is False:
             return False
         else:
             if self.jumelle:
@@ -1214,34 +1226,10 @@ class Ope(models.Model):
             return True
 
     def save(self, *args, **kwargs):
-        if not self.moyen:
-            if self.montant >= 0:
-                if self.compte.moyen_credit_defaut:
-                    self.moyen = self.compte.moyen_credit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit",
-                                                                                         "id": settings.MD_CREDIT, 'type': "r"})[0]
-                    self.moyen = moyen
-            if self.montant < 0:
-                if self.compte.moyen_debit_defaut:
-                    self.moyen = self.compte.moyen_debit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit",
-                                                                                        "id": settings.MD_DEBIT, "type": "d"})[0]
-                    self.moyen = moyen
-        if self.is_mere:
-            self.cat = Cat.objects.get_or_create(
-                nom=u"Opération Ventilée",
-                defaults={'type': "d", 'nom': u"Opération Ventilée"}
-            )[0]
-            if self.montant != self.tot_fille:
-                if self.rapp or self.pointe:
-
-                    raise IntegrityError(
-                        u"attention opération ( %s ) est pointée ou rapproché et on change le montant global" % self.id)
-                else:
-                    self.montant = self.tot_fille
-
+        try:
+            self.clean()
+        except ValidationError as e:
+            raise IntegrityError("%s"%e)
         super(Ope, self).save(*args, **kwargs)
 
 class Virement(object):
@@ -1256,7 +1244,7 @@ class Virement(object):
                 self.dest = self.origine.jumelle
             else:
                 self.dest = ope
-                self.origine = self.origine.jumelle
+                self.origine = self.dest.jumelle
             self._init = True
         else:
             self._init = False

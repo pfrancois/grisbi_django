@@ -9,14 +9,16 @@ from django.utils.decorators import method_decorator
 from django.core import exceptions as django_exceptions
 from ..models import Compte, Ope
 
-from ..views import Myformview as FormView
-from .. import forms as gsb_forms
 from django.db import models as models_agg
 from django import forms
 import time
+
 from ..utils import Excel_csv
+from ..views import Myformview as FormView
+from .. import forms as gsb_forms
 from .. import utils as utils
 
+from .. import models
 
 class Writer_base(object):
     writer = None
@@ -98,21 +100,25 @@ class Exportform_ope(gsb_forms.Baseform):
 
     def clean(self):
         if self.model_collec is None:
-            raise django_exceptions.ImproperlyConfigured(
-                "model_collec non defini")
+            raise django_exceptions.ImproperlyConfigured("model_collec non defini")
         super(Exportform_ope, self).clean()
         data = self.cleaned_data
-        ensemble = [objet.id for objet in data["collection"]]
-        self.query = self.model_initial.objects.filter(
-            date__gte=getattr(data, 'date_min', utils.now()),
-            date__lte=getattr(data, 'date_max', utils.now()))
-        if ensemble == [] or len(ensemble) == self.model_collec.objects.count():
+        ensemble = [objet.id for objet in data["collection"]]# liste des id des comptes
+        if data.has_key('date_min'):
+            date_min=data['date_min']
+        else:
+            date_min=utils.now()
+        if data.has_key('date_max'):
+            date_max=data['date_max']
+        else:
+            date_max=utils.now()
+        self.query = self.model_initial.objects.filter(date__gte=date_min, date__lte=date_max)
+        if ensemble == [] or len(ensemble) == models.Compte.objects.count():
             pass
         else:
             self.query = self.verif_collec(self.query, ensemble)
-            if self.query.count() == 0:  # si des operations n'existent pas
-                raise forms.ValidationError(
-                    u"attention pas d'opérations pour la selection demandée")
+        if self.query.count() == 0:  # si des operations n'existent pas
+            raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
         return data
 
     def verif_collec(self, query, ensemble):
@@ -126,25 +132,22 @@ class ExportViewBase(FormView):
     nomfich = None
     debug = False
     form_class = None
+    titre = None
 
     def export(self, query):  # pylint: disable=W0613
         """
         fonction principale mais abstraite
         """
-        raise django_exceptions.ImproperlyConfigured(
-            "attention, il doit y avoir une methode qui extrait effectivement")
+        raise django_exceptions.ImproperlyConfigured("attention, il doit y avoir une methode qui extrait effectivement")
 
     def get_initial(self):
         """gestion des donnees initiales"""
         # prend la date de la premiere operation de l'ensemble des compte
         if self.model_initial is None:
-            raise django_exceptions.ImproperlyConfigured(
-                "un modele d'ou on tire les dates initiales doit etre defini")
-        date_min = self.model_initial.objects.aggregate(
-            element=models_agg.Min('date'))['element']
+            raise django_exceptions.ImproperlyConfigured("un modele d'ou on tire les dates initiales doit etre defini")
+        date_min = self.model_initial.objects.aggregate(element=models_agg.Min('date'))['element']
         # la derniere operation
-        date_max = self.model_initial.objects.aggregate(
-            element=models_agg.Max('date'))['element']
+        date_max = self.model_initial.objects.aggregate(element=models_agg.Max('date'))['element']
         return {'date_min': date_min, 'date_max': date_max}
 
     @method_decorator(login_required)
@@ -154,21 +157,17 @@ class ExportViewBase(FormView):
 
     def form_valid(self, form):
         """si le form est valid"""
-        reponse = self.export(
-            query=form.query)  # comme on a verifier dans le form que c'etait ok
         if self.nomfich is None:
             raise django_exceptions.ImproperlyConfigured('nomfich non defini')
         if self.extension_file is None:
-            raise django_exceptions.ImproperlyConfigured(
-                'extension_file non defini')
+            raise django_exceptions.ImproperlyConfigured('extension_file non defini')
+        reponse = self.export(query=form.query)  # comme on a verifier dans le form que c'etait ok
 
         if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"
-            reponse[
-                "Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                            time.strftime(
-                                                                            "%d_%m_%Y-%H_%M_%S",
-                                                                            time.localtime()), self.extension_file
+            reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
+                                                                            time.strftime( "%d_%m_%Y",time.localtime()),
+                                                                            self.extension_file
                                                                             )
         return reponse

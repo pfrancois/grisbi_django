@@ -8,8 +8,6 @@ from django.contrib import messages
 from .. import models
 from . import import_base
 from .. import utils
-from django.db.models import Max
-from django.db import IntegrityError 
 
 class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
     pass
@@ -104,14 +102,6 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def ligne(self):
         return self.line_num
 
-    @property
-    def ligne_a_lire(self):
-        if self.row['date'] != '' and self.row['montant']:
-            return True
-        else:
-            return False
-
-
 class Import_csv_ope(import_base.Import_base):
     reader = Csv_unicode_reader_ope
     extension = ("csv",)
@@ -121,16 +111,16 @@ class Import_csv_ope(import_base.Import_base):
     encoding = "iso-8859-1"
 
     def init_cache(self):
-        self.moyens = Moyen_cache(self.request)
-        self.cats = Cat_cache(self.request)
-        self.ibs = IB_cache(self.request)
-        self.comptes = Compte_cache(self.request)
-        self.banques = Banque_cache(self.request)
-        self.cours = Cours_cache(self.request)
-        self.exos = Exercice_cache(self.request)
-        self.tiers = Tiers_cache(self.request)
-        self.opes = Ope_cache(self.request)
-        self.titres = Titre_cache(self.request)
+        self.moyens = import_base.Moyen_cache(self.request)
+        self.cats = import_base.Cat_cache(self.request)
+        self.ibs = import_base.IB_cache(self.request)
+        self.comptes = import_base.Compte_cache(self.request)
+        self.banques = import_base.Banque_cache(self.request)
+        self.cours = import_base.Cours_cache(self.request)
+        self.exos = import_base.Exercice_cache(self.request)
+        self.tiers = import_base.Tiers_cache(self.request)
+        self.opes = import_base.Ope_cache(self.request)
+        self.titres = import_base.Titre_cache(self.request)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
@@ -138,17 +128,7 @@ class Import_csv_ope(import_base.Import_base):
         self.erreur = list()
 
         # les moyens par defaut
-        created = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={"id": settings.MD_DEBIT, "nom": 'DEBIT', "type": "d"})[1]
-        if created:  messages.info(self.request, "ajout moyen debit par defaut")
-        created = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={"id": settings.MD_CREDIT, "nom": 'CREDIT', "type": "r"})[1]
-        if created: messages.info(self.request, "ajout moyen credit par defaut")
-        moyen_virement, created = models.Moyen.objects.get_or_create(nom='Virement', type="v", defaults={"nom":'Virement', "type":"v"})
-        if created: messages.info(self.request, "ajout moyen virement par defaut")
-        # les cat
-        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_OST, defaults={"id": settings.ID_CAT_OST, "nom": 'Operation sur titre', "type": "d"})[1]
-        if created: messages.info(self.request, "ajout cat OST")
-        created = models.Moyen.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={"id": settings.ID_CAT_PMV, "nom": 'Revenus de placement:Plus-values', "type": "r"})[1]
-        if created: messages.info(self.request, "ajout cat PMV")
+        moyen_virement=self.moyens.goc('',{'nom':"virement",'type':'v'})
         retour = False
         try:
             with open(nomfich, 'rt') as f_non_encode:
@@ -253,9 +233,9 @@ class Import_csv_ope(import_base.Import_base):
                 if origine  and dest:
                     if self.comptes.goc(origine) != ope['compte_id']:
                         if self.comptes.goc(dest) != ope['compte_id']:
-                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.compte))
+                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, self.compte))
                         else:
-                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.compte))
+                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, self.compte))
                         continue
                 else:
                     self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.ligne)
@@ -311,122 +291,3 @@ class Import_csv_ope(import_base.Import_base):
         return retour
 
 
-class Table(object):
-    """Moyen avec cache"""
-    element = None
-    readonly = False
-    def __init__(self, request):
-        self.id = dict()
-        self.create_item = list()
-        self.request = request
-        if self.element is None:
-            raise NotImplementedError("table de l'element non choisi")
-        else:
-            self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
-        self.nb_created = 0
-
-    def goc(self, nom, obj=None):
-        if nom == "" or nom is None:
-            return None
-        try:
-            pk = self.id[nom]
-        except KeyError:
-            try:
-                if obj is None:
-                    arguments = {"nom": nom}
-                else:
-                    arguments = obj
-                pk = self.element.objects.get(**arguments).id
-                self.id[nom] = pk
-            except self.element.DoesNotExist:
-                if not self.readonly:  # on cree donc l'operation
-                    argument_def = self.arg_def(nom, obj)
-                    try:
-                        created = self.element.objects.create(**argument_def)
-                        self.nb_created += 1
-                    except IntegrityError as e:
-                        raise import_base.ImportException("%s" % e)
-                    pk = created.pk
-                    self.id[nom] = pk 
-                    self.create_item.append(created)
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
-                else:
-                    raise import_base.ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
-        return pk
-    
-    def arg_def(self, nom, obj):
-        raise NotImplementedError("methode arg_def non defini")
-
-    
-
-class Cat_cache(Table):
-    element = models.Cat
-    readonly = True
-
-
-class Moyen_cache(Table):
-    element = models.Moyen
-    readonly = True
-
-class IB_cache(Table):
-    element = models.Ib
-    def arg_def(self, nom, obj):
-        if obj is None:
-            return {"nom":nom, "type":'d'}
-
-class Compte_cache(Table):
-    element = models.Compte
-    readonly = True
-
-class Banque_cache(Table):
-    element = models.Banque
-    readonly = True
-
-class Cours_cache(Table):
-    element = models.Cours
-    def goc(self, date, titre, montant):
-        try:
-            titre_id = self.id[titre]
-            pk = titre_id[date]
-        except KeyError:
-            try:
-                el = self.element.objects.get(date=date, titre_id=titre)
-                pk = el.id
-                if el.montant != montant:
-                    raise import_base.ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (el.montant, montant, el.titre.nom, date))
-            except self.element.DoesNotExist:
-                self.create_item.append({'titre': titre, 'date': date, "montant": montant})
-                pk = self.create_item.index({'titre': titre, 'date': date, "montant": montant}) + self.last_id
-            finally:
-                if self.id.get(titre) is not None:
-                    self.id[titre][date] = pk
-                else:
-                    self.id[titre] = titre
-                    self.id[titre][date] = pk
-                pk = self.id[titre][date]
-        finally:
-            return pk
-
-class Exercice_cache(Table):
-    element = models.Exercice
-    readonly = True  # a finir
-
-class Tiers_cache(Table):
-    element = models.Tiers
-    def arg_def(self, nom, obj):
-        if obj is None:
-            return {"nom":nom}
-
-class Titre_cache(Table):
-    element = models.Titre
-    def goc(self, pk, obj):
-        self.element.objects.create(id=pk, isin="XX00000%s" % pk, type="XXX")
-        messages.info(self.request, 'creation du titre "%s"' % obj)
-
-class Ope_cache(Table):
-    element = models.Ope
-    def goc(self, nom):
-        raise NotImplementedError("methode goc non defini")
-    def create(self, ope):
-        self.create_item.append(ope)
-        self.nb_created += 1

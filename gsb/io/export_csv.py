@@ -37,8 +37,9 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'account name', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes',
-                  'projet', 'n chq', 'id jumelle lie', 'has fille', 'num op vent m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes',
+                  'projet', 'numchq', 'id jumelle lie', 'has_fille', 'id_ope_m', 'ope_titre', 'ope_pmv', 'mois')
+    titre="Export des operations au format csv"
 
     def export(self, query):
         """
@@ -54,7 +55,7 @@ class Export_ope_csv(Export_view_csv_base):
 
         for ope in query:
             # id compte date montant
-            ligne = {'id': ope.id, 'account name': ope.compte.nom}
+            ligne = {'id': ope.id, 'cpt': ope.compte.nom}
             # date
             ligne['date'] = ope.date.strftime('%d/%m/%Y')
 
@@ -82,25 +83,22 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
             try:
-                ligne['projet'] = utils.idtostr(
-                    ope.ib, defaut='', membre="nom")
+                ligne['projet'] = utils.idtostr( ope.ib, defaut='', membre="nom")
             except django_exceptions.ObjectDoesNotExist:
                 ligne['projet'] = ""
 
             # le reste
-            ligne['n chq'] = ope.num_cheque
-            ligne['id jumelle lie'] = utils.idtostr(
-                ope, defaut='', membre='jumelle_id')
-            ligne['has fille'] = utils.booltostr(ope.id in ope_mere)
-            ligne['num op vent m'] = utils.idtostr(
-                ope, defaut='', membre='mere_id')
-            if ope.ope is not None:
+            ligne['numchq'] = ope.num_cheque
+            ligne['id jumelle lie'] = utils.idtostr(ope, defaut='', membre='jumelle_id')
+            ligne['has_fille'] = utils.booltostr(ope.id in ope_mere)
+            ligne['id_ope_m'] = utils.idtostr(ope, defaut='', membre='mere_id')
+            try:
                 ligne['ope_titre'] = ope.ope.id
-            else:
+            except django_exceptions.ObjectDoesNotExist:
                 ligne['ope_titre'] = ''
-            if ope.ope_pmv is not None:
+            try:
                 ligne['ope_pmv'] = ope.ope_pmv.id
-            else:
+            except django_exceptions.ObjectDoesNotExist:
                 ligne['ope_pmv'] = ''
             ligne['mois'] = ope.date.strftime('%m')
             data.append(ligne)
@@ -133,8 +131,7 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related(
-            'cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
+        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
         for ope in query:
             # id compte date montant
             ligne = {'account name': ope.compte.nom}

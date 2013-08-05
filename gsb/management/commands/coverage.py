@@ -28,7 +28,6 @@ class Command(BaseCommand):
         interactive = options.get('interactive', True)
         # failfast=options.get("failfast",False)
         mod = runner.CoverageRunner()
-        failures = mod.run_tests(tests, verbosity=verbosity,
-                                 interactive=interactive)
+        failures = mod.run_tests(tests, verbosity=verbosity, interactive=interactive)
         if failures:
             sys.exit(bool(failures))

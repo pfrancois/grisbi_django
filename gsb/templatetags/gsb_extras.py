@@ -30,12 +30,13 @@ def cur(value, symbol=None):
     special_floats = [str(pos_inf), str(neg_inf), str(nan)]
     input_val = force_unicode(value)
     try:
-        val_decim = Decimal(input_val)
-    except UnicodeEncodeError:
-        val_decim = Decimal(0)
-    except InvalidOperation:
         if input_val in special_floats:
             val_decim = Decimal(0)
+        else:
+            val_decim = Decimal(input_val)
+#    except UnicodeEncodeError:
+#        val_decim = Decimal(0)
+    except InvalidOperation:
         try:
             val_decim = Decimal(force_unicode(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
@@ -55,16 +56,4 @@ def centimes(value):
     @param value:le montant a renvoyer
     @type value:comme on veut
     """
-    return str(Decimal(force_unicode(value)) * Decimal(100))
-
-
-@register.simple_tag()
-def dev(symbol=None):
-    if symbol is None:
-        symbol = settings.DEVISE_GENERALE
-    if symbol == 'EUR':
-        symbol = "&#8364;"
-    return symbol
-
-dev.is_safe = True
-
+    return unicode(Decimal(force_unicode(value)) * Decimal(100))

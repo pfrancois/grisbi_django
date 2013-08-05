@@ -3,18 +3,23 @@
 test models
 """
 from __future__ import absolute_import
+import datetime
+import decimal
+from operator import attrgetter
+
+import mock
+
 from .test_base import TestCase
-from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
-from ..models import Virement, Ope_titre, Ib, Exercice, Cours
-from ..models import Rapp, Echeance, Gsb_exc
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.core.exceptions import ImproperlyConfigured
-import datetime
-import decimal
-from ..utils import strpdate
-from operator import attrgetter
-import mock
+ 
+
+from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
+from ..models import Virement, Ope_titre, Ib, Exercice, Cours
+from ..models import Rapp, Echeance, Gsb_exc
+from .. import utils
+from .. import forms
 
 class Test_models(TestCase):
     fixtures = ['test.json']
@@ -145,8 +150,8 @@ class Test_models(TestCase):
         self.assertEquals(t.cours_set.count(), 2)
 
     def test_titre_fusionne_error(self):
-        Cours.objects.create(titre=Titre.objects.get(nom="autre"), valeur=20, date=strpdate('2011-01-01'))
-        Cours.objects.create(titre=Titre.objects.get(nom="autre 2"), valeur=40, date=strpdate('2011-01-01'))
+        Cours.objects.create(titre=Titre.objects.get(nom="autre"), valeur=20, date=utils.strpdate('2011-01-01'))
+        Cours.objects.create(titre=Titre.objects.get(nom="autre 2"), valeur=40, date=utils.strpdate('2011-01-01'))
         self.assertRaises(Gsb_exc, Titre.objects.get(nom="autre").fusionne, Titre.objects.get(nom="autre 2"))
 
     def test_titre_investi(self):
@@ -229,8 +234,8 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Exercice.objects.order_by('id'), [1], attrgetter("id"))
         # on verifie qu'il prend la totalite de la durée des 2 exo
         exo = Exercice.objects.get(id=1)
-        self.assertEquals(exo.date_debut, strpdate('2010-1-1'))
-        self.assertEquals(exo.date_fin, strpdate('2011-12-31'))
+        self.assertEquals(exo.date_debut, utils.strpdate('2010-1-1'))
+        self.assertEquals(exo.date_fin, utils.strpdate('2011-12-31'))
         # verification des liens
         self.assertQuerysetEqual(Ope.objects.filter(exercice__id=1).order_by('id'), [4, 5], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(exercice__id=1).order_by('id'), [1, 2], attrgetter("id"))
@@ -244,13 +249,13 @@ class Test_models(TestCase):
         # seulement les operations rapproches
         self.assertEqual(Compte.objects.get(id=1).solde(rapp=True), -90)
         # a une date anterieur
-        self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2009-01-01')), 0)
-        self.assertEqual(Compte.objects.get(id=1).solde(datel=strpdate('2011-10-01')), -70)
+        self.assertEqual(Compte.objects.get(id=1).solde(datel=utils.strpdate('2009-01-01')), 0)
+        self.assertEqual(Compte.objects.get(id=1).solde(datel=utils.strpdate('2011-10-01')), -70)
 
     def test_compte_solde_rappro(self):
         c = Compte.objects.get(id=1)
         self.assertEqual(c.solde_rappro(), -90)
-        self.assertEqual(c.date_rappro(), strpdate('2011-08-12'))
+        self.assertEqual(c.date_rappro(), utils.strpdate('2011-08-12'))
         self.assertEqual(Compte.objects.get(id=3).date_rappro(), None)
 
     def test_compte_solde_pointe(self):
@@ -308,7 +313,7 @@ class Test_models(TestCase):
         t.cours_set.create(date='2012-07-18', valeur=2)
         self.assertEqual(c.solde(), 1)
         # solde a une date anterieur
-        teston = c.solde(datel=strpdate('2010-01-01'))
+        teston = c.solde(datel=utils.strpdate('2010-01-01'))
         self.assertEqual(teston, 0)
         teston = c2.solde(rapp=True)
         self.assertEqual(teston, 0)
@@ -403,7 +408,7 @@ class Test_models(TestCase):
         # on cree le titre
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         # utilisation des cat et tiers par defaut
-        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         c.vente(titre=t, nombre=5, frais=20, date='2011-11-01', prix=5)
         self.assertEqual(c.solde() - c.solde_titre(), -145)
         self.assertEqual(c.solde_titre(), 50)
@@ -482,7 +487,7 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(c.liste_titre(), [u'autre', u't1'], attrgetter("nom"))
 
     def test_compte_date_rappro(self):
-        self.assertEqual(Compte.objects.get(id=5).date_rappro(), strpdate('2011-10-30'))
+        self.assertEqual(Compte.objects.get(id=5).date_rappro(), utils.strpdate('2011-10-30'))
         self.assertEqual(Compte.objects.get(id=4).date_rappro(), None)
 
     def test_compte_t_solde_rappro(self):
@@ -498,7 +503,7 @@ class Test_models(TestCase):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
         # creation d'une nouvelle operation
-        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         Ope_titre.objects.create(titre=t, compte=c, nombre=5, date='2011-01-02', cours=20)
         Ope_titre.objects.get(id=5)
         o2 = Ope_titre.objects.get(id=6)
@@ -535,7 +540,7 @@ class Test_models(TestCase):
     def test_ope_titre_moins_value(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
-        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-02', cours=5)
         o = Ope.objects.filter(compte=c).filter(date='2011-01-02')[0]
         self.assertEqual(o.id, 15)
@@ -548,14 +553,14 @@ class Test_models(TestCase):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
         # creation d'une nouvelle operation
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         self.assertEqual(o.ope.id, 14)
         self.assertEqual(o.ope.montant, -150)
         self.assertEqual(o.ope.moyen_id, 2)
         self.assertEqual(t.investi(c), 150)
         self.assertEqual(o.ope.notes, "15@10")
         # on verifie qu'il creer bien un cours a la date
-        self.assertEqual(Cours.objects.get(date=strpdate('2011-01-01'), titre=t).valeur, 10)
+        self.assertEqual(Cours.objects.get(date=utils.strpdate('2011-01-01'), titre=t).valeur, 10)
         # on vend
         o = Ope_titre.objects.create(titre=t, compte=c, nombre= -10, date='2011-01-02', cours=15)
         self.assertEqual(o.ope.id, 15)
@@ -577,24 +582,23 @@ class Test_models(TestCase):
 
     def test_ope_titre_delete(self):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
-        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1),
-                                        moyen_debit_defaut=Moyen.objects.get(id=2))
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=1), moyen_debit_defaut=Moyen.objects.get(id=2))
         # on cree l'ope
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on l'efface
         o.delete()
 
         self.assertFalse(Ope_titre.objects.filter(id=o_id).exists())
         # on la recree
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
         o.ope.rapp_id = 1
         o.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
         # on la recree mais avec une vente comme ca il y a des plus values
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
         r = Rapp.objects.get(id=1)
@@ -628,7 +632,7 @@ class Test_models(TestCase):
 
     def test_echeance_save(self):
         # on ne peut sauver une echeance avec un virement sur un meme compte
-        self.assertRaises(ValidationError, lambda: Echeance.objects.create(date=strpdate('2011-01-01'),
+        self.assertRaises(ValidationError, lambda: Echeance.objects.create(date=utils.strpdate('2011-01-01'),
                                                                            compte=Compte.objects.get(id=1),
                                                                            montant=2,
                                                                            tiers=Tiers.objects.get(id=2),
@@ -636,19 +640,21 @@ class Test_models(TestCase):
 
     def test_echeance_calcul_next(self):
         self.assertEquals(Echeance.objects.get(id=1).calcul_next(), None)
-        self.assertEquals(Echeance.objects.get(id=2).calcul_next(), strpdate('2011-12-02'))
-        self.assertEquals(Echeance.objects.get(id=3).calcul_next(), strpdate('2011-11-01'))
-        self.assertEquals(Echeance.objects.get(id=4).calcul_next(), strpdate('2011-11-13'))
-        self.assertEquals(Echeance.objects.get(id=5).calcul_next(), strpdate('2011-12-30'))
-        self.assertEquals(Echeance.objects.get(id=6).calcul_next(), strpdate('2013-10-30'))
+        self.assertEquals(Echeance.objects.get(id=2).calcul_next(), utils.strpdate('2011-12-02'))
+        self.assertEquals(Echeance.objects.get(id=3).calcul_next(), utils.strpdate('2011-11-01'))
+        self.assertEquals(Echeance.objects.get(id=4).calcul_next(), utils.strpdate('2011-11-13'))
+        self.assertEquals(Echeance.objects.get(id=5).calcul_next(), utils.strpdate('2011-12-30'))
+        self.assertEquals(Echeance.objects.get(id=6).calcul_next(), utils.strpdate('2013-10-30'))
         self.assertEquals(Echeance.objects.get(id=7).calcul_next(), None)
 
     def test_echeance_check1(self):
-        Echeance.check(to=strpdate('2011-12-31'))
+        request=self.request_get('/options/check')
+        Echeance.check(to=utils.strpdate('2011-12-31'),request=request)
+        self.assertcountmessage(request, 57)
         self.assertEqual(Ope.objects.count(), 71)
 
     def test_echeance_check2(self):
-        Echeance.check(queryset=Echeance.objects.filter(id=2), to=strpdate('2011-12-09'))
+        Echeance.check(queryset=Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'))
         self.assertEqual(Ope.objects.count(), 18)
 
     def test_ope_absolute_url(self):
@@ -699,6 +705,53 @@ class Test_models(TestCase):
         o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
 
+    def test_ope_clean(self):
+        o = Ope.objects.get(pk=4)
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt=Compte.objects.get(id=1)
+        r=Rapp.objects.get(id=1)
+        ensemble_a_tester=(({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now()},True,o),# normal
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'pointe':True, 'rapp':r.id,'date':utils.now()},False,o),# poitne et rapproche
+                           ({'tiers':t.id, 'compte':None, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()},False,o),# pas de compte
+                           ({'tiers':t.id, 'compte':Ope.objects.get(id=6).id, 'cat':c.id, 'montant':120, 'moyen':m.id, 'date':utils.now()},False,o),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now()},True,Ope.objects.get(pk=11)),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now(),'pointe':True},False,Ope.objects.get(pk=11)),
+                           ({'tiers':t.id, 'compte':cpt.id, 'cat':c.id, 'montant':120, 'moyen':m.id,'date':utils.now(),'rapp':r.id},False,Ope.objects.get(pk=11)),
+                           )
+        for ens in ensemble_a_tester:
+            form=forms.OperationForm(ens[0], instance=ens[2])
+            self.assertEqual(form.is_valid(),ens[1])
+        
+    def test_solde_set_nul(self):
+        self.assertEqual(Ope.solde_set(Ope.objects.none()), 0)
+        self.assertEqual(Ope.solde_set(Ope.objects.all()), -1476)
+
+    def test_iseditable(self):
+        self.assertEqual(Ope.objects.get(pk=4).is_editable(), False)#ope rapp
+        self.assertEqual(Ope.objects.get(pk=12).is_editable(), True)#ope normale
+        self.assertEqual(Ope.objects.get(pk=11).is_editable(), False)#ope mere
+        
+        #rajout d'une operation dans un compte ferme
+        c=Compte.objects.get(id=6)
+        t = Tiers.objects.get(id=1)
+        c.ouvert=True
+        c.save()
+        o=Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
+        c.ouvert=False
+        c.save()
+        self.assertEqual(o.is_editable(), False)
+        c.ouvert=False
+        
+        #ajout d'un virement rapproche
+        o=Ope.objects.get(pk=9)
+        o.rapp=Rapp.objects.get(id=1)
+        o.save()
+        o=Ope.objects.get(pk=8)
+        self.assertEqual(o.is_editable(), False)
+        
+
     def test_pre_delete_ope_rapp(self):
         # ope rapp
         self.assertRaises(IntegrityError, Ope.objects.get(id=3).delete)
@@ -723,6 +776,10 @@ class Test_models(TestCase):
         o.save()
         # on ne peut effacer fille qui a une mere rapp
         o = Ope.objects.get(id=8)
+        self.assertRaises(IntegrityError, o.delete)
+
+    def test_pre_delete_ope_mere_avec_fille(self):
+        o = Ope.objects.get(id=11)
         self.assertRaises(IntegrityError, o.delete)
 
     def test_pre_delete_ope_rapp_jumelle(self):
@@ -777,7 +834,7 @@ class Test_models(TestCase):
         self.assertEquals(v.dest.id, 9)
         self.assertEquals(v.origine.compte, Compte.objects.get(nom='cpte1'))
         self.assertEquals(v.dest.compte, Compte.objects.get(nom='cptb3'))
-        self.assertEquals(v.date, strpdate('2011-10-30'))
+        self.assertEquals(v.date, utils.strpdate('2011-10-30'))
         self.assertEquals(v.montant, v.origine.montant * -1)
         self.assertEquals(v.montant, v.dest.montant)
         self.assertEquals(v.montant, 100)
@@ -787,8 +844,28 @@ class Test_models(TestCase):
         v.date_val = '2011-02-01'
         v.pointe = True
         v.save()
-        self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, strpdate('2011-02-01'))
+        self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
         self.assertEquals(Virement(Ope.objects.get(id=8)).pointe, True)
+
+    def test_virement_inverse(self):
+        v = Virement(Ope.objects.get(id=9))
+        self.assertEquals(v.origine.id, 8)
+        self.assertEquals(v.dest.id, 9)
+        self.assertEquals(v.origine.compte, Compte.objects.get(nom='cpte1'))
+        self.assertEquals(v.dest.compte, Compte.objects.get(nom='cptb3'))
+        self.assertEquals(v.date, utils.strpdate('2011-10-30'))
+        self.assertEquals(v.montant, v.origine.montant * -1)
+        self.assertEquals(v.montant, v.dest.montant)
+        self.assertEquals(v.montant, 100)
+        self.assertEquals(v.__unicode__(), u"cpte1 => cptb3")
+        self.assertEquals(v.auto, False)
+        self.assertEquals(v.exercice, None)
+        v.date_val = '2011-02-01'
+        v.pointe = True
+        v.save()
+        self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
+        self.assertEquals(Virement(Ope.objects.get(id=8)).pointe, True)
+        
 
     @mock.patch('gsb.utils.today')
     def test_virement_create(self, today_mock):
@@ -831,19 +908,23 @@ class Test_models(TestCase):
 
 
 class Test_models2(TestCase):
+    #sans fixtures
     def test_last_cours_date_special(self):
         # on cree les elements indiepensables
         c = Compte.objects.create(nom="cpt_titre1")
         t = Titre.objects.create(isin="0000", nom="titre1")
         self.assertEqual(t.encours(), 0)
-        c.achat(t, 10, date=strpdate('2012-01-01'))
-        r = Rapp.objects.create(nom="rapp1", date=strpdate('2012-01-20'))
+        c.achat(t, 10, date=utils.strpdate('2012-01-01'))
+        r = Rapp.objects.create(nom="rapp1", date=utils.strpdate('2012-01-20'))
         o = Ope.objects.get(id=1)
         o.rapp = r
         o.save()
+        #Cours.objects.get(id=1).delete()
+        cours=t.last_cours_date(rapp=True)
+        self.assertEquals(cours, utils.strpdate('2012-01-01'))
         Cours.objects.get(id=1).delete()
-        self.assertEquals(t.last_cours_date(rapp=True), None)
-
+        cours=t.last_cours_date(rapp=True)
+        self.assertEquals(cours, None)
     def test_ope_titre_special(self):
         """si une categorie "Operation sur titre" existe deja mais que l'id ost est definie autrement"""
         t = Titre.objects.create(isin="0000", nom="titre1")
@@ -861,7 +942,7 @@ class Test_models2(TestCase):
     def test_ope_titre_special3(self):
         t = Titre.objects.create(isin="0000", nom="titre1")
         c = Compte.objects.create(nom="cpt_titre1")
-        o = Ope_titre.objects.create(titre=t, compte=c, date=strpdate('2011-01-01'), nombre=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, date=utils.strpdate('2011-01-01'), nombre=10)
         o.cours = 3
         o.save()
         self.assertEqual(t.encours(), 30)

@@ -13,7 +13,6 @@ except ImportError:
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
-                       # url(r'^test$',import_sg.testimport_view.as_view() )
 )
 
 # les vues relatives aux outils

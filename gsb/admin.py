@@ -23,7 +23,7 @@ from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
 
-##-------------ici les class generiques------
+##-------------ici les classes generiques------
 class date_perso_filter(DateFieldListFilter):
     """filtre date perso
     """
