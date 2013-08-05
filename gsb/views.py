@@ -731,7 +731,7 @@ def dividende(request, cpt_id):
         messages.error(request, u"attention le titre demandé intialement n'existe pas")
         titre_id = None
         titre = None
-    except AttributeError:  # on est dans le cas où l'on viens d'une page sans titre defini
+    except KeyError:  # on est dans le cas où l'on viens d'une page sans titre defini
         titre_id = None
         titre = None
     if compte.titre.all().distinct().count() == 0:
