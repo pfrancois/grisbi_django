@@ -148,7 +148,7 @@ class Import_csv_ope(import_base.Import_base):
         self.tiers = import_base.Tiers_cache(self.request)
         self.opes = import_base.Ope_cache(self.request)
         self.titres = import_base.Titre_cache(self.request)
-        self.moyen_par_defaut=import_base.moyen_defaut_cache(self.request)
+        self.moyen_par_defaut = import_base.moyen_defaut_cache(self.request)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""

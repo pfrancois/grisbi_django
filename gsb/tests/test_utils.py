@@ -58,17 +58,17 @@ class Test_utils(TestCase):
 
     @mock.patch('django.utils.timezone.now')
     def test_now(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
-        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone()))
+        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
+        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()))
         
     @mock.patch('django.utils.timezone.now')
     def test_timestamp(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
-        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone()).timetuple()))
+        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
+        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()).timetuple()))
         
     @mock.patch('django.utils.timezone.now')
     def test_today(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
+        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
         
     def test_add_month(self):

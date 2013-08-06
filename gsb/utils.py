@@ -105,7 +105,7 @@ def today():
 
 # utilise pour mock et les test
 def now(utc=True):
-    now=timezone.now()
+    now = timezone.now()
     if utc:
         return now
     else:

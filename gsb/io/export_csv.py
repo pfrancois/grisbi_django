@@ -48,8 +48,7 @@ class Export_ope_csv(Export_view_csv_base):
         """
         logger = logging.getLogger('gsb.export')
         data = []
-        query = query.order_by('date', 'id').select_related(
-            'cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
+        query = query.order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
         liste_ope = query.values_list('id')
         ope_mere = query.filter(id__in=liste_ope).exclude(
             filles_set__isnull=True).values_list('id', flat=True)

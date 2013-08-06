@@ -5,11 +5,6 @@ from django.conf.urls import patterns, url
 from . import views, outils
 from .io import import_csv, export_sql_money, export_csv, export_qif
 from .io import import_titre_csv as import_titres
-try:
-    import perso
-    rep_perso = True
-except ImportError:
-    rep_perso = False
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -147,7 +142,11 @@ urlpatterns += patterns('gsb.views',
 #                        url(r'^test$', 'test.test')
 # )
 # import gsb.forms_perso
-if perso:
-    urlpatterns += patterns('', url(r'options/import/csv/sg$',
-                            perso.sg.Import_view.as_view(),
-                            name="import_csv_ope_sg"))
+try:
+    import perso
+    urlpatterns += patterns('', url(r'options/import/csv/sg$', perso.Import_view.as_view(), name="import_csv_ope_sg"),
+                                url(r'options/execution$', perso.Execution_view.as_view(), name="execution_perso")
+                        )
+    
+except ImportError:
+    pass

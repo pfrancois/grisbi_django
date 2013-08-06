@@ -625,8 +625,8 @@ class Compte(models.Model):
     @transaction.commit_on_success
     def revenu(self, titre, montant=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
-        if date==None:
-            date=utils.today()
+        if date == None:
+            date = utils.today()
         self.alters_data = True
         if isinstance(titre, Titre):
             # extraction des titres dans portefeuille
@@ -676,7 +676,7 @@ class Compte(models.Model):
             try:
                 datel = min(datel, utils.today())  # @UnusedVariable
             except TypeError:
-                datel=utils.strpdate(datel)
+                datel = utils.strpdate(datel)
                 datel = min(datel, utils.today())
         else:
             datel = utils.today()

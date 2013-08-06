@@ -16,13 +16,14 @@ from sql.pg import sqlite_db
 
 class Export_view_sql(export_base.ExportViewBase):
     extension_file = "sql"
-    debug = False
+    debug = True
     nomfich = "export_full"
     model_initial = models.Ope
     form_class = export_base.Exportform_ope
     titre = "export sql money"
 
     def export(self, query):
+        query = query.order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
         sql = sqlite_db()
         # attention ce n'est les comptes
         s = ("""DROP TABLE IF EXISTS account;
@@ -90,7 +91,7 @@ CREATE TABLE budget (id INTEGER PRIMARY KEY,
             if id_placement == 0:
                 raise models.Cat.DoesNotExist
         except models.Cat.DoesNotExist:
-            id_placement = models.Cat.objects.exclude(type='v').aggregate(id=models_agg.Max('id'))['id'] + 1
+            id_placement = models.Cat.objects.aggregate(id=models_agg.Max('id'))['id'] + 1
             sql.query(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);",
                     {'id': id_placement,
                      'name': 'placement',
@@ -138,6 +139,7 @@ CREATE TABLE payment (
                 param['place'] = i
                 param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
                 sql.query(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
+        return HttpResponse(sql.dump(), mimetype="text/plain")
 # operation
         sql.query("""CREATE TABLE record (
     id INTEGER PRIMARY KEY,
@@ -161,9 +163,8 @@ CREATE TABLE payment (
         param = {}
         nbope = 0
         # on elimine les ope mere ou les ope dans les compte non bq ni especes ou les virement interne
-        for ope in models.Ope.objects.filter(compte__type__in=['b', 'e'],
-                                             filles_set__isnull=True
-                                    ).select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen"):
+        for ope in models.Ope.objects.filter(compte__type__in=['b', 'e'], filles_set__isnull=True).select_related('cat', "compte", "tiers",
+                                                                                                                  "ib", "rapp", "ope", "ope_pmv", "moyen"):
             nbope += 1
             param['id'] = ope.id
             # gestion des paiments on recupere l'id qui va bien

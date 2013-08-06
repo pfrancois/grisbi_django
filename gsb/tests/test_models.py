@@ -708,31 +708,31 @@ class Test_models(TestCase):
 
     def test_uuid(self):
         o = Ope.objects.get(pk=4)
-        uuid=o.uuid
+        uuid = o.uuid
         o.save()
         o = Ope.objects.get(pk=4)
         self.assertEqual(o.uuid, uuid)
 
     def test_uuid2(self):
-        o=Ope.objects.create(tiers_id=1, compte_id=1, cat_id=1, moyen_id=1, date=utils.now())
-        uuid=o.uuid
+        o = Ope.objects.create(tiers_id=1, compte_id=1, cat_id=1, moyen_id=1, date=utils.now())
+        uuid = o.uuid
         o.save()
         o = Ope.objects.get(pk=o.id)
         self.assertEqual(o.uuid, uuid)
 
     def test_last_modif(self):
         o = Ope.objects.get(pk=4)
-        lup=o.lastupdate
+        lup = o.lastupdate
         o.save()
         o = Ope.objects.get(pk=4)
         self.assertLess(lup, o.lastupdate)
 
     def test_last_modif2(self):
-        o=Tiers.objects.create(nom="Test")
-        lup=o.lastupdate
-        pk=o.id
+        o = Tiers.objects.create(nom="Test")
+        lup = o.lastupdate
+        pk = o.id
         time.sleep(1)
-        o.nom="Test2"
+        o.nom = "Test2"
         o.save()
         o = Tiers.objects.get(pk=pk)
         self.assertLess(lup, o.lastupdate)
