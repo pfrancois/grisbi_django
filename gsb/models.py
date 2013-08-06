@@ -14,7 +14,6 @@ from django.utils.encoding import smart_unicode, force_unicode
 import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
-from django_extensions.db.fields import ModificationDateTimeField
 
 
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement']
@@ -36,7 +35,7 @@ class Tiers(models.Model):
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
     is_titre = models.BooleanField(default=False)
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -64,7 +63,7 @@ class Tiers(models.Model):
 
 
 class Titre(models.Model):
-    """
+    """²
     les titres englobe les actifs financiers
     afin de pouvoir faire le lien dans les operations, il y a un ligne vers les tiers
     :model:`gsb.tiers`
@@ -81,7 +80,7 @@ class Titre(models.Model):
     isin = models.CharField(max_length=12, unique=True, db_index=True)
     tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False)
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -259,7 +258,7 @@ class Cours(models.Model):
     date = models.DateField(default=utils.today)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre)
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -281,7 +280,7 @@ class Banque(models.Model):
     cib = models.CharField(max_length=5, blank=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -315,7 +314,7 @@ class Cat(models.Model):
         ('v', u'virement'))
     nom = models.CharField(max_length=50, unique=True, verbose_name=u"nom de la catégorie", db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d', verbose_name=u"type de la catégorie")
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -350,7 +349,7 @@ class Ib(models.Model):
      c'est juste un deuxieme type de categories ou apparentes"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=Cat.typesdep, default=u'd')
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -388,7 +387,7 @@ class Exercice(models.Model):
     date_debut = models.DateField(default=utils.today)
     date_fin = models.DateField(null=True, blank=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -447,7 +446,7 @@ class Compte(models.Model):
     moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="compte_moyen_credit_set", default=None)
     moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="compte_moyen_debit_set", default=None)
     titre = models.ManyToManyField('Titre', through="Ope_titre")
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -531,8 +530,7 @@ class Compte(models.Model):
     date_rappro.short_description = u"date dernier rapp"
 
     @transaction.commit_on_success
-    def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None,
-              tiers_frais=None):
+    def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None, tiers_frais=None):
         """fonction pour achat de titre:
         @param titre:object titre
         @param nombre:decimal
@@ -577,8 +575,7 @@ class Compte(models.Model):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def vente(self, titre, nombre, prix=1, date=utils.today(), frais=0, virement_vers=None, cat_frais=None,
-              tiers_frais=None):
+    def vente(self, titre, nombre, prix=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
         @param nombre
@@ -587,6 +584,8 @@ class Compte(models.Model):
         @param frais
         @param virement_vers
         """
+        if date is None:
+            date = utils.today()
         nombre = abs(nombre)
         self.alters_data = True
         if isinstance(titre, Titre):
@@ -602,8 +601,7 @@ class Compte(models.Model):
                                                  cours=prix)
             if decimal.Decimal(force_unicode(frais)):
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:",
-                                                          defaults={'nom': u'frais bancaires:'})[0]
+                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom': u'frais bancaires:'})[0]
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
@@ -625,9 +623,10 @@ class Compte(models.Model):
             raise TypeError("pas un titre")
 
     @transaction.commit_on_success
-    def revenu(self, titre, montant=1, date=utils.today(), frais=0, virement_vers=None, cat_frais=None,
-               tiers_frais=None):
+    def revenu(self, titre, montant=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
+        if date==None:
+            date=utils.today()
         self.alters_data = True
         if isinstance(titre, Titre):
             # extraction des titres dans portefeuille
@@ -677,7 +676,8 @@ class Compte(models.Model):
             try:
                 datel = min(datel, utils.today())  # @UnusedVariable
             except TypeError:
-                datel = min(utils.strpdate(datel), utils.today())
+                datel=utils.strpdate(datel)
+                datel = min(datel, utils.today())
         else:
             datel = utils.today()
         # si il n'y a pas d'operations
@@ -713,7 +713,7 @@ class Ope_titre(models.Model):
                                    null=True,
                                    on_delete=models.CASCADE,
                                    related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -867,7 +867,7 @@ class Moyen(models.Model):
                 )
     nom = models.CharField(max_length=40, unique=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d')
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -909,7 +909,7 @@ class Rapp(models.Model):
     """rapprochement d'un compte"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     date = models.DateField(null=True, blank=True, default=utils.today)
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -983,7 +983,7 @@ class Echeance(models.Model):
     notes = models.TextField(blank=True, default='')
     inscription_automatique = models.BooleanField(default=False,
                                                   help_text=u"inutile")  # tt les echeances sont automatiques
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
@@ -1108,7 +1108,7 @@ class Ope(models.Model):
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.PROTECT, verbose_name=u'Mere')
     automatique = models.BooleanField(default=False, help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
-    lastupdate = ModificationDateTimeField()
+    lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:

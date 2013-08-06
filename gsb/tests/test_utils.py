@@ -10,6 +10,7 @@ from ..models import Exercice, Cat, Ope
 import decimal
 import mock
 import time
+import django.utils.timezone as timezone
 
 class Test_utils(TestCase):
     fixtures = ['test.json']
@@ -55,19 +56,19 @@ class Test_utils(TestCase):
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
         self.assertRaises(ValueError, utils.strpdate, "2011-12-52")
 
-    @mock.patch('gsb.utils.now')
+    @mock.patch('django.utils.timezone.now')
     def test_now(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, 0, 0)
-        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, 0, 0))
+        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
+        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone()))
         
-    @mock.patch('gsb.utils.timestamp')
+    @mock.patch('django.utils.timezone.now')
     def test_timestamp(self, today_mock):
-        today_mock.return_value = time.mktime(datetime.datetime(2010, 1, 1, 0, 0).timetuple())
-        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, 0, 0).timetuple()))
+        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
+        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone()).timetuple()))
         
-    @mock.patch('gsb.utils.today')
+    @mock.patch('django.utils.timezone.now')
     def test_today(self, today_mock):
-        today_mock.return_value = datetime.date(2010, 1, 1)
+        today_mock.return_value = datetime.datetime(2010, 1, 1,tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
         
     def test_add_month(self):

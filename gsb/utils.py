@@ -101,13 +101,21 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
 
 # utilise pour mock et les test
 def today():
-    return datetime.date.today()
+    return now().date()
 
 # utilise pour mock et les test
-def now():
-    return timezone.now()
+def now(utc=True):
+    now=timezone.now()
+    if utc:
+        return now
+    else:
+        return timezone.localtime(now)
+
 def timestamp():
-    return time.time()
+    return dt2timestamp(now())
+
+def dt2timestamp(date):
+    return time.mktime(date.timetuple())
 
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""

@@ -5,7 +5,7 @@ import os
 from django.db import models
 from django import forms
 import gsb.utils as utils
-
+from django.db.models import DateTimeField
 
 # definition d'un moneyfield
 class CurField(models.DecimalField):
@@ -91,3 +91,24 @@ class uuidfield(models.CharField):
                 value = unicode(utils.uuid())
                 setattr(model_instance, self.attname, value)
         return value
+
+"""tire initialement de django extension"""
+class ModificationDateTimeField(DateTimeField):
+    """ ModificationDateTimeField
+
+    By default, sets editable=False, blank=True, default=datetime.now
+
+    Sets value to datetime.now() on each save of the model.
+    """
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('editable', False)
+        kwargs.setdefault('blank', True)
+        DateTimeField.__init__(self, *args, **kwargs)
+
+    def pre_save(self, model, add):
+        value = utils.now()
+        setattr(model, self.attname, value)
+        return value
+
+    def get_internal_type(self):
+        return "DateTimeField"
