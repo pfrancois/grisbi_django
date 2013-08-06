@@ -400,6 +400,29 @@ class Rapp_cache(Table):
         if not obj:
             return {"nom":nom}
 
+class moyen_defaut_cache(object):
+    def __init__(self, request):
+        self.id={}
+        for c in models.Compte.objects.all():
+            self.id[c.nom]={"c":c.moyen_credit_defaut_id,"d":c.moyen_debit_defaut_id}
+            if self.id[c.nom]['c'] is None:
+                self.id[c.nom]['c'] = settings.MD_CREDIT
+            if self.id[c.nom]['d'] is None:
+                self.id[c.nom]['d'] = settings.MD_DEBIT
+            
+    def goc(self,compte,montant):
+        if compte in self.id.keys():
+            if montant > 0:
+                return self.id[compte]['c']
+            else:
+                return self.id[compte]['d']
+        else:
+            if montant > 0:
+                return settings.MD_CREDIT
+            else:
+                return settings.MD_DEBIT
+
+
 class Import_base(views.Myformview):
     # chemin du template
     template_name = "gsb/import.djhtm"

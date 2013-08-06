@@ -15,7 +15,8 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
     def id(self):
-        return utils.to_id(self.row['id'])
+        if 'id' in self.row:
+            return utils.to_id(self.row['id'])
 
     @property
     def cat(self):
@@ -26,7 +27,10 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def cpt(self):
-        cpt = utils.to_unicode(self.row['cpt'])
+        if 'cpt' in self.row:
+            cpt = utils.to_unicode(self.row['cpt'])
+        else:
+            cpt = "Caisse"
         if cpt is None:
             return "Caisse"
         else:
@@ -41,6 +45,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def ib(self):
+        if 'projet' in self.row:
             return utils.to_unicode(self.row['projet'], None)
 
     @property
@@ -50,19 +55,31 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def notes(self):
-        return self.row['notes']
+        if 'notes' in self.row:
+            return self.row['notes']
+        else:
+            return ""
 
     @property
     def num_cheque(self):
-        return utils.to_unicode(self.row['numchq'], "")
+        if 'numchq' in self.row:
+            return utils.to_unicode(self.row['numchq'], "")
+        else:
+            return ""
 
     @property
     def pointe(self):
-        return utils.to_bool(self.row['p'])
+        if 'p' in self.row:
+            return utils.to_bool(self.row['p'])
+        else:
+            return False
 
     @property
     def rapp(self):
-        return utils.to_bool(self.row['r'])
+        if 'r' in self.row:
+            return utils.to_bool(self.row['r'])
+        else:
+            return False
 
     @property
     def tiers(self):
@@ -74,7 +91,9 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def mere(self):
-        return utils.to_id(self.row['id_ope_m'])
+        if 'id_ope_m' in self.row:
+            return utils.to_id(self.row['id_ope_m'])
+    
 
     @property
     def jumelle(self):
@@ -84,19 +103,27 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        return utils.to_unicode(self.row['moyen'], None)
+        if 'moyen' in self.row:
+            return utils.to_unicode(self.row['moyen'], None)
+        else:
+            return None
 
     @property
     def ope_titre(self):
-        return utils.to_bool(self.row['ope_titre'])
+        if 'ope_titre' in self.row:
+            return utils.to_bool(self.row['ope_titre'])
 
     @property
     def ope_pmv(self):
-        return utils.to_bool(self.row['ope_pmv'])
+        if 'ope_pmv' in self.row:
+            return utils.to_bool(self.row['ope_pmv'])
 
     @property
     def has_fille(self):
-        return utils.to_bool(self.row['has_fille'])
+        if 'has_fille' in self.row:
+            return utils.to_bool(self.row['has_fille'])
+        else:
+            return False
 
     @property
     def ligne(self):
@@ -121,6 +148,7 @@ class Import_csv_ope(import_base.Import_base):
         self.tiers = import_base.Tiers_cache(self.request)
         self.opes = import_base.Ope_cache(self.request)
         self.titres = import_base.Titre_cache(self.request)
+        self.moyen_par_defaut=import_base.moyen_defaut_cache(self.request)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
@@ -133,7 +161,9 @@ class Import_csv_ope(import_base.Import_base):
         try:
             with open(nomfich, 'rt') as f_non_encode:
                 fich = self.reader(f_non_encode, encoding=self.encoding)
+                #---------------------- boucle
                 retour = self.tableau(fich, moyen_virement)
+                #------------------fin boucle
         except (utils.FormatException, import_base.ImportException) as e:
             messages.error(self.request, "attention traitement interrompu parce que %s" % e)
             retour = False
@@ -200,8 +230,8 @@ class Import_csv_ope(import_base.Import_base):
                     row.notes
                     row.num_cheque
                     row.ope_pmv
-                    # row.ope_titre
-                    # row.piece_comptable
+                    row.ope_titre
+                    row.piece_comptable
                     row.rapp
                     row.tiers
                 except KeyError as excp:
@@ -251,10 +281,7 @@ class Import_csv_ope(import_base.Import_base):
                     if row.moyen:
                         ope['moyen_id'] = self.moyens.goc(row.moyen)
                     else:
-                        if row.montant > 0:
-                            ope['moyen_id'] = settings.MD_CREDIT
-                        else:
-                            ope['moyen_id'] = settings.MD_DEBIT
+                            ope['moyen_id'] = self.moyen_par_defaut.goc(row.cpt, row.montant)
                 except import_base.ImportException:
                     self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.ligne))
                     continue
