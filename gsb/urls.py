@@ -32,16 +32,16 @@ urlpatterns += patterns('gsb',
                         # export au format general en csv
                         url(r'^options/export/csv/ope$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
                         # export en qif
-                        url(r'^options/export/qif$', export_qif.Export_qif.as_view(),name='export_qif'),
+                        url(r'^options/export/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
                         # export des ope titres
                         url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
                         # export des cours
-                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(),name='export_cours' ),
-                        #export en sql vers money iphone 
+                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
+                        # export en sql vers money iphone 
                         url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone')
 )
 # import
-#version grisbi 0.5.0
+# version grisbi 0.5.0
 urlpatterns += patterns('gsb.io.import_gsb', url(r'options/import/gsb$', 'import_gsb_0_5_x', name="import_gsb"))
 
 urlpatterns += patterns('',
@@ -72,7 +72,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$', views.Cpt_detail_view.as_view(cpt_titre_espece=True, rapp=True), name="gsb_cpt_titre_espece_rapp"),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),
-                        url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)$','titre_detail_cpt', name="gsb_cpt_titre_detail"),
+                        url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)$', 'titre_detail_cpt', name="gsb_cpt_titre_detail"),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/all$', 'titre_detail_cpt', {'all': True}, name="gsb_cpt_titre_detail_all"),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/rapp$', 'titre_detail_cpt', {'rapp': True}, name="gsb_cpt_titre_detail_rapp"),
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),

@@ -128,10 +128,10 @@ class Test_export_csv(Test_view_base):
         reponse_recu = self.client.post(reverse('export_sql_money_iphone'),
                                          data={'collection':(1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
                                          ).content
-        #print len(reponse_recu)
+        # print len(reponse_recu)
         chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
         chaine2 = 'INSERT INTO "category" VALUES(68,\'placement\',2,13369344,8,1375886177.0);'
-        reponse_recu = re.sub(chaine1,chaine2,reponse_recu)
+        reponse_recu = re.sub(chaine1, chaine2, reponse_recu)
         reponse_attendu = """BEGIN TRANSACTION;
 CREATE TABLE account (id INTEGER PRIMARY KEY,
                     name TEXT,
@@ -234,7 +234,7 @@ COMMIT;
         rr_iter = reponse_recu.split('\n')
         self.assertEqual(len(ra_iter), len(rr_iter))
         for ra, rr in zip(ra_iter, rr_iter):
-            self.assertEqual(ra,rr)
+            self.assertEqual(ra, rr)
         # erreur
 """
     def test_csv_erreur(self):

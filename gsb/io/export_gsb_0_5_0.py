@@ -497,7 +497,7 @@ def export(request):
         reponse["Content-Disposition"] = "attachment; filename=%s" % settings.TITRE
         return reponse
     else:
-        messages.error(request,u"attention, il n'y a pas de comptes donc pas de possibilité d'export.")
+        messages.error(request, u"attention, il n'y a pas de comptes donc pas de possibilité d'export.")
         return render_to_response('generic.djhtm',
                                   {'titre': 'import gsb'},
                                   context_instance=RequestContext(request)
