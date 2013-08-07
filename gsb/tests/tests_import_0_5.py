@@ -7,8 +7,7 @@ Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
 from .test_base import TestCase as Tcd
-from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, \
-    Cat, Ib, Exercice, Moyen, Rapp
+from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, Cat, Ib, Exercice, Moyen, Rapp
 from ..io.import_gsb import import_gsb_050
 from ..io.import_base import ImportException
 import decimal
@@ -18,7 +17,8 @@ from operator import attrgetter
 from django.conf import settings
 import os.path
 import logging
-
+import mock
+import gsb.utils as utils
 
 class importtests(Tcd):
     def test_mauvais_format(self):
@@ -29,7 +29,9 @@ class importtests(Tcd):
 
 
 class importposttests(Tcd):
-    def setUp(self):
+    @mock.patch('gsb.utils.today')
+    def setUp(self, today_mock):
+        today_mock.return_value = datetime.date(2013, 1, 1)
         logger = logging.getLogger('gsb')
         super(importposttests, self).setUp()
         logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
@@ -47,7 +49,9 @@ class importposttests(Tcd):
         self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9], attrgetter("id"))
         self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9], attrgetter("id"))
 
-    def test_titre_normal(self):
+    @mock.patch('gsb.utils.today')
+    def test_titre_normal(self, today_mock):
+        today_mock.return_value = datetime.date(2013, 1, 1)
         obj = Titre.objects.get(id=1)
         self.assertEquals(obj.nom, u'SG')
         self.assertEquals(obj.isin, u'FR0000130809')
@@ -56,7 +60,7 @@ class importposttests(Tcd):
         self.assertEquals(obj.type, u'ACT')
         obj = Titre.objects.get(id=2)
         self.assertEquals(obj.nom, u'test1')
-        self.assertEquals(obj.isin, "ZZ%sN%s" % (datetime.date.today().strftime('%d%m%Y'), 2))
+        self.assertEquals(obj.isin, "ZZ%sN%s" % (datetime.date(2013, 1, 1).strftime('%d%m%Y'), 2))
         self.assertEquals(obj.tiers.id, 6)
         self.assertEquals(obj.type, u'ZZZ')
         obj = Titre.objects.get(id=3)
@@ -66,12 +70,12 @@ class importposttests(Tcd):
         self.assertEquals(obj.type, u'ZZZ')
         obj = Titre.objects.get(id=4)
         self.assertEquals(obj.nom, u'test3')
-        self.assertEquals(obj.isin, "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), 4))
+        self.assertEquals(obj.isin, "XX%sN%s" % (datetime.date(2013, 1, 1).strftime('%d%m%Y'), 4))
         self.assertEquals(obj.tiers.id, 8)
         self.assertEquals(obj.type, u'ACT')
         obj = Titre.objects.get(id=5)
         self.assertEquals(obj.nom, u'test4')
-        self.assertEquals(obj.isin, "XX%sN%s" % (datetime.date.today().strftime('%d%m%Y'), 5))
+        self.assertEquals(obj.isin, "XX%sN%s" % (datetime.date(2013, 1, 1).strftime('%d%m%Y'), 5))
         self.assertEquals(obj.tiers.id, 9)
         self.assertEquals(obj.type, u'ZZZ')
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom, u'SG')
