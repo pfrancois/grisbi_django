@@ -2,8 +2,7 @@
 from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 
-from ..models import (Compte, Ope, Tiers, Cat, Moyen,
-                     Echeance, Ib, Banque, Exercice, Rapp, Titre)
+from ..models import (Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre)
 from django.http import HttpResponse
 # from django.core.exceptions import ObjectDoesNotExist
 # import decimal
@@ -16,6 +15,7 @@ try:
     from lxml import etree as et
 except ImportError:
     from xml.etree import cElementTree as et
+from django.contrib import messages
 import logging
 from .. import utils
 # definitions des listes
@@ -35,10 +35,11 @@ def _export():
                 list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_nom, 'type': cat_en_cours.type},
                                               'scat': {'id': cat_en_cours.id, 'nom': scat_nom}}
             else:
-                list_cats[cat_en_cours.id] = {
-                    'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}, 'scat': None}
+                list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type},
+                                              'scat': None}
         except ValueError:
-            list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type}, 'scat': None}
+            list_cats[cat_en_cours.id] = {'cat': {'id': cat_en_cours.id, 'nom': cat_en_cours.nom, 'type': cat_en_cours.type},
+                                          'scat': None}
             # creation des id pour cat et sact
     list_ibs = {}
     for ib_en_cours in Ib.objects.all().order_by('id'):
@@ -48,9 +49,8 @@ def _export():
                 list_ibs[ib_en_cours.id] = {'ib': {'id': ib_en_cours.id, 'nom': ib_nom, 'type': ib_en_cours.type},
                                             'sib': {'id': ib_en_cours.id, 'nom': sib_nom}}
             else:
-                list_ibs[ib_en_cours.id] = {
-                'ib': {'id': ib_en_cours.id, 'nom': ib_en_cours.nom, 'type': ib_en_cours.type},
-                'sib': None}
+                list_ibs[ib_en_cours.id] = {'ib': {'id': ib_en_cours.id, 'nom': ib_en_cours.nom, 'type': ib_en_cours.type},
+                                            'sib': None}
         except ValueError:
             list_ibs[ib_en_cours.id] = {'ib': {'id': ib_en_cours.id, 'nom': ib_en_cours.nom, 'type': ib_en_cours.type},
                                         'sib': None}
@@ -78,8 +78,7 @@ def _export():
     et.SubElement(xml_generalites, "Echelle_date_import").text = "2"  # NOT IN BDD
     et.SubElement(xml_generalites, "Utilise_logo").text = "1"  # NOT IN BDD
     et.SubElement(xml_generalites, "Chemin_logo").text = "g:/Program Files/Grisbi/pixmaps/grisbi-logo.png"  # NOT IN BDD
-    et.SubElement(xml_generalites,
-                  "Affichage_opes").text = "18-1-3-13-5-6-7-0-0-12-0-9-8-0-0-0-15-0-0-0-0-0-0-0-0-0-0-0"  # NOT IN BDD
+    et.SubElement(xml_generalites, "Affichage_opes").text = "18-1-3-13-5-6-7-0-0-12-0-9-8-0-0-0-15-0-0-0-0-0-0-0-0-0-0-0"  # NOT IN BDD
     et.SubElement(xml_generalites, "Rapport_largeur_col").text = "7-9-33-2-10-9-7"  # NOT IN BDD
     et.SubElement(xml_generalites, "Ligne_aff_une_ligne").text = "0"  # NOT IN BDD
     et.SubElement(xml_generalites, "Lignes_aff_deux_lignes").text = "0-1"  # NOT IN BDD
@@ -128,12 +127,9 @@ def _export():
         et.SubElement(xml_detail, "Solde_mini_autorise").text = utils.floattostr(cpt.solde_mini_autorise)
         et.SubElement(xml_detail, "Solde_courant").text = utils.floattostr(cpt.solde())
         try:
-            et.SubElement(xml_detail, "Date_dernier_releve").text = utils.datetostr(
-                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
-            et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(
-                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde)
-            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(
-                Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
+            et.SubElement(xml_detail, "Date_dernier_releve").text = utils.datetostr(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.date)
+            et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.solde)
+            et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(Ope.objects.filter(compte=cpt, rapp__isnull=False).latest().rapp.id)
         except Ope.DoesNotExist:
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(0)
@@ -501,11 +497,8 @@ def export(request):
         reponse["Content-Disposition"] = "attachment; filename=%s" % settings.TITRE
         return reponse
     else:
+        messages.error(request,u"attention, il n'y a pas de comptes donc pas de possibilité d'export.")
         return render_to_response('generic.djhtm',
-                                  {
-                                      'titre': 'import gsb',
-                                      'resultats': (
-                                      u"attention, il n'y a pas de comptes donc pas de possibilité d'export.",)
-                                  },
+                                  {'titre': 'import gsb'},
                                   context_instance=RequestContext(request)
         )

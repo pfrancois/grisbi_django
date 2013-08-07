@@ -4,8 +4,7 @@ register = template.Library()
 
 
 class MessagesNode(template.Node):
-    """ Outputs grouped Django Messages Framework messages in separate
-        lists sorted by level. """
+    """ Outputs grouped Django Messages Framework messages in separate lists sorted by level. """
 
     def __init__(self, messages):
         self.messages = messages
@@ -38,6 +37,5 @@ class MessagesNode(template.Node):
 def render_messages(parser, token):
     parts = token.split_contents()
     if len(parts) != 2:
-        raise template.TemplateSyntaxError("%r tag requires a single argument"
-                                           % token.contents.split()[0])
+        raise template.TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
     return MessagesNode(parts[1])
