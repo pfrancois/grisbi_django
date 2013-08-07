@@ -139,7 +139,7 @@ CREATE TABLE payment (
                 param['place'] = i
                 param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
                 sql.query(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
-        return HttpResponse(sql.dump(), mimetype="text/plain")
+
 # operation
         sql.query("""CREATE TABLE record (
     id INTEGER PRIMARY KEY,
@@ -205,12 +205,5 @@ CREATE TABLE payment (
             sql.query('DROP INDEX IF EXISTS record_repeat_index;')
             sql.query('CREATE INDEX record_repeat_index on record(repeat);')
         reponse = HttpResponse(sql.dump(), mimetype="text/plain")
-        if not self.debug:
-            reponse["Cache-Control"] = "no-cache, must-revalidate"
-            reponse['Pragma'] = "public"
-            reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                                time.strftime(
-                                                                                "%d_%m_%Y-%H_%M_%S",
-                                                                                utils.timestamp()), self.extension_file
-                                                                                )
+        nbope = len(reponse.content)
         return reponse
