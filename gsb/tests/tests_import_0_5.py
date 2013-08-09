@@ -18,7 +18,6 @@ from django.conf import settings
 import os.path
 import logging
 import mock
-import gsb.utils as utils
 
 class importtests(Tcd):
     def test_mauvais_format(self):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, include, url
 # from django.conf.urls import include #non utilise actuellement
 from . import views, outils
 from .io import import_csv, export_sql_money, export_csv, export_qif
@@ -92,9 +92,8 @@ urlpatterns += patterns('gsb.views',
 # import gsb.forms_perso
 try:
     import perso
-    urlpatterns += patterns('', url(r'options/import/csv/sg$', perso.Import_view.as_view(), name="import_csv_ope_sg"),
-                                url(r'options/execution$', perso.Execution_view.as_view(), name="execution_perso")
-                        )
+    urlpatterns += patterns('',(r'^perso/', include(perso)),)
+
     
 except ImportError:
     pass

@@ -1,12 +1,15 @@
 from __future__ import absolute_import
-from .test_base import TestCase
-from ..templatetags import smart_if
+#from .test_base import TestCase
+import unittest
+from gsb.templatetags import smart_if
+from django.template import Template, Context, TemplateSyntaxError
+
 
 #===============================================================================
 # Tests
 #===============================================================================
 
-class Test_SmartIf(TestCase):
+class Test_SmartIf(unittest.TestCase):
     def setUp(self):
         super(Test_SmartIf, self).setUp()
         self.true = smart_if.TestVar(True)
@@ -92,6 +95,54 @@ class Test_SmartIf(TestCase):
 
         var = smart_if.IfParser([1, '<', 2]).parse()
         self.assert_(var.resolve({}))
-
-        var = smart_if.IfParser([2, 'not', 'in', [2, 3]]).parse()
-        self.assertFalse(var.resolve({}))
+        var = smart_if.IfParser([1, 'not','in', [2,3]]).parse()
+        self.assert_(var.resolve({}))
+    
+    def test_error(self):
+        with self.assertRaises(ValueError) as exc:
+            var = smart_if.IfParser([]).parse()
+            var.resolve({})
+        self.assertEqual(exc.exception.args[0], 'No variables provided.')
+    def test_error2(self):
+        with self.assertRaises(ValueError) as exc:
+            var = smart_if.IfParser([3,'not']).parse()
+            var.resolve({})
+        self.assertEqual(exc.exception.args[0], 'No variable provided after "not".')
+    def test_error3(self):
+        with self.assertRaises(ValueError) as exc:
+            var = smart_if.IfParser([3,'cecinestpasunoperateur']).parse()
+            var.resolve({})
+        self.assertEqual(exc.exception.args[0], 'cecinestpasunoperateur is not a valid operator.')
+    def test_error5(self):
+        with self.assertRaises(ValueError) as exc:
+            var = smart_if.IfParser([3,'>']).parse()
+            var.resolve({})
+        self.assertEqual(exc.exception.args[0], 'No variable provided after ">"')
+    def test_error6(self):
+        with self.assertRaises(ValueError) as exc:
+            var = smart_if.IfParser(['not']).parse()
+            var.resolve({})
+        self.assertEqual(exc.exception.args[0], 'No variable provided after "not".')
+    def test_template(self):
+        rendered=Template("{% load smart_if %}"
+                          "{% if 3 < 5 %}...{% endif %}").render(Context())
+        self.assertEqual(rendered,'...')
+        rendered=Template("{% load smart_if %}"
+                          "{% if 3 > 5 %}...{% endif %}").render(Context())
+        self.assertEqual(rendered,'')
+        rendered=Template("{% load smart_if %}"
+                          "{% if 3 > 5 %}...{% else %}   {% endif %}").render(Context())
+        self.assertEqual(rendered,'   ')
+        rendered=Template("{% load smart_if %}{% if 2 == 2 or 3 <= 5 %} {% endif %}").render(Context())
+        self.assertEqual(rendered,' ')
+        rendered=Template("{% load smart_if %}{% if 2 in l %} {% endif %}").render(Context({"l":(1,2,3)}))
+        self.assertEqual(rendered,' ')
+        rendered=Template("{% load smart_if %}{% if 2 = 2 %}{% if 2 = 2 %}  {% endif %}{% endif %}").render(Context())
+        self.assertEqual(rendered,'  ')
+        rendered=Template("{% load smart_if %}{% if texte|length = 5 %} {% endif %}").render(Context({"texte":"12345"}))
+        self.assertEqual(rendered,' ')
+    def test_parsing_errors(self):
+        "There are various ways that the flatpages template tag won't parse"
+        render = lambda t: Template(t).render(Context())
+        self.assertRaises(TemplateSyntaxError, render, "{% load smart_if %}{% if 3 > 5 %}")
+        self.assertRaises(TemplateSyntaxError, render, "{% load smart_if %}{% if 3>5 %}{% endif %}")

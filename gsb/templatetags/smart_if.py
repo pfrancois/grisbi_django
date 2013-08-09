@@ -187,14 +187,14 @@ class SmartIfNode(template.Node):
     def __repr__(self):
         return "<Smart If node>"
 
-    def __iter__(self):
+    def __iter__(self):#pragma: no cover
         for node in self.nodelist_true:
             yield node
         if self.nodelist_false:
             for node in self.nodelist_false:
                 yield node
 
-    def get_nodes_by_type(self, nodetype):
+    def get_nodes_by_type(self, nodetype):# pragma: no cover
         nodes = []
         if isinstance(self, nodetype):
             nodes.append(self)
