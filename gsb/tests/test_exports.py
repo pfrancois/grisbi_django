@@ -15,6 +15,7 @@ import logging
 
 import re
 
+
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']
 
@@ -22,11 +23,12 @@ class Test_view_base(TestCase):
         super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
 
+
 class Test_export_csv(Test_view_base):
     def test_csv_global(self):
         logger = logging.getLogger('gsb')
         logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
-        rep = self.client.post(reverse('export_csv'), data={'collection':(1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
+        rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;id jumelle lie;has_fille;id_ope_m;ope_titre;ope_pmv;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08\r
 5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;08\r
@@ -48,10 +50,11 @@ class Test_export_csv(Test_view_base):
         rr_iter = reponse_recu.split('\r\n')
         for ra, rr in zip(ra_iter, rr_iter):
             self.assertEqual(ra, unicode(rr, 'cp1252'))
+
     def test_csv_debug(self):
         # on cree ce les entree de la vue
         req = RequestFactory()
-        request = req.post(reverse('export_csv'), data={'collection':(1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
+        request = req.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
         # initialisation de la vue
         view = self.setup_view(ex_csv.Export_ope_csv(), request)
         # choix des parametre du test proprement dit
@@ -73,51 +76,68 @@ class Test_export_csv(Test_view_base):
             self.assertEqual(ra, unicode(rr, 'cp1252'))
 
     def test_export_form1(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':""
+        # test normal avec aucune selection
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': ""
                    }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_export_form1bis(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':(1, 2, 3, 4, 5, 6)
+        # test normal avec selection de tous comptes
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': (1, 2, 3, 4, 5, 6)
                    }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
 
     def test_export_form2(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':(1, 2, 3, 6)
+        # test normal avec selection de certains comptes
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': (1, 2, 3, 6)
                    }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
+
+    def test_export_form3(self):
+        # test normal avec aucune operation
+        form_data = {'date_min': "01/01/2013",
+                   'date_max': "31/12/2013",
+                   'collection': (1, 2, 3, 6)
+                   }
+        form = export_base.Exportform_ope(data=form_data)
+        r = form.is_valid()
+        self.assertFalse(r)
+        self.assert_(form.errors['__all__'] != u"attention pas d'opérations pour la selection demandée")
+
     def test_export_formcours1(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':(1, 2, 3, 4)
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': (1, 2, 3, 4)
                    }
         form = ex_csv.Exportform_cours(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_export_formcpt_titre1(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':(4, 5)
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': (4, 5)
                    }
         form = ex_csv.Exportform_Compte_titre(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
 
     def test_export_formcpt_titre2(self):
-        form_data = {'date_min':"01/01/2010",
-                   'date_max':"31/12/2013",
-                   'collection':(4, 6)
+        form_data = {'date_min': "01/01/2010",
+                   'date_max': "31/12/2013",
+                   'collection': (4, 6)
                    }
         form = ex_csv.Exportform_Compte_titre(data=form_data)
         r = form.is_valid()
@@ -126,7 +146,7 @@ class Test_export_csv(Test_view_base):
     def test_sql_money_iphone(self):
         # on cree ce les entree de la vue
         reponse_recu = self.client.post(reverse('export_sql_money_iphone'),
-                                         data={'collection':(1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
+                                         data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
                                          ).content
         # print len(reponse_recu)
         chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
