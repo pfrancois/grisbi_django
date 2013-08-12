@@ -21,6 +21,8 @@ from ..models import Rapp, Echeance, Gsb_exc
 from .. import utils
 from .. import forms
 
+__all__ = ['Test_models', 'Test_models2']
+
 
 class Test_models(TestCase):
     fixtures = ['test.json']

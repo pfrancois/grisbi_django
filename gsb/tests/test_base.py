@@ -6,6 +6,8 @@ from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
 import logging
 
+__all__ = ['TestCase']
+
 
 @override_settings(ID_CPT_M=1)
 @override_settings(MD_DEBIT=1)

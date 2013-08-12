@@ -16,6 +16,8 @@ from .. import models
 from django.contrib.auth.models import User
 from ..io import import_base
 
+__all__ = ['Test_import', ]
+
 
 class Test_import(TestCase):
 

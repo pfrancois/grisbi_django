@@ -15,6 +15,8 @@ import logging
 
 import re
 
+__all__ = ['Test_view_base', 'Test_export_csv']
+
 
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']

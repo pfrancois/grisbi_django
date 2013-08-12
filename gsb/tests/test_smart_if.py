@@ -1,15 +1,16 @@
 from __future__ import absolute_import
 # from .test_base import TestCase
-import unittest
+from django.test import SimpleTestCase
 from gsb.templatetags import smart_if
 from django.template import Template, Context, TemplateSyntaxError
 
-
+__all__ = ['Test_SmartIf']
 #===============================================================================
 # Tests
 #===============================================================================
 
-class Test_SmartIf(unittest.TestCase):
+
+class Test_SmartIf(SimpleTestCase):
     def setUp(self):
         super(Test_SmartIf, self).setUp()
         self.true = smart_if.TestVar(True)

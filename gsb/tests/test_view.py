@@ -14,6 +14,8 @@ import mock
 import datetime
 from .. import models
 
+__all__ = ['Test_urls', 'Test_views_general', 'Test_forms']
+
 
 class Test_view_base(TestCase):
     fixtures = ['test.json', 'auth.json']

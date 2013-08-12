@@ -8,6 +8,8 @@ from django.contrib.admin.sites import AdminSite
 
 request = None
 
+__all__ = ['Test_admin']
+
 
 class Test_admin(TestCase):
     def setUp(self):

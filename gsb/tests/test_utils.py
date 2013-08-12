@@ -4,6 +4,7 @@ test utils
 """
 from __future__ import absolute_import
 from .test_base import TestCase
+from django.test import SimpleTestCase
 from ..import utils
 import datetime
 from ..models import Exercice, Cat, Ope
@@ -12,12 +13,10 @@ import mock
 import time
 import django.utils.timezone as timezone
 
+__all__ = ['Test_utils1', 'Test_utils']
 
-class Test_utils(TestCase):
-    fixtures = ['test.json']
 
-    def setUp(self):
-        super(Test_utils, self).setUp()
+class Test_utils1(SimpleTestCase):
 
     def test_utils_uuid(self):
         self.assertEquals(len(utils.uuid()), 36)
@@ -77,8 +76,6 @@ class Test_utils(TestCase):
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, first=True), datetime.date(2011, 03, 01))
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, last=True), datetime.date(2011, 03, 31))
 
-# test des formats de sortie
-
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
         self.assertEquals(utils.datetostr(d), '1/1/2011')
@@ -103,25 +100,6 @@ class Test_utils(TestCase):
         liste = ['a', 'b', 'c', 'd']
         self.assertEquals(utils.typetostr(liste, 'a'), '1')
         self.assertEquals(utils.typetostr(liste, 'jhk'), '0')
-
-    def test_maxtostr(self):
-        self.assertEquals(utils.maxtostr(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
-        self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin'), "0")
-        self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin', defaut="abc"), "abc")
-
-    def test_idtostr(self):
-        self.assertEquals(utils.idtostr(None), '0')
-        self.assertEquals(utils.idtostr(None, defaut='toto'), 'toto')
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
-        Cat.objects.create(nom="test:", id=999)
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=9)), "9")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='jumelle_id'), "")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id'), "1")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom'), "")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom'), "cpt_titre2201101")
 
 # test des formats d'entree
     def test_tostr(self):
@@ -158,3 +136,31 @@ class Test_utils(TestCase):
         self.assertEquals(utils.to_date("10/01/1999"), datetime.date(1999, 1, 10))
         self.assertEquals(utils.to_date(None), datetime.date(1, 1, 1))
         self.assertRaises(utils.FormatException, utils.to_date, 'toto')
+
+
+class Test_utils(TestCase):
+    fixtures = ['test.json']
+
+    def setUp(self):
+        super(Test_utils, self).setUp()
+# test des formats de sortie
+
+    def test_maxtostr(self):
+        self.assertEquals(utils.maxtostr(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
+        self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin'), "0")
+        self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin', defaut="abc"), "abc")
+
+    def test_idtostr(self):
+        self.assertEquals(utils.idtostr(None), '0')
+        self.assertEquals(utils.idtostr(None, defaut='toto'), 'toto')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
+        Cat.objects.create(nom="test:", id=999)
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=9)), "9")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='jumelle_id'), "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id'), "1")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom'), "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom'), "cpt_titre2201101")
+

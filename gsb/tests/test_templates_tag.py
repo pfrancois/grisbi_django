@@ -3,12 +3,14 @@
 test models
 """
 from __future__ import absolute_import
-from .test_base import TestCase
+from django.test import SimpleTestCase
 from ..templatetags import gsb_extras
 from decimal import Decimal
 
+__all__ = ['Test_templates_tags_gsb_extra']
 
-class Test_templates_tags(TestCase):
+
+class Test_templates_tags(SimpleTestCase):
     def test_gsb_extra_cur1(self):
         out = gsb_extras.cur(225.50, "EUR")
         self.assertEquals(out, "225,50 &#8364;")

@@ -19,6 +19,8 @@ import os.path
 import logging
 import mock
 
+__all__ = ['Importtests', 'Importposttests']
+
 
 class importtests(Tcd):
     def test_mauvais_format(self):
