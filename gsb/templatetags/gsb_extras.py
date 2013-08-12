@@ -34,8 +34,8 @@ def cur(value, symbol=None):
             val_decim = Decimal(0)
         else:
             val_decim = Decimal(input_val)
-#    except UnicodeEncodeError:
-#        val_decim = Decimal(0)
+#   except UnicodeEncodeError:
+#       val_decim = Decimal(0)
     except InvalidOperation:
         try:
             val_decim = Decimal(force_unicode(float(value)))
@@ -45,9 +45,11 @@ def cur(value, symbol=None):
         val_decim = 0
     return mark_safe("%s %s" % (formats.number_format(val_decim, 2), symbol))
 
+
 @register.filter(is_safe=True)
 def somme(value, arg):
     return Decimal(force_unicode(value)) + Decimal(force_unicode(arg))
+
 
 @register.filter(is_safe=True)
 def centimes(value):

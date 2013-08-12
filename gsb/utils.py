@@ -19,11 +19,20 @@ __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_nu
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
            'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'switch']
+
+
 class FormatException(Exception):
-    pass
+    def __init__(self, message):
+        super(FormatException, self).__init__(message)
+        self.msg = message
+
+    def __str__(self):
+        return self.msg
+
 
 def uuid():
     return str(uuid4())
+
 
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
@@ -70,6 +79,7 @@ def datefr2datesql(chaine):
     except ValueError:
         return None
 
+
 def is_number(s):
     """fonction qui verifie si ca a l'apparence d'un nombre"""
     try:
@@ -83,12 +93,14 @@ def is_number(s):
             return False
     return True
 
+
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
     s = force_unicode(s).strip()
     s = s.replace(',', '.')
     s = s.replace(' ', '')
     return decimal.Decimal(s)
+
 
 def strpdate(end_date, fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD
@@ -99,9 +111,11 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
     else:
         return datetime.date(1, 1, 1)
 
+
 # utilise pour mock et les test
 def today():
     return now().date()
+
 
 # utilise pour mock et les test
 def now(utc=True):
@@ -111,11 +125,14 @@ def now(utc=True):
     else:
         return timezone.localtime(now)
 
+
 def timestamp():
     return dt2timestamp(now())
 
+
 def dt2timestamp(date):
     return time.mktime(date.timetuple())
+
 
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
@@ -130,11 +147,13 @@ def addmonths(sourcedate, months, last=False, first=False):
         day = min(sourcedate.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
 
+
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + datetime.timedelta(n)
 
-"""------------------------------------format d'entree---------------------------------"""
+
+#------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
     try:
         if var is None:
@@ -151,6 +170,7 @@ def to_unicode(var, defaut=''):
             return var
     except KeyError:
         return defaut
+
 
 def to_id(var):
     try:
@@ -209,8 +229,7 @@ def to_date(var, format_date="%d/%m/%Y"):
         return None
 
 
-"""-------------------------------format de sortie-----------------------------"""
-
+#-------------------------------format de sortie-----------------------------
 def datetostr(s, defaut="0/0/0"):
     """
     fonction qui transforme un object date en une chaine AA/MM/JJJJ
@@ -231,6 +250,7 @@ def datetostr(s, defaut="0/0/0"):
             return "/".join(result)
         else:
             raise FormatException('attention ce ne peut pas etre qu\'un objet date')
+
 
 def booltostr(s, defaut='0'):
     """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
@@ -258,6 +278,7 @@ def floattostr(s):
     s = "%10.7f" % s
     return s.replace('.', ',').strip()
 
+
 def typetostr(liste, s, defaut='0'):
     """convertit un indice d'une liste par une string
     @param liste: liste a utiliser
@@ -270,6 +291,7 @@ def typetostr(liste, s, defaut='0'):
         s = defaut
     return s
 
+
 def maxtostr(query, defaut='0', champ='id'):
     """recupere le max d'un queryset"""
     agg = query.aggregate(id=Max(champ))['id']
@@ -277,6 +299,7 @@ def maxtostr(query, defaut='0', champ='id'):
         return defaut
     else:
         return str(agg)
+
 
 def idtostr(obj, membre='id', defaut='0'):
     """renvoie id d'un objet avec la gestion des null
@@ -299,13 +322,15 @@ def idtostr(obj, membre='id', defaut='0'):
     retour = retour.strip()
     return retour
 
+
 def nulltostr(s):
     if s == '':
         return 'NULL'
     else:
         return s
 
-"""------------------fonction basiques pour lecture ecriture------"""
+
+#------------------fonction basiques pour lecture ecriture------"""
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
@@ -332,12 +357,14 @@ class Excel_csv(csv.Dialect):
 
 csv.register_dialect("excel_csv", Excel_csv)
 
+
 class Csv_unicode_reader(object):
     """
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
     """
     champs = None
+
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
         self.line_num = 1
         fich = UTF8Recoder(fich, encoding)
@@ -350,6 +377,7 @@ class Csv_unicode_reader(object):
 
     def __iter__(self):
         return self
+
 
 class switch(object):
     """http://code.activestate.com/recipes/410692/"""

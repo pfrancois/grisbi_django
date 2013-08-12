@@ -9,8 +9,10 @@ from .. import models
 from . import import_base
 from .. import utils
 
+
 class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
     pass
+
 
 class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
@@ -41,7 +43,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException ("%s" % self.row['date'])
+            raise utils.FormatException("%s" % self.row['date'])
 
     @property
     def ib(self):
@@ -51,7 +53,6 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
     def montant(self):
         return utils.to_decimal(self.row['montant'])
-
 
     @property
     def notes(self):
@@ -93,7 +94,6 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def mere(self):
         if 'id_ope_m' in self.row:
             return utils.to_id(self.row['id_ope_m'])
-    
 
     @property
     def jumelle(self):
@@ -129,6 +129,7 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     def ligne(self):
         return self.line_num
 
+
 class Import_csv_ope(import_base.Import_base):
     reader = Csv_unicode_reader_ope
     extension = ("csv",)
@@ -156,7 +157,7 @@ class Import_csv_ope(import_base.Import_base):
         self.erreur = list()
 
         # les moyens par defaut
-        moyen_virement = self.moyens.goc('', {'nom':"virement", 'type':'v'})
+        moyen_virement = self.moyens.goc('', {'nom': "virement", 'type': 'v'})
         retour = False
         try:
             with open(nomfich, 'rt') as f_non_encode:
@@ -202,8 +203,8 @@ class Import_csv_ope(import_base.Import_base):
         if self.opes.nb_created > 0:
             messages.info(self.request, u"%s opés crées" % (self.opes.nb_created))
 
-        return True 
-    
+        return True
+
     def tableau(self, fich, moyen_virement):
         # lecture effective du fichier
         verif_format = False
@@ -316,5 +317,3 @@ class Import_csv_ope(import_base.Import_base):
             self.opes.create(ope)
         retour = True
         return retour
-
-

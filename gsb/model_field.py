@@ -7,6 +7,7 @@ from django import forms
 import gsb.utils as utils
 from django.db.models import DateTimeField
 
+
 # definition d'un moneyfield
 class CurField(models.DecimalField):
     """
@@ -23,6 +24,7 @@ class CurField(models.DecimalField):
 
     def __mul__(self, other):
         return decimal.Decimal(self) * decimal.Decimal(other)
+
 
 class ExtFileField(forms.FileField):
     """
@@ -64,6 +66,7 @@ class ExtFileField(forms.FileField):
                 error = "Only allowed file types are: %s" % file_types
                 raise forms.ValidationError(error)
 
+
 class uuidfield(models.CharField):
     """tire de la
     https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
@@ -92,7 +95,7 @@ class uuidfield(models.CharField):
                 setattr(model_instance, self.attname, value)
         return value
 
-"""tire initialement de django extension"""
+# tire initialement de django extension"""
 class ModificationDateTimeField(DateTimeField):
     """ ModificationDateTimeField
 

@@ -351,4 +351,3 @@ class Import_csv_ope(import_base.Import_base):
                     self.erreur.append("attention opemere n'existe pas.  ligne %s " % ope['ligne'])
             if ope['has_fille'] == True:
                 ope['cat_id'] = self.element('cat', "Opération Ventilée", Cat, {'nom': u"opération ventilée", 'type': 'd'})
-

@@ -6,10 +6,15 @@ from ..models import Titre, Compte
 from . import import_base
 from .. import utils
 
+
 def mot(var):
     return var.partition(' ')[0].strip()
+
+
 def reste(var):
     return var.partition(' ')[2].strip()
+
+
 def mots(var):
     tour = var.split(' ')
     tour1 = []
@@ -23,9 +28,11 @@ class csv_sg_reader(utils.Csv_unicode_reader):
     @property
     def lib(self):
         return self.row['lib'].strip()
+
     @property
     def detail(self):
         return self.row['detail'].strip()
+
     @property
     def liste_detail(self):
         tour1 = mots(self.detail)
@@ -228,4 +235,3 @@ class Import_csv_ope_titre(import_base.Import_base):
                 opes.append(ope)
         self.resultat = opes
         return True
-

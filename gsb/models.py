@@ -1157,7 +1157,7 @@ class Ope(models.Model):
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
-            raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")            
+            raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
             self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom': u"Opération Ventilée", 'type': "r"})[0]
             try:

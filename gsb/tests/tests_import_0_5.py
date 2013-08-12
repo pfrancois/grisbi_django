@@ -19,6 +19,7 @@ import os.path
 import logging
 import mock
 
+
 class importtests(Tcd):
     def test_mauvais_format(self):
         logger = logging.getLogger('gsb')

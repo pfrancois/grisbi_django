@@ -131,12 +131,14 @@ class Ope_titre_addForm(Baseform):
             self.cleaned_data['frais'] = self.cleaned_data['frais'] * -1
         return self.cleaned_data
 
+
 class Ope_titre_dividendeForm(Baseform):
     date = gsb_field.DateFieldgsb(localize=True)
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
     compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     montant = forms.DecimalField(localize=True, initial='0', required=True, min_value=0)
+
     def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_dividendeForm, self).__init__(*args, **kwargs)
         self.cpt = cpt
@@ -192,6 +194,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
 
 class Ope_titreForm(Basemodelform):
     fields = ['titre', 'compte', 'nombre', 'date', 'cours']
+
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)

@@ -7,13 +7,12 @@ from .test_base import TestCase
 import decimal
 from gsb import forms as gsb_forms
 from django.core.urlresolvers import reverse
-import os.path
-from django.conf import settings
+# import os.path
+# from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
-from ..models import (Tiers, Cat, Ope, Compte, Titre, Ope_titre)
-
+from .. import models
 
 
 class Test_view_base(TestCase):
@@ -23,20 +22,6 @@ class Test_view_base(TestCase):
         super(Test_view_base, self).setUp()
         self.client.login(username='admin', password='mdp')
 
-
-class Test_import(Test_view_base):
-    def test_import_ok(self):
-        self.assertEqual(Tiers.objects.count(), 8)
-        self.assertEqual(Ope.objects.count(), 13)
-        self.assertEqual(Cat.objects.count(), 8)
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_simple.csv"))  as file_test:
-            r = self.client.post('/options/import/csv/all', { 'nom_du_fichier': file_test})
-            self.assertEqual(r.status_code, 302)
-            self.assertEqual(Tiers.objects.count(), 11)
-            self.assertEqual(Ope.objects.count(), 17)
-            self.assertEqual(Cat.objects.count(), 10)
-            self.assertEqual(Compte.objects.get(nom="cpte1").solde(), -74)
-            self.assertEqual(Compte.objects.get(nom="cptb2").solde(), -54)
 
 class Test_urls(Test_view_base):
     def test_404(self):
@@ -87,7 +72,6 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/titre/1/rapp').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
-
 
 
 class Test_views_general(Test_view_base):
@@ -242,15 +226,15 @@ class Test_forms(Test_view_base):
                          )
 
     def test_virement_forms(self):
-        form_data = {'date':"02/09/2012",
-                   'compte_origine':'1',
-                   'moyen_origine':'5',
-                   'compte_destination':'2',
-                   'moyen_destination':'5',
-                   'montant':decimal.Decimal("13.50"),
-                   'notes':'ceci est des notes',
-                   'pointe':""
-                   
+        form_data = {'date': "02/09/2012",
+                   'compte_origine': '1',
+                   'moyen_origine': '5',
+                   'compte_destination': '2',
+                   'moyen_destination': '5',
+                   'montant': decimal.Decimal("13.50"),
+                   'notes': 'ceci est des notes',
+                   'pointe': ""
+
                    }
         form = gsb_forms.VirementForm(data=form_data)
         r = form.is_valid()
@@ -258,235 +242,244 @@ class Test_forms(Test_view_base):
         r = form.cleaned_data['montant']
         self.assertEqual(r, decimal.Decimal("13.50"))
         form.save()
-        self.assertEqual(Ope.objects.count(), 15)
+        self.assertEqual(models.Ope.objects.count(), 15)
+
     def test_virement_forms2(self):
-        form_data = {'date':"02/09/2012",
-                   'compte_origine':'1',
-                   'moyen_origine':'5',
-                   'compte_destination':'2',
-                   'moyen_destination':'5',
-                   'montant':decimal.Decimal("13.50"),
-                   'notes':'ceci est des notes',
-                   'pointe':""
-                   
+        form_data = {'date': "02/09/2012",
+                   'compte_origine': '1',
+                   'moyen_origine': '5',
+                   'compte_destination': '2',
+                   'moyen_destination': '5',
+                   'montant': decimal.Decimal("13.50"),
+                   'notes': 'ceci est des notes',
+                   'pointe': ""
+
                    }
-        ope = Ope.objects.get(id=8)
+        ope = models.Ope.objects.get(id=8)
         form = gsb_forms.VirementForm(data=form_data, ope=ope)
         r = form.is_valid()
         self.assertTrue(r)
         r = form.cleaned_data['montant']
         self.assertEqual(r, decimal.Decimal("13.50"))
         form.save()
-        self.assertEqual(Ope.objects.count(), 13)
-    
+        self.assertEqual(models.Ope.objects.count(), 13)
+
     def test_virement_forms_erreur(self):
-        form_data = {'date':"02/09/2012",
-                   'compte_origine':'1',
-                   'moyen_origine':'5',
-                   'compte_destination':'1',
-                   'moyen_destination':'5',
-                   'montant':decimal.Decimal("13.50"),
-                   'notes':'ceci est des notes',
-                   'pointe':""
-                   
+        form_data = {'date': "02/09/2012",
+                   'compte_origine': '1',
+                   'moyen_origine': '5',
+                   'compte_destination': '1',
+                   'moyen_destination': '5',
+                   'montant': decimal.Decimal("13.50"),
+                   'notes': 'ceci est des notes',
+                   'pointe': ""
+
                    }
         form = gsb_forms.VirementForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'compte_origine' : [u"pas possible de faire un virement vers le même compte"],
-                                        'compte_destination' : [u"pas possible de faire un virement vers le même compte"]})
-        
+        self.assertEqual(form.errors, {'compte_origine': [u"pas possible de faire un virement vers le même compte"],
+                                        'compte_destination': [u"pas possible de faire un virement vers le même compte"]})
+
     def test_Ope_titre_addForm1(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"1",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'0',
-                   'cours':'1.56',
-                   'frais':'10'
+        form_data = {'date': "02/09/2012",
+                   'titre': "1",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '0',
+                   'cours': '1.56',
+                   'frais': '10'
                    }
         form = gsb_forms.Ope_titre_addForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'nombre':[u'le nombre de titre ne peut être nul']})
+        self.assertEqual(form.errors, {'nombre': [u'le nombre de titre ne peut être nul']})
 
     def test_Ope_titre_addForm3(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"1",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10'
+        form_data = {'date': "02/09/2012",
+                   'titre': "1",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10'
                    }
         form = gsb_forms.Ope_titre_addForm(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
         self.assertEqual(form.cleaned_data['frais'], -10)
+
     def test_Ope_titre_dividendeForm2(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'montant':'10'
+        form_data = {'date': "02/09/2012",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'montant': '10'
                    }
-        cpt_titre = Compte.objects.get(id=5)
+        cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_Ope_titre_dividendeForm3(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"1",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'montant':'10'
+        form_data = {'date': "02/09/2012",
+                   'titre': "1",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'montant': '10'
                    }
-        cpt_titre = Compte.objects.get(id=5)
+        cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertFalse(r)
+
     def test_Ope_titre_dividendeForm4(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'montant':'10'
+        form_data = {'date': "02/09/2012",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'montant': '10'
                    }
-        cpt_titre = Compte.objects.get(id=1)
+        cpt_titre = models.Compte.objects.get(id=1)
         form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_Ope_titre_add_achatForm1(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"1",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
-                   'nouveau_titre':'',
-                   'nouveau_isin':'',
+        form_data = {'date': "02/09/2012",
+                   'titre': "1",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
+                   'nouveau_titre': '',
+                   'nouveau_isin': '',
                    }
         form = gsb_forms.Ope_titre_add_achatForm(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_Ope_titre_add_achatForm2(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
-                   'nouveau_titre':'ceci est un nouveau titre',
-                   'nouveau_isin':'',
+        form_data = {'date': "02/09/2012",
+                   'titre': "",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
+                   'nouveau_titre': 'ceci est un nouveau titre',
+                   'nouveau_isin': '',
                    }
         form = gsb_forms.Ope_titre_add_achatForm(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
+
     def test_Ope_titre_add_achatForm3(self):
-        form_data = {'date':"02/09/2012",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
+        form_data = {'date': "02/09/2012",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
                    }
         form = gsb_forms.Ope_titre_add_achatForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'nouveau_titre':[u'si vous ne choisissez pas un titre, vous devez taper le nom du nouveau']})
+        self.assertEqual(form.errors, {'nouveau_titre': [u'si vous ne choisissez pas un titre, vous devez taper le nom du nouveau']})
+
     def test_Ope_titre_add_achatForm4(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"1",
-                   'compte_titre':'4',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
-                   'nouveau_titre':'',
-                   'nouveau_isin':'isis',
+        form_data = {'date': "02/09/2012",
+                   'titre': "1",
+                   'compte_titre': '4',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
+                   'nouveau_titre': '',
+                   'nouveau_isin': 'isis',
                    }
         form = gsb_forms.Ope_titre_add_achatForm(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
         self.assertNotIn('nouvel_isin', form.cleaned_data)
+
     def test_Ope_titre_add_venteForm1(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
+        form_data = {'date': "02/09/2012",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
                    }
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
-        self.assertQuerysets(form.fields['titre'].queryset, Titre.objects.all())
+        self.assertQuerysets(form.fields['titre'].queryset, models.Titre.objects.all())
         for p in form.errors:
             print p.message
+
     def test_Ope_titre_add_venteForm2(self):
-        form_data = {'date':"02/09/2012",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'nombre':'10',
-                   'cours':'1.56',
-                   'frais':'10',
+        form_data = {'date': "02/09/2012",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'nombre': '10',
+                   'cours': '1.56',
+                   'frais': '10',
                    }
-        cpt_titre = Compte.objects.get(id=5)
+        cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
         self.assertQuerysets(form.fields['titre'].queryset, cpt_titre.liste_titre())
         r = form.is_valid()
         self.assertTrue(r)
         for p in form.errors:
                 print p.message
+
     def test_Ope_titre_add_venteForm3(self):
-        form_data = {'date':"01/07/2011",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'nombre':'1000',
-                   'cours':'1.56',
-                   'frais':'10',
+        form_data = {'date': "01/07/2011",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'nombre': '1000',
+                   'cours': '1.56',
+                   'frais': '10',
                    }
-        cpt_titre = Compte.objects.get(id=5)
+        cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'titre':[u"titre pas en portefeuille", ]})
+        self.assertEqual(form.errors, {'titre': [u"titre pas en portefeuille", ]})
 
     def test_Ope_titre_add_venteForm4(self):
-        form_data = {'date':"01/01/2013",
-                   'titre':"3",
-                   'compte_titre':'5',
-                   'compte_espece':'2',
-                   'nombre':'1000',
-                   'cours':'1.56',
-                   'frais':'10',
-                   
+        form_data = {'date': "01/01/2013",
+                   'titre': "3",
+                   'compte_titre': '5',
+                   'compte_espece': '2',
+                   'nombre': '1000',
+                   'cours': '1.56',
+                   'frais': '10',
                    }
-        cpt_titre = Compte.objects.get(id=5)
+        cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'titre':[u"titre pas assez en portefeuille pour que l'opération puisse s'effectuer", ]})
+        self.assertEqual(form.errors, {'titre': [u"titre pas assez en portefeuille pour que l'opération puisse s'effectuer", ]})
 
     def testOpe_titreForm(self):
-        ope = Ope_titre.objects.get(id=2)
+        ope = models.Ope_titre.objects.get(id=2)
         form = gsb_forms.Ope_titreForm(instance=ope)
         self.assertTrue('titre' in [k for k in form.fields.keys()])
         self.assertTrue('compte' in [k for k in form.fields.keys()])
-    
+
     def testMajCoursform(self):
         gsb_forms.MajCoursform()
-    
+
     def testMajtitre(self):
-        form = gsb_forms.Majtitre(Titre.objects.all())
+        form = gsb_forms.Majtitre(models.Titre.objects.all())
         k = [k for k in form.fields.keys()]
         self.assert_(len(k) == 7)
-    
+
     def testSearchForm(self):
         gsb_forms.SearchForm()
-

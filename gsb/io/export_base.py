@@ -19,6 +19,7 @@ from .. import widgets as gsb_field
 
 from .. import models
 
+
 class Writer_base(object):
     writer = None
     stream = None
@@ -29,8 +30,8 @@ class Writer_base(object):
         self.encoder = codecs.getincrementalencoder(encoding)()
         self.stream = cStringIO.StringIO()
             # Force BOM
-        #        if encoding=="utf-16":
-        #            f.write(codecs.BOM_UTF16)
+        #       if encoding=="utf-16":
+        #           f.write(codecs.BOM_UTF16)
         self.encoding = encoding
 
     def writerow(self, row):
@@ -72,8 +73,8 @@ class Csv_unicode_writer(Writer_base):
         # ... and reencode it into the target encoding
         data = self.encoder.encode(data)
         # strip BOM
-        #       if self.encoding == "utf-16":
-        #           data = data[2:]
+        #      if self.encoding == "utf-16":
+        #          data = data[2:]
         # write to the target stream
         self.stream.write(data)
         # empty queue
@@ -81,6 +82,7 @@ class Csv_unicode_writer(Writer_base):
 
     def writeheader(self):
             self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
+
 
 class Exportform_ope(gsb_forms.Baseform):
     collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False, label="Comptes")

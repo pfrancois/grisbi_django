@@ -12,15 +12,16 @@ import mock
 import time
 import django.utils.timezone as timezone
 
+
 class Test_utils(TestCase):
     fixtures = ['test.json']
 
     def setUp(self):
         super(Test_utils, self).setUp()
-    
+
     def test_utils_uuid(self):
         self.assertEquals(len(utils.uuid()), 36)
-    
+
     def test_utils_valid_rib(self):
         self.assertEquals(utils.validrib(30004, 12345, 12312345678, 30), True)
         self.assertEquals(utils.validrib(30004, 12345, "123A2345678", 30), True)
@@ -45,12 +46,12 @@ class Test_utils(TestCase):
         self.assertEquals(utils.is_number("-inf"), False)
         self.assertEquals(utils.is_number("+inf"), False)
         self.assertEquals(utils.is_number("1+2j"), True)
-        
+
     def test_fr2decimal(self):
         self.assertEquals(utils.fr2decimal("1,2"), decimal.Decimal('1.2'))
         self.assertEquals(utils.fr2decimal("0,0000000"), decimal.Decimal('0'))
         self.assertEquals(utils.fr2decimal("2 010,2500000"), decimal.Decimal('2010.25'))
-                
+
     def test_strpdate(self):
         self.assertEquals(utils.strpdate("2011-12-31"), datetime.date(2011, 12, 31))
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
@@ -60,17 +61,17 @@ class Test_utils(TestCase):
     def test_now(self, today_mock):
         today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()))
-        
+
     @mock.patch('django.utils.timezone.now')
     def test_timestamp(self, today_mock):
         today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()).timetuple()))
-        
+
     @mock.patch('django.utils.timezone.now')
     def test_today(self, today_mock):
         today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
-        
+
     def test_add_month(self):
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1), datetime.date(2011, 03, 15))
         self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, first=True), datetime.date(2011, 03, 01))
@@ -107,7 +108,7 @@ class Test_utils(TestCase):
         self.assertEquals(utils.maxtostr(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
         self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin'), "0")
         self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin', defaut="abc"), "abc")
-        
+
     def test_idtostr(self):
         self.assertEquals(utils.idtostr(None), '0')
         self.assertEquals(utils.idtostr(None, defaut='toto'), 'toto')
@@ -117,10 +118,10 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=9)), "9")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='jumelle_id') , "")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id') , "1")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom') , "")
-        self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom') , "cpt_titre2201101")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='jumelle_id'), "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id'), "1")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom'), "")
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom'), "cpt_titre2201101")
 
 # test des formats d'entree
     def test_tostr(self):
@@ -157,5 +158,3 @@ class Test_utils(TestCase):
         self.assertEquals(utils.to_date("10/01/1999"), datetime.date(1999, 1, 10))
         self.assertEquals(utils.to_date(None), datetime.date(1, 1, 1))
         self.assertRaises(utils.FormatException, utils.to_date, 'toto')
-
-                

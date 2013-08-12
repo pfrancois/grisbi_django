@@ -16,6 +16,7 @@ register = template.Library()
 # Calculation objects
 #===============================================================================
 
+
 class BaseCalc(object):
     def __init__(self, var1, var2=None, negate=False):
         self.var1 = var1
@@ -160,6 +161,7 @@ class IfParser(object):
 # Actual templatetag code.
 #===============================================================================
 
+
 class TemplateIfParser(IfParser):
     error_class = template.TemplateSyntaxError
 
@@ -187,14 +189,14 @@ class SmartIfNode(template.Node):
     def __repr__(self):
         return "<Smart If node>"
 
-    def __iter__(self):#pragma: no cover
+    def __iter__(self):  # pragma: no cover
         for node in self.nodelist_true:
             yield node
         if self.nodelist_false:
             for node in self.nodelist_false:
                 yield node
 
-    def get_nodes_by_type(self, nodetype):# pragma: no cover
+    def get_nodes_by_type(self, nodetype):  # pragma: no cover
         nodes = []
         if isinstance(self, nodetype):
             nodes.append(self)

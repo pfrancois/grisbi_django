@@ -52,8 +52,8 @@ class QifWriter(Writer_base):
         # ... and reencode it into the target encoding
         data = data.encode(self.encoding)
         # strip BOM
-        #       if self.encoding == "utf-16":
-        #           data = data[2:]
+        #      if self.encoding == "utf-16":
+        #          data = data[2:]
         # write to the target stream
         self.stream.write(data)
         # empty queue

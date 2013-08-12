@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 import time
 # import logging
-import os, sys
+import os
+import sys
 
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
@@ -13,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.decorators import method_decorator
-from django.db import IntegrityError 
+from django.db import IntegrityError
 
 
 from .. import forms as gsb_forms
@@ -21,12 +22,15 @@ from .. import models
 from .. import views
 from .. import utils
 
+
 class ImportException(Exception):
     def __init__(self, message):
+        super(ImportException, self).__init__(message)
         self.msg = message
 
     def __str__(self):
-        return repr(self.msg)
+        return self.msg
+
 
 class ImportForm1(gsb_forms.Baseform):
     nom_du_fichier = gsb_forms.forms.FileField()
@@ -138,6 +142,7 @@ class Table(object):
     """Moyen avec cache"""
     element = None
     readonly = False
+
     def __init__(self, request):
         self.id = dict()
         self.create_item = list()
@@ -170,91 +175,91 @@ class Table(object):
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk
-                    self.id[nom] = pk 
+                    self.id[nom] = pk
                     self.create_item.append(created)
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
-                    raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
-        finally:
-            return pk
-    
+                    raise ImportException(u"%s '%s' non créée alors que c'est read only" % (self.element._meta.object_name, nom))
+        return pk
+
     def arg_def(self, nom, obj):
         raise NotImplementedError("methode arg_def non defini")
 
+
 class Cat_cache(Table):
     element = models.Cat
+
     def __init__(self, request):
         super(Cat_cache, self).__init__(request)
-        if self.readonly == True: 
-            self.readonly = False
-            readonly = True
-        else:
-            readonly = False
-        self.goc("", {'nom':'Operation sur titre', 'id':settings.ID_CAT_OST, 'type':'d'})
-        self.goc("", {'nom':'Revenus de placement:Plus-values', 'id':settings.ID_CAT_PMV, 'type':'r'})
-        self.goc("", {'nom': settings.REV_PLAC, 'type':'r'})
-        self.goc("", {'nom':u'Impôts:Cotisations sociales', 'id':settings.ID_CAT_COTISATION, 'type':'d'})
-        self.goc(u'Non affecté')
-        self.goc(u'Opération Ventilée')
-        self.goc("Frais bancaires")
-        self.goc('', {'nom':'Virement', 'type':"v"})
-        if readonly == True:
-            self.readonly = True
+        c = models.Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': 'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'})[0]
+        self.id[c.nom] = c.pk
+        c = models.Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': 'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'})[0]
+        self.id[c.nom] = c.pk
+        c = models.Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom': settings.REV_PLAC, 'type': 'r'})[0]
+        self.id[c.nom] = c.pk
+        c = models.Cat.objects.get_or_create(nom=settings.ID_CAT_COTISATION, defaults={'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'})[0]
+        self.id[c.nom] = c.pk
+        c = models.Cat.objects.filter(type="v")
+        if c.exists():
+            self.id['Virement'] = c[0].id
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, "type":'d'}
+            return {"nom": nom, "type": 'd'}
         else:
             return obj
 
+
 class Moyen_cache(Table):
     element = models.Moyen
+
     def __init__(self, request):
         super(Moyen_cache, self).__init__(request)
-        if self.readonly == True: 
-            self.readonly = False
-            readonly = True
-        else:
-            readonly = False
-        self.goc("", {'nom':'CREDIT', 'id':settings.MD_CREDIT, 'type':'r'})
-        self.goc("", {'nom':'DEBIT', 'id':settings.MD_DEBIT, 'type':'d'})
-        if readonly == True:
-            self.readonly = True
+        c = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'})[0]
+        self.id[c.nom] = c.pk
+        c = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'})[0]
+        self.id[c.nom] = c.pk
 
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, "type":'d'}
+            return {"nom": nom, "type": 'd'}
         else:
             return obj
 
 
 class IB_cache(Table):
     element = models.Ib
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, "type":'d'}
+            return {"nom": nom, "type": 'd'}
         else:
             return obj
 
 
 class Compte_cache(Table):
     element = models.Compte
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, "type":'b', 'moyen_credit_defaut_id':settings.MD_CREDIT, 'moyen_debit_defaut_id':settings.MD_DEBIT}
+            return {"nom": nom, "type": 'b', 'moyen_credit_defaut_id': settings.MD_CREDIT, 'moyen_debit_defaut_id': settings.MD_DEBIT}
         else:
             return obj
 
 
 class Banque_cache(Table):
     element = models.Banque
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom}
+            return {"nom": nom}
         else:
             return obj
 
+
 class Cours_cache(Table):
     element = models.Cours
+
     def goc(self, date, titre_id, montant):
         if not (date and titre_id and montant):
             return None
@@ -278,41 +283,43 @@ class Cours_cache(Table):
                 pk = self.id[titre_id][date]
         finally:
             return pk
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom}
+            return {"nom": nom}
         else:
             return obj
-
 
 
 class Exercice_cache(Table):
     element = models.Exercice
+
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom, 'date_debut':utils.today(), 'date_fin':utils.today()}
+            return {"nom": nom, 'date_debut': utils.today(), 'date_fin': utils.today()}
         else:
             return obj
 
-        
 
 class Tiers_cache(Table):
     element = models.Tiers
+
     def __init__(self, request):
         super(Tiers_cache, self).__init__(request)
-        self.goc("", {'nom':'Secu', 'id':settings.ID_TIERS_COTISATION})
+        self.goc("", {'nom': 'Secu', 'id': settings.ID_TIERS_COTISATION})
 
     def arg_def(self, nom, obj):
         if obj is None:
-            return {"nom":nom}
+            return {"nom": nom}
         else:
             return obj
 
 
 class Titre_cache(Table):
     element = models.Titre
+
     def __init__(self, request):
-        self.id = {"nom":dict(), "isin":dict()}
+        self.id = {"nom": dict(), "isin": dict()}
         self.create_item = list()
         self.request = request
         if self.element is None:
@@ -353,7 +360,7 @@ class Titre_cache(Table):
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk
-                    self.id[nom] = pk 
+                    self.id[nom] = pk
                     self.create_item.append(created)
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
@@ -371,21 +378,25 @@ class Titre_cache(Table):
                 arg_isin = isin
             else:
                 arg_isin = "XX00000%s" % self.nb_created
-            return {"nom":arg_nom, "isin":arg_isin, "type":"XXX"}
+            return {"nom": arg_nom, "isin": arg_isin, "type": "XXX"}
         else:
             return obj
 
 
 class Ope_cache(Table):
     element = models.Ope
+
     def goc(self, nom, obj=None):
         raise NotImplementedError("methode goc non defini")
+
     def create(self, ope):
         self.create_item.append(ope)
         self.nb_created += 1
 
+
 class Rapp_cache(Table):
     element = models.Rapp
+
     def goc(self, nom, date, obj=None):
         if nom:
             pk = super(Rapp_cache, self).goc(nom, obj)
@@ -398,18 +409,20 @@ class Rapp_cache(Table):
 
     def arg_def(self, nom, obj):
         if not obj:
-            return {"nom":nom}
+            return {"nom": nom}
+
 
 class moyen_defaut_cache(object):
+
     def __init__(self, request):
         self.id = {}
         for c in models.Compte.objects.all():
-            self.id[c.nom] = {"c":c.moyen_credit_defaut_id, "d":c.moyen_debit_defaut_id}
+            self.id[c.nom] = {"c": c.moyen_credit_defaut_id, "d": c.moyen_debit_defaut_id}
             if self.id[c.nom]['c'] is None:
                 self.id[c.nom]['c'] = settings.MD_CREDIT
             if self.id[c.nom]['d'] is None:
                 self.id[c.nom]['d'] = settings.MD_DEBIT
-            
+
     def goc(self, compte, montant):
         if compte in self.id.keys():
             if montant > 0:
@@ -440,7 +453,6 @@ class Import_base(views.Myformview):
     # affiche les resultats plutot qu'une importation
     resultat = False
     debug = False
-
 
     def form_valid(self, form):
         # logger = logging.getLogger('gsb.import')
@@ -620,6 +632,7 @@ class Import_base(views.Myformview):
                     nom = u"%s => %s" % (obj.jumelle.compte.nom, obj.compte.nom)
                 obj.tiers = models.Tiers.objects.get_or_create(nom=nom, defaults={"nom": nom})[0]
                 obj.save()
+
     def get_success_url(self):
         return reverse(self.url)
 
@@ -686,6 +699,7 @@ class Import_base(views.Myformview):
 
     def tableau_import(self, nomfich):
         raise NotImplementedError(u"il faut definir comment on importe")
+
     def create(self, obj, model):
         nb_ajout = 0
         nom_ajoute = [objet['nom'] for objet in self.ajouter[obj]]
@@ -697,4 +711,3 @@ class Import_base(views.Myformview):
                 messages.info(self.request, u"%s %s ajoutés (%s)" % (nb_ajout, obj, nom_ajoute))
         except KeyError as e:
             messages.error(self.request, e)
-

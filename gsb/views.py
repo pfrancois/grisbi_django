@@ -76,10 +76,12 @@ class Myformview(generic.FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         return self.render_to_response(self.get_context_data(form=form))
+
     def get_context_data(self, *args, **kwargs):
         context = super(Myformview, self).get_context_data(*args, **kwargs)
-        context.update({'titre':self.titre})
+        context.update({'titre': self.titre})
         return context
+
 
 class Myredirectview(generic.RedirectView):
     call = None
@@ -301,7 +303,7 @@ class Cpt_detail_view(Mytemplateview):
                        "sort_tab": args[3],
                        "type": self.type,
                        "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
-                       "nb":args[1].count()
+                       "nb": args[1].count()
             }
         else:
             context = {
@@ -718,6 +720,7 @@ def ope_titre_achat(request, cpt_id):
                    'sens': 'achat'}
     )
 
+
 @login_required
 def dividende(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
@@ -747,7 +750,7 @@ def dividende(request, cpt_id):
                                compte=form.cleaned_data['compte'],
                                montant=form.cleaned_data['montant'],
                                tiers=tiers,
-                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom':settings.REV_PLAC, 'type':'r'}))
+                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom': settings.REV_PLAC, 'type': 'r'}))
             if form.cleaned_data['compte_espece']:
                 # creation du virement
                 vir = Virement()
@@ -774,7 +777,7 @@ def dividende(request, cpt_id):
                    'cpt': compte,
                    'sens': 'vente'}
     )
-    
+
 
 @login_required
 def ope_titre_vente(request, cpt_id):
@@ -829,6 +832,7 @@ def ope_titre_vente(request, cpt_id):
                    'cpt': compte,
                    'sens': 'vente'}
     )
+
 
 @login_required
 def search_opes(request):

@@ -392,11 +392,11 @@ def import_gsb_050(nomfich, efface_table=True):
         compte_ferme = not ope.compte.ouvert
         if compte_ferme:
             ope.compte.ouvert = True
-            ope.compte.save() 
+            ope.compte.save()
         ope.save()
         if compte_ferme:
             ope.compte.ouvert = False
-            ope.compte.save() 
+            ope.compte.save()
 
         tabl_correspondance_ope[xml_ope.get('No')] = ope.id
         logger.debug('ope %s cree id %s' % (xml_ope.get('No'), ope.id))
@@ -446,7 +446,7 @@ def import_gsb_050(nomfich, efface_table=True):
         compte_ferme = not ope.compte.ouvert
         if compte_ferme:
             ope.compte.ouvert = True
-            ope.compte.save() 
+            ope.compte.save()
         ope.save()
         if compte_ferme:
             ope.compte.ouvert = False

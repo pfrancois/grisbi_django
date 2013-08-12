@@ -37,7 +37,7 @@ urlpatterns += patterns('gsb',
                         url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
                         # export des cours
                         url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
-                        # export en sql vers money iphone 
+                        # export en sql vers money iphone
                         url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone')
 )
 # import
@@ -83,17 +83,17 @@ urlpatterns += patterns('gsb.views',
 # gestion de mes trucs perso
 # form tester
 # if settings.DEBUG and perso:
-#    from gsb.form_tester import SomeModelFormPreview
+#   from gsb.form_tester import SomeModelFormPreview
 
 # urlpatterns += patterns('gsb',
-#    (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
-#                        url(r'^test$', 'test.test')
+#   (r'^testform/$', SomeModelFormPreview(gsb_forms.MajCoursform)),
+#                       url(r'^test$', 'test.test')
 # )
 # import gsb.forms_perso
 try:
     import perso
-    urlpatterns += patterns('',(r'^perso/', include(perso)),)
+    urlpatterns += patterns('', (r'^perso/', include(perso)),)
 
-    
+
 except ImportError:
     pass

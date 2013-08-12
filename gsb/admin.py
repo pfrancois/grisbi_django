@@ -23,7 +23,8 @@ from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
 
-##-------------ici les classes generiques------
+
+#-------------ici les classes generiques------
 class date_perso_filter(DateFieldListFilter):
     """filtre date perso
     """
@@ -184,6 +185,7 @@ class formestligne_limit(BaseInlineFormSet):
         sup = super(formestligne_limit, self).get_queryset()
         return sup.order_by('-id')[:10]
 
+
 class liste_perso_inline(admin.TabularInline):
     can_delete = True
     extra = 0
@@ -194,6 +196,7 @@ class liste_perso_inline(admin.TabularInline):
     readonly = False
     orderby = None
     formset = formestligne_limit
+
     # afin de pouvoir avoir des inline readonly
     def __init__(self, parent_model, admin_site):
         if self.readonly:
@@ -214,7 +217,7 @@ class liste_perso_inline(admin.TabularInline):
         return qs
 
 
-# #------------defintiion des classes
+# ------------definitiion des classes
 class ope_cat_admin(liste_perso_inline):
     model = Ope
     fields = ('date', 'compte', 'montant', 'tiers', 'ib', 'notes')
@@ -223,6 +226,7 @@ class ope_cat_admin(liste_perso_inline):
     related = ('compte', 'tiers', 'ib')
     orderby = ('-date',)
     max_num = 10
+
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -530,6 +534,7 @@ class ope_rapp_admin(liste_perso_inline):
     fk_name = 'rapp'
     related = ('compte', 'tiers', 'moyen', 'cat')
     formset = BaseInlineFormSet
+
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""

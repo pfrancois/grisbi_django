@@ -6,9 +6,10 @@ import time
 from .. import utils
 
 from . import export_base
-from django.core import exceptions as django_exceptions
+# from django.core import exceptions as django_exceptions
 from django.http import HttpResponse
 from sql.pg import sqlite_db as db
+
 
 class Export_view_sql(export_base.ExportViewBase):
     extension_file = "sql"
@@ -17,6 +18,7 @@ class Export_view_sql(export_base.ExportViewBase):
     model_initial = models.Ope
     form_class = export_base.Exportform_ope
     titre = "export sql pocket money"
+
     def export(self, query):
         self.debug = True
         sql = db()
@@ -109,6 +111,7 @@ class Export_view_sql(export_base.ExportViewBase):
 
         return HttpResponse(sql.dump(), mimetype="text/plain")
 
+
 class Export_view_sql2(export_base.ExportViewBase):
     extension_file = "sql"
     debug = True
@@ -116,6 +119,7 @@ class Export_view_sql2(export_base.ExportViewBase):
     model_initial = models.Ope
     form_class = export_base.Exportform_ope
     titre = "export sql pocket money"
+
     def export(self, query):
         self.titre = "export sql pocket money"
         self.debug = True

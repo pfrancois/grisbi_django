@@ -19,7 +19,7 @@ class TestCase(Test_Case_django):
         logger = logging.getLogger('django.request')
         logger.setLevel(logging.ERROR)
         super(TestCase, self).setUp()
-    
+
     def assertQueryset_list(self, qs1, list1):
         # compare les id d'un query set avec une liste
         pk = qs1.values_list('pk', flat=True)
@@ -39,6 +39,7 @@ class TestCase(Test_Case_django):
         view.args = args
         view.kwargs = kwargs
         return view
+
     def request_get(self, url):
         factory = RequestFactory()
         request = factory.get(url)
@@ -46,7 +47,7 @@ class TestCase(Test_Case_django):
         messages = FallbackStorage(request)
         setattr(request, '_messages', messages)
         return request
-    
+
     def request_post(self, url):
         factory = RequestFactory()
         request = factory.post(url)
@@ -54,7 +55,7 @@ class TestCase(Test_Case_django):
         messages = FallbackStorage(request)
         setattr(request, '_messages', messages)
         return request
-    
+
     def assertcountmessage(self, request, nb):
         actual = len([e.message for e in request._messages])
         if actual != nb:
