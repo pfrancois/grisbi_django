@@ -1,2 +1,2 @@
 mettre un truc dans le setting qui permette le all par dafaut
-tester dividende
+mettre dans l'import qui gere les titres et les comptes titres

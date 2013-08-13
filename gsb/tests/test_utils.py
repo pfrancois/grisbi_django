@@ -79,6 +79,7 @@ class Test_utils1(SimpleTestCase):
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
         self.assertEquals(utils.datetostr(d), '1/1/2011')
+        self.assertEquals(utils.datetostr(d, '%d/%m/%y'), '1/1/11')
         self.assertEquals(utils.datetostr(None), '0/0/0')
         self.assertRaises(utils.FormatException, utils.datetostr, 'toto')
 
@@ -95,6 +96,8 @@ class Test_utils1(SimpleTestCase):
         self.assertEquals(utils.floattostr(1.256), '1,2560000')
         self.assertEquals(utils.floattostr(1), '1,0000000')
         self.assertEquals(utils.floattostr(True), '1,0000000')
+        self.assertEquals(utils.floattostr(1, 0), '1')
+        self.assertEquals(utils.floattostr(1.256, 4), '1,2560')
 
     def test_typetostr(self):
         liste = ['a', 'b', 'c', 'd']

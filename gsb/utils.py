@@ -230,7 +230,7 @@ def to_date(var, format_date="%d/%m/%Y"):
 
 
 #-------------------------------format de sortie-----------------------------
-def datetostr(s, defaut="0/0/0"):
+def datetostr(s, defaut="0/0/0", param='%d/%m/%Y'):
     """
     fonction qui transforme un object date en une chaine AA/MM/JJJJ
     @param s:objet datetime
@@ -240,7 +240,7 @@ def datetostr(s, defaut="0/0/0"):
         return defaut
     else:
         if isinstance(s, datetime.date):
-            s = s.strftime('%d/%m/%Y')
+            s = s.strftime(param)
             result = []
             tab = s.split("/")
             for partie in tab:
@@ -273,9 +273,9 @@ def booltostr(s, defaut='0'):
             return force_unicode(int(bool(s)))
 
 
-def floattostr(s):
+def floattostr(s, nb_digit=7):
     """ convertit un float en string 10,7"""
-    s = "%10.7f" % s
+    s = "{0:0.{1}f}".format(s, nb_digit)
     return s.replace('.', ',').strip()
 
 

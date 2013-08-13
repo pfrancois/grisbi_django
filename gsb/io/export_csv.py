@@ -109,7 +109,7 @@ class pocket_csv(csv.Dialect):
     quoting = csv.QUOTE_NONNUMERIC
 
 
-class Export_ope_pocket_money_csv(Export_view_csv_base):
+class Export_ope_pocket_money_csv_view(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
@@ -121,14 +121,13 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
         """
         fonction principale
         """
-        logger = logging.getLogger('gsb.export')
         data = []
         query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
         for ope in query:
             # id compte date montant
             ligne = {'account name': ope.compte.nom}
             # date
-            ligne['date'] = ope.date.strftime('%d/%m/%y')
+            ligne['date'] = utils.datetostr(ope.date, param='%d/%m/%y')
             # checknum
             ligne['ChkNum'] = ope.num_cheque
             # tiers
@@ -138,10 +137,7 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             ligne['Payee'] = tiers
             # cat
             ligne['Category'] = utils.idtostr(ope.cat, defaut='', membre="nom")
-            try:
-                ligne['Class'] = utils.idtostr(ope.ib, defaut='', membre="nom")
-            except django_exceptions.ObjectDoesNotExist:
-                ligne['Class'] = ""
+            ligne['Class'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             ligne['Memo'] = ope.notes
             # montant
             ligne['Amount'] = str.strip("%10.2f" % ope.montant)
@@ -153,7 +149,6 @@ class Export_ope_pocket_money_csv(Export_view_csv_base):
             ligne["CurrencyCode"] = "EUR"
             ligne["ExchangeRate"] = "1"
             data.append(ligne)
-        logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
 
@@ -172,9 +167,8 @@ class Export_cours_csv(Export_view_csv_base):
     model_initial = models.Cours
     form_class = Exportform_cours
     nomfich = "export_cours"
-    fieldnames = ("id", "date", "nom", "isin", "value")
+    fieldnames = ("id", "date", "nom", "isin", "cours")
     titre = u"Export des cours pour des titres determinés"
-    debug = True
 
     def export(self, query):
         """
@@ -183,12 +177,12 @@ class Export_cours_csv(Export_view_csv_base):
         @return: object httpreponse se composant du fichier csv
         """
         data = []
-        for objet in query.order_by('date').select_related('titre'):
-            ligne = {'id': objet.titre.isin,
-                     'date': objet.date,
+        for objet in query.order_by('titre__nom', 'date').select_related('titre'):
+            ligne = {'id': objet.titre.id,
+                     'date': utils.datetostr(objet.date),
                      'nom': objet.titre.nom,
                      'isin': objet.titre.isin,
-                     'value': objet.valeur}
+                     'cours': utils.floattostr(objet.valeur)}
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_cours")
         return reponse
@@ -209,8 +203,9 @@ class Export_ope_titre_csv(Export_view_csv_base):
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
-    titre = u"export des opération-titres"
-    fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "cours", "nombre", "montant")
+    titre = u"export des opérations-titres"
+    fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "nombre", "cours", "montant_ope")
+    # debug = True
 
     def export(self, query):
         """
@@ -219,19 +214,20 @@ class Export_ope_titre_csv(Export_view_csv_base):
         @return: object httpreponse se composant du fichier csv
         """
         data = []
-        for objet in query.order_by('date').select_related('compte', 'titre'):
+        for objet in query.order_by('compte__nom', 'date', 'titre__nom').select_related('compte', 'titre'):
             ligne = {
                 'id': objet.id,
-                'date': objet.date,
-                'nom': objet.compte.nom,
-                'compte': objet.titre.nom,
+                'date': utils.datetostr(objet.date),
+                'compte': objet.compte.nom,
+                'nom': objet.titre.nom,
                 'isin': objet.titre.isin}
             if objet.nombre > 0:
                 ligne['sens'] = u"achat"
             else:
                 ligne['sens'] = u"vente"
-            ligne['cours'] = objet.nombre
-            ligne['montant'] = objet.invest
+            ligne['cours'] = utils.floattostr(objet.cours)
+            ligne['nombre'] = utils.floattostr(objet.nombre)
+            ligne['montant_ope'] = utils.floattostr(objet.cours * objet.nombre)
             data.append(ligne)
         reponse = self.export_csv_view(data=data, nomfich="export_ope_titre")
         return reponse

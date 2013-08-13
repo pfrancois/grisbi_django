@@ -75,3 +75,20 @@ class TestCase(Test_Case_django):
         else:
             messages_str = ", ".join('"%s"' % m for m in messages)
             self.fail('No message contained text "%s", messages were: %s' % (text, messages_str))
+
+    def assertreponsequal(self, reponse_recu, reponse_attendu, split_rr, split_ra, unicode_encoding=None):
+        rr_iter = reponse_recu.split(split_rr)
+        ra_iter = reponse_attendu.split(split_ra)
+        if len(ra_iter) != len(rr_iter):
+            msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
+            self._formatMessage(None, msg)
+            raise self.failureException(msg)
+        for ra, rr in zip(ra_iter, rr_iter):
+            if unicode_encoding is not None:
+                rr = unicode(rr, unicode_encoding)
+            if rr != ra:
+                msg = "\nrecu:'%s'\natt :'%s'" % (rr, ra)
+                self._formatMessage(None, msg)
+                raise self.failureException(msg)
+
+

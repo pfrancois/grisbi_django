@@ -38,7 +38,9 @@ urlpatterns += patterns('gsb',
                         # export des cours
                         url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
                         # export en sql vers money iphone
-                        url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone')
+                        url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone'),
+                        # export en csv vers pocket money iphone
+                        url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(), name='export_csv_pocket_money')
 )
 # import
 # version grisbi 0.5.0

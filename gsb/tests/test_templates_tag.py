@@ -7,7 +7,7 @@ from django.test import SimpleTestCase
 from ..templatetags import gsb_extras
 from decimal import Decimal
 
-__all__ = ['Test_templates_tags_gsb_extra']
+__all__ = ['Test_templates_tags']
 
 
 class Test_templates_tags(SimpleTestCase):
