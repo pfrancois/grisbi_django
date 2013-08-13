@@ -7,30 +7,22 @@ from django.http import HttpResponse
 
 from django.conf import settings  # @Reimport
 from django.contrib.admin.views.decorators import staff_member_required
-import os
-import gsb.utils as utils
+from sql.pg import sqlite_db
+from django.views.generic import View
+from django.utils.decorators import method_decorator
 
 
-def _export():
-    # output backup
-    cmd = settings.MYSQLDUMP_BIN + ' --opt --compact --skip-add-locks -u %s -p%s %s | gzip -c' % (
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME)
-    stdin, stdout = os.popen2(cmd)
-    stdin.close()
-    return stdout
+class export_fsb_view(View):
 
+    @method_decorator(staff_member_required)
+    def dispatch(self, *args, **kwargs):
+        """on a besoin pour le method decorator"""
+        return super(export_fsb_view, self).dispatch(*args, **kwargs)
 
-@staff_member_required
-def export_database(request):  # @UnusedVariable
-    """
-    view pour export en sql
-    """
-    response = HttpResponse(_export(), mimetype="application/octet-stream")
-    response['Content-Disposition'] = 'attachment; filename=%s' % utils.today().__str__() + '_db.sql.bz2'
-    return response
-
-if __name__ == "__main__":
-    xml_string = _export()
-    fichier = open("%s/export.gz" % (os.path.dirname(os.path.abspath(__file__))), "w")
-    fichier.write(xml_string)
-    fichier.close()
+    def get(self, *args, **kwargs):
+        engine = settings.DATABASES['default']['ENGINE']
+        if engine == 'django.db.backends.sqlite3':
+            db = sqlite_db(settings.DATABASES['default']['NAME'])
+            return HttpResponse(db.dump(), mimetype="text/plain")
+        else:
+            raise NotImplementedError("il faut initialiser")
