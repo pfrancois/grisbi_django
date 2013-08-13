@@ -89,14 +89,15 @@ class TestCase(Test_Case_django):
         else:  # c'est le cas des fichier par exemple
             reponse_attendu = [r.replace('\n', '') for r in reponse_attendu]
             ra_iter = [r.replace('\r', '') for r in reponse_attendu]
+        fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu%s.txt" % nom), 'w')
+        fichier.writelines(['%s\n' % l for l in rr_iter])
+        fichier.close()
+        fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu%s.txt" % nom), 'w')
+        fichier.writelines(['%s\n' % l for l in ra_iter])
+        fichier.close()
+
         if len(ra_iter) != len(rr_iter):
             msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu%s.txt" % nom), 'w')
-            fichier.writelines(['%s\n' % l for l in rr_iter])
-            fichier.close()
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu.txt%s.txt" % nom), 'w')
-            fichier.writelines(['%s\n' % l for l in ra_iter])
-            fichier.close()
             raise self.fail(msg)
         msg = ""
         for ra, rr in zip(ra_iter, rr_iter):
@@ -105,12 +106,6 @@ class TestCase(Test_Case_django):
             if rr != ra:
                 msg = "%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
         if msg != "":
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu.txt"), 'w')
-            fichier.writelines(['%s\n' % l for l in rr_iter])
-            fichier.close()
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu.txt"), 'w')
-            fichier.writelines(['%s\n' % l for l in rr_iter])
-            fichier.close()
             raise self.fail(msg)
 
     def assertfileequal(self, reponse_recu, fichier, split_ra=None, unicode_encoding=None, nom=""):
