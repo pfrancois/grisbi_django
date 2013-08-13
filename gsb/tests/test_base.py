@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+import os
+import logging
+import difflib
 from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
 from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
-import logging
+from django.conf import settings
+
 
 __all__ = ['TestCase']
 
@@ -76,19 +80,43 @@ class TestCase(Test_Case_django):
             messages_str = ", ".join('"%s"' % m for m in messages)
             self.fail('No message contained text "%s", messages were: %s' % (text, messages_str))
 
-    def assertreponsequal(self, reponse_recu, reponse_attendu, split_rr, split_ra, unicode_encoding=None):
-        rr_iter = reponse_recu.split(split_rr)
-        ra_iter = reponse_attendu.split(split_ra)
+    def assertreponsequal(self, reponse_recu, reponse_attendu, fichier=False, unicode_encoding=None, nom=""):
+        if nom != "":
+            nom = "_%s" % nom
+        rr_iter = reponse_recu.splitlines()
+        if not fichier:
+            ra_iter = reponse_attendu.splitlines()
+        else:  # c'est le cas des fichier par exemple
+            reponse_attendu = [r.replace('\n', '') for r in reponse_attendu]
+            ra_iter = [r.replace('\r', '') for r in reponse_attendu]
         if len(ra_iter) != len(rr_iter):
             msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
-            self._formatMessage(None, msg)
-            raise self.failureException(msg)
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu%s.txt" % nom), 'w')
+            fichier.writelines(['%s\n' % l for l in rr_iter])
+            fichier.close()
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu.txt%s.txt" % nom), 'w')
+            fichier.writelines(['%s\n' % l for l in ra_iter])
+            fichier.close()
+            raise self.fail(msg)
+        msg = ""
         for ra, rr in zip(ra_iter, rr_iter):
             if unicode_encoding is not None:
                 rr = unicode(rr, unicode_encoding)
             if rr != ra:
-                msg = "\nrecu:'%s'\natt :'%s'" % (rr, ra)
-                self._formatMessage(None, msg)
-                raise self.failureException(msg)
+                msg = "%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
+        if msg != "":
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu.txt"), 'w')
+            fichier.writelines(['%s\n' % l for l in rr_iter])
+            fichier.close()
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu.txt"), 'w')
+            fichier.writelines(['%s\n' % l for l in rr_iter])
+            fichier.close()
+            raise self.fail(msg)
+
+    def assertfileequal(self, reponse_recu, fichier, split_ra=None, unicode_encoding=None, nom=""):
+        fichier = open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", fichier), 'r')
+        attendu = fichier.readlines()
+        fichier.close()
+        self.assertreponsequal(reponse_recu, attendu, True, unicode_encoding, nom)
 
 
