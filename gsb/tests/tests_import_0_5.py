@@ -12,6 +12,8 @@ from ..io.import_gsb import import_gsb_050
 from ..io.import_base import ImportException
 import decimal
 import datetime
+import os
+import glob
 from django.db import models
 from operator import attrgetter
 from django.conf import settings
@@ -28,6 +30,8 @@ class importtests(Tcd):
         logger.setLevel(50)
         self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"))
         self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"))
+        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'mauvais*')):
+                os.remove(name)
 
 
 class importposttests(Tcd):
@@ -40,6 +44,11 @@ class importposttests(Tcd):
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
         Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
         logger.setLevel(30)  # change le niveau de log (10 = debug, 20=info)
+
+    @classmethod
+    def teardownClass(cls):
+        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'test_original*')):
+                os.remove(name)
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)

@@ -15,7 +15,8 @@ from django.conf import settings
 from .. import models
 from django.contrib.auth.models import User
 from ..io import import_base
-
+import glob
+import os
 __all__ = ['Test_import', ]
 
 
@@ -35,6 +36,8 @@ class Test_import(TestCase):
             self.assertEqual(models.Cat.objects.count(), 8)
             self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), -4)
             self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
+        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):
+                os.remove(name)
 
     def test_import_base(self):
         prop = import_base.property_ope_base()
