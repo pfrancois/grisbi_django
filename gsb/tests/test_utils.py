@@ -79,7 +79,7 @@ class Test_utils1(SimpleTestCase):
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
         self.assertEquals(utils.datetostr(d), '1/1/2011')
-        self.assertEquals(utils.datetostr(d, '%d/%m/%y'), '1/1/11')
+        self.assertEquals(utils.datetostr(d, param='%d/%m/%y'), '1/1/11')
         self.assertEquals(utils.datetostr(None), '0/0/0')
         self.assertRaises(utils.FormatException, utils.datetostr, 'toto')
 

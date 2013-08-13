@@ -974,15 +974,12 @@ class Echeance(models.Model):
     tiers = models.ForeignKey(Tiers, on_delete=models.PROTECT)
     cat = models.ForeignKey(Cat, on_delete=models.PROTECT, verbose_name=u"catégorie")
     moyen = models.ForeignKey(Moyen, blank=False, on_delete=models.PROTECT, default=None)
-    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None,
-                           verbose_name=u"imputation")
-    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set',
-                                        default=None)
+    ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"imputation")
+    compte_virement = models.ForeignKey(Compte, null=True, blank=True, related_name='echeance_virement_set', default=None)
     moyen_virement = models.ForeignKey(Moyen, null=True, blank=True, related_name='echeance_moyen_virement_set')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     notes = models.TextField(blank=True, default='')
-    inscription_automatique = models.BooleanField(default=False,
-                                                  help_text=u"inutile")  # tt les echeances sont automatiques
+    inscription_automatique = models.BooleanField(default=False, help_text=u"inutile")  # tt les echeances sont automatiques
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 

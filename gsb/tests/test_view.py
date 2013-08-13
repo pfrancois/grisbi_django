@@ -34,25 +34,18 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/').status_code, 200)
         self.assertEqual(self.client.get('/gestion_bdd/doc/').status_code, 200)
         self.assertEqual(self.client.get('/login').status_code, 200)
-
-    def test_normaux2(self):
         self.assertEqual(self.client.get('/options').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_cours')).status_code, 200)
         self.assertEqual(self.client.get('/options/import/csv/all').status_code, 200)
+        self.assertEqual(self.client.get('/options/export/sql/all').status_code, 200)
         self.assertEqual(self.client.get('/options/import/gsb').status_code, 200)
         self.assertEqual(self.client.get('/options/verif_config').status_code, 200)
-        self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
+# on l'enleve car on test ailleurs
+#        self.assertEqual(self.client.get(reverse('export_gsb_050')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_csv')).status_code, 200)
         self.assertEqual(self.client.get(reverse('export_qif')).status_code, 200)
         self.assertEqual(self.client.get('/options/export').status_code, 200)
         self.assertEqual(self.client.get(reverse('export_ope_titre')).status_code, 200)
-
-    @mock.patch('gsb.utils.today')
-    def test_echeance(self, today_mock):
-        today_mock.return_value = datetime.date(2010, 1, 1)
-        self.assertEqual(self.client.get('/options/ech').status_code, 200)
-
-    def test_normaux3(self):
         self.assertEqual(self.client.get('/majcours/1/').status_code, 200)
         self.assertEqual(self.client.get(reverse('gsb_cpt_detail', args=(1,))).status_code, 200)
         self.assertEqual(self.client.get('/ope/1/delete').status_code, 302)
@@ -61,8 +54,6 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/ope_titre/1/').status_code, 200)
         self.assertEqual(self.client.get('/ope_titre/1/delete').status_code, 302)
         self.assertEqual(self.client.get('/search').status_code, 200)
-
-    def test_normaux4(self):
         self.assertEqual(self.client.get('/compte/1/').status_code, 200)
         self.assertEqual(self.client.get('/compte/1/rapp').status_code, 200)
         self.assertEqual(self.client.get('/compte/1/all').status_code, 200)
@@ -74,6 +65,11 @@ class Test_urls(Test_view_base):
         self.assertEqual(self.client.get('/compte/4/titre/1/rapp').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/achat').status_code, 200)
         self.assertEqual(self.client.get('/compte/4/vente').status_code, 200)
+
+    @mock.patch('gsb.utils.today')
+    def test_echeance(self, today_mock):
+        today_mock.return_value = datetime.date(2010, 1, 1)
+        self.assertEqual(self.client.get('/options/ech').status_code, 200)
 
 
 class Test_views_general(Test_view_base):
