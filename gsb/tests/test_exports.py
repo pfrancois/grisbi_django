@@ -12,6 +12,7 @@ from gsb.io import export_base
 import gsb.io.export_csv as ex_csv
 import logging
 from .. import models
+from .. import utils
 
 import re
 from .test_view import Test_view_base
@@ -40,7 +41,7 @@ class Test_export(Test_view_base):
 13;cpte1;24/09/2012;1,00;;0;moyen_rec1;cat2;tiers2;;;;;0;11;;;09\r
 """
         # on coupe ligne par ligne
-        self.assertreponsequal(rep.content, reponse_attendu, '\r\n', '\r\n', 'cp1252')
+        self.assertreponsequal(rep.content, reponse_attendu, unicode_encoding='cp1252', nom="csv_global")
 
     def test_csv_debug(self):
         # on cree ce les entree de la vue
@@ -60,7 +61,7 @@ class Test_export(Test_view_base):
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;id jumelle lie;has_fille;id_ope_m;ope_titre;ope_pmv;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08\r
 """
-        self.assertreponsequal(view.export_csv_view(data=[final], nomfich='test_file').content, reponse_attendu, '\r\n', '\r\n', 'cp1252')
+        self.assertreponsequal(view.export_csv_view(data=[final], nomfich='test_file').content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")
 
     def test_export_form1(self):
         # test normal avec aucune selection
@@ -139,105 +140,9 @@ class Test_export(Test_view_base):
         chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
         chaine2 = 'INSERT INTO "category" VALUES(68,\'placement\',2,13369344,8,1375886177.0);'
         reponse_recu = re.sub(chaine1, chaine2, reponse_recu)
-        reponse_attendu = """BEGIN TRANSACTION;
-CREATE TABLE account (id INTEGER PRIMARY KEY,
-                    name TEXT,
-                    place INTEGER
-                    , lastupdate DOUBLE);
-INSERT INTO "account" VALUES(1,'account.name1',0,NULL);
-CREATE TABLE budget (id INTEGER PRIMARY KEY,
-                    month INTEGER,
-                    year INTEGER,
-                    amount    Double
-                , lastupdate DOUBLE);
-INSERT INTO "budget" VALUES(1,8,2011,0.0,1312149600.0);
-INSERT INTO "budget" VALUES(2,9,2011,0.0,1314828000.0);
-INSERT INTO "budget" VALUES(3,10,2011,0.0,1317420000.0);
-INSERT INTO "budget" VALUES(4,11,2011,0.0,1320102000.0);
-INSERT INTO "budget" VALUES(5,12,2011,0.0,1322694000.0);
-INSERT INTO "budget" VALUES(6,1,2012,0.0,1325372400.0);
-INSERT INTO "budget" VALUES(7,2,2012,0.0,1328050800.0);
-INSERT INTO "budget" VALUES(8,3,2012,0.0,1330556400.0);
-INSERT INTO "budget" VALUES(9,4,2012,0.0,1333231200.0);
-INSERT INTO "budget" VALUES(10,5,2012,0.0,1335823200.0);
-INSERT INTO "budget" VALUES(11,6,2012,0.0,1338501600.0);
-INSERT INTO "budget" VALUES(12,7,2012,0.0,1341093600.0);
-INSERT INTO "budget" VALUES(13,8,2012,0.0,1343772000.0);
-INSERT INTO "budget" VALUES(14,9,2012,0.0,1346450400.0);
-CREATE TABLE category (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    type INTEGER,
-    color INTEGER,
-    place INTEGER,
-    lastupdate DOUBLE);
-INSERT INTO "category" VALUES(1,'cat1',1,35840,5,1369245100.0);
-INSERT INTO "category" VALUES(2,'cat2',1,35840,6,1369245100.0);
-INSERT INTO "category" VALUES(3,'cat3',2,13369344,7,1369245100.0);
-INSERT INTO "category" VALUES(64,'Operation Sur Titre',2,13369344,1,1369245100.0);
-INSERT INTO "category" VALUES(65,'Virement',2,13369344,4,1369245100.0);
-INSERT INTO "category" VALUES(66,'Opération Ventilée',2,13369344,2,1369245100.0);
-INSERT INTO "category" VALUES(67,'Revenus de placement:Plus-values',2,13369344,3,1369245100.0);
-INSERT INTO "category" VALUES(68,'placement',2,13369344,8,1375886177.0);
-CREATE TABLE subcategory (
-    id INTEGER PRIMARY KEY,
-    category INTEGER,
-    name TEXT,
-    place INTEGER,
-    lastupdate DOUBLE);
-CREATE TABLE currency (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    sign TEXT,
-    decimal INTEGER,
-    lastupdate DOUBLE);
-INSERT INTO "currency" VALUES(1,'Dollar','$',2,'');
-INSERT INTO "currency" VALUES(2,'Euro','EUR',2,'');
-CREATE TABLE payment (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    symbol INTEGER,
-    color INTEGER,
-    place INTEGER,
-    lastupdate DOUBLE);
-INSERT INTO "payment" VALUES(1,'cpte1',4,35840,4,1369245100.0);
-INSERT INTO "payment" VALUES(2,'cptb2',2,35840,2,1369245100.0);
-INSERT INTO "payment" VALUES(3,'cptb3',3,35840,3,1369245100.0);
-INSERT INTO "payment" VALUES(6,'cpt_ferme',1,35840,1,1369245100.0);
-CREATE TABLE record (
-    id INTEGER PRIMARY KEY,
-    payment INTEGER,
-    category INTEGER,
-    subcategory INTEGER,
-    memo TEXT,
-    currency INTEGER,
-    amount FLOAT,
-    date DOUBLE,
-    photo INTEGER,
-    voice INTEGER,
-    payee TEXT,
-    note TEXT,
-    account INTEGER,
-    type INTEGER,
-    repeat INTEGER,
-    place INTEGER,
-    lastupdate DOUBLE,
-    day INTEGER);
-INSERT INTO "record" VALUES(4,1,1,NULL,'tiers1',2,-100.0,'2011-08-11',0,0,NULL,'',0,2,0,1,20110811.0,1369245100);
-INSERT INTO "record" VALUES(5,1,2,NULL,'tiers1',2,10.0,'2011-08-11',0,0,NULL,'',0,1,0,3,20110811.0,1369245100);
-INSERT INTO "record" VALUES(6,1,2,NULL,'tiers2',2,10.0,'2011-08-21',0,0,NULL,'',0,1,0,4,20110821.0,1369245100);
-INSERT INTO "record" VALUES(7,1,1,NULL,'tiers1',2,10.0,'2011-08-11',0,0,NULL,'',0,1,0,5,20110811.0,1369245100);
-INSERT INTO "record" VALUES(8,1,65,NULL,'virement',2,-100.0,'2011-10-30',0,0,NULL,'',0,2,0,6,20111030.0,1369245100);
-INSERT INTO "record" VALUES(9,3,65,NULL,'virement',2,100.0,'2011-10-30',0,0,NULL,'',0,2,0,2,20111030.0,1369245100);
-INSERT INTO "record" VALUES(12,1,1,NULL,'tiers2',2,99.0,'2012-09-24',0,0,NULL,'',0,1,0,7,20120924.0,1369245100);
-INSERT INTO "record" VALUES(13,1,2,NULL,'tiers2',2,1.0,'2012-09-24',0,0,NULL,'',0,1,0,8,20120924.0,1369245100);
-CREATE INDEX budget_month_index on budget(month);
-CREATE INDEX record_day_index on record(day);
-CREATE INDEX record_repeat_index on record(repeat);
-COMMIT;
-"""
+
         # on coupe ligne par ligne
-        self.assertreponsequal(reponse_recu, reponse_attendu, '\n', '\n')
+        self.assertfileequal(reponse_recu, "money_iphone.txt", nom="csv_sql_money_iphone")
 
     def test_csv_pocket_money_iphone(self):
         reponse_recu = self.client.post(reverse('export_csv_pocket_money'),
@@ -258,9 +163,7 @@ COMMIT;
 "cpte1","24/9/12","","tiers2","cat1","","","99.00","","EUR","1"
 "cpte1","24/9/12","","tiers2","cat2","","","1.00","","EUR","1"
 """
-        self.assertreponsequal(reponse_recu, reponse_attendu, '\r\n', '\n')
-
-    fixtures = ['test.json', 'auth.json']
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_csv_pocket_money_iphone")
 
     def test_export_cours(self):
         reponse_recu = self.client.post(reverse('export_cours'),
@@ -274,7 +177,7 @@ COMMIT;
 3;29/10/2011;t2;2;5,0000000
 3;30/11/2011;t2;2;10,0000000
 """
-        self.assertreponsequal(reponse_recu, reponse_attendu, '\r\n', '\n')
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_cours")
 
     def test_export_ope_titre(self):
         c = models.Compte.objects.get(id=5)
@@ -291,4 +194,13 @@ COMMIT;
 2;30/11/2011;cpt_titre2;t2;2;achat;150,0000000;10,0000000;1500,0000000
 5;1/12/2011;cpt_titre2;t2;2;vente;-10,0000000;20,0000000;-200,0000000
 """
-        self.assertreponsequal(reponse_recu, reponse_attendu, '\r\n', '\n')
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_ope_titre")
+
+    def test_export_gsb_0_5_0(self):
+        c = models.Compte.objects.create(nom='test')
+        models.Ope.objects.create(date=utils.strpdate('2011-08-13'), compte=c, date_val=utils.strpdate('2011-08-13'))
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='j')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='m')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='s')
+        reponse_recu = self.client.get(reverse('export_gsb_050')).content
+        self.assertfileequal(reponse_recu, "export_050.xml", nom="test_gsb")
