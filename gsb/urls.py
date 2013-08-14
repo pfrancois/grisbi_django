@@ -42,7 +42,7 @@ urlpatterns += patterns('gsb',
                         # export en csv vers pocket money iphone
                         url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(), name='export_csv_pocket_money'),
                         # export sql brut
-                        url(r'^options/export/sql/all', export_fsb.export_fsb_view.as_view(), name="export_sql_all")
+                        url(r'^options/export/sql/all', export_fsb.export_fsb_view.as_view(), name="export_fsb")
 )
 
 # version grisbi 0.5.0
