@@ -325,7 +325,6 @@ def ope_detail(request, pk):
     @param pk: id de l'ope
     """
     ope = get_object_or_404(Ope.objects.select_related(), pk=pk)
-    # logger = logging.getLogger('gsb')
     if ope.jumelle is not None:
         #------un virement--------------
         if ope.montant > 0:
@@ -399,7 +398,6 @@ def ope_new(request, cpt_id=None):
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
         cpt = None
-        # logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.OperationForm(request.POST)
         if form.is_valid():
@@ -447,7 +445,6 @@ def vir_new(request, cpt_id=None):
         cpt = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     else:
         cpt = cpt_origine
-        # logger = logging.getLogger('gsb')
     if request.method == 'POST':
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():

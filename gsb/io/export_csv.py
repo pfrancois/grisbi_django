@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from .. import models
 from .. import utils
 
-import logging
 from django.http import HttpResponse
 # from django.conf import settings
 # pour les vues
@@ -46,7 +45,6 @@ class Export_ope_csv(Export_view_csv_base):
         """
         fonction principale
         """
-        logger = logging.getLogger('gsb.export')
         data = []
         query = query.order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
         liste_ope = query.values_list('id')
@@ -93,8 +91,6 @@ class Export_ope_csv(Export_view_csv_base):
                 ligne['ope_pmv'] = ''
             ligne['mois'] = ope.date.strftime('%m')
             data.append(ligne)
-
-        logger.info('export ope csv')
         return self.export_csv_view(data=data)
 
 

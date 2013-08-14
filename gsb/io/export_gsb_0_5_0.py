@@ -22,8 +22,6 @@ liste_type_compte = Compte.typescpt
 
 
 def _export():
-    # logger = logging.getLogger('gsb.export')
-
     # creation des id pour IB
             #####generalites###
     xml_root = et.Element("Grisbi")
@@ -65,11 +63,9 @@ def _export():
     et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(
         ["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0)  # NOT IN BDD
-    # logger.debug("gen ok")
     nb_compte = 0
     # --boucle des comptes
     for cpt in Compte.objects.all().order_by('id'):
-        # logger.debug('compte %s' % cpt.id)
         nb_compte += 1
         xml_compte = et.SubElement(xml_comptes, "Compte")
         xml_detail = et.SubElement(xml_compte, "Details")
@@ -126,7 +122,6 @@ def _export():
         # types ou moyens
         xml_types = et.SubElement(xml_compte, "Detail_de_Types")
         for m_pai in moyens:
-            # logger.debug('moyen %s' % m_pai.id)
             xml_element = et.SubElement(xml_types, "Type")
             xml_element.set('No', str(m_pai.id))
             xml_element.set('Nom', m_pai.nom)
@@ -138,7 +133,6 @@ def _export():
 
         # #operations
         for ope in Ope.objects.filter(compte=cpt.id).order_by('id').select_related('compte', 'jumelle'):
-            # logger.debug('ope %s' % ope.id)
             # raise
             xml_element = et.SubElement(xml_opes, 'Operation')
             # numero de l'operation

@@ -18,32 +18,26 @@ from django.db import models
 from operator import attrgetter
 from django.conf import settings
 import os.path
-import logging
 import mock
 
 __all__ = ['Importtests', 'Importposttests']
 
 
-class importtests(Tcd):
+class Importtests(Tcd):
     def test_mauvais_format(self):
-        logger = logging.getLogger('gsb')
-        logger.setLevel(50)
-        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"))
-        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"), self.request_post('toto'))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"), self.request_post('toto'))
         for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'mauvais*')):
                 os.remove(name)
 
 
-class importposttests(Tcd):
+class Importposttests(Tcd):
     @mock.patch('gsb.utils.today')
     def setUp(self, today_mock):
         today_mock.return_value = datetime.date(2013, 1, 1)
-        logger = logging.getLogger('gsb')
-        super(importposttests, self).setUp()
-        logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
-        import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))))
+        super(Importposttests, self).setUp()
+        import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))), self.request_post('toto'))
         Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
-        logger.setLevel(30)  # change le niveau de log (10 = debug, 20=info)
 
     @classmethod
     def teardownClass(cls):

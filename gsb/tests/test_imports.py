@@ -16,7 +16,6 @@ from .. import models
 from django.contrib.auth.models import User
 from ..io import import_base
 import glob
-import os
 __all__ = ['Test_import', ]
 
 
