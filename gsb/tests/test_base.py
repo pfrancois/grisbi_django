@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 import os
 import logging
-import difflib
 from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
 from django.test.client import RequestFactory
@@ -82,19 +81,25 @@ class TestCase(Test_Case_django):
 
     def assertreponsequal(self, reponse_recu, reponse_attendu, fichier=False, unicode_encoding=None, nom=""):
         if nom != "":
-            nom = "_%s" % nom
+            nom = "%s_" % nom
         rr_iter = reponse_recu.splitlines()
         if not fichier:
             ra_iter = reponse_attendu.splitlines()
         else:  # c'est le cas des fichier par exemple
             reponse_attendu = [r.replace('\n', '') for r in reponse_attendu]
             ra_iter = [r.replace('\r', '') for r in reponse_attendu]
-        fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "recu%s.txt" % nom), 'w')
-        fichier.writelines(['%s\n' % l for l in rr_iter])
-        fichier.close()
-        fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "attendu%s.txt" % nom), 'w')
-        fichier.writelines(['%s\n' % l for l in ra_iter])
-        fichier.close()
+        try:
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w')
+            fichier.writelines(['%s\n' % l for l in rr_iter])
+            fichier.close()
+            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w')
+            for l in ra_iter:
+                if unicode_encoding is not None:
+                    fichier.write('%s\n' % l.encode(unicode_encoding))
+                else:
+                    fichier.write('%s\n' % l)
+        finally:
+            fichier.close()
 
         if len(ra_iter) != len(rr_iter):
             msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
