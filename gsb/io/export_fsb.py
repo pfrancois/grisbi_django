@@ -23,6 +23,6 @@ class export_fsb_view(View):
         engine = settings.DATABASES['default']['ENGINE']
         if engine == 'django.db.backends.sqlite3':
             db = sqlite_db(settings.DATABASES['default']['NAME'])
-            return HttpResponse(db.dump(), mimetype="text/plain")
+            return HttpResponse(list(db.dump()), mimetype="text/plain")
         else:
             raise NotImplementedError("il faut initialiser")
