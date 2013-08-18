@@ -95,6 +95,7 @@ class uuidfield(models.CharField):
                 setattr(model_instance, self.attname, value)
         return value
 
+
 # tire initialement de django extension"""
 class ModificationDateTimeField(DateTimeField):
     """ ModificationDateTimeField
@@ -115,3 +116,4 @@ class ModificationDateTimeField(DateTimeField):
 
     def get_internal_type(self):
         return "DateTimeField"
+

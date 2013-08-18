@@ -49,6 +49,9 @@ class Test_models(TestCase):
         self.assertRaises(TypeError, Tiers.objects.get(nom="tiers1").fusionne, Cat.objects.get(id=1))
         # fusion sur lui meme
         self.assertRaises(ValueError, Tiers.objects.get(nom="tiers1").fusionne, Tiers.objects.get(nom="tiers1"))
+        # fusion entre deu tiers differents
+        self.assertRaises(ValueError, Tiers.objects.get(nom="titre_ t1").fusionne, Tiers.objects.get(nom="tiers1"))
+        self.assertRaises(ValueError, Tiers.objects.get(nom="titre_ t1").fusionne, Tiers.objects.get(nom="titre_ t2"))
         # fusion avec un autre  d'objet
         self.assertRaises(TypeError, Titre.objects.get(nom="t1").fusionne, Cat.objects.get(id=1))
         # fusion sur lui meme
@@ -109,6 +112,28 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Ope.objects.filter(tiers=t).order_by('id'), [4, 5, 6, 7, 11, 12, 13], attrgetter("id"))
         # id des echeances
         self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8], attrgetter("id"))
+
+    def test_tiers_titre_save(self):
+        t = Tiers.objects.get(nom="titre_ t1")
+        t.nom = "titre_ test"
+        id_titre = t.titre.id
+        t.save()
+        self.assertEqual(Titre.objects.get(id=id_titre).nom, 'test')
+
+    def test_tiers_titre_save2(self):
+        t = Titre.objects.get(nom='t1')
+        t.nom = 'test'
+        id_tiers = t.tiers.id
+        t.save()
+        self.assertEqual(Tiers.objects.get(id=id_tiers).nom, 'titre_ test')
+
+    def test_titre_chgt_isin(self):
+        t = Titre.objects.get(nom='t1')
+        t.isin = "1234567"
+        id_tiers = t.tiers.id
+        t.save()
+        self.assertEqual(Tiers.objects.get(id=id_tiers).notes, '1234567@ACT')
+
 
     def test_titre_last_cours(self):
         t = Titre.objects.get(nom="t2")
@@ -709,13 +734,15 @@ class Test_models(TestCase):
         self.assertEquals(o.moyen_id, 1)
 
     def test_uuid(self):
+        # on verifie que l'uuid ne change pas
         o = Ope.objects.get(pk=4)
+        o.montant = 245
         uuid = o.uuid
         o.save()
         o = Ope.objects.get(pk=4)
         self.assertEqual(o.uuid, uuid)
 
-    def test_uuid2(self):
+    def test_uuid_cree(self):
         o = Ope.objects.create(tiers_id=1, compte_id=1, cat_id=1, moyen_id=1, date=utils.now())
         uuid = o.uuid
         o.save()
@@ -758,11 +785,11 @@ class Test_models(TestCase):
             form = forms.OperationForm(ens[0], instance=ens[2])
             self.assertEqual(form.is_valid(), ens[1])
 
-    def test_solde_set_nul(self):
+    def test_ope_solde_set_nul(self):
         self.assertEqual(Ope.solde_set(Ope.objects.none()), 0)
         self.assertEqual(Ope.solde_set(Ope.objects.all()), -1476)
 
-    def test_iseditable(self):
+    def test_ope_iseditable(self):
         self.assertEqual(Ope.objects.get(pk=4).is_editable(), False)  # ope rapp
         self.assertEqual(Ope.objects.get(pk=12).is_editable(), True)  # ope normale
         self.assertEqual(Ope.objects.get(pk=11).is_editable(), False)  # ope mere
@@ -785,7 +812,7 @@ class Test_models(TestCase):
         o = Ope.objects.get(pk=8)
         self.assertEqual(o.is_editable(), False)
 
-    def test_pre_delete_ope_rapp(self):
+    def test_ope_rapp_pre_delete(self):
         # ope rapp
         self.assertRaises(IntegrityError, Ope.objects.get(id=3).delete)
 
@@ -918,14 +945,12 @@ class Test_models(TestCase):
         self.assertEqual(v.notes, 'test_notes')
 
     def test_virement_delete(self):
-        """on cree puis on efface un virement"""
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20)
         v.delete()
         self.assertEquals(Compte.objects.get(nom='cpte1').solde(), -70)
         self.assertEquals(Compte.objects.get(nom='cptb2').solde(), 0)
 
     def test_virement_init_form(self):
-        """creation d'un virement puis verification avec les form"""
         v = Virement.create(Compte.objects.get(id=1), Compte.objects.get(id=2), 20, '2010-01-01', 'test_notes')
         tab = {'compte_origine': 1,
                'compte_destination': 2,

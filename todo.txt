@@ -1,2 +1,3 @@
 mettre un truc dans le setting qui permette le all par dafaut
 mettre dans l'import qui gere les titres et les comptes titres
+faire que si on change le nom , l'isin ou le type d'un titre qu'il change le truc correspondant dans le tiers (et vice versa)

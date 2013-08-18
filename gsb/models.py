@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse
 
 
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement']
+
+
 class Gsb_exc(Exception):
     pass
 
@@ -24,7 +26,6 @@ class Gsb_exc(Exception):
 class Ex_jumelle_neant(Exception):
     pass
 
-# import logging
 
 class Tiers(models.Model):
     """
@@ -47,19 +48,30 @@ class Tiers(models.Model):
         return u"%s" % self.nom
 
     @transaction.commit_on_success
-    def fusionne(self, new):
+    def fusionne(self, new, ok_titre=False):
         """fusionnne tiers vers new tiers
         @param new: tiers
         """
         if new == self:
             raise ValueError(u"un objet ne peut etre fusionné sur lui même")
+
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
+        if (self.is_titre or new.is_titre) and not ok_titre:
+            raise ValueError(u"un tiers suppport de titre ne peut etre fusionnné directement. vous devez fusionner les titres")
+        if (self.is_titre and new.is_titre == False) or (self.is_titre == False and new.is_titre):
+            raise TypeError(u"attention un tiers support de titre ne peut etre fusionné avec un tiers non supprt de titre")
         nb_tiers_change = Echeance.objects.filter(tiers=self).update(tiers=new)
         nb_tiers_change += Ope.objects.filter(tiers=self).update(tiers=new)
         self.delete()
         return nb_tiers_change
+
+    def save(self, *args, **kwargs):
+        if self.is_titre and self.id is not None:
+            self.titre.nom = self.nom[7:]
+            self.titre.save()
+        super(Tiers, self).save(*args, **kwargs)
 
 
 class Titre(models.Model):
@@ -142,20 +154,27 @@ class Titre(models.Model):
         nb_change = 0
         nb_change += Ope_titre.objects.filter(titre=self).update(titre=new)
         # on doit aussi reaffecter le tiers associe
-        self.tiers.fusionne(new.tiers)
+        self.tiers.fusionne(new.tiers, ok_titre=True)
         self.delete()
         return nb_change
 
     def save(self, *args, **kwargs):
+        tiers_save = False
         self.alters_data = True
         if not self.tiers:
             self.tiers = Tiers.objects.get_or_create(nom='titre_ %s' % self.nom,
                                                      defaults={"nom": 'titre_ %s' % self.nom,
                                                                "is_titre": True,
                                                                "notes": "%s@%s" % (self.isin, self.type)})[0]
-        if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
-            self.tiers.notes = u"%s@%s" % (self.isin, self.type)
-            self.tiers.save()
+        else:
+            if self.tiers.nom != 'titre_ %s' % self.nom:
+                self.tiers.nom = 'titre_ %s' % self.nom
+                tiers_save = True
+            if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
+                self.tiers.notes = u"%s@%s" % (self.isin, self.type)
+                tiers_save = True
+            if tiers_save:
+                self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 
     def investi(self, compte=None, datel=None, rapp=None, exclude_id=None):
@@ -727,12 +746,12 @@ class Ope_titre(models.Model):
         self.nombre = decimal.Decimal(self.nombre)
         # definition des cat avec possibilite
         try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre', 'id':settings.ID_CAT_OST})[0]
+            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre', 'id': settings.ID_CAT_OST})[0]
         except IntegrityError:
             raise ImproperlyConfigured(
                 u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
         try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values', 'id':settings.ID_CAT_PMV})[0]
+            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values', 'id': settings.ID_CAT_PMV})[0]
         except IntegrityError:
             raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
             # gestion des cours
@@ -742,7 +761,7 @@ class Ope_titre(models.Model):
             obj.delete()
         else:
             old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre':self.titre, 'date':old_date, 'valeur': 0})  # @UnusedVariable
+        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre': self.titre, 'date': old_date, 'valeur': 0})  # @UnusedVariable
         obj.date = self.date
         obj.valeur = self.cours
         obj.save()
@@ -850,8 +869,7 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (
-            self.id, sens, self.nombre, self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, self.nombre, self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
 
@@ -904,6 +922,7 @@ class Moyen(models.Model):
         if self.id == settings.MD_CREDIT or self.id == settings.MD_CREDIT:
             raise IntegrityError(u"moyen par defaut")
         super(Moyen, self).delete(*args, **kwargs)
+
 
 class Rapp(models.Model):
     """rapprochement d'un compte"""
@@ -1184,7 +1203,6 @@ class Ope(models.Model):
         if self.is_mere:
             self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
 
-
     @property
     def is_mere(self):
         return self.filles_set.count() > 0 and self.id > 1  # on rajouter and self.id >1 afin de pouvoir creer une mere
@@ -1228,6 +1246,7 @@ class Ope(models.Model):
         except ValidationError as e:
             raise IntegrityError("%s" % e)
         super(Ope, self).save(*args, **kwargs)
+
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""

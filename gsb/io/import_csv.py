@@ -132,7 +132,6 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
 class Import_csv_ope(import_base.Import_base):
     reader = Csv_unicode_reader_ope
-    extension = ("csv",)
     type_f = "csv_version_totale"
     creation_de_compte = True
     titre = "import csv"
@@ -144,12 +143,12 @@ class Import_csv_ope(import_base.Import_base):
         self.ibs = import_base.IB_cache(self.request)
         self.comptes = import_base.Compte_cache(self.request)
         self.banques = import_base.Banque_cache(self.request)
-        self.cours = import_base.Cours_cache(self.request)
         self.exos = import_base.Exercice_cache(self.request)
         self.tiers = import_base.Tiers_cache(self.request)
         self.opes = import_base.Ope_cache(self.request)
         self.titres = import_base.Titre_cache(self.request)
-        self.moyen_par_defaut = import_base.moyen_defaut_cache(self.request)
+        self.cours = import_base.Cours_cache(self.request, self.titres)
+        self.moyen_par_defaut = import_base.moyen_defaut_cache(self.request, self.moyens)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
