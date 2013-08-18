@@ -7,13 +7,12 @@ import os
 
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
-from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.db import IntegrityError
-
+from django.db.models import Max
 
 from .. import forms as gsb_forms
 from .. import models
@@ -148,7 +147,10 @@ class Table(object):
 
     def goc(self, nom, obj=None):
         if nom == "" or nom is None:
-            return None
+            if not obj is None:
+                nom = obj['nom']
+            else:
+                return None
         try:
             pk = self.id[nom]
         except KeyError:
@@ -175,7 +177,7 @@ class Table(object):
                     raise ImportException(u"%s '%s' non créée alors que c'est read only" % (self.element._meta.object_name, nom))
         return pk
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         raise NotImplementedError("methode arg_def non defini")
 
 
@@ -196,7 +198,7 @@ class Cat_cache(Table):
         if c.exists():
             self.id['Virement'] = c[0].id
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'd'}
         else:
@@ -213,7 +215,7 @@ class Moyen_cache(Table):
         c = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'})[0]
         self.id[c.nom] = c.pk
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'd'}
         else:
@@ -223,7 +225,7 @@ class Moyen_cache(Table):
 class IB_cache(Table):
     element = models.Ib
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'd'}
         else:
@@ -233,7 +235,7 @@ class IB_cache(Table):
 class Compte_cache(Table):
     element = models.Compte
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'b', 'moyen_credit_defaut_id': settings.MD_CREDIT, 'moyen_debit_defaut_id': settings.MD_DEBIT}
         else:
@@ -243,41 +245,7 @@ class Compte_cache(Table):
 class Banque_cache(Table):
     element = models.Banque
 
-    def arg_def(self, nom, obj):
-        if obj is None:
-            return {"nom": nom}
-        else:
-            return obj
-
-
-class Cours_cache(Table):
-    element = models.Cours
-
-    def goc(self, date, titre_id, montant):
-        if not (date and titre_id and montant):
-            return None
-        try:
-            pk = self.id[titre_id][date]
-        except KeyError:
-            try:
-                el = models.Cours.objects.get(date=date, titre_id=titre_id)
-                pk = el.id
-                if el.montant != montant:
-                    raise ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (el.montant, montant, el.titre.nom, date))
-            except self.element.DoesNotExist:
-                self.create_item.append({'titre': titre_id, 'date': date, "montant": montant})
-                pk = self.create_item.index({'titre': titre_id, 'date': date, "montant": montant}) + self.last_id
-            finally:
-                if self.id.get(titre_id) is not None:
-                    self.id[titre_id][date] = pk
-                else:
-                    self.id[titre_id] = titre_id
-                    self.id[titre_id][date] = pk
-                pk = self.id[titre_id][date]
-        finally:
-            return pk
-
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom}
         else:
@@ -287,9 +255,9 @@ class Cours_cache(Table):
 class Exercice_cache(Table):
     element = models.Exercice
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
-            return {"nom": nom, 'date_debut': utils.today(), 'date_fin': utils.today()}
+                return {"nom": nom, 'date_debut': utils.today(), 'date_fin': utils.today()}
         else:
             return obj
 
@@ -299,9 +267,9 @@ class Tiers_cache(Table):
 
     def __init__(self, request):
         super(Tiers_cache, self).__init__(request)
-        self.goc("", {'nom': 'Secu', 'id': settings.ID_TIERS_COTISATION})
+        self.element.objects.create(nom='Secu', id=settings.ID_TIERS_COTISATION)
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom}
         else:
@@ -312,27 +280,21 @@ class Titre_cache(Table):
     element = models.Titre
 
     def __init__(self, request):
+        super(Titre_cache, self).__init__(request)
         self.id = {"nom": dict(), "isin": dict()}
-        self.create_item = list()
-        self.request = request
-        if self.element is None:
-            raise NotImplementedError("table de l'element non choisi")
-        else:
-            self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
-        self.nb_created = 0
 
     def goc(self, nom=None, isin=None, obj=None):
-        if nom[:6] == "titre_":
-            nom = nom[7:]
+        if nom is not None and "titre_ " in nom:  # cas ou on utiliserait les nom de tiers
+            nom = nom.replace("titre_ ", '')
             nom = nom.strip()
-        if (nom == "" or nom is None) and (isin == "" or isin is None):
+        if (not nom) and (not isin) and obj is None:  # cas ou pas de parametre
             return None
         try:
             if nom:
                 pk = self.id["nom"][nom]
             else:
                 pk = self.id["isin"][isin]
-        except KeyError:
+        except KeyError:  # on essaye de le recuperer
             try:
                 if obj is None:
                     if nom:
@@ -358,22 +320,58 @@ class Titre_cache(Table):
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
                     raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
-        finally:
-            return pk
+        return pk
 
-    def arg_def(self, nom, isin, obj):
+    def arg_def(self, nom=None, isin=None, obj=None):
         if obj is None:
             if nom:
                 arg_nom = nom
             else:
-                arg_nom = "inconnu"
+                arg_nom = "inconnu%s%s" % (self.nb_created + 1, utils.today())
             if isin:
                 arg_isin = isin
             else:
-                arg_isin = "XX00000%s" % self.nb_created
-            return {"nom": arg_nom, "isin": arg_isin, "type": "XXX"}
+                arg_isin = "XX00000%s%s" % (self.nb_created + 1, utils.today())
+            return {"nom": arg_nom, "isin": arg_isin, "type": "ZZZ"}
         else:
             return obj
+
+
+class Cours_cache(Table):
+    element = models.Cours
+
+    def __init__(self, request, titre_cache):
+        super(Cours_cache, self).__init__(request)
+        self.TC = titre_cache
+
+    def goc(self, titre, date, montant, methode="nom"):
+        if methode == "nom":
+            titre_id = self.TC.goc(nom=titre)
+        else:
+            titre_id = self.TC.goc(isin=titre)
+        try:
+            pk = self.id[titre_id][date]
+        except KeyError:
+            try:
+                el = models.Cours.objects.get(date=date, titre_id=titre_id)
+                pk = el.id
+                if el.valeur != montant:
+                    raise ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (el.valeur, montant, el.titre.nom, date))
+            except self.element.DoesNotExist:
+                arg_def = {'titre_id': titre_id, 'date': date, "valeur": montant}
+                el = models.Cours.objects.create(**arg_def)
+                self.create_item.append(el)
+                self.nb_created += 1
+                pk = el.id
+        if self.id.get(titre_id) is not None:
+            self.id[titre_id][date] = pk
+        else:
+            self.id[titre_id] = dict()
+            self.id[titre_id][date] = pk
+        return pk
+
+    def arg_def(self, nom, obj=None):
+        raise NotImplementedError
 
 
 class Ope_cache(Table):
@@ -389,25 +387,46 @@ class Ope_cache(Table):
 
 class Rapp_cache(Table):
     element = models.Rapp
+    date_en_cours = None
 
-    def goc(self, nom, date, obj=None):
-        if nom:
+    def __init__(self, request):
+        super(Rapp_cache, self).__init__(request)
+        self.dates = {}
+
+    def goc(self, nom=None, date=None, obj=None):
+        if nom or obj:
+            if obj:
+                date = obj['date']
+            self.date_en_cours = date
             pk = super(Rapp_cache, self).goc(nom, obj)
-            rapp = models.Rapp.objects.filter(id=pk)
-            if rapp.date > date:
-                rapp.date = date
-                rapp.save()
+            if self.dates.get(pk, None) is not None:
+                i = self.dates[pk]
+                i.append(date)
+            else:
+                self.dates[pk] = [date]
+            return pk
         else:
             return None
 
-    def arg_def(self, nom, obj):
+    def arg_def(self, nom, obj=None):
         if not obj:
-            return {"nom": nom}
+            return {"nom": nom, 'date': self.date_en_cours}
+        else:
+            return obj
+
+    def sync_date(self):
+        for r in self.id.values():
+            date_max = max(self.dates[r])
+            rapp = self.element.objects.get(pk=r)
+            if rapp.date < date_max:
+                rapp.date = date_max
+                rapp.save()
+                messages.info(self.request, u"date pour le rapp %s mise a jour au %s" % (rapp, date_max))
 
 
 class moyen_defaut_cache(object):
 
-    def __init__(self, request):
+    def __init__(self, request, moyens_cache):
         self.id = {}
         for c in models.Compte.objects.all():
             self.id[c.nom] = {"c": c.moyen_credit_defaut_id, "d": c.moyen_debit_defaut_id}
@@ -434,8 +453,6 @@ class Import_base(views.Myformview):
     template_name = "gsb/import.djhtm"
     # classe du reader
     reader = None
-    # extension du fichier
-    extension = (None,)
     # nom du type de fichier
     type_f = None
     # formulaire utilise
@@ -450,13 +467,13 @@ class Import_base(views.Myformview):
     def form_valid(self, form):
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
-        nomfich = nomfich[:-4]
-        nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), self.extension[0]))
+        nomfich, fileExtension = os.path.splitext(nomfich)
+        nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), fileExtension[1:]))
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
         # si le repertoire n'existe pas on le crée
         try:
             destination = open(nomfich, 'wb+')
-        except IOError:
+        except IOError:  # pragma: no cover
             os.makedirs(os.path.join(settings.PROJECT_PATH, 'upload'))
             destination = open(nomfich, 'wb+')
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
@@ -468,15 +485,13 @@ class Import_base(views.Myformview):
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
-            if self.debug:
-                os.remove(nomfich)
             if self.resultat:
                 return self.render_to_response(self.get_context_data(form=form, resultat=self.resultat))
             else:
                 return HttpResponseRedirect(self.get_success_url())
 
     def import_file(self, nomfich):
-        raise NotImplemented()
+        raise NotImplementedError("methode goc non defini")
 
     def get_success_url(self):
         return reverse(self.url)
@@ -485,21 +500,6 @@ class Import_base(views.Myformview):
         form = super(Import_base, self).get_form(form_class)
         form.fields['nom_du_fichier'].label = u"nom_du_fichier %s" % self.type_f
         return form
-
-    def post(self, request, *args, **kwargs):
-        self.request = request
-        form = self.get_form(self.form_class)
-        if form.is_valid():
-            nomfich = form.cleaned_data['nom_du_fichier'].name
-            ext = os.path.splitext(nomfich)[1][1:]
-            ext = ext.lower()
-            if ext not in self.extension:
-                messages.error(self.request, u"attention, l'extension du fichier '%s' est incompatible avec le type du fichier '%s'" % (ext, self.type_f))
-                return self.form_invalid(form)
-            else:
-                return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
