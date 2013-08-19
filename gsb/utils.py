@@ -249,7 +249,7 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y'):
                 result.append(partie)
             return "/".join(result)
         else:
-            raise FormatException('attention ce ne peut pas etre qu\'un objet date')
+            raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 
 
 def booltostr(s, defaut='0'):
