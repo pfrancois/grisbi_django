@@ -33,7 +33,7 @@ class Test_import(TestCase):
             self.assertEqual(r.status_code, 302)
             self.assertEqual(models.Tiers.objects.count(), 4)  # ne pas oublier le tiers cree automatiquement
             self.assertEqual(models.Ope.objects.count(), 4)
-            self.assertEqual(models.Cat.objects.count(), 8)  # ne pas oublier les cat cree automatiquement
+            self.assertEqual(models.Cat.objects.count(), 11)  # ne pas oublier les cat cree automatiquement
             self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), -4)
             self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
         for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):
@@ -74,11 +74,10 @@ class Test_import(TestCase):
     def test_cat_cache(self):
         # on teste si les categories par defaut sont bien crees
         cats = import_base.Cat_cache(self.request_get("/outils"))
-        self.assertEqual(models.Cat.objects.filter(nom=u"Opération sur titre").count(), 1)
-        self.assertEqual(models.Cat.objects.filter(nom="Revenus de placements:Plus-values").count(), 1)
-        self.assertEqual(models.Cat.objects.filter(nom=settings.REV_PLAC).count(), 1)
-        self.assertEqual(models.Cat.objects.filter(nom=u'Impôts:Cotisations sociales').count(), 1)
-        self.assertEqual(cats.goc('Opération sur titre'), settings.ID_CAT_OST)
+        self.assertEqual(models.Cat.objects.get(nom=u"Opération sur titre").id, 64)
+        self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:Plus-values").id, 67)
+        self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:interets").id, 68)
+        self.assertEqual(models.Cat.objects.get(nom=u'Impôts:Cotisations sociales').id, 54)
 
     def test_cat_cache2(self):
         # test avec definition de l'ensemble
@@ -93,8 +92,8 @@ class Test_import(TestCase):
     def test_cat_cache3(self):
         # test normal
         cats = import_base.Cat_cache(self.request_get("/outils"))
-        self.assertEqual(cats.goc("cat1"), 69)
-        self.assertEqual(models.Cat.objects.filter(nom=u"cat1").count(), 1)
+        cats.goc("cat1")  # on cree
+        self.assertEqual(cats.goc("cat1"), models.Cat.objects.get(nom=u"cat1").id)  # on demande
 
     def test_cat_cache4(self):
         # test integrity error
@@ -121,14 +120,8 @@ class Test_import(TestCase):
     def test_cat_cache6(self):
         # on teste si on peut bien recuperer une cat deja existante
         cats = import_base.Cat_cache(self.request_get("/outils"))
-        models.Cat.objects.create(nom='test')
-        self.assertEqual(cats.goc("test"), 69)
-
-    def test_cat_cache7(self):
-        # on teste si on peut bien recuperer une cat de virement deja existante
-        models.Cat.objects.create(nom='test', type='v', pk=30)
-        cats = import_base.Cat_cache(self.request_get("/outils"))
-        self.assertEqual(cats.goc("Virement"), 30)
+        cat_id = models.Cat.objects.create(nom='test').id
+        self.assertEqual(cats.goc("test"), cat_id)
 
     def test_moyen_cache1(self):
         moyens = import_base.Moyen_cache(self.request_get("/outils"))
@@ -191,8 +184,8 @@ class Test_import(TestCase):
 
     def test_tiers_cache(self):
         cache = import_base.Tiers_cache(self.request_get("/outils"))
-        self.assertEqual(cache.goc("t1"), 3)
-        m = models.Tiers.objects.get(id=3)
+        self.assertEqual(cache.goc("t1"), 257)
+        m = models.Tiers.objects.get(id=257)
         self.assertEqual(m.nom, 't1')
         models.Tiers.objects.create(nom='test', id=30)
         self.assertEqual(cache.goc("test"), 30)

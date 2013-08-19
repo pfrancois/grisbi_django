@@ -135,10 +135,20 @@ class Table(object):
     element = None
     readonly = False
 
+    def auto(self):
+        return None
+
     def __init__(self, request):
         self.id = dict()
         self.create_item = list()
         self.request = request
+        if self.auto() is not None:
+            for param in self.auto():
+                c, created = self.element.objects.get_or_create(**param)
+                self.id[c.nom] = c.pk
+                if created:
+                    messages.info(request, "%s cree" % c.nom)
+
         if self.element is None:
             raise NotImplementedError("table de l'element non choisi")
         else:
@@ -184,19 +194,15 @@ class Table(object):
 class Cat_cache(Table):
     element = models.Cat
 
-    def __init__(self, request):
-        super(Cat_cache, self).__init__(request)
-        c = models.Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': 'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'})[0]
-        self.id[c.nom] = c.pk
-        c = models.Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': 'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'})[0]
-        self.id[c.nom] = c.pk
-        c = models.Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom': settings.REV_PLAC, 'type': 'r'})[0]
-        self.id[c.nom] = c.pk
-        c = models.Cat.objects.get_or_create(nom=settings.ID_CAT_COTISATION, defaults={'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'})[0]
-        self.id[c.nom] = c.pk
-        c = models.Cat.objects.filter(type="v")
-        if c.exists():
-            self.id['Virement'] = c[0].id
+    def auto(self):
+        return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': u'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
+                    {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
+                    {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
+                    {'id': settings.ID_CAT_PMV, 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
+                    {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
+                    {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
+                    {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
+                        ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:
@@ -208,12 +214,9 @@ class Cat_cache(Table):
 class Moyen_cache(Table):
     element = models.Moyen
 
-    def __init__(self, request):
-        super(Moyen_cache, self).__init__(request)
-        c = models.Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'})[0]
-        self.id[c.nom] = c.pk
-        c = models.Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'})[0]
-        self.id[c.nom] = c.pk
+    def auto(self):
+        return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
+                     {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}}, ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:
@@ -265,9 +268,8 @@ class Exercice_cache(Table):
 class Tiers_cache(Table):
     element = models.Tiers
 
-    def __init__(self, request):
-        super(Tiers_cache, self).__init__(request)
-        self.element.objects.create(nom='Secu', id=settings.ID_TIERS_COTISATION)
+    def auto(self):
+        return [{'id': settings.ID_TIERS_COTISATION, 'defaults': {'nom': 'secu', 'id': settings.ID_TIERS_COTISATION}}, ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:
@@ -429,11 +431,7 @@ class moyen_defaut_cache(object):
     def __init__(self, request, moyens_cache):
         self.id = {}
         for c in models.Compte.objects.all():
-            self.id[c.nom] = {"c": c.moyen_credit_defaut_id, "d": c.moyen_debit_defaut_id}
-            if self.id[c.nom]['c'] is None:
-                self.id[c.nom]['c'] = settings.MD_CREDIT
-            if self.id[c.nom]['d'] is None:
-                self.id[c.nom]['d'] = settings.MD_DEBIT
+            self.id[c.nom] = {"c": c.moyen_credit().id, "d": c.moyen_debit().id}
 
     def goc(self, compte, montant):
         if compte in self.id.keys():

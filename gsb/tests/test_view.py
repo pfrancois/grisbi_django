@@ -380,8 +380,6 @@ class Test_forms(Test_view_base):
         r = form.is_valid()
         self.assertTrue(r)
         self.assertQuerysets(form.fields['titre'].queryset, models.Titre.objects.all())
-        for p in form.errors:
-            print p.message
 
     def test_Ope_titre_add_venteForm2(self):
         form_data = {'date': "02/09/2012",
@@ -397,8 +395,6 @@ class Test_forms(Test_view_base):
         self.assertQuerysets(form.fields['titre'].queryset, cpt_titre.liste_titre())
         r = form.is_valid()
         self.assertTrue(r)
-        for p in form.errors:
-                print p.message
 
     def test_Ope_titre_add_venteForm3(self):
         form_data = {'date': "01/07/2011",
