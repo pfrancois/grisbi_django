@@ -16,7 +16,7 @@ from gsb import utils
 from django.core.urlresolvers import reverse
 
 
-__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement']
+__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed']
 
 
 class Gsb_exc(Exception):
@@ -25,6 +25,26 @@ class Gsb_exc(Exception):
 
 class Ex_jumelle_neant(Exception):
     pass
+
+
+def has_changed(instance, fields):
+    if not instance.pk:
+        return False
+    changed = False
+    obj = instance.__class__._default_manager.get(pk=instance.pk)
+    for field in fields:
+        old_value = getattr(obj, field)
+        new_value = getattr(instance, field)
+        if hasattr(new_value, "file"):
+            # Handle FileFields as special cases, because the uploaded filename could be
+            # the same as the filename that's already there even though there may
+            # be different file contents.
+            from django.core.files.uploadedfile import UploadedFile
+            if isinstance(new_value.file, UploadedFile):
+                changed = isinstance(new_value.file, UploadedFile)
+        if not getattr(instance, field) == old_value:
+            changed = not getattr(instance, field) == old_value
+    return changed
 
 
 class Tiers(models.Model):
@@ -60,8 +80,6 @@ class Tiers(models.Model):
             raise TypeError(u"pas la même classe d'objet")
         if (self.is_titre or new.is_titre) and not ok_titre:
             raise ValueError(u"un tiers suppport de titre ne peut etre fusionnné directement. vous devez fusionner les titres")
-        if (self.is_titre and new.is_titre == False) or (self.is_titre == False and new.is_titre):
-            raise TypeError(u"attention un tiers support de titre ne peut etre fusionné avec un tiers non supprt de titre")
         nb_tiers_change = Echeance.objects.filter(tiers=self).update(tiers=new)
         nb_tiers_change += Ope.objects.filter(tiers=self).update(tiers=new)
         self.delete()
@@ -127,8 +145,6 @@ class Titre(models.Model):
                 liste = Cours.objects.filter(titre=self).filter(date__lte=date_rapp)
                 if liste.exists():
                     return liste.latest('date').date
-                else:
-                    return None
             else:
                 return None
 
@@ -229,42 +245,24 @@ class Titre(models.Model):
         @param rapp: boolean, renvoie les operation rapproches, attention, si rempli, cela renvoie l'encours avec le cours rapproche
         """
         # si pas d'operation existante
-        if datel and (not self.cours_set.filter(date__lte=datel).exists()):
-            return 0
-            # definition de la population des ope
-        opes = Ope.objects.filter(tiers=self.tiers)
+        if datel is None:
+            datel = utils.today()
+        # definition de la population des ope
+        opes = Ope.objects.filter(tiers=self.tiers, date__lte=datel)
         # si on a defini sur seulement un compte
         if compte:
             opes = opes.filter(compte=compte)
-            # si on veut juste l'encours des ope rapp
+        # si on veut juste l'encours des ope rapp
         if rapp:
-            # on prend uniquement les ope rapp
             opes = opes.filter(rapp__isnull=False)
-            # gestion de la date
-            if opes.exists():
-                liste = []
-                if datel is not None:
-                    try:
-                        liste.append(utils.strpdate(datel))
-                    except TypeError:
-                        liste.append(datel)
-                liste.append(self.last_cours_date(rapp=rapp))
-                date_r = min(liste)
-                # ca veut dire pas d"ope
-                if date_r is None:
-                    return 0
-            else:
-                return 0  # comme pas d'ope, pas d'encours
-        else:
-            if datel:
-                date_r = datel
-            else:
-                date_r = utils.today()
-                # maintenant que l'on a la date max, on peut filtrer
-        opes = opes.filter(date__lte=date_r)
         if opes.exists():
+            if rapp:
+                date_cours = opes.latest('date').date
+            else:
+                date_cours = datel
+
             # recupere le dernier cours
-            cours = self.last_cours(datel=date_r)
+            cours = self.last_cours(datel=date_cours)
             # renvoie la gestion des param de nb
             nb = self.nb(compte=compte, rapp=rapp, datel=datel)
             return nb * cours
@@ -441,7 +439,6 @@ class Exercice(models.Model):
 class Compte(models.Model):
     """
     comptes (normal)
-    attention les comptes de type "t" ne peuvent etre cree directement
     """
     typescpt = (
         ('b', u'bancaire'),
@@ -491,7 +488,7 @@ class Compte(models.Model):
         req = query.aggregate(total=models.Sum('montant'))['total']
         if req is None:
             req = 0
-        if self.solde_init is not None:
+        if self.solde_init is not None and self.solde_init != 0:
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
@@ -564,16 +561,16 @@ class Compte(models.Model):
         if isinstance(titre, Titre):
             if decimal.Decimal(force_unicode(frais)):  # des frais bancaires existent
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"Frais bancaires:",
-                                                          defaults={'nom': u'Frais bancaires:'})[0]
+                    cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
                     tiers_frais = titre.tiers
+
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes=u"Frais %s@%s" % (nombre, prix),
-                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
+                                    moyen=self.moyen_debit(),
                                     automatique=True
                                     )
                 # gestion compta matiere (et donc opération sous jacente et cours)
@@ -620,7 +617,7 @@ class Compte(models.Model):
                                                  cours=prix)
             if decimal.Decimal(force_unicode(frais)):
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"frais bancaires:", defaults={'nom': u'frais bancaires:'})[0]
+                    cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
@@ -628,7 +625,7 @@ class Compte(models.Model):
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes="frais -%s@%s" % (nombre, prix),
-                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
+                                    moyen=self.moyen_debit(),
                                     automatique=True
                                     )
             if virement_vers:
@@ -650,29 +647,28 @@ class Compte(models.Model):
         if isinstance(titre, Titre):
             # extraction des titres dans portefeuille
             nb_titre_avant = titre.nb(compte=self, datel=date)
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation sur titre'})[0]
             if not nb_titre_avant:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
                 # ajout du revenu proprement dit
             self.ope_set.create(date=date,
                                 montant=decimal.Decimal(force_unicode(montant)),
                                 tiers=titre.tiers,
-                                cat=cat_ost,
+                                cat=Cat.objects.get(id=settings.ID_CAT_OST),
                                 notes="revenu",
-                                moyen=Moyen.objects.get(id=settings.MD_CREDIT),
+                                moyen=self.moyen_credit(),
                                 # on ne prend le moyen par defaut car ce n'est pas une OST
                                 automatique=True)
             if decimal.Decimal(force_unicode(frais)):
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 if not cat_frais:
-                    cat_frais = Cat.objects.get_or_create(nom=u"Frais bancaires", defaults={'nom': u'Frais bancaires'})[0]
+                    cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes="frais revenu",
-                                    moyen=Moyen.objects.get(id=settings.MD_DEBIT),
+                                    moyen=self.moyen_debit(),
                                     automatique=True
                 )
             if virement_vers:
@@ -713,6 +709,18 @@ class Compte(models.Model):
         liste = self.titre.all().distinct().values_list("id", flat=True)
         return Titre.objects.filter(id__in=liste)
 
+    def moyen_debit(self):
+        if self.moyen_debit_defaut is not None:
+            return self.moyen_debit_defaut
+        else:
+            return Moyen.objects.get(id=settings.MD_DEBIT)
+
+    def moyen_credit(self):
+        if self.moyen_credit_defaut is not None:
+            return self.moyen_credit_defaut
+        else:
+            return Moyen.objects.get(id=settings.MD_CREDIT)
+
 
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
@@ -745,36 +753,27 @@ class Ope_titre(models.Model):
         self.cours = decimal.Decimal(self.cours)
         self.nombre = decimal.Decimal(self.nombre)
         # definition des cat avec possibilite
-        try:
-            cat_ost = Cat.objects.get_or_create(id=settings.ID_CAT_OST, defaults={'nom': u'Operation Sur Titre', 'id': settings.ID_CAT_OST})[0]
-        except IntegrityError:
-            raise ImproperlyConfigured(
-                u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une categorie 'Operation sur titre'" % settings.ID_CAT_OST)
-        try:
-            cat_pmv = Cat.objects.get_or_create(id=settings.ID_CAT_PMV, defaults={'nom': u'Revenus de placement:Plus-values', 'id': settings.ID_CAT_PMV})[0]
-        except IntegrityError:
-            raise ImproperlyConfigured(u"attention problème de configuration. l'id pour la cat %s n'existe pas mais il existe deja une catégorie 'Revenus de placement:Plus-values'" % settings.ID_CAT_OST)
-            # gestion des cours
+        cat_ost = Cat.objects.get(id=settings.ID_CAT_OST)
+        cat_pmv = Cat.objects.get(id=settings.ID_CAT_PMV)
+        # gestion de la date
+        # self.date = utils.strpdate(self.date)
+
+        # gestion des cours
+        # si on chnage la date de l'operation il faut supprimer le cours associe
         if self.ope:
             old_date = self.ope.date
-            obj = Cours.objects.get(titre=self.titre, date=old_date)
-            obj.delete()
-        else:
-            old_date = self.date
-        obj, created = Cours.objects.get_or_create(titre=self.titre, date=old_date, defaults={'titre': self.titre, 'date': old_date, 'valeur': 0})  # @UnusedVariable
-        obj.date = self.date
-        obj.valeur = self.cours
-        obj.save()
+            Cours.objects.get(titre=self.titre, date=old_date).delete()
+        cours_obj, created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
+        if not created:
+            cours_obj.date = self.date
+            cours_obj.valeur = self.cours
+            cours_obj.save()
+
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if self.ope_pmv is not None:
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
-            moyen = self.compte.moyen_debit_defaut
-            if moyen is None:
-                try:
-                    moyen = Moyen.objects.get(id=settings.MD_DEBIT)
-                except Moyen.DoesNotExist:
-                    moyen = Moyen.objects.create(id=settings.MD_DEBIT, nom="debit par defaut", type='d')
+            moyen = self.compte.moyen_debit()
             if not self.ope:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
@@ -808,12 +807,7 @@ class Ope_titre(models.Model):
             pmv = self.nombre * self.cours - ost
             # on cree les ope
             self.invest = ost
-            moyen = self.compte.moyen_credit_defaut
-            if moyen is None:
-                try:
-                    moyen = Moyen.objects.get(id=settings.MD_CREDIT)
-                except Moyen.DoesNotExist:
-                    moyen = Moyen.objects.create(id=settings.MD_CREDIT, nom="credit par defaut", type='r')
+            moyen = self.compte.moyen_credit()
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=ost * -1,
@@ -1175,7 +1169,7 @@ class Ope(models.Model):
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
-            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'nom': u"Opération Ventilée", 'type': "r"})[0]
+            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
             try:
                 ope_orig = Ope.objects.get(id=self.id)
                 if self.montant != ope_orig.montant:
@@ -1189,19 +1183,11 @@ class Ope(models.Model):
                 self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
         if not self.moyen:
             if self.montant >= 0:
-                if self.compte.moyen_credit_defaut:
-                    self.moyen = self.compte.moyen_credit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_CREDIT, defaults={'nom': "moyen_par_defaut_credit", "id": settings.MD_CREDIT, 'type': "r"})[0]
-                    self.moyen = moyen
+                self.moyen = self.compte.moyen_credit()
             if self.montant < 0:
-                if self.compte.moyen_debit_defaut:
-                    self.moyen = self.compte.moyen_debit_defaut
-                else:
-                    moyen = Moyen.objects.get_or_create(id=settings.MD_DEBIT, defaults={'nom': "moyen_par_defaut_debit", "id": settings.MD_DEBIT, "type": "d"})[0]
-                    self.moyen = moyen
+                self.moyen = self.compte.moyen_debit()
         if self.is_mere:
-            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={'type': "d", 'nom': u"Opération Ventilée"})[0]
+            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
 
     @property
     def is_mere(self):
@@ -1336,7 +1322,7 @@ class Virement(object):
             tier = Tiers.objects.get_or_create(nom=self.__unicode__(), defaults={'nom': self.__unicode__()})[0]
             self.origine.tiers = tier
             self.dest.tiers = tier
-            self.origine.cat = Cat.objects.get_or_create(nom="Virement", defaults={'nom': u'Virement'})[0]
+            self.origine.cat = Cat.objects.get(nom="Virement")
             self.dest.cat = self.origine.cat
             self.origine.save()
             self.dest.save()

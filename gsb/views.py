@@ -6,7 +6,7 @@ from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement
+from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement, has_changed
 from .import forms as gsb_forms
 from django.db import models
 import decimal
@@ -17,22 +17,6 @@ from django.core import exceptions as django_exceptions
 from django.views import generic
 from django.utils.decorators import method_decorator
 import gsb.utils
-
-
-def has_changed(instance, field):
-    if not instance.pk:
-        return False
-    old_value = getattr(instance.__class__._default_manager.get(pk=instance.pk), field)
-    new_value = getattr(instance, field)
-    if hasattr(new_value, "file"):
-        # Handle FileFields as special cases, because the uploaded filename could be
-        # the same as the filename that's already there even though there may
-        # be different file contents.
-        from django.core.files.uploadedfile import UploadedFile
-
-        return isinstance(new_value.file, UploadedFile)
-
-    return not getattr(instance, field) == old_value
 
 
 class Mytemplateview(generic.TemplateView):
@@ -358,12 +342,10 @@ def ope_detail(request, pk):
                 http.HttpResponseRedirect(ope.compte.get_absolute_url())
             form = gsb_forms.OperationForm(request.POST, instance=ope)
             if form.is_valid():
-                if not form.cleaned_data['tiers']:
+                if not form.cleaned_data['tiers']:  # TODO
                     form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
-                                                                      defaults={
-                                                                      'nom': form.cleaned_data['nouveau_tiers'],
-                                                                      }
-                    )[0]
+                                                                      defaults={'nom': form.cleaned_data['nouveau_tiers'], }
+                                                                      )[0]
                     messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
                 if not ope.rapp:
                     messages.success(request, u"opération modifiée")
@@ -747,7 +729,7 @@ def dividende(request, cpt_id):
                                compte=form.cleaned_data['compte'],
                                montant=form.cleaned_data['montant'],
                                tiers=tiers,
-                               cat=Cat.objects.get_or_create(nom=settings.REV_PLAC, defaults={'nom': settings.REV_PLAC, 'type': 'r'}))
+                               cat=Cat.objects.get(id=settings.REV_PLAC))
             if form.cleaned_data['compte_espece']:
                 # creation du virement
                 vir = Virement()
@@ -879,22 +861,6 @@ def search_opes(request):
                                                             "sort": "",
                                                             'date_max': date_max,
                                                             'solde': None})
-
-
-def perso(request):
-    resultat = []
-    for r in Rapp.objects.filter(nom__startswith="Sg"):
-        solde_visa = r.ope_set.filter(compte__nom="Visa").aggregate(total=models.Sum('montant'))['total']
-        if solde_visa:
-            resultat.append(r.nom)
-            resultat.append(solde_visa)
-            # r.save()
-    return render(request, 'generic.djhtm',
-                  {'resultats': resultat,
-                   'titre_long': "traitement personalise",
-                   'titre': "perso",
-                  }
-    )
 
 
 class Titre_view(generic.ListView):
