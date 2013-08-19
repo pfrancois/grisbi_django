@@ -12,12 +12,15 @@ from django.conf import settings
 __all__ = ['TestCase']
 
 
+@override_settings(REV_PLAC=68)
 @override_settings(ID_CPT_M=1)
 @override_settings(MD_DEBIT=1)
 @override_settings(MD_CREDIT=4)
-@override_settings(ID_CAT_COTISATION=3)
-@override_settings(ID_TIERS_COTISATION=2)
+@override_settings(ID_CAT_COTISATION=54)
+@override_settings(ID_TIERS_COTISATION=256)
 @override_settings(ID_CAT_PMV=67)
+@override_settings(ID_CAT_OST=64)
+@override_settings(ID_CAT_VIR=65)
 class TestCase(Test_Case_django):
     def setUp(self):
         # supprime l'affichage des probleme de 404
