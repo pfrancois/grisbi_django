@@ -13,11 +13,10 @@ import mock
 from .test_base import TestCase
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.core.exceptions import ImproperlyConfigured
 
 from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Virement, Ope_titre, Ib, Exercice, Cours
-from ..models import Rapp, Echeance, Gsb_exc
+from ..models import Rapp, Echeance, Gsb_exc, has_changed
 from ..io import import_base
 from .. import utils
 from .. import forms
@@ -47,11 +46,16 @@ class Test_models(TestCase):
         self.assertEquals(Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
         self.assertEquals(Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
         self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
+        self.assertEquals(Ope_titre.objects.get(id=1).__unicode__(), u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
         self.assertEquals(Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
         self.assertEquals(Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:30/10/2011)")
         self.assertEquals(Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:30/10/2011)")
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1")
+
+    def test_models_unicode2(self):
+        Compte.objects.get(nom="cpt_titre1").vente(titre=Titre.objects.get(nom="t1"), nombre=1, date='2011-12-20')
+        self.assertEquals(Ope_titre.objects.get(id=5).__unicode__(), u"(5) vente de 1 t1 (1) à 1 EUR le 20/12/2011 cpt:cpt_titre1")
 
     def test_fusionne_error(self):
         # fusion avec un autre type
@@ -666,6 +670,14 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Echeance.objects.filter(moyen_virement__id=2).order_by('id'), [1, ], attrgetter("id"))
         self.assertQuerysetEqual(Ope.objects.filter(moyen__id=2).order_by('id'), [1, 2, 3, 10], attrgetter("id"))
 
+    def test_moyen_defaut(self):
+        m = Moyen.objects.get(id=1)
+        self.assertRaises(IntegrityError, m.delete)
+
+    def test_moyen_defaut2(self):
+        m = Moyen.objects.get(id=4)
+        self.assertRaises(IntegrityError, m.delete)
+
     def test_rapp_compte(self):
         self.assertEquals(Rapp.objects.get(id=1).compte, 1)
         self.assertEquals(Rapp.objects.get(id=3).compte, None)
@@ -1046,4 +1058,14 @@ class Test_models2(TestCase):
         self.assertEqual(c2.moyen_credit().id, settings.MD_CREDIT)
         self.assertEqual(c2.moyen_debit().id, settings.MD_DEBIT)
 
+    def test_has_changed(self):
+        t = Tiers.objects.create(nom='teet')
+        t.nom = "toto"
+        self.assertEqual(has_changed(t, ('nom','notes')), True)
+        t.notes = "notes"
+        self.assertEqual(has_changed(t, ('nom','notes')), True)
 
+    def test_has_changed2(self):
+        t = Tiers.objects.create(nom='teet')
+        self.assertEqual(has_changed(t, ('nom','notes')), False)
+        self.assertEqual(has_changed('toto', ('nom','notes')), False)

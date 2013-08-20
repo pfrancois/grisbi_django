@@ -105,6 +105,8 @@ def fr2decimal(s):
 def strpdate(end_date, fmt="%Y-%m-%d"):
     """@param s: YYYY-MM-DD
     attention si s est None ou impossible renvoie None"""
+    if isinstance(end_date, datetime.date) or isinstance(end_date, datetime.datetime):
+        end_date = end_date.strftime(fmt)
     if end_date is not None:
         end_date = time.strptime(end_date, fmt)
         return datetime.date(*end_date[0:3])

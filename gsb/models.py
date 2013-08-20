@@ -28,7 +28,8 @@ class Ex_jumelle_neant(Exception):
 
 
 def has_changed(instance, fields):
-    if not instance.pk:
+
+    if not getattr(instance,"pk",False):
         return False
     changed = False
     obj = instance.__class__._default_manager.get(pk=instance.pk)
@@ -641,7 +642,7 @@ class Compte(models.Model):
     @transaction.commit_on_success
     def revenu(self, titre, montant=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
-        if date == None:
+        if date is None:
             date = utils.today()
         self.alters_data = True
         if isinstance(titre, Titre):
@@ -852,7 +853,6 @@ class Ope_titre(models.Model):
         if self.ope_pmv is not None:
             if self.ope_pmv.rapp is not None:
                 raise IntegrityError(u"opération pmv rapprochée")
-            self.ope_pmv.delete()
         super(Ope_titre, self).delete(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -863,7 +863,7 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, self.nombre, self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
 
@@ -913,7 +913,7 @@ class Moyen(models.Model):
         return nb_change
 
     def delete(self, *args, **kwargs):
-        if self.id == settings.MD_CREDIT or self.id == settings.MD_CREDIT:
+        if self.id == settings.MD_CREDIT or self.id == settings.MD_DEBIT:
             raise IntegrityError(u"moyen par defaut")
         super(Moyen, self).delete(*args, **kwargs)
 
