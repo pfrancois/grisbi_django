@@ -714,8 +714,17 @@ class Test_models(TestCase):
         self.assertEqual(Ope.objects.count(), 71)
 
     def test_echeance_check2(self):
-        Echeance.check(queryset=Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'))
+        request = self.request_get('/options/check')
+        Echeance.check(queryset=Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'), request=request)
         self.assertEqual(Ope.objects.count(), 18)
+
+    @mock.patch('gsb.utils.today')
+    def test_echeance_check3(self, today_mock):
+        today_mock.return_value = datetime.date(2011, 12, 31)
+        request = self.request_get('/options/check')
+        Echeance.check(request=request)
+        self.assertcountmessage(request, 57)
+        self.assertEqual(Ope.objects.count(), 71)
 
     def test_ope_absolute_url(self):
         self.assertEqual(Ope.objects.get(id=1).get_absolute_url(), '/ope/1/')
@@ -805,17 +814,117 @@ class Test_models(TestCase):
         m = Moyen.objects.get(id=1)
         cpt = Compte.objects.get(id=1)
         r = Rapp.objects.get(id=1)
-        ensemble_a_tester = (({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, True, o),  # normal
-                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'pointe': True, 'rapp': r.id, 'date': utils.now()}, False, o),  # poitne et rapproche
-                           ({'tiers': t.id, 'compte': None, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, False, o),  # pas de compte
-                           ({'tiers': t.id, 'compte': Ope.objects.get(id=6).id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, False, o),
-                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, True, Ope.objects.get(pk=11)),
-                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'pointe': True}, False, Ope.objects.get(pk=11)),
-                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'rapp': r.id}, False, Ope.objects.get(pk=11)),
-                           )
+        ensemble_a_tester = (({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {}, o),  # normal
+                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'pointe': True, 'rapp': r.id, 'date': utils.now()},
+                             {'__all__': [u"cette opération ne peut pas etre à la fois pointée et rapprochée", ]},
+                              o),
+                           ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {}, Ope.objects.get(pk=11)))
         for ens in ensemble_a_tester:
             form = forms.OperationForm(ens[0], instance=ens[2])
-            self.assertEqual(form.is_valid(), ens[1])
+            form.is_valid()
+            self.assertEqual(form.errors, ens[1], "probleme avec le form: data %s, resultat attendu %s" % (ens[0], ens[1]))
+
+    def test_ope_clean_pointee(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        r = Rapp.objects.get(id=1)
+
+        o = Ope.objects.get(pk=12)
+        o.pointe = True
+        o.save()
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}
+        form = forms.OperationForm(data, instance=Ope.objects.get(pk=11))
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+
+    def test_ope_clean_pointee2(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        o = Ope.objects.get(pk=12)
+        o.pointe = True
+        o.save()
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}
+        form = forms.OperationForm(data, instance=Ope.objects.get(pk=13))
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+
+    def test_ope_cleanrapp(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        r = Rapp.objects.get(id=1)
+        o = Ope.objects.get(pk=12)
+        o.rapp = r
+        o.save()
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}
+        form = forms.OperationForm(data, instance=Ope.objects.get(pk=11))
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+
+    def test_ope_cleanrapp2(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        r = Rapp.objects.get(id=1)
+        o = Ope.objects.get(pk=12)
+        o.rapp = r
+        o.save()
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}
+        form = forms.OperationForm(data, instance=Ope.objects.get(pk=13))
+        form.is_valid()
+        self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+
+    def test_ope_clean3(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        m = Moyen.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 250, 'moyen': m.id, 'date': utils.now()}
+        form = forms.OperationForm(data, instance=Ope.objects.get(pk=13))
+        if form.is_valid():
+            form.save()
+        else:
+            self.assertEqual(form.errors, "")
+        self.assertEqual(Ope.objects.get(pk=13).montant, -250)
+        self.assertEqual(Ope.objects.get(pk=11).montant, 100)
+
+    def test_ope_moyen_def_recette1(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant': 120, 'moyen': None, 'date': utils.now()}
+        Ope.objects.create(**data)
+        o = Ope.objects.get(pk=14)
+        self.assertEqual(o.moyen_id, 4)
+
+    def test_ope_moyen_def_recette2(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        cpt = Compte.objects.get(id=1)
+        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant':-120, 'moyen': None, 'date': utils.now()}
+        Ope.objects.create(**data)
+        o = Ope.objects.get(pk=14)
+        self.assertEqual(o.moyen_id, 1)
+
+    def test_ope_moyen_def_recette3(self):
+        t = Tiers.objects.get(id=1)
+        c = Cat.objects.get(id=1)
+        cpt = Compte.objects.get(id=5)
+        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant':-120, 'moyen': None, 'date': utils.now()}
+        Ope.objects.create(**data)
+        o = Ope.objects.get(pk=14)
+        self.assertEqual(o.moyen_id, 3)
+
+    def test_ope_ferme(self):
+        o = Ope.objects.get(pk=12)
+        o.compte_id = 6
+        self.assertRaises(IntegrityError, o.save)
 
     def test_ope_solde_set_nul(self):
         self.assertEqual(Ope.solde_set(Ope.objects.none()), 0)
@@ -900,11 +1009,6 @@ class Test_models(TestCase):
         o.save()
         o = Ope.objects.get(id=11)
         self.assertEquals(o.montant, 100)
-        o.pointe = True
-        o.save()
-        o = Ope.objects.get(id=11)
-        o.montant = 154563
-        self.assertRaises(IntegrityError, o.save)
 
     def test_virement_error(self):
         # _non_ope
@@ -1061,11 +1165,13 @@ class Test_models2(TestCase):
     def test_has_changed(self):
         t = Tiers.objects.create(nom='teet')
         t.nom = "toto"
-        self.assertEqual(has_changed(t, ('nom','notes')), True)
+        self.assertEqual(has_changed(t, ('nom', 'notes')), True)
+        self.assertEqual(has_changed(t, ('nom',)), True)
+        self.assertEqual(has_changed(t, 'nom'), True)
         t.notes = "notes"
-        self.assertEqual(has_changed(t, ('nom','notes')), True)
+        self.assertEqual(has_changed(t, ('nom', 'notes')), True)
 
     def test_has_changed2(self):
         t = Tiers.objects.create(nom='teet')
-        self.assertEqual(has_changed(t, ('nom','notes')), False)
-        self.assertEqual(has_changed('toto', ('nom','notes')), False)
+        self.assertEqual(has_changed(t, ('nom', 'notes')), False)
+        self.assertEqual(has_changed('toto', ('nom', 'notes')), False)

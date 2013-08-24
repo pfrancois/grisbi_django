@@ -5,7 +5,7 @@ import datetime
 import decimal
 from django.db import transaction, IntegrityError
 from django.conf import settings
-from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
@@ -14,7 +14,6 @@ from django.utils.encoding import smart_unicode, force_unicode
 import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
-
 
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed']
 
@@ -28,15 +27,16 @@ class Ex_jumelle_neant(Exception):
 
 
 def has_changed(instance, fields):
-
-    if not getattr(instance,"pk",False):
+    if not getattr(instance, "pk", False):
         return False
+    if isinstance(fields, basestring):  # si c'est une chaine de caraceteres on le transforme en tupple
+        fields = (fields,)
     changed = False
     obj = instance.__class__._default_manager.get(pk=instance.pk)
     for field in fields:
         old_value = getattr(obj, field)
         new_value = getattr(instance, field)
-        if hasattr(new_value, "file"):
+        if hasattr(new_value, "file"):  # pragma: no cover
             # Handle FileFields as special cases, because the uploaded filename could be
             # the same as the filename that's already there even though there may
             # be different file contents.
@@ -184,12 +184,14 @@ class Titre(models.Model):
                                                                "is_titre": True,
                                                                "notes": "%s@%s" % (self.isin, self.type)})[0]
         else:
-            if self.tiers.nom != 'titre_ %s' % self.nom:
-                self.tiers.nom = 'titre_ %s' % self.nom
-                tiers_save = True
-            if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
-                self.tiers.notes = u"%s@%s" % (self.isin, self.type)
-                tiers_save = True
+            if has_changed(self, 'nom'):
+                if self.tiers.nom != 'titre_ %s' % self.nom:
+                    self.tiers.nom = 'titre_ %s' % self.nom
+                    tiers_save = True
+            if has_changed(self, ('isin', 'type')):
+                if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
+                    self.tiers.notes = u"%s@%s" % (self.isin, self.type)
+                    tiers_save = True
             if tiers_save:
                 self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
@@ -1161,33 +1163,43 @@ class Ope(models.Model):
         self.alters_data = True
         self.deja_clean = True
         super(Ope, self).clean()
-        if not self.compte:
-            raise ValidationError(u"vous devez mettre un compte")
-            # verification qu'il n'y pas pointe et rapprochee
+        # verification qu'il n'y pas pointe et rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
-            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
-            try:
-                ope_orig = Ope.objects.get(id=self.id)
-                if self.montant != ope_orig.montant:
-                # comme c'est une operation mere, elle est automatiquement la somme des filles et a une cat specifique
-                    self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
-                    if self.pointe is True:
-                        raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est pointée")
-                    if self.rapp is not None:
-                        raise ValidationError(u"impossible de modifier l'opération car vous modifiez le montant alors qu'elle est rapprochée")
-            except Ope.DoesNotExist:
-                self.montant = Ope.objects.filter(mere_id=self.id).aggregate(total=models.Sum('montant'))['total']
-        if not self.moyen:
+            if has_changed(self, 'cat'):
+                self.cat = Cat.objects.get(nom=u"Opération Ventilée")
+            if has_changed(self, 'montant'):
+                mere = self
+                # ensemble des opefilles
+                opes = Ope.objects.filter(mere_id=mere.id)
+                for o in opes.values('id', 'pointe', 'rapp'):
+                    if o['pointe'] == True:
+                        raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
+                    if o['rapp'] is not None:
+                        raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
+                mere.montant = Ope.objects.filter(mere_id=mere.id).aggregate(total=models.Sum('montant'))['total']
+        if self.is_fille:
+            if has_changed(self, 'montant'):
+                mere = self.mere
+                # ensemble des opefilles
+                opes = Ope.objects.filter(mere_id=mere.id)
+                for o in opes.values('id', 'pointe', 'rapp'):
+                    if o['pointe'] == True:
+                        raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
+                    if o['rapp'] is not None:
+                        raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
+                # sinon on change le montant de la mere
+                mere.montant = Ope.objects.filter(mere_id=mere.id).aggregate(total=models.Sum('montant'))['total'] - Ope.objects.get(id=self.id).montant + self.montant
+        if self.moyen is None:
             if self.montant >= 0:
                 self.moyen = self.compte.moyen_credit()
             if self.montant < 0:
                 self.moyen = self.compte.moyen_debit()
-        if self.is_mere:
-            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
+        if self.moyen == u'd' and self.moyen > 0:
+            self.moyen = self.moyen * -1
 
     @property
     def is_mere(self):
@@ -1227,6 +1239,7 @@ class Ope(models.Model):
             return True
 
     def save(self, *args, **kwargs):
+        # lance clean et attrape les erreurs
         try:
             self.clean()
         except ValidationError as e:
