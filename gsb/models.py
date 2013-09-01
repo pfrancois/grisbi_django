@@ -464,8 +464,20 @@ class Compte(models.Model):
     solde_mini_autorise = models_gsb.CurField(null=True, blank=True)
     ouvert = models.BooleanField(default=True)
     notes = models.TextField(blank=True, default='')
-    moyen_credit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="compte_moyen_credit_set", default=None)
-    moyen_debit_defaut = models.ForeignKey('Moyen', null=True, blank=True, on_delete=models.SET_NULL, related_name="compte_moyen_debit_set", default=None)
+    moyen_credit_defaut = models.ForeignKey('Moyen',
+                                             null=True,
+                                             blank=True,
+                                             on_delete=models.PROTECT,
+                                             related_name="compte_moyen_credit_set",
+                                             default=None,
+                                             limit_choices_to={'type':"r"})
+    moyen_debit_defaut = models.ForeignKey('Moyen',
+                                             null=True,
+                                             blank=True,
+                                             on_delete=models.PROTECT,
+                                             related_name="compte_moyen_debit_set",
+                                             default=None,
+                                             limit_choices_to={'type':"d"})
     titre = models.ManyToManyField('Titre', through="Ope_titre")
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
@@ -730,7 +742,7 @@ class Compte(models.Model):
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre)
-    compte = models.ForeignKey(Compte, verbose_name=u"compte titre")
+    compte = models.ForeignKey(Compte, verbose_name=u"compte titre", limit_choices_to={'type':'t'})
     nombre = models_gsb.CurField(default=0, decimal_places=5)
     date = models.DateField()
     cours = models_gsb.CurField(default=1, decimal_places=5)
