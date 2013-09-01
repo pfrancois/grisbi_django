@@ -116,7 +116,7 @@ class VirementForm(Baseform):
 class Ope_titre_addForm(Baseform):
     date = gsb_field.DateFieldgsb()
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
-    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
+    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t', ouvert=True), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     nombre = forms.DecimalField(localize=True, required=True)
     cours = forms.DecimalField(initial='1', required=True, localize=True, min_value=0)
@@ -135,7 +135,7 @@ class Ope_titre_addForm(Baseform):
 class Ope_titre_dividendeForm(Baseform):
     date = gsb_field.DateFieldgsb(localize=True)
     titre = forms.ModelChoiceField(Titre.objects.all(), required=False)
-    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t'), empty_label=None, required=True)
+    compte_titre = forms.ModelChoiceField(Compte.objects.filter(type='t', ouvert=True), empty_label=None, required=True)
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     montant = forms.DecimalField(localize=True, initial='0', required=True, min_value=0)
 

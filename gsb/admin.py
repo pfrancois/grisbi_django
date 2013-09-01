@@ -549,6 +549,12 @@ class Exo_admin(Modeladmin_perso):
     list_filter = ('date_debut', 'date_fin')
 
 
+class ope_titre_form(forms.ModelForm):
+    def __init__(self, cpt=None, *args, **kwargs):
+        super(ope_titre_form, self).__init__(*args, **kwargs)
+        self.fields['compte'].queryset = Compte.objects.filter(type='t', ouvert=True)
+
+
 class Ope_titre_admin(Modeladmin_perso):
     list_display = ('id', 'date', 'compte', 'titre', 'nombre', 'cours', 'invest')
     readonly_fields = ('invest', 'show_ope', "show_ope_pmv")
@@ -565,6 +571,11 @@ class Ope_titre_admin(Modeladmin_perso):
     def show_ope_pmv(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(Ope_titre_admin, self).get_form(request, obj, **kwargs)
+        form.base_fields['compte'].queryset = Compte.objects.filter(type='t', ouvert=True)
+        return form
 
     show_ope_pmv.short_description = u"opération relative aux plus ou moins values"
 
