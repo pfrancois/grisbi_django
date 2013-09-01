@@ -6,6 +6,7 @@ from django.db import models
 from django import forms
 import gsb.utils as utils
 from django.db.models import DateTimeField
+from south.modelsinspector import add_introspection_rules
 
 
 # definition d'un moneyfield
@@ -24,6 +25,14 @@ class CurField(models.DecimalField):
 
     def __mul__(self, other):
         return decimal.Decimal(self) * decimal.Decimal(other)
+
+    def south_field_triple(self):
+        "Returns a suitable description of this field for South."
+        # We'll just introspect ourselves, since we inherit.
+        from south.modelsinspector import introspector
+        field_class = "django.db.models.fields.DecimalField"
+        args, kwargs = introspector(self)
+        return (field_class, args, kwargs)
 
 
 class ExtFileField(forms.FileField):
@@ -95,6 +104,15 @@ class uuidfield(models.CharField):
                 setattr(model_instance, self.attname, value)
         return value
 
+    def south_field_triple(self):
+        "Returns a suitable description of this field for South."
+        # We'll just introspect the _actual_ field.
+        from south.modelsinspector import introspector
+        field_class = "django.db.models.fields.CharField"
+        args, kwargs = introspector(self)
+        # That's our definition!
+        return (field_class, args, kwargs)
+
 
 # tire initialement de django extension"""
 class ModificationDateTimeField(DateTimeField):
@@ -117,3 +135,10 @@ class ModificationDateTimeField(DateTimeField):
     def get_internal_type(self):
         return "DateTimeField"
 
+    def south_field_triple(self):
+        "Returns a suitable description of this field for South."
+        # We'll just introspect ourselves, since we inherit.
+        from south.modelsinspector import introspector
+        field_class = "django.db.models.fields.DateTimeField"
+        args, kwargs = introspector(self)
+        return (field_class, args, kwargs)
