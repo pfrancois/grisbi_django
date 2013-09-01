@@ -87,6 +87,11 @@ class Tiers(models.Model):
         return nb_tiers_change
 
     def save(self, *args, **kwargs):
+        try:
+            self.titre
+            self.is_titre = True
+        except Titre.DoesNotExist:
+            self.is_titre = False
         if self.is_titre and self.id is not None:
             self.titre.nom = self.nom[7:]
             self.titre.save()
@@ -193,6 +198,7 @@ class Titre(models.Model):
                     self.tiers.notes = u"%s@%s" % (self.isin, self.type)
                     tiers_save = True
             if tiers_save:
+                self.tiers.is_titre = True
                 self.tiers.save()
         super(Titre, self).save(*args, **kwargs)
 

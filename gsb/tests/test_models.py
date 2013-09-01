@@ -126,6 +126,7 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Echeance.objects.filter(tiers=t).order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8], attrgetter("id"))
 
     def test_tiers_titre_save(self):
+        """ si on change le nom du tiers, ca chqnge le nom du titre"""
         t = Tiers.objects.get(nom="titre_ t1")
         t.nom = "titre_ test"
         id_titre = t.titre.id
@@ -133,14 +134,30 @@ class Test_models(TestCase):
         self.assertEqual(Titre.objects.get(id=id_titre).nom, 'test')
 
     def test_tiers_titre_save2(self):
-        # on verifie que si on change le nom du titre, ca change le nom du tiers"""
+        """on verifie que si on change le nom du titre, ca change le nom du tiers"""
         t = Titre.objects.get(nom='t1')
         t.nom = 'test'
         id_tiers = t.tiers.id
         t.save()
         self.assertEqual(Tiers.objects.get(id=id_tiers).nom, 'titre_ test')
 
+    def test_tiers_is_titre1(self):
+        """on rajouter un titre a un tiers, il devient is_titre"""
+        t = Tiers.objects.get(id=1)
+        titre = Titre.objects.get(nom='t1')
+        t.titre = titre
+        t.save()
+        self.assertTrue(Tiers.objects.get(id=1).is_titre)
+
+    def test_tiers_is_titre2(self):
+        """on enleve un titre a un tiers, il n'est plus is_titre"""
+        t = Tiers.objects.get(nom="titre_ t1")
+        t_id = t.id
+        t.save()
+        self.assertTrue(Tiers.objects.get(id=t_id).is_titre)
+
     def test_titre_chgt_isin(self):
+        """si on change isin , ca change chez le tiers"""
         t = Titre.objects.get(nom='t1')
         t.isin = "1234567"
         id_tiers = t.tiers.id
@@ -1235,6 +1252,7 @@ class Test_models2(TestCase):
         self.r = Rapp.objects.create(nom="rapp1", date=utils.strpdate('2012-01-20'))
 
     # sans fixtures
+
     def test_last_cours_date_special(self):
         c = self.c
         t = self.t

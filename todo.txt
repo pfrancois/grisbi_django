@@ -1,3 +1,4 @@
-mettre un truc dans le setting qui permette le all par dafaut
-mettre dans l'import qui gere les titres et les comptes titres
 FAIRE que si on ajoute un tiers c'est pas possible de recreer un tiers
+
+probleme dans la table:
+titre devrait etre dans tiers et non ds titre
