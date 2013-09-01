@@ -6,7 +6,7 @@ import decimal
 from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -203,7 +203,7 @@ class Titre(models.Model):
         @param rapp: Bool, si true, renvoie uniquement les opération rapprochées
         @param exclude_id: int id de l'ope a exclure.attention c'ets bien ope et non ope_titre
         """
-        query = Ope.non_meres().filter(tiers=self.tiers).exclude(cat__id=settings.ID_CAT_PMV)
+        query = Ope.non_meres().filter(tiers=self.tiers)
         if compte:
             query = query.filter(compte=compte)
         if datel:
@@ -211,7 +211,9 @@ class Titre(models.Model):
         if rapp:
             query = query.filter(rapp__isnull=False)
         if exclude_id:
-            query = query.exclude(pk=exclude_id)
+            query = query.exclude(pk=exclude_id.ope.id)
+            if exclude_id.ope_pmv is not None:
+                query = query.exclude(pk=exclude_id.ope_pmv.id)
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
         if not valeur:
             return decimal.Decimal(0)
@@ -624,7 +626,7 @@ class Compte(models.Model):
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
-                                    montant=decimal.Decimal(force_unicode(frais)) * -1,
+                                    montant=abs(decimal.Decimal(force_unicode(frais))) * -1,
                                     tiers=tiers_frais,
                                     cat=cat_frais,
                                     notes="frais -%s@%s" % (nombre, prix),
@@ -766,24 +768,18 @@ class Ope_titre(models.Model):
         if self.ope:
             old_date = self.ope.date
             Cours.objects.get(titre=self.titre, date=old_date).delete()
-        cours_obj, created = Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
-        if not created:
-            cours_obj.date = self.date
-            cours_obj.valeur = self.cours
-            cours_obj.save()
-
+        Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
+        self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if self.ope_pmv is not None:
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
-            self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
-            moyen = self.compte.moyen_debit()
-            if not self.ope:  # il faut creer l'ope sous jacente
+            if self.ope is None:  # il faut creer l'ope sous jacente
                 self.ope = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
                                               cat=cat_ost,
                                               notes="%s@%s" % (self.nombre, self.cours),
-                                              moyen=moyen,
+                                              moyen=self.compte.moyen_debit(),
                                               compte=self.compte,
                 )
 
@@ -793,58 +789,57 @@ class Ope_titre(models.Model):
                 self.ope.tiers = self.titre.tiers
                 self.ope.notes = "%s@%s" % (self.nombre, self.cours)
                 self.ope.compte = self.compte
-                self.ope.moyen = moyen
                 self.ope.save()
         else:  # c'est une vente
             # calcul prealable
             # on met des plus car les chiffres sont negatif
             if self.ope:  # ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self.ope.id)
+                inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
                 nb_vrai = self.titre.nb(self.compte, datel=self.date)
                 # chaine car comme on a des decimal
             ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
-            ost = decimal.Decimal(ost)
-            pmv = self.nombre * self.cours - ost
+            ost = decimal.Decimal(ost) * -1
+            pmv = abs(self.invest) - abs(ost)
             # on cree les ope
-            self.invest = ost
-            moyen = self.compte.moyen_credit()
             if not self.ope:
                 self.ope = Ope.objects.create(date=self.date,
-                                              montant=ost * -1,
+                                              montant=ost,
                                               tiers=self.titre.tiers,
                                               cat=cat_ost,
                                               notes="%s@%s" % (self.nombre, self.cours),
-                                              moyen=moyen,
+                                              moyen=self.compte.moyen_credit(),
                                               compte=self.compte,
                 )
+
             else:
                 self.ope.date = self.date
-                self.ope.montant = ost * -1
+                self.ope.montant = ost
                 self.ope.tiers = self.titre.tiers
                 self.ope.notes = "%s@%s" % (self.nombre, self.cours)
                 self.ope.compte = self.compte
+                self.ope.moyen = self.compte.moyen_credit()
                 self.ope.save()
             if self.ope_pmv is None:
                 self.ope_pmv = Ope.objects.create(date=self.date,
-                                                  montant=pmv * -1,
+                                                  montant=pmv,
                                                   tiers=self.titre.tiers,
                                                   cat=cat_pmv,
                                                   notes="%s@%s" % (self.nombre, self.cours),
-                                                  moyen=moyen,
+                                                  moyen=self.compte.moyen_credit(),
                                                   compte=self.compte,
                 )
             else:
                 # on modifie tout
                 self.ope_pmv.date = self.date
-                self.ope_pmv.montant = pmv * -1
+                self.ope_pmv.montant = pmv
                 self.ope_pmv.tiers = self.titre.tiers
                 self.ope_pmv.cat = cat_pmv
                 self.ope_pmv.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope_pmv.moyen = moyen
                 self.ope_pmv.compte = self.compte
+                self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
         super(Ope_titre, self).save(*args, **kwargs)
 
@@ -1172,38 +1167,36 @@ class Ope(models.Model):
             if has_changed(self, 'cat'):
                 self.cat = Cat.objects.get(nom=u"Opération Ventilée")
             if has_changed(self, 'montant'):
-                mere = self
                 # ensemble des opefilles
-                opes = Ope.objects.filter(mere_id=mere.id)
+                opes = self.filles_set.all()
                 for o in opes.values('id', 'pointe', 'rapp'):
                     if o['pointe'] == True:
                         raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
                     if o['rapp'] is not None:
                         raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
-                mere.montant = Ope.objects.filter(mere_id=mere.id).aggregate(total=models.Sum('montant'))['total']
+                if self.pointe:
+                    raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
+                if self.rapp is not None:
+                    raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
+
         if self.is_fille:
             if has_changed(self, 'montant'):
                 mere = self.mere
-                # ensemble des opefilles
+                # ensemble des opefilles de la mere
                 opes = Ope.objects.filter(mere_id=mere.id)
                 for o in opes.values('id', 'pointe', 'rapp'):
                     if o['pointe'] == True:
                         raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
                     if o['rapp'] is not None:
                         raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
-                # sinon on change le montant de la mere
-                mere.montant = Ope.objects.filter(mere_id=mere.id).aggregate(total=models.Sum('montant'))['total'] - Ope.objects.get(id=self.id).montant + self.montant
-        if self.moyen is None:
-            if self.montant >= 0:
-                self.moyen = self.compte.moyen_credit()
-            if self.montant < 0:
-                self.moyen = self.compte.moyen_debit()
-        if self.moyen == u'd' and self.moyen > 0:
-            self.moyen = self.moyen * -1
+                if self.pointe or mere.pointe:
+                    raise ValidationError(u"impossible de modifier l'opération car au moins une partie est pointée")
+                if self.rapp is not None or mere.rapp is not None:
+                    raise ValidationError(u"impossible de modifier l'opération car au moins une partie est rapprochée")
 
     @property
     def is_mere(self):
-        return self.filles_set.count() > 0 and self.id > 1  # on rajouter and self.id >1 afin de pouvoir creer une mere
+        return self.filles_set.count() > 0  # and self.id > 1  # on rajouter and self.id >1 afin de pouvoir creer une mere
 
     @property
     def is_fille(self):
@@ -1244,13 +1237,48 @@ class Ope(models.Model):
             self.clean()
         except ValidationError as e:
             raise IntegrityError("%s" % e)
+        if self.is_mere:
+            self.montant = self.tot_fille
+        if self.moyen is None:
+            if self.montant >= 0:
+                self.moyen = self.compte.moyen_credit()
+            if self.montant < 0:
+                self.moyen = self.compte.moyen_debit()
+        if self.moyen.type == u'd' and self.montant > 0:
+            self.montant = self.montant * -1
         super(Ope, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=Ope, weak=False)
+def ope_fille(sender, **kwargs):
+    if kwargs['raw'] == True:
+        return
+    self = kwargs['instance']
+    if self.is_fille:
+        self.mere.save()
+
+
+@receiver(pre_delete, sender=Ope, weak=False)
+def verif_ope_rapp(sender, **kwargs):
+    instance = kwargs['instance']
+    # on evite que cela soit une opération rapproche
+    if instance.rapp:
+        raise IntegrityError(u"opération rapprochee")
+    if instance.jumelle:
+        if instance.jumelle.rapp:
+            raise IntegrityError(u"opération jumelle rapprochée")
+    if instance.mere:
+        if instance.mere.rapp:
+            raise IntegrityError(u"opération mere rapprochée")
+    if instance.filles_set.count() > 0:
+        raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
 
 
 class Virement(object):
     """raccourci pour creer un virement entre deux comptes"""
 
     def __init__(self, ope=None):
+
         if ope:
             if type(ope) != type(Ope()):
                 raise TypeError('pas ope')
@@ -1402,18 +1430,3 @@ class Virement(object):
     def __unicode__(self):
         return u"%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
 
-
-@receiver(pre_delete, sender=Ope)
-def verif_ope_rapp(sender, **kwargs):
-    instance = kwargs['instance']
-    # on evite que cela soit une opération rapproche
-    if instance.rapp:
-        raise IntegrityError(u"opération rapprochee")
-    if instance.jumelle:
-        if instance.jumelle.rapp:
-            raise IntegrityError(u"opération jumelle rapprochée")
-    if instance.mere:
-        if instance.mere.rapp:
-            raise IntegrityError(u"opération mere rapprochée")
-    if instance.filles_set.count() > 0:
-        raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
