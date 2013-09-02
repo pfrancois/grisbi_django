@@ -18,7 +18,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'switch']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'isonexist', 'switch']
 
 
 class FormatException(Exception):
@@ -379,6 +379,16 @@ class Csv_unicode_reader(object):
 
     def __iter__(self):
         return self
+
+
+def is_onexist(objet, attribut):
+    try:
+        if getattr(objet, attribut) is not None:
+            return True
+        else:
+            return False
+    except ObjectDoesNotExist:
+        return False
 
 
 class switch(object):

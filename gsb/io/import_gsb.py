@@ -103,13 +103,11 @@ def import_gsb_050(nomfich, request, efface_table=True):
             percent += 1
         nb += 1
         query = {'nom': xml_tiers.get('Nom'), 'notes': xml_tiers.get('Informations')}
-        if xml_tiers.get('Nom')[:6] != 'titre_':  # creation du tiers titre
+        if xml_tiers.get('Nom')[:6] == 'titre_':  # creation du tiers titre
             element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
-        else:
-            # test puis creation du titre (et donc du tiers automatiquement)
             try:
-                Tiers.objects.get(nom=xml_tiers.get('Nom'))
-            except Tiers.DoesNotExist:
+                Titre.objects.get(nom=dj_encoding.smart_unicode(xml_tiers.get('Nom'))[7:])
+            except Titre.DoesNotExist:
                 nb_titre += 1
                 s = dj_encoding.smart_unicode(xml_tiers.get('Informations'))
                 nom = dj_encoding.smart_unicode(xml_tiers.get('Nom'))
@@ -133,13 +131,10 @@ def import_gsb_050(nomfich, request, efface_table=True):
                         titre.type = s[2]
                     else:
                         titre.type = 'ZZZ'
-                element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
-                titre.tiers = element
                 titre.save()
-                element.notes = "%s@%s" % (titre.isin, titre.type)
-                element.is_titre = True
-                element.save()
                 messages.info(request, u'titre cree %s isin (%s) as %s' % (titre.nom, titre.isin, titre.type))
+        else:
+            element, created = Tiers.objects.get_or_create(nom=xml_tiers.get('Nom'), defaults=query)
         tabl_correspondance_tiers[xml_tiers.get('No')] = element.id
         if created:
             nb_nx += 1
@@ -188,8 +183,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
             element, created = Ib.objects.get_or_create(nom=query['nom'], defaults=query)
             tabl_correspondance_ib[xml_ib.get('No')][xml_sib.get('No')] = element.id
             if created:
-                messages.info(request,
-                    'sib %s:%s cree au numero %s' % (int(xml_ib.get('No')), int(xml_sib.get('No')), element.id))
+                messages.info(request, 'sib %s:%s cree au numero %s' % (int(xml_ib.get('No')), int(xml_sib.get('No')), element.id))
     messages.info(request, u"%s imputations dont %s nouveaux" % (nb_ib, nb_nx))
 
     #------------------------------banques------------------------------

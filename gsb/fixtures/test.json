@@ -39,6 +39,7 @@
             "nom":"titre_ autre",
             "notes":"a@",
             "is_titre":true,
+            "titre":1,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571+02:00"
         }
@@ -50,6 +51,7 @@
             "nom":"titre_ autre 2",
             "notes":"svjkdfkjh@",
             "is_titre":true,
+            "titre": 5,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571+02:00"
         }
@@ -61,6 +63,7 @@
             "nom":"titre_ t1",
             "notes":"1@ACT",
             "is_titre":true,
+            "titre":2,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571+02:00"
         }
@@ -72,6 +75,7 @@
             "nom":"titre_ t2",
             "notes":"2@OBL",
             "is_titre":true,
+            "titre":3,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571+02:00"
         }
@@ -83,6 +87,7 @@
             "nom":"titre_ t4",
             "notes":"aaa@CSL",
             "is_titre":true,
+            "titre":4,
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
             "lastupdate": "2013-05-22T20:51:40.571+02:00"
         }
@@ -92,7 +97,6 @@
         "model":"gsb.titre",
         "fields":{
             "nom":"autre",
-            "tiers":3,
             "type":"",
             "isin":"a",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
@@ -104,7 +108,6 @@
         "model":"gsb.titre",
         "fields":{
             "nom":"autre 2",
-            "tiers":8,
             "type":"",
             "isin":"svjkdfkjh",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
@@ -116,7 +119,6 @@
         "model":"gsb.titre",
         "fields":{
             "nom":"t1",
-            "tiers":4,
             "type":"ACT",
             "isin":"1",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
@@ -128,7 +130,6 @@
         "model":"gsb.titre",
         "fields":{
             "nom":"t2",
-            "tiers":5,
             "type":"OBL",
             "isin":"2",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",
@@ -140,7 +141,6 @@
         "model":"gsb.titre",
         "fields":{
             "nom":"t4",
-            "tiers":6,
             "type":"CSL",
             "isin":"aaa",
             "uuid": "51a6674d-7f28-427b-8cf7-25ad2ac07f79",

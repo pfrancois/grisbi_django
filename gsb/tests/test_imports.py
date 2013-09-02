@@ -73,7 +73,7 @@ class Test_import(TestCase):
 
     def test_cat_cache(self):
         # on teste si les categories par defaut sont bien crees
-        cats = import_base.Cat_cache(self.request_get("/outils"))
+        import_base.Cat_cache(self.request_get("/outils"))
         self.assertEqual(models.Cat.objects.get(nom=u"Opération sur titre").id, 64)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:Plus-values").id, 67)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:interets").id, 68)

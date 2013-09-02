@@ -57,6 +57,7 @@ class Tiers(models.Model):
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
     is_titre = models.BooleanField(default=False)
+    titre = models.OneToOneField("Titre", null=True, blank=True, editable=False, on_delete=models.CASCADE)
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
@@ -86,17 +87,6 @@ class Tiers(models.Model):
         self.delete()
         return nb_tiers_change
 
-    def save(self, *args, **kwargs):
-        try:
-            self.titre
-            self.is_titre = True
-        except Titre.DoesNotExist:
-            self.is_titre = False
-        if self.is_titre and self.id is not None:
-            self.titre.nom = self.nom[7:]
-            self.titre.save()
-        super(Tiers, self).save(*args, **kwargs)
-
 
 class Titre(models.Model):
     """²
@@ -114,7 +104,6 @@ class Titre(models.Model):
         ('ZZZ', u'autre'))
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     isin = models.CharField(max_length=12, unique=True, db_index=True)
-    tiers = models.OneToOneField(Tiers, null=True, blank=True, editable=False)
     type = models.CharField(max_length=3, choices=typestitres, default='ZZZ')
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
@@ -183,11 +172,17 @@ class Titre(models.Model):
     def save(self, *args, **kwargs):
         tiers_save = False
         self.alters_data = True
-        if not self.tiers:
+        if not utils.is_onexist(self, "tiers"):
+            super(Titre, self).save(*args, **kwargs)
             self.tiers = Tiers.objects.get_or_create(nom='titre_ %s' % self.nom,
                                                      defaults={"nom": 'titre_ %s' % self.nom,
                                                                "is_titre": True,
                                                                "notes": "%s@%s" % (self.isin, self.type)})[0]
+            self.tiers.nom = 'titre_ %s' % self.nom
+            self.tiers.notes = u"%s@%s" % (self.isin, self.type)
+            self.tiers.is_titre = True
+            tiers_save = True
+
         else:
             if has_changed(self, 'nom'):
                 if self.tiers.nom != 'titre_ %s' % self.nom:
@@ -197,10 +192,14 @@ class Titre(models.Model):
                 if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
                     self.tiers.notes = u"%s@%s" % (self.isin, self.type)
                     tiers_save = True
-            if tiers_save:
-                self.tiers.is_titre = True
-                self.tiers.save()
+        # comme ca a ete obligatoirement cree au dessus
+        if 'force_insert' in kwargs.keys():
+            del kwargs['force_insert']
+            kwargs['force_update'] = True
         super(Titre, self).save(*args, **kwargs)
+        if tiers_save:
+            self.tiers.is_titre = True
+            self.tiers.save()
 
     def investi(self, compte=None, datel=None, rapp=None, exclude_id=None):
         """renvoie le montant investi
@@ -747,7 +746,7 @@ class Compte(models.Model):
 
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
-    titre = models.ForeignKey(Titre)
+    titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     compte = models.ForeignKey(Compte, verbose_name=u"compte titre", limit_choices_to={'type':'t'})
     nombre = models_gsb.CurField(default=0, decimal_places=5)
     date = models.DateField()
@@ -1120,7 +1119,7 @@ class Ope(models.Model):
     date = models.DateField(default=utils.today)
     date_val = models.DateField(null=True, blank=True, default=None)
     montant = models_gsb.CurField()
-    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.PROTECT, default=None)
+    tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     cat = models.ForeignKey(Cat, null=True, blank=True, on_delete=models.PROTECT, default=None, verbose_name=u"Catégorie")
     notes = models.TextField(blank=True, default='')
     moyen = models.ForeignKey(Moyen, null=True, blank=True, on_delete=models.SET_NULL, default=None)
@@ -1129,7 +1128,7 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"projet")
-    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None, editable=False)
+    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None, editable=False, on_delete=models.CASCADE)
     mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.PROTECT, verbose_name=u'Mere')
     automatique = models.BooleanField(default=False, help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')

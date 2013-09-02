@@ -312,6 +312,9 @@ class Titre_cache(Table):
                 if not self.readonly:  # on cree donc l'operation
                     argument_def = self.arg_def(nom, isin, obj)
                     try:
+                        if obj is not None:
+                            if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
+                                raise IntegrityError("ce titre existe deja")
                         created = self.element.objects.create(**argument_def)
                         self.nb_created += 1
                     except IntegrityError as e:
