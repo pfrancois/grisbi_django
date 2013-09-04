@@ -23,19 +23,19 @@
 {% block ope %}
     <tr class="item hover{% if ope.nombre > 0 %} creditElement{% endif %}{% if ope.nombre < 0 %} debitElement{% endif %}">
         <td class="opDate">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.date }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.date }}</a>
         </td>
         <td class="opCenter">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.titre.nom|escape }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.titre.nom|escape }}</a>
         </td>
         <td class="opCenter">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a>
         </td>
         <td class="opDebit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.cours|cur }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.cours|cur }}</a>
         </td>
         <td class="opCredit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.ope.rapp %}class='rappElement' {% endif %}{% if ope.ope.pointe %}class='poiElement' {% endif %}>{{ ope.invest|cur }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.invest|cur }}</a>
         </td>
     </tr>
 {% endblock ope %}

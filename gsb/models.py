@@ -216,8 +216,8 @@ class Titre(models.Model):
         if rapp:
             query = query.filter(rapp__isnull=False)
         if exclude_id:
-            query = query.exclude(pk=exclude_id.ope.id)
-            if exclude_id.ope_pmv is not None:
+            query = query.exclude(pk=exclude_id.ope_ost.id)
+            if utils.is_onexist(exclude_id, "ope_pmv"):
                 query = query.exclude(pk=exclude_id.ope_pmv.id)
         valeur = query.aggregate(invest=models.Sum('montant'))['invest']
         if not valeur:
@@ -235,7 +235,7 @@ class Titre(models.Model):
         if compte:
             query = query.filter(compte=compte)
         if rapp:
-            query = query.filter(ope__rapp__isnull=False)
+            query = query.filter(ope_ost__rapp__isnull=False)
         if datel:
             query = query.filter(date__lte=datel)
         if exclude_id:
@@ -284,7 +284,7 @@ class Cours(models.Model):
     """cours des titres"""
     date = models.DateField(default=utils.today)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
-    titre = models.ForeignKey(Titre)
+    titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
@@ -586,7 +586,6 @@ class Compte(models.Model):
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
                     tiers_frais = titre.tiers
-
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -631,7 +630,7 @@ class Compte(models.Model):
             nb_titre_avant = titre.nb(compte=self, datel=date)
             if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
-                # compta matiere
+            # compta matiere
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
                                                  nombre=decimal.Decimal(force_unicode(nombre)) * -1,
@@ -752,24 +751,18 @@ class Ope_titre(models.Model):
     date = models.DateField()
     cours = models_gsb.CurField(default=1, decimal_places=5)
     invest = models_gsb.CurField(default=0, editable=False, decimal_places=2)
-    ope = models.OneToOneField('Ope',
-                               editable=False,
-                               null=True,
-                               on_delete=models.CASCADE,
-                               related_name="ope")  # null=true car j'ai des operations sans lien
-    ope_pmv = models.OneToOneField('Ope',
-                                   editable=False,
-                                   null=True,
-                                   on_delete=models.CASCADE,
-                                   related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
     class Meta:
         db_table = 'gsb_ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
-        verbose_name = u'Opérations titres(compta_matiere)'
+        verbose_name = u'Opération titres(compta_matiere)'
         ordering = ['-date']
+
+    @property
+    def rapp(self):
+        return self.ope_ost.rapp is None or (utils.is_onexist(self, "ope_pmv") and self.ope_pmv.rapp)
 
     def save(self, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
@@ -777,77 +770,75 @@ class Ope_titre(models.Model):
         # definition des cat avec possibilite
         cat_ost = Cat.objects.get(id=settings.ID_CAT_OST)
         cat_pmv = Cat.objects.get(id=settings.ID_CAT_PMV)
-        # gestion de la date
-        # self.date = utils.strpdate(self.date)
-
+        super(Ope_titre, self).save(*args, **kwargs)
         # gestion des cours
         # si on chnage la date de l'operation il faut supprimer le cours associe
-        if self.ope:
-            old_date = self.ope.date
+        if utils.is_onexist(self, "ope_ost"):
+            old_date = self.ope_ost.date
             Cours.objects.get(titre=self.titre, date=old_date).delete()
         Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
         self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
-            if self.ope_pmv is not None:
+            if utils.is_onexist(self, 'ope_pmv'):
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
-            if self.ope is None:  # il faut creer l'ope sous jacente
-                self.ope = Ope.objects.create(date=self.date,
+            if not utils.is_onexist(self, 'ope_ost'):  # il faut creer l'ope sous jacente
+                Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
                                               cat=cat_ost,
                                               notes="%s@%s" % (self.nombre, self.cours),
                                               moyen=self.compte.moyen_debit(),
                                               compte=self.compte,
-                )
-
+                                              ope_titre_ost=self
+                                              )
             else:  # la modifier juste
-                self.ope.date = self.date
-                self.ope.montant = self.cours * self.nombre * -1
-                self.ope.tiers = self.titre.tiers
-                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope.compte = self.compte
-                self.ope.save()
+                self.ope_ost.date = self.date
+                self.ope_ost.montant = self.cours * self.nombre * -1
+                self.ope_ost.tiers = self.titre.tiers
+                self.ope_ost.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope_ost.compte = self.compte
+                self.ope_ost.save()
         else:  # c'est une vente
-            # calcul prealable
-            # on met des plus car les chiffres sont negatif
-            if self.ope:  # ope existe deja, donc il faut faire attention car les montant inv sont faux
+            # calcul prealable, on met des plus car les chiffres sont negatif
+            if utils.is_onexist(self, 'ope_ost'):  # ope existe deja, donc il faut faire attention car les montant inv sont faux
                 inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self)
-                nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             else:
                 inv_vrai = self.titre.investi(self.compte, datel=self.date)
-                nb_vrai = self.titre.nb(self.compte, datel=self.date)
-                # chaine car comme on a des decimal
+            # on exclue par defaut car l'operation existe deja
+            nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
+            # chaine car comme on a des decimal
             ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
             ost = decimal.Decimal(ost) * -1
             pmv = abs(self.invest) - abs(ost)
             # on cree les ope
-            if not self.ope:
-                self.ope = Ope.objects.create(date=self.date,
+            if not utils.is_onexist(self, 'ope_ost'):
+                Ope.objects.create(date=self.date,
                                               montant=ost,
                                               tiers=self.titre.tiers,
                                               cat=cat_ost,
                                               notes="%s@%s" % (self.nombre, self.cours),
                                               moyen=self.compte.moyen_credit(),
                                               compte=self.compte,
-                )
-
+                                              ope_titre_ost=self
+                                              )
             else:
-                self.ope.date = self.date
-                self.ope.montant = ost
-                self.ope.tiers = self.titre.tiers
-                self.ope.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope.compte = self.compte
-                self.ope.moyen = self.compte.moyen_credit()
-                self.ope.save()
-            if self.ope_pmv is None:
-                self.ope_pmv = Ope.objects.create(date=self.date,
+                self.ope_ost.date = self.date
+                self.ope_ost.montant = ost
+                self.ope_ost.tiers = self.titre.tiers
+                self.ope_ost.notes = "%s@%s" % (self.nombre, self.cours)
+                self.ope_ost.compte = self.compte
+                self.ope_ost.moyen = self.compte.moyen_credit()
+                self.ope_ost.save()
+            if not utils.is_onexist(self, 'ope_pmv'):
+                Ope.objects.create(date=self.date,
                                                   montant=pmv,
                                                   tiers=self.titre.tiers,
                                                   cat=cat_pmv,
                                                   notes="%s@%s" % (self.nombre, self.cours),
                                                   moyen=self.compte.moyen_credit(),
                                                   compte=self.compte,
-                )
+                                                  ope_titre_pmv=self
+                                                  )
             else:
                 # on modifie tout
                 self.ope_pmv.date = self.date
@@ -858,16 +849,6 @@ class Ope_titre(models.Model):
                 self.ope_pmv.compte = self.compte
                 self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
-        super(Ope_titre, self).save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.ope is not None:
-            if self.ope.rapp is not None:
-                raise IntegrityError(u"opération espèce rapprochée")
-        if self.ope_pmv is not None:
-            if self.ope_pmv.rapp is not None:
-                raise IntegrityError(u"opération pmv rapprochée")
-        super(Ope_titre, self).delete(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('ope_titre_detail', kwargs={'pk': str(self.id)})
@@ -877,8 +858,28 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id,
+                                                             sens,
+                                                             abs(self.nombre),
+                                                             self.titre,
+                                                             self.cours,
+                                                             settings.DEVISE_GENERALE,
+                                                             self.date.strftime('%d/%m/%Y'),
+                                                             self.compte
+                                                             )
         return chaine
+
+
+@receiver(pre_delete, sender=Ope_titre, weak=False)
+def verif_opetitre_rapp(sender, **kwargs):
+    instance = kwargs['instance']
+    # on evite que cela soit une opération rapproche
+    if utils.is_onexist(instance, 'ope_ost'):
+        if instance.ope_ost.rapp is not None:
+            raise IntegrityError(u"opération espèce rapprochée")
+    if utils.is_onexist(instance, 'ope_pmv'):
+        if instance.ope_pmv.rapp is not None:
+            raise IntegrityError(u"opération pmv rapprochée")
 
 
 class Moyen(models.Model):
@@ -1134,6 +1135,16 @@ class Ope(models.Model):
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
+    ope_titre_ost = models.OneToOneField('Ope_titre',
+                               editable=False,
+                               null=True,
+                               on_delete=models.CASCADE,
+                               related_name="ope_ost")  # null=true car j'ai des operations sans lien
+    ope_titre_pmv = models.OneToOneField('Ope_titre',
+                               editable=False,
+                               null=True,
+                               on_delete=models.CASCADE,
+                               related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null"""
 
     class Meta:
         db_table = 'gsb_ope'
@@ -1151,6 +1162,14 @@ class Ope(models.Model):
         """ renvoie uniquement les opération non mere
         """
         return Ope.objects.all().filter(filles_set__isnull=True)
+
+    @property
+    def opetitre(self):
+        if self.ope_titre_ost is not None:
+            return self.ope_titre_ost
+        if self.ope_titre_pmv is not None:
+            return self.ope_titre_pmv
+        return None
 
     @staticmethod
     def solde_set(q):

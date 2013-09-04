@@ -82,12 +82,12 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['has_fille'] = utils.booltostr(ope.id in ope_mere)
             ligne['id_ope_m'] = utils.idtostr(ope, defaut='', membre='mere_id')
             try:
-                ligne['ope_titre'] = ope.ope.id
-            except django_exceptions.ObjectDoesNotExist:
+                ligne['ope_titre'] = ope.ope_titre_ost.id
+            except (django_exceptions.ObjectDoesNotExist, AttributeError):
                 ligne['ope_titre'] = ''
             try:
-                ligne['ope_pmv'] = ope.ope_pmv.id
-            except django_exceptions.ObjectDoesNotExist:
+                ligne['ope_pmv'] = ope.ope_titre_pmv.id
+            except (django_exceptions.ObjectDoesNotExist, AttributeError):
                 ligne['ope_pmv'] = ''
             ligne['mois'] = ope.date.strftime('%m')
             data.append(ligne)

@@ -176,7 +176,10 @@ class Modeladmin_perso(admin.ModelAdmin):
         return self.keepfilter(request, result)
 
     def delete_view(self, request, object_id, extra_context=None):
-        result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
+        try:
+            result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
+        except IntegrityError as excp:
+            messages.error(request, excp)
         return self.keepfilter(request, result)
 
 
@@ -398,9 +401,9 @@ class Ope_admin(Modeladmin_perso):
     show_mere.short_description = "mere"
 
     def oper_titre(self, obj):
-        if obj.ope:
-            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
+        if obj.ope_ost:
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_ost.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_ost))
         else:
             return "(aucun-e)"
 
@@ -429,27 +432,6 @@ class Ope_admin(Modeladmin_perso):
             messages.error(request, unicode(err))
 
     action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
-
-    def delete_view(self, request, object_id, extra_context=None):
-        instance = self.get_object(request, admin.util.unquote(object_id))
-        # on evite que cela soit une operation rapproche
-        error = False
-        if instance.rapp:
-            messages.error(request, u'ope rapprochee')
-            error = True
-        if instance.jumelle:
-            if instance.jumelle.rapp:
-                messages.error(request, u'jumelle rapproche')
-                error = True
-        if instance.mere:
-            if instance.mere.rapp:
-                messages.error(request, u'mere rapprochee')
-                error = True
-        if not error:
-            try:
-                return super(Ope_admin, self).delete_view(request, object_id, extra_context)
-            except IntegrityError, excp:
-                messages.error(request, excp)
 
 
 class Cours_admin(Modeladmin_perso):
@@ -557,8 +539,8 @@ class Ope_titre_admin(Modeladmin_perso):
     ordering = ('-date',)
 
     def show_ope(self, obj):
-        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope.id,))
-        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope))
+        change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_ost.id,))
+        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_ost))
 
     show_ope.short_description = u"opération"
 

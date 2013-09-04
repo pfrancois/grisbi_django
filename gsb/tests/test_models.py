@@ -559,10 +559,11 @@ class Test_models(TestCase):
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4), moyen_debit_defaut=Moyen.objects.get(id=2))
         # creation d'une nouvelle operation
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
-        Ope_titre.objects.create(titre=t, compte=c, nombre=5, date='2011-01-02', cours=20)
-        Ope_titre.objects.get(id=5)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=5, date=utils.strpdate('2011-01-02'), cours=20)
+        o = Ope_titre.objects.get(id=5)
         o2 = Ope_titre.objects.get(id=6)
-        self.assertEqual(o2.ope.montant, -100)  # juste verification
+        self.assertEqual(o.ope_ost.montant, -150)
+        self.assertEqual(o2.ope_ost.montant, -100)  # juste verification
         self.assertEqual(t.nb(c), 20)
         self.assertEqual(t.investi(c), 250)
         self.assertEqual(t.encours(c), 20 * 20)
@@ -570,7 +571,7 @@ class Test_models(TestCase):
         o2.nombre = -5
         o2.save()
         o2 = Ope_titre.objects.get(id=6)
-        self.assertEqual(o2.ope.id, 15)
+        self.assertEqual(o2.ope_ost.id, 15)
         self.assertEqual(o2.ope_pmv.id, 16)
         self.assertEqual(t.nb(c), 10)
         self.assertEqual(t.investi(c), 50)
@@ -578,7 +579,7 @@ class Test_models(TestCase):
         o2 = Ope_titre.objects.get(id=6)
         o2.nombre = -10
         o2.save()
-        self.assertEqual(o2.ope.id, 15)
+        self.assertEqual(o2.ope_ost.id, 15)
         self.assertEqual(o2.ope_pmv.id, 16)
         self.assertEqual(t.nb(c), 5)
         self.assertEqual(t.investi(c), -50)
@@ -610,29 +611,29 @@ class Test_models(TestCase):
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4), moyen_debit_defaut=Moyen.objects.get(id=2))
         # creation d'une nouvelle operation
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
-        self.assertEqual(o.ope.id, 14)
-        self.assertEqual(o.ope.montant, -150)
-        self.assertEqual(o.ope.moyen_id, 2)
+        self.assertEqual(o.ope_ost.id, 14)
+        self.assertEqual(o.ope_ost.montant, -150)
+        self.assertEqual(o.ope_ost.moyen_id, 2)
         self.assertEqual(t.investi(c), 150)
-        self.assertEqual(o.ope.notes, "15@10")
+        self.assertEqual(o.ope_ost.notes, "15@10")
         # on verifie qu'il creer bien un cours a la date
         self.assertEqual(Cours.objects.get(date=utils.strpdate('2011-01-01'), titre=t).valeur, 10)
         # on vend
         o = Ope_titre.objects.create(titre=t, compte=c, nombre= -10, date='2011-01-02', cours=15)
-        self.assertEqual(o.ope.id, 15)
-        self.assertEqual(o.ope.montant, 100)
-        self.assertEqual(o.ope.moyen_id, 4)
+        self.assertEqual(o.ope_ost.id, 15)
+        self.assertEqual(o.ope_ost.montant, 100)
+        self.assertEqual(o.ope_ost.moyen_id, 4)
         self.assertEqual(o.ope_pmv.id, 16)
         self.assertEqual(o.ope_pmv.montant, 50)
         self.assertEqual(o.ope_pmv.moyen_id, 4)
         self.assertEqual(o.ope_pmv.cat.nom, 'Revenus de placement:Plus-values')
-        self.assertEqual(o.ope.notes, "-10@15")
+        self.assertEqual(o.ope_ost.notes, "-10@15")
         self.assertEqual(t.investi(c), 0)
         self.assertEqual(t.encours(c), 5 * 15)
         # on vend ce qui reste
         o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-03', cours=20)
         self.assertEqual(t.investi(c), -100)
-        self.assertEqual(o.ope.montant, 0)
+        self.assertEqual(o.ope_ost.montant, 0)
         self.assertEqual(o.ope_pmv.montant, 100)
         self.assertEqual(t.encours(c), 0)
 
@@ -650,8 +651,8 @@ class Test_models(TestCase):
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
-        o.ope.rapp_id = 1
-        o.save()
+        o.ope_ost.rapp_id = 1
+        o.ope_ost.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
         # on la recree mais avec une vente comme ca il y a des plus values
         o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=utils.strpdate('2011-01-01'), cours=10)
@@ -659,7 +660,8 @@ class Test_models(TestCase):
         # on rapproche son ope
         r = Rapp.objects.get(id=1)
         o.ope_pmv.rapp = r
-        o.save()
+        o.ope_pmv.save()
+        o = Ope_titre.objects.get(id=o_id)
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
 
     def test_ope_titre_get_absolute_url(self):
@@ -1121,7 +1123,7 @@ class Test_models(TestCase):
         o = Ope.objects.filter(compte=Compte.objects.get(id=5), date='2011-01-01')[0]
         o.rapp = Rapp.objects.get(id=1)
         o.save()
-        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope.id).delete)
+        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o.ope_titre_ost.id).delete)
 
     def test_pre_save_ope_mere(self):
         o = Ope.objects.get(id=11)

@@ -383,7 +383,7 @@ class Csv_unicode_reader(object):
 
 def is_onexist(objet, attribut):
     try:
-        if getattr(objet, attribut) is not None:
+        if getattr(objet, attribut, None) is not None:
             return True
         else:
             return False

@@ -55,16 +55,12 @@
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R
                             {% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
                     </td>
-                    <td>{% if ope.jumelle %}
-                        <a href="{{ ope.jumelle.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {{ ope.jumelle }}</a>{% else %}
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>-
-                        </div>{% endif %}</td>
-                    <td>{% if ope.ope %}
-                        <a href="{{ ope.ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>
-                        {{ ope.ope }}</a>{% else %}
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>-
-                        </div>{% endif %}</td>
+                    <td>{% if ope.jumelle %}<a href="{{ ope.jumelle.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.jumelle }}</a>
+                    	{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
+                    	{% endif %}</td>
+                    <td>{% if ope.opetitre %}<a href="{{ ope.opetitre.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.opetitre }}</a>
+                    	{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
+                    	{% endif %}</td>
                     <td>
                         <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.montant|cur }}</div>
                     </td>

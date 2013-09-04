@@ -581,7 +581,7 @@ def ope_titre_detail(request, pk):
         # date_initial = ope.date#inutile
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
-            if ope.ope.rapp is None:
+            if ope.rapp:
                 try:
                     form.save()
                     messages.info(request, u"opération modifiée")
@@ -590,22 +590,17 @@ def ope_titre_detail(request, pk):
             else:
                 messages.error(request, u"opération impossible a modifier, elle est rapprochée")
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
-                                                     kwargs={'cpt_id': ope.compte.id,
-                                                             'titre_id': ope.titre.id}
-            )
-            )
+                                                     kwargs={'cpt_id': ope.compte.id, 'titre_id': ope.titre.id}
+                                                    )
+                                             )
     else:
         form = gsb_forms.Ope_titreForm(instance=ope)
-    if ope.ope is not None:
-        rapp = bool(ope.ope.rapp_id)
-    else:
-        rapp = False
     return render(request, 'gsb/ope_titre_detail.djhtm',
                   {'titre_long': u'opération sur titre %s' % ope.id,
                    'titre': u'modification',
                    'form': form,
                    'ope': ope,
-                   'rapp': rapp}
+                   'rapp': ope.rapp}
     )
 
 
@@ -613,7 +608,7 @@ def ope_titre_detail(request, pk):
 def ope_titre_delete(request, pk):
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
-        if ope.ope and ope.ope.rapp:
+        if ope.rapp:
             messages.error(request, u"impossible d'effacer une operation rapprochée")
             return http.HttpResponseRedirect(ope.get_absolute_url())
         compte_id = ope.compte.id
@@ -624,16 +619,13 @@ def ope_titre_delete(request, pk):
             s = u'%s' % cours
             cours.delete()
             messages.success(request, u'cours effacé: %s' % s)
-        if ope.ope:
-            ope.ope.delete()
         s = u'%s' % ope.id
         ope.delete()
         messages.success(request, u'ope effacé id %s' % s)
         return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
-                                                 kwargs={'cpt_id': compte_id,
-                                                         'titre_id': titre_id}
-        )
-        )
+                                                 kwargs={'cpt_id': compte_id, 'titre_id': titre_id}
+                                                 )
+                                         )
     else:
         return http.HttpResponseRedirect(ope.get_absolute_url())
 
