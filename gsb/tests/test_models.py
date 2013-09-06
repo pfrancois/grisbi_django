@@ -667,6 +667,25 @@ class Test_models(TestCase):
     def test_ope_titre_get_absolute_url(self):
         self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')
 
+    def test_ope_titre_rapp(self):
+        """verifie les deux cas ou une ope peut etre rapp"""
+        t = Titre.objects.create(nom="t3", isin="xxxxxxx")
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4), moyen_debit_defaut=Moyen.objects.get(id=2))
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
+        o_id = o.id
+        # on rapproche son ope
+        o.ope_ost.rapp_id = 1
+        o.ope_ost.save()
+        self.assertEqual(Ope_titre.objects.get(id=o_id).rapp, True)
+        o.ope_ost.rapp = None
+        o.ope_ost.save()
+        self.assertEqual(Ope_titre.objects.get(id=o_id).rapp, False)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=utils.strpdate('2011-01-01'), cours=100)
+        o_id = o.id
+        o.ope_pmv.rapp_id = 1
+        o.ope_pmv.save()
+        self.assertEqual(Ope_titre.objects.get(id=o_id).rapp, True)
+
     def test_moyen_fusionne(self):
         Moyen.objects.get(id=3).fusionne(Moyen.objects.get(id=2))
         self.assertQuerysetEqual(Moyen.objects.order_by('id'), [1, 2, 4, 5], attrgetter("id"))

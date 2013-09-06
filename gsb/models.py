@@ -762,7 +762,11 @@ class Ope_titre(models.Model):
 
     @property
     def rapp(self):
-        return self.ope_ost.rapp is None or (utils.is_onexist(self, "ope_pmv") and self.ope_pmv.rapp)
+        if utils.is_onexist(self, "ope_ost") and self.ope_ost.rapp is not None:
+            return True
+        if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.rapp is not None:
+            return True
+        return False
 
     def save(self, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
