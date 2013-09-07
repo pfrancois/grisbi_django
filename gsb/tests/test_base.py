@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.conf import settings
-
+from operator import attrgetter
 
 __all__ = ['TestCase']
 
@@ -28,16 +28,13 @@ class TestCase(Test_Case_django):
         logger.setLevel(logging.ERROR)
         super(TestCase, self).setUp()
 
-    def assertQueryset_list(self, qs1, list1):
+    def assertQueryset_list(self, qs1, liste, element="pk"):
         # compare les id d'un query set avec une liste
-        pk = qs1.values_list('pk', flat=True)
-        return self.assertEqual(sorted(list(pk)), sorted(list(list1)))
-
-    def assertQuerysets(self, qs1, qs2):
-        # compare les id d'un query set avec une liste
-        pk = qs1.values_list('pk', flat=True)
-        pk2 = qs1.values_list('pk', flat=True)
-        return self.assertEqual(sorted(list(pk)), sorted(list(pk2)))
+        items = list()
+        for obj in qs1.order_by(element):
+            items.append(getattr(obj, element))
+        diff = [x for x in list(items) if x not in liste] + [x for x in liste if x not in list(items)]
+        return self.assertEqual(sorted(items), sorted(liste), diff)
 
     def setup_view(self, view, request, *args, **kwargs):
         """Mimic as_view() returned callable, but returns view instance.
