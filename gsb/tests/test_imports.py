@@ -17,13 +17,13 @@ from django.contrib.auth.models import User
 from ..io import import_base
 import glob
 
-__all__ = ['Test_import', ]
+__all__ = ['Test_import_csv', 'Test_import_base']
 
 
-class Test_import(TestCase):
+class Test_import_csv(TestCase):
 
     def setUp(self):
-        super(Test_import, self).setUp()
+        super(Test_import_csv, self).setUp()
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
         self.client.login(username='admin', password='mdp')
 
@@ -36,8 +36,16 @@ class Test_import(TestCase):
             self.assertEqual(models.Cat.objects.count(), 11)  # ne pas oublier les cat cree automatiquement
             self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), -4)
             self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
-        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):
+        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
                 os.remove(name)
+
+
+class Test_import_base(TestCase):
+
+    def setUp(self):
+        super(Test_import_csv, self).setUp()
+        self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
+        self.client.login(username='admin', password='mdp')
 
     def test_import_base(self):
         prop = import_base.property_ope_base()

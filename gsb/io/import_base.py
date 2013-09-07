@@ -482,11 +482,11 @@ class Import_base(views.Myformview):
         destination.close()
         # renomage ok
         result = self.import_file(nomfich)
-        if result == False:  # probleme importation
+        if result == False:  # probleme importation raise # pragma: no cover
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
-            if self.resultat:
+            if self.resultat:  # pragma: no cover
                 return self.render_to_response(self.get_context_data(form=form, resultat=self.resultat))
             else:
                 return HttpResponseRedirect(self.get_success_url())
