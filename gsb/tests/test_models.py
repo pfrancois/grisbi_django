@@ -1102,6 +1102,20 @@ class Test_models(TestCase):
         # ope rapp
         self.assertRaises(IntegrityError, Ope.objects.get(id=3).delete)
 
+    def test_ope_ope_titre(self):
+        o = Ope.objects.get(pk=10)
+        self.assertEqual(o.opetitre.id, 4)
+
+    def test_ope_ope_titre2(self):
+        t = Titre.objects.get(id=1)
+        c = Compte.objects.get(id=4)
+        c.vente(t, 2)
+        o = Ope.objects.get(pk=15)
+        self.assertEqual(o.opetitre.id, 5)
+
+    def test_ope_ope_titre3(self):
+        self.assertEqual(Ope.objects.get(pk=11).opetitre, None)
+
     def test_pre_delete_ope_mere(self):
         o = Ope.objects.get(id=8)
         # on transforme l'ope 1 en ope mere

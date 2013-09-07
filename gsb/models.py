@@ -1310,8 +1310,6 @@ def verif_ope_rapp(sender, **kwargs):
     if instance.mere:
         if instance.mere.rapp:
             raise IntegrityError(u"opération mere rapprochée")
-    if instance.filles_set.count() > 0:
-        raise IntegrityError(u"opérations filles existantes %s" % instance.filles_set.all())
 
 
 class Virement(object):
@@ -1455,13 +1453,13 @@ class Virement(object):
                    'date': self.date,
                    'notes': self.notes,
                    'pointe': self.pointe}
-            if self.origine.moyen:
+            try:
                 tab['moyen_origine'] = self.origine.moyen.id
-            else:
+            except AttributeError:  # pragma: no cover
                 tab['moyen_origine'] = Moyen.objects.filter(type='v')[0]
-            if self.dest.moyen:
+            try:
                 tab['moyen_destination'] = self.dest.moyen.id
-            else:
+            except AttributeError:  # pragma: no cover
                 tab['moyen_destination'] = Moyen.objects.filter(type='v')[0]
         else:
             raise Gsb_exc(u'attention, on ne peut intialiser un form que si virement est bound')
