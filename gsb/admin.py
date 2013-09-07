@@ -238,7 +238,7 @@ class Cat_admin(Modeladmin_perso):
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
     list_filter = ('type',)
-    radio_fields = {'type': admin.VERTICAL}
+    radio_fields = {'type': admin.HORIZONTAL}
     list_select_related = True
     inlines = [ope_cat_admin]
 
@@ -441,6 +441,7 @@ class Cours_admin(Modeladmin_perso):
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
     list_filter = ('date', 'titre')
+    fields = ('date', 'titre', 'valeur')
     ordering = ('-date',)
 
 
@@ -469,8 +470,9 @@ class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
     list_filter = ('type',)
-    fields = ['type', 'nom']
+    fields = ['nom', 'type']
     list_display = ('nom', 'type', 'nb_ope')
+    radio_fields = {'type': admin.HORIZONTAL}
 
 
 class ope_tiers_admin(liste_perso_inline):
@@ -495,10 +497,11 @@ class Tiers_admin(Modeladmin_perso):
 
 class Ech_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les écheances d'operations"""
-    list_display = (
-        'id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
+    list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
+    fields = ('date', 'date_limite', ('intervalle', 'periodicite'), 'valide', 'compte', ('montant', 'tiers'), ('cat', 'moyen', 'ib'), ('compte_virement', 'moyen_virement'), 'exercice', 'notes')
     actions = ['check_ech']
+    radio_fields = {'periodicite': admin.HORIZONTAL}
 
     def check_ech(self, request, queryset):
         Echeance.check(request=request, queryset=queryset)
