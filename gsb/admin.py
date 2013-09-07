@@ -262,11 +262,13 @@ class Compte_admin(Modeladmin_perso):
     actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a',
                'action_supprimer_pointe', 'action_transformer_pointee_rapp',
                'action_ajustement_cb']
-    fields = (
-        'nom', 'type', 'ouvert', 'banque', 'guichet', 'num_compte', 'cle_compte', 'solde_init', 'solde_mini_voulu',
-        'solde_mini_autorise', 'moyen_debit_defaut', 'moyen_credit_defaut')
+    fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
+              'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut'))
     list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
+    radio_fields = {'type': admin.HORIZONTAL,
+                    'moyen_debit_defaut':admin.VERTICAL,
+                    'moyen_credit_defaut':admin.VERTICAL}
 
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
