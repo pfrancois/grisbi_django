@@ -30,10 +30,13 @@ class TestCase(Test_Case_django):
 
     def assertQueryset_list(self, qs1, liste, element="pk"):
         # compare les id d'un query set avec une liste
+        # mais avantil faut preparer la liste
         items = list()
         for obj in qs1.order_by(element):
             items.append(getattr(obj, element))
-        diff = [x for x in list(items) if x not in liste] + [x for x in liste if x not in list(items)]
+        if not hasattr(liste, "__iter__"):
+            liste = (liste,)
+        diff = ([x for x in list(items) if x not in liste], [x for x in liste if x not in list(items)])
         return self.assertEqual(sorted(items), sorted(liste), diff)
 
     def setup_view(self, view, request, *args, **kwargs):

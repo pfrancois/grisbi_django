@@ -34,7 +34,7 @@ class ImportForm1(gsb_forms.Baseform):
 
 
 class property_ope_base(object):
-    """defini toutes le proprietes d'ope"""
+    """defini toutes les proprietes d'ope"""
 
     @property
     def id(self):
@@ -147,7 +147,7 @@ class Table(object):
                 c, created = self.element.objects.get_or_create(**param)
                 self.id[c.nom] = c.pk
                 if created:
-                    messages.info(request, "%s cree" % c.nom)
+                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
 
         if self.element is None:
             raise NotImplementedError("table de l'element non choisi")
@@ -216,7 +216,8 @@ class Moyen_cache(Table):
 
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
-                     {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}}, ]
+                     {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}},
+                     {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}}, ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:

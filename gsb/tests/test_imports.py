@@ -30,20 +30,26 @@ class Test_import_csv(TestCase):
     def test_import_csv_ok(self):
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_simple.csv"))  as file_test:
             r = self.client.post(reverse('import_csv_ope_all'), {'nom_du_fichier': file_test})
-            self.assertEqual(r.status_code, 302)
-            self.assertEqual(models.Tiers.objects.count(), 4)  # ne pas oublier le tiers cree automatiquement
-            self.assertEqual(models.Ope.objects.count(), 4)
-            self.assertEqual(models.Cat.objects.count(), 11)  # ne pas oublier les cat cree automatiquement
-            self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), -4)
-            self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
-        for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
+            for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
                 os.remove(name)
+
+        self.assertEqual(r.status_code, 302)
+        self.assertQueryset_list(models.Tiers.objects.all(), ['Franprix', 'Picard', 'leaderprice', 'secu'], 'nom')  # ne pas oublier le tiers cree automatiquement
+        self.assertQueryset_list(models.Ope.objects.all(), [1, 2, 3, 4, 5, 6])
+        self.assertQueryset_list(models.Cat.objects.all(),
+                                  ['cat1', 'cat2', 'cat3',
+                                    u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre", u"Revenus de placements:Plus-values",
+                                    u'Impôts:Cotisations sociales', u'Revenus de placements:interets', u'Virement'],
+                                   'nom')  # ne pas oublier les cat cree automatiquement
+        self.assertQueryset_list(models.Rapp.objects.all(), ["test", ], "nom")
+        self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), 36)
+        self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
 
 
 class Test_import_base(TestCase):
 
     def setUp(self):
-        super(Test_import_csv, self).setUp()
+        super(Test_import_base, self).setUp()
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
         self.client.login(username='admin', password='mdp')
 

@@ -78,9 +78,10 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
     @property
     def rapp(self):
         if 'r' in self.row:
-            return utils.to_bool(self.row['r'])
+            rapp = utils.to_unicode(self.row['r'], '')
+            return rapp
         else:
-            return False
+            return ''
 
     @property
     def tiers(self):
@@ -149,6 +150,7 @@ class Import_csv_ope(import_base.Import_base):
         self.titres = import_base.Titre_cache(self.request)
         self.cours = import_base.Cours_cache(self.request, self.titres)
         self.moyen_par_defaut = import_base.moyen_defaut_cache(self.request, self.moyens)
+        self.rapps = import_base.Rapp_cache(self.request)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
@@ -158,41 +160,43 @@ class Import_csv_ope(import_base.Import_base):
         # les moyens par defaut
         moyen_virement = self.moyens.goc('', {'nom': "virement", 'type': 'v'})
         retour = False
-        try:
-            with open(nomfich, 'rt') as f_non_encode:
-                fich = self.reader(f_non_encode, encoding=self.encoding)
-                #---------------------- boucle
-                retour = self.tableau(fich, moyen_virement)
-                #------------------fin boucle
-        except (utils.FormatException, import_base.ImportException) as e:
-            messages.error(self.request, "attention traitement interrompu parce que %s" % e)
-            retour = False
+        # try:
+        with open(nomfich, 'rt') as f_non_encode:
+            fich = self.reader(f_non_encode, encoding=self.encoding)
+            #---------------------- boucle
+            retour = self.tableau(fich, moyen_virement)
+            #------------------fin boucle
+        # except ( import_base.ImportException) as e:
+        #    messages.error(self.request, "attention traitement interrompu parce que %s" % e)
+        #    retour = False
         # gestion des erreurs
         if len(self.erreur) or retour == False:
             for err in self.erreur:
                     messages.warning(self.request, err)
             return False
         # on gere le nombre de truc annex crée
-        for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres):
+        for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
             if obj.nb_created > 0:
                 messages.info(self.request, u"%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
         # maintenant on sauvegarde les operations
         for ope in self.opes.create_item:
             ligne = ope.pop('ligne')
             ope.pop('mere_id')  # on efface ca comme pour l'instant je gere pas
-            if ope.get('has_fille', True):
+            if ope.get('has_fille', False):
                 messages.warning(self.request, u"opé ligne %s efface car ope mere " % ligne)
                 continue
             ope.pop('has_fille', False)
             virement = ope.pop('virement', False)
             if virement:
                 # on cree deux operation
-                ope_origine = models.Ope.objects.create(**ope)
-                dest = ope.pop('dest_id')
-                ope['compte'] = dest
-                ope['montant'] = ope['montant'] * -1
-                ope.pop('ib_id', None)
-                ope_dest = models.Ope.objects.create(**ope)
+                ope_orig = ope
+                ope_dest = ope
+                dest = ope_orig.pop('dest_id')
+                ope_dest['compte_id'] = dest
+                ope_dest['montant'] = ope['montant'] * -1
+                ope_dest.pop('ib_id', None)
+                ope_origine = models.Ope.objects.create(**ope_orig)
+                ope_dest = models.Ope.objects.create(**ope_dest)
                 ope_origine.jumelle = ope_dest
                 ope_origine.save()
                 ope_dest.jumelle = ope_origine
@@ -260,12 +264,12 @@ class Import_csv_ope(import_base.Import_base):
                 dest = row.tiers.split("=>")[1]
                 dest = dest.strip()
                 ope['dest_id'] = self.comptes.goc(dest)
-                if origine  and dest:
+                if origine and dest:
                     if self.comptes.goc(origine) != ope['compte_id']:
                         if self.comptes.goc(dest) != ope['compte_id']:
-                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, self.compte))
+                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.cpt))
                         else:
-                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, self.compte))
+                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.cpt))
                         continue
                 else:
                     self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.ligne)
@@ -313,6 +317,10 @@ class Import_csv_ope(import_base.Import_base):
             ope['num_cheque'] = row.num_cheque
             ope['piece_comptable'] = row.piece_comptable
             ope['pointe'] = row.pointe
+            if row.rapp != '':
+                ope['rapp_id'] = self.rapps.goc(row.rapp, ope['date'])
+            else:
+                ope['rapp_id'] = None
             self.opes.create(ope)
         retour = True
         return retour

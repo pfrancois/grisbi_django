@@ -20,10 +20,10 @@ from django.conf import settings
 import os.path
 import mock
 
-__all__ = ['Importtests', 'Importposttests']
+__all__ = ['Test_import_gsb050', 'Test_import_gsb050_post']
 
 
-class Importtests(Tcd):
+class Test_import_gsb050(Tcd):
     def test_mauvais_format(self):
         self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"), self.request_post('toto'))
         self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"), self.request_post('toto'))
@@ -31,11 +31,11 @@ class Importtests(Tcd):
                 os.remove(name)
 
 
-class Importposttests(Tcd):
+class Test_import_gsb050_post(Tcd):
     @mock.patch('gsb.utils.today')
     def setUp(self, today_mock):
         today_mock.return_value = datetime.date(2013, 1, 1)
-        super(Importposttests, self).setUp()
+        super(Test_import_gsb050_post, self).setUp()
         import_gsb_050("%s/../test_files/test_original.gsb" % (os.path.dirname(os.path.abspath(__file__))), self.request_post('toto'))
         Cours(valeur=decimal.Decimal('10.00'), titre=Titre.objects.get(nom=u'SG'), date=datetime.date(day=1, month=1, year=2010)).save()
 
@@ -51,8 +51,8 @@ class Importposttests(Tcd):
         self.assertEqual(obj.is_titre, False)
         self.assertEqual(Tiers.objects.count(), 9)
         self.assertEqual(9, Tiers.objects.all().aggregate(max=models.Max('id'))['max'])
-        self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [1, 2, 3, 4, 5, 6, 7, 8, 9], attrgetter("id"))
-        self.assertQuerysetEqual(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9], attrgetter("id"))
+        self.assertQueryset_list(Tiers.objects.all(), [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertQueryset_list(Tiers.objects.filter(is_titre=True).all().order_by('id'), [5, 6, 7, 8, 9])
 
     @mock.patch('gsb.utils.today')
     def test_titre_normal(self, today_mock):
@@ -84,7 +84,7 @@ class Importposttests(Tcd):
         self.assertEquals(obj.tiers.id, 9)
         self.assertEquals(obj.type, u'ZZZ')
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom, u'SG')
-        self.assertQuerysetEqual(Titre.objects.all().order_by('id'), [1, 2, 3, 4, 5], attrgetter("id"))
+        self.assertQueryset_list(Titre.objects.all(), [1, 2, 3, 4, 5])
         obj = Titre.objects.get(isin=u'FR0000130809').cours_set.get(date=datetime.date(day=1, month=1, year=2010))
         self.assertEquals(obj.valeur, decimal.Decimal('10.00'))
         self.assertEquals(obj.titre, Titre.objects.get(id=1))
@@ -96,7 +96,7 @@ class Importposttests(Tcd):
         self.assertEqual(obj.cib, u'30003')
         self.assertEqual(obj.notes, u'voici qq remarques')
         self.assertEqual(Banque.objects.get(id=2).cib, u'12345')
-        self.assertQuerysetEqual(Banque.objects.all().order_by('id'), [1, 2], attrgetter("id"))
+        self.assertQueryset_list(Banque.objects.all(), [1, 2])
 
     def test_cat(self):
         obj = Cat.objects.get(id=1)
