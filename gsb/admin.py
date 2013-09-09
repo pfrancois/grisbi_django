@@ -403,11 +403,15 @@ class Ope_admin(Modeladmin_perso):
     show_mere.short_description = "mere"
 
     def oper_titre(self, obj):
-        if obj.ope_ost:
-            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_ost.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_ost))
+        if obj.ope_titre_ost:
+            change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre_ost.id,))
+            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre_ost))
         else:
-            return "(aucun-e)"
+            if obj.ope_titre_pmv:
+                change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre_pmv.id,))
+                return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre_pmv))
+            else:
+                return "(aucun-e)"
 
     oper_titre.short_description = u"compta matiere"
 
