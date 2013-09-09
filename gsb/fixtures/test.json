@@ -493,7 +493,6 @@
         "model":"gsb.ope_titre",
         "fields":{
             "cours":"1",
-            "invest":"1",
             "nombre":"1",
             "date":"2011-12-18",
             "titre":2,
@@ -507,7 +506,6 @@
         "model":"gsb.ope_titre",
         "fields":{
             "cours":"10",
-            "invest":"1500",
             "nombre":"150",
             "date":"2011-11-30",
             "titre":3,
@@ -521,7 +519,6 @@
         "model":"gsb.ope_titre",
         "fields":{
             "cours":"5",
-            "invest":"100",
             "nombre":"20",
             "date":"2011-10-29",
             "titre":3,
@@ -535,7 +532,6 @@
         "model":"gsb.ope_titre",
         "fields":{
             "cours":"1",
-            "invest":"5",
             "nombre":"5",
             "date":"2012-09-24",
             "titre":1,

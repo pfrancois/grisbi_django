@@ -221,7 +221,7 @@ class Cpt_detail_view(Mytemplateview):
             titre_sans_sum = compte_titre.titre.all().distinct()
             titres = []
             for t in titre_sans_sum:
-                invest = t.investi(compte_titre)
+                investi = t.investi(compte_titre)
                 total = t.encours(compte_titre)
                 nb = t.nb(compte_titre)
                 if abs(nb) > decimal.Decimal('0.01'):
@@ -229,8 +229,8 @@ class Cpt_detail_view(Mytemplateview):
                         {'nom': t.nom,
                          'type': t.get_type_display(),
                          'nb': nb,
-                         'invest': invest,
-                         'pmv': total - invest,
+                         'investi': investi,
+                         'pmv': total - investi,
                          'total': total,
                          'id': t.id,
                          't': t

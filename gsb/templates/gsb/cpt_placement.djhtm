@@ -42,7 +42,7 @@
                     <a href="{% url 'maj_cours' titre.id %}">MAJ cours</a></td>
                 <td> {{ titre.nb|floatformat:3 }}</td>
                 <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>
-                <td class="opDebit">{{ titre.invest|cur }}</td>
+                <td class="opDebit">{{ titre.investi|cur }}</td>
                 <td class="opCredit">{{ titre.pmv|cur }}</td>
                 <td class="opDebit">{{ titre.total|cur }}</td>
             </tr>

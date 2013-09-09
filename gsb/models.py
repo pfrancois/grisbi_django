@@ -219,7 +219,7 @@ class Titre(models.Model):
             query = query.exclude(pk=exclude_id.ope_ost.id)
             if utils.is_onexist(exclude_id, "ope_pmv"):
                 query = query.exclude(pk=exclude_id.ope_pmv.id)
-        valeur = query.aggregate(invest=models.Sum('montant'))['invest']
+        valeur = query.aggregate(investi=models.Sum('montant'))['investi']
         if not valeur:
             return decimal.Decimal(0)
         else:
@@ -750,7 +750,6 @@ class Ope_titre(models.Model):
     nombre = models_gsb.CurField(default=0, decimal_places=5)
     date = models.DateField()
     cours = models_gsb.CurField(default=1, decimal_places=5)
-    invest = models_gsb.CurField(default=0, editable=False, decimal_places=2)
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
@@ -768,6 +767,10 @@ class Ope_titre(models.Model):
             return True
         return False
 
+    @property
+    def invest(self):
+        return self.nombre * self.cours
+
     def save(self, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
         self.nombre = decimal.Decimal(self.nombre)
@@ -781,7 +784,6 @@ class Ope_titre(models.Model):
             old_date = self.ope_ost.date
             Cours.objects.get(titre=self.titre, date=old_date).delete()
         Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
-        self.invest = decimal.Decimal(force_unicode(self.cours)) * decimal.Decimal(force_unicode(self.nombre))
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if utils.is_onexist(self, 'ope_pmv'):
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
@@ -813,7 +815,7 @@ class Ope_titre(models.Model):
             # chaine car comme on a des decimal
             ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
             ost = decimal.Decimal(ost) * -1
-            pmv = abs(self.invest) - abs(ost)
+            pmv = abs(0) - abs(ost)
             # on cree les ope
             if not utils.is_onexist(self, 'ope_ost'):
                 Ope.objects.create(date=self.date,
