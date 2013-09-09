@@ -1,19 +1,18 @@
-{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}{% load smart_if %}
 {% block content %}
     <form method="post" action="" id="form1">
         {% csrf_token %}
         <table>
             {{ form }}
             <tr>
-                <th>id_ope:</th>
+                <th>id opération:</th>
                 <td><a href="{{ ope.ope_ost.get_absolute_url }}"> {{ ope.ope_ost.id }}</a></td>
             </tr>
-            {{% if ope.nombre < 0 %}}
+            
             <tr>
-                <th>id_ope_pmv:</th>
-                <td><a href="{{ ope.ope_pmv.get_absolute_url }}"> {{ ope.ope_pmv.id }}</a></td>
+                <th>id opération pmv:</th>
+                <td>{% if ope.nombre < 0 %}<a href="{{ ope.ope_pmv.get_absolute_url }}"> {{ ope.ope_pmv.id }} {% else %}-{% endif %}</a></td>
             </tr>
-            {{% endif %}
             <tr>
                 <th>rapp:</th>
                 <td>{{ ope.rapp }}</td>
@@ -34,7 +33,7 @@
         <table style=" width: 100%;" summary="bouton effacer">
             <tr class="boutton">
                 <td width="100%">
-                    <a href="javascript:document.forms['form2'].submit();">supprimer l'operation</a></td>
+                    <a href="javascript:document.forms['form2'].submit();">supprimer l'opération</a></td>
             </tr>
         </table>
     {% endif %}

@@ -513,7 +513,7 @@ def maj_cours(request, pk):
 
 
 @login_required
-def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
+def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si rapp affiche uniquement les rapp
     si all affiche toute les ope
@@ -525,14 +525,9 @@ def titre_detail_cpt(request, cpt_id, titre_id, all=False, rapp=False):
     date_rappro = compte.date_rappro()
     solde_rappro = titre.encours(compte=compte, rapp=True)
     q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
-    if all:
-        pass
-    else:
-        # on prend comme reference les ope especes
-        if rapp:
-            q = q.filter(ope__rapp__isnull=False)
-        else:
-            q = q.filter(ope__rapp__isnull=True)
+    # on prend comme reference les ope especes
+    if rapp:
+        q = q.exclude(ope_ost__rapp__isnull=True).exclude(ope_pmv__rapp__isnull=True)
     paginator = Paginator(q, 50)
     try:
         page = int(request.GET.get('page'))
