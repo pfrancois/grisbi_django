@@ -7,11 +7,10 @@ from django.db import models
 import django.forms as forms
 from django.utils.safestring import mark_safe
 from django.core import urlresolvers
-from django.db import IntegrityError
 # from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-# from django import forms
+from django.conf import settings  # @Reimport
 
 from django.utils.translation import ugettext_lazy as _
 # from django.db.models import Q
@@ -176,10 +175,7 @@ class Modeladmin_perso(admin.ModelAdmin):
         return self.keepfilter(request, result)
 
     def delete_view(self, request, object_id, extra_context=None):
-        try:
-            result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
-        except IntegrityError as excp:
-            messages.error(request, excp)
+        result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
         return self.keepfilter(request, result)
 
 
@@ -246,6 +242,14 @@ class Cat_admin(Modeladmin_perso):
         qs = super(Cat_admin, self).queryset(request)
         return qs.select_related('ope')
 
+    def has_delete_permission(self, request, obj=None):
+        if obj is None:
+            return True
+        if obj.id in ( settings.ID_CAT_OS, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
+            return False
+        if obj.nom in (u"Frais bancaires", u"Opération Ventilée"):
+            return False
+        return True
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
@@ -334,6 +338,13 @@ class Compte_admin(Modeladmin_perso):
             if db_field.name == 'moyen_credit_defaut':
                 kwargs['queryset'] = Moyen.objects.filter(type='r')
         return super(Compte_admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is None:
+            return True
+        if obj.ferme == True:
+            return False
+        return True
 
 
 class ope_fille_admin(liste_perso_inline):
@@ -439,6 +450,23 @@ class Ope_admin(Modeladmin_perso):
 
     action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
 
+    def has_delete_permission(self, request, obj=None):
+        if obj is None:
+            return True
+        if not obj.compte.ouvert:
+            return False
+        if obj.is_mere:
+            opes = obj.filles_set.all()
+            for o in opes.values('id', 'pointe', 'rapp'):
+                if o['pointe'] == True or o['rapp'] is not None:
+                    return False
+            if obj.pointe or obj.rapp is not None:
+                return False
+        if obj.ope_titre_ost is not None or obj.ope_titre_pmv is not None:
+            return False
+        if ope.jumelle is not None and (ope.jumelle.pointe == True or ope.jumelle.rapp is not None):
+            return False
+        return True
 
 class Cours_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
@@ -497,6 +525,13 @@ class Tiers_admin(Modeladmin_perso):
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is None:
+            return True
+        if is_titre is True:
+            return False
+        return True
 
 
 class Ech_admin(Modeladmin_perso):
@@ -558,6 +593,24 @@ class Ope_titre_admin(Modeladmin_perso):
         return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
 
     show_ope_pmv.short_description = u"opération relative aux plus ou moins values"
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is None:
+            return True
+        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.rapp is not None :
+            print "1"
+            return False
+        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.pointe is True :
+            print "2"
+            return False
+        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.rapp is not None :
+            print 3
+            return False
+        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.pointe is True :
+            print 4
+            return False
+        return True
+
 
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)
