@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from django.conf.urls import patterns, include, url
+from django.views.generic import TemplateView
 # from django.conf.urls import include #non utilise actuellement
 from . import views, outils
 from .io import import_csv, export_sql_money, export_csv, export_qif, export_fsb
 from .io import import_titre_csv as import_titres
+from django.conf import settings
 # les vues generales
 urlpatterns = patterns('gsb',
                        url(r'^$', views.Index_view.as_view(), name='index'),
@@ -49,7 +51,7 @@ urlpatterns += patterns('gsb',
 urlpatterns += patterns('gsb.io.import_gsb', url(r'options/import/gsb$', 'import_gsb_0_5_x', name="import_gsb"))
 
 urlpatterns += patterns('',
-                        url(r'options/import/csv/all$', import_csv.Import_csv_ope.as_view(), name="import_csv_ope_all"),
+                        url(r'options/import/csv/simple$', import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(), name="import_csv_ope_simple"),
                         url(r'options/import/csv/titres$', import_titres.Import_csv_ope_titre.as_view(), name="import_csv_ope_titre_all")
 )
 
@@ -82,7 +84,15 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende")
 )
-
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf.urls.static import static
+urlpatterns += staticfiles_urlpatterns()
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns = patterns('',
+        (r'^500.html$', 'django.views.defaults.server_error'),
+        (r'^404.html$', TemplateView.as_view(template_name='404.html')),
+    ) + urlpatterns
 # gestion de mes trucs perso
 # form tester
 # if settings.DEBUG and perso:

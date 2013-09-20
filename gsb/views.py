@@ -16,6 +16,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnIn
 from django.core import exceptions as django_exceptions
 from django.views import generic
 from django.utils.decorators import method_decorator
+from django.db import IntegrityError
 import gsb.utils
 
 
@@ -82,16 +83,17 @@ class Index_view(Mytemplateview):
     template_name = 'gsb/index.djhtm'
 
     def get(self, request, *args, **kwargs):
+        print "toto"
         if settings.AFFICHE_CLOT:
-            self.bq = Compte.objects.exclude(type='t').select_related('ope')
-            self.pl = Compte.objects.filter(type='t').select_related('ope', 'tiers')
+            self.bq = Compte.objects.exclude(type='t')
+            self.pl = Compte.objects.filter(type='t')
         else:
-            self.bq = Compte.objects.exclude(type='t').filter(ouvert=True).select_related('ope')
-            self.pl = Compte.objects.filter(type='t', ouvert=True).select_related('ope', 'tiers')
+            self.bq = Compte.objects.exclude(type='t').filter(ouvert=True)
+            self.pl = Compte.objects.filter(type='t').filter(ouvert=True)
             # calcul du solde des bq
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
-        soldes = self.bq.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models.Sum('ope__montant'))
+        soldes = self.bq.exclude(ope__filles_set__isnull=False).select_related('ope').annotate(solde=models.Sum('ope__montant'))
         for p in soldes:
             cpt = {'solde': p.solde,
                  'nom': p.nom,
@@ -576,14 +578,11 @@ def ope_titre_detail(request, pk):
         # date_initial = ope.date#inutile
         form = gsb_forms.Ope_titreForm(request.POST, instance=ope)
         if form.is_valid():
-            if ope.rapp:
-                try:
-                    form.save()
-                    messages.info(request, u"opération modifiée")
-                except django_exceptions.ImproperlyConfigured as e:
-                    messages.error(request, e.unicode())
-            else:
-                messages.error(request, u"opération impossible a modifier, elle est rapprochée")
+            try:
+                form.save()
+                messages.info(request, u"opération titre (%s) modifiée" % ope)
+            except IntegrityError as e:
+                messages.error(request, e.unicode())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
                                                      kwargs={'cpt_id': ope.compte.id, 'titre_id': ope.titre.id}
                                                     )

@@ -15,7 +15,7 @@ import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
 
-__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed']
+__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
 
 
 class Gsb_exc(Exception):
@@ -201,24 +201,22 @@ class Titre(models.Model):
             self.tiers.is_titre = True
             self.tiers.save()
 
-    def investi(self, compte=None, datel=None, rapp=None, exclude_id=None):
+    def investi(self, compte=None, datel=None, rapp=None, exclude=None):
         """renvoie le montant investi
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel: date, renvoie sur avant la date ou tout si none
         @param rapp: Bool, si true, renvoie uniquement les opération rapprochées
-        @param exclude_id: int id de l'ope a exclure.attention c'ets bien ope et non ope_titre
+        @param exclude: Ope_titre ope titre a exclure.attention c'ets bien ope et non ope_titre
         """
-        query = Ope.non_meres().filter(tiers=self.tiers)
+        query = Ope.non_meres().filter(tiers=self.tiers).exclude(cat_id=settings.ID_CAT_PMV)
         if compte:
             query = query.filter(compte=compte)
         if datel:
             query = query.filter(date__lte=datel)
         if rapp:
             query = query.filter(rapp__isnull=False)
-        if exclude_id:
-            query = query.exclude(pk=exclude_id.ope_ost.id)
-            if utils.is_onexist(exclude_id, "ope_pmv"):
-                query = query.exclude(pk=exclude_id.ope_pmv.id)
+        if exclude and utils.is_onexist(exclude, "ope_ost"):
+            query = query.exclude(pk=exclude.ope_ost.id)
         valeur = query.aggregate(investi=models.Sum('montant'))['investi']
         if not valeur:
             return decimal.Decimal(0)
@@ -270,7 +268,6 @@ class Titre(models.Model):
                 date_cours = opes.latest('date').date
             else:
                 date_cours = datel
-
             # recupere le dernier cours
             cours = self.last_cours(datel=date_cours)
             # renvoie la gestion des param de nb
@@ -544,7 +541,7 @@ class Compte(models.Model):
         return reverse('gsb_cpt_detail', kwargs={'cpt_id': str(self.id)})
 
     def solde_rappro(self, espece=False):
-        return self.solde(rapp=True)
+        return self.solde(rapp=True, espece=espece)
 
     def solde_pointe(self, espece=False):
         """renvoie le solde du compte pour les operations pointees
@@ -769,7 +766,22 @@ class Ope_titre(models.Model):
 
     @property
     def invest(self):
-        return self.nombre * self.cours
+        if utils.is_onexist(self, "ope_ost"):
+            return self.ope_ost.montant * -1
+        else:  # pragma: no cover
+            return 0
+
+    def clean(self):
+        super(Ope_titre, self).clean()
+        # verification qu'il n'y pas pointe et rapprochee
+        if utils.is_onexist(self, "ope_ost") and self.ope_ost.rapp is not None and has_changed('titre', 'compte', 'nombre', 'cours'):
+            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est rapprochée")
+        if utils.is_onexist(self, "ope_ost") and self.ope_ost.pointe is True and has_changed('titre', 'compte', 'nombre', 'cours'):
+            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est pointée")
+        if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.rapp is not None and has_changed('titre', 'compte', 'nombre', 'cours'):
+            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est rapprochée")
+        if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.pointe is True and has_changed('titre', 'compte', 'nombre', 'cours'):
+            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
 
     def save(self, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
@@ -779,7 +791,7 @@ class Ope_titre(models.Model):
         cat_pmv = Cat.objects.get(id=settings.ID_CAT_PMV)
         super(Ope_titre, self).save(*args, **kwargs)
         # gestion des cours
-        # si on chnage la date de l'operation il faut supprimer le cours associe
+        # si on change la date de l'operation il faut supprimer le cours associe
         if utils.is_onexist(self, "ope_ost"):
             old_date = self.ope_ost.date
             Cours.objects.get(titre=self.titre, date=old_date).delete()
@@ -788,7 +800,7 @@ class Ope_titre(models.Model):
             if utils.is_onexist(self, 'ope_pmv'):
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
             if not utils.is_onexist(self, 'ope_ost'):  # il faut creer l'ope sous jacente
-                Ope.objects.create(date=self.date,
+                ope_ost = Ope.objects.create(date=self.date,
                                               montant=self.cours * self.nombre * -1,
                                               tiers=self.titre.tiers,
                                               cat=cat_ost,
@@ -797,25 +809,25 @@ class Ope_titre(models.Model):
                                               compte=self.compte,
                                               ope_titre_ost=self
                                               )
+                self.ope_ost = ope_ost
             else:  # la modifier juste
-                self.ope_ost.date = self.date
-                self.ope_ost.montant = self.cours * self.nombre * -1
-                self.ope_ost.tiers = self.titre.tiers
-                self.ope_ost.notes = "%s@%s" % (self.nombre, self.cours)
-                self.ope_ost.compte = self.compte
-                self.ope_ost.save()
+                ope_ost = self.ope_ost
+                ope_ost.date = self.date
+                ope_ost.montant = self.cours * self.nombre * -1
+                ope_ost.tiers = self.titre.tiers
+                ope_ost.notes = "%s@%s" % (self.nombre, self.cours)
+                ope_ost.compte = self.compte
+                ope_ost.save()
         else:  # c'est une vente
             # calcul prealable, on met des plus car les chiffres sont negatif
-            if utils.is_onexist(self, 'ope_ost'):  # ope existe deja, donc il faut faire attention car les montant inv sont faux
-                inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude_id=self)
-            else:
-                inv_vrai = self.titre.investi(self.compte, datel=self.date)
+            # on ne sait pas si l'ope existe donc on exclue
+            inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude=self)
             # on exclue par defaut car l'operation existe deja
             nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             # chaine car comme on a des decimal
             ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
             ost = decimal.Decimal(ost) * -1
-            pmv = abs(0) - abs(ost)
+            pmv = abs(self.nombre * self.cours) - ost
             # on cree les ope
             if not utils.is_onexist(self, 'ope_ost'):
                 Ope.objects.create(date=self.date,
@@ -855,6 +867,8 @@ class Ope_titre(models.Model):
                 self.ope_pmv.compte = self.compte
                 self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
+        for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date).exclude(pk=self.id):
+            ope.save()
 
     def get_absolute_url(self):
         return reverse('ope_titre_detail', kwargs={'pk': str(self.id)})
@@ -1158,16 +1172,12 @@ class Ope(models.Model):
         order_with_respect_to = 'compte'
         verbose_name = u"opération"
         ordering = ['-date']
-        permissions = (
-            ('can_import', 'peut importer des fichiers'),
-            ('can_export', 'peut exporter des fichiers'),
-            )
 
     @staticmethod
     def non_meres():
         """ renvoie uniquement les opération non mere
         """
-        return Ope.objects.all().filter(filles_set__isnull=True)
+        return Ope.objects.all().exclude(filles_set__isnull=False)
 
     @property
     def opetitre(self):

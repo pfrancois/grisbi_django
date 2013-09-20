@@ -134,7 +134,7 @@ class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
 
     def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.filter(filles_set__isnull=True).count())
+        return '%s' % (obj.ope_set.exclude(filles_set__isnull=False).count())
 
     def fusionne_a_dans_b(self, request, queryset):
         fusion(request, queryset, 'ab')
@@ -245,11 +245,12 @@ class Cat_admin(Modeladmin_perso):
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if obj.id in ( settings.ID_CAT_OS, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
+        if obj.id in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
             return False
         if obj.nom in (u"Frais bancaires", u"Opération Ventilée"):
             return False
         return True
+
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
@@ -464,9 +465,10 @@ class Ope_admin(Modeladmin_perso):
                 return False
         if obj.ope_titre_ost is not None or obj.ope_titre_pmv is not None:
             return False
-        if ope.jumelle is not None and (ope.jumelle.pointe == True or ope.jumelle.rapp is not None):
+        if obj.jumelle is not None and (obj.jumelle.pointe == True or obj.jumelle.rapp is not None):
             return False
         return True
+
 
 class Cours_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les  cours des titres """
@@ -529,7 +531,7 @@ class Tiers_admin(Modeladmin_perso):
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if is_titre is True:
+        if obj.is_titre is True:
             return False
         return True
 
@@ -597,17 +599,13 @@ class Ope_titre_admin(Modeladmin_perso):
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.rapp is not None :
-            print "1"
+        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.rapp is not None:
             return False
-        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.pointe is True :
-            print "2"
+        if utils.is_onexist(obj, "ope_ost") and obj.ope_ost.pointe is True:
             return False
-        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.rapp is not None :
-            print 3
+        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.rapp is not None:
             return False
-        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.pointe is True :
-            print 4
+        if utils.is_onexist(obj, "ope_pmv") and obj.ope_pmv.pointe is True:
             return False
         return True
 
