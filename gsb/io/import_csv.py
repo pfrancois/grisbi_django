@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 from django.conf import settings  # @Reimport
 
 from django.contrib import messages
@@ -14,11 +13,7 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
     pass
 
 
-class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
-    @property
-    def id(self):
-        if 'id' in self.row:
-            return utils.to_id(self.row['id'])
+class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
 
     @property
     def cat(self):
@@ -29,26 +24,18 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def cpt(self):
-        if 'cpt' in self.row:
-            cpt = utils.to_unicode(self.row['cpt'])
-        else:
-            cpt = "Caisse"
-        if cpt is None:
-            return "Caisse"
-        else:
-            return cpt
+        return utils.to_unicode(self.row['cpt'], 'Caisse')
 
     @property
     def date(self):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException("%s" % self.row['date'])
+            raise utils.FormatException("erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
 
     @property
     def ib(self):
-        if 'projet' in self.row:
-            return utils.to_unicode(self.row['projet'], None)
+        return utils.to_unicode(self.row['projet'], None)
 
     @property
     def montant(self):
@@ -56,32 +43,19 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def notes(self):
-        if 'notes' in self.row:
-            return self.row['notes']
-        else:
-            return ""
+        return self.row['notes']
 
     @property
     def num_cheque(self):
-        if 'numchq' in self.row:
-            return utils.to_unicode(self.row['numchq'], "")
-        else:
-            return ""
+        return utils.to_unicode(self.row['numchq'], "")
 
     @property
     def pointe(self):
-        if 'p' in self.row:
-            return utils.to_bool(self.row['p'])
-        else:
-            return False
+        return utils.to_bool(self.row['p'])
 
     @property
     def rapp(self):
-        if 'r' in self.row:
-            rapp = utils.to_unicode(self.row['r'], '')
-            return rapp
-        else:
-            return ''
+        return utils.to_unicode(self.row['r'], '')
 
     @property
     def tiers(self):
@@ -92,11 +66,6 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
         return "EUR"
 
     @property
-    def mere(self):
-        if 'id_ope_m' in self.row:
-            return utils.to_id(self.row['id_ope_m'])
-
-    @property
     def jumelle(self):
         if self.tiers.count('=>') == 1:
             return True
@@ -104,39 +73,24 @@ class Csv_unicode_reader_ope(Csv_unicode_reader_ope_base):
 
     @property
     def moyen(self):
-        if 'moyen' in self.row:
-            return utils.to_unicode(self.row['moyen'], None)
-        else:
-            return None
+        return utils.to_unicode(self.row['moyen'], None)
 
     @property
     def ope_titre(self):
-        if 'ope_titre' in self.row:
-            return utils.to_bool(self.row['ope_titre'])
-
-    @property
-    def ope_pmv(self):
-        if 'ope_pmv' in self.row:
-            return utils.to_bool(self.row['ope_pmv'])
-
-    @property
-    def has_fille(self):
-        if 'has_fille' in self.row:
-            return utils.to_bool(self.row['has_fille'])
-        else:
-            return False
+        return False
 
     @property
     def ligne(self):
         return self.line_num
 
 
-class Import_csv_ope(import_base.Import_base):
-    reader = Csv_unicode_reader_ope
+class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
+    reader = Csv_unicode_reader_ope_sans_jumelle_et_ope_mere
     type_f = "csv_version_totale"
     creation_de_compte = True
     titre = "import csv"
     encoding = "iso-8859-1"
+    complexe = False
 
     def init_cache(self):
         self.moyens = import_base.Moyen_cache(self.request)
@@ -156,10 +110,9 @@ class Import_csv_ope(import_base.Import_base):
         """renvoi un tableau complet de l'import"""
         self.init_cache()
         self.erreur = list()
-
         # les moyens par defaut
-        moyen_virement = self.moyens.goc('', {'nom': "virement", 'type': 'v'})
         retour = False
+        moyen_virement = self.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         # try:
         with open(nomfich, 'rt') as f_non_encode:
             fich = self.reader(f_non_encode, encoding=self.encoding)
@@ -190,11 +143,10 @@ class Import_csv_ope(import_base.Import_base):
             if virement:
                 # on cree deux operation
                 ope_orig = ope
-                ope_dest = ope
-                dest = ope_orig.pop('dest_id')
-                ope_dest['compte_id'] = dest
+                ope_dest = ope.copy()
+                ope_dest['compte_id'] = ope_orig.pop('dest_id')
+                ope_dest.pop('dest_id')
                 ope_dest['montant'] = ope['montant'] * -1
-                ope_dest.pop('ib_id', None)
                 ope_origine = models.Ope.objects.create(**ope_orig)
                 ope_dest = models.Ope.objects.create(**ope_dest)
                 ope_origine.jumelle = ope_dest
@@ -218,23 +170,22 @@ class Import_csv_ope(import_base.Import_base):
             if not verif_format:  # on verifie a la premiere ligne
                 try:
                     row.id
+                    row.has_fille
+                    row.mere
+                    row.ope_titre
                     row.automatique
                     row.cat
                     row.cpt
                     row.date
                     if settings.UTILISE_EXERCICES == True:
                         row.exercice
-                    row.has_fille
                     row.ib
                     row.ligne
-                    row.mere
                     row.monnaie
                     row.moyen
                     row.montant
                     row.notes
                     row.num_cheque
-                    row.ope_pmv
-                    row.ope_titre
                     row.piece_comptable
                     row.rapp
                     row.tiers
@@ -255,40 +206,43 @@ class Import_csv_ope(import_base.Import_base):
                 self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.ligne))
                 continue
             # virement (cat, moyen)
-            if "=>" in row.tiers:
+            try:
+                ope['cat_id'] = self.cats.goc(row.cat)  # ca marche meme si virement
+            except import_base.ImportException:
+                self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.ligne))
+                continue
+
+            if row.jumelle:
                 virement = True
-                ope['cat_id'] = self.cats.goc('Virement')
-                ope['moyen_id'] = moyen_virement
                 origine = row.tiers.split("=>")[0]
                 origine = origine.strip()
                 dest = row.tiers.split("=>")[1]
                 dest = dest.strip()
-                ope['dest_id'] = self.comptes.goc(dest)
                 if origine and dest:
-                    if self.comptes.goc(origine) != ope['compte_id']:
-                        if self.comptes.goc(dest) != ope['compte_id']:
-                            self.erreur.append(u"attention cette operation n'a pas la bonne origine, elle dit partir de %s alors qu'elle part de %s" % (origine, row.cpt))
-                        else:
-                            self.erreur.append(u"attention cette operation n'a pas orientée corectement, il faut remplir le compte de depart et non le compte d'arrivee" % (dest, row.cpt))
-                        continue
+                    if dest == origine:
+                        self.erreur.append('attention, virement impossible entre le meme compte à la ligne' % row.ligne)
+                    if self.comptes.goc(dest) != ope['compte_id'] and self.comptes.goc(origine) != ope['compte_id']:
+                        self.erreur.append('le compte doit dans le virement' % row.ligne)
+                    if self.comptes.goc(dest) == ope['compte_id']:
+                        origine, dest = dest, origine
+                    ope['dest_id'] = self.comptes.goc(dest)
+                    ope['compte_id'] = self.comptes.goc(origine)
                 else:
                     self.erreur.append("attention il faut deux bout a un virement ligne %s" % row.ligne)
                     continue
             else:
                 virement = False
-                try:
-                    ope['cat_id'] = self.cats.goc(row.cat)
-                except import_base.ImportException:
-                    self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.ligne))
-                    continue
-                try:
+            try:
+                if not row.jumelle:
                     if row.moyen:
                         ope['moyen_id'] = self.moyens.goc(row.moyen)
                     else:
-                            ope['moyen_id'] = self.moyen_par_defaut.goc(row.cpt, row.montant)
-                except import_base.ImportException:
-                    self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.ligne))
-                    continue
+                        ope['moyen_id'] = self.moyen_par_defaut.goc(row.cpt, row.montant)
+                else:
+                    ope['moyen_id'] = moyen_virement
+            except import_base.ImportException:
+                self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.ligne))
+                continue
             ope['virement'] = virement
             # tiers
             ope['tiers_id'] = self.tiers.goc(row.tiers)
@@ -312,7 +266,10 @@ class Import_csv_ope(import_base.Import_base):
             ope['mere_id'] = row.mere
             ope['has_fille'] = row.has_fille
             # montant
-            ope['montant'] = row.montant
+            if virement == False:
+                ope['montant'] = row.montant
+            else:
+                ope['montant'] = abs(row.montant) * -1  # comme c'est obligatoirement un compte de depart, c'est du negatif
             ope['notes'] = row.notes
             ope['num_cheque'] = row.num_cheque
             ope['piece_comptable'] = row.piece_comptable
@@ -324,3 +281,33 @@ class Import_csv_ope(import_base.Import_base):
             self.opes.create(ope)
         retour = True
         return retour
+
+
+class Csv_unicode_reader_ope_avec_gestion_id(Csv_unicode_reader_ope_sans_jumelle_et_ope_mere):  # pragma: no cover
+    @property
+    def id(self):
+        if 'id' in self.row:
+            return utils.to_id(self.row['id'])
+
+    @property
+    def mere(self):
+        if 'id_ope_m' in self.row:
+            return utils.to_id(self.row['id_ope_m'])
+
+    @property
+    def jumelle(self):
+        if self.tiers.count('=>') == 1:
+            return True
+        return False
+
+    @property
+    def ope_titre(self):
+        if 'ope_titre' in self.row:
+            return utils.to_bool(self.row['ope_titre'])
+
+    @property
+    def has_fille(self):
+        if 'has_fille' in self.row:
+            return utils.to_bool(self.row['has_fille'])
+        else:
+            return False

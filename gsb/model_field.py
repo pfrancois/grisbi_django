@@ -7,6 +7,7 @@ from django import forms
 import gsb.utils as utils
 from django.db.models import DateTimeField
 from south.modelsinspector import add_introspection_rules
+from south.modelsinspector import introspector
 
 
 # definition d'un moneyfield
@@ -29,7 +30,7 @@ class CurField(models.DecimalField):
     def south_field_triple(self):
         "Returns a suitable description of this field for South."
         # We'll just introspect ourselves, since we inherit.
-        from south.modelsinspector import introspector
+
         field_class = "django.db.models.fields.DecimalField"
         args, kwargs = introspector(self)
         return (field_class, args, kwargs)
@@ -107,7 +108,6 @@ class uuidfield(models.CharField):
     def south_field_triple(self):
         "Returns a suitable description of this field for South."
         # We'll just introspect the _actual_ field.
-        from south.modelsinspector import introspector
         field_class = "django.db.models.fields.CharField"
         args, kwargs = introspector(self)
         # That's our definition!

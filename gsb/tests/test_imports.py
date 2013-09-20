@@ -27,23 +27,30 @@ class Test_import_csv(TestCase):
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
         self.client.login(username='admin', password='mdp')
 
-    def test_import_csv_ok(self):
+    def test_import_csv_simple_ok(self):
+        """test import csv version sans jumelle ni ope mere bref en ne gerant pas les id"""
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_simple.csv"))  as file_test:
-            r = self.client.post(reverse('import_csv_ope_all'), {'nom_du_fichier': file_test})
+            r = self.client.post(reverse('import_csv_ope_simple'), {'nom_du_fichier': file_test})
             for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
                 os.remove(name)
 
         self.assertEqual(r.status_code, 302)
-        self.assertQueryset_list(models.Tiers.objects.all(), ['Franprix', 'Picard', 'leaderprice', 'secu'], 'nom')  # ne pas oublier le tiers cree automatiquement
-        self.assertQueryset_list(models.Ope.objects.all(), [1, 2, 3, 4, 5, 6])
+        self.assertQueryset_list(models.Tiers.objects.all(), ['Franprix', 'Picard', 'cpte1=>cptb2', 'leaderprice', 'secu'], 'nom')  # ne pas oublier le tiers cree automatiquement
+        self.assertEquals(models.Ope.objects.all().count(), 12)
         self.assertQueryset_list(models.Cat.objects.all(),
                                   ['cat1', 'cat2', 'cat3',
                                     u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre", u"Revenus de placements:Plus-values",
                                     u'Impôts:Cotisations sociales', u'Revenus de placements:interets', u'Virement'],
                                    'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["test", ], "nom")
+        self.assertEqual(models.Rapp.objects.get(nom="test").solde, 40)
         self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), 36)
-        self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -54)
+        self.assertEqual(models.Compte.objects.get(nom="cptb2").solde(), -50)
+        self.assertQueryset_list(models.Ib.objects.all(), ['test', ], "nom")
+        self.assertEqual(models.Ope.objects.get(id=6).notes, 'ope rapp')
+        self.assertEqual(models.Ope.objects.get(id=6).rapp.id, 1)
+        self.assertEqual(models.Ope.objects.get(id=7).ib.nom, 'test')
+        self.assertEqual(models.Ope.objects.get(id=8).num_cheque, '12345678')
 
 
 class Test_import_base(TestCase):
@@ -141,7 +148,7 @@ class Test_import_base(TestCase):
         moyens = import_base.Moyen_cache(self.request_get("/outils"))
         self.assertEqual(models.Moyen.objects.filter(id=settings.MD_CREDIT).count(), 1)
         self.assertEqual(models.Moyen.objects.filter(id=settings.MD_DEBIT).count(), 1)
-        self.assertEqual(moyens.goc("moyen1"), 5)
+        self.assertEqual(moyens.goc("moyen1"), 6)
         models.Moyen.objects.create(nom='test', type='d', id=30)
         self.assertEqual(moyens.goc("test"), 30)
         self.assertEqual(moyens.goc("test2", {"nom": 'test2', 'type': 'r', 'id': 31}), 31)
@@ -314,8 +321,8 @@ class Test_import_base(TestCase):
         cache = import_base.moyen_defaut_cache(self.request_get("/outils"), moyens)
         self.assertEqual(cache.goc("sansrien", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("sansrien", -10), settings.MD_DEBIT)
-        self.assertEqual(cache.goc("les2", 10), 5)
-        self.assertEqual(cache.goc("les2", -10), 6)
+        self.assertEqual(cache.goc("les2", 10), 6)
+        self.assertEqual(cache.goc("les2", -10), 7)
         self.assertEqual(cache.goc("test", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("test", -10), settings.MD_DEBIT)
 
