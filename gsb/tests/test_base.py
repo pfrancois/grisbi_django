@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-import os
+
 import logging
 from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
 from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.conf import settings
-from operator import attrgetter
+import os
+import codecs
+
+#from operator import attrgetter
 
 __all__ = ['TestCase']
 
@@ -85,35 +88,42 @@ class TestCase(Test_Case_django):
     def assertreponsequal(self, reponse_recu, reponse_attendu, fichier=False, unicode_encoding=None, nom=""):
         if nom != "":
             nom = "%s_" % nom
+        if unicode_encoding is None:
+            unicode_encoding="utf-8"
         rr_iter = reponse_recu.splitlines()
+
         if not fichier:
             ra_iter = reponse_attendu.splitlines()
         else:  # c'est le cas des fichier par exemple
-            reponse_attendu = [r.replace('\n', '') for r in reponse_attendu]
-            ra_iter = [r.replace('\r', '') for r in reponse_attendu]
+            ra_iter=[]
+            for r in reponse_attendu:
+                if not isinstance(r,unicode):
+                    r = r.decode(unicode_encoding)
+                r = r.replace('\n', '')
+                r = r.replace('\r', '')
+                ra_iter.append(r)
         try:
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w')
-            fichier.writelines(['%s\n' % l for l in rr_iter])
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w', "utf-8")  
+            for l in rr_iter:
+                    fichier.write(l)
+                    fichier.write('\n')
             fichier.close()
-            fichier = open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w')
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w',unicode_encoding)
             for l in ra_iter:
-                if unicode_encoding is not None:
-                    fichier.write('%s\n' % l.encode(unicode_encoding))
-                else:
-                    fichier.write('%s\n' % l)
+                fichier.write(l)
+                fichier.write('\n')
         finally:
             fichier.close()
-
         if len(ra_iter) != len(rr_iter):
             msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
             raise self.fail(msg)
-        msg = ""
+        msg = u""
         for ra, rr in zip(ra_iter, rr_iter):
-            if unicode_encoding is not None:
-                rr = unicode(rr, unicode_encoding)
+            if not isinstance(ra,unicode):
+                ra=unicode(ra,unicode_encoding)
             if rr != ra:
-                msg = "%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
-        if msg != "":
+                msg = u"%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
+        if msg != u"":
             raise self.fail(msg)
 
     def assertfileequal(self, reponse_recu, fichier, split_ra=None, unicode_encoding=None, nom=""):
@@ -121,5 +131,3 @@ class TestCase(Test_Case_django):
         attendu = fichier.readlines()
         fichier.close()
         self.assertreponsequal(reponse_recu, attendu, True, unicode_encoding, nom)
-
-

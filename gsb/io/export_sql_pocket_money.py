@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from sql.pg import sqlite_db as db
 
 
-class Export_view_sql(export_base.ExportViewBase):
+class Export_view_sql_pocket_money(export_base.ExportViewBase):
     extension_file = "sql"
     debug = True
     nomfich = "export_full"
@@ -109,7 +109,7 @@ class Export_view_sql(export_base.ExportViewBase):
                                                      :limitAmount, :noLimit, :totalWorth, :exchangeRate, :currencyCode, :lastSyncTime,
                                                      :routingNumber, :overdraftAccountID, :keepTheChangeAccountID, :keepChangeRoundTo, :serverID);""", param)
 
-        return HttpResponse(sql.dump(), mimetype="text/plain")
+        return HttpResponse(sql.dump(), content_type="text/plain")
 
 
 class Export_view_sql2(export_base.ExportViewBase):
@@ -435,7 +435,7 @@ INSERT INTO "exchangeRates" VALUES(0, 1366406972, 'QAR', '');
 INSERT INTO "exchangeRates" VALUES(0, 1366406972, 'HNL', '');
 INSERT INTO "exchangeRates" VALUES(0, 1366406972, 'TZS', '');
 """)
-        reponse = HttpResponse(sql.getvalue(), mimetype="text/plain")
+        reponse = HttpResponse(sql.getvalue(), content_type="text/plain")
         if not self.debug:
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"

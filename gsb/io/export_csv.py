@@ -5,11 +5,11 @@ from .. import models
 from .. import utils
 
 from django.http import HttpResponse
-# from django.conf import settings
+from django.conf import settings
 # pour les vues
 from . import export_base
 from ..models import Ope_titre, Compte
-from django.core import exceptions as django_exceptions
+#from django.core import exceptions as django_exceptions
 from ..utils import Excel_csv
 import csv
 from .. import widgets as gsb_field
@@ -27,7 +27,7 @@ class Export_view_csv_base(export_base.ExportViewBase):
         csv_file.writeheader()
         csv_file.writerows(data)
         if self.debug:
-            return HttpResponse(csv_file.getvalue(), mimetype="text/plain")
+            return HttpResponse(csv_file.getvalue(), content_type="text/plain")
         else:
             return HttpResponse(csv_file.getvalue(), content_type='text/csv')
 
@@ -37,8 +37,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes',
-                  'projet', 'numchq', 'id jumelle lie', 'has_fille', 'id_ope_m', 'ope_titre', 'ope_pmv', 'mois')
+    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'numchq', 'mois')
     titre = "Export des operations au format csv"
 
     def export(self, query):
@@ -46,51 +45,49 @@ class Export_ope_csv(Export_view_csv_base):
         fonction principale
         """
         data = []
-        query = query.order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen")
-        liste_ope = query.values_list('id')
-        ope_mere = query.filter(id__in=liste_ope).exclude(
-            filles_set__isnull=True).values_list('id', flat=True)
+        query = query.order_by('date', 'id').exclude(cat__id=settings.ID_CAT_PMV).exclude(filles_set__isnull=False)
+        query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen","ope_titre_ost","jumelle","mere")
 
         for ope in query:
+            if ope.jumelle is not None and ope.montant > 0:
+                continue # c'est l'autre coté du virement qui est pris en compte
             # id compte date montant
             ligne = {'id': ope.id, 'cpt': ope.compte.nom}
             # date
-            ligne['date'] = ope.date.strftime('%d/%m/%Y')
-
+            ligne['date'] = utils.datetostr(ope.date)
             # montant
-            montant = "%10.2f" % ope.montant
-            montant = montant.replace('.', ',').strip()
-            ligne['montant'] = montant
+            ligne['montant'] = utils.floattostr(ope.montant,nb_digit=2)
             # rapp
             if ope.rapp is not None:
                 ligne['r'] = ope.rapp.nom
             else:
+                if ope.mere is not None and ope.mere.rapp is not None:
+                    ligne['r']=ope.mere.rapp.nom
                 ligne['r'] = ''
             # pointee
             ligne['p'] = utils.booltostr(ope.pointe)
-
             # moyen
             ligne['moyen'] = utils.idtostr(ope.moyen, defaut='', membre="nom")
             ligne['cat'] = utils.idtostr(ope.cat, defaut='', membre="nom")
             # tiers
             ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
+            #phase de verif des notes
+            #si c'est une ope jumelle pointe ou rapproche on rajoute une note
+            if ope.jumelle is not None:
+                if ope.jumelle.rapp is not None:#jumelle rapprochee
+                    if '>R' not in ligne['notes']:
+                        ligne['notes']= ligne['notes'] + u'>R' + ope.jumelle.rapp.nom
+                if ope.jumelle.pointe:#jumelle pointee
+                    if '>P' not in ligne['notes']:
+                        ligne['notes']= ligne['notes'] + u'>P'
+                ligne['tiers'] = "%s => %s"%(ope.compte.nom,ope.jumelle.compte.nom)
             ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['numchq'] = ope.num_cheque
-            ligne['id jumelle lie'] = utils.idtostr(ope, defaut='', membre='jumelle_id')
-            ligne['has_fille'] = utils.booltostr(ope.id in ope_mere)
-            ligne['id_ope_m'] = utils.idtostr(ope, defaut='', membre='mere_id')
-            try:
-                ligne['ope_titre'] = ope.ope_titre_ost.id
-            except (django_exceptions.ObjectDoesNotExist, AttributeError):
-                ligne['ope_titre'] = ''
-            try:
-                ligne['ope_pmv'] = ope.ope_titre_pmv.id
-            except (django_exceptions.ObjectDoesNotExist, AttributeError):
-                ligne['ope_pmv'] = ''
-            ligne['mois'] = ope.date.strftime('%m')
+            ligne['mois'] = utils.datetostr(ope.date,param='%m')
             data.append(ligne)
+        
         return self.export_csv_view(data=data)
 
 

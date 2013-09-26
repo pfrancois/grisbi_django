@@ -78,8 +78,9 @@ class Test_utils1(SimpleTestCase):
 
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
-        self.assertEquals(utils.datetostr(d), '1/1/2011')
-        self.assertEquals(utils.datetostr(d, param='%d/%m/%y'), '1/1/11')
+        self.assertEquals(utils.datetostr(d), '01/01/2011')
+        self.assertEquals(utils.datetostr(d, gsb=True), '1/1/2011')
+        self.assertEquals(utils.datetostr(d, param='%d/%m/%y'), '01/01/11')
         self.assertEquals(utils.datetostr(None), '0/0/0')
         self.assertRaises(utils.FormatException, utils.datetostr, 'toto')
 
@@ -156,8 +157,8 @@ class Test_utils(TestCase):
     def test_idtostr(self):
         self.assertEquals(utils.idtostr(None), '0')
         self.assertEquals(utils.idtostr(None, defaut='toto'), 'toto')
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
-        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), 'Operation Sur Titre')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), u'Opération sur titre')
+        self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), u'Opération sur titre')
         Cat.objects.create(nom="test:", id=999)
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")

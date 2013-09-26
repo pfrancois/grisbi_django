@@ -1429,6 +1429,8 @@ class Virement(object):
             raise TypeError(u'pas compte')
         if not isinstance(compte_dest, Compte):
             raise TypeError(u'pas compte')
+        if compte_origine == compte_dest:
+            raise TypeError(u"attention, le compte de depart ne peut etre celui d'arrivée")
         vir = Virement()
         vir.origine = Ope()
         vir.dest = Ope()
@@ -1476,7 +1478,6 @@ class Virement(object):
         else:
             raise Gsb_exc(u'attention, on ne peut intialiser un form que si virement est bound')
         return tab
-
     def __unicode__(self):
         return u"%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
 

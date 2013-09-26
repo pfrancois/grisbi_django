@@ -8,8 +8,8 @@ from django.http import HttpResponse
 # import decimal
 # import datetime
 from django.conf import settings  # @Reimport
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+#from django.shortcuts import render_to_response
+#from django.template import RequestContext
 
 
 from lxml import etree as et
@@ -94,7 +94,7 @@ def _export():
         et.SubElement(xml_detail, "Solde_courant").text = utils.floattostr(cpt.solde())
         try:
             rapp = Ope.objects.filter(compte=cpt, rapp__isnull=False).select_related('rapp').latest().rapp
-            et.SubElement(xml_detail, "Date_dernier_releve").text = utils.datetostr(rapp.date)
+            et.SubElement(xml_detail, "Date_dernier_releve").text = utils.datetostr(rapp.date,gsb=True)
             et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(rapp.solde)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(rapp.id)
         except Ope.DoesNotExist:
@@ -139,12 +139,12 @@ def _export():
             xml_element.set('No', str(ope.id))
             xml_element.set('Id', '')  # NOT IN BDD
             # date de l'operation
-            xml_element.set('D', utils.datetostr(ope.date))
+            xml_element.set('D', utils.datetostr(ope.date,gsb=True))
             # date de valeur
             if ope.date_val is None:
                 xml_element.set('Db', "0/0/0")
             else:
-                xml_element.set('Db', utils.datetostr(ope.date_val))
+                xml_element.set('Db', utils.datetostr(ope.date_val,gsb=True))
             xml_element.set('M', utils.floattostr(ope.montant))
             xml_element.set('De', str(1))
             xml_element.set('Rdc', '0')  # NOT IN BDD
@@ -209,7 +209,7 @@ def _export():
     xml_echeances = et.SubElement(xml_echeances_root, 'Detail_des_echeances')
     for ech in Echeance.objects.all().order_by('id'):
         xml_element = et.SubElement(xml_echeances, 'Echeance', No=str(ech.id))
-        xml_element.set('Date', utils.datetostr(ech.date))
+        xml_element.set('Date', utils.datetostr(ech.date,gsb=True))
         xml_element.set('Compte', str(ech.compte_id))
         xml_element.set('Montant', utils.floattostr(ech.montant))
         xml_element.set('Devise', str(1))
@@ -270,7 +270,7 @@ def _export():
                     xml_element.set('Periodicite', str(ech.intervalle))
                 if ech.periodicite == 'a':
                     xml_element.set('Intervalle_periodicite', str(ech.intervalle))
-        xml_element.set('Date_limite', utils.datetostr(ech.date_limite, defaut=''))
+        xml_element.set('Date_limite', utils.datetostr(ech.date_limite, defaut='',gsb=True))
         xml_element.set('Ech_ventilee', '0')
         xml_element.set('No_ech_associee', '0')
 
@@ -385,8 +385,8 @@ def _export():
             xml_sub = et.SubElement(xml_detail, 'Exercice')
             xml_sub.set('No', str(exo.id))
             xml_sub.set('Nom', exo.nom)
-            xml_sub.set('Date_debut', utils.datetostr(exo.date_debut))
-            xml_sub.set('Date_fin', utils.datetostr(exo.date_fin))
+            xml_sub.set('Date_debut', utils.datetostr(exo.date_debut,gsb=True))
+            xml_sub.set('Date_fin', utils.datetostr(exo.date_fin,gsb=True))
             xml_sub.set('Affiche', "1")
 
     # #rapprochement##
@@ -415,8 +415,8 @@ def _export():
 @permission_required('gsb_can_export')
 def export(request):
     xml_django = _export()
-    reponse = HttpResponse(xml_django, mimetype="text/plain")
-    # reponse = HttpResponse(xml_django, mimetype="application/x-grisbi-gsb")
+    reponse = HttpResponse(xml_django, content_type="text/plain")
+    # reponse = HttpResponse(xml_django, content_type="application/x-grisbi-gsb")
     reponse["Cache-Control"] = "no-cache, must-revalidate"
     # reponse["Content-Disposition"] = "attachment; filename=%s.gsb" % settings.TITRE
     return reponse

@@ -385,7 +385,7 @@
       <Categorie No="2" Nom="cat2" Type="1" No_derniere_sous_cagegorie="0"/>
       <Categorie No="3" Nom="cat3" Type="2" No_derniere_sous_cagegorie="0"/>
       <Categorie No="4" Nom="cat4" Type="3" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="64" Nom="Operation Sur Titre" Type="2" No_derniere_sous_cagegorie="0"/>
+      <Categorie No="64" Nom="Op&#xE9;ration sur titre" Type="2" No_derniere_sous_cagegorie="0"/>
       <Categorie No="65" Nom="Virement" Type="2" No_derniere_sous_cagegorie="0"/>
       <Categorie No="66" Nom="Op&#xE9;ration Ventil&#xE9;e" Type="2" No_derniere_sous_cagegorie="0"/>
       <Categorie No="67" Nom="Revenus de placement:Plus-values" Type="2" No_derniere_sous_cagegorie="0"/>

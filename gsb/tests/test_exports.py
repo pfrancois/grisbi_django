@@ -8,9 +8,12 @@ Created on 25 mars 2013
 from __future__ import absolute_import
 from django.test import RequestFactory
 from django.core.urlresolvers import reverse
+#from django.conf import settings
+
+
 from gsb.io import export_base
 import gsb.io.export_csv as ex_csv
-import logging
+
 from .. import models
 from .. import utils
 
@@ -21,27 +24,42 @@ __all__ = ['Test_export']
 
 
 class Test_export(Test_view_base):
+
     def test_csv_global(self):
-        logger = logging.getLogger('gsb')
-        logger.setLevel(40)  # change le niveau de log (10 = debug, 20=info)
-        rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;id jumelle lie;has_fille;id_ope_m;ope_titre;ope_pmv;mois\r
-4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08\r
-5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;;0;;;;08\r
-7;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;;;0;;;;08\r
-6;cpte1;21/08/2011;10,00;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;;0;;;;08\r
-3;cpt_titre2;29/10/2011;-100,00;cpt_titre2201101;0;moyen_dep3;Operation Sur Titre;titre_ t2;20@5;;;;0;;3;;10\r
-8;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;virement;;;;9;0;;;;10\r
-9;cptb3;30/10/2011;100,00;;0;moyen_vir4;Virement;virement;;;;8;0;;;;10\r
-2;cpt_titre2;30/11/2011;-1500,00;;0;moyen_dep3;Operation Sur Titre;titre_ t2;150@10;;;;0;;2;;11\r
-1;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Operation Sur Titre;titre_ t1;1@1;;;;0;;1;;12\r
-10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Operation Sur Titre;titre_ autre;5@1;;;;0;;4;;09\r
-11;cpte1;24/09/2012;100,00;;0;moyen_rec1;Opération Ventilée;tiers2;;;;;1;;;;09\r
-12;cpte1;24/09/2012;99,00;;0;moyen_rec1;cat1;tiers2;;;;;0;11;;;09\r
-13;cpte1;24/09/2012;1,00;;0;moyen_rec1;cat2;tiers2;;;;;0;11;;;09\r
+        #on recupere un compte
+        models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
+                                compte_dest=models.Compte.objects.get(nom='cptb3'),
+                                montant=100,
+                                date=utils.strpdate("18/12/2012",fmt='%d/%m/%Y'))
+        o = models.Ope.objects.get(id=15)
+        o.rapp=models.Rapp.objects.get(id=1)
+        o.save()
+        models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
+                                compte_dest=models.Compte.objects.get(nom='cptb3'),
+                                montant=100,
+                                date=utils.strpdate("18/12/2013",fmt='%d/%m/%Y'))
+        o = models.Ope.objects.get(id=17)
+        o.pointe=True
+        o.save()
+        rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
+        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
+4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
+5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;08\r
+7;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;;08\r
+6;cpte1;21/08/2011;10,00;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;08\r
+3;cpt_titre2;29/10/2011;-100,00;cpt_titre2201101;0;moyen_dep3;Opération sur titre;titre_ t2;20@5;;;10\r
+8;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;;10\r
+2;cpt_titre2;30/11/2011;-1500,00;;0;moyen_dep3;Opération sur titre;titre_ t2;150@10;;;11\r
+1;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;;12\r
+10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;5@1;;;09\r
+12;cpte1;24/09/2012;99,00;;0;moyen_rec1;cat1;tiers2;;;;09\r
+13;cpte1;24/09/2012;1,00;;0;moyen_rec1;cat2;tiers2;;;;09\r
+14;cpte1;18/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;;12\r
+16;cpte1;18/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12\r
 """
         # on coupe ligne par ligne
-        self.assertreponsequal(rep.content, reponse_attendu, unicode_encoding='cp1252', nom="csv_global")
+        reponse_recu = unicode(rep.content,'latin-1')
+        self.assertreponsequal(reponse_recu, reponse_attendu, unicode_encoding='cp1252', nom="csv_global")
 
     def test_csv_debug(self):
         # on cree ce les entree de la vue
@@ -52,14 +70,14 @@ class Test_export(Test_view_base):
         # choix des parametre du test proprement dit
         view.debug = True
         # de la ligne d'export
-        data = u"4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08".split(";")
+        data = u"4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08".split(";")
         header = view.fieldnames
         final = dict()
         for d, h in zip(data, header):
             final[h] = d
         # on compare a ce qui est attendu
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;id jumelle lie;has_fille;id_ope_m;ope_titre;ope_pmv;mois\r
-4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;;0;;;;08\r
+        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
+4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 """
         self.assertreponsequal(view.export_csv_view(data=[final], nomfich='test_file').content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")
 
@@ -140,30 +158,33 @@ class Test_export(Test_view_base):
         chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
         chaine2 = 'INSERT INTO "category" VALUES(68,\'placement\',2,13369344,8,1375886177.0);'
         reponse_recu = re.sub(chaine1, chaine2, reponse_recu)
-
+        #on recreer un fichier unicode
+        reponse_recu = reponse_recu.decode('utf-8')
         # on coupe ligne par ligne
-        self.assertfileequal(reponse_recu, "money_iphone.txt", nom="csv_sql_money_iphone")
+        self.assertfileequal(reponse_recu, "money_iphone.txt", nom="csv_sql_money_iphone", unicode_encoding='cp1252')
+
 
     def test_csv_pocket_money_iphone(self):
         reponse_recu = self.client.post(reverse('export_csv_pocket_money'),
                                         data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
                                          ).content
 
-        reponse_attendu = """"account name","date","ChkNum","Payee","Category","Class","Memo","Amount","Cleared","CurrencyCode","ExchangeRate"
-"cpte1","11/8/11","","tiers1","cat1","","","-100.00","*","EUR","1"
-"cpte1","11/8/11","","tiers1","cat2","","","10.00","*","EUR","1"
-"cpte1","11/8/11","","tiers1","cat1","ib1","","10.00","","EUR","1"
-"cpte1","21/8/11","","tiers2","cat2","ib2","fusion avec ope1","10.00","","EUR","1"
-"cpt_titre2","29/10/11","","titre_ t2","Operation Sur Titre","","20@5","-100.00","*","EUR","1"
+        reponse_attendu = u""""account name","date","ChkNum","Payee","Category","Class","Memo","Amount","Cleared","CurrencyCode","ExchangeRate"
+"cpte1","11/08/11","","tiers1","cat1","","","-100.00","*","EUR","1"
+"cpte1","11/08/11","","tiers1","cat2","","","10.00","*","EUR","1"
+"cpte1","11/08/11","","tiers1","cat1","ib1","","10.00","","EUR","1"
+"cpte1","21/08/11","","tiers2","cat2","ib2","fusion avec ope1","10.00","","EUR","1"
+"cpt_titre2","29/10/11","","titre_ t2","Opération sur titre","","20@5","-100.00","*","EUR","1"
 "cpte1","30/10/11","","<cptb3>","Virement","","","-100.00","","EUR","1"
 "cptb3","30/10/11","","<cpte1>","Virement","","","100.00","","EUR","1"
-"cpt_titre2","30/11/11","","titre_ t2","Operation Sur Titre","","150@10","-1500.00","","EUR","1"
-"cpt_titre1","18/12/11","","titre_ t1","Operation Sur Titre","","1@1","-1.00","","EUR","1"
-"cpt_titre1","24/9/12","","titre_ autre","Operation Sur Titre","","5@1","-5.00","","EUR","1"
-"cpte1","24/9/12","","tiers2","cat1","","","99.00","","EUR","1"
-"cpte1","24/9/12","","tiers2","cat2","","","1.00","","EUR","1"
-"""
-        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_csv_pocket_money_iphone")
+"cpt_titre2","30/11/11","","titre_ t2","Opération sur titre","","150@10","-1500.00","","EUR","1"
+"cpt_titre1","18/12/11","","titre_ t1","Opération sur titre","","1@1","-1.00","","EUR","1"
+"cpt_titre1","24/09/12","","titre_ autre","Opération sur titre","","5@1","-5.00","","EUR","1"
+"cpte1","24/09/12","","tiers2","cat1","","","99.00","","EUR","1"
+"cpte1","24/09/12","","tiers2","cat2","","","1.00","","EUR","1"
+"""     
+        reponse_recu = unicode(reponse_recu,'latin-1')
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_csv_pocket_money_iphone", unicode_encoding='cp1252')
 
     def test_export_cours(self):
         reponse_recu = self.client.post(reverse('export_cours'),
@@ -171,13 +192,13 @@ class Test_export(Test_view_base):
                                          ).content
 
         reponse_attendu = """id;date;nom;isin;cours
-1;24/9/2012;autre;a;1,0000000
-5;23/9/2012;autre 2;svjkdfkjh;2,0000000
+1;24/09/2012;autre;a;1,0000000
+5;23/09/2012;autre 2;svjkdfkjh;2,0000000
 2;18/12/2011;t1;1;1,0000000
 3;29/10/2011;t2;2;5,0000000
 3;30/11/2011;t2;2;10,0000000
 """
-        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_cours")
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_cours", unicode_encoding='cp1252')
 
     def test_export_ope_titre(self):
         c = models.Compte.objects.get(id=5)
@@ -189,12 +210,12 @@ class Test_export(Test_view_base):
 
         reponse_attendu = """id;date;compte;nom;isin;sens;nombre;cours;montant_ope
 1;18/12/2011;cpt_titre1;t1;1;achat;1,0000000;1,0000000;1,0000000
-4;24/9/2012;cpt_titre1;autre;a;achat;5,0000000;1,0000000;5,0000000
+4;24/09/2012;cpt_titre1;autre;a;achat;5,0000000;1,0000000;5,0000000
 3;29/10/2011;cpt_titre2;t2;2;achat;20,0000000;5,0000000;100,0000000
 2;30/11/2011;cpt_titre2;t2;2;achat;150,0000000;10,0000000;1500,0000000
-5;1/12/2011;cpt_titre2;t2;2;vente;-10,0000000;20,0000000;-200,0000000
+5;01/12/2011;cpt_titre2;t2;2;vente;-10,0000000;20,0000000;-200,0000000
 """
-        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_ope_titre")
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_export_ope_titre", unicode_encoding='cp1252')
 
     def test_export_gsb_0_5_0(self):
         c = models.Compte.objects.create(nom='test')

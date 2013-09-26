@@ -192,5 +192,5 @@ class Export_qif(ExportViewBase):
                     qif.w('$', fille.montant)
             qif.end_record()
             # finalisation
-        reponse = HttpResponse(fich.getvalue(), mimetype="text/plain")
+        reponse = HttpResponse(fich.getvalue(), content_type="text/plain")
         return reponse

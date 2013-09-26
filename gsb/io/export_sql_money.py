@@ -205,6 +205,6 @@ CREATE TABLE payment (
             sql.query('CREATE INDEX record_day_index on record(day);')
             sql.query('DROP INDEX IF EXISTS record_repeat_index;')
             sql.query('CREATE INDEX record_repeat_index on record(repeat);')
-        reponse = HttpResponse(sql.dump(), mimetype="text/plain")
+        reponse = HttpResponse(sql.dump(), content_type="text/plain; charset=utf-8")
         nbope = len(reponse.content)
         return reponse

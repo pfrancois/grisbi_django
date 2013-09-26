@@ -18,7 +18,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'isonexist', 'switch']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'is_onexist', 'switch']
 
 
 class FormatException(Exception):
@@ -232,7 +232,7 @@ def to_date(var, format_date="%d/%m/%Y"):
 
 
 #-------------------------------format de sortie-----------------------------
-def datetostr(s, defaut="0/0/0", param='%d/%m/%Y'):
+def datetostr(s, defaut="0/0/0", param='%d/%m/%Y',gsb=False):
     """
     fonction qui transforme un object date en une chaine AA/MM/JJJJ
     @param s:objet datetime
@@ -243,13 +243,16 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y'):
     else:
         if isinstance(s, datetime.date):
             s = s.strftime(param)
-            result = []
-            tab = s.split("/")
-            for partie in tab:
-                if partie[0] == '0':  # transform 01/01/2010 en 1/1/2010
-                    partie = partie[1:]
-                result.append(partie)
-            return "/".join(result)
+            if gsb:
+                result = []
+                tab = s.split("/")
+                for partie in tab:
+                    if partie[0] == '0':  # transform 01/01/2010 en 1/1/2010
+                        partie = partie[1:]
+                    result.append(partie)
+                return "/".join(result)
+            else:
+                return s
         else:
             raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 

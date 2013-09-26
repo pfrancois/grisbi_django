@@ -83,7 +83,6 @@ class Index_view(Mytemplateview):
     template_name = 'gsb/index.djhtm'
 
     def get(self, request, *args, **kwargs):
-        print "toto"
         if settings.AFFICHE_CLOT:
             self.bq = Compte.objects.exclude(type='t')
             self.pl = Compte.objects.filter(type='t')
@@ -93,9 +92,8 @@ class Index_view(Mytemplateview):
             # calcul du solde des bq
         self.bqe = []
         self.total_bq = decimal.Decimal('0')
-        soldes = self.bq.exclude(ope__filles_set__isnull=False).select_related('ope').annotate(solde=models.Sum('ope__montant'))
-        for p in soldes:
-            cpt = {'solde': p.solde,
+        for p in self.bq:
+            cpt = {'solde': p.solde(),
                  'nom': p.nom,
                  'url': p.get_absolute_url(),
                  'ouvert': p.ouvert}

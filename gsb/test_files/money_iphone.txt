@@ -33,9 +33,9 @@ CREATE TABLE category (
 INSERT INTO "category" VALUES(1,'cat1',1,35840,5,1369245100.0);
 INSERT INTO "category" VALUES(2,'cat2',1,35840,6,1369245100.0);
 INSERT INTO "category" VALUES(3,'cat3',2,13369344,7,1369245100.0);
-INSERT INTO "category" VALUES(64,'Operation Sur Titre',2,13369344,1,1369245100.0);
+INSERT INTO "category" VALUES(64,'Opération sur titre',2,13369344,2,1369245100.0);
 INSERT INTO "category" VALUES(65,'Virement',2,13369344,4,1369245100.0);
-INSERT INTO "category" VALUES(66,'OpÃ©ration VentilÃ©e',2,13369344,2,1369245100.0);
+INSERT INTO "category" VALUES(66,'Opération Ventilée',2,13369344,1,1369245100.0);
 INSERT INTO "category" VALUES(67,'Revenus de placement:Plus-values',2,13369344,3,1369245100.0);
 INSERT INTO "category" VALUES(68,'placement',2,13369344,8,1375886177.0);
 CREATE TABLE subcategory (

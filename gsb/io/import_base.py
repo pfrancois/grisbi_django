@@ -131,7 +131,7 @@ class property_ope_base(object):
 
 
 class Table(object):
-    """Moyen avec cache"""
+    """obj avec cache"""
     element = None
     readonly = False
 
@@ -147,7 +147,7 @@ class Table(object):
                 c, created = self.element.objects.get_or_create(**param)
                 self.id[c.nom] = c.pk
                 if created:
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
+                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, c))
 
         if self.element is None:
             raise NotImplementedError("table de l'element non choisi")
@@ -219,6 +219,15 @@ class Moyen_cache(Table):
                      {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}},
                      {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}}, ]
 
+    def goc(self, nom, obj=None,montant=None):
+        if obj is not None:
+            return super(Moyen_cache,self).goc('',obj=obj)
+        if montant is None:
+            raise ValueError('attention, vous devez remplir soit obj soit montant')
+        if montant > 0:
+            return super(Moyen_cache,self).goc('',obj={"nom":nom,"type":"r"})
+        else:
+            return super(Moyen_cache,self).goc('',obj={"nom":nom,"type":"d"})
     def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'd'}
@@ -290,7 +299,7 @@ class Titre_cache(Table):
         if nom is not None and "titre_ " in nom:  # cas ou on utiliserait les nom de tiers
             nom = nom.replace("titre_ ", '')
             nom = nom.strip()
-        if (not nom) and (not isin) and obj is None:  # cas ou pas de parametre
+        if nom is None and isin is None and obj is None:  # cas ou pas de parametre
             return None
         try:
             if nom:
@@ -491,6 +500,7 @@ class Import_base(views.Myformview):
                 return self.render_to_response(self.get_context_data(form=form, resultat=self.resultat))
             else:
                 return HttpResponseRedirect(self.get_success_url())
+                #return self.render_to_response(self.get_context_data(form=form))
 
     def import_file(self, nomfich):
         raise NotImplementedError("methode goc non defini")
