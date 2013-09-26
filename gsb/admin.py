@@ -343,7 +343,7 @@ class Compte_admin(Modeladmin_perso):
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if obj.ferme == True:
+        if obj.ouvert == False:
             return False
         return True
 
