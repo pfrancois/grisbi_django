@@ -95,20 +95,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     encoding = "iso-8859-1"
     complexe = False
 
-    def init_cache(self):
-        self.moyens = import_base.Moyen_cache(self.request)
-        self.cats = import_base.Cat_cache(self.request)
-        self.ibs = import_base.IB_cache(self.request)
-        self.comptes = import_base.Compte_cache(self.request)
-        self.banques = import_base.Banque_cache(self.request)
-        self.exos = import_base.Exercice_cache(self.request)
-        self.tiers = import_base.Tiers_cache(self.request)
-        self.opes = import_base.Ope_cache(self.request)
-        self.titres = import_base.Titre_cache(self.request)
-        self.cours = import_base.Cours_cache(self.request, self.titres)
-        self.moyen_par_defaut = import_base.moyen_defaut_cache(self.request, self.moyens)
-        self.rapps = import_base.Rapp_cache(self.request)
-
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
         self.init_cache()
@@ -116,15 +102,15 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         # les moyens par defaut
         retour = False
         moyen_virement = self.moyens.goc('', {'nom': "Virement", 'type': 'v'})
-        # try:
-        with open(nomfich, 'rt') as f_non_encode:
-            fich = self.reader(f_non_encode, encoding=self.encoding)
-            #---------------------- boucle
-            retour = self.tableau(fich, moyen_virement)
-            #------------------fin boucle
-        # except ( import_base.ImportException) as e:
-        #    messages.error(self.request, "attention traitement interrompu parce que %s" % e)
-        #    retour = False
+        try:
+            with open(nomfich, 'rt') as f_non_encode:
+                fich = self.reader(f_non_encode, encoding=self.encoding)
+                #---------------------- boucle
+                retour = self.tableau(fich, moyen_virement)
+                #------------------fin boucle
+        except (import_base.ImportException) as e:
+           messages.error(self.request, "attention traitement interrompu parce que %s" % e)
+           retour = False
         # gestion des erreurs
         if len(self.erreur) or retour == False:
             for err in self.erreur:
@@ -160,13 +146,19 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     self.opes.nb_created+=1
                 if ope_titre:
                     compte=models.Compte.objects.get(id=ope['compte_id'])
-                    if compte.type != 't':
+                    nombre=utils.to_decimal(ope['notes'].split('@')[0])
+                    cours=utils.to_decimal(ope['notes'].split('@')[1])
+                    if nombre == 0 and cours == 0:
+                        messages.warning(u'attention, fausse opération sur titre ligne %s'%ope['ligne'])
+                        ope.pop('ligne')
+                        models.Ope.objects.create(**ope)
+                        continue
+                    if compte.type != 't' :
                         compte.type = 't'
                         compte.save()
                     id_titre=self.titres.goc(nom=models.Tiers.objects.get(id=ope['tiers_id']).nom)
                     titre=models.Titre.objects.get(id=id_titre)
-                    nombre=ope['notes'].split('@')[0]
-                    cours=ope['notes'].split('@')[1]
+
                     if nombre >0:
                         compte.achat(titre=titre,nombre=nombre,prix=cours,date=ope['date'])
                         self.opes.nb_created+=1

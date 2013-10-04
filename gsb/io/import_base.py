@@ -296,11 +296,12 @@ class Titre_cache(Table):
         self.id = {"nom": dict(), "isin": dict()}
 
     def goc(self, nom=None, isin=None, obj=None):
+        if nom is None and isin is None and obj is None:  # cas ou pas de parametre
+            return None
+
         if nom is not None and "titre_ " in nom:  # cas ou on utiliserait les nom de tiers
             nom = nom.replace("titre_ ", '')
             nom = nom.strip()
-        if nom is None and isin is None and obj is None:  # cas ou pas de parametre
-            return None
         try:
             if nom:
                 pk = self.id["nom"][nom]
@@ -517,4 +518,18 @@ class Import_base(views.Myformview):
     def dispatch(self, *args, **kwargs):
         """on a besoin pour le method decorator"""
         return super(Import_base, self).dispatch(*args, **kwargs)
+
+    def init_cache(self):
+        self.moyens = Moyen_cache(self.request)
+        self.cats = Cat_cache(self.request)
+        self.ibs = IB_cache(self.request)
+        self.comptes = Compte_cache(self.request)
+        self.banques = Banque_cache(self.request)
+        self.exos = Exercice_cache(self.request)
+        self.tiers = Tiers_cache(self.request)
+        self.opes = Ope_cache(self.request)
+        self.titres = Titre_cache(self.request)
+        self.cours = Cours_cache(self.request, self.titres)
+        self.moyen_par_defaut = moyen_defaut_cache(self.request, self.moyens)
+        self.rapps = Rapp_cache(self.request)
 
