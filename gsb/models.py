@@ -994,6 +994,8 @@ class Rapp(models.Model):
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
+        new.date=max(new.date,self.date)
+        new.save()
         nb_change = Ope.objects.filter(rapp=self).update(rapp=new)
         self.delete()
         return nb_change
