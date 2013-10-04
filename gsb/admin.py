@@ -22,7 +22,6 @@ from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
 
-
 #-------------ici les classes generiques------
 class date_perso_filter(DateFieldListFilter):
     """filtre date perso
@@ -84,6 +83,7 @@ class rapprochement_filter(SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
+        queryset = queryset.filter(date__gt=utils.strpdate("2007-01-01"))
         if self.value() == 'p':
             return queryset.filter(pointe=True)
         if self.value() == 'rapp':
