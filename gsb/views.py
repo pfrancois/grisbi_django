@@ -319,7 +319,7 @@ def ope_detail(request, pk):
                 if not ope.rapp and not ope.jumelle.rapp:
                     form.save()
                     messages.success(request, 'modification du virement effectue')
-                    return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
+                    return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))
                 else:
                     if ope.rapp:
                         compte = ope.compte
@@ -360,7 +360,7 @@ def ope_detail(request, pk):
                     else:
                         messages.success(request, u"opération modifiée")
                         ope = form.save()
-                return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
+                return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))
         else:
             form = gsb_forms.OperationForm(instance=ope)
         return render(request, 'gsb/ope.djhtm',

@@ -96,55 +96,38 @@ class rapprochement_filter(SimpleListFilter):
             return queryset.exclude(rapp__isnull=False)
 
 
-def fusion(request, queryset, sens):
-    """fonction générique de fusion entre 2 objets"""
-    nom_module = queryset[0]._meta.module_name
-    if queryset.count() != 2:
-        messages.error(request,
-                       u"attention, vous devez selectionner 2 %(type)s et uniquement 2, vous en avez selectionné %(n)s" % {
-                           'n': queryset.count(),
-                           'type': nom_module}
-        )
-        return
-    obj_a = queryset[0]
-    obj_b = queryset[1]
-    if type(obj_a) != type(obj_b):
-        messages.error(request, u"attention vous devez selectionner deux item du même type")
-        return
-    try:
-        if sens == 'ab':
-            message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
-                nom_module,
-                obj_a,
-                obj_b)
-            obj_a.fusionne(obj_b)
-        else:
-            message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
-                nom_module,
-                obj_b,
-                obj_a)
-            obj_b.fusionne(obj_a)
-        messages.success(request, message)
-    except Exception as inst:  # TODO mieux gerer
-        message = inst.__unicode__()
-        messages.error(request, message)
-
-
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
 
     def nb_ope(self, obj):
         return '%s' % (obj.ope_set.exclude(filles_set__isnull=False).count())
 
-    def fusionne_a_dans_b(self, request, queryset):
-        fusion(request, queryset, 'ab')
+    def fusionne(self, request, queryset):
+        """fonction générique de fusion entre 2 objets"""
+        nom_module = queryset[0]._meta.module_name
+        if queryset.count() < 2:
+            messages.error(request,
+                           u"attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
+                               'n': queryset.count(),
+                               'type': nom_module}
+            )
+            return
+        obj_a = queryset[0]
+        for obj_b in queryset:
+            if obj_a == obj_b:#on saute le premier
+                continue
+            try:
+                message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
+                    nom_module,
+                    obj_b,
+                    obj_a)
+                obj_b.fusionne(obj_a)
+                messages.success(request, message)
+            except Exception as inst:  # TODO mieux gerer
+                message = inst.__unicode__()
+                messages.error(request, message)
 
-    fusionne_a_dans_b.short_description = u"Fusion de 1 dans 2"
-
-    def fusionne_b_dans_a(self, request, queryset):
-        fusion(request, queryset, 'ba')
-
-    fusionne_b_dans_a.short_description = u"Fusion de 2 dans 1"
+    fusionne.short_description = u"Fusion dans la première selectionnée"
 
     # from here http://djangosnippets.org/snippets/2531/
     def keepfilter(self, request, result):
@@ -229,7 +212,7 @@ class ope_cat_admin(liste_perso_inline):
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne',]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -254,7 +237,7 @@ class Cat_admin(Modeladmin_perso):
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne',]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -264,9 +247,7 @@ class Ib_admin(Modeladmin_perso):
 
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a',
-               'action_supprimer_pointe', 'action_transformer_pointee_rapp',
-               'action_ajustement_cb']
+    actions = ['fusionne','action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
               'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut'))
     list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
@@ -463,7 +444,7 @@ class Ope_admin(Modeladmin_perso):
                     return False
             if obj.pointe or obj.rapp is not None:
                 return False
-        if obj.ope_titre_ost is not None or obj.ope_titre_pmv is not None:
+        if obj.oper_titre is not None:
             return False
         if obj.jumelle is not None and (obj.jumelle.pointe == True or obj.jumelle.rapp is not None):
             return False
@@ -481,14 +462,12 @@ class Cours_admin(Modeladmin_perso):
 
 class Titre_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
     list_display = ('nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
-    formfield_overrides = {
-        models.TextField: {'widget': admin.widgets.AdminTextInputWidget},
-    }
+    formfield_overrides = {models.TextField: {'widget': admin.widgets.AdminTextInputWidget},}
 
     def show_tiers(self, obj):
         if obj.tiers_id:
@@ -502,7 +481,7 @@ class Titre_admin(Modeladmin_perso):
 
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
     list_filter = ('type',)
     fields = ['nom', 'type']
     list_display = ('nom', 'type', 'nb_ope')
@@ -519,7 +498,7 @@ class ope_tiers_admin(liste_perso_inline):
 
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
@@ -552,7 +531,7 @@ class Ech_admin(Modeladmin_perso):
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
 
 
 class ope_rapp_admin(liste_perso_inline):
@@ -573,7 +552,7 @@ class Rapp_admin(Modeladmin_perso):
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')
 
 
