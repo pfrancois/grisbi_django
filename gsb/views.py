@@ -392,7 +392,7 @@ def ope_new(request, cpt_id=None):
 
             messages.success(request, u"Opération '%s' crée" % ope)
             # retour vers
-            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/ope.djhtm',
                           {'titre': u'création',
@@ -438,7 +438,7 @@ def vir_new(request, cpt_id=None):
                 ope.date.strftime('%d/%m/%Y')
                 )
             )
-            return http.HttpResponseRedirect(reverse('gsb_cpt_detail_all', args=(ope.compte.id,)))
+            return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))
         else:
             return render(request, 'gsb/vir.djhtm',
                           {'titre_long': u'création virement interne ',
