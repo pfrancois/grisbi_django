@@ -83,7 +83,7 @@ class rapprochement_filter(SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        queryset = queryset.filter(date__gt=utils.strpdate("2007-01-01"))
+        #queryset = queryset.filter(date__gt=utils.strpdate("2007-01-01"))
         if self.value() == 'p':
             return queryset.filter(pointe=True)
         if self.value() == 'rapp':
@@ -123,7 +123,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                     obj_a)
                 obj_b.fusionne(obj_a)
                 messages.success(request, message)
-            except Exception as inst:  # TODO mieux gerer
+            except Exception as inst: 
                 message = inst.__unicode__()
                 messages.error(request, message)
 
@@ -444,9 +444,11 @@ class Ope_admin(Modeladmin_perso):
                     return False
             if obj.pointe or obj.rapp is not None:
                 return False
-        if obj.oper_titre is not None:
+        if obj.ope_titre_ost is not None or obj.ope_titre_pmv is not None:
             return False
         if obj.jumelle is not None and (obj.jumelle.pointe == True or obj.jumelle.rapp is not None):
+            return False
+        if obj.rapp is not None:
             return False
         return True
 
