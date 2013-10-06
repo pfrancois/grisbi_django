@@ -547,7 +547,7 @@ class ope_rapp_admin(liste_perso_inline):
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
-    actions = ['fusionne_a_dans_b', 'fusionne_b_dans_a']
+    actions = ['fusionne']
     list_display = ('nom', 'date')
     inlines = [ope_rapp_admin]
 
