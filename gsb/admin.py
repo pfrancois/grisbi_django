@@ -165,17 +165,16 @@ class Modeladmin_perso(admin.ModelAdmin):
 class formestligne_limit(BaseInlineFormSet):
     def get_queryset(self):
         sup = super(formestligne_limit, self).get_queryset()
-        return sup.order_by('-id')[:10]
+        return sup[:10]
 
 
 class liste_perso_inline(admin.TabularInline):
-    can_delete = True
     extra = 0
     formfield_overrides = {
         models.TextField: {'widget': forms.TextInput, },
     }
     related = None
-    readonly = False
+    readonly = True
     orderby = None
     formset = formestligne_limit
 
@@ -197,18 +196,21 @@ class liste_perso_inline(admin.TabularInline):
             args = self.orderby
             qs = qs.order_by(*args)
         return qs
+    # afin de pouvoir avoir des inline readonly
+    def has_add_permission(self, request, obj=None):
+        if self.readonly:
+            return False
+        return True
 
 
 # ------------definitiion des classes
 class ope_cat_admin(liste_perso_inline):
     model = Ope
     fields = ('date', 'compte', 'montant', 'tiers', 'ib', 'notes')
-    readonly = True
     fk_name = 'cat'
     related = ('compte', 'tiers', 'ib')
     orderby = ('-date',)
     max_num = 10
-
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
@@ -234,6 +236,16 @@ class Cat_admin(Modeladmin_perso):
             return False
         return True
 
+class ope_ib_admin(liste_perso_inline):
+    model = Ope
+    fields = ('date', 'compte', 'montant', 'tiers', 'cat', 'notes')
+    fk_name = 'ib'
+    related = ('compte', 'tiers', 'cat')
+    orderby = ('-date',)
+    readonly = False
+    formset = BaseInlineFormSet
+
+
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
@@ -243,6 +255,7 @@ class Ib_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
+    inlines = [ope_ib_admin]
 
 
 class Compte_admin(Modeladmin_perso):
@@ -334,6 +347,9 @@ class ope_fille_admin(liste_perso_inline):
     fields = ('montant', 'cat', 'ib', 'notes')
     fk_name = 'mere'
     related = ('cat', 'ib')
+    orderby = ('ib',)
+    readonly = True
+
 
 
 class Ope_admin(Modeladmin_perso):
@@ -495,6 +511,7 @@ class ope_tiers_admin(liste_perso_inline):
     fields = ('date', 'compte', 'montant', 'cat', 'ib', 'notes')
     readonly = True
     fk_name = 'tiers'
+    orderby = ('-date',)
     related = ('compte', 'cat', 'ib')
 
 
@@ -542,6 +559,7 @@ class ope_rapp_admin(liste_perso_inline):
     readonly_fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
     related = ('compte', 'tiers', 'moyen', 'cat')
+    orderby = ('-date',)
     formset = BaseInlineFormSet
 
 
