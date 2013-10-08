@@ -94,6 +94,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     titre = "import csv"
     encoding = "iso-8859-1"
     complexe = False
+    extensions=('.csv',)
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""

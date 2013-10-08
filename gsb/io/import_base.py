@@ -475,11 +475,15 @@ class Import_base(views.Myformview):
     # affiche les resultats plutot qu'une importation
     resultat = False
     debug = False
+    extensions=None
 
     def form_valid(self, form):
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
         nomfich, fileExtension = os.path.splitext(nomfich)
+        if fileExtension not in self.extensions:
+            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s"%(fileExtension,self.extensions))
+            return self.form_invalid(form)
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), fileExtension[1:]))
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
         # si le repertoire n'existe pas on le crée
