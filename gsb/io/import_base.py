@@ -91,7 +91,7 @@ class property_ope_base(object):
 
     @property
     def num_cheque(self):
-        return None
+        return ''
 
     @property
     def piece_comptable(self):
