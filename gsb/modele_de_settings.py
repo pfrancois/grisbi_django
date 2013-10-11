@@ -16,9 +16,9 @@ DJANGO_EXTENSION = True
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
 ADMINS = (
-# ('toto', 'your_email@domain.com'),
+    # ('toto', 'your_email@domain.com'),
 )
-#####################################
+#
 # config gsb
 TITRE = "20040701_django.gsb"
 DEVISE_GENERALE = 'EUR'
@@ -39,7 +39,7 @@ ID_CAT_OST = 64
 ID_CAT_PMV = 4
 MD_CREDIT = 6
 MD_DEBIT = 7
-##################
+#
 
 MANAGERS = ADMINS
 
@@ -114,9 +114,9 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'  # plus utilise car deprecated
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-# Put strings here, like "/home/html/static" or "C:/www/django/static".
-# Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
@@ -125,7 +125,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
-    )
+)
 
 # Make this unique, and don't share it with anybody.
 try:
@@ -146,7 +146,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     #    'django.template.loaders.eggs.Loader',
-    )
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -155,7 +155,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.transaction.TransactionMiddleware'
-    )
+)
 
 ROOT_URLCONF = 'urls'
 
@@ -164,7 +164,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_PATH, 'templates'),
-    )
+)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -177,7 +177,7 @@ INSTALLED_APPS = (
     # gestion admin
     'django.contrib.admin',
     'django.contrib.admindocs'
-    )
+)
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
@@ -185,7 +185,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
-    )
+)
 if DJANGO_EXTENSION:
     INSTALLED_APPS += ('django_extensions',)
 

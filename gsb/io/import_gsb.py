@@ -234,13 +234,13 @@ def import_gsb_050(nomfich, request, efface_table=True):
         if type_compte in ('t',):
             messages.info(request, "cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
-                                                             defaults={'nom': xml_cpt.find('Details/Nom').text, 'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)), }
-                                                             )
+                                                            defaults={'nom': xml_cpt.find('Details/Nom').text, 'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)), }
+                                                            )
         else:
             messages.info(request, "cpt %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
-                                                             defaults={'nom': xml_cpt.find('Details/Nom').text,
-                                                                       'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
+                                                            defaults={'nom': xml_cpt.find('Details/Nom').text,
+                                                                      'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
                                                                        }
                                                             )
 
@@ -474,7 +474,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
         else:
             element.compte_virement = None
             element.moyen_virement = None
-        if  int(xml_ech.get('Periodicite')) == 4:  # c'est le mode personalise
+        if int(xml_ech.get('Periodicite')) == 4:  # c'est le mode personalise
             if int(xml_ech.get('Periodicite_personnalisee')) == 7 and int(xml_ech.get('Intervalle_periodicite')) == 0:  # on cree les semaine
                 element.periodicite = 'h'
                 element.intervalle = 1

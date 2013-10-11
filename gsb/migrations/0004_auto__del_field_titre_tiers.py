@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
+#import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+#from django.db import models
 
 
 class Migration(SchemaMigration):
@@ -11,13 +11,11 @@ class Migration(SchemaMigration):
         # Deleting field 'Titre.tiers'
         db.delete_column(u'gsb_titre', 'tiers_id')
 
-
     def backwards(self, orm):
         # Adding field 'Titre.tiers'
         db.add_column(u'gsb_titre', 'tiers',
                       self.gf('django.db.models.fields.related.OneToOneField')(related_name='titre_temp', unique=True, null=True, to=orm['gsb.Tiers'], blank=True),
                       keep_default=False)
-
 
     models = {
         u'gsb.banque': {

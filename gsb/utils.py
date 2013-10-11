@@ -194,12 +194,12 @@ def to_bool(var):
     try:
         if var is None:
             return False
-        if var == True or var == False:
+        if var is True or var is False:
             return var
 
         var = force_unicode(var).strip()
         try:
-            if var == "" or var == 0 or var == "0" or bool(var) == False:
+            if var == "" or var == 0 or var == "0" or bool(var) is False:
                 return False
             else:
                 return True
@@ -232,7 +232,7 @@ def to_date(var, format_date="%d/%m/%Y"):
 
 
 #-------------------------------format de sortie-----------------------------
-def datetostr(s, defaut="0/0/0", param='%d/%m/%Y',gsb=False):
+def datetostr(s, defaut="0/0/0", param='%d/%m/%Y', gsb=False):
     """
     fonction qui transforme un object date en une chaine AA/MM/JJJJ
     @param s:objet datetime

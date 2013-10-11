@@ -6,7 +6,7 @@ from django.db import models
 from django import forms
 import gsb.utils as utils
 from django.db.models import DateTimeField
-from south.modelsinspector import add_introspection_rules
+#from south.modelsinspector import add_introspection_rules
 from south.modelsinspector import introspector
 
 

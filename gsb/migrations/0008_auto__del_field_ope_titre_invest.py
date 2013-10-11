@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
+# import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+# from django.db import models
 
 
 class Migration(SchemaMigration):
@@ -11,13 +11,11 @@ class Migration(SchemaMigration):
         # Deleting field 'Ope_titre.invest'
         db.delete_column(u'gsb_ope_titre', 'invest')
 
-
     def backwards(self, orm):
         # Adding field 'Ope_titre.invest'
         db.add_column(u'gsb_ope_titre', 'invest',
                       self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=15, decimal_places=2),
                       keep_default=False)
-
 
     models = {
         u'gsb.banque': {

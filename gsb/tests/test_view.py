@@ -184,8 +184,8 @@ class Test_forms(Test_view_base):
         form = gsb_forms.OperationForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {'nouveau_tiers': [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
-                                        'tiers': [u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]
-                                        }
+                                       'tiers': [u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]
+                                      }
                          )
 
     def test_virement_forms(self):
@@ -242,7 +242,9 @@ class Test_forms(Test_view_base):
         r = form.is_valid()
         self.assertFalse(r)
         self.assertEqual(form.errors, {'compte_origine': [u"pas possible de faire un virement vers le même compte"],
-                                        'compte_destination': [u"pas possible de faire un virement vers le même compte"]})
+                                       'compte_destination': [u"pas possible de faire un virement vers le même compte"]
+                                      }
+                        )
 
     def test_Ope_titre_addForm1(self):
         form_data = {'date': "02/09/2012",

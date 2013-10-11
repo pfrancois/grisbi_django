@@ -89,26 +89,26 @@ class TestCase(Test_Case_django):
         if nom != "":
             nom = "%s_" % nom
         if unicode_encoding is None:
-            unicode_encoding="utf-8"
+            unicode_encoding = "utf-8"
         rr_iter = reponse_recu.splitlines()
 
         if not fichier:
             ra_iter = reponse_attendu.splitlines()
         else:  # c'est le cas des fichier par exemple
-            ra_iter=[]
+            ra_iter = []
             for r in reponse_attendu:
-                if not isinstance(r,unicode):
+                if not isinstance(r, unicode):
                     r = r.decode(unicode_encoding)
                 r = r.replace('\n', '')
                 r = r.replace('\r', '')
                 ra_iter.append(r)
         try:
-            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w', "utf-8")  
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w', "utf-8")
             for l in rr_iter:
                     fichier.write(l)
                     fichier.write('\n')
             fichier.close()
-            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w',unicode_encoding)
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w', unicode_encoding)
             for l in ra_iter:
                 fichier.write(l)
                 fichier.write('\n')
@@ -119,8 +119,8 @@ class TestCase(Test_Case_django):
             raise self.fail(msg)
         msg = u""
         for ra, rr in zip(ra_iter, rr_iter):
-            if not isinstance(ra,unicode):
-                ra=unicode(ra,unicode_encoding)
+            if not isinstance(ra, unicode):
+                ra = unicode(ra, unicode_encoding)
             if rr != ra:
                 msg = u"%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
         if msg != u"":

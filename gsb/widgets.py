@@ -68,10 +68,7 @@ class TitreField(forms.MultiValueField):
     """field utilisé pour la maj des titres"""
 
     def __init__(self, *args, **kwargs):
-        fields = (
-            CurField(label='cur'),
-            forms.DecimalField(initial='0', label='nb')
-            )
+        fields = (CurField(label='cur'), forms.DecimalField(initial='0', label='nb'))
         super(TitreField, self).__init__(fields, widget=Titrewidget(), *args, **kwargs)
 
     def compress(self, data_list):

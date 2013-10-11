@@ -196,13 +196,13 @@ class Cat_cache(Table):
 
     def auto(self):
         return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': u'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
-                    {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
-                    {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
-                    {'id': settings.ID_CAT_PMV, 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
-                    {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
-                    {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
-                    {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
-                        ]
+                {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
+                {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
+                {'id': settings.ID_CAT_PMV, 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
+                {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
+                {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
+                {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
+            ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:
@@ -216,18 +216,20 @@ class Moyen_cache(Table):
 
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
-                     {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}},
-                     {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}}, ]
+                {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}},
+                {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
+            ]
 
-    def goc(self, nom, obj=None,montant=None):
+    def goc(self, nom, obj=None, montant=None):
         if obj is not None:
-            return super(Moyen_cache,self).goc('',obj=obj)
+            return super(Moyen_cache, self).goc('', obj=obj)
         if montant is None:
             raise ValueError('attention, vous devez remplir soit obj soit montant')
         if montant > 0:
-            return super(Moyen_cache,self).goc('',obj={"nom":nom,"type":"r"})
+            return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "r"})
         else:
-            return super(Moyen_cache,self).goc('',obj={"nom":nom,"type":"d"})
+            return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "d"})
+
     def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'd'}
@@ -475,14 +477,14 @@ class Import_base(views.Myformview):
     # affiche les resultats plutot qu'une importation
     resultat = False
     debug = False
-    extensions=None
+    extensions = None
 
     def form_valid(self, form):
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
         nomfich, fileExtension = os.path.splitext(nomfich)
         if fileExtension not in self.extensions:
-            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s"%(fileExtension,self.extensions))
+            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (fileExtension, self.extensions))
             return self.form_invalid(form)
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), fileExtension[1:]))
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
@@ -497,7 +499,7 @@ class Import_base(views.Myformview):
         destination.close()
         # renomage ok
         result = self.import_file(nomfich)
-        if result == False:  # probleme importation raise # pragma: no cover
+        if not result:  # probleme importation raise # pragma: no cover
             os.remove(nomfich)
             return self.form_invalid(form)
         else:
@@ -536,4 +538,3 @@ class Import_base(views.Myformview):
         self.cours = Cours_cache(self.request, self.titres)
         self.moyen_par_defaut = moyen_defaut_cache(self.request, self.moyens)
         self.rapps = Rapp_cache(self.request)
-

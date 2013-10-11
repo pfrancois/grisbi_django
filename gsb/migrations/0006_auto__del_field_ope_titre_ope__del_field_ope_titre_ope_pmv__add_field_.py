@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
+# import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+# from django.db import models
 
 
 class Migration(SchemaMigration):
@@ -24,7 +24,6 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.related.OneToOneField')(related_name='ope_pmv', unique=True, null=True, to=orm['gsb.Ope']),
                       keep_default=False)
 
-
     def backwards(self, orm):
         # Adding field 'Ope_titre.ope'
         db.add_column(u'gsb_ope_titre', 'ope',
@@ -41,7 +40,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Ope.ope_titre_pmv'
         db.delete_column('gsb_ope', 'ope_titre_pmv_id')
-
 
     models = {
         u'gsb.banque': {

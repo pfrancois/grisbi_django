@@ -16,6 +16,6 @@ urlpatterns = patterns('',
     (r'^admin/password_reset/done/$', 'django.contrib.auth.views.password_reset_done'),
     (r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', 'django.contrib.auth.views.password_reset_confirm'),
     (r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete'),
-                       # attention catch all vers gsb le mettre en dernier
+    # attention catch all vers gsb le mettre en dernier
     (r'^', include(gsb.urls)),
 )

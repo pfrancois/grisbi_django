@@ -27,7 +27,7 @@ tiers_perso = (
      "date": True},
     {"reg": r"CARTE X\d* (\d\d/\d\d)", "def": {"moyen": 3, "tiers": None, "cat": None, "ib": None}, "decal": 20,
      "date": True},
-    )
+)
 
 
 class qifitem:

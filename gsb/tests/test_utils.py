@@ -167,4 +167,3 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id'), "1")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom'), "")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom'), "cpt_titre2201101")
-

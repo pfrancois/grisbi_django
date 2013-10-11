@@ -15,7 +15,7 @@ import datetime
 import os
 import glob
 from django.db import models
-from operator import attrgetter
+#from operator import attrgetter
 from django.conf import settings
 import os.path
 import mock

@@ -28,18 +28,18 @@ class Test_export(Test_view_base):
     def test_csv_global(self):
         #on recupere un compte
         models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
-                                compte_dest=models.Compte.objects.get(nom='cptb3'),
-                                montant=100,
-                                date=utils.strpdate("18/12/2012",fmt='%d/%m/%Y'))
+                               compte_dest=models.Compte.objects.get(nom='cptb3'),
+                               montant=100,
+                               date=utils.strpdate("18/12/2012", fmt='%d/%m/%Y'))
         o = models.Ope.objects.get(id=15)
-        o.rapp=models.Rapp.objects.get(id=1)
+        o.rapp = models.Rapp.objects.get(id=1)
         o.save()
         models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
-                                compte_dest=models.Compte.objects.get(nom='cptb3'),
-                                montant=100,
-                                date=utils.strpdate("18/12/2013",fmt='%d/%m/%Y'))
+                               compte_dest=models.Compte.objects.get(nom='cptb3'),
+                               montant=100,
+                               date=utils.strpdate("18/12/2013", fmt='%d/%m/%Y'))
         o = models.Ope.objects.get(id=17)
-        o.pointe=True
+        o.pointe = True
         o.save()
         rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
@@ -58,7 +58,7 @@ class Test_export(Test_view_base):
 16;cpte1;18/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12\r
 """
         # on coupe ligne par ligne
-        reponse_recu = unicode(rep.content,'latin-1')
+        reponse_recu = unicode(rep.content, 'latin-1')
         self.assertreponsequal(reponse_recu, reponse_attendu, unicode_encoding='cp1252', nom="csv_global")
 
     def test_csv_debug(self):
@@ -152,8 +152,8 @@ class Test_export(Test_view_base):
     def test_sql_money_iphone(self):
         # on cree ce les entree de la vue
         reponse_recu = self.client.post(reverse('export_sql_money_iphone'),
-                                         data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
-                                         ).content
+                                        data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
+                                        ).content
         # on remplace pour que ca marche 'version special du mock'
         chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
         chaine2 = 'INSERT INTO "category" VALUES(68,\'placement\',2,13369344,8,1375886177.0);'
@@ -162,7 +162,6 @@ class Test_export(Test_view_base):
         reponse_recu = reponse_recu.decode('utf-8')
         # on coupe ligne par ligne
         self.assertfileequal(reponse_recu, "money_iphone.txt", nom="csv_sql_money_iphone", unicode_encoding='cp1252')
-
 
     def test_csv_pocket_money_iphone(self):
         reponse_recu = self.client.post(reverse('export_csv_pocket_money'),
@@ -182,8 +181,8 @@ class Test_export(Test_view_base):
 "cpt_titre1","24/09/12","","titre_ autre","Opération sur titre","","5@1","-5.00","","EUR","1"
 "cpte1","24/09/12","","tiers2","cat1","","","99.00","","EUR","1"
 "cpte1","24/09/12","","tiers2","cat2","","","1.00","","EUR","1"
-"""     
-        reponse_recu = unicode(reponse_recu,'latin-1')
+"""
+        reponse_recu = unicode(reponse_recu, 'latin-1')
         self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_csv_pocket_money_iphone", unicode_encoding='cp1252')
 
     def test_export_cours(self):
@@ -220,9 +219,9 @@ class Test_export(Test_view_base):
     def test_export_gsb_0_5_0(self):
         c = models.Compte.objects.create(nom='test')
         models.Ope.objects.create(date=utils.strpdate('2011-08-13'), compte=c, date_val=utils.strpdate('2011-08-13'))
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='j')
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='m')
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant= -10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='s')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='j')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='m')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='s')
         reponse_recu = self.client.get(reverse('export_gsb_050')).content
         self.assertfileequal(reponse_recu, "export_050.xml", nom="test_gsb")
 

@@ -94,7 +94,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     titre = "import csv"
     encoding = "iso-8859-1"
     complexe = False
-    extensions=('.csv',)
+    extensions = ('.csv', )
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
@@ -110,10 +110,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 retour = self.tableau(fich, moyen_virement)
                 #------------------fin boucle
         except (import_base.ImportException) as e:
-           messages.error(self.request, "attention traitement interrompu parce que %s" % e)
-           retour = False
+            messages.error(self.request, "attention traitement interrompu parce que %s" % e)
+            retour = False
         # gestion des erreurs
-        if len(self.erreur) or retour == False:
+        if len(self.erreur) or retour is False:
             for err in self.erreur:
                     messages.warning(self.request, err)
             return False
@@ -128,44 +128,44 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     # on cree deux operation
                     vir = models.Virement.create(compte_origine=models.Compte.objects.get(id=ope['compte_id']),
                                             compte_dest=models.Compte.objects.get(id=ope['dest_id']),
-                                            montant=ope['montant']*-1,#-1 car la premiere ope est negative alors que le virement est positif
+                                            montant=ope['montant']*-1,  # -1 car la premiere ope est negative alors que le virement est positif
                                             date=ope['date'])
                     # on definit le detail des virement
-                    vir.origine.pointe=ope['pointe']
-                    vir.notes=ope['notes']
+                    vir.origine.pointe = ope['pointe']
+                    vir.notes = ope['notes']
                     if ">P" in ope['notes']:
-                        vir.dest.pointe=True
-                        vir.notes=ope['notes'].split('>R')[0]
+                        vir.dest.pointe = True
+                        vir.notes = ope['notes'].split('>R')[0]
                     #les rapp des jumelle
                     if "rapp" in ope.keys():
-                        vir.origine.rapp=models.Rapp.get(id=ope['rapp_id'])
+                        vir.origine.rapp = models.Rapp.get(id=ope['rapp_id'])
                     if ">R" in ope['notes']:
-                        rapp=ope['notes'].split('>R')[1]
-                        vir.notes=ope['notes'].split('>R')[0]
-                        vir.dest.rapp=models.Rapp.objects.get_or_create(nom=rapp,defaults={'nom':rapp})[0]
+                        rapp = ope['notes'].split('>R')[1]
+                        vir.notes = ope['notes'].split('>R')[0]
+                        vir.dest.rapp = models.Rapp.objects.get_or_create(nom=rapp, defaults={'nom': rapp})[0]
                     vir.save()
-                    self.opes.nb_created+=1
+                    self.opes.nb_created += 1
                 if ope_titre:
-                    compte=models.Compte.objects.get(id=ope['compte_id'])
-                    nombre=utils.to_decimal(ope['notes'].split('@')[0])
-                    cours=utils.to_decimal(ope['notes'].split('@')[1])
+                    compte = models.Compte.objects.get(id=ope['compte_id'])
+                    nombre = utils.to_decimal(ope['notes'].split('@')[0])
+                    cours = utils.to_decimal(ope['notes'].split('@')[1])
                     if nombre == 0 and cours == 0:
-                        messages.warning(u'attention, fausse opération sur titre ligne %s'%ope['ligne'])
+                        messages.warning(u'attention, fausse opération sur titre ligne %s' % ope['ligne'])
                         ope.pop('ligne')
                         models.Ope.objects.create(**ope)
                         continue
-                    if compte.type != 't' :
+                    if compte.type != 't':
                         compte.type = 't'
                         compte.save()
-                    id_titre=self.titres.goc(nom=models.Tiers.objects.get(id=ope['tiers_id']).nom)
-                    titre=models.Titre.objects.get(id=id_titre)
+                    id_titre = self.titres.goc(nom=models.Tiers.objects.get(id=ope['tiers_id']).nom)
+                    titre = models.Titre.objects.get(id=id_titre)
 
-                    if nombre >0:
-                        compte.achat(titre=titre,nombre=nombre,prix=cours,date=ope['date'])
-                        self.opes.nb_created+=1
+                    if nombre > 0:
+                        compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                        self.opes.nb_created += 1
                     else:
-                        compte.vente(titre=titre,nombre=nombre,prix=cours,date=ope['date'])
-                        self.opes.nb_created+=2
+                        compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                        self.opes.nb_created += 2
             else:
                 ope.pop('ligne')
                 models.Ope.objects.create(**ope)
@@ -191,7 +191,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     row.cat
                     row.cpt
                     row.date
-                    if settings.UTILISE_EXERCICES == True:
+                    if settings.UTILISE_EXERCICES is True:
                         row.exercice
                     row.ib
                     row.ligne
@@ -271,12 +271,12 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             # date_val
             ope['date_val'] = row.date_val
             # ib
-            if settings.UTILISE_IB == True:
+            if settings.UTILISE_IB is True:
                 ope['ib_id'] = self.ibs.goc(row.ib)
             else:
                 ope['ib_id'] = None
             # montant
-            if virement == False:
+            if virement is False:
                 ope['montant'] = row.montant
             else:
                 ope['montant'] = abs(row.montant) * -1  # comme c'est obligatoirement un compte de depart, c'est du negatif
@@ -289,9 +289,9 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             else:
                 ope['rapp_id'] = None
             if row.ope_titre:
-                ope['ope_titre']=True
+                ope['ope_titre'] = True
             else:
-                ope['ope_titre']=False
+                ope['ope_titre'] = False
             self.opes.create(ope)
         retour = True
         return retour

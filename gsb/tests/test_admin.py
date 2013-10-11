@@ -21,4 +21,4 @@ class Test_admin(TestCase):
     def test_cat_admin(self):
         ca = admin.Cat_admin(models.Cat, self.site)
         cat = models.Cat.objects.create(nom="test", type="d")
-        self.assertEqual(ca.get_fieldsets(request, cat), [(None, {'fields':['nom', 'type']})])
+        self.assertEqual(ca.get_fieldsets(request, cat), [(None, {'fields': ['nom', 'type']})])

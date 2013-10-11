@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
+#import datetime
+#from south.db import db
 from south.v2 import DataMigration
-from django.db import models
+#from django.db import models
 
 
 class Migration(DataMigration):

@@ -22,8 +22,10 @@ from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
 
+
 #-------------ici les classes generiques------
 class date_perso_filter(DateFieldListFilter):
+
     """filtre date perso
     """
 
@@ -54,7 +56,7 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_since: str(today.replace(day=1, year=today.year - 1, month=1)),
                 self.lookup_kwarg_until: str(today.replace(day=31, month=12, year=today.year - 1)),
             }),
-            )
+        )
 
 
 class rapprochement_filter(SimpleListFilter):
@@ -75,7 +77,7 @@ class rapprochement_filter(SimpleListFilter):
             ('nrapp', u'non-rapproché'),
             ('rapp', u'rapproché uniquement'),
             ('pr', u'pointé ou rapproché')
-            )
+        )
 
     def queryset(self, request, queryset):
         """
@@ -110,11 +112,11 @@ class Modeladmin_perso(admin.ModelAdmin):
                            u"attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
                                'n': queryset.count(),
                                'type': nom_module}
-            )
+                           )
             return
         obj_a = queryset[0]
         for obj_b in queryset:
-            if obj_a == obj_b:#on saute le premier
+            if obj_a == obj_b:  # on saute le premier
                 continue
             try:
                 message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
@@ -123,7 +125,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                     obj_a)
                 obj_b.fusionne(obj_a)
                 messages.success(request, message)
-            except Exception as inst: 
+            except Exception as inst:
                 message = inst.__unicode__()
                 messages.error(request, message)
 
@@ -163,6 +165,7 @@ class Modeladmin_perso(admin.ModelAdmin):
 
 
 class formestligne_limit(BaseInlineFormSet):
+
     def get_queryset(self):
         sup = super(formestligne_limit, self).get_queryset()
         return sup[:10]
@@ -197,6 +200,7 @@ class liste_perso_inline(admin.TabularInline):
             qs = qs.order_by(*args)
         return qs
     # afin de pouvoir avoir des inline readonly
+
     def has_add_permission(self, request, obj=None):
         if self.readonly:
             return False
@@ -212,9 +216,11 @@ class ope_cat_admin(liste_perso_inline):
     orderby = ('-date',)
     max_num = 10
 
+
 class Cat_admin(Modeladmin_perso):
+
     """classe admin pour les categories"""
-    actions = ['fusionne',]
+    actions = ['fusionne', ]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -236,6 +242,7 @@ class Cat_admin(Modeladmin_perso):
             return False
         return True
 
+
 class ope_ib_admin(liste_perso_inline):
     model = Ope
     fields = ('date', 'compte', 'montant', 'tiers', 'cat', 'notes')
@@ -246,10 +253,10 @@ class ope_ib_admin(liste_perso_inline):
     formset = BaseInlineFormSet
 
 
-
 class Ib_admin(Modeladmin_perso):
+
     """admin pour les ib"""
-    actions = ['fusionne',]
+    actions = ['fusionne', ]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_ope')
     list_display_links = ('id',)
@@ -259,15 +266,16 @@ class Ib_admin(Modeladmin_perso):
 
 
 class Compte_admin(Modeladmin_perso):
+
     """admin pour les comptes normaux"""
-    actions = ['fusionne','action_supprimer_pointe', 'action_transformer_pointee_rapp']
+    actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
               'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut'))
     list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
     list_filter = ('type', 'banque', 'ouvert')
     radio_fields = {'type': admin.HORIZONTAL,
-                    'moyen_debit_defaut':admin.VERTICAL,
-                    'moyen_credit_defaut':admin.VERTICAL}
+                    'moyen_debit_defaut': admin.VERTICAL,
+                    'moyen_credit_defaut': admin.VERTICAL}
 
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
@@ -280,6 +288,7 @@ class Compte_admin(Modeladmin_perso):
     action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
     class RappForm(forms.Form):
+
         """form pour la transfo de pointe en rapprochee
         la seule chose demande est la date
         sinon on decide automatiquement du nom
@@ -337,7 +346,7 @@ class Compte_admin(Modeladmin_perso):
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if obj.ouvert == False:
+        if not obj.ouvert:
             return False
         return True
 
@@ -351,8 +360,8 @@ class ope_fille_admin(liste_perso_inline):
     readonly = True
 
 
-
 class Ope_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les opes"""
     fields = (
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
@@ -456,13 +465,13 @@ class Ope_admin(Modeladmin_perso):
         if obj.is_mere:
             opes = obj.filles_set.all()
             for o in opes.values('id', 'pointe', 'rapp'):
-                if o['pointe'] == True or o['rapp'] is not None:
+                if o['pointe'] or o['rapp'] is not None:
                     return False
             if obj.pointe or obj.rapp is not None:
                 return False
         if obj.ope_titre_ost is not None or obj.ope_titre_pmv is not None:
             return False
-        if obj.jumelle is not None and (obj.jumelle.pointe == True or obj.jumelle.rapp is not None):
+        if obj.jumelle is not None and (obj.jumelle.pointe or obj.jumelle.rapp is not None):
             return False
         if obj.rapp is not None:
             return False
@@ -470,6 +479,7 @@ class Ope_admin(Modeladmin_perso):
 
 
 class Cours_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
@@ -479,13 +489,14 @@ class Cours_admin(Modeladmin_perso):
 
 
 class Titre_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne']
     list_display = ('nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
-    formfield_overrides = {models.TextField: {'widget': admin.widgets.AdminTextInputWidget},}
+    formfield_overrides = {models.TextField: {'widget': admin.widgets.AdminTextInputWidget}, }
 
     def show_tiers(self, obj):
         if obj.tiers_id:
@@ -498,6 +509,7 @@ class Titre_admin(Modeladmin_perso):
 
 
 class Moyen_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne']
     list_filter = ('type',)
@@ -516,6 +528,7 @@ class ope_tiers_admin(liste_perso_inline):
 
 
 class Tiers_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne']
     list_editable = ('nom',)
@@ -535,6 +548,7 @@ class Tiers_admin(Modeladmin_perso):
 
 
 class Ech_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
@@ -549,6 +563,7 @@ class Ech_admin(Modeladmin_perso):
 
 
 class Banque_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne']
 
@@ -564,6 +579,7 @@ class ope_rapp_admin(liste_perso_inline):
 
 
 class Rapp_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
@@ -571,6 +587,7 @@ class Rapp_admin(Modeladmin_perso):
 
 
 class Exo_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')

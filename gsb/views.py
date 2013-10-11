@@ -6,14 +6,13 @@ from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Rapp, Virement, has_changed
+from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed
 from .import forms as gsb_forms
 from django.db import models
 import decimal
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
-from django.core import exceptions as django_exceptions
 from django.views import generic
 from django.utils.decorators import method_decorator
 from django.db import IntegrityError
@@ -150,7 +149,7 @@ class Cpt_detail_view(Mytemplateview):
         if self.rapp:
             self.type = "rapp"
         #-----------pour les comptes especes
-        if compte.type not in ('t',) or self.cpt_titre_espece == True:
+        if compte.type not in ('t',) or self.cpt_titre_espece:
             if self.cpt_titre_espece:
                 self.template_name = 'gsb/cpt_placement_espece.djhtm'
             # sinon on prend le nom du template par defaut
@@ -432,10 +431,10 @@ def vir_new(request, cpt_id=None):
         if form.is_valid():
             ope = form.save()
             messages.success(request, u"virement crée %s=>%s de %s le %s" % (
-                ope.compte,
-                ope.jumelle.compte,
-                ope.jumelle.montant,
-                ope.date.strftime('%d/%m/%Y')
+                             ope.compte,
+                             ope.jumelle.compte,
+                             ope.jumelle.montant,
+                             ope.date.strftime('%d/%m/%Y')
                 )
             )
             return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))

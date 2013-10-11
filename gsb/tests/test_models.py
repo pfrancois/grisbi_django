@@ -605,7 +605,7 @@ class Test_models(TestCase):
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4), moyen_debit_defaut=Moyen.objects.get(id=2))
         Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
-        Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-02', cours=5)
+        Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-02', cours=5)
         o = Ope.objects.filter(compte=c).filter(date='2011-01-02')[0]
         self.assertEqual(o.id, 15)
         self.assertEqual(o.montant, 50)  # desinvestissement
@@ -627,7 +627,7 @@ class Test_models(TestCase):
         # on verifie qu'il creer bien un cours a la date
         self.assertEqual(Cours.objects.get(date=utils.strpdate('2011-01-01'), titre=t).valeur, 10)
         # on vend
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -10, date='2011-01-02', cours=15)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-10, date='2011-01-02', cours=15)
         self.assertEqual(o.ope_ost.id, 15)
         self.assertEqual(o.ope_ost.montant, 100)
         self.assertEqual(o.ope_ost.moyen_id, 4)
@@ -639,7 +639,7 @@ class Test_models(TestCase):
         self.assertEqual(t.investi(c), 50)
         self.assertEqual(t.encours(c), 5 * 15)
         # on vend ce qui reste
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date='2011-01-03', cours=20)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date='2011-01-03', cours=20)
         self.assertEqual(t.investi(c), 0)
         self.assertEqual(o.ope_ost.montant, 50)
         self.assertEqual(o.ope_pmv.montant, 50)
@@ -663,7 +663,7 @@ class Test_models(TestCase):
         o.ope_ost.save()
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
         # on la recree mais avec une vente comme ca il y a des plus values
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=utils.strpdate('2011-01-01'), cours=10)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
         r = Rapp.objects.get(id=1)
@@ -688,7 +688,7 @@ class Test_models(TestCase):
         o.ope_ost.rapp = None
         o.ope_ost.save()
         self.assertEqual(Ope_titre.objects.get(id=o_id).rapp, False)
-        o = Ope_titre.objects.create(titre=t, compte=c, nombre= -5, date=utils.strpdate('2011-01-01'), cours=100)
+        o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=utils.strpdate('2011-01-01'), cours=100)
         o_id = o.id
         o.ope_pmv.rapp_id = 1
         o.ope_pmv.save()
@@ -794,17 +794,17 @@ class Test_models(TestCase):
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
         self.assertEquals(o.moyen_id, 4)
         # test avecmoyen par defaut debit
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
         # test avec moyen defini
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t, moyen=Moyen.objects.get(id=2))
         self.assertEquals(o.moyen_id, 2)
         # test avec les moyens par defaut
         c.moyen_credit_defaut = None
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
         self.assertEquals(o.moyen_id, 4)
         c.moyen_debit_defaut = None
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t)
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
 
     def test_uuid(self):
@@ -849,8 +849,8 @@ class Test_models(TestCase):
         r = Rapp.objects.get(id=1)
         ensemble_a_tester = (({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {}, o),  # normal
                            ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'pointe': True, 'rapp': r.id, 'date': utils.now()},
-                             {'__all__': [u"cette opération ne peut pas etre à la fois pointée et rapprochée", ]},
-                              o),
+                            {'__all__': [u"cette opération ne peut pas etre à la fois pointée et rapprochée", ]},
+                            o),
                            ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {}, Ope.objects.get(pk=11)))
         for ens in ensemble_a_tester:
             form = forms.OperationForm(ens[0], instance=ens[2])
@@ -908,7 +908,7 @@ class Test_models(TestCase):
         o = Ope.objects.get(pk=11)
         o.pointe = True
         o.save()
-        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'pointe':True}
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'pointe': True}
         form = forms.OperationForm(data, instance=Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
@@ -922,7 +922,7 @@ class Test_models(TestCase):
         o = Ope.objects.get(pk=13)
         o.pointe = True
         o.save()
-        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'pointe':True}
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'pointe': True}
         form = forms.OperationForm(data, instance=Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
@@ -982,7 +982,7 @@ class Test_models(TestCase):
         r = Rapp.objects.get(id=1)
         o.rapp = r
         o.save()
-        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'rapp':r.id}
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'rapp': r.id}
         form = forms.OperationForm(data, instance=Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
@@ -997,7 +997,7 @@ class Test_models(TestCase):
         r = Rapp.objects.get(id=1)
         o.rapp = r
         o.save()
-        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'rapp':r.id}
+        data = {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now(), 'rapp': r.id}
         form = forms.OperationForm(data, instance=Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors, {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
@@ -1060,7 +1060,7 @@ class Test_models(TestCase):
         t = Tiers.objects.get(id=1)
         c = Cat.objects.get(id=1)
         cpt = Compte.objects.get(id=1)
-        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant':-120, 'moyen': None, 'date': utils.now()}
+        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant': -120, 'moyen': None, 'date': utils.now()}
         Ope.objects.create(**data)
         o = Ope.objects.get(pk=14)
         self.assertEqual(o.moyen_id, 1)
@@ -1069,7 +1069,7 @@ class Test_models(TestCase):
         t = Tiers.objects.get(id=1)
         c = Cat.objects.get(id=1)
         cpt = Compte.objects.get(id=5)
-        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant':-120, 'moyen': None, 'date': utils.now()}
+        data = {'tiers': t, 'compte': cpt, 'cat': c, 'montant': -120, 'moyen': None, 'date': utils.now()}
         Ope.objects.create(**data)
         o = Ope.objects.get(pk=14)
         self.assertEqual(o.moyen_id, 3)
@@ -1093,7 +1093,7 @@ class Test_models(TestCase):
         t = Tiers.objects.get(id=1)
         c.ouvert = True
         c.save()
-        o = Ope.objects.create(compte=c, date='2010-01-01', montant= -20, tiers=t, moyen=Moyen.objects.get(id=2))
+        o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t, moyen=Moyen.objects.get(id=2))
         c.ouvert = False
         c.save()
         self.assertEqual(o.is_editable(), False)
@@ -1268,6 +1268,7 @@ class Test_models(TestCase):
 
 
 class Test_models2(TestCase):
+
     def setUp(self):
         super(Test_models2, self).setUp()
         # on cree les elements indiepensables

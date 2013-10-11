@@ -46,23 +46,23 @@ class Export_ope_csv(Export_view_csv_base):
         """
         data = []
         query = query.order_by('date', 'id').exclude(cat__id=settings.ID_CAT_PMV).exclude(filles_set__isnull=False)
-        query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen","ope_titre_ost","jumelle","mere")
+        query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
 
         for ope in query:
             if ope.jumelle is not None and ope.montant > 0:
-                continue # c'est l'autre coté du virement qui est pris en compte
+                continue  # c'est l'autre coté du virement qui est pris en compte
             # id compte date montant
             ligne = {'id': ope.id, 'cpt': ope.compte.nom}
             # date
             ligne['date'] = utils.datetostr(ope.date)
             # montant
-            ligne['montant'] = utils.floattostr(ope.montant,nb_digit=2)
+            ligne['montant'] = utils.floattostr(ope.montant, nb_digit=2)
             # rapp
             if ope.rapp is not None:
                 ligne['r'] = ope.rapp.nom
             else:
                 if ope.mere is not None and ope.mere.rapp is not None:
-                    ligne['r']=ope.mere.rapp.nom
+                    ligne['r'] = ope.mere.rapp.nom
                 ligne['r'] = ''
             # pointee
             ligne['p'] = utils.booltostr(ope.pointe)
@@ -75,19 +75,19 @@ class Export_ope_csv(Export_view_csv_base):
             #phase de verif des notes
             #si c'est une ope jumelle pointe ou rapproche on rajoute une note
             if ope.jumelle is not None:
-                if ope.jumelle.rapp is not None:#jumelle rapprochee
+                if ope.jumelle.rapp is not None:  # jumelle rapprochee
                     if '>R' not in ligne['notes']:
-                        ligne['notes']= ligne['notes'] + u'>R' + ope.jumelle.rapp.nom
-                if ope.jumelle.pointe:#jumelle pointee
+                        ligne['notes'] = ligne['notes'] + u'>R' + ope.jumelle.rapp.nom
+                if ope.jumelle.pointe:  # jumelle pointee
                     if '>P' not in ligne['notes']:
-                        ligne['notes']= ligne['notes'] + u'>P'
-                ligne['tiers'] = "%s => %s"%(ope.compte.nom,ope.jumelle.compte.nom)
+                        ligne['notes'] = ligne['notes'] + u'>P'
+                ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
             ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['numchq'] = ope.num_cheque
-            ligne['mois'] = utils.datetostr(ope.date,param='%m')
+            ligne['mois'] = utils.datetostr(ope.date, param='%m')
             data.append(ligne)
-        
+
         return self.export_csv_view(data=data)
 
 
