@@ -36,6 +36,10 @@ class date_perso_filter(DateFieldListFilter):
 
         self.links = (
             (_('Any date'), {}),
+            (_('Today'), {
+                self.lookup_kwarg_since: str(today - timedelta(days=1)),
+                self.lookup_kwarg_until: str(tomorrow),
+            }),
             (_('Past 7 days'), {
                 self.lookup_kwarg_since: str(today - timedelta(days=7)),
                 self.lookup_kwarg_until: str(tomorrow),
@@ -534,7 +538,7 @@ class Tiers_admin(Modeladmin_perso):
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
-    list_filter = ('is_titre',)
+    list_filter = ('is_titre', ('lastupdate', date_perso_filter),)
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
