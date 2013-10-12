@@ -1140,6 +1140,11 @@ class Echeance(models.Model):
         self.clean()
         super(Echeance, self).save(force_insert, force_update, using)
 
+    @staticmethod
+    def verif(request):
+        if Echeance.objects.filter(valide=True).aggregate(models.Min('date'))['date__min'] < utils.today():
+            messages.info(request, u'attention une ou plusieurs echeances sont arrivées a maturités')
+
 
 class Ope(models.Model):
 

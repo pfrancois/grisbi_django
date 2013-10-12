@@ -6,7 +6,7 @@ from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed
+from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed, Echeance
 from .import forms as gsb_forms
 from django.db import models
 import decimal
@@ -31,6 +31,7 @@ class Mytemplateview(generic.TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """on a besoin pour le method decorator"""
+        Echeance.verif(self.request)
         return super(Mytemplateview, self).dispatch(*args, **kwargs)
 
 
@@ -845,15 +846,50 @@ def search_opes(request):
                                                             'solde': None})
 
 
-class Titre_view(generic.ListView):
-    model = Cours
-    template_name = 'gsb/liste_titre.djhtm'
+from django import forms
+from . import widgets as gsb_field
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        """on a besoin pour le method decorator"""
-        return super(Titre_view, self).dispatch(*args, **kwargs)
 
-    def get_queryset(self):
-        self.titre = get_object_or_404(Titre, id=self.kwargs['pk'])
-        return Cours.objects.filter(titre=self.titre).order_by('date')
+class ajout_ope_bulk_form(gsb_forms.Baseform):
+    date = gsb_field.DateFieldgsb()
+    compte = forms.ModelChoiceField(Compte.objects.filter(type='t'))
+    titre = forms.ModelChoiceField(Titre.objects.all())
+    nombre = forms.DecimalField()
+    cours = gsb_field.CurField()
+
+
+def test_ajout_ope(request, cpt_id):
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
+        messages.error(request, "ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
+    titre_compte = compte.titre.all().distinct()
+    titres_forms = []
+    if request.method == 'POST':
+        i = 0
+        for titre in titre_compte:
+            i += 1
+            titres_forms.append(ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
+        if all([form.is_valid() for form in titres_forms]):
+            for form in titres_forms:
+                compte_titre = form.cleaned_data['compte']
+                nb = form.cleaned_data['nombre']
+                if nb > 0:
+                    compte_titre.achat(titre=form.cleaned_data['titre'],
+                         nombre=form.cleaned_data['nombre'],
+                         prix=form.cleaned_data['cours'],
+                         date=form.cleaned_data['date'])
+                    messages.info(request, u"nouvel achat de %s %s @ %s le %s" % (form.cleaned_data['nombre'],
+                                                                          form.cleaned_data['titre'].nom,
+                                                                          form.cleaned_data['cours'],
+                                                                          form.cleaned_data['date']))
+                else:
+                    if nb < 0:
+                        messages.warning(request, 'attention ope nombre %s non prise en compte pour le titre %s' % (form.cleaned_data['nombre'], form.cleaned_data['titre'].nom))
+            return http.HttpResponseRedirect(compte.get_absolute_url())
+    else:
+        i = 0
+        for titre in titre_compte:
+            i += 1
+            titres_forms.append(ajout_ope_bulk_form(prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
+    return render(request, 'gsb/maj_compte_titre.djhtm', {'forms': titres_forms})

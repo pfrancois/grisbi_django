@@ -1,0 +1,31 @@
+{% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
+{% block content %}
+    <form method="post" action="" id="form1">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <table>
+        <tr><th>  Date </th> <th> compte </th> <th> titre </th> <th> montant </th> <th> cours </th> </th> </tr>
+        {% for form in forms %}
+        <tr>
+            {% for field in form %}
+            <td>
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </td>
+            {% endfor %}
+        </tr>
+        {% empty %}
+            aucun titre
+        {% endfor %}
+        </table>
+    </form>
+
+
+    <table style=" width: 100%;" summary="bouton">
+        <tr class="boutton">
+            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+            <td width="50%">
+                <a href="{{ url }}">Annuler</a></td>
+        </tr>
+    </table>
+{% endblock content %}

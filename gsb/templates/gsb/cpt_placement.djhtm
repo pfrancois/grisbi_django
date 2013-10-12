@@ -6,7 +6,7 @@
 	        <tr class="boutton">
 	            <td width="30%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
 	            <td width="30%"><a href="{% url 'cpt_titre_vente' compte.id %}">vente</a></td>
-	            <td width="30%"><a href="{% url 'cpt_titre_dividende' compte.id %}">dividende</a></td>
+	            <td width="30%"><a href="{% url 'titre_bulk' compte.id %}">bulk</a></td>
 	        </tr>
 	        {% else %}
 	            <tr class="boutton">
@@ -63,7 +63,7 @@
             </td>
             <td class="opDebit">{{ especes|cur }}</td>
         </tr>
-        
+
         <tr class="footerbar">
             <td colspan="5" class="cptLabel">Solde global</td>
             <td colspan="1" class="cptSolde">{{ solde|cur }}</td>
