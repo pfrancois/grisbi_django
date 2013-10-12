@@ -363,6 +363,9 @@ class ope_fille_admin(liste_perso_inline):
     orderby = ('ib',)
     readonly = True
 
+from django.forms import TextInput
+from . import model_field
+
 
 class Ope_admin(Modeladmin_perso):
 
@@ -383,6 +386,10 @@ class Ope_admin(Modeladmin_perso):
     ordering = ['-date']
     inlines = [ope_fille_admin]
     raw_id_fields = ('mere',)
+    formfield_overrides = {
+        model_field.CurField: {'widget': TextInput(attrs={'size': '8'})},
+        #    models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':40})},
+    }
 
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
