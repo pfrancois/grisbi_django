@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response
 from django.contrib import messages
 from .views import Mytemplateview
 from .models import Compte, Cat, Tiers, Moyen, Echeance
+from .io import import_base
 
 
 def gestion_echeances(request):
@@ -31,6 +32,18 @@ def verif_element_config(element, request, collection=None):
 
 
 def verif_config(request):
+    moyens = import_base.Moyen_cache(request)
+    import_base.Cat_cache(request)
+    import_base.IB_cache(request)
+    import_base.Compte_cache(request)
+    import_base.Banque_cache(request)
+    import_base.Exercice_cache(request)
+    import_base.Tiers_cache(request)
+    import_base.Ope_cache(request)
+    titres = import_base.Titre_cache(request)
+    import_base.Cours_cache(request, titres)
+    import_base.moyen_defaut_cache(request, moyens)
+    import_base.Rapp_cache(request)
     verif_element_config("ID_CPT_M", request, Compte)
     verif_element_config("TAUX_VERSEMENT", request)
     verif_element_config("ID_CAT_COTISATION", request, Cat)
@@ -44,7 +57,6 @@ def verif_config(request):
     verif_element_config("TAUX_VERSEMENT", request)
     verif_element_config("AFFICHE_CLOT", request)
     verif_element_config("UTILISE_EXERCICES", request)
-
     return render_to_response(
         'generic.djhtm',
         {'resultats': (u"vous trouverez les résultats de la verification de la config",),
