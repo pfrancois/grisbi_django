@@ -590,7 +590,7 @@ class Compte(models.Model):
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
-                    tiers_frais = titre.tiers
+                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -645,7 +645,7 @@ class Compte(models.Model):
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
-                    tiers_frais = titre.tiers
+                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
                 self.ope_set.create(date=date,
                                     montant=abs(decimal.Decimal(force_unicode(frais))) * -1,
                                     tiers=tiers_frais,
@@ -686,7 +686,7 @@ class Compte(models.Model):
                                 automatique=True)
             if decimal.Decimal(force_unicode(frais)):
                 if not tiers_frais:
-                    tiers_frais = titre.tiers
+                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 self.ope_set.create(date=date,
