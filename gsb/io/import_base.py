@@ -202,6 +202,7 @@ class Cat_cache(Table):
                 {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
                 {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
                 {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
+                {'nom': u"Non affecté", 'defaults': {'nom': u"Non affecté", 'type': 'd'}},
             ]
 
     def arg_def(self, nom, obj=None):

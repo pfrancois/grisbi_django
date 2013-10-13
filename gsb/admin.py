@@ -304,6 +304,9 @@ class Compte_admin(Modeladmin_perso):
     def action_transformer_pointee_rapp(self, request, queryset):
         form = None
         query_ope = Ope.objects.filter(pointe=True, compte__in=queryset).order_by('-date')
+        if query_ope.filter(cat__nom="Non affecté").exists():
+            self.message_user(request, u"attention, au moins une operation n'est pas encore affectée")
+            return HttpResponseRedirect(request.get_full_path())
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
