@@ -1229,8 +1229,7 @@ class Ope(models.Model):
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
-            if has_changed(self, 'cat'):
-                self.cat = Cat.objects.get(nom=u"Opération Ventilée")
+            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
             if has_changed(self, 'montant'):
                 # ensemble des opefilles
                 opes = self.filles_set.all()
