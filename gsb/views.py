@@ -239,11 +239,11 @@ class Cpt_detail_view(Mytemplateview):
 
         return self.render_to_response(context)
 
-    def cpt_espece_pagination(self, request, q):
+    def cpt_espece_pagination(self, q):
         # gestion pagination
         paginator = Paginator(q, self.nb_ope_par_pages)
         try:
-            page = int(request.GET.get('page'))
+            page = int(self.request.GET.get('page'))
             return paginator.page(page)
         except (ValueError, TypeError, PageNotAnInteger):
             return paginator.page(1)
@@ -274,8 +274,13 @@ class Cpt_detail_view(Mytemplateview):
             solde_p_neg = 0
 
         if self.espece:
+            #gestion pagination
+            if self.all:
+                list_opes = self.cpt_espece_pagination(args[1])
+            else:
+                list_opes = args[1]
             context = {'compte': c,
-                       'list_ope': args[1],
+                       'list_opes': list_opes,
                        'nbrapp': args[2],
                        'titre': c.nom,
                        'solde': solde_espece,
