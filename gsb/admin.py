@@ -281,6 +281,9 @@ class Compte_admin(Modeladmin_perso):
                     'moyen_debit_defaut': admin.VERTICAL,
                     'moyen_credit_defaut': admin.VERTICAL}
 
+    def nb_ope(self, obj):
+        return '%s(%s non rapp)' % (obj.ope_set.exclude(filles_set__isnull=False).count(), obj.ope_set.exclude(filles_set__isnull=False).filter(rapp__isnull=True).count())
+
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
