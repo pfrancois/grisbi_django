@@ -7,6 +7,7 @@ import calendar
 import csv
 import codecs
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 import math
 try:
     from django.db.models import Max
@@ -18,7 +19,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'daterange', 'nulltostr', 'is_onexist', 'switch']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch']
 
 
 class FormatException(Exception):
@@ -138,21 +139,13 @@ def dt2timestamp(date):
 
 def addmonths(sourcedate, months, last=False, first=False):
     """renvoie le premier jour du mois ou le dernier si option"""
-    month = sourcedate.month - 1 + months
-    year = int(sourcedate.year + month / 12)
-    month = month % 12 + 1
+    datefin = sourcedate + relativedelta(month=+1)
     if last:
-        day = calendar.monthrange(year, month)[1]
+        return datefin.replace(day=calendar.monthrange(datefin.year, datefin.month)[1])
     elif first:
-        day = 1
+        return datefin.replace(day=1)
     else:
-        day = min(sourcedate.day, calendar.monthrange(year, month)[1])
-    return datetime.date(year, month, day)
-
-
-def daterange(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + datetime.timedelta(n)
+        return
 
 
 #------------------------------------format d'entree---------------------------------
@@ -371,7 +364,7 @@ class Csv_unicode_reader(object):
     champs = None
 
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
-        self.line_num = 1
+        self.line_num = 0
         fich = UTF8Recoder(fich, encoding)
         self.reader = csv.DictReader(fich, dialect=dialect, fieldnames=self.champs, **kwds)
 

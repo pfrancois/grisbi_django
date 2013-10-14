@@ -48,3 +48,4 @@ sqlite2mysql.py
 reset.bat
 *.sublim*
 sql
+old

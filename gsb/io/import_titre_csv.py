@@ -48,7 +48,7 @@ class Import_csv_ope_titre(import_base.Import_base):
     encoding = "iso-8859-1"
     complexe = False
     reader = Csv_unicode_reader_titre
-    extension = ("csv",)
+    extensions = (".csv",)
     type_f = "csv_ope_titres"
     creation_de_compte = False
 
@@ -80,10 +80,14 @@ class Import_csv_ope_titre(import_base.Import_base):
                     ope['ligne'] = row.ligne
                     ope['date'] = row.date
                     ope['compte_id'] = self.comptes.goc(row.compte)
-                    ope["titre_id"] = self.titres.goc(nom=row.compte)
+                    ope["titre_id"] = self.titres.goc(nom=row.titre)
                     ope['nombre'] = row.nombre
                     ope['cours'] = row.cours
-                    self.opes.create(ope)
+                    if ope['nombre'] != 0:
+                        self.opes.create(ope)
+                    else:
+                        models.Cours.objects.create(date=ope["date"], titre_id=ope["titre_id"], valeur=ope['cours'])
+                        messages.info(self.request, 'cours du titre %s a la date du %s ajoute' % (row.titre, ope["date"]))
                 retour = True
                 #------------------fin boucle
         except (import_base.ImportException) as e:
