@@ -180,9 +180,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     def tableau(self, fich, moyen_virement):
         # lecture effective du fichier
         verif_format = False
+        retour = False
         for row in fich:
             if row.ligne < 1:
-                self.erreur.append(u"Ligne numero %x saute" % row.ligne)
+                messages.info(self.request, u"Ligne numero %x saute" % row.ligne)
                 continue
             if not verif_format:  # on verifie a la premiere ligne
                 try:
