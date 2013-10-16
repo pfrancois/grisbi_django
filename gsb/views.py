@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
 from __future__ import absolute_import
-from django.template import RequestContext, loader
 from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -545,28 +544,22 @@ def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
         opes = paginator.page(1)
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
-    template = loader.get_template('gsb/cpt_placement_titre.djhtm')
-    return http.HttpResponse(
-        template.render(
-            RequestContext(
-                request,
-                {
-                    'compte': compte,
-                    'titre_id': titre.id,
-                    'list_ope': opes,
-                    'titre': "%s: %s" % (compte.nom, titre.nom),
-                    'encours': titre.encours(compte),
-                    't': titre,
-                    'nb_titre': titre.nb(compte),
-                    'nb_r': titre.nb(compte, rapp=True),
-                    'date_rappro': date_rappro,
-                    'solde_rappro': solde_rappro,
-                    'investi_r': titre.investi(compte, rapp=True),
-                    'pmv': titre.encours(compte) - titre.investi(compte)
-                }
-            )
-        )
-    )
+    return render(request, "gsb/cpt_placement_titre.djhtm",
+                    {
+                        'compte': compte,
+                        'titre_id': titre.id,
+                        'list_opes': opes,
+                        'titre': "%s: %s" % (compte.nom, titre.nom),
+                        'encours': titre.encours(compte),
+                        't': titre,
+                        'nb_titre': titre.nb(compte),
+                        'nb_r': titre.nb(compte, rapp=True),
+                        'date_rappro': date_rappro,
+                        'solde_rappro': solde_rappro,
+                        'investi_r': titre.investi(compte, rapp=True),
+                        'pmv': titre.encours(compte) - titre.investi(compte)
+                    }
+                )
 
 
 @login_required
