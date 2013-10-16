@@ -260,22 +260,17 @@ class Titre(models.Model):
         if datel is None:
             datel = utils.today()
         # definition de la population des ope
-        opes = Ope.objects.filter(tiers=self.tiers, date__lte=datel)
-        # si on a defini sur seulement un compte
-        if compte:
-            opes = opes.filter(compte=compte)
-        # si on veut juste l'encours des ope rapp
-        if rapp:
-            opes = opes.filter(rapp__isnull=False)
-        if opes.exists():
+        nb = self.nb(compte=compte, rapp=rapp, datel=datel)
+        if nb > 0:
             if rapp:
+                opes = Ope.objects.filter(tiers=self.tiers, date__lte=datel, rapp__isnull=False)
+                if compte:
+                    opes = opes.filter(compte=compte)
                 date_cours = opes.latest('date').date
             else:
                 date_cours = datel
             # recupere le dernier cours
             cours = self.last_cours(datel=date_cours)
-            # renvoie la gestion des param de nb
-            nb = self.nb(compte=compte, rapp=rapp, datel=datel)
             return nb * cours
         else:
             return 0  # comme pas d'ope, pas d'encours
