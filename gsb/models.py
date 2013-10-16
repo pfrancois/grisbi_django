@@ -126,9 +126,9 @@ class Titre(models.Model):
         if datel is None:
             datel = utils.today()
         reponse = self.cours_set.filter(date__lte=datel)
-        if reponse.exists():
+        try:
             return reponse.latest('date').valeur
-        else:
+        except AttributeError:
             return 0
 
     def last_cours_date(self, rapp=False):
@@ -138,7 +138,7 @@ class Titre(models.Model):
         if not rapp:
             return self.cours_set.latest('date').date
         else:
-            opes = Ope.objects.filter(tiers=self.tiers).filter(rapp__isnull=False)
+            opes = Ope.objects.filter(tiers=self.tiers).filter(rapp__isnull=False).exclude(filles_set__isnull=False)
             if opes.exists():
                 date_rapp = opes.latest('date').rapp.date
                 liste = Cours.objects.filter(titre=self).filter(date__lte=date_rapp)
@@ -263,7 +263,7 @@ class Titre(models.Model):
         nb = self.nb(compte=compte, rapp=rapp, datel=datel)
         if nb > 0:
             if rapp:
-                opes = Ope.objects.filter(tiers=self.tiers, date__lte=datel, rapp__isnull=False)
+                opes = Ope.objects.filter(tiers=self.tiers, date__lte=datel, rapp__isnull=False).exclude(filles_set__isnull=False)
                 if compte:
                     opes = opes.filter(compte=compte)
                 date_cours = opes.latest('date').date
@@ -279,7 +279,7 @@ class Titre(models.Model):
 class Cours(models.Model):
 
     """cours des titres"""
-    date = models.DateField(default=utils.today)
+    date = models.DateField(default=utils.today, db_index=True)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
     titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     lastupdate = models_gsb.ModificationDateTimeField()
@@ -302,7 +302,7 @@ class Cours(models.Model):
 class Banque(models.Model):
 
     """banques"""
-    cib = models.CharField(max_length=5, blank=True)
+    cib = models.CharField(max_length=5, blank=True, db_index=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     notes = models.TextField(blank=True, default='')
     lastupdate = models_gsb.ModificationDateTimeField()
@@ -464,7 +464,7 @@ class Compte(models.Model):
     banque = models.ForeignKey(Banque, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     guichet = models.CharField(max_length=15, blank=True, default='')
     # il est en charfield comme celui d'en dessous parce qu'on n'est pas sur qu'il n y ait que des chiffres
-    num_compte = models.CharField(max_length=20, blank=True, default='')
+    num_compte = models.CharField(max_length=20, blank=True, default='', db_index=True)
     cle_compte = models.IntegerField(null=True, blank=True, default=0)
     solde_init = models_gsb.CurField(default=decimal.Decimal('0.00'))
     solde_mini_voulu = models_gsb.CurField(null=True, blank=True)
@@ -516,6 +516,7 @@ class Compte(models.Model):
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
+        print 'ok'
         if self.type == 't' and espece is False:
             solde = solde + self.solde_titre(datel, rapp)
         return solde
@@ -751,7 +752,7 @@ class Ope_titre(models.Model):
     titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     compte = models.ForeignKey(Compte, verbose_name=u"compte titre", limit_choices_to={'type': 't'})
     nombre = models_gsb.CurField(default=0, decimal_places=5)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     cours = models_gsb.CurField(default=1, decimal_places=5)
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
@@ -772,10 +773,7 @@ class Ope_titre(models.Model):
 
     @property
     def invest(self):
-        if utils.is_onexist(self, "ope_ost"):
-            return self.ope_ost.montant * -1
-        else:  # pragma: no cover
-            return 0
+        return self.nombre * self.cours
 
     def clean(self):
         super(Ope_titre, self).clean()
@@ -912,7 +910,7 @@ class Moyen(models.Model):
                 ('d', u'depense'),
                 ('r', u'recette'),
                 )
-    nom = models.CharField(max_length=40, unique=True)
+    nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d')
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
@@ -1016,8 +1014,8 @@ class Echeance(models.Model):
         ('j', u'jour'),
     )
 
-    date = models.DateField(default=utils.today)
-    date_limite = models.DateField(null=True, blank=True, default=None)
+    date = models.DateField(default=utils.today, db_index=True)
+    date_limite = models.DateField(null=True, blank=True, default=None, db_index=True)
     intervalle = models.IntegerField(default=1)
     periodicite = models.CharField(max_length=1, choices=typesperiod, default="u")
     valide = models.BooleanField(default=True)
@@ -1139,7 +1137,8 @@ class Echeance(models.Model):
 
     @staticmethod
     def verif(request):
-        if Echeance.objects.filter(valide=True).aggregate(models.Min('date'))['date__min'] < utils.today():
+        date_min = Echeance.objects.filter(valide=True).aggregate(models.Min('date'))['date__min']
+        if date_min is not None and date_min < utils.today():
             messages.info(request, u"attention une ou plusieurs echeances sont arrivées a maturités <a href='%s'> cliquer ici pour les integrer</A>" % mark_safe(reverse('gestion_echeances')))
 
 
@@ -1147,7 +1146,7 @@ class Ope(models.Model):
 
     """operation"""
     compte = models.ForeignKey(Compte)
-    date = models.DateField(default=utils.today)
+    date = models.DateField(default=utils.today, db_index=True)
     date_val = models.DateField(null=True, blank=True, default=None)
     montant = models_gsb.CurField()
     tiers = models.ForeignKey(Tiers, null=True, blank=True, on_delete=models.SET_NULL, default=None)
