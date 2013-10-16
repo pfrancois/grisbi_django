@@ -14,6 +14,8 @@ from django.utils.encoding import smart_unicode, force_unicode
 import gsb.model_field as models_gsb
 from gsb import utils
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
+
 
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
 
@@ -1143,7 +1145,7 @@ class Echeance(models.Model):
     @staticmethod
     def verif(request):
         if Echeance.objects.filter(valide=True).aggregate(models.Min('date'))['date__min'] < utils.today():
-            messages.info(request, u'attention une ou plusieurs echeances sont arrivées a maturités')
+            messages.info(request, u"attention une ou plusieurs echeances sont arrivées a maturités <a href='%s'> cliquer ici pour les integrer</A>" % mark_safe(reverse('gestion_echeances')))
 
 
 class Ope(models.Model):
