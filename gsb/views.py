@@ -525,10 +525,9 @@ def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
     titre = get_object_or_404(Titre.objects.select_related(), pk=titre_id)
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     request.session['titre'] = titre_id
-
     date_rappro = compte.date_rappro()
     solde_rappro = titre.encours(compte=compte, rapp=True)
-    q = Ope_titre.objects.filter(compte__pk=cpt_id).order_by('-date').filter(titre=titre)
+    q = Ope_titre.objects.filter(compte_id=cpt_id).order_by('-date').filter(titre_id=titre_id).select_related('ope_ost', 'titre')
     # on prend comme reference les ope especes
     if rapp:
         q = q.exclude(ope_ost__rapp__isnull=True).exclude(ope_pmv__rapp__isnull=True)
@@ -544,20 +543,23 @@ def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
         opes = paginator.page(1)
     except (EmptyPage, InvalidPage):
         opes = paginator.page(paginator.num_pages)
+    opes = q
+    encours = titre.encours(compte)
+    investi = titre.investi(compte)
     return render(request, "gsb/cpt_placement_titre.djhtm",
                     {
                         'compte': compte,
                         'titre_id': titre.id,
                         'list_opes': opes,
                         'titre': "%s: %s" % (compte.nom, titre.nom),
-                        'encours': titre.encours(compte),
+                        'encours': encours,
                         't': titre,
                         'nb_titre': titre.nb(compte),
                         'nb_r': titre.nb(compte, rapp=True),
                         'date_rappro': date_rappro,
                         'solde_rappro': solde_rappro,
                         'investi_r': titre.investi(compte, rapp=True),
-                        'pmv': titre.encours(compte) - titre.investi(compte)
+                        'pmv': encours - investi
                     }
                 )
 

@@ -32,10 +32,10 @@
             <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.nombre|floatformat:3 }}</a>
         </td>
         <td class="opDebit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.cours|cur }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.cours|cur }}</a>
         </td>
         <td class="opCredit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.invest|cur }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.ope_ost.rapp %}class='rappElement' {% endif %}{% if ope.ope_ost.pointe %}class='poiElement' {% endif %}>{{ ope.invest|cur }}</a>
         </td>
     </tr>
 {% endblock ope %}
