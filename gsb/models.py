@@ -588,7 +588,7 @@ class Compte(models.Model):
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
-                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
+                    tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
                                     montant=decimal.Decimal(force_unicode(frais)) * -1,
                                     tiers=tiers_frais,
@@ -643,7 +643,7 @@ class Compte(models.Model):
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
-                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
+                    tiers_frais = titre.tiers
                 self.ope_set.create(date=date,
                                     montant=abs(decimal.Decimal(force_unicode(frais))) * -1,
                                     tiers=tiers_frais,
@@ -684,7 +684,7 @@ class Compte(models.Model):
                                 automatique=True)
             if decimal.Decimal(force_unicode(frais)):
                 if not tiers_frais:
-                    tiers_frais = Tiers.object.get_or_create(nom=u"frais %" % self.nom, defaults={"nom": u"frais %" % self.nom})
+                    tiers_frais = titre.tiers
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 self.ope_set.create(date=date,
@@ -751,9 +751,9 @@ class Ope_titre(models.Model):
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     compte = models.ForeignKey(Compte, verbose_name=u"compte titre", limit_choices_to={'type': 't'})
-    nombre = models_gsb.CurField(default=0, decimal_places=5)
+    nombre = models_gsb.CurField(default=0, decimal_places=6)
     date = models.DateField(db_index=True)
-    cours = models_gsb.CurField(default=1, decimal_places=5)
+    cours = models_gsb.CurField(default=1, decimal_places=6)
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 

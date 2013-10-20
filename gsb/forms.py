@@ -122,6 +122,11 @@ class Ope_titre_addForm(Baseform):
     cours = forms.DecimalField(initial='1', required=True, localize=True, min_value=0)
     frais = forms.DecimalField(initial='0', required=False, localize=True,)
 
+    class Meta:
+        widgets = {
+            'my_decimal_field': forms.TextInput(attrs={'localization': True}),
+        }
+
     def clean(self):
         super(Ope_titre_addForm, self).clean()
         if 'nombre' in self.cleaned_data and self.cleaned_data['nombre'] == 0:
