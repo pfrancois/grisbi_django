@@ -9,6 +9,7 @@ import codecs
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 import math
+from inspector_panel.panels.inspector import debug
 try:
     from django.db.models import Max
     from django.core.exceptions import ObjectDoesNotExist

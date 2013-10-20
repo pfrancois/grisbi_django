@@ -3,8 +3,9 @@
     <form method="post" action="" id="form1">
         {% csrf_token %}
         {{ form.non_field_errors }}
+        {{ date_ope_form }}
         <table>
-        <tr><th>  Date </th> <th> compte </th> <th> titre </th> <th> montant </th> <th> cours </th> </th> </tr>
+        <tr><th> titre </th> <th> cours </th> <th> nombre </th> </th> </tr>
         {% for form in forms %}
         <tr>
             {% for field in form %}
@@ -24,8 +25,7 @@
     <table style=" width: 100%;" summary="bouton">
         <tr class="boutton">
             <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%">
-                <a href="{{ url }}">Annuler</a></td>
+            <td width="50%"><a href="{% url 'gsb_cpt_detail' cpt_id=compte_id %}">Annuler</a></td>
         </tr>
     </table>
 {% endblock content %}
