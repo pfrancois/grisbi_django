@@ -3,11 +3,9 @@ from __future__ import absolute_import
 import datetime
 import time
 import decimal
-import calendar
 import csv
 import codecs
 from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 import math
 from inspector_panel.panels.inspector import debug
 try:
@@ -18,7 +16,7 @@ except ImportError:
     pass
 from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
-           'strpdate', 'today', 'now', 'timestamp', 'addmonths', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
+           'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
            'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch']
 
@@ -136,17 +134,6 @@ def timestamp():
 
 def dt2timestamp(date):
     return time.mktime(date.timetuple())
-
-
-def addmonths(sourcedate, months, last=False, first=False):
-    """renvoie le premier jour du mois ou le dernier si option"""
-    datefin = sourcedate + relativedelta(month=+1)
-    if last:
-        return datefin.replace(day=calendar.monthrange(datefin.year, datefin.month)[1])
-    elif first:
-        return datefin.replace(day=1)
-    else:
-        return
 
 
 #------------------------------------format d'entree---------------------------------

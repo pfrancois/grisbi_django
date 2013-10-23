@@ -71,11 +71,6 @@ class Test_utils1(SimpleTestCase):
         today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
         self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
 
-    def test_add_month(self):
-        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1), datetime.date(2011, 03, 15))
-        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, first=True), datetime.date(2011, 03, 01))
-        self.assertEquals(utils.addmonths(datetime.date(2011, 02, 15), 1, last=True), datetime.date(2011, 03, 31))
-
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
         self.assertEquals(utils.datetostr(d), '01/01/2011')

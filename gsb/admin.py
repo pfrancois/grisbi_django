@@ -21,6 +21,7 @@ from django.contrib.admin import SimpleListFilter
 from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 
 #-------------ici les classes generiques------
@@ -49,7 +50,7 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(utils.addmonths(today, -3, first=True)),
+                self.lookup_kwarg_since: str(today.replace(day=1) + relativedelta(month=-3)),
                 self.lookup_kwarg_until: str(today.replace(day=7)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
