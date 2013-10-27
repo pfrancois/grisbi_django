@@ -24,7 +24,7 @@ class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
 
     @property
     def titre(self):
-        return utils.to_unicode(self.row['titre'], 'titre1')
+        return utils.to_unicode(self.row['titre'])
 
     @property
     def nombre(self):
@@ -41,6 +41,10 @@ class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
     @property
     def frais(self):
         return utils.to_decimal(self.row['frais'])
+
+    @property
+    def isin(self):
+        return utils.to_unicode(self.row['isin'])
 
 
 class Import_csv_ope_titre(import_base.Import_base):
@@ -69,20 +73,35 @@ class Import_csv_ope_titre(import_base.Import_base):
                         try:
                             row.compte
                             row.date
-                            row.titre
                             row.nombre
                             row.cours
                         except KeyError as excp:
                             raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
+                        try:
+                            row.titre
+                            isin = False
+                        except KeyError as excp:
+                            try:
+                                row.isin
+                                isin = True
+                            except KeyError:
+                                raise import_base.ImportException(u"il manque les colonne 'isin' et/ou 'nom'")
                         else:
                             verif_format = True
                     ope = dict()
                     ope['ligne'] = row.ligne
                     ope['date'] = row.date
                     ope['compte_id'] = self.comptes.goc(row.compte)
-                    ope["titre_id"] = self.titres.goc(nom=row.titre)
+                    if isin:
+                        ope["titre_id"] = self.titres.goc(isin=row.isin)
+                    else:
+                        ope["titre_id"] = self.titres.goc(nom=row.titre)
                     ope['nombre'] = row.nombre
                     ope['cours'] = row.cours
+                    if row.frais:
+                        ope['frais'] = row.frais
+                    else:
+                        ope['frais'] = 0
                     if ope['nombre'] != 0:
                         self.opes.create(ope)
                     else:
@@ -109,9 +128,9 @@ class Import_csv_ope_titre(import_base.Import_base):
             if nombre == 0 and cours == 0:
                 messages.warning(u'attention, nombre et cours nul ligne %s' % ope['ligne'])
             if nombre > 0:
-                compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'], frais=ope['frais'])
             else:
-                compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'], frais=ope['frais'])
             nb_ope += 1
         messages.info(self.request, u"%s opés titres crées" % nb_ope)
         if self.titres.nb_created > 0:

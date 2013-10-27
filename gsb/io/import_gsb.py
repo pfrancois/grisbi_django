@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from ..models import (Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, Ope_titre)
 from .import_base import ImportException, ImportForm1
-
+from . import import_base
 from .. import utils
 
 
@@ -62,6 +62,18 @@ def import_gsb_0_5_x(request):
 
 
 def import_gsb_050(nomfich, request, efface_table=True):
+    moyens_cache = import_base.Moyen_cache(request)
+    import_base.Cat_cache(request)
+    import_base.IB_cache(request)
+    import_base.Compte_cache(request)
+    import_base.Banque_cache(request)
+    import_base.Exercice_cache(request)
+    import_base.Tiers_cache(request)
+    import_base.Ope_cache(request)
+    titre_cache = import_base.Titre_cache(request)
+    import_base.Cours_cache(request, titre_cache)
+    import_base.moyen_defaut_cache(request, moyens_cache)
+    import_base.Rapp_cache(request)
     liste_type_period = Echeance.typesperiod
     liste_type_titre = [e[0] for e in Titre.typestitres]
     tabl_correspondance_moyen = {}

@@ -8,6 +8,7 @@ import codecs
 from django.utils import timezone
 import math
 from inspector_panel.panels.inspector import debug
+import locale
 try:
     from django.db.models import Max
     from django.core.exceptions import ObjectDoesNotExist
@@ -18,7 +19,7 @@ from uuid import uuid4
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr']
 
 
 class FormatException(Exception):
@@ -32,6 +33,42 @@ class FormatException(Exception):
 
 def uuid():
     return str(uuid4())
+
+
+class Compfr(object):
+
+    def __init__(self, decod='utf-8'):
+        self.decod = decod
+        self.loc = locale.getlocale() # stocker la locale courante
+        self.espinsec = u'\xA0' # espace insécable
+
+    def __call__(self, v1, v2):
+        if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
+            # on convertit en unicode si nécessaire
+            if isinstance(v1, str):
+                v1 = v1.decode(self.decod)
+            if isinstance(v2, str):
+                v2 = v2.decode(self.decod)
+
+            # on retire les tirets et les blancs insécables
+            v1 = v1.replace(u'-', u'')
+            v1 = v1.replace(self.espinsec, u'')
+            v2 = v2.replace(u'-', '')
+            v2 = v2.replace(self.espinsec, u'')
+
+            # on retourne le résultat de la comparaison
+            locale.setlocale(locale.LC_ALL, '')
+            comp = locale.strcoll(v1, v2)
+            locale.setlocale(locale.LC_ALL, self.loc) #retour à la locale courante
+
+            return comp # retour du résultat de la comparaison
+        else:
+            if v1 < v2:
+                return -1
+            elif v1 > v2:
+                return 1
+            else:
+                return 0
 
 
 def validrib(banque, guichet, compte, cle):

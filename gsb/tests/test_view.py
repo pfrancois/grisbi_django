@@ -62,7 +62,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 10)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
-        self.assertQueryset_list(resp.context['list_ope'], [8, 12, 13])
+        self.assertQueryset_list(resp.context['list_opes'], [8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
         resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
@@ -76,7 +76,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 10)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
-        self.assertQueryset_list(resp.context['list_ope'], [4, 5])
+        self.assertQueryset_list(resp.context['list_opes'], [4, 5])
 
     def test_view_cpt_detail_all(self):
         resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1,)))
@@ -90,7 +90,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 10)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -80)
-        self.assertQueryset_list(resp.context['list_ope'], [4, 5, 6, 7, 8, 12, 13])
+        self.assertQueryset_list(resp.context['list_opes'], [4, 5, 6, 7, 8, 12, 13])
 
     @mock.patch('gsb.utils.today')
     def test_view_cpt_espece(self, today_mock):
@@ -106,7 +106,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 0)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
-        self.assertQueryset_list(resp.context['list_ope'], [2, ])
+        self.assertQueryset_list(resp.context['list_opes'], [2, ])
 
     def test_view_cpt_especes_all(self):
         resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5,)))
@@ -121,7 +121,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 0)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
-        self.assertQueryset_list(resp.context['list_ope'], [2, 3])
+        self.assertQueryset_list(resp.context['list_opes'], [2, 3])
 
     def test_view_cpt_especes_rapp(self):
         resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5,)))
@@ -136,7 +136,7 @@ class Test_views_general(Test_view_base):
         self.assertEqual(resp.context['solde_p_pos'], 0)
         self.assertEqual(resp.context['solde_p_neg'], 0)
         self.assertEqual(resp.context['solde_pr'], -100)
-        self.assertQueryset_list(resp.context['list_ope'], [3, ])
+        self.assertQueryset_list(resp.context['list_opes'], [3, ])
 
 
 class Test_forms(Test_view_base):

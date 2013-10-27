@@ -136,6 +136,12 @@ class Test_utils1(SimpleTestCase):
         self.assertEquals(utils.to_date(None), datetime.date(1, 1, 1))
         self.assertRaises(utils.FormatException, utils.to_date, 'toto')
 
+    def test_compfr(self):
+        compfr = utils.Compfr()
+        self.assertEquals(sorted([4, 3, 1, 0], cmp=compfr), [0, 1, 3, 4])
+        self.assertEquals(sorted(['pêche', 'PÈCHE', 'PÊCHE', 'pèche'], cmp=compfr), ['pèche', 'PÈCHE', 'pêche', 'PÊCHE'])
+        self.assertEquals(sorted([u'vice' + u'\xA0' + u'versa', 'pêche', 'PÈCHE', 'PÊCHE'], cmp=compfr), ['PÈCHE', 'pêche', 'PÊCHE', u'vice' + u'\xA0' + u'versa'])
+
 
 class Test_utils(TestCase):
     fixtures = ['test.json']

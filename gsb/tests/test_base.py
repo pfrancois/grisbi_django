@@ -7,6 +7,7 @@ from django.test.utils import override_settings
 from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.conf import settings
+from gsb import utils
 import os
 import codecs
 
@@ -35,8 +36,10 @@ class TestCase(Test_Case_django):
         # compare les id d'un query set avec une liste
         # mais avantil faut preparer la liste
         items = list()
-        for obj in qs1.order_by(element):
+        compfr = utils.Compfr()
+        for obj in qs1:
             items.append(getattr(obj, element))
+        items.sort(cmp=compfr)
         if not hasattr(liste, "__iter__"):
             liste = (liste,)
         diff = ([x for x in list(items) if x not in liste], [x for x in liste if x not in list(items)])

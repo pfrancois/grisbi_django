@@ -5,6 +5,7 @@ from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre,
 from . import widgets as gsb_field
 from django.utils.safestring import mark_safe
 
+
 # import decimal
 ERROR_CSS_CLASS = ''
 REQUIRED_CSS_CLASS = 'required'
@@ -120,7 +121,7 @@ class Ope_titre_addForm(Baseform):
     compte_espece = forms.ModelChoiceField(Compte.objects.filter(type__in=('b', 'e', 'p')).filter(ouvert=True), required=False)
     nombre = forms.DecimalField(localize=True, required=True)
     cours = forms.DecimalField(initial='1', required=True, localize=True, min_value=0)
-    frais = forms.DecimalField(initial='0', required=False, localize=True,)
+    frais = forms.DecimalField(initial='0', required=False, localize=True)
 
     class Meta:
         widgets = {
@@ -214,7 +215,7 @@ class Ope_titreForm(Basemodelform):
 class MajCoursform(Baseform):
     titre = forms.ModelChoiceField(Titre.objects.all(), empty_label=None)
     date = gsb_field.DateFieldgsb()
-    cours = gsb_field.CurField()
+    cours = gsb_field.CurField(localize=True)
 
 
 class Majtitre(Baseform):

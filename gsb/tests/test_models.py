@@ -267,7 +267,7 @@ class Test_models(TestCase):
     def test_cat_fusionne(self):
         Cat.objects.get(nom="cat2").fusionne(Cat.objects.get(nom="cat1"))
         # on verfie qu'elle est effface
-        self.assertQuerysetEqual(Cat.objects.all().order_by('id'), [1, 3, 4, 54, 64, 65, 66, 67, 68, 69], attrgetter("id"))
+        self.assertQuerysetEqual(Cat.objects.all().order_by('id'), [1, 3, 4, 54, 64, 65, 66, 67, 68, 69, 70], attrgetter("id"))
         self.assertQuerysetEqual(Ope.objects.filter(cat__nom="cat1").order_by('id'), [4, 5, 6, 7, 12, 13], attrgetter("id"))
         self.assertQuerysetEqual(Echeance.objects.filter(cat__nom="cat1").order_by('id'), [1, 2, 5, 6, 7], attrgetter("id"))
 

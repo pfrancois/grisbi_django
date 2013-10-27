@@ -41,7 +41,7 @@ class Test_import_csv(TestCase):
                                  [u'cat1', u'cat2',
                                   u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
                                   u"Revenus de placements:Plus-values", u'Impôts:Cotisations sociales',
-                                  u'Revenus de placements:interets', u'Virement'],
+                                  u'Revenus de placements:interets', u'Virement', u"Non affecté"],
                                 'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["cpt_titre2201101", "cpte1201101"], "nom")
         self.assertEqual(models.Rapp.objects.get(nom="cpte1201101").solde, 10)
@@ -77,7 +77,7 @@ class Test_import_base(TestCase):
         self.assertEqual(prop.moyen, None)
         self.assertEqual(prop.rapp, None)
         self.assertEqual(prop.notes, "")
-        self.assertEqual(prop.num_cheque, None)
+        self.assertEqual(prop.num_cheque, "")
         self.assertEqual(prop.piece_comptable, "")
         self.assertEqual(prop.pointe, False)
         self.assertEqual(prop.tiers, None)
@@ -103,6 +103,7 @@ class Test_import_base(TestCase):
         self.assertEqual(models.Cat.objects.get(nom=u'Virement').id, 65)
         self.assertEqual(models.Cat.objects.get(nom=u"Opération Ventilée").id, 66)
         self.assertEqual(models.Cat.objects.get(nom=u"Frais bancaires").id, 69)
+        self.assertEqual(models.Cat.objects.get(nom=u"Non affecté").id, 70)
 
     def test_cat_cache2(self):
         # test avec definition de l'ensemble

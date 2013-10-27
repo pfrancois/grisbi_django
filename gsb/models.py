@@ -128,7 +128,7 @@ class Titre(models.Model):
         reponse = self.cours_set.filter(date__lte=datel)
         try:
             return reponse.latest('date').valeur
-        except AttributeError:
+        except (AttributeError, Cours.DoesNotExist):
             return 0
 
     def last_cours_date(self, rapp=False):
@@ -186,7 +186,6 @@ class Titre(models.Model):
             self.tiers.notes = u"%s@%s" % (self.isin, self.type)
             self.tiers.is_titre = True
             tiers_save = True
-
         else:
             if has_changed(self, 'nom'):
                 if self.tiers.nom != 'titre_ %s' % self.nom:
@@ -516,7 +515,6 @@ class Compte(models.Model):
             solde = decimal.Decimal(req) + decimal.Decimal(self.solde_init)
         else:
             solde = decimal.Decimal(req)
-        print 'ok'
         if self.type == 't' and espece is False:
             solde = solde + self.solde_titre(datel, rapp)
         return solde
@@ -639,7 +637,7 @@ class Compte(models.Model):
                                                  nombre=decimal.Decimal(force_unicode(nombre)) * -1,
                                                  date=date,
                                                  cours=prix)
-            if decimal.Decimal(force_unicode(frais)):
+            if frais:
                 if not cat_frais:
                     cat_frais = Cat.objects.get(nom=u"Frais bancaires")
                 if not tiers_frais:
@@ -682,7 +680,7 @@ class Compte(models.Model):
                                 moyen=self.moyen_credit(),
                                 # on ne prend le moyen par defaut car ce n'est pas une OST
                                 automatique=True)
-            if decimal.Decimal(force_unicode(frais)):
+            if frais:
                 if not tiers_frais:
                     tiers_frais = titre.tiers
                 if not cat_frais:
@@ -787,7 +785,7 @@ class Ope_titre(models.Model):
         if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.pointe is True and has_changed('titre', 'compte', 'nombre', 'cours'):
             raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
 
-    def save(self, *args, **kwargs):
+    def save(self, shortcut=False, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
         self.nombre = decimal.Decimal(self.nombre)
         # definition des cat avec possibilite
@@ -871,8 +869,9 @@ class Ope_titre(models.Model):
                 self.ope_pmv.compte = self.compte
                 self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
-        for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date).exclude(pk=self.id):
-            ope.save()
+        if shortcut:
+            for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date, compte=self.compte).exclude(pk=self.id).order_by('-date'):
+                ope.save(shortcut=False)
 
     def get_absolute_url(self):
         return reverse('ope_titre_detail', kwargs={'pk': str(self.id)})
@@ -1225,7 +1224,7 @@ class Ope(models.Model):
         if not self.compte.ouvert:
             raise ValidationError(u"cette opération ne peut pas être modifié car le compte est fermé")
         if self.is_mere:
-            self.cat = Cat.objects.get(nom=u"Opération Ventilée")
+            self.cat = Cat.objects.get_or_create(nom=u"Opération Ventilée", defaults={"nom": u"Opération Ventilée"})[0]
             if has_changed(self, 'montant'):
                 # ensemble des opefilles
                 opes = self.filles_set.all()
