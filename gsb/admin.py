@@ -34,6 +34,8 @@ class date_perso_filter(DateFieldListFilter):
         super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
         today = utils.today()
         tomorrow = today + timedelta(days=1)
+        troismois = today + relativedelta(months=-3, day=1)
+        print troismois
 
         self.links = (
             (_('Any date'), {}),
@@ -50,7 +52,7 @@ class date_perso_filter(DateFieldListFilter):
                 self.lookup_kwarg_until: str(tomorrow),
             }),
             ('Les trois derniers mois', {
-                self.lookup_kwarg_since: str(today.replace(day=1) + relativedelta(month=-3)),
+                self.lookup_kwarg_since: str(troismois),
                 self.lookup_kwarg_until: str(today.replace(day=7)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
