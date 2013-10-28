@@ -519,8 +519,8 @@ class Titre_admin(Modeladmin_perso):
     formfield_overrides = {models.TextField: {'widget': admin.widgets.AdminTextInputWidget}, }
 
     def show_tiers(self, obj):
-        if obj.tiers_id:
-            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers_id,))
+        if obj.tiers:
+            change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers.id,))
             return mark_safe('<a href="%s">%s</a>' % (change_url, obj.tiers))
         else:
             return "(aucun-e)"

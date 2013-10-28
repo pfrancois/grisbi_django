@@ -350,7 +350,7 @@ class Titre_cache(Table):
             if isin:
                 arg_isin = isin
             else:
-                arg_isin = "XX00000%s%s" % (self.nb_created + 1, utils.today())
+                arg_isin = "%s%s" % (self.nb_created + 1, utils.today())
             return {"nom": arg_nom, "isin": arg_isin, "type": "ZZZ"}
         else:
             return obj
