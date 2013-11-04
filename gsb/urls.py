@@ -71,7 +71,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
 )
 urlpatterns += patterns('gsb.views',
-                        url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'test_ajout_ope', name="titre_bulk"),
+                        url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'ajout_ope_titre_bulk', name="titre_bulk"),
 )
 
 

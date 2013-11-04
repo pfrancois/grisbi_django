@@ -607,11 +607,14 @@ def ope_titre_delete(request, pk):
         compte_id = ope.compte.id
         titre_id = ope.titre.id
         # gestion des cours inutiles
-        cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
-        if cours.exists():
-            s = u'%s' % cours
-            cours.delete()
-            messages.success(request, u'cours effacé: %s' % s)
+        if Ope_titre.objects.filter(titre=ope.titre, date=ope.date).count() == 1:
+            cours = Cours.objects.filter(date=ope.date, titre=ope.titre)
+            try:
+                s = u'%s' % cours
+                cours.delete()
+                messages.success(request, u'cours effacé: %s' % s)
+            except Cours.DoesNotExist:
+                pass
         s = u'%s' % ope.id
         ope.delete()
         messages.success(request, u'ope effacé id %s' % s)
@@ -800,6 +803,7 @@ def ope_titre_vente(request, cpt_id):
 
 @login_required
 def search_opes(request):
+    """recherche des operations"""
     if request.method == 'POST':
         form = gsb_forms.SearchForm(request.POST)
         if form.is_valid():
@@ -851,16 +855,20 @@ from . import widgets as gsb_field
 
 
 class ajout_ope_bulk_form(gsb_forms.Baseform):
+    """premier form utilise ajout_ope_titre_bulk"""
     titre = forms.ModelChoiceField(Titre.objects.all())
     cours = gsb_field.CurField()
     nombre = forms.DecimalField(localize=True)
+    frais = forms.DecimalField(localize=True, required=False)
 
 
 class ajout_ope_date_form(gsb_forms.Baseform):
+    """second form utilise ajout_ope_titre_bulk"""
     date = forms.DateField()
 
 
-def test_ajout_ope(request, cpt_id):
+def ajout_ope_titre_bulk(request, cpt_id):
+    """view qui s'occupe d'achat ou de vente pour l'ensemble des titres d'un compte"""
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
@@ -880,9 +888,10 @@ def test_ajout_ope(request, cpt_id):
                 nb = form.cleaned_data['nombre']
                 if nb > 0:
                     compte_titre.achat(titre=form.cleaned_data['titre'],
-                         nombre=form.cleaned_data['nombre'],
-                         prix=form.cleaned_data['cours'],
-                         date=date_ope)
+                                        nombre=form.cleaned_data['nombre'],
+                                        prix=form.cleaned_data['cours'],
+                                        date=date_ope,
+                                        frais=form.cleaned_data['frais'])
                     messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
@@ -891,7 +900,17 @@ def test_ajout_ope(request, cpt_id):
                                   )
                 else:
                     if nb < 0:
-                        messages.warning(request, 'attention ope nombre %s non prise en compte pour le titre %s' % (form.cleaned_data['nombre'], form.cleaned_data['titre'].nom))
+                        compte_titre.vente(titre=form.cleaned_data['titre'],
+                                            nombre=form.cleaned_data['nombre']*-1,
+                                            prix=form.cleaned_data['cours'],
+                                            date=date_ope,
+                                            frais=form.cleaned_data['frais'])
+                        messages.info(request, u"nouvel vente de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
+                                                                                              form.cleaned_data['titre'].nom,
+                                                                                              form.cleaned_data['cours'],
+                                                                                              date_ope,
+                                                                                              round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
+                                  )
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         i = 0

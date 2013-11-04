@@ -616,7 +616,7 @@ class Compte(models.Model):
     def vente(self, titre, nombre, prix=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
-        @param nombre
+        @param nombre positif
         @param prix
         @param date
         @param frais
@@ -796,7 +796,8 @@ class Ope_titre(models.Model):
         # si on change la date de l'operation il faut supprimer le cours associe
         if utils.is_onexist(self, "ope_ost"):
             old_date = self.ope_ost.date
-            Cours.objects.get(titre=self.titre, date=old_date).delete()
+            if Ope_titre.objects.filter(titre=self.titre, date=self.date).count() == 1:
+                Cours.objects.get(titre=self.titre, date=old_date).delete()
         Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if utils.is_onexist(self, 'ope_pmv'):

@@ -5,7 +5,7 @@
         {{ form.non_field_errors }}
         {{ date_ope_form }}
         <table>
-        <tr><th> titre </th> <th> cours </th> <th> nombre </th> </th> </tr>
+        <tr><th> titre </th> <th> cours </th> <th> nombre </th> <th> Frais </th> </tr>
         {% for form in forms %}
         <tr>
             {% for field in form %}
