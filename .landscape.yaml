@@ -1,0 +1,4 @@
+strictness: medium
+uses:
+    - django
+autodetect: yes
