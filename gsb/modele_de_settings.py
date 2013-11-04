@@ -1,10 +1,12 @@
 # -*- coding: utf-8
+from __future__ import absolute_import
 import os
 import decimal
 import sys
 # on change le context par defaut
 decimal.getcontext().rouding = decimal.ROUND_HALF_UP
 decimal.getcontext().precision = 3
+# chemin du projet
 PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 DEFAULT_CHARSET = 'utf-8'
@@ -15,15 +17,17 @@ DJANGO_EXTENSION = True
 
 DEBUG_PROPAGATE_EXCEPTIONS = False
 
-ADMINS = (
-    # ('toto', 'your_email@domain.com'),
-)
 #
 # config gsb
+# titre affiche dans export gsb
 TITRE = "20040701_django.gsb"
+# devise utilise
 DEVISE_GENERALE = 'EUR'
-ID_CPT_M = 1  # cpt principal utlise si l'on ne rentre pas de compte
-AFFICHE_CLOT = False  # affiche les comptes clos
+# compte utilise comme contrepartie par defaut en virement
+ID_CPT_M = 1
+# affiche les comptes clos
+AFFICHE_CLOT = False
+# utilise les exercices
 UTILISE_EXERCICES = False
 UTILISE_IB = True
 UTILISE_PC = False
@@ -33,21 +37,32 @@ UTILISE_PC = False
 __TAUX_VERSEMENT_legal = 0.08 * 0.97
 TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal))
 # id et cat des operation speciales
-ID_CAT_COTISATION = 23
-ID_TIERS_COTISATION = 727
-ID_CAT_OST = 64
-ID_CAT_PMV = 4
+ID_CAT_COTISATION = 256
+ID_TIERS_COTISATION = 55
+# id des operations sur titre elle doit s'appeler 'Opération sur titre'
+ID_CAT_OST = 2
+# elle doit s'appeler 'Revenus de placement:Plus-values'
+ID_CAT_PMV = 3
+# moyen par defaut pour les ope de recette
 MD_CREDIT = 6
+# moyen par defaut pour les ope de depenses
 MD_DEBIT = 7
+REV_PLAC = 47
+ID_CAT_VIR = 4
+
+
 #
+ADMINS = (
+    # ('toto', 'your_email@domain.com'),
+)
 
 MANAGERS = ADMINS
-
+WSGI_APPLICATION = "gsb.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, 'grisbi.db'),  # Or path to database file if using sqlite3.
+        'NAME': os.path.join(PROJECT_PATH, 'grisbi.sqlite'),  # Or path to database file if using sqlite3.
         'USER': 'root',  # Not used with sqlite3.
         'PASSWORD': '',  # Not used with sqlite3.
         'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
@@ -70,7 +85,7 @@ TIME_ZONE = 'Europe/Paris'
 USE_TZ = True
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'fr-fr'
+LANGUAGE_CODE = 'fr-FR'
 THOUSAND_SEPARATOR = " "
 DECIMAL_SEPARATOR = ','
 FIRST_DAY_OF_WEEK = 1
@@ -90,27 +105,22 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = "C:/django/gsb/upload"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = 'media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(PROJECT_PATH, '/static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
-
-# URL prefix for admin static files -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'  # plus utilise car deprecated
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -139,7 +149,7 @@ except ImportError:
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
     fichier.write("SECRET_KEY=%s" % secret)
-    from secret_key import *  # @UnusedWildImport
+    from .secret_key import *  # @UnusedWildImport
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -176,7 +186,9 @@ INSTALLED_APPS = (
     'gsb',
     # gestion admin
     'django.contrib.admin',
-    'django.contrib.admindocs'
+    'django.contrib.admindocs',
+    'django_extensions',
+    'south'
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
@@ -186,8 +198,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
 )
-if DJANGO_EXTENSION:
-    INSTALLED_APPS += ('django_extensions',)
 
 # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
 LOGGING = {
