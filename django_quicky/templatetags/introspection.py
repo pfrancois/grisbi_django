@@ -38,6 +38,6 @@ def getattr(obj, args):
     try:
         return obj.__getattribute__(attribute)
     except AttributeError:
-         return  obj.__dict__.get(attribute, default)
+        return  obj.__dict__.get(attribute, default)
     except:
         return default

@@ -115,7 +115,7 @@ class Import_csv_ope_titre(import_base.Import_base):
         # gestion des erreurs
         if len(self.erreur) or retour is False:
             for err in self.erreur:
-                    messages.warning(self.request, err)
+                messages.warning(self.request, err)
             return False
         for ope in self.opes.create_item:
             compte = models.Compte.objects.get(id=ope['compte_id'])

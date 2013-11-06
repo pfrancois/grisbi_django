@@ -273,7 +273,7 @@ class Exercice_cache(Table):
 
     def arg_def(self, nom, obj=None):
         if obj is None:
-                return {"nom": nom, 'date_debut': utils.today(), 'date_fin': utils.today()}
+            return {"nom": nom, 'date_debut': utils.today(), 'date_fin': utils.today()}
         else:
             return obj
 

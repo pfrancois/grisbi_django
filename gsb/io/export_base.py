@@ -81,7 +81,7 @@ class Csv_unicode_writer(Writer_base):
         self.queue.truncate(0)
 
     def writeheader(self):
-            self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
+        self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
 
 
 class Exportform_ope(gsb_forms.Baseform):

@@ -115,7 +115,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         # gestion des erreurs
         if len(self.erreur) or retour is False:
             for err in self.erreur:
-                    messages.warning(self.request, err)
+                messages.warning(self.request, err)
             return False
         # maintenant on sauvegarde les operations
         for ope in self.opes.create_item:
