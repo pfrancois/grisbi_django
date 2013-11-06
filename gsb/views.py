@@ -501,10 +501,13 @@ def maj_cours(request, pk):
             titre = form.cleaned_data['titre']
             date = form.cleaned_data['date']
             if not Cours.objects.filter(titre=titre, date=date).exists():
-                messages.info(request, u"cours crée")
                 titre.cours_set.create(valeur=form.cleaned_data['cours'], date=date)
+                messages.success(request, u"cours crée")
             else:
-                titre.cours_set.get(date=date).valeur = form.cleaned_data['cours']
+                cours = titre.cours_set.get(date=date)
+                cours.valeur = form.cleaned_data['cours']
+                cours.save()
+                messages.success(request, u"cours modifié")
             compte = Ope_titre.objects.filter(titre=titre).latest('date').compte
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
