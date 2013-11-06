@@ -79,7 +79,7 @@ class Test_export(Test_view_base):
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 """
-        self.assertreponsequal(view.export_csv_view(data=[final], nomfich='test_file').content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")
+        self.assertreponsequal(view.export_csv_view(data=[final]).content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")
 
     def test_export_form1(self):
         # test normal avec aucune selection

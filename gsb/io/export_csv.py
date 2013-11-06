@@ -222,5 +222,5 @@ class Export_ope_titre_csv(Export_view_csv_base):
             ligne['nombre'] = utils.floattostr(objet.nombre)
             ligne['montant_ope'] = utils.floattostr(objet.cours * objet.nombre)
             data.append(ligne)
-        reponse = self.export_csv_view(data=data, nomfich="export_ope_titre")
+        reponse = self.export_csv_view(data=data)
         return reponse
