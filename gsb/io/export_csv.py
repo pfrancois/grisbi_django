@@ -21,7 +21,7 @@ class Export_view_csv_base(export_base.ExportViewBase):
     csv_dialect = None
     class_csv_dialect = Excel_csv
 
-    def export_csv_view(self, data, nomfich="export"):
+    def export_csv_view(self, data):
         """machinerie commune aux classes filles"""
         csv_file = export_base.Csv_unicode_writer(encoding='iso-8859-15', fieldnames=self.fieldnames, dialect=self.class_csv_dialect)
         csv_file.writeheader()
@@ -177,7 +177,7 @@ class Export_cours_csv(Export_view_csv_base):
                      'isin': objet.titre.isin,
                      'cours': utils.floattostr(objet.valeur)}
             data.append(ligne)
-        reponse = self.export_csv_view(data=data, nomfich="export_cours")
+        reponse = self.export_csv_view(data=data)
         return reponse
 
 
