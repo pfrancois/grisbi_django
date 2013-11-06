@@ -354,7 +354,7 @@ def nulltostr(s):
 
 
 #------------------fonction basiques pour lecture ecriture------"""
-class UTF8Recoder:
+class UTF8Recoder(object):
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
