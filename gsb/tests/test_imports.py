@@ -268,12 +268,13 @@ class Test_import_base(TestCase):
 
     def test_titre_cache(self):
         cache = import_base.Titre_cache(self.request_get('toto'))
-        self.assertEqual(cache.goc("titre1"), 1)
-        self.assertEqual(cache.goc(isin="XX00000%s%s" % (1, utils.today())), 1)
+        tata = cache.goc("titre1")
+        self.assertEqual(tata, 1)
+        self.assertEqual(cache.goc(isin="%s%s" % (1, utils.today())), 1)
         m = models.Titre.objects.get(id=1)
         self.assertEqual(m.nom, 'titre1')
         self.assertEqual(m.type, 'ZZZ')
-        self.assertEqual(m.isin, "XX00000%s%s" % (1, utils.today()))
+        self.assertEqual(m.isin, "%s%s" % (1, utils.today()))
         self.assertEqual(cache.goc(isin="isin1"), 2)
         self.assertEqual(cache.goc("inconnu%s%s" % (2, utils.today())), 2)
         m = models.Titre.objects.get(id=2)

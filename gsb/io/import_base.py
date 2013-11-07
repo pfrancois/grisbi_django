@@ -301,30 +301,29 @@ class Titre_cache(Table):
     def goc(self, nom=None, isin=None, obj=None):
         if nom is None and isin is None and obj is None:  # cas ou pas de parametre
             return None
+        if nom is None:
+            return self.goc_isin(isin, obj)
+        else:
+            return self.goc_titre(nom, obj)
 
+    def goc_titre(self, nom, obj=None):
         if nom is not None and "titre_ " in nom:  # cas ou on utiliserait les nom de tiers
             nom = nom.replace("titre_ ", '')
             nom = nom.strip()
         try:
-            if nom:
-                pk = self.id["nom"][nom]
-            else:
-                pk = self.id["isin"][isin]
+            pk = self.id["nom"][nom]
         except KeyError:  # on essaye de le recuperer
             try:
                 if obj is None:
-                    if nom:
-                        arguments = {"nom": nom}
-                    else:
-                        arguments = {"isin": isin}
+                    arguments = {"nom": nom}
                 else:
                     arguments = obj
                 pk = self.element.objects.get(**arguments).id
                 self.id["nom"][nom] = pk
-                self.id["isin"][isin] = pk
-            except self.element.DoesNotExist:
+                self.id["isin"][self.element.objects.get(**arguments).isin] = pk
+            except self.element.DoesNotExist:# on doit le creer
                 if not self.readonly:  # on cree donc l'operation
-                    argument_def = self.arg_def(nom, isin, obj)
+                    argument_def = self.arg_def(nom, None, obj)
                     try:
                         if obj is not None:
                             if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
@@ -334,11 +333,44 @@ class Titre_cache(Table):
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk
-                    self.id[nom] = pk
+                    self.id["nom"][created.nom] = pk
+                    self.id["isin"][created.isin] = pk
                     self.create_item.append(created)
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
                     raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
+        return pk
+
+    def goc_isin(self, isin, obj=None):
+        try:
+            pk = self.id["isin"][isin]
+        except KeyError:  # on essaye de le recuperer
+            try:
+                if obj is None:
+                    arguments = {"isin": isin}
+                else:
+                    arguments = obj
+                pk = self.element.objects.get(**arguments).id
+                self.id["nom"][self.element.objects.get(**arguments).nom] = pk
+                self.id["isin"][isin] = pk
+            except self.element.DoesNotExist:
+                if not self.readonly:  # on cree donc l'operation
+                    argument_def = self.arg_def(None, isin, obj)
+                    try:
+                        if obj is not None:
+                            if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
+                                raise IntegrityError("ce titre existe deja")
+                        created = self.element.objects.create(**argument_def)
+                        self.nb_created += 1
+                    except IntegrityError as e:
+                        raise ImportException("%s" % e)
+                    pk = created.pk
+                    self.id["nom"][created.nom] = pk
+                    self.id["isin"][created.isin] = pk
+                    self.create_item.append(created)
+                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
+                else:
+                    raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, isin))
         return pk
 
     def arg_def(self, nom=None, isin=None, obj=None):

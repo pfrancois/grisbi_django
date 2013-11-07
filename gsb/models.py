@@ -1131,9 +1131,9 @@ class Echeance(models.Model):
             raise ValidationError(u"pas possible de mettre un même compte en virement et compte de base")
         super(Echeance, self).clean()
 
-    def save(self, force_insert=False, force_update=False, using=None):
+    def save(self,*args, **kwargs):
         self.clean()
-        super(Echeance, self).save(force_insert, force_update, using)
+        super(Echeance, self).save(*args, **kwargs)
 
     @staticmethod
     def verif(request):
