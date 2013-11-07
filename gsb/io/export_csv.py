@@ -63,7 +63,8 @@ class Export_ope_csv(Export_view_csv_base):
             else:
                 if ope.mere is not None and ope.mere.rapp is not None:
                     ligne['r'] = ope.mere.rapp.nom
-                ligne['r'] = ''
+                else:
+                    ligne['r'] = ''
             # pointee
             ligne['p'] = utils.booltostr(ope.pointe)
             # moyen
