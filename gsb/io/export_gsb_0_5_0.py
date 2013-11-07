@@ -21,7 +21,7 @@ liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 
 
-def _export():
+def _export(request):
     # creation des id pour IB
             #####generalites###
     xml_root = et.Element("Grisbi")
@@ -200,7 +200,7 @@ def _export():
                 xml_element.set('Va', str(ope.mere_id))
                 # raison pour lesquelles il y a des attributs non modifiables
                 # Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
-
+    print nb_compte
     ###Echeances###
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")
@@ -414,9 +414,9 @@ def _export():
 
 @permission_required('gsb_can_export')
 def export(request):
-    xml_django = _export()
+    xml_django = _export(request)
     reponse = HttpResponse(xml_django, content_type="text/plain")
     # reponse = HttpResponse(xml_django, content_type="application/x-grisbi-gsb")
     reponse["Cache-Control"] = "no-cache, must-revalidate"
-    # reponse["Content-Disposition"] = "attachment; filename=%s.gsb" % settings.TITRE
+    reponse["Content-Disposition"] = "attachment; filename=%s.gsb" % settings.TITRE
     return reponse

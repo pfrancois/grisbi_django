@@ -345,7 +345,7 @@ class Test_import_base(TestCase):
         # on cree les deux comptes utiles
         models.Compte.objects.create(nom="sansrien")
         models.Compte.objects.create(nom="les2", moyen_credit_defaut_id=moyens.goc("uniquement_credit", montant=10), moyen_debit_defaut_id=moyens.goc("uniquement_debit", montant=-10))
-        cache = import_base.moyen_defaut_cache(self.request_get("/outils"), moyens)
+        cache = import_base.moyen_defaut_cache()
         self.assertEqual(cache.goc("sansrien", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("sansrien", -10), settings.MD_DEBIT)
         self.assertEqual(cache.goc("les2", 10), 6)

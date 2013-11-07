@@ -150,7 +150,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     nombre = utils.to_decimal(ope['notes'].split('@')[0])
                     cours = utils.to_decimal(ope['notes'].split('@')[1])
                     if nombre == 0 and cours == 0:
-                        messages.warning(u'attention, fausse opération sur titre ligne %s' % ope['ligne'])
+                        messages.warning(self.request, u'attention, fausse opération sur titre ligne %s' % ope['ligne'])
                         ope.pop('ligne')
                         models.Ope.objects.create(**ope)
                         continue
@@ -187,23 +187,25 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 continue
             if not verif_format:  # on verifie a la premiere ligne
                 try:
-                    row.id
-                    row.automatique
-                    row.cat
-                    row.cpt
-                    row.date
+                    a = row.id
+                    a = row.automatique
+                    a = row.cat
+                    a = row.cpt
+                    a = row.date
                     if settings.UTILISE_EXERCICES is True:
-                        row.exercice
-                    row.ib
-                    row.ligne
-                    row.monnaie        # on gere le nombre de truc annex crée
-                    row.moyen
-                    row.montant
-                    row.notes
-                    row.num_cheque
-                    row.piece_comptable
-                    row.rapp
-                    row.tiers
+                        a = row.exercice
+                    a = row.ib
+                    a = row.ligne
+                    a = row.monnaie        # on gere le nombre de truc annex crée
+                    a = row.moyen
+                    a = row.montant
+                    a = row.notes
+                    a = row.num_cheque
+                    a = row.piece_comptable
+                    a = row.rapp
+                    a = row.tiers
+                    if a:
+                        pass
                 except KeyError as excp:
                     raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
                 else:

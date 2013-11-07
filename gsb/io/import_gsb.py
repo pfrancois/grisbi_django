@@ -62,7 +62,7 @@ def import_gsb_0_5_x(request):
 
 
 def import_gsb_050(nomfich, request, efface_table=True):
-    moyens_cache = import_base.Moyen_cache(request)
+    import_base.Moyen_cache(request)
     import_base.Cat_cache(request)
     import_base.IB_cache(request)
     import_base.Compte_cache(request)
@@ -72,7 +72,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
     import_base.Ope_cache(request)
     titre_cache = import_base.Titre_cache(request)
     import_base.Cours_cache(request, titre_cache)
-    import_base.moyen_defaut_cache(request, moyens_cache)
+    import_base.moyen_defaut_cache()
     import_base.Rapp_cache(request)
     liste_type_period = Echeance.typesperiod
     liste_type_titre = [e[0] for e in Titre.typestitres]
@@ -236,12 +236,12 @@ def import_gsb_050(nomfich, request, efface_table=True):
     messages.info(request, u'%s rapprochements dont %s nouveaux ' % (nb, nb_nx))
 
     #------------------------------comptes#------------------------------
+    nb_moyen = 0
+    nb_nx_moyens = 0
     nb = 0
-    nb_tot_moyen = 0
     nb_nx = 0
     for xml_cpt in xml_tree.findall('//Compte'):
         nb += 1
-        nb_moyen = 0
         type_compte = Compte.typescpt[int(xml_cpt.find('Details/Type_de_compte').text)][0]
         if type_compte in ('t',):
             messages.info(request, "cpt_titre %s" % xml_cpt.find('Details/Nom').text)
@@ -290,10 +290,9 @@ def import_gsb_050(nomfich, request, efface_table=True):
                 element.notes = ''
             element.save()
             #---------------MOYENS---------------------
-        nb_nx_moyens = 0
         tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text] = {}
+        nb_nx_moyens = 0
         for xml_moyen in xml_cpt.find('Detail_de_Types'):
-            nb_tot_moyen += 1
             nb_moyen += 1
             messages.info(request, "moyen %s" % xml_moyen.get('No'))
             moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
@@ -313,7 +312,8 @@ def import_gsb_050(nomfich, request, efface_table=True):
         except (KeyError, TypeError):
             element.moyen_debit_defaut_id = None
         element.save()
-    messages.info(request, u'%s comptes dont %s nouveaux' % (nb, nb_nx))
+    messages.info(request, u'%s moyens dont %s nouveaux' % (nb_moyen, nb_nx_moyens))
+
     nb_tot_ope = 0
 
     #------------------------------OPERATIONS-----------------------

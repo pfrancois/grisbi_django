@@ -477,10 +477,19 @@ class Rapp_cache(Table):
 
 class moyen_defaut_cache(object):
 
-    def __init__(self, request, moyens_cache):
+    def __init__(self):
         self.id = {}
         for c in models.Compte.objects.all():
-            self.id[c.nom] = {"c": c.moyen_credit().id, "d": c.moyen_debit().id}
+            try:
+                credit = c.moyen_credit().id
+            except models.Moyen.DoesNotExist:
+                credit = None
+            try:
+                debit = c.moyen_debit().id
+            except models.Moyen.DoesNotExist:
+                debit = None
+
+            self.id[c.nom] = {"c": credit, "d": debit}
 
     def goc(self, compte, montant):
         if compte in self.id.keys():
@@ -569,5 +578,5 @@ class Import_base(views.Myformview):
         self.opes = Ope_cache(self.request)
         self.titres = Titre_cache(self.request)
         self.cours = Cours_cache(self.request, self.titres)
-        self.moyen_par_defaut = moyen_defaut_cache(self.request, self.moyens)
+        self.moyen_par_defaut = moyen_defaut_cache()
         self.rapps = Rapp_cache(self.request)

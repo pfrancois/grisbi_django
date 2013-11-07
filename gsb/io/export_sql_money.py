@@ -196,7 +196,7 @@ CREATE TABLE payment (
             param['repeat'] = 0
             param['place'] = nbope
             param['day'] = ope.date.strftime('%Y%m%d')
-            param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
+            param['lastupdate'] = time.mktime(ope.lastupdate.timetuple())
             sql.query(u"""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
                 :amount,:date,:photo,:voice,:payee,:note,:account,:type,:repeat,:place,:day,:lastupdate);""", param)
             sql.query('DROP INDEX IF EXISTS budget_month_index;')

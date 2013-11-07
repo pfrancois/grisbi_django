@@ -25,7 +25,7 @@ class Writer_base(object):
     stream = None
     Encoder = None
 
-    def __init__(self, encoding="utf-8", **kwds):
+    def __init__(self, encoding="utf-8"):
         self.queue = cStringIO.StringIO()
         self.encoder = codecs.getincrementalencoder(encoding)()
         self.stream = cStringIO.StringIO()
@@ -58,7 +58,7 @@ class Csv_unicode_writer(Writer_base):
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fieldnames, fich=None, encoding="utf-8", dialect=Excel_csv, **kwds):
+    def __init__(self, fieldnames, encoding="utf-8", dialect=Excel_csv, **kwds):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding)
         self.fieldnames = fieldnames

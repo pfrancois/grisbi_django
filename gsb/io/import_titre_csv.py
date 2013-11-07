@@ -71,10 +71,12 @@ class Import_csv_ope_titre(import_base.Import_base):
                 for row in fich:
                     if not verif_format:
                         try:
-                            row.compte
-                            row.date
-                            row.nombre
-                            row.cours
+                            a = row.compte
+                            a = row.date
+                            a = row.nombre
+                            a = row.cours
+                            if a:
+                                pass
                         except KeyError as excp:
                             raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
                         try:
@@ -126,7 +128,7 @@ class Import_csv_ope_titre(import_base.Import_base):
             nombre = ope['nombre']
             cours = ope['cours']
             if nombre == 0 and cours == 0:
-                messages.warning(u'attention, nombre et cours nul ligne %s' % ope['ligne'])
+                messages.warning(self.request, u'attention, nombre et cours nul ligne %s' % ope['ligne'])
             if nombre > 0:
                 compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'], frais=ope['frais'])
             else:

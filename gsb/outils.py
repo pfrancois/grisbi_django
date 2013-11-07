@@ -32,7 +32,7 @@ def verif_element_config(element, request, collection=None):
 
 
 def verif_config(request):
-    moyens = import_base.Moyen_cache(request)
+    import_base.Moyen_cache(request)
     import_base.Cat_cache(request)
     import_base.IB_cache(request)
     import_base.Compte_cache(request)
@@ -42,7 +42,7 @@ def verif_config(request):
     import_base.Ope_cache(request)
     titres = import_base.Titre_cache(request)
     import_base.Cours_cache(request, titres)
-    import_base.moyen_defaut_cache(request, moyens)
+    import_base.moyen_defaut_cache()
     import_base.Rapp_cache(request)
     verif_element_config("ID_CPT_M", request, Compte)
     verif_element_config("TAUX_VERSEMENT", request)
