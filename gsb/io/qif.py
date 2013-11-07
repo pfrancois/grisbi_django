@@ -112,7 +112,6 @@ def parseqif(infile):
         else:
             # don't recognise this line; ignore it
             print >> sys.stderr, "Skipping unknown line:\n", line
-
         line = infile.readline()
     return items
 

@@ -34,11 +34,11 @@ class QifWriter(Writer_base):
     which is encoded in the given encoding.
     """
 
-    def __init__(self, fich, encoding="utf-8"):
+    def __init__(self, encoding="utf-8"):
         """ Redirect output to a queue
         """
         self.queue = cStringIO.StringIO()
-        self.stream = fich
+        self.stream = cStringIO.StringIO()
         self.encoding = encoding
 
     def writerow(self, row):
@@ -106,8 +106,7 @@ class Export_qif(ExportViewBase):
     def export(self, query):
         """exportationn effective du fichier qif"""
         # ouverture du fichier
-        fich = cStringIO.StringIO()
-        qif = QifWriter(fich, encoding='iso-8859-15')
+        qif = QifWriter(encoding='iso-8859-15')
         # recuperation des requete
         opes = query.order_by('compte', 'date').select_related('cat', "compte", "tiers", "ib", 'moyen').exclude(
             mere__isnull=False)
@@ -192,5 +191,5 @@ class Export_qif(ExportViewBase):
                     qif.w('$', fille.montant)
             qif.end_record()
             # finalisation
-        reponse = HttpResponse(fich.getvalue(), content_type="text/plain")
+        reponse = HttpResponse(qif.getvalue(), content_type="text/plain")
         return reponse
