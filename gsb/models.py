@@ -776,14 +776,16 @@ class Ope_titre(models.Model):
     def clean(self):
         super(Ope_titre, self).clean()
         # verification qu'il n'y pas pointe et rapprochee
-        if utils.is_onexist(self, "ope_ost") and self.ope_ost.rapp is not None and has_changed('titre', 'compte', 'nombre', 'cours'):
-            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est rapprochée")
-        if utils.is_onexist(self, "ope_ost") and self.ope_ost.pointe is True and has_changed('titre', 'compte', 'nombre', 'cours'):
-            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est pointée")
-        if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.rapp is not None and has_changed('titre', 'compte', 'nombre', 'cours'):
-            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est rapprochée")
-        if utils.is_onexist(self, "ope_pmv") and self.ope_pmv.pointe is True and has_changed('titre', 'compte', 'nombre', 'cours'):
-            raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
+        if utils.is_onexist(self, "ope_ost"):
+            if self.ope_ost.rapp is not None and has_changed(self.ope_ost, ('titre', 'compte', 'nombre', 'cours')):
+                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est rapprochée")
+            if self.ope_ost.pointe is True and has_changed(self.ope_ost, ('titre', 'compte', 'nombre', 'cours')):
+                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est pointée")
+        if utils.is_onexist(self, "ope_pmv"):
+            if self.ope_pmv.rapp is not None and has_changed(self.ope_pmv, ('titre', 'compte', 'nombre', 'cours')):
+                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est rapprochée")
+            if self.ope_pmv.pointe is True and has_changed(self.ope_pmv, ('titre', 'compte', 'nombre', 'cours')):
+                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
 
     def save(self, shortcut=False, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
@@ -1131,7 +1133,7 @@ class Echeance(models.Model):
             raise ValidationError(u"pas possible de mettre un même compte en virement et compte de base")
         super(Echeance, self).clean()
 
-    def save(self,*args, **kwargs):
+    def save(self, *args, **kwargs):
         self.clean()
         super(Echeance, self).save(*args, **kwargs)
 

@@ -20,9 +20,9 @@ class SafeSettings(object):
             raise AttributeError
 
 
-settings_obj = SafeSettings()
+SETTINGS_OBJ = SafeSettings()
 
 
 def settings(request):
-    return {'settings': settings_obj}
+    return {'settings': SETTINGS_OBJ}
 

@@ -104,7 +104,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         retour = False
         moyen_virement = self.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         try:
-            with open(nomfich, 'rt') as f_non_encode:
+            with open(nomfich, 'r') as f_non_encode:
                 fich = self.reader(f_non_encode, encoding=self.encoding)
                 #---------------------- boucle
                 retour = self.tableau(fich, moyen_virement)

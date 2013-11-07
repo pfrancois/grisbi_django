@@ -65,31 +65,33 @@ class Import_csv_ope_titre(import_base.Import_base):
         verif_format = False
         nb_ope = 0
         try:
-            with open(nomfich, 'rt') as f_non_encode:
+            with open(nomfich, 'r') as f_non_encode:
                 fich = self.reader(f_non_encode, encoding=self.encoding)
                 #---------------------- boucle
                 for row in fich:
                     if not verif_format:
+                        a = True
                         try:
                             a = row.compte
                             a = row.date
                             a = row.nombre
                             a = row.cours
-                            if a:
-                                pass
                         except KeyError as excp:
                             raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
                         try:
-                            row.titre
+                            a = row.titre
                             isin = False
                         except KeyError as excp:
                             try:
-                                row.isin
+                                a = row.isin
                                 isin = True
                             except KeyError:
                                 raise import_base.ImportException(u"il manque les colonne 'isin' et/ou 'nom'")
                         else:
                             verif_format = True
+                        if a:
+                                pass
+
                     ope = dict()
                     ope['ligne'] = row.ligne
                     ope['date'] = row.date

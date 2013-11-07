@@ -25,13 +25,13 @@ from dateutil.relativedelta import relativedelta
 
 
 #-------------ici les classes generiques------
-class date_perso_filter(DateFieldListFilter):
+class Date_perso_filter(DateFieldListFilter):
 
     """filtre date perso
     """
 
     def __init__(self, field, request, params, model, model_admin, field_path):
-        super(date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
+        super(Date_perso_filter, self).__init__(field, request, params, model, model_admin, field_path)
         today = utils.today()
         tomorrow = today + timedelta(days=1)
         troismois = today + relativedelta(months=-3, day=1)
@@ -66,7 +66,7 @@ class date_perso_filter(DateFieldListFilter):
         )
 
 
-class rapprochement_filter(SimpleListFilter):
+class Rapprochement_filter(SimpleListFilter):
     title = "type de rapprochement"
     parameter_name = 'rapp'
 
@@ -385,7 +385,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     list_display = ('id', 'pointe', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'num_cheque', 'rapp')
     list_filter = (
-        'compte', ('date', date_perso_filter), rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
+        'compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
@@ -554,7 +554,7 @@ class Tiers_admin(Modeladmin_perso):
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
     list_display_links = ('id',)
-    list_filter = ('is_titre', ('lastupdate', date_perso_filter),)
+    list_filter = ('is_titre', ('lastupdate', Date_perso_filter),)
     search_fields = ['nom']
     inlines = [ope_tiers_admin]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }

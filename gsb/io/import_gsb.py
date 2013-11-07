@@ -31,7 +31,7 @@ def import_gsb_0_5_x(request):
             nomfich = form.cleaned_data['nom_du_fichier']
             nomfich = nomfich[:-4]
             nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), "gsb"))
-            destination = open(nomfich, 'wb+')
+            destination = open(nomfich, 'w+b')
             for chunk in request.FILES['nom_du_fichier'].chunks():
                 destination.write(chunk)
             destination.close()

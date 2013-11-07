@@ -7,7 +7,7 @@ import csv
 import codecs
 from django.utils import timezone
 import math
-from inspector_panel.panels.inspector import debug
+#from inspector_panel.panels.inspector import debug
 import locale
 try:
     from django.db.models import Max

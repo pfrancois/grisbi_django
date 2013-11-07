@@ -45,7 +45,6 @@ class Test_export(Test_view_base):
         ope_mere = models.Ope.objects.get(id=11)
         ope_mere.rapp = models.Rapp.objects.get(id=1)
         ope_mere.save()
-        print ope_mere.rapp.nom
         rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r

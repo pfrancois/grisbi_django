@@ -532,10 +532,10 @@ class Import_base(views.Myformview):
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
         # si le repertoire n'existe pas on le crée
         try:
-            destination = open(nomfich, 'wb+')
+            destination = open(nomfich, 'w+b')
         except IOError:  # pragma: no cover
             os.makedirs(os.path.join(settings.PROJECT_PATH, 'upload'))
-            destination = open(nomfich, 'wb+')
+            destination = open(nomfich, 'w+b')
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
             destination.write(chunk)
         destination.close()
