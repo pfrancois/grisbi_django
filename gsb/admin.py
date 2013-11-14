@@ -35,8 +35,6 @@ class Date_perso_filter(DateFieldListFilter):
         today = utils.today()
         tomorrow = today + timedelta(days=1)
         troismois = today + relativedelta(months=-3, day=1)
-        print troismois
-
         self.links = (
             (_('Any date'), {}),
             (_('Today'), {

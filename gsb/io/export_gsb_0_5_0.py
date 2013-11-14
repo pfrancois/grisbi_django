@@ -200,7 +200,6 @@ def _export(request):
                 xml_element.set('Va', str(ope.mere_id))
                 # raison pour lesquelles il y a des attributs non modifiables
                 # Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
-    print nb_compte
     ###Echeances###
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")

@@ -217,7 +217,7 @@ class Moyen_cache(Table):
 
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
-                {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'r'}},
+                {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
                 {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
             ]
 

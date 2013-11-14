@@ -119,7 +119,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             return False
         # maintenant on sauvegarde les operations
         for ope in self.opes.create_item:
-            #print "\nope # %s"%ope
             virement = ope.pop('virement', False)
             ope_titre = ope.pop('ope_titre', False)
             #gestions des cas speciaux

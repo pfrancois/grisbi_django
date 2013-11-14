@@ -39,6 +39,7 @@ a tester ailleurs
 
 class Test_views_general(Test_view_base):
     def test_view_index(self):
+        """page d'acceuil"""
         resp = self.client.get('/')
         self.assertEqual(resp.context['titre'], 'liste des comptes')
         self.assertEqual(len(resp.context['liste_cpt_bq']), 3)
@@ -50,6 +51,7 @@ class Test_views_general(Test_view_base):
 
     @mock.patch('gsb.utils.today')
     def test_view_cpt_detail(self, today_mock):
+        """vois le detail du compte 1 au 14/10/2012"""
         today_mock.return_value = datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_detail', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
@@ -65,6 +67,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset_list(resp.context['list_opes'], [8, 12, 13])
 
     def test_view_cpt_detail_rapp(self):
+        """vois le detail des ope rapp du compte 1 """
         resp = self.client.get(reverse('gsb_cpt_detail_rapp', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
@@ -79,6 +82,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset_list(resp.context['list_opes'], [4, 5])
 
     def test_view_cpt_detail_all(self):
+        """vois le detail du compte 1 aujourdhui (y compris les ope rapp)"""
         resp = self.client.get(reverse('gsb_cpt_detail_all', args=(1,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_detail.djhtm")
         self.assertEqual(resp.context['titre'], 'cpte1')
@@ -94,6 +98,7 @@ class Test_views_general(Test_view_base):
 
     @mock.patch('gsb.utils.today')
     def test_view_cpt_espece(self, today_mock):
+        """detail du compte espece du compte titre 5 au 14/10/2012"""
         today_mock.return_value = datetime.date(2012, 10, 14)
         resp = self.client.get(reverse('gsb_cpt_titre_espece', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
@@ -109,6 +114,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset_list(resp.context['list_opes'], [2, ])
 
     def test_view_cpt_especes_all(self):
+        """detail du compte espece rapproche ou non du compte titre 5"""
         resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
@@ -124,6 +130,7 @@ class Test_views_general(Test_view_base):
         self.assertQueryset_list(resp.context['list_opes'], [2, 3])
 
     def test_view_cpt_especes_rapp(self):
+        """detail du compte espece rapproche du compte titre 5 au 14/10/2012"""
         resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
@@ -141,6 +148,7 @@ class Test_views_general(Test_view_base):
 
 class Test_forms(Test_view_base):
     def test_form_ope_normal(self):
+        """test form nouvel ope sans probleme"""
         form_data = {'compte': "1",
                      'date': "02/09/2012",
                      'date_val': "",
@@ -158,10 +166,10 @@ class Test_forms(Test_view_base):
                      "operation_mere": "",
         }
         form = gsb_forms.OperationForm(data=form_data, initial=form_data)
-        r = form.is_valid()
-        self.assertTrue(r)
-        r = form.cleaned_data['montant']
-        self.assertEqual(r, decimal.Decimal(-24))
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['compte'].id, 1)
+        self.assertEqual(form.cleaned_data['date'], utils.strpdate("2012-09-02"))
+        self.assertEqual(form.cleaned_data['montant'], decimal.Decimal(-24))
 
     def test_form_ope_sans_tiers(self):
         """pas de tiers  ni de nouveau tiers"""
