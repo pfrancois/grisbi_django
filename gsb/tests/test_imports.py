@@ -20,12 +20,19 @@ import glob
 __all__ = ['Test_import_csv', 'Test_import_base']
 
 
-class Test_import_csv(TestCase):
+class Test_import_abstract(TestCase):
 
     def setUp(self):
-        super(Test_import_csv, self).setUp()
+        super(Test_import_abstract, self).setUp()
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
         self.client.login(username='admin', password='mdp')
+
+    def tearDwon(self):
+        nomfich = os.path.join(settings.PROJECT_PATH, 'upload', "test_*")
+        os.remove(nomfich)
+
+
+class Test_import_csv(Test_import_abstract):
 
     def test_import_csv_simple_ok(self):
         """test import csv version sans jumelle ni ope mere bref en ne gerant pas les id mais gere les virement et les ope titre"""
@@ -54,12 +61,7 @@ class Test_import_csv(TestCase):
         self.assertEqual(models.Ope.objects.get(id=1).num_cheque, '12345678')
 
 
-class Test_import_base(TestCase):
-
-    def setUp(self):
-        super(Test_import_base, self).setUp()
-        self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
-        self.client.login(username='admin', password='mdp')
+class Test_import_base(Test_import_abstract):
 
     def test_import_base(self):
         prop = import_base.property_ope_base()
@@ -186,6 +188,12 @@ class Test_import_base(TestCase):
         self.assertEqual(m.nom, 'test')
         self.assertEqual(m.type, 'r')
 
+    def test_moyen_cache6(self):
+        """test avec des erreurs"""
+        moyens = import_base.Moyen_cache(self.request_get("/outils"))
+        with self.assertRaises(ValueError):
+            moyens.goc("test", montant=None, obj=None)
+
     def test_ib_cache(self):
         ibs = import_base.IB_cache(self.request_get("/outils"))
         self.assertEqual(ibs.goc("moyen1"), 1)
@@ -289,10 +297,16 @@ class Test_import_base(TestCase):
             cache.goc("titre4", obj={"nom": 'titre4', "isin": 'ceci est un isin', "type": "ZZZ", 'id': 23553})
 
     def test_titre_cache2(self):
+        """essai de creer un titre alors qu'on est en read only"""
         cache = import_base.Titre_cache(self.request_get('toto'))
         cache.readonly = True
         with self.assertRaises(import_base.ImportException):
             cache.goc("titre1")
+
+    def test_titre_cache3(self):
+        """interogation sans parametre"""
+        cache = import_base.Titre_cache(self.request_get('toto'))
+        self.assertEqual(cache.goc(), None)
 
     def test_cours_cache(self):
         # version avec nom titre

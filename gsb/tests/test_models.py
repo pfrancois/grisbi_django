@@ -30,13 +30,13 @@ class Test_models(TestCase):
 
     def setUp(self):
         super(Test_models, self).setUp()
-        # on cree les elements indiepensables
+        # on cree les elements indispensables
         import_base.Cat_cache(self.request_get('toto'))
         import_base.Moyen_cache(self.request_get('toto'))
         import_base.Tiers_cache(self.request_get('toto'))
 
     def test_models_unicode(self):
-        # on test les sortie unicode
+        """on test les sortie unicode"""
         self.assertEquals(Tiers.objects.get(nom="tiers1").__unicode__(), u"tiers1")
         self.assertEquals(Titre.objects.get(nom="t1").__unicode__(), u"t1 (1)")
         self.assertEquals(Banque.objects.get(nom="banque1").__unicode__(), u"banque1")
@@ -54,10 +54,12 @@ class Test_models(TestCase):
         self.assertEquals(Ope.objects.get(id=1).__unicode__(), u"(1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1")
 
     def test_models_unicode2(self):
+        """sortie unicode d'une vente de titre"""
         Compte.objects.get(nom="cpt_titre1").vente(titre=Titre.objects.get(nom="t1"), nombre=1, date='2011-12-20')
         self.assertEquals(Ope_titre.objects.get(id=5).__unicode__(), u"(5) vente de 1 t1 (1) à 1 EUR le 20/12/2011 cpt:cpt_titre1")
 
     def test_fusionne_error(self):
+        """les erreur de fusions, toutes en un seul test"""
         # fusion avec un autre type
         self.assertRaises(TypeError, Tiers.objects.get(nom="tiers1").fusionne, Cat.objects.get(id=1))
         # fusion sur lui meme
@@ -115,6 +117,7 @@ class Test_models(TestCase):
         self.assertRaises(ValueError, Rapp.objects.get(id=1).fusionne, Rapp.objects.get(id=1))
 
     def test_tiers_fusionne(self):
+        """fusion entre 2 tiers"""
         Tiers.objects.get(nom="tiers1").fusionne(Tiers.objects.get(nom="tiers2"))
         # un tiers de moins
         self.assertQuerysetEqual(Tiers.objects.all().order_by('id'), [2, 3, 4, 5, 6, 7, 8, 256], attrgetter("id"))
@@ -133,13 +136,6 @@ class Test_models(TestCase):
         t.save()
         self.assertEqual(Tiers.objects.get(id=id_tiers).nom, 'titre_ test')
 
-    def test_tiers_is_titre2(self):
-        """on enleve un titre a un tiers, il n'est plus is_titre"""
-        t = Tiers.objects.get(nom="titre_ t1")
-        t_id = t.id
-        t.save()
-        self.assertTrue(Tiers.objects.get(id=t_id).is_titre)
-
     def test_titre_chgt_isin(self):
         """si on change isin , ca change chez le tiers"""
         t = Titre.objects.get(nom='t1')
@@ -148,13 +144,22 @@ class Test_models(TestCase):
         t.save()
         self.assertEqual(Tiers.objects.get(id=id_tiers).notes, '1234567@ACT')
 
-    def test_titre_last_cours(self):
+    def test_titre_last_cours1(self):
+        """recupere le derniere cours d'un tiers 3 test:
+        dernier cours
+        dernier cours a une date et cours exist pas
+        dernier cours a un dat et cours existe"""
         t = Titre.objects.get(nom="t2")
         self.assertEquals(t.last_cours(), 10)
         self.assertEquals(t.last_cours("2001-01-01"), 0)  # pas de cours possible
         self.assertEquals(t.last_cours("2011-11-01"), 5)
 
     def test_titre_last_date(self):
+        """tests:
+        date du dernier cours
+        date du dernier cours rapprochee
+        date du dernier cours rapp mais qui n'existe pas
+        date du dernier cours alors que aucun n'est rapp"""
         t2 = Titre.objects.get(nom="t2")
         self.assertEqual(t2.last_cours_date(), datetime.date(2011, 11, 30))
         rep = t2.last_cours_date(rapp=True)
@@ -164,6 +169,7 @@ class Test_models(TestCase):
         self.assertEqual(t.last_cours_date(), datetime.date(2011, 12, 18))
 
     def test_titre_creation(self):
+        """creation titre"""
         # on cree le titre
         t = Titre.objects.create(nom='ceci_est_un_titre', isin="123456789", type='ACT')
         # un titre de plus
@@ -174,6 +180,7 @@ class Test_models(TestCase):
         self.assertEqual(tiers.is_titre, True)
 
     def test_titre_fusionne(self):
+        """fusion de deux titres"""
         Titre.objects.get(nom="autre").fusionne(Titre.objects.get(nom="autre 2"))
         t = Titre.objects.get(nom="autre 2")
         # on regarde ce qui existe comme id de titre
@@ -191,12 +198,13 @@ class Test_models(TestCase):
         self.assertEquals(t.cours_set.count(), 2)
 
     def test_titre_fusionne_error(self):
-        # fusionnne deux titre avec des cours differents
+        """fusionnne deux titre avec des cours differents"""
         Cours.objects.create(titre=Titre.objects.get(nom="autre"), valeur=20, date=utils.strpdate('2011-01-01'))
         Cours.objects.create(titre=Titre.objects.get(nom="autre 2"), valeur=40, date=utils.strpdate('2011-01-01'))
         self.assertRaises(Gsb_exc, Titre.objects.get(nom="autre").fusionne, Titre.objects.get(nom="autre 2"))
 
     def test_titre_investi(self):
+        """test titre investi (version initial puis apres achat 20 t2 @ 20 """
         c1 = Compte.objects.get(id=4)
         c2 = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t2")
@@ -215,7 +223,7 @@ class Test_models(TestCase):
         self.assertEquals(t.investi(compte=c2, exclude=Ope_titre.objects.get(id=3)), 1500)
 
     def test_titre_nb(self):
-        # definition initiale
+        """test nb titre"""
         c1 = Compte.objects.get(id=4)
         c2 = Compte.objects.get(id=5)
         t = Titre.objects.get(nom="t2")
@@ -231,7 +239,10 @@ class Test_models(TestCase):
         self.assertEquals(t.nb(compte=c2, exclude_id=2), 20)
         self.assertEquals(t.nb(rapp=True, compte=c2), 20)
 
-    def test_titre_encours(self):
+    @mock.patch('gsb.utils.today')
+    def test_titre_encours(self, today_mock):
+        """test titres encours"""
+        today_mock.return_value = datetime.date(2011, 12, 31)
         c1 = Compte.objects.get(id=4)
         c2 = Compte.objects.get(id=5)
         t2 = Titre.objects.get(nom="t2")
@@ -248,13 +259,6 @@ class Test_models(TestCase):
         self.assertEquals(t2.encours(compte=c1, datel='2010-07-01'), 0)
         self.assertEquals(t2.encours(compte=c2, datel='2011-11-01'), 100)
         self.assertEquals(t2.encours(rapp=True, datel='2011-01-01'), 0)
-
-    @mock.patch('gsb.utils.today')
-    def test_titre_encours2(self, today_mock):
-        today_mock.return_value = datetime.date(2011, 01, 01)
-        c2 = Compte.objects.get(id=5)
-        t2 = Titre.objects.get(nom="t2")
-        self.assertEquals(t2.encours(rapp=True, compte=c2), 0)
 
     # pas de test specifique pour cours
 
@@ -724,7 +728,7 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(Ope.objects.filter(rapp__id=3).order_by('id'), [4, 5], attrgetter("id"))
 
     def test_echeance_save(self):
-        # on ne peut sauver une echeance avec un virement sur un meme compte
+        """on ne peut sauver une echeance avec un virement sur un meme compte"""
         self.assertRaises(ValidationError, lambda: Echeance.objects.create(date=utils.strpdate('2011-01-01'),
                                                                            compte=Compte.objects.get(id=1),
                                                                            montant=2,
@@ -741,18 +745,21 @@ class Test_models(TestCase):
         self.assertEquals(Echeance.objects.get(id=7).calcul_next(), None)
 
     def test_echeance_check1(self):
+        """enregistre toutes les echaances jusqu'au 31/12/2011"""
         request = self.request_get('/options/check')
         Echeance.check(to=utils.strpdate('2011-12-31'), request=request)
         self.assertcountmessage(request, 57)
         self.assertEqual(Ope.objects.count(), 71)
 
     def test_echeance_check2(self):
+        """enregistre les echeance du compte 2 jusqu'au 09/12/2011"""
         request = self.request_get('/options/check')
         Echeance.check(queryset=Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'), request=request)
         self.assertEqual(Ope.objects.count(), 18)
 
     @mock.patch('gsb.utils.today')
     def test_echeance_check3(self, today_mock):
+        """enregistre les operation jusqu'a aujourdhui 'en fait le 31/12/2011'"""
         today_mock.return_value = datetime.date(2011, 12, 31)
         request = self.request_get('/options/check')
         Echeance.check(request=request)
@@ -807,8 +814,8 @@ class Test_models(TestCase):
         o = Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
 
-    def test_uuid(self):
-        # on verifie que l'uuid ne change pas
+    def test_uuid1(self):
+        """on verifie que l'uuid ne change pas si on sauve"""
         o = Ope.objects.get(pk=4)
         o.montant = 245
         uuid = o.uuid
@@ -831,10 +838,11 @@ class Test_models(TestCase):
         self.assertLess(lup, o.lastupdate)
 
     def test_last_modif2(self):
+        """on verifie que last update est toujours modifie"""
         o = Tiers.objects.create(nom="Test")
         lup = o.lastupdate
         pk = o.id
-        time.sleep(1)
+        time.sleep(10)
         o.nom = "Test2"
         o.save()
         o = Tiers.objects.get(pk=pk)
@@ -1229,6 +1237,11 @@ class Test_models(TestCase):
         self.assertEquals(Virement(Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
         self.assertEquals(Virement(Ope.objects.get(id=8)).pointe, True)
 
+    def test_virement_edit(self):
+        v = Virement(Ope.objects.get(id=8))
+        v.date = '2011-02-01'
+        v.save()
+
     @mock.patch('gsb.utils.today')
     def test_virement_create(self, today_mock):
         today_mock.return_value = datetime.date(2012, 10, 14)
@@ -1271,7 +1284,7 @@ class Test_models2(TestCase):
 
     def setUp(self):
         super(Test_models2, self).setUp()
-        # on cree les elements indiepensables
+        # on cree les elements indispensables
         import_base.Cat_cache(self.request_get('toto'))
         import_base.Moyen_cache(self.request_get('toto'))
         import_base.Tiers_cache(self.request_get('toto'))
@@ -1282,6 +1295,7 @@ class Test_models2(TestCase):
     # sans fixtures
 
     def test_last_cours_date_special(self):
+        """last cours avec ope cree, modifie puis effacee"""
         c = self.c
         t = self.t
         r = self.r
@@ -1296,6 +1310,7 @@ class Test_models2(TestCase):
         self.assertEquals(cours, None)
 
     def test_ope_titre_special3(self):
+        """encours simple mais le cours a change entre temps"""
         c = self.c
         t = self.t
         o = Ope_titre.objects.create(titre=t, compte=c, date=utils.strpdate('2011-01-01'), nombre=10)
@@ -1341,6 +1356,10 @@ class Test_models2(TestCase):
         self.assertEqual(has_changed(t, ('nom', 'notes')), True)
 
     def test_has_changed2(self):
+        """verifie si on a rien change par defaut"""
         t = Tiers.objects.create(nom='teet')
         self.assertEqual(has_changed(t, ('nom', 'notes')), False)
+
+    def test_has_changed3(self):
+        """verifie si qd on envoit une string et non un objet ds haschanged"""
         self.assertEqual(has_changed('toto', ('nom', 'notes')), False)

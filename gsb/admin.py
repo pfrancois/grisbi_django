@@ -22,6 +22,7 @@ from django.forms.models import BaseInlineFormSet
 import gsb.utils as utils
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from django.db import transaction
 
 
 #-------------ici les classes generiques------
@@ -124,12 +125,13 @@ class Modeladmin_perso(admin.ModelAdmin):
             if obj_a == obj_b:  # on saute le premier
                 continue
             try:
-                message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
-                    nom_module,
-                    obj_b,
-                    obj_a)
-                obj_b.fusionne(obj_a)
-                messages.success(request, message)
+                with transaction.commit_on_success():
+                    message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
+                        nom_module,
+                        obj_b,
+                        obj_a)
+                    obj_b.fusionne(obj_a)
+                    messages.success(request, message)
             except Exception as inst:
                 message = inst.__unicode__()
                 messages.error(request, message)

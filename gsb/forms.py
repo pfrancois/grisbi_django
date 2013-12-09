@@ -206,7 +206,6 @@ class Ope_titreForm(Basemodelform):
         instance = getattr(self, 'instance', None)
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
-        self.fields['date'] = gsb_field.DateFieldgsb(localize=True)
 
     class Meta:
         model = Ope_titre

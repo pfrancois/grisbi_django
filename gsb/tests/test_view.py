@@ -170,6 +170,10 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.cleaned_data['compte'].id, 1)
         self.assertEqual(form.cleaned_data['date'], utils.strpdate("2012-09-02"))
         self.assertEqual(form.cleaned_data['montant'], decimal.Decimal(-24))
+        self.assertEqual(form.cleaned_data['tiers'].id, 1)
+        self.assertEqual(form.cleaned_data['cat'].id, 3)
+        self.assertEqual(form.cleaned_data['moyen'].id, 1)
+        self.assertEqual(form.cleaned_data['rapp'], None)
 
     def test_form_ope_sans_tiers(self):
         """pas de tiers  ni de nouveau tiers"""
@@ -197,6 +201,7 @@ class Test_forms(Test_view_base):
                          )
 
     def test_virement_forms(self):
+        """creation d'un nouveau virement sans probleme"""
         form_data = {'date': "02/09/2012",
                    'compte_origine': '1',
                    'moyen_origine': '5',
@@ -208,14 +213,15 @@ class Test_forms(Test_view_base):
 
                    }
         form = gsb_forms.VirementForm(data=form_data)
-        r = form.is_valid()
-        self.assertTrue(r)
-        r = form.cleaned_data['montant']
-        self.assertEqual(r, decimal.Decimal("13.50"))
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['montant'], decimal.Decimal("13.50"))
+        self.assertEqual(form.cleaned_data['compte_destination'].id, 2)
         form.save()
         self.assertEqual(models.Ope.objects.count(), 15)
+        self.assertEqual(str(models.Ope.objects.filter(id__in=(14, 15)).order_by('id')), "[<Ope: (14) le 02/09/2012 : -13.5 EUR a cpte1 => cptb2 cpt: cpte1>, <Ope: (15) le 02/09/2012 : 13.5 EUR a cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms2(self):
+        """edition d'un virement deja crée sans probleme"""
         form_data = {'date': "02/09/2012",
                    'compte_origine': '1',
                    'moyen_origine': '5',
@@ -228,14 +234,14 @@ class Test_forms(Test_view_base):
                    }
         ope = models.Ope.objects.get(id=8)
         form = gsb_forms.VirementForm(data=form_data, ope=ope)
-        r = form.is_valid()
-        self.assertTrue(r)
-        r = form.cleaned_data['montant']
-        self.assertEqual(r, decimal.Decimal("13.50"))
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['montant'], decimal.Decimal("13.50"))
         form.save()
         self.assertEqual(models.Ope.objects.count(), 13)
+        self.assertEqual(str(models.Ope.objects.filter(id__in=(8, 9)).order_by('id')), "[<Ope: (8) le 02/09/2012 : -13.5 EUR a cpte1 => cptb2 cpt: cpte1>, <Ope: (9) le 02/09/2012 : 13.5 EUR a cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms_erreur(self):
+        """ creation virement mais erreur car deux fois le meme compte"""
         form_data = {'date': "02/09/2012",
                    'compte_origine': '1',
                    'moyen_origine': '5',
@@ -255,6 +261,7 @@ class Test_forms(Test_view_base):
                         )
 
     def test_Ope_titre_addForm1(self):
+        """ajout ope titre mais erreur car nombre de titre =0"""
         form_data = {'date': "02/09/2012",
                    'titre': "1",
                    'compte_titre': '4',
@@ -269,6 +276,7 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.errors, {'nombre': [u'le nombre de titre ne peut être nul']})
 
     def test_Ope_titre_addForm3(self):
+        """ajout ope titre normal"""
         form_data = {'date': "02/09/2012",
                    'titre': "1",
                    'compte_titre': '4',
@@ -283,6 +291,7 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.cleaned_data['frais'], -10)
 
     def test_Ope_titre_dividendeForm2(self):
+        """ajout dividende normal"""
         form_data = {'date': "02/09/2012",
                    'titre': "3",
                    'compte_titre': '5',
@@ -295,6 +304,7 @@ class Test_forms(Test_view_base):
         self.assertTrue(r)
 
     def test_Ope_titre_dividendeForm3(self):
+        """ajout dividende mais erreur car titre pas dans compte"""
         form_data = {'date': "02/09/2012",
                    'titre': "1",
                    'compte_titre': '5',
@@ -305,20 +315,10 @@ class Test_forms(Test_view_base):
         form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
         r = form.is_valid()
         self.assertFalse(r)
-
-    def test_Ope_titre_dividendeForm4(self):
-        form_data = {'date': "02/09/2012",
-                   'titre': "3",
-                   'compte_titre': '5',
-                   'compte_espece': '2',
-                   'montant': '10'
-                   }
-        cpt_titre = models.Compte.objects.get(id=1)
-        form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
-        r = form.is_valid()
-        self.assertTrue(r)
+        self.assertEqual(form.errors, {'titre': [u'Sélectionnez un choix valide. Ce choix ne fait pas partie de ceux disponibles.']})
 
     def test_Ope_titre_add_achatForm1(self):
+        """achat titre ok"""
         form_data = {'date': "02/09/2012",
                    'titre': "1",
                    'compte_titre': '4',
@@ -334,6 +334,7 @@ class Test_forms(Test_view_base):
         self.assertTrue(r)
 
     def test_Ope_titre_add_achatForm2(self):
+        """achat nouveau titre ds ce portefeuille"""
         form_data = {'date': "02/09/2012",
                    'titre': "",
                    'compte_titre': '4',
@@ -349,6 +350,7 @@ class Test_forms(Test_view_base):
         self.assertTrue(r)
 
     def test_Ope_titre_add_achatForm3(self):
+        """achat titre mais pas de titre"""
         form_data = {'date': "02/09/2012",
                    'compte_titre': '4',
                    'compte_espece': '2',
@@ -362,6 +364,7 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.errors, {'nouveau_titre': [u'si vous ne choisissez pas un titre, vous devez taper le nom du nouveau']})
 
     def test_Ope_titre_add_achatForm4(self):
+        """achat titre mais nouveau_isin n'est pas la"""
         form_data = {'date': "02/09/2012",
                    'titre': "1",
                    'compte_titre': '4',
@@ -373,11 +376,11 @@ class Test_forms(Test_view_base):
                    'nouveau_isin': 'isis',
                    }
         form = gsb_forms.Ope_titre_add_achatForm(data=form_data)
-        r = form.is_valid()
-        self.assertTrue(r)
+        self.assertTrue(form.is_valid())
         self.assertNotIn('nouvel_isin', form.cleaned_data)
 
     def test_Ope_titre_add_venteForm1(self):
+        """vente titre avec virement integre"""
         form_data = {'date': "02/09/2012",
                    'titre': "3",
                    'compte_titre': '5',
@@ -387,26 +390,11 @@ class Test_forms(Test_view_base):
                    'frais': '10',
                    }
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data)
-        r = form.is_valid()
-        self.assertTrue(r)
+        self.assertTrue(form.is_valid())
         self.assertQueryset_list(form.fields['titre'].queryset, models.Titre.objects.all().order_by('pk').values_list('pk', flat=True))
 
     def test_Ope_titre_add_venteForm2(self):
-        form_data = {'date': "02/09/2012",
-                   'titre': "3",
-                   'compte_titre': '5',
-                   'compte_espece': '2',
-                   'nombre': '10',
-                   'cours': '1.56',
-                   'frais': '10',
-                   }
-        cpt_titre = models.Compte.objects.get(id=5)
-        form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
-        self.assertQueryset_list(form.fields['titre'].queryset, cpt_titre.liste_titre().order_by('pk').values_list('pk', flat=True))
-        r = form.is_valid()
-        self.assertTrue(r)
-
-    def test_Ope_titre_add_venteForm3(self):
+        """vente titre mais pas en portefeuille"""
         form_data = {'date': "01/07/2011",
                    'titre': "3",
                    'compte_titre': '5',
@@ -417,11 +405,11 @@ class Test_forms(Test_view_base):
                    }
         cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
-        r = form.is_valid()
-        self.assertFalse(r)
+        self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {'titre': [u"titre pas en portefeuille", ]})
 
     def test_Ope_titre_add_venteForm4(self):
+        """ vente titre mais pas assez de titre en portefeuille"""
         form_data = {'date': "01/01/2013",
                    'titre': "3",
                    'compte_titre': '5',
@@ -432,23 +420,26 @@ class Test_forms(Test_view_base):
                    }
         cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
-        r = form.is_valid()
-        self.assertFalse(r)
+        self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {'titre': [u"titre pas assez en portefeuille pour que l'opération puisse s'effectuer", ]})
 
     def testOpe_titreForm(self):
+        """comme tout le reste depend directement des test django pas de probleme"""
         ope = models.Ope_titre.objects.get(id=2)
         form = gsb_forms.Ope_titreForm(instance=ope)
         self.assertTrue('titre' in [k for k in form.fields.keys()])
         self.assertTrue('compte' in [k for k in form.fields.keys()])
 
+#-------------------------------
+
     def testMajCoursform(self):
-        gsb_forms.MajCoursform()
+        #gsb_forms.MajCoursform()
+        pass
 
     def testMajtitre(self):
         form = gsb_forms.Majtitre(models.Titre.objects.all())
         k = [k for k in form.fields.keys()]
-        self.assert_(len(k) == 7)
+        self.assertTrue(len(k) == 7)
 
     def testSearchForm(self):
         gsb_forms.SearchForm()

@@ -16,7 +16,6 @@ from gsb import utils
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
-
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
 
 
@@ -50,6 +49,15 @@ def has_changed(instance, fields):
     return changed
 
 
+class config(models.Model):
+    """model generique pour tout ce qui est modifiable"""
+    derniere_import_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
+    derniere_export_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
+
+    class Meta:
+        db_table = 'gsb_config'
+
+
 class Tiers(models.Model):
 
     """
@@ -72,7 +80,6 @@ class Tiers(models.Model):
     def __unicode__(self):
         return u"%s" % self.nom
 
-    @transaction.commit_on_success
     def fusionne(self, new, ok_titre=False):
         """fusionnne tiers vers new tiers
         @param new: tiers
@@ -147,7 +154,6 @@ class Titre(models.Model):
             else:
                 return None
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new
         @param new: Titre
@@ -314,7 +320,6 @@ class Banque(models.Model):
     def __unicode__(self):
         return self.nom
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne cette banque  avec la banque new
         @param new: banque
@@ -350,7 +355,6 @@ class Cat(models.Model):
     def __unicode__(self):
         return u"%s(%s)" % (self.nom, self.type)
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne cette cat  avec la cat new
         @param new: cat
@@ -387,7 +391,6 @@ class Ib(models.Model):
     def __unicode__(self):
         return self.nom
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne cette ib avec l'ib new
         @param new: ib
@@ -425,7 +428,6 @@ class Exercice(models.Model):
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne cet exercice avec l'exercice new
         @param new: exercice
@@ -519,7 +521,6 @@ class Compte(models.Model):
             solde = solde + self.solde_titre(datel, rapp)
         return solde
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne deux compte, verifie avant que c'est le même type
         @param new: Compte
@@ -926,7 +927,6 @@ class Moyen(models.Model):
     def __unicode__(self):
         return u"%s (%s)" % (self.nom, self.type)
 
-    @transaction.commit_on_success
     def fusionne(self, new):
         """fusionnne ce Moyen avec le Moyen new
         @param new: Moyen
