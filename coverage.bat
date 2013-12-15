@@ -1,2 +1,2 @@
-manage.py coverage gsb 
+manage.py test gsb  --failfast
 pause

@@ -56,7 +56,7 @@ def find_files(directory, pattern):
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def handle(self, *args, **options):
         config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
         lastmaj = config.derniere_import_money_journal
@@ -80,7 +80,7 @@ class Command(BaseCommand):
             else:
                 raise IndexError(reponse['action'])
             del reponse['action']
-            with transaction.commit_on_success():
+            with transaction.atomic():
                 for key in reponse:
                     obj = reponse[key]
                     type_enr = obj['$class']['$classname']
@@ -101,7 +101,7 @@ class Command(BaseCommand):
                     elif type_enr == 'Budget':
                         pass
                     else:
-                        raise lecture_plist_exception("attention il un type inconnu: %s" % type_enr)
+                        raise lecture_plist_exception("attention un type inconnu: %s" % type_enr)
                     nb_ok += 1
                 #on gere ceux qu'on elimine car deja pris en en compte
                 config.derniere_import_money_journal = utils.now()

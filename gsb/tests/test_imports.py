@@ -64,6 +64,7 @@ class Test_import_csv(Test_import_abstract):
 class Test_import_base(Test_import_abstract):
 
     def test_import_base(self):
+        """verification des property"""
         prop = import_base.property_ope_base()
         self.assertEqual(prop.id, None)
         self.assertEqual(prop.cat, None)
@@ -90,13 +91,14 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(prop.has_fille, False)
 
     def test_import_exception(self):
+        """test de l'exception sans rien de special"""
         with self.assertRaises(import_base.ImportException) as exc:
             raise import_base.ImportException('test')
         self.assertEqual(exc.exception.msg, 'test')
         self.assertEqual("%s" % exc.exception, 'test')
 
     def test_cat_cache(self):
-        # on teste si les categories par defaut sont bien crees
+        """on teste si les categories par defaut sont bien crees"""
         import_base.Cat_cache(self.request_get("/outils"))
         self.assertEqual(models.Cat.objects.get(nom=u"Opération sur titre").id, 64)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:Plus-values").id, 67)
@@ -108,23 +110,23 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(models.Cat.objects.get(nom=u"Non affecté").id, 70)
 
     def test_cat_cache2(self):
-        # test avec definition de l'ensemble
+        """test avec definition de l'ensemble avec nom defini"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         self.assertEqual(cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'd'}), 1215)
 
     def test_cat_cache2bis(self):
-        # test avec definition de l'ensemble
+        """# test avec definition de l'ensemble sans nom defini"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         self.assertEqual(cats.goc('', {'nom': 'test', 'id': 1215, 'type': 'd'}), 1215)
 
     def test_cat_cache3(self):
-        # test normal
+        """test normal"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         cats.goc("cat1")  # on cree
         self.assertEqual(cats.goc("cat1"), models.Cat.objects.get(nom=u"cat1").id)  # on demande
 
     def test_cat_cache4(self):
-        # test integrity error
+        """test integrity error"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'd'})
         with self.assertRaises(import_base.ImportException):
@@ -138,7 +140,7 @@ class Test_import_base(Test_import_abstract):
             cats.goc('test', {'nom': 'test', 'id': 1216, 'type': 'c'})
 
     def test_cat_cache5(self):
-        # test creation et readonly
+        """test creation et readonly"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         cats.readonly = True
         with self.assertRaises(import_base.ImportException) as exc:
@@ -146,7 +148,7 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(exc.exception.msg, u"Cat 'cat1' non créée alors que c'est read only")
 
     def test_cat_cache6(self):
-        # on teste si on peut bien recuperer une cat deja existante
+        """on teste si on peut bien recuperer une cat deja existante"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         cat_id = models.Cat.objects.create(nom='test').id
         self.assertEqual(cats.goc("test"), cat_id)

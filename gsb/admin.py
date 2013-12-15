@@ -125,7 +125,7 @@ class Modeladmin_perso(admin.ModelAdmin):
             if obj_a == obj_b:  # on saute le premier
                 continue
             try:
-                with transaction.commit_on_success():
+                with transaction.atomic():
                     message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
                         nom_module,
                         obj_b,

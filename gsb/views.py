@@ -17,6 +17,7 @@ from django.views import generic
 from django.utils.decorators import method_decorator
 from django.db import IntegrityError
 import gsb.utils
+from django.db import transaction
 
 
 class Mytemplateview(generic.TemplateView):

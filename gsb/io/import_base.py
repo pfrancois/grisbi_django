@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.db import IntegrityError
 from django.db.models import Max
+from django.db import transaction
 
 from .. import forms as gsb_forms
 from .. import models
@@ -169,14 +170,16 @@ class Table(object):
                     arguments = {"nom": nom}
                 else:
                     arguments = obj
-                pk = self.element.objects.get(**arguments).id
+                with transaction.atomic():
+                    pk = self.element.objects.get(**arguments).id
                 self.id[nom] = pk
             except self.element.DoesNotExist:
                 if not self.readonly:  # on cree donc l'element
                     argument_def = self.arg_def(nom, obj)
                     try:
-                        created = self.element.objects.create(**argument_def)
-                        self.nb_created += 1
+                        with transaction.atomic():
+                            created = self.element.objects.create(**argument_def)
+                            self.nb_created += 1
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk
@@ -325,11 +328,12 @@ class Titre_cache(Table):
                 if not self.readonly:  # on cree donc l'operation
                     argument_def = self.arg_def(nom, None, obj)
                     try:
-                        if obj is not None:
-                            if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
-                                raise IntegrityError("ce titre existe deja")
-                        created = self.element.objects.create(**argument_def)
-                        self.nb_created += 1
+                        with transaction.atomic():
+                            if obj is not None:
+                                if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
+                                    raise IntegrityError("ce titre existe deja")
+                            created = self.element.objects.create(**argument_def)
+                            self.nb_created += 1
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk
@@ -357,11 +361,12 @@ class Titre_cache(Table):
                 if not self.readonly:  # on cree donc l'operation
                     argument_def = self.arg_def(None, isin, obj)
                     try:
-                        if obj is not None:
-                            if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
-                                raise IntegrityError("ce titre existe deja")
-                        created = self.element.objects.create(**argument_def)
-                        self.nb_created += 1
+                        with transaction.atomic():
+                            if obj is not None:
+                                if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
+                                    raise IntegrityError("ce titre existe deja")
+                            created = self.element.objects.create(**argument_def)
+                            self.nb_created += 1
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
                     pk = created.pk

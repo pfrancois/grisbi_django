@@ -13,6 +13,7 @@ import mock
 from .test_base import TestCase
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db import transaction
 
 from ..models import Compte, Ope, Tiers, Cat, Moyen, Titre, Banque
 from ..models import Virement, Ope_titre, Ib, Exercice, Cours
@@ -665,7 +666,8 @@ class Test_models(TestCase):
         # on rapproche son ope
         o.ope_ost.rapp_id = 1
         o.ope_ost.save()
-        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
+        with transaction.atomic():
+            Ope_titre.objects.get(id=o_id).delete
         # on la recree mais avec une vente comme ca il y a des plus values
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id

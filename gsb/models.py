@@ -80,6 +80,7 @@ class Tiers(models.Model):
     def __unicode__(self):
         return u"%s" % self.nom
 
+    @transaction.atomic
     def fusionne(self, new, ok_titre=False):
         """fusionnne tiers vers new tiers
         @param new: tiers
@@ -154,6 +155,7 @@ class Titre(models.Model):
             else:
                 return None
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne ce titre avec le titre new
         @param new: Titre
@@ -179,6 +181,7 @@ class Titre(models.Model):
         self.delete()
         return nb_change
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         tiers_save = False
         self.alters_data = True
@@ -320,6 +323,7 @@ class Banque(models.Model):
     def __unicode__(self):
         return self.nom
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne cette banque  avec la banque new
         @param new: banque
@@ -355,6 +359,7 @@ class Cat(models.Model):
     def __unicode__(self):
         return u"%s(%s)" % (self.nom, self.type)
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne cette cat  avec la cat new
         @param new: cat
@@ -391,6 +396,7 @@ class Ib(models.Model):
     def __unicode__(self):
         return self.nom
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne cette ib avec l'ib new
         @param new: ib
@@ -428,6 +434,7 @@ class Exercice(models.Model):
     def __unicode__(self):
         return u"%s au %s" % (self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne cet exercice avec l'exercice new
         @param new: exercice
@@ -521,6 +528,7 @@ class Compte(models.Model):
             solde = solde + self.solde_titre(datel, rapp)
         return solde
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne deux compte, verifie avant que c'est le même type
         @param new: Compte
@@ -569,7 +577,7 @@ class Compte(models.Model):
 
     date_rappro.short_description = u"date dernier rapp"
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def achat(self, titre, nombre, prix=1, date=None, frais=0, virement_de=None, cat_frais=None, tiers_frais=None):
         """fonction pour achat de titre:
         @param titre:object titre
@@ -613,7 +621,7 @@ class Compte(models.Model):
         else:
             raise TypeError("pas un titre")
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def vente(self, titre, nombre, prix=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour vente de titre:
         @param titre
@@ -661,7 +669,7 @@ class Compte(models.Model):
         else:
             raise TypeError("pas un titre")
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def revenu(self, titre, montant=1, date=None, frais=0, virement_vers=None, cat_frais=None, tiers_frais=None):
         """fonction pour ost de titre:"""
         if date is None:
@@ -788,6 +796,7 @@ class Ope_titre(models.Model):
             if self.ope_pmv.pointe is True and has_changed(self.ope_pmv, ('titre', 'compte', 'nombre', 'cours')):
                 raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
 
+    @transaction.atomic
     def save(self, shortcut=False, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
         self.nombre = decimal.Decimal(self.nombre)
@@ -927,6 +936,7 @@ class Moyen(models.Model):
     def __unicode__(self):
         return u"%s (%s)" % (self.nom, self.type)
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne ce Moyen avec le Moyen new
         @param new: Moyen
@@ -986,6 +996,7 @@ class Rapp(models.Model):
             solde = req['solde']
         return solde
 
+    @transaction.atomic
     def fusionne(self, new):
         """fusionnne ce Rapp avec le Rapp new
         @param new: Rapp
@@ -1077,7 +1088,7 @@ class Echeance(models.Model):
         return finale
 
     @staticmethod
-    @transaction.commit_on_success
+    @transaction.atomic
     def check(request=None, queryset=None, to=None):
         """
         attention ce n'est pas une vue
@@ -1293,6 +1304,7 @@ class Ope(models.Model):
                     return False
             return True
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
         # lance clean et attrape les erreurs
         try:
