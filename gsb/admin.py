@@ -91,7 +91,6 @@ class Rapprochement_filter(SimpleListFilter):
         provided in the query string and retrievable via
         `self.value()`.
         """
-        #queryset = queryset.filter(date__gt=utils.strpdate("2007-01-01"))
         if self.value() == 'p':
             return queryset.filter(pointe=True)
         if self.value() == 'rapp':
@@ -138,43 +137,11 @@ class Modeladmin_perso(admin.ModelAdmin):
 
     fusionne.short_description = u"Fusion dans la première selectionnée"
 
-    # from here http://djangosnippets.org/snippets/2531/
-    def keepfilter(self, request, result):
-    # Look at the referer for a query string '^.*\?.*$'
-        ref = request.META.get('HTTP_REFERER', '')
-        if ref.find('?') != -1:
-            # We've got a query string, set the session value
-            request.session['filtered'] = ref
-        if '_save' in request.POST:
-            try:
-                if request.session['filtered'] is not None:
-                    result['Location'] = request.session['filtered']
-                    request.session['filtered'] = None
-            except KeyError:
-                pass
-        return result
 
-    def add_view(self, request, *args, **kwargs):
-        result = super(Modeladmin_perso, self).add_view(request, *args, **kwargs)
-        return self.keepfilter(request, result)
-
-    def change_view(self, request, *args, **kwargs):
-        """
-        save the referer of the page to return to the filtered
-        change_list after saving the page
-        """
-        result = super(Modeladmin_perso, self).change_view(request, *args, **kwargs)
-        return self.keepfilter(request, result)
-
-    def delete_view(self, request, object_id, extra_context=None):
-        result = super(Modeladmin_perso, self).delete_view(request, object_id, extra_context)
-        return self.keepfilter(request, result)
-
-
-class formestligne_limit(BaseInlineFormSet):
+class formsetligne_limit(BaseInlineFormSet):
 
     def get_queryset(self):
-        sup = super(formestligne_limit, self).get_queryset()
+        sup = super(formsetligne_limit, self).get_queryset()
         return sup[:10]
 
 
@@ -186,7 +153,7 @@ class liste_perso_inline(admin.TabularInline):
     related = None
     readonly = True
     orderby = None
-    formset = formestligne_limit
+    formset = formsetligne_limit
 
     # afin de pouvoir avoir des inline readonly
     def __init__(self, parent_model, admin_site):

@@ -87,7 +87,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
     tabl_correspondance_ech = {}
     tabl_correspondance_ope = {}
     if efface_table:
-        with transaction.atomic()
+        with transaction.atomic():
             for table in ('ope', 'echeance', 'rapp', 'moyen', 'compte', 'cat', 'exercice', 'ib', 'banque', 'titre', 'tiers', 'Ope_titre'):
                 connection.cursor().execute("delete from gsb_%s;" % table)  # @UndefinedVariable
     xml_tree = et.parse(nomfich)
