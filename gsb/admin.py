@@ -100,7 +100,7 @@ class Rapprochement_filter(SimpleListFilter):
         if self.value() == 'pr':
             return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
-            return queryset.exclude(rapp__isnull=False)
+            return queryset.filter(rapp__isnull=True)
 
 
 class Modeladmin_perso(admin.ModelAdmin):
@@ -344,21 +344,18 @@ from . import model_field
 
 
 class Ope_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les opes"""
     fields = (
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     list_display = ('id', 'pointe', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'num_cheque', 'rapp')
-    list_filter = (
-        'compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
+    list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     save_on_top = True
     save_as = True
-    search_fields = ['tiers__nom']
     ordering = ['-date']
     inlines = [ope_fille_admin]
     raw_id_fields = ('mere',)
