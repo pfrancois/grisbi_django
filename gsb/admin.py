@@ -283,31 +283,32 @@ class Compte_admin(Modeladmin_perso):
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
             if form.is_valid():
-                rapp = form.cleaned_data['rapp_']
-                if not rapp:
-                    rapp_date = form.cleaned_data['date'].year
-                    last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte__in=queryset).distinct()
-                    if last.exists():
-                        last = last.latest('date')
-                        rapp_id = int(last.nom[-2:]) + 1
-                    else:
-                        rapp_id = 1
-                    nomrapp = "%s%s_%02d" % (queryset[0].nom, rapp_date, rapp_id)
-                    rapp = Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
-                count = 0
-                for article in query_ope:
-                    article.pointe = False
-                    article.rapp = rapp
-                    count += 1
-                    article.save()
-                plural = ''
-                if count != 1:
-                    plural = 's'
-                rapp.date = form.cleaned_data['date']
-                rapp.save()
-                self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
-                    queryset[0], count, plural, plural))
-                return HttpResponseRedirect(request.get_full_path())
+                with transaction.atomic():
+                    rapp = form.cleaned_data['rapp_']
+                    if not rapp:
+                        rapp_date = form.cleaned_data['date'].year
+                        last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte__in=queryset).distinct()
+                        if last.exists():
+                            last = last.latest('date')
+                            rapp_id = int(last.nom[-2:]) + 1
+                        else:
+                            rapp_id = 1
+                        nomrapp = "%s%s_%02d" % (queryset[0].nom, rapp_date, rapp_id)
+                        rapp = Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
+                    count = 0
+                    for article in query_ope:
+                        article.pointe = False
+                        article.rapp = rapp
+                        count += 1
+                        article.save()
+                    plural = ''
+                    if count != 1:
+                        plural = 's'
+                    rapp.date = form.cleaned_data['date']
+                    rapp.save()
+                    self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
+                        queryset[0], count, plural, plural))
+                    return HttpResponseRedirect(request.get_full_path())
 
         if not form:
             form = self.RappForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
@@ -352,7 +353,7 @@ class Ope_admin(Modeladmin_perso):
     list_display = ('id', 'pointe', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'num_cheque', 'rapp')
     list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('montant', 'pointe')
+    list_editable = ('montant', 'pointe', 'date')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
     save_on_top = True
     save_as = True
