@@ -18,7 +18,7 @@
     <a href="{% url 'index' %}">{% if titre_long %}{{ titre_long|escape }}{% else %}{{ titre|escape }}{% endif %}</a>
     </h1>{% endblock titre %}
 {% block messages %}{% if messages %}{% render_messages messages %}{% endif %}{% endblock messages %}
-{% block result %}<div>{% if messages %}{{ resultat|escape }}{% endif %}</div>
+{% block result %}<div>{% if resultat %}{{ resultat|escape }}{% endif %}</div>
 {% endblock result %}
 {% block content %}
     <div class="progress">
