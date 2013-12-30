@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import plistlib
 import os
 import datetime
@@ -8,6 +9,7 @@ from django.core.management.base import BaseCommand
 from ... import models
 from ... import utils
 from django.db import transaction
+from django.conf import settings
 
 
 class lecture_plist_exception(Exception):
@@ -23,6 +25,7 @@ def lecture(path):
 
 
 def simplification(obj, objects, level):
+    """fonction recursive de simplification des plist"""
     if isinstance(obj, dict):  # dico
         tab = {}
         if "CF$UID" in obj and len(obj) == 1:
@@ -58,11 +61,12 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        """fonction principale de la commande manage"""
         config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
         lastmaj = config.derniere_import_money_journal
         nb_deja = 0
         nb_ok = 0
-        for fichier in find_files('D:\Dropbox\Applications\Money Journal\log', '*.*'):
+        for fichier in find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log'), '*.*'):
             datemaj = pytz.utc.localize(datetime.datetime.utcfromtimestamp(int(os.path.splitext(os.path.basename(fichier))[0])/1000))
             print datemaj
             reponse = lecture(fichier)
@@ -108,6 +112,7 @@ class Command(BaseCommand):
                 config.save()
 
     def Record(obj, datemaj, type_action):
+        """si c'est une operation"""
         #on recupere les donnees de l'ope
         if obj['type'] == 1:#ajout
             montant = decimal.Decimal(round(float(obj['amount']), 2))
