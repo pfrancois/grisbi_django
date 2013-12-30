@@ -28,6 +28,8 @@ dist
 *.pyo
 *.tmp*
 *.sqlite
+*.sql
+*.db
 settings.py
 *.lnk
 *.db*

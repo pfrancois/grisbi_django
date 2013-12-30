@@ -84,7 +84,8 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def ligne(self):
-        return self.line_num
+        #on fait -1 pour sauter la premiere ligne
+        return self.line_num-1
 
 
 class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
@@ -93,7 +94,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     creation_de_compte = True
     titre = "import csv"
     encoding = "iso-8859-1"
-    complexe = False
     extensions = ('.csv', )
 
     def import_file(self, nomfich):
@@ -268,6 +268,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     ope['date'] = utils.today()
             except utils.FormatException as e:
                 self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
+                raise e
             # auto
             ope['automatique'] = row.automatique
             # date_val
