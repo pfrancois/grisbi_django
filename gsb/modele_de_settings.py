@@ -8,14 +8,13 @@ decimal.getcontext().rouding = decimal.ROUND_HALF_UP
 decimal.getcontext().precision = 3
 # chemin du projet
 PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = PROJECT_PATH
 
 DEFAULT_CHARSET = 'utf-8'
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 DJANGO_EXTENSION = True
 # TEMPLATE_STRING_IF_INVALID="INVALID"
-
-DEBUG_PROPAGATE_EXCEPTIONS = False
 
 #
 # config gsb
@@ -37,27 +36,27 @@ UTILISE_PC = False
 __TAUX_VERSEMENT_legal = 0.08 * 0.97
 TAUX_VERSEMENT = decimal.Decimal(str(1 / (1 - __TAUX_VERSEMENT_legal) * __TAUX_VERSEMENT_legal))
 # id et cat des operation speciales
-ID_CAT_COTISATION = 256
-ID_TIERS_COTISATION = 55
+ID_CAT_COTISATION = 2
+ID_TIERS_COTISATION = 1
 # id des operations sur titre elle doit s'appeler 'Opération sur titre'
-ID_CAT_OST = 2
+ID_CAT_OST = 3
 # elle doit s'appeler 'Revenus de placement:Plus-values'
-ID_CAT_PMV = 3
+ID_CAT_PMV = 4
 # moyen par defaut pour les ope de recette
-MD_CREDIT = 6
+MD_CREDIT = 1
 # moyen par defaut pour les ope de depenses
-MD_DEBIT = 7
-REV_PLAC = 47
-ID_CAT_VIR = 4
-
-
-#
+MD_DEBIT = 2
+REV_PLAC = 5
+ID_CAT_VIR = 1
+DIR_DROPBOX=D:\Dropbox
+##################
+ATOMIC_REQUESTS = True
+WSGI_APPLICATION = "gsb.wsgi.application"
 ADMINS = (
     # ('toto', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
-WSGI_APPLICATION = "gsb.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -86,11 +85,7 @@ USE_TZ = True
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'fr-FR'
-THOUSAND_SEPARATOR = " "
-DECIMAL_SEPARATOR = ','
 FIRST_DAY_OF_WEEK = 1
-MONTH_DAY_FORMAT = 'l j F'
-NUMBER_GROUPING = 3
 USE_THOUSAND_SEPARATOR = True
 
 SITE_ID = 1
@@ -144,7 +139,6 @@ except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
     nomfich = os.path.join(PROJECT_PATH, 'secret_key.py')
     from random import choice
-
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
@@ -158,13 +152,20 @@ TEMPLATE_LOADERS = (
     #    'django.template.loaders.eggs.Loader',
 )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+if DJANGO_TOOLBAR:
+    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',
+                            'django.contrib.sessions.middleware.SessionMiddleware',
+                            'django.middleware.common.CommonMiddleware',)
+else:
+    MIDDLEWARE_CLASSES = ('django.contrib.sessions.middleware.SessionMiddleware',
+                            'django.middleware.common.CommonMiddleware',)
+
+MIDDLEWARE_CLASSES += (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.transaction.TransactionMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -190,6 +191,60 @@ INSTALLED_APPS = (
     'django_extensions',
     'south'
 )
+if DJANGO_TOOLBAR:
+    DEBUG_TOOLBAR_CONFIG = {
+        # If set to True (default), the debug toolbar will show an intermediate
+        # page upon redirect so you can view any debug information prior to
+        # redirecting. This page will provide a link to the redirect destination
+        # you can follow when ready. If set to False, redirects will proceed as
+        # normal.
+        'INTERCEPT_REDIRECTS': False,
+
+        # If not set or set to None, the debug_toolbar middleware will use its
+        # built-in show_toolbar method for determining whether the toolbar should
+        # show or not. The default checks are that DEBUG must be set to True and
+        # the IP of the request must be in INTERNAL_IPS. You can provide your own
+        # method for displaying the toolbar which contains your custom logic. This
+        # method should return True or False.
+        'SHOW_TOOLBAR_CALLBACK': None,
+
+        # An array of custom signals that might be in your project, defined as the
+        # python path to the signal.
+        'EXTRA_SIGNALS': [],
+
+        # If set to True (the default) then code in Django itself won't be shown in
+        # SQL stacktraces.
+        'HIDE_DJANGO_SQL': True,
+
+        # If set to True (the default) then a template's context will be included
+        # with it in the Template debug panel. Turning this off is useful when you
+        # have large template contexts, or you have template contexts with lazy
+        # datastructures that you don't want to be evaluated.
+        'SHOW_TEMPLATE_CONTEXT': True,
+
+        # If set, this will be the tag to which debug_toolbar will attach the debug
+        # toolbar. Defaults to 'body'.
+        'TAG': 'body',
+    }
+    DEBUG_TOOLBAR_PANELS = ('debug_toolbar.panels.version.VersionDebugPanel',
+                            'debug_toolbar.panels.timer.TimerDebugPanel',
+                            'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+                            'debug_toolbar.panels.headers.HeaderDebugPanel',
+                            'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+                            'debug_toolbar.panels.template.TemplateDebugPanel',
+                            'debug_toolbar.panels.sql.SQLDebugPanel',
+                            'debug_toolbar.panels.signals.SignalDebugPanel',
+                            'debug_toolbar.panels.logger.LoggingPanel',
+                            'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+                            'inspector_panel.panels.inspector.InspectorPanel'
+                           )
+    INSTALLED_APPS += ('debug_toolbar',
+                        'template_timings_panel',
+                        'inspector_panel'
+                        )
+    #https://github.com/santiagobasulto/debug-inspector-panel
+    #https://github.com/orf/django-debug-toolbar-template-timings
+    IGNORED_TEMPLATES = ["debug_toolbar/*"]
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
