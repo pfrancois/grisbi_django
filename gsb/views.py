@@ -164,17 +164,7 @@ class Cpt_detail_view(Mytemplateview):
             else:
                 if not self.all:
                     q = q.filter(rapp__isnull=True)
-            # nb ope rapp
-            if self.all:
-                nb_ope_rapp = 0
-            else:
-                nb_ope_rapp = 0
-                if self.all:
-                    nb_ope_rapp = 0
-                if self.rapp:
-                    nb_ope_rapp = 0
-                if not self.all and not self.rapp:
-                    nb_ope_rapp = Ope.objects.filter(compte=compte, rapp__isnull=False).count()
+
             # gestion du tri
             try:
                 sort = request.GET.get('sort')  # il y a un sort dans le get
@@ -206,9 +196,11 @@ class Cpt_detail_view(Mytemplateview):
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
             # gestion des ope anciennes
-            if not (self.all or self.rapp):
-                q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
+            if not (self.all or self.rapp) and not settings.ANCIEN:
+                    q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
             opes = q.select_related('tiers', 'cat', 'rapp')
+            # nb ope rapp
+            nb_ope_rapp = q.count()
             context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
 
         else:
@@ -675,7 +667,7 @@ def ope_titre_achat(request, cpt_id):
                                                                           titre.nom,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date'],
-                                                                          form.cleaned_data['cours'] * form.cleaned_data['nombre']))
+                                                                          round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2)))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -784,11 +776,12 @@ def ope_titre_vente(request, cpt_id):
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
                          virement_vers=virement)
-            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s" % (form.cleaned_data['nombre'],
+            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s soit %S EUR" % (form.cleaned_data['nombre'],
                                                                           form.cleaned_data['titre'],
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
-                                                                          form.cleaned_data['date']))
+                                                                          form.cleaned_data['date']),
+                                                                          round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -871,13 +864,14 @@ class ajout_ope_date_form(gsb_forms.Baseform):
     date = forms.DateField()
 
 
+@transaction.atomic
 def ajout_ope_titre_bulk(request, cpt_id):
     """view qui s'occupe d'achat ou de vente pour l'ensemble des titres d'un compte"""
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
-    titre_compte = compte.titre.all().distinct().order_by('-nom')
+    titre_compte = compte.titre.all().distinct().order_by('nom')
     titres_forms = []
     if request.method == 'POST':
         i = 0
@@ -895,7 +889,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                         nombre=form.cleaned_data['nombre'],
                                         prix=form.cleaned_data['cours'],
                                         date=date_ope,
-                                        frais=form.cleaned_data['frais'])
+                                        frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
                     messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
@@ -908,13 +902,24 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                             nombre=form.cleaned_data['nombre']*-1,
                                             prix=form.cleaned_data['cours'],
                                             date=date_ope,
-                                            frais=form.cleaned_data['frais'])
+                                            frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
                         messages.info(request, u"nouvel vente de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
                                                                                               date_ope,
                                                                                               round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
                                   )
+                    else:
+                        if not nb and form.cleaned_data['cours']:
+                            titre = form.cleaned_data['titre']
+                            if not Cours.objects.filter(titre=titre, date=date_ope).exists():
+                                titre.cours_set.create(valeur=form.cleaned_data['cours'], date=date_ope)
+                                messages.success(request, u"cours crée")
+                            else:
+                                cours = titre.cours_set.get(date=date_ope)
+                                cours.valeur = form.cleaned_data['cours']
+                                cours.save()
+                                messages.success(request, u"cours maj")
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         i = 0
