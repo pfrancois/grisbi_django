@@ -52,7 +52,7 @@ class Date_perso_filter(DateFieldListFilter):
             }),
             ('Les trois derniers mois', {
                 self.lookup_kwarg_since: str(troismois),
-                self.lookup_kwarg_until: str(today.replace(day=7)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
+                self.lookup_kwarg_until: str(today.replace(day=15)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
@@ -154,13 +154,6 @@ class liste_perso_inline(admin.TabularInline):
     readonly = True
     orderby = None
     formset = formsetligne_limit
-
-    # afin de pouvoir avoir des inline readonly
-    def __init__(self, parent_model, admin_site):
-        if self.readonly:
-            self.readonly_fields = self.fields
-            self.can_delete = False
-        super(liste_perso_inline, self).__init__(parent_model, admin_site)
 
     def queryset(self, request):
         qs = super(liste_perso_inline, self).queryset(request)
@@ -350,7 +343,7 @@ class Ope_admin(Modeladmin_perso):
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'pointe', 'compte', 'date', 'montant', 'tiers', 'moyen', 'cat', 'num_cheque', 'rapp')
+    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'moyen', 'cat', 'num_cheque', 'rapp')
     list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
@@ -555,8 +548,8 @@ class Banque_admin(Modeladmin_perso):
 
 class ope_rapp_admin(liste_perso_inline):
     model = Ope
-    fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
-    readonly_fields = ('compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+    fields = ('rapp', "pk", "compte", 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+    readonly_fields = ('rapp', 'pk', 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
     fk_name = 'rapp'
     related = ('compte', 'tiers', 'moyen', 'cat')
     orderby = ('-date',)
@@ -564,15 +557,14 @@ class ope_rapp_admin(liste_perso_inline):
 
 
 class Rapp_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
     inlines = [ope_rapp_admin]
+#TODO faire que ca marche
 
 
 class Exo_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')
