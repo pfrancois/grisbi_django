@@ -48,7 +48,7 @@ MD_CREDIT = 1
 MD_DEBIT = 2
 REV_PLAC = 5
 ID_CAT_VIR = 1
-DIR_DROPBOX=D:\Dropbox
+DIR_DROPBOX = "D:\Dropbox"
 ##################
 ATOMIC_REQUESTS = True
 WSGI_APPLICATION = "gsb.wsgi.application"

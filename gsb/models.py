@@ -894,8 +894,7 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, abs(self.nombre), self.titre, self.cours,
-                                                            settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
 

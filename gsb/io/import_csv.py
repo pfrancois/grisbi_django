@@ -170,7 +170,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                         vir.notes = ope['notes'].split('>R')[0]
                     #les rapp des jumelle
                     if "rapp" in ope.keys():
-                        vir.origine.rapp = models.Rapp.get(id=ope['rapp_id'])
+                        vir.origine.rapp = models.Rapp.objects.get(id=ope['rapp_id'])
                     if ">R" in ope['notes']:
                         rapp = ope['notes'].split('>R')[1]
                         vir.notes = ope['notes'].split('>R')[0]

@@ -773,7 +773,7 @@ def ope_titre_vente(request, cpt_id):
                          prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'],
                          virement_vers=virement)
-            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s soit %S EUR" % (form.cleaned_data['nombre'],
+            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                           form.cleaned_data['titre'],
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
