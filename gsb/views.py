@@ -141,10 +141,7 @@ class Cpt_detail_view(Mytemplateview):
         @param request:
         @param cpt_id: id du compte demande
         """
-        try:
-            compte = Compte.objects.get(pk=cpt_id)
-        except Compte.DoesNotExist:
-            raise http.Http404('pas de compte correspondant.')
+        compte = get_object_or_404(Compte, pk=cpt_id)
         self.type = "nrapp"
         if self.all:
             self.type = "all"

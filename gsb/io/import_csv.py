@@ -14,9 +14,11 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 
 
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
+    champs = None #c'est a dire qu'il prend la premiere ligne
 
     @property
     def cat(self):
+        """obligatoire"""
         if self.jumelle:
             return 'Virement'
         else:
@@ -24,10 +26,12 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def cpt(self):
+        """obligatoire"""
         return utils.to_unicode(self.row['cpt'], 'Caisse')
 
     @property
     def date(self):
+        """obligatoire au format DD/MM/YYYY"""
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
@@ -35,31 +39,56 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def ib(self):
-        return utils.to_unicode(self.row['projet'], None)
+        """facultatif"""
+        if 'projet' in self.row:
+            return utils.to_unicode(self.row['projet'], None)
+        else:
+            return None
 
     @property
     def montant(self):
+        """obligatoire format anglais"""
         return utils.to_decimal(self.row['montant'])
 
     @property
     def notes(self):
-        return self.row['notes']
+        """facultatif"""
+        if 'notes' in self.row:
+            return utils.to_unicode(self.row['notes'], "")
+        else:
+            return ''
 
     @property
     def num_cheque(self):
-        return utils.to_unicode(self.row['numchq'], "")
+        """facultatif"""
+        if 'numchq' in self.row:
+            return utils.to_unicode(self.row['numchq'], "")
+        else:
+            return ""
 
     @property
     def pointe(self):
-        return utils.to_bool(self.row['p'])
+        """facultatif"""
+        if 'p' in self.row:
+            return utils.to_bool(self.row['p'])
+        else:
+            return False
 
     @property
     def rapp(self):
-        return utils.to_unicode(self.row['r'], '')
+        """facultatif"""
+        if 'p' in self.row:
+            return utils.to_unicode(self.row['r'], None)
+        else:
+            return ""
 
     @property
     def tiers(self):
-        return utils.to_unicode(self.row['tiers'], "tiers inconnu")
+        """facultatif"""
+        if 'tiers' in self.row:
+            return utils.to_unicode(self.row['tiers'], "tiers inconnu")
+        else:
+            return "tiers inconnu"
 
     @property
     def monnaie(self):
@@ -73,7 +102,11 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def moyen(self):
-        return utils.to_unicode(self.row['moyen'], None)
+        """facultatif"""
+        if 'moyen' in self.row:
+            return utils.to_unicode(self.row['moyen'], None)
+        else:
+            return None
 
     @property
     def ope_titre(self):
@@ -185,28 +218,16 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 messages.info(self.request, u"Ligne numero %x saute" % row.ligne)
                 continue
             if not verif_format:  # on verifie a la premiere ligne
-                try:
-                    a = row.id
-                    a = row.automatique
-                    a = row.cat
-                    a = row.cpt
-                    a = row.date
-                    if settings.UTILISE_EXERCICES is True:
-                        a = row.exercice
-                    a = row.ib
-                    a = row.ligne
-                    a = row.monnaie        # on gere le nombre de truc annex crée
-                    a = row.moyen
-                    a = row.montant
-                    a = row.notes
-                    a = row.num_cheque
-                    a = row.piece_comptable
-                    a = row.rapp
-                    a = row.tiers
-                    if a:
-                        pass
-                except KeyError as excp:
-                    raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
+                liste_colonnes = ['id', 'automatique', 'cat', 'cpt', 'date', "ib", "ligne", "moyen", "montant", "notes", "num_cheque", "piece_comptable", "rapp", "tiers"]
+                if settings.UTILISE_EXERCICES is True:
+                    liste_colonnes.append('exercice')
+                colonnes_oublies = []
+                for attr in liste_colonnes:
+                    if not hasattr(row, attr):
+                        colonnes_oublies.append(attr)
+                print colonnes_oublies, len(colonnes_oublies)
+                if len(colonnes_oublies) > 0:
+                    raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
                 else:
                     verif_format = True
             ope = dict()

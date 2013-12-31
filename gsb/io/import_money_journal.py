@@ -58,7 +58,7 @@ class csv_money_journal_reader(import_csv.Csv_unicode_reader_ope_sans_jumelle_et
     def moyen(self):
         if self.montant < 0:
             if self.cpt == "Sg":
-                return u"visa"
+                return u"carte visa"
             else:
                 return u"depense"
         else:
