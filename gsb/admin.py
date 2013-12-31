@@ -23,6 +23,7 @@ import gsb.utils as utils
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+from collections import OrderedDict
 
 
 #-------------ici les classes generiques------
@@ -343,11 +344,11 @@ class Ope_admin(Modeladmin_perso):
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'moyen', 'cat', 'num_cheque', 'rapp')
+    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'moyen', 'cat', 'num_cheque', 'rapp', "mere")
     list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
-    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul']
+    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
     save_on_top = True
     save_as = True
     ordering = ['-date']
@@ -360,7 +361,7 @@ class Ope_admin(Modeladmin_perso):
 
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
-        return qs.select_related('compte', 'rapp', 'moyen', 'tiers', 'cat')
+        return qs.select_related('compte', 'rapp', 'moyen', 'tiers', 'cat', 'mere')
 
     def is_mere(self, obj):
         if obj.is_mere:
@@ -454,6 +455,67 @@ class Ope_admin(Modeladmin_perso):
         if obj.rapp is not None:
             return False
         return True
+
+    @transaction.atomic
+    def cree_operation_mere(self, request, queryset):
+        #on verifie que les operations ont la meme date et ne sont pas deja des operations filles ni des operations mere.
+        montant = 0
+        mere = None
+        for ope in queryset:
+            montant = ope.montant + montant
+            if ope.mere is not None:
+                if mere is None:
+                    mere = ope.mere
+                else:
+                    messages.error(request, u"les opé ont plusieurs mère")
+                    return
+            if ope.is_mere:
+                messages.error(request, u"l'ope %s est déja une ope mère" % ope.id)
+                return
+            if ope.rapp:
+                messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+                return
+        date_ope = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('date', flat=True)))
+        if len(date_ope) > 1:
+            messages.error(request, "toutes les opérations doivent avoir la meme date")
+            return
+        else:
+            date_ope = date_ope[0]
+        tiers_id = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('tiers', flat=True)))[0]
+        compte_id = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('compte', flat=True)))[0]
+        #ok c'est bon on peut commencer a creer
+        if mere is None:
+            mere = Ope.objects.create(date=date_ope,
+                                        montant=montant,
+                                        tiers_id=tiers_id,
+                                        cat=Cat.objects.get(nom=u"Opération Ventilée"),
+                                        moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
+                                        compte_id=compte_id
+                                    )
+            messages.success(request, u"ope mere crée '%s' " % mere)
+        else:
+            messages.info(request, u"on va utiliser cette operation mere '%s' " % mere)
+        for ope in queryset:
+            ope.mere = mere
+            ope.save()
+            messages.success(request, u"ope '%s' mise à jour" % ope)
+
+    cree_operation_mere.short_description = u"cree une opération mère pour les opérations selectionnées"
+
+    @transaction.atomic
+    def defilliser(self, request, queryset):
+        if len(list(OrderedDict.fromkeys(queryset.order_by('id').values_list('mere', flat=True)))) > 1:
+            messages.error(request, u"les opé ont plusieurs mère")
+            return
+        for ope in queryset:
+            if ope.rapp:
+                messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+                return
+            ope.mere = None
+            ope.save()
+            messages.success(request, u"ope '%s' mise à jour" % ope)
+
+    defilliser.short_description = u"rompt la relation entre les filles selectionné et la mère"
 
 
 class Cours_admin(Modeladmin_perso):
