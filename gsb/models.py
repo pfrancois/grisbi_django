@@ -1155,7 +1155,6 @@ class Echeance(models.Model):
 
 
 class Ope(models.Model):
-
     """operation"""
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=utils.today, db_index=True)
@@ -1171,7 +1170,7 @@ class Ope(models.Model):
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"projet")
     jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None, editable=False, on_delete=models.CASCADE)
-    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.PROTECT, verbose_name=u'Mere')
+    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.CASCADE, verbose_name=u'Mere')
     automatique = models.BooleanField(default=False, help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
     lastupdate = models_gsb.ModificationDateTimeField()
@@ -1328,7 +1327,9 @@ def ope_fille(sender, **kwargs):
         return
     self = kwargs['instance']
     if self.is_fille:
-        self.mere.save()
+        if self.mere.tot_fille != self.mere.montant:
+            self.mere.montant == self.mere.tot_fille
+            self.mere.save()
 
 
 @receiver(pre_delete, sender=Ope, weak=False)
