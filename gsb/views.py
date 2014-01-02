@@ -10,11 +10,9 @@ from .import forms as gsb_forms
 from django import forms
 from django.db import models
 import decimal
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
 from django.views import generic
-from django.utils.decorators import method_decorator
 from django.db import IntegrityError
 import gsb.utils
 from django.db import transaction
@@ -22,62 +20,25 @@ from django.db import transaction
 
 class Mytemplateview(generic.TemplateView):
     template_name = 'gsb/options.djhtm'
-    titre = None
+    titre = ""
 
     def get_context_data(self, **kwargs):
-        return {
-            'titre': self.titre
-        }
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        """on a besoin pour le method decorator"""
         Echeance.verif(self.request)
-        return super(Mytemplateview, self).dispatch(*args, **kwargs)
+        context = super(Mytemplateview, self).get_context_data(**kwargs)
+        context.update({'titre': self.titre})
+        return context
 
 
 class Myformview(generic.FormView):
     form_class = None
     template_name = None
-    titre = None
+    titre = ""
 
-    def form_valid(self, form):
-        """
-        This is what's called when the form is valid.
-        """
-        return super(Myformview, self).form_valid(form)
-
-    def form_invalid(self, form):
-        """
-        This is what's called when the form is invalid.
-        """
-        return self.render_to_response(self.get_context_data(form=form))
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        """on a besoin pour le method decorator"""
-        return super(Myformview, self).dispatch(*args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(Myformview, self).get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        Echeance.verif(self.request)
+        context = super(Myformview, self).get_context_data(**kwargs)
         context.update({'titre': self.titre})
         return context
-
-
-class Myredirectview(generic.RedirectView):
-    call = None
-
-    def post(self, request, *args, **kwargs):
-        pass
-
-    @method_decorator(login_required)
-    def get(self, request, *args, **kwargs):
-        return super(Myredirectview, self).get(self, request, *args, **kwargs)
 
 
 class Index_view(Mytemplateview):
@@ -116,7 +77,8 @@ class Index_view(Mytemplateview):
         return super(Index_view, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return {
+        context = super(Index_view, self).get_context_data(**kwargs)
+        context.update({
             'titre': 'liste des comptes',
             'liste_cpt_bq': self.bqe,
             'liste_cpt_pl': self.pla,
@@ -125,7 +87,8 @@ class Index_view(Mytemplateview):
             'total': self.total_bq + self.total_pla,
             'nb_clos': self.nb_clos,
             'clos_caches': not settings.AFFICHE_CLOT
-        }
+        })
+        return context
 
 
 class Cpt_detail_view(Mytemplateview):
@@ -195,10 +158,11 @@ class Cpt_detail_view(Mytemplateview):
             # gestion des ope anciennes
             if not (self.all or self.rapp) and not settings.ANCIEN:
                     q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
+            q = q.filter(date__gte=gsb.utils.today().replace(year=2005, month=1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             # nb ope rapp
             nb_ope_rapp = q.count()
-            context = self.get_context_data(compte, opes, nb_ope_rapp, sort_t)
+            context = self.get_context_data(compte=compte, opes=opes, nb_ope_rapp=nb_ope_rapp, sort=sort_t)
 
         else:
             #---------pour le compte titre
@@ -225,7 +189,7 @@ class Cpt_detail_view(Mytemplateview):
                          'id': t.id,
                          't': t
                         })
-            context = self.get_context_data(compte_titre, titres)
+            context = self.get_context_data(compte=compte_titre, opes=titres)
 
         return self.render_to_response(context)
 
@@ -240,63 +204,61 @@ class Cpt_detail_view(Mytemplateview):
         except (EmptyPage, InvalidPage):
             return paginator.page(paginator.num_pages)
 
-    def get_context_data(self, *args):
+    def get_context_data(self, compte=None, opes=None, nb_ope_rapp=None, sort=None):
+        context = super(Cpt_detail_view, self).get_context_data()
         type_long = {
             "nrapp": u"Opérations non rapprochées",
             "rapp": u"Opérations rapprochées",
             "all": u"Ensemble des opérations"
         }
-        c = args[0]
-        solde_espece = c.solde(espece=True)
-        solde_r_esp = c.solde(rapp=True, espece=True)
+        solde_espece = compte.solde(espece=True)
+        solde_r_esp = compte.solde(rapp=True, espece=True)
         try:
-            solde_p_pos = Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
+            solde_p_pos = Ope.non_meres().filter(compte__id__exact=compte.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
             solde_p_pos = 0
         if solde_p_pos is None:
             solde_p_pos = 0
-
         try:
-            solde_p_neg = Ope.non_meres().filter(compte__id__exact=c.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
+            solde_p_neg = Ope.non_meres().filter(compte__id__exact=compte.id).filter(pointe=True).filter(montant__lte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
             solde_p_neg = 0
         if solde_p_neg is None:
             solde_p_neg = 0
-
         if self.espece:
             #gestion pagination
             if self.all:
-                list_opes = self.cpt_espece_pagination(args[1])
+                list_opes = self.cpt_espece_pagination(opes)
             else:
-                list_opes = args[1]
-            context = {'compte': c,
+                list_opes = opes
+            context.update({'compte': compte,
                        'list_opes': list_opes,
-                       'nbrapp': args[2],
-                       'titre': c.nom,
+                       'nbrapp': nb_ope_rapp,
+                       'titre': compte.nom,
                        'solde': solde_espece,
-                       "date_r": c.date_rappro(),
+                       "date_r": compte.date_rappro(),
                        "solde_r": solde_r_esp,
                        "solde_p_pos": solde_p_pos,
                        "solde_p_neg": solde_p_neg,
                        "solde_pr": solde_r_esp + solde_p_pos + solde_p_neg,
-                       "sort_tab": args[3],
+                       "sort_tab": sort,
                        "type": self.type,
-                       "titre_long": "%s (%s)" % (c.nom, type_long[self.type]),
-                       "nb": args[1].count()
-            }
+                       "titre_long": "%s (%s)" % (compte.nom, type_long[self.type]),
+                       "nb": opes.count()
+            })
         else:
-            context = {
-                'compte': c,
-                'titre': c.nom,
-                'solde': c.solde(),
-                'titres': args[1],
+            context.update({
+                'compte': compte,
+                'titre': compte.nom,
+                'solde': compte.solde(),
+                'titres': opes,
                 'especes': solde_espece
-            }
+            })
 
         return context
 
 
-@login_required
+@transaction.atomic
 def ope_detail(request, pk):
     """
     view, une seule operation
@@ -366,7 +328,7 @@ def ope_detail(request, pk):
         )
 
 
-@login_required
+@transaction.atomic
 def ope_new(request, cpt_id=None):
     """
     creation d'une nouvelle operation
@@ -411,7 +373,7 @@ def ope_new(request, cpt_id=None):
         )
 
 
-@login_required
+@transaction.atomic
 def vir_new(request, cpt_id=None):
     cpt_par_def = Compte.objects.filter(id=settings.ID_CPT_M)
     if cpt_par_def.exists():
@@ -457,7 +419,7 @@ def vir_new(request, cpt_id=None):
         )
 
 
-@login_required
+@transaction.atomic
 def ope_delete(request, pk):
     ope = get_object_or_404(Ope.objects.select_related(), pk=pk)
     if request.method == 'POST':
@@ -482,7 +444,7 @@ def ope_delete(request, pk):
     return http.HttpResponseRedirect(ope.compte.get_absolute_url())
 
 
-@login_required
+@transaction.atomic
 def maj_cours(request, pk):
     titre = get_object_or_404(Titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
@@ -510,7 +472,7 @@ def maj_cours(request, pk):
     return render(request, "gsb/maj_cours.djhtm", {"titre": u"maj du titre '%s'" % titre.nom, "form": form, "url": url})
 
 
-@login_required
+@transaction.atomic
 def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
     """view qui affiche la liste des operations relative a un titre (titre_id) d'un compte titre (cpt_id)
     si rapp affiche uniquement les rapp
@@ -558,7 +520,7 @@ def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
                 )
 
 
-@login_required
+@transaction.atomic
 def ope_titre_detail(request, pk):
     """
     view, une seule operation mais pour les comptes titres
@@ -590,7 +552,7 @@ def ope_titre_detail(request, pk):
     )
 
 
-@login_required
+@transaction.atomic
 def ope_titre_delete(request, pk):
     ope = get_object_or_404(Ope_titre.objects.select_related(), pk=pk)
     if request.method == 'POST':
@@ -619,7 +581,7 @@ def ope_titre_delete(request, pk):
         return http.HttpResponseRedirect(ope.get_absolute_url())
 
 
-@login_required
+@transaction.atomic
 def ope_titre_achat(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
@@ -681,7 +643,7 @@ def ope_titre_achat(request, cpt_id):
     )
 
 
-@login_required
+@transaction.atomic
 def dividende(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
@@ -739,7 +701,7 @@ def dividende(request, cpt_id):
     )
 
 
-@login_required
+@transaction.atomic
 def ope_titre_vente(request, cpt_id):
     compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
     if compte.type != 't':
@@ -795,7 +757,6 @@ def ope_titre_vente(request, cpt_id):
     )
 
 
-@login_required
 def search_opes(request):
     """recherche des operations"""
     if request.method == 'POST':
