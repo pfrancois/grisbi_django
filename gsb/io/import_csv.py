@@ -79,7 +79,7 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
     @property
     def rapp(self):
         """facultatif"""
-        if 'p' in self.row:
+        if 'r' in self.row:
             return utils.to_unicode(self.row['r'], None)
         else:
             return ""
