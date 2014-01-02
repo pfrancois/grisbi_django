@@ -328,7 +328,7 @@ class Compte_admin(Modeladmin_perso):
 
 class ope_fille_admin(liste_perso_inline):
     model = Ope
-    fields = ('montant', 'cat', 'ib', 'notes')
+    fields = ('id', 'montant', 'cat', 'ib', 'notes', 'mere')
     fk_name = 'mere'
     related = ('cat', 'ib')
     orderby = ('ib',)
@@ -351,8 +351,8 @@ class Ope_admin(Modeladmin_perso):
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
     save_on_top = True
     save_as = True
-    ordering = ['-date']
-    inlines = [ope_fille_admin]
+    ordering = ['-date', 'id']
+    #inlines = [ope_fille_admin]
     raw_id_fields = ('mere',)
     formfield_overrides = {
         model_field.CurField: {'widget': TextInput(attrs={'size': '8'})},
@@ -504,16 +504,34 @@ class Ope_admin(Modeladmin_perso):
 
     @transaction.atomic
     def defilliser(self, request, queryset):
-        if len(list(OrderedDict.fromkeys(queryset.order_by('id').values_list('mere', flat=True)))) > 1:
-            messages.error(request, u"les opé ont plusieurs mère")
-            return
-        for ope in queryset:
-            if ope.rapp:
-                messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+        if queryset.count() > 1:
+            if queryset[0].is_fille:
+                if len(list(OrderedDict.fromkeys(queryset.order_by('id').values_list('mere', flat=True)))) > 1:
+                    messages.error(request, u"les opé ont plusieurs mère")
+                    return
+                for ope in queryset:
+                    if ope.rapp:
+                        messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+                        return
+                    ope.mere = None
+                    ope.save()
+                    messages.success(request, u"ope '%s' mise à jour" % ope)
+            else:
+                messages.error(request, u"vous ne pouvez selectionnner que plusieurs filles")
                 return
-            ope.mere = None
-            ope.save()
-            messages.success(request, u"ope '%s' mise à jour" % ope)
+        else:
+            ope = queryset[0]
+            if ope.is_mere:
+                for o in ope.filles_set.all():
+                    o.mere = None
+                    o.save()
+                    messages.success(request, u"ope '%s' mise à jour" % o)
+                ope.delete()
+                messages.success(request, u"ope mere effacee")
+
+            else:
+                messages.error(request, u"si vous en selectionner une seul, vous ne pouvez selection qu'une mere")
+                return
 
     defilliser.short_description = u"rompt la relation entre les filles selectionné et la mère"
 
