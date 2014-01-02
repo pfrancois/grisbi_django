@@ -16,6 +16,7 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
     """seuls cat cpt date montant obligatoire, mais moyen et tiers sont fortement recommande"""
     champs = None #c'est a dire qu'il prend la premiere ligne
+    champ_test = 'cat'
 
     @property
     def cat(self):
@@ -119,7 +120,7 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
     @property
     def ligne(self):
         #on fait -1 pour sauter la premiere ligne
-        return self.line_num-1
+        return self.line_num
 
 
 class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
@@ -155,20 +156,17 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         for ope in self.opes.create_item:
             virement = ope.pop('virement', False)
             ope_titre = ope.pop('ope_titre', False)
+            ligne = ope.pop('ligne')
             #gestions des cas speciaux
             if virement or ope_titre:
                 if virement:
-                    # on cree deux operation
                     vir = models.Virement.create(compte_origine=models.Compte.objects.get(id=ope['compte_id']),
-                                            compte_dest=models.Compte.objects.get(id=ope['dest_id']),
-                                            montant=ope['montant']*-1,  # -1 car la premiere ope est negative alors que le virement est positif
-                                            date=ope['date'])
+                        compte_dest=models.Compte.objects.get(id=ope['dest_id']),
+                        montant=ope['montant'] * -1,  # -1 car la premiere ope est negative alors que le virement est positif
+                        date=ope['date'])
                     # on definit le detail des virement
                     vir.origine.pointe = ope['pointe']
                     vir.notes = ope['notes']
-                    if ">P" in ope['notes']:
-                        vir.dest.pointe = True
-                        vir.notes = ope['notes'].split('>R')[0]
                     #les rapp des jumelle
                     if "rapp" in ope.keys():
                         vir.origine.rapp = models.Rapp.objects.get(id=ope['rapp_id'])
@@ -178,32 +176,30 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                         vir.dest.rapp = models.Rapp.objects.get_or_create(nom=rapp, defaults={'nom': rapp})[0]
                     vir.save()
                     self.opes.nb_created += 1
+                    messages.success(self.request, u"virement ope: %s ligne %s" % (vir.origine, ligne))
+                    messages.success(self.request, u"virement ope: %s ligne %s" % (vir.dest, ligne))
                 if ope_titre:
                     compte = models.Compte.objects.get(id=ope['compte_id'])
                     nombre = utils.to_decimal(ope['notes'].split('@')[0])
                     cours = utils.to_decimal(ope['notes'].split('@')[1])
                     if nombre == 0 and cours == 0:
-                        messages.warning(self.request, u'attention, fausse opération sur titre ligne %s' % ope['ligne'])
-                        ope.pop('ligne')
-                        models.Ope.objects.create(**ope)
+                        messages.warning(self.request, u'attention, fausse opération sur titre ligne %s' % ligne)
                         continue
                     if compte.type != 't':
-                        compte.type = 't'
-                        compte.save()
+                        messages.warning(self.request, u"le compte '%s' n'est pas un compte titre" % compte)
+                        continue
                     id_titre = self.titres.goc(nom=models.Tiers.objects.get(id=ope['tiers_id']).nom)
                     titre = models.Titre.objects.get(id=id_titre)
-
                     if nombre > 0:
-                        compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
-                        self.opes.nb_created += 1
+                        ope_gsb = compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                        messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
                     else:
-                        compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
-                        self.opes.nb_created += 2
+                        ope_gsb = compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
+                        messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
+                        messages.success(self.request, u"ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
             else:
-                ope.pop('ligne')
-                models.Ope.objects.create(**ope)
-        if self.opes.nb_created > 0:
-            messages.info(self.request, u"%s opés crées" % (self.opes.nb_created))
+                ope_gsb = models.Ope.objects.create(**ope)
+                messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
         # on gere le nombre de truc annex crée
         for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
             if obj.nb_created > 0:
@@ -215,7 +211,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         verif_format = False
         retour = False
         for row in fich:
-            if row.ligne < 1:
+            if not row.champ_test in row.row:
+                messages.info(self.request, u'ligne %s %s sauté car pas de champ %s' % (row.row, row.line_num, row.champ_test))
                 continue
             if not verif_format:  # on verifie a la premiere ligne
                 liste_colonnes = ['id', 'automatique', 'cat', 'cpt', 'date', "ib", "ligne", "moyen", "montant", "notes", "num_cheque", "piece_comptable", "rapp", "tiers"]
@@ -242,12 +239,20 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             except import_base.ImportException:
                 self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.ligne))
                 continue
-            # virement (cat, moyen)
             try:
                 ope['cat_id'] = self.cats.goc(row.cat)  # ca marche meme si virement
             except import_base.ImportException:
                 self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.ligne))
                 continue
+            # date
+            try:
+                ope['date'] = row.date
+                if ope['date'] is None:
+                    ope['date'] = utils.today()
+            except utils.FormatException as e:
+                self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
+                raise e
+            #virement
             if row.jumelle:
                 virement = True
                 origine = row.tiers.split("=>")[0]
@@ -259,8 +264,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                         self.erreur.append('attention, virement impossible entre le meme compte à la ligne' % row.ligne)
                     if self.comptes.goc(dest) != ope['compte_id'] and self.comptes.goc(origine) != ope['compte_id']:
                         self.erreur.append('le compte doit dans le virement' % row.ligne)
-                    if self.comptes.goc(dest) == ope['compte_id']:
+                    # si on est du cote de l'operation receptrice, verification que l'on ne s'est pas trompe dans le tiers
+                    if self.comptes.goc(dest) == ope['compte_id'] and row.montant < 0:
                         origine, dest = dest, origine
+                        messages.info(self.request, "swap %s=%s" % origine, dest)
                     ope['dest_id'] = self.comptes.goc(dest)
                     ope['compte_id'] = self.comptes.goc(origine)
                 else:
@@ -282,14 +289,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             ope['virement'] = virement
             # tiers
             ope['tiers_id'] = self.tiers.goc(row.tiers)
-            # date
-            try:
-                ope['date'] = row.date
-                if ope['date'] is None:
-                    ope['date'] = utils.today()
-            except utils.FormatException as e:
-                self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
-                raise e
             # auto
             ope['automatique'] = row.automatique
             # date_val
