@@ -14,6 +14,7 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 
 
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
+    """seuls cat cpt date montant obligatoire, mais moyen et tiers sont fortement recommande"""
     champs = None #c'est a dire qu'il prend la premiere ligne
 
     @property
@@ -215,7 +216,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         retour = False
         for row in fich:
             if row.ligne < 1:
-                messages.info(self.request, u"Ligne numero %x saute" % row.ligne)
                 continue
             if not verif_format:  # on verifie a la premiere ligne
                 liste_colonnes = ['id', 'automatique', 'cat', 'cpt', 'date', "ib", "ligne", "moyen", "montant", "notes", "num_cheque", "piece_comptable", "rapp", "tiers"]
