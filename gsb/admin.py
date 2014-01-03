@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.conf import settings  # @Reimport
 
 from django.utils.translation import ugettext_lazy as _
-# from django.db.models import Q
+#from django.db.models import Q
 # import decimal
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
@@ -68,6 +68,7 @@ class Date_perso_filter(DateFieldListFilter):
 
 class Rapprochement_filter(SimpleListFilter):
     title = "type de rapprochement"
+    # Parameter for the filter that will be used in the URL query.
     parameter_name = 'rapp'
 
     def lookups(self, request, model_admin):
@@ -102,6 +103,68 @@ class Rapprochement_filter(SimpleListFilter):
             return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
             return queryset.filter(rapp__isnull=True)
+
+
+class ouinonfilter(SimpleListFilter):
+    title = None
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = None
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return (
+            ('1', u'oui'),
+            ('0', u'non')
+        )
+
+
+class mere_et_standalone_filter(ouinonfilter):
+    title = "elimination des filles"
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'elimfille'
+
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            return queryset.filter(mere__isnull=True)
+        else:
+            return queryset
+
+
+class sauf_visa_filter(ouinonfilter):
+    title = "tous les moyens sauf visa"
+    parameter_name = 'visa'
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        if self.value() == '1':
+            return queryset.exclude(moyen_id=24)
+        else:
+            return queryset
+
+
+class verifmere_filter(ouinonfilter):
+    title = "fille oui mere non ou inverse"
+    parameter_name = 'merep'
+
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            messages.info(request, "attention sur l'ensemble de la base")
+            merep = Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
+            fillep = Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
+            listep = list(merep)+list(fillep)
+            return Ope.objects.filter(id__in=listep)
+        else:
+            return queryset
 
 
 class Modeladmin_perso(admin.ModelAdmin):
@@ -345,7 +408,7 @@ class Ope_admin(Modeladmin_perso):
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'moyen', 'cat', 'num_cheque', 'rapp', "mere")
-    list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, 'moyen', 'exercice', 'cat__type', 'cat__nom')
+    list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter, 'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
