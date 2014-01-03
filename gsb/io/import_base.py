@@ -567,11 +567,6 @@ class Import_base(views.Myformview):
         form.fields['nom_du_fichier'].label = u"nom_du_fichier %s" % self.type_f
         return form
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        """on a besoin pour le method decorator"""
-        return super(Import_base, self).dispatch(*args, **kwargs)
-
     def init_cache(self):
         self.moyens = Moyen_cache(self.request)
         self.cats = Cat_cache(self.request)

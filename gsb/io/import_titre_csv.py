@@ -10,10 +10,11 @@ from .. import utils
 
 
 class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
+    """obligatoire :  cpt date titre nombre cours"""
 
     @property
     def compte(self):
-        return utils.to_unicode(self.row['compte'], 'compte_titre1')
+        return utils.to_unicode(self.row['cpt'], 'compte_titre1')
 
     @property
     def date(self):
@@ -69,34 +70,24 @@ class Import_csv_ope_titre(import_base.Import_base):
                 fich = self.reader(f_non_encode, encoding=self.encoding)
                 #---------------------- boucle
                 for row in fich:
-                    if not verif_format:
-                        a = True
-                        try:
-                            a = row.compte
-                            a = row.date
-                            a = row.nombre
-                            a = row.cours
-                        except KeyError as excp:
-                            raise import_base.ImportException(u"il manque la colonne '%s'" % excp.message)
-                        try:
-                            a = row.titre
-                            isin = False
-                        except KeyError as excp:
-                            try:
-                                a = row.isin
-                                isin = True
-                            except KeyError:
-                                raise import_base.ImportException(u"il manque les colonne 'isin' et/ou 'nom'")
+                    if row.ligne < 1:
+                        continue
+                    if not verif_format:  # on verifie a la premiere ligne
+                        liste_colonnes = ['cpt', 'date', 'titre', 'nombre', 'cours', "frais", "isin"]
+                        colonnes_oublies = []
+                        for attr in liste_colonnes:
+                            if not hasattr(row, attr):
+                                colonnes_oublies.append(attr)
+                        print colonnes_oublies, len(colonnes_oublies)
+                        if len(colonnes_oublies) > 0:
+                            raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
                         else:
                             verif_format = True
-                        if a:
-                                pass
-
                     ope = dict()
                     ope['ligne'] = row.ligne
                     ope['date'] = row.date
                     ope['compte_id'] = self.comptes.goc(row.compte)
-                    if isin:
+                    if row.isin:
                         ope["titre_id"] = self.titres.goc(isin=row.isin)
                     else:
                         ope["titre_id"] = self.titres.goc(nom=row.titre)
