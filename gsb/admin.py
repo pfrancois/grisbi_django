@@ -24,6 +24,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from collections import OrderedDict
+from . import model_field
 
 
 #-------------ici les classes generiques------
@@ -148,8 +149,8 @@ class sauf_visa_filter(ouinonfilter):
         """
         if self.value() == '1':
             return queryset.exclude(moyen_id=24)
-        else:
-            return queryset
+        if self.value() == '0':
+            return queryset.filter(moyen_id=24)
 
 
 class verifmere_filter(ouinonfilter):
@@ -202,7 +203,13 @@ class Modeladmin_perso(admin.ModelAdmin):
     fusionne.short_description = u"Fusion dans la première selectionnée"
 
 
-class formsetligne_limit(BaseInlineFormSet):
+class formsetreadonly(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(formsetreadonly, self).__init__(*args, **kwargs)
+        self.can_delete = False
+
+
+class formsetligne_limit(formsetreadonly):
 
     def get_queryset(self):
         sup = super(formsetligne_limit, self).get_queryset()
@@ -217,7 +224,7 @@ class liste_perso_inline(admin.TabularInline):
     related = None
     readonly = True
     orderby = None
-    formset = formsetligne_limit
+    #formset = formsetreadonly
 
     def queryset(self, request):
         qs = super(liste_perso_inline, self).queryset(request)
@@ -238,14 +245,20 @@ class liste_perso_inline(admin.TabularInline):
         return True
 
 
-# ------------definitiion des classes
-class ope_cat_admin(liste_perso_inline):
+class ope_inline_admin(liste_perso_inline):
     model = Ope
-    fields = ('date', 'compte', 'montant', 'tiers', 'ib', 'notes')
-    fk_name = 'cat'
-    related = ('compte', 'tiers', 'ib')
+    fields = ('date', 'compte', 'montant', 'cat', 'ib', 'notes')
+    readonly = True
+    formset = formsetreadonly
+    fk_name = 'tiers'
     orderby = ('-date',)
-    max_num = 10
+    related = ('compte', 'cat', 'ib')
+
+# ------------definition des classes
+
+
+class ope_cat(ope_inline_admin):
+    fk_name = 'cat'
 
 
 class Cat_admin(Modeladmin_perso):
@@ -258,7 +271,7 @@ class Cat_admin(Modeladmin_perso):
     list_filter = ('type',)
     radio_fields = {'type': admin.HORIZONTAL}
     list_select_related = True
-    inlines = [ope_cat_admin]
+    inlines = [ope_cat]
 
     def queryset(self, request):
         qs = super(Cat_admin, self).queryset(request)
@@ -274,14 +287,8 @@ class Cat_admin(Modeladmin_perso):
         return True
 
 
-class ope_ib_admin(liste_perso_inline):
-    model = Ope
-    fields = ('date', 'compte', 'montant', 'tiers', 'cat', 'notes')
+class ope_ib(ope_inline_admin):
     fk_name = 'ib'
-    related = ('compte', 'tiers', 'cat')
-    orderby = ('-date',)
-    readonly = False
-    formset = BaseInlineFormSet
 
 
 class Ib_admin(Modeladmin_perso):
@@ -293,11 +300,10 @@ class Ib_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
-    inlines = [ope_ib_admin]
+    inlines = [ope_ib]
 
 
 class Compte_admin(Modeladmin_perso):
-
     """admin pour les comptes normaux"""
     actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
@@ -389,16 +395,14 @@ class Compte_admin(Modeladmin_perso):
         return True
 
 
-class ope_fille_admin(liste_perso_inline):
-    model = Ope
-    fields = ('id', 'montant', 'cat', 'ib', 'notes', 'mere')
+class ope_ib(ope_inline_admin):
     fk_name = 'mere'
-    related = ('cat', 'ib')
-    orderby = ('ib',)
-    readonly = True
 
-from django.forms import TextInput
-from . import model_field
+
+class MyAdminForm(forms.ModelForm):
+    class Meta:
+        model = Ope
+    date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
 
 
 class Ope_admin(Modeladmin_perso):
@@ -407,7 +411,7 @@ class Ope_admin(Modeladmin_perso):
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'moyen', 'cat', 'num_cheque', 'rapp', "mere")
+    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant',  'cat', "moyen", 'num_cheque', 'rapp', "mere")
     list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter, 'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
@@ -415,12 +419,15 @@ class Ope_admin(Modeladmin_perso):
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
-    #inlines = [ope_fille_admin]
+    inlines = [ope_ib]
     raw_id_fields = ('mere',)
     formfield_overrides = {
-        model_field.CurField: {'widget': TextInput(attrs={'size': '8'})},
+        model_field.CurField: {'widget': forms.TextInput(attrs={'size': '8'})},
         #    models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':40})},
     }
+
+    def get_changelist_form(self, request, **kwargs):
+        return MyAdminForm
 
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
@@ -639,13 +646,8 @@ class Moyen_admin(Modeladmin_perso):
     radio_fields = {'type': admin.HORIZONTAL}
 
 
-class ope_tiers_admin(liste_perso_inline):
-    model = Ope
-    fields = ('date', 'compte', 'montant', 'cat', 'ib', 'notes')
-    readonly = True
+class ope_tiers(ope_inline_admin):
     fk_name = 'tiers'
-    orderby = ('-date',)
-    related = ('compte', 'cat', 'ib')
 
 
 class Tiers_admin(Modeladmin_perso):
@@ -657,7 +659,7 @@ class Tiers_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('is_titre', ('lastupdate', Date_perso_filter),)
     search_fields = ['nom']
-    inlines = [ope_tiers_admin]
+    inlines = [ope_tiers]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
 
     def has_delete_permission(self, request, obj=None):
@@ -689,22 +691,15 @@ class Banque_admin(Modeladmin_perso):
     actions = ['fusionne']
 
 
-class ope_rapp_admin(liste_perso_inline):
-    model = Ope
-    fields = ('rapp', "pk", "compte", 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
-    readonly_fields = ('rapp', 'pk', 'compte', 'date', 'tiers', 'moyen', 'montant', 'cat', 'notes')
+class ope_rapp(ope_inline_admin):
     fk_name = 'rapp'
-    related = ('compte', 'tiers', 'moyen', 'cat')
-    orderby = ('-date',)
-    formset = BaseInlineFormSet
 
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
-    inlines = [ope_rapp_admin]
-#TODO faire que ca marche
+    inlines = [ope_rapp]
 
 
 class Exo_admin(Modeladmin_perso):
