@@ -834,14 +834,12 @@ class Ope_titre(models.Model):
                 ope_ost.compte = self.compte
                 ope_ost.save()
         else:  # c'est une vente
-            # calcul prealable, on met des plus car les chiffres sont negatif
             # on ne sait pas si l'ope existe donc on exclue
             inv_vrai = self.titre.investi(self.compte, datel=self.date, exclude=self)
             # on exclue par defaut car l'operation existe deja
             nb_vrai = self.titre.nb(self.compte, datel=self.date, exclude_id=self.id)
             # chaine car comme on a des decimal
-            ost = "{0:.2f}".format((inv_vrai / nb_vrai) * self.nombre)
-            ost = decimal.Decimal(ost) * -1
+            ost = decimal.Decimal("{0:.2f}".format((max(inv_vrai, 0) / nb_vrai) * abs(decimal.Decimal(self.nombre))))
             pmv = abs(self.nombre * self.cours) - ost
             # on cree les ope
             if not utils.is_onexist(self, 'ope_ost'):

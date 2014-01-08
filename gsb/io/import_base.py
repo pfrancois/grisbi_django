@@ -7,10 +7,8 @@ import os
 
 from django.conf import settings  # @Reimport
 from django.http import HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.utils.decorators import method_decorator
 from django.db import IntegrityError
 from django.db.models import Max
 from django.db import transaction
@@ -297,98 +295,9 @@ class Tiers_cache(Table):
 class Titre_cache(Table):
     element = models.Titre
 
-    def __init__(self, request):
-        super(Titre_cache, self).__init__(request)
-        self.id = {"nom": dict(), "isin": dict()}
-
-    def goc(self, nom=None, isin=None, obj=None):
-        if nom is None and isin is None and obj is None:  # cas ou pas de parametre
-            return None
-        if nom is None:
-            return self.goc_isin(isin, obj)
-        else:
-            return self.goc_titre(nom, obj)
-
-    def goc_titre(self, nom, obj=None):
-        if nom is not None and "titre_ " in nom:  # cas ou on utiliserait les nom de tiers
-            nom = nom.replace("titre_ ", '')
-            nom = nom.strip()
-        try:
-            pk = self.id["nom"][nom]
-        except KeyError:  # on essaye de le recuperer
-            try:
-                if obj is None:
-                    arguments = {"nom": nom}
-                else:
-                    arguments = obj
-                pk = self.element.objects.get(**arguments).id
-                self.id["nom"][nom] = pk
-                self.id["isin"][self.element.objects.get(**arguments).isin] = pk
-            except self.element.DoesNotExist:# on doit le creer
-                if not self.readonly:  # on cree donc l'operation
-                    argument_def = self.arg_def(nom, None, obj)
-                    try:
-                        with transaction.atomic():
-                            if obj is not None:
-                                if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
-                                    raise IntegrityError("ce titre existe deja")
-                            created = self.element.objects.create(**argument_def)
-                            self.nb_created += 1
-                    except IntegrityError as e:
-                        raise ImportException("%s" % e)
-                    pk = created.pk
-                    self.id["nom"][created.nom] = pk
-                    self.id["isin"][created.isin] = pk
-                    self.create_item.append(created)
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
-                else:
-                    raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, nom))
-        return pk
-
-    def goc_isin(self, isin, obj=None):
-        try:
-            pk = self.id["isin"][isin]
-        except KeyError:  # on essaye de le recuperer
-            try:
-                if obj is None:
-                    arguments = {"isin": isin}
-                else:
-                    arguments = obj
-                pk = self.element.objects.get(**arguments).id
-                self.id["nom"][self.element.objects.get(**arguments).nom] = pk
-                self.id["isin"][isin] = pk
-            except self.element.DoesNotExist:
-                if not self.readonly:  # on cree donc l'operation
-                    argument_def = self.arg_def(None, isin, obj)
-                    try:
-                        with transaction.atomic():
-                            if obj is not None:
-                                if models.Titre.objects.filter(id=obj['id']).exists() or models.Titre.objects.filter(nom=obj['nom']).exists() or models.Titre.objects.filter(isin=obj['isin']).exists():
-                                    raise IntegrityError("ce titre existe deja")
-                            created = self.element.objects.create(**argument_def)
-                            self.nb_created += 1
-                    except IntegrityError as e:
-                        raise ImportException("%s" % e)
-                    pk = created.pk
-                    self.id["nom"][created.nom] = pk
-                    self.id["isin"][created.isin] = pk
-                    self.create_item.append(created)
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
-                else:
-                    raise ImportException("%s '%s' non cree alors que c'est read only" % (self.element._meta.object_name, isin))
-        return pk
-
-    def arg_def(self, nom=None, isin=None, obj=None):
+    def arg_def(self, nom, obj=None):
         if obj is None:
-            if nom:
-                arg_nom = nom
-            else:
-                arg_nom = "inconnu%s%s" % (self.nb_created + 1, utils.today())
-            if isin:
-                arg_isin = isin
-            else:
-                arg_isin = "%s%s" % (self.nb_created + 1, utils.today())
-            return {"nom": arg_nom, "isin": arg_isin, "type": "ZZZ"}
+            return {"nom": nom, 'isin': utils.now().isoformat(), "type": "ZZZ"}
         else:
             return obj
 
@@ -400,11 +309,8 @@ class Cours_cache(Table):
         super(Cours_cache, self).__init__(request)
         self.TC = titre_cache
 
-    def goc(self, titre, date, montant, methode="nom"):
-        if methode == "nom":
-            titre_id = self.TC.goc(nom=titre)
-        else:
-            titre_id = self.TC.goc(isin=titre)
+    def goc(self, titre, date, montant):
+        titre_id = self.TC.goc(nom=titre)
         try:
             pk = self.id[titre_id][date]
         except KeyError:
@@ -425,9 +331,6 @@ class Cours_cache(Table):
             self.id[titre_id] = dict()
             self.id[titre_id][date] = pk
         return pk
-
-    def arg_def(self, nom, obj=None):
-        raise NotImplementedError
 
 
 class Ope_cache(Table):

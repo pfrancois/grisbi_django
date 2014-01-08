@@ -135,6 +135,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         """renvoi un tableau complet de l'import"""
         self.init_cache()
         self.erreur = list()
+        cache_titre = dict()
         # les moyens par defaut
         retour = False
         moyen_virement = self.moyens.goc('', {'nom': "Virement", 'type': 'v'})
@@ -188,8 +189,9 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     if compte.type != 't':
                         messages.warning(self.request, u"le compte '%s' n'est pas un compte titre" % compte)
                         continue
-                    id_titre = self.titres.goc(nom=models.Tiers.objects.get(id=ope['tiers_id']).nom)
-                    titre = models.Titre.objects.get(id=id_titre)
+                    if ope['titre_id'] not in cache_titre.keys():
+                        cache_titre[ope['titre_id']] = models.Titre.objects.get(id=ope['titre_id'])
+                    titre = cache_titre[ope['titre_id']]
                     if nombre > 0:
                         ope_gsb = compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
                         messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
@@ -227,6 +229,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
                 else:
                     verif_format = True
+
             ope = dict()
             ope['ligne'] = row.ligne
             # verification pour les lignes
@@ -248,7 +251,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             try:
                 ope['date'] = row.date
                 if ope['date'] is None:
-                    ope['date'] = utils.today()
+                    self.erreur.append(u"date non remplie ligne %s" % row.ligne)
+                    raise utils.FormatException
             except utils.FormatException as e:
                 self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
                 raise e
@@ -280,11 +284,11 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     if row.moyen:
                         ope['moyen_id'] = self.moyens.goc(row.moyen, montant=row.montant)
                     else:
-                        ope['moyen_id'] = self.moyen_par_defaut.goc(row.cpt, row.montant)
+                        ope['moyen_id'] = self.moyen_par_defaut.goc(row.cpt, montant=row.montant)
                 else:
                     ope['moyen_id'] = moyen_virement
             except import_base.ImportException:
-                self.erreur.append(u"le moyen %s est inconnu à la ligne %s" % (row.cat, row.ligne))
+                self.erreur.append(u"le moyen %s est inconnu (ou est mal utilisé) à la ligne %s" % (row.cat, row.ligne))
                 continue
             ope['virement'] = virement
             # tiers
@@ -313,6 +317,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 ope['rapp_id'] = None
             if row.ope_titre:
                 ope['ope_titre'] = True
+                if 'titre_ ' in row.tiers:
+                    ope['titre_id'] = self.titres.goc(nom=row.tiers.replace('titre_ ', '').strip())
+                else:
+                    raise import_base.ImportException(u"ce tiers '%s' ne peut etre un titre" % row.tiers)
             else:
                 ope['ope_titre'] = False
             self.opes.create(ope)

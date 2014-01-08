@@ -68,9 +68,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
                         url(r'^search$', 'search_opes', name='g_search_ope'),
-                        url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
-)
-urlpatterns += patterns('gsb.views',
+                        url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours'),
                         url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'ajout_ope_titre_bulk', name="titre_bulk"),
 )
 
