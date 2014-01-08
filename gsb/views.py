@@ -158,7 +158,7 @@ class Cpt_detail_view(Mytemplateview):
             # gestion des ope anciennes
             if not (self.all or self.rapp) and not settings.ANCIEN:
                     q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
-            q = q.filter(date__gte=gsb.utils.today().replace(year=2005, month=1))
+            #q = q.filter(date__gte=gsb.utils.today().replace(year=2005, month=1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             # nb ope rapp
             nb_ope_rapp = q.count()
@@ -534,7 +534,7 @@ def ope_titre_detail(request, pk):
         if form.is_valid():
             try:
                 form.save()
-                messages.info(request, u"opération titre (%s) modifiée" % ope)
+                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2)))
             except IntegrityError as e:
                 messages.error(request, e.unicode())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
@@ -885,4 +885,4 @@ def ajout_ope_titre_bulk(request, cpt_id):
         for titre in titre_compte:
             i += 1
             titres_forms.append(ajout_ope_bulk_form(prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
-    return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id})
+    return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id, 'titre': u'opération sur les titres suivants'})

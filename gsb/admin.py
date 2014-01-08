@@ -395,7 +395,7 @@ class Compte_admin(Modeladmin_perso):
         return True
 
 
-class ope_ib(ope_inline_admin):
+class ope_ope(ope_inline_admin):
     fk_name = 'mere'
 
 
@@ -419,7 +419,7 @@ class Ope_admin(Modeladmin_perso):
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
-    inlines = [ope_ib]
+    #inlines = [ope_ope]
     raw_id_fields = ('mere',)
     formfield_overrides = {
         model_field.CurField: {'widget': forms.TextInput(attrs={'size': '8'})},
