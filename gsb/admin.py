@@ -7,7 +7,7 @@ from django.db import models
 import django.forms as forms
 from django.utils.safestring import mark_safe
 from django.core import urlresolvers
-# from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.conf import settings  # @Reimport
@@ -162,7 +162,7 @@ class verifmere_filter(ouinonfilter):
             messages.info(request, "attention sur l'ensemble de la base")
             merep = Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
             fillep = Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
-            listep = list(merep)+list(fillep)
+            listep = list(merep) + list(fillep)
             return Ope.objects.filter(id__in=listep)
         else:
             return queryset
@@ -170,9 +170,26 @@ class verifmere_filter(ouinonfilter):
 
 class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
+    id_ope = None
+    table_annexe = None
+    change_list=False
 
-    def nb_ope(self, obj):
-        return '%s' % (obj.ope_set.exclude(filles_set__isnull=False).count())
+    def get_queryset(self, request):
+    #    raise
+    # compte le nombre d'ope
+        if 'nb_opes' in self.list_display and self.change_list:
+            if (self.id_ope is None) or (self.table_annexe is None):
+                raise ImproperlyConfigured
+            else:
+                return super(Modeladmin_perso, self).queryset(request).extra(select={
+                    'nb_opes': 'select count(*) from gsb_ope WHERE (gsb_ope.%s = %s.id AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (self.id_ope, self.table_annexe), },)
+        else:
+            self.message_user(request,'non change_list')
+            return super(Modeladmin_perso, self).queryset(request)
+
+    def nb_opes(self, inst):
+        return inst.nb_opes
+    nb_opes.admin_order_field = 'nb_opes'
 
     def fusionne(self, request, queryset):
         """fonction générique de fusion entre 2 objets"""
@@ -202,18 +219,15 @@ class Modeladmin_perso(admin.ModelAdmin):
 
     fusionne.short_description = u"Fusion dans la première selectionnée"
 
+    def changelist_view(self, request, extra_context=None):
+        self.change_list=True
+        return super(Modeladmin_perso, self).changelist_view(request, extra_context)
 
 class formsetreadonly(BaseInlineFormSet):
+
     def __init__(self, *args, **kwargs):
         super(formsetreadonly, self).__init__(*args, **kwargs)
         self.can_delete = False
-
-
-class formsetligne_limit(formsetreadonly):
-
-    def get_queryset(self):
-        sup = super(formsetligne_limit, self).get_queryset()
-        return sup[:10]
 
 
 class liste_perso_inline(admin.TabularInline):
@@ -266,16 +280,14 @@ class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
     actions = ['fusionne', ]
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type', 'nb_ope')
+    list_display = ('id', 'nom', 'type', 'nb_opes')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.HORIZONTAL}
     list_select_related = True
     inlines = [ope_cat]
-
-    def queryset(self, request):
-        qs = super(Cat_admin, self).queryset(request)
-        return qs.select_related('ope')
+    id_ope = "cat_id"
+    table_annexe = "gsb_cat"
 
     def has_delete_permission(self, request, obj=None):
         if obj is None:
@@ -296,14 +308,17 @@ class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
     actions = ['fusionne', ]
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type', 'nb_ope')
+    list_display = ('id', 'nom', 'type', 'nb_opes')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
     inlines = [ope_ib]
+    id_ope = "ib_id"
+    table_annexe = "gsb_ib"
 
 
 class Compte_admin(Modeladmin_perso):
+
     """admin pour les comptes normaux"""
     actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
@@ -400,18 +415,20 @@ class ope_ope(ope_inline_admin):
 
 
 class MyAdminForm(forms.ModelForm):
+
     class Meta:
         model = Ope
     date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
 
 
 class Ope_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les opes"""
     fields = (
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
-    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant',  'cat', "moyen", 'num_cheque', 'rapp', "mere")
+    list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'cat', "moyen", 'num_cheque', 'rapp', "mere")
     list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter, 'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
@@ -528,7 +545,7 @@ class Ope_admin(Modeladmin_perso):
 
     @transaction.atomic
     def cree_operation_mere(self, request, queryset):
-        #on verifie que les operations ont la meme date et ne sont pas deja des operations filles ni des operations mere.
+        # on verifie que les operations ont la meme date et ne sont pas deja des operations filles ni des operations mere.
         montant = 0
         mere = None
         for ope in queryset:
@@ -553,14 +570,14 @@ class Ope_admin(Modeladmin_perso):
             date_ope = date_ope[0]
         tiers_id = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('tiers', flat=True)))[0]
         compte_id = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('compte', flat=True)))[0]
-        #ok c'est bon on peut commencer a creer
+        # ok c'est bon on peut commencer a creer
         if mere is None:
             mere = Ope.objects.create(date=date_ope,
-                                        montant=montant,
-                                        tiers_id=tiers_id,
-                                        cat=Cat.objects.get(nom=u"Opération Ventilée"),
-                                        moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
-                                        compte_id=compte_id
+                                     montant=montant,
+                                     tiers_id=tiers_id,
+                                     cat=Cat.objects.get(nom=u"Opération Ventilée"),
+                                     moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
+                                     compte_id=compte_id
                                     )
             messages.success(request, u"ope mere crée '%s' " % mere)
         else:
@@ -642,8 +659,10 @@ class Moyen_admin(Modeladmin_perso):
     actions = ['fusionne']
     list_filter = ('type',)
     fields = ['nom', 'type']
-    list_display = ('nom', 'type', 'nb_ope')
+    list_display = ('nom', 'type', 'nb_opes')
     radio_fields = {'type': admin.HORIZONTAL}
+    id_ope = "moyen_id"
+    table_annexe = "gsb_moyen"
 
 
 class ope_tiers(ope_inline_admin):
@@ -655,12 +674,14 @@ class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne']
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_ope')
+    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_opes')
     list_display_links = ('id',)
     list_filter = ('is_titre', ('lastupdate', Date_perso_filter),)
     search_fields = ['nom']
     inlines = [ope_tiers]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
+    id_ope = "tiers_id"
+    table_annexe = "gsb_tiers"
 
     def has_delete_permission(self, request, obj=None):
         if obj is None:
@@ -696,6 +717,7 @@ class ope_rapp(ope_inline_admin):
 
 
 class Rapp_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
@@ -703,6 +725,7 @@ class Rapp_admin(Modeladmin_perso):
 
 
 class Exo_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')
