@@ -50,6 +50,7 @@ def has_changed(instance, fields):
 
 
 class config(models.Model):
+
     """model generique pour tout ce qui est modifiable"""
     derniere_import_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
     derniere_export_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
@@ -1153,6 +1154,7 @@ class Echeance(models.Model):
 
 
 class Ope(models.Model):
+
     """operation"""
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=utils.today, db_index=True)

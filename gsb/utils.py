@@ -23,6 +23,7 @@ __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_nu
 
 
 class FormatException(Exception):
+
     def __init__(self, message):
         super(FormatException, self).__init__(message)
         self.msg = message
@@ -39,8 +40,8 @@ class Compfr(object):
 
     def __init__(self, decod='utf-8'):
         self.decod = decod
-        self.loc = locale.getlocale() # stocker la locale courante
-        self.espinsec = u'\xA0' # espace insécable
+        self.loc = locale.getlocale()  # stocker la locale courante
+        self.espinsec = u'\xA0'  # espace insécable
 
     def __call__(self, v1, v2):
         if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
@@ -59,9 +60,9 @@ class Compfr(object):
             # on retourne le résultat de la comparaison
             locale.setlocale(locale.LC_ALL, '')
             comp = locale.strcoll(v1, v2)
-            locale.setlocale(locale.LC_ALL, self.loc) #retour à la locale courante
+            locale.setlocale(locale.LC_ALL, self.loc)  # retour à la locale courante
 
-            return comp # retour du résultat de la comparaison
+            return comp  # retour du résultat de la comparaison
         else:
             if v1 < v2:
                 return -1
@@ -355,6 +356,7 @@ def nulltostr(s):
 
 #------------------fonction basiques pour lecture ecriture------"""
 class UTF8Recoder(object):
+
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
@@ -370,6 +372,7 @@ class UTF8Recoder(object):
 
 
 class Excel_csv(csv.Dialect):
+
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ';'
     quotechar = '"'
@@ -382,6 +385,7 @@ csv.register_dialect("excel_csv", Excel_csv)
 
 
 class Csv_unicode_reader(object):
+
     """
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
@@ -413,7 +417,9 @@ def is_onexist(objet, attribut):
 
 
 class switch(object):
+
     """http://code.activestate.com/recipes/410692/"""
+
     def __init__(self, value):
         self.value = value
         self.fall = False

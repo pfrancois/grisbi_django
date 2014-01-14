@@ -20,6 +20,7 @@ from .. import utils
 
 
 class ImportException(Exception):
+
     def __init__(self, message):
         super(ImportException, self).__init__(message)
         self.msg = message
@@ -33,6 +34,7 @@ class ImportForm1(gsb_forms.Baseform):
 
 
 class property_ope_base(object):
+
     """defini toutes les proprietes d'ope"""
 
     @property
@@ -130,6 +132,7 @@ class property_ope_base(object):
 
 
 class Table(object):
+
     """obj avec cache"""
     element = None
     readonly = False
@@ -457,7 +460,7 @@ class Import_base(views.Myformview):
                 return self.render_to_response(self.get_context_data(form=form, resultat=self.resultat))
             else:
                 return HttpResponseRedirect(self.get_success_url())
-                #return self.render_to_response(self.get_context_data(form=form))
+                # return self.render_to_response(self.get_context_data(form=form))
 
     def import_file(self, nomfich):
         raise NotImplementedError("methode goc non defini")

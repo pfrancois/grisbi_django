@@ -173,6 +173,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
 
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
+
     def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None

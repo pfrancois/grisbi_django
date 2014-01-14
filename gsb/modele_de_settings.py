@@ -49,7 +49,7 @@ MD_DEBIT = 2
 REV_PLAC = 5
 ID_CAT_VIR = 1
 DIR_DROPBOX = "D:\Dropbox"
-##################
+#
 ATOMIC_REQUESTS = True
 WSGI_APPLICATION = "gsb.wsgi.application"
 ADMINS = (
@@ -154,11 +154,11 @@ TEMPLATE_LOADERS = (
 
 if DJANGO_TOOLBAR:
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',
-                            'django.contrib.sessions.middleware.SessionMiddleware',
-                            'django.middleware.common.CommonMiddleware',)
+                         'django.contrib.sessions.middleware.SessionMiddleware',
+                         'django.middleware.common.CommonMiddleware',)
 else:
     MIDDLEWARE_CLASSES = ('django.contrib.sessions.middleware.SessionMiddleware',
-                            'django.middleware.common.CommonMiddleware',)
+                         'django.middleware.common.CommonMiddleware',)
 
 MIDDLEWARE_CLASSES += (
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -239,11 +239,11 @@ if DJANGO_TOOLBAR:
                             'inspector_panel.panels.inspector.InspectorPanel'
                            )
     INSTALLED_APPS += ('debug_toolbar',
-                        'template_timings_panel',
-                        'inspector_panel'
+                      'template_timings_panel',
+                      'inspector_panel'
                         )
-    #https://github.com/santiagobasulto/debug-inspector-panel
-    #https://github.com/orf/django-debug-toolbar-template-timings
+    # https://github.com/santiagobasulto/debug-inspector-panel
+    # https://github.com/orf/django-debug-toolbar-template-timings
     IGNORED_TEMPLATES = ["debug_toolbar/*"]
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',

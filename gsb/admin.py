@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db import models
 import django.forms as forms
 from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django.core import urlresolvers
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
@@ -172,7 +173,8 @@ class Modeladmin_perso(admin.ModelAdmin):
     save_on_top = True
     id_ope = None
     table_annexe = None
-    change_list=False
+    change_list = False
+    list_select_related = True
 
     def get_queryset(self, request):
     #    raise
@@ -184,7 +186,6 @@ class Modeladmin_perso(admin.ModelAdmin):
                 return super(Modeladmin_perso, self).queryset(request).extra(select={
                     'nb_opes': 'select count(*) from gsb_ope WHERE (gsb_ope.%s = %s.id AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (self.id_ope, self.table_annexe), },)
         else:
-            self.message_user(request,'non change_list')
             return super(Modeladmin_perso, self).queryset(request)
 
     def nb_opes(self, inst):
@@ -220,8 +221,9 @@ class Modeladmin_perso(admin.ModelAdmin):
     fusionne.short_description = u"Fusion dans la première selectionnée"
 
     def changelist_view(self, request, extra_context=None):
-        self.change_list=True
+        self.change_list = True
         return super(Modeladmin_perso, self).changelist_view(request, extra_context)
+
 
 class formsetreadonly(BaseInlineFormSet):
 
@@ -230,18 +232,21 @@ class formsetreadonly(BaseInlineFormSet):
         self.can_delete = False
 
 
-class liste_perso_inline(admin.TabularInline):
+class ope_inline_admin(admin.TabularInline):
+    model = Ope
+    fields = ('lien', 'date', 'compte', 'montant', 'cat', 'tiers', 'ib', 'notes')
+    readonly_fields = fields
     extra = 0
     formfield_overrides = {
         models.TextField: {'widget': forms.TextInput, },
     }
-    related = None
+    related = ('compte', 'cat', 'ib')
     readonly = True
-    orderby = None
-    #formset = formsetreadonly
+    orderby = ('-date',)
+    formset = formsetreadonly
 
     def queryset(self, request):
-        qs = super(liste_perso_inline, self).queryset(request)
+        qs = super(ope_inline_admin, self).queryset(request)
         # on related pour les inlines
         if self.related is not None:
             args = self.related
@@ -258,20 +263,21 @@ class liste_perso_inline(admin.TabularInline):
             return False
         return True
 
+    def lien(self, obj):
+        if obj.id:
+            obj.has_absolute_url = False
+            change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.id,))
+            return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.id))
+        else:
+            return "(aucun-e)"
 
-class ope_inline_admin(liste_perso_inline):
-    model = Ope
-    fields = ('date', 'compte', 'montant', 'cat', 'ib', 'notes')
-    readonly = True
-    formset = formsetreadonly
-    fk_name = 'tiers'
-    orderby = ('-date',)
-    related = ('compte', 'cat', 'ib')
+    lien.short_description = u"ID"
 
 # ------------definition des classes
 
 
 class ope_cat(ope_inline_admin):
+
     fk_name = 'cat'
 
 
@@ -284,7 +290,6 @@ class Cat_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.HORIZONTAL}
-    list_select_related = True
     inlines = [ope_cat]
     id_ope = "cat_id"
     table_annexe = "gsb_cat"
@@ -414,7 +419,7 @@ class ope_ope(ope_inline_admin):
     fk_name = 'mere'
 
 
-class MyAdminForm(forms.ModelForm):
+class Ope_changelist_Form(forms.ModelForm):
 
     class Meta:
         model = Ope
@@ -436,15 +441,15 @@ class Ope_admin(Modeladmin_perso):
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
-    #inlines = [ope_ope]
+    inlines = [ope_ope]
     raw_id_fields = ('mere',)
+    date_hierarchy = 'date'
     formfield_overrides = {
         model_field.CurField: {'widget': forms.TextInput(attrs={'size': '8'})},
-        #    models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':40})},
     }
 
     def get_changelist_form(self, request, **kwargs):
-        return MyAdminForm
+        return Ope_changelist_Form
 
     def queryset(self, request):
         qs = super(Ope_admin, self).queryset(request)
@@ -471,7 +476,7 @@ class Ope_admin(Modeladmin_perso):
         """
         if obj.jumelle_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.jumelle.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.jumelle))
+            return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.jumelle))
         else:
             return "(aucun-e)"
 
@@ -480,7 +485,7 @@ class Ope_admin(Modeladmin_perso):
     def show_mere(self, obj):
         if obj.mere_id:
             change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.mere.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.mere))
+            return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.mere))
         else:
             return "(aucun-e)"
 
@@ -489,11 +494,11 @@ class Ope_admin(Modeladmin_perso):
     def oper_titre(self, obj):
         if obj.ope_titre_ost:
             change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre_ost.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre_ost))
+            return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_titre_ost))
         else:
             if obj.ope_titre_pmv:
                 change_url = urlresolvers.reverse('admin:gsb_ope_titre_change', args=(obj.ope_titre_pmv.id,))
-                return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_titre_pmv))
+                return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_titre_pmv))
             else:
                 return "(aucun-e)"
 
@@ -646,7 +651,7 @@ class Titre_admin(Modeladmin_perso):
     def show_tiers(self, obj):
         if obj.tiers:
             change_url = urlresolvers.reverse('admin:gsb_tiers_change', args=(obj.tiers.id,))
-            return mark_safe('<a href="%s">%s</a>' % (change_url, obj.tiers))
+            return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.tiers))
         else:
             return "(aucun-e)"
 
@@ -740,13 +745,13 @@ class Ope_titre_admin(Modeladmin_perso):
 
     def show_ope(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_ost.id,))
-        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_ost))
+        return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_ost))
 
     show_ope.short_description = u"opération"
 
     def show_ope_pmv(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
-        return mark_safe('<a href="%s">%s</a>' % (change_url, obj.ope_pmv))
+        return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_pmv))
 
     show_ope_pmv.short_description = u"opération relative aux plus ou moins values"
 

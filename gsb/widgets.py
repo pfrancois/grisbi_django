@@ -11,6 +11,7 @@ input_format_date = ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d%m%y', '%d%m%Y')
 
 
 class Dategsbwidget(forms.DateInput):
+
     """ widget de gestion des dates simple marche sur n95
     """
 
@@ -38,6 +39,7 @@ class Dategsbwidget(forms.DateInput):
 
 
 class DateFieldgsb(forms.DateField):
+
     """field qui marche avec le widget au dessus"""
 
     def __init__(self, input_formats=input_format_date, initial=utils.today, **kwargs):
@@ -46,6 +48,7 @@ class DateFieldgsb(forms.DateField):
 
 
 class Titrewidget(forms.MultiWidget):
+
     """widget utilise pour la maj des titres"""
 
     def __init__(self, attrs=None):
@@ -65,6 +68,7 @@ class Titrewidget(forms.MultiWidget):
 
 
 class TitreField(forms.MultiValueField):
+
     """field utilisé pour la maj des titres"""
 
     def __init__(self, *args, **kwargs):
@@ -119,6 +123,7 @@ class ReadonlyField(forms.FileField):
 
 
 class Curwidget(forms.TextInput):
+
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
@@ -132,5 +137,6 @@ class Curwidget(forms.TextInput):
 
 
 class CurField(forms.DecimalField):
+
     def __init__(self, localize=True, initial='0', widget=Curwidget, *args, **kwargs):
         super(CurField, self).__init__(localize=localize, initial=initial, widget=widget, *args, **kwargs)

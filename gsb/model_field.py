@@ -12,6 +12,7 @@ from south.modelsinspector import introspector
 
 # definition d'un moneyfield
 class CurField(models.DecimalField):
+
     """
     un champ decimal mais defini pour les monnaies
     """
@@ -37,6 +38,7 @@ class CurField(models.DecimalField):
 
 
 class ExtFileField(forms.FileField):
+
     """
     http://djangosnippets.org/snippets/977/
     Same as forms.FileField, but you can specify a file extension whitelist.
@@ -78,9 +80,11 @@ class ExtFileField(forms.FileField):
 
 
 class uuidfield(models.CharField):
+
     """tire de la
     https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
     """
+
     def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):
         kwargs['max_length'] = 36
         self.auto = auto
@@ -116,12 +120,14 @@ class uuidfield(models.CharField):
 
 # tire initialement de django extension"""
 class ModificationDateTimeField(DateTimeField):
+
     """ ModificationDateTimeField
 
     By default, sets editable=False, blank=True, default=datetime.now
 
     Sets value to datetime.now() on each save of the model.
     """
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('editable', False)
         kwargs.setdefault('blank', True)

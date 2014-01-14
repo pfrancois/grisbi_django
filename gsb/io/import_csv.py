@@ -14,8 +14,9 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 
 
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
+
     """seuls cat cpt date montant obligatoire, mais moyen et tiers sont fortement recommande"""
-    champs = None #c'est a dire qu'il prend la premiere ligne
+    champs = None  # c'est a dire qu'il prend la premiere ligne
     champ_test = 'cat'
 
     @property
@@ -119,7 +120,7 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def ligne(self):
-        #on fait -1 pour sauter la premiere ligne
+        # on fait -1 pour sauter la premiere ligne
         return self.line_num
 
 
@@ -158,7 +159,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             virement = ope.pop('virement', False)
             ope_titre = ope.pop('ope_titre', False)
             ligne = ope.pop('ligne')
-            #gestions des cas speciaux
+            # gestions des cas speciaux
             if virement or ope_titre:
                 if virement:
                     vir = models.Virement.create(compte_origine=models.Compte.objects.get(id=ope['compte_id']),
@@ -168,7 +169,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     # on definit le detail des virement
                     vir.origine.pointe = ope['pointe']
                     vir.notes = ope['notes']
-                    #les rapp des jumelle
+                    # les rapp des jumelle
                     if "rapp" in ope.keys():
                         vir.origine.rapp = models.Rapp.objects.get(id=ope['rapp_id'])
                     if ">R" in ope['notes']:
@@ -256,7 +257,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             except utils.FormatException as e:
                 self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
                 raise e
-            #virement
+            # virement
             if row.jumelle:
                 virement = True
                 origine = row.tiers.split("=>")[0]
@@ -329,6 +330,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
 
 
 class Csv_unicode_reader_ope_avec_gestion_id(Csv_unicode_reader_ope_sans_jumelle_et_ope_mere):  # pragma: no cover
+
     @property
     def id(self):
         if 'id' in self.row:

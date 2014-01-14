@@ -226,7 +226,7 @@ class Cpt_detail_view(Mytemplateview):
         if solde_p_neg is None:
             solde_p_neg = 0
         if self.espece:
-            #gestion pagination
+            # gestion pagination
             if self.all:
                 list_opes = self.cpt_espece_pagination(opes)
             else:
@@ -503,19 +503,19 @@ def titre_detail_cpt(request, cpt_id, titre_id, rapp=False):
     encours = titre.encours(compte)
     investi = titre.investi(compte)
     return render(request, "gsb/cpt_placement_titre.djhtm",
-                    {
-                        'compte': compte,
-                        'titre_id': titre.id,
-                        'list_opes': opes,
-                        'titre': "%s: %s" % (compte.nom, titre.nom),
-                        'encours': encours,
-                        't': titre,
-                        'nb_titre': titre.nb(compte),
-                        'nb_r': titre.nb(compte, rapp=True),
-                        'date_rappro': date_rappro,
-                        'solde_rappro': solde_rappro,
-                        'investi_r': titre.investi(compte, rapp=True),
-                        'pmv': encours - investi
+                 {
+                  'compte': compte,
+                 'titre_id': titre.id,
+                 'list_opes': opes,
+                 'titre': "%s: %s" % (compte.nom, titre.nom),
+                 'encours': encours,
+                 't': titre,
+                 'nb_titre': titre.nb(compte),
+                 'nb_r': titre.nb(compte, rapp=True),
+                 'date_rappro': date_rappro,
+                 'solde_rappro': solde_rappro,
+                 'investi_r': titre.investi(compte, rapp=True),
+                 'pmv': encours - investi
                     }
                 )
 
@@ -740,7 +740,7 @@ def ope_titre_vente(request, cpt_id):
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']),
-                                                                          round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
+                         round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -810,6 +810,7 @@ from . import widgets as gsb_field
 
 
 class ajout_ope_bulk_form(gsb_forms.Baseform):
+
     """premier form utilise ajout_ope_titre_bulk"""
     titre = forms.ModelChoiceField(Titre.objects.all())
     cours = gsb_field.CurField()
@@ -818,6 +819,7 @@ class ajout_ope_bulk_form(gsb_forms.Baseform):
 
 
 class ajout_ope_date_form(gsb_forms.Baseform):
+
     """second form utilise ajout_ope_titre_bulk"""
     date = forms.DateField()
 
@@ -844,10 +846,10 @@ def ajout_ope_titre_bulk(request, cpt_id):
                 nb = form.cleaned_data['nombre']
                 if nb > 0:
                     compte_titre.achat(titre=form.cleaned_data['titre'],
-                                        nombre=form.cleaned_data['nombre'],
-                                        prix=form.cleaned_data['cours'],
-                                        date=date_ope,
-                                        frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
+                                      nombre=form.cleaned_data['nombre'],
+                                      prix=form.cleaned_data['cours'],
+                                      date=date_ope,
+                                      frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
                     messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
@@ -857,10 +859,10 @@ def ajout_ope_titre_bulk(request, cpt_id):
                 else:
                     if nb < 0:
                         compte_titre.vente(titre=form.cleaned_data['titre'],
-                                            nombre=form.cleaned_data['nombre']*-1,
-                                            prix=form.cleaned_data['cours'],
-                                            date=date_ope,
-                                            frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
+                                          nombre=form.cleaned_data['nombre'] * -1,
+                                          prix=form.cleaned_data['cours'],
+                                          date=date_ope,
+                                          frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
                         messages.info(request, u"nouvel vente de %s %s @ %s le %s soit %s EUR" % (form.cleaned_data['nombre'],
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
