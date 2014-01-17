@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed, Echeance
-from .import forms as gsb_forms
+from . import forms as gsb_forms
 from django import forms
 from django.db import models
 import decimal
@@ -535,7 +535,7 @@ def ope_titre_detail(request, pk):
         if form.is_valid():
             try:
                 form.save()
-                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
+                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
             except IntegrityError as e:
                 messages.error(request, e.unicode())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
@@ -627,7 +627,7 @@ def ope_titre_achat(request, cpt_id):
                                                                           titre.nom,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date'],
-                                                                          '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
+                                                                          '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -741,7 +741,7 @@ def ope_titre_vente(request, cpt_id):
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']),
-                                                                        '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
+                                                                        '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -765,10 +765,13 @@ def search_opes(request):
         if form.is_valid():
             data = form.cleaned_data
             compte = data['compte']
+            print data['date_max']
             if compte:
-                q = Ope.objects.filter(compte=compte, date__gte=data['date_min'], date__lte=data['date_max'])
+                q = Ope.objects.filter(compte=compte, date__gte=data['date_min'])
             else:
-                q = Ope.objects.filter(date__gte=data['date_min'], date__lte=data['date_max'])
+                q = Ope.objects.filter(date__gte=data['date_min'])
+            if data['date_max']:
+                q.filter(date__lte=data['date_max'])
             sort = request.GET.get('sort')
             if sort:
                 sort = unicode(sort)
@@ -779,11 +782,14 @@ def search_opes(request):
                 q = q.order_by('-date')
             q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope')[:100]
             if compte:
-                titre = u'recherche des %s premières opérations du compte %s' % (q.count(), compte.nom)
+                titre = u'recherche des %s dernieres opérations du compte %s' % (q.count(), compte.nom)
             else:
                 titre = u'recherche des %s premières opérations' % q.count()
             if compte:
-                solde = compte.solde(datel=data['date_max'])
+                if data['date_max']:
+                    solde = compte.solde(datel=data['date_max'],espece=True)
+                else:
+                    solde = compte.solde(espece=True)
             else:
                 solde = 0
 
@@ -807,22 +813,9 @@ def search_opes(request):
                                                             'date_max': date_max,
                                                             'solde': None})
 
-from . import widgets as gsb_field
 
 
-class ajout_ope_bulk_form(gsb_forms.Baseform):
 
-    """premier form utilise ajout_ope_titre_bulk"""
-    titre = forms.ModelChoiceField(Titre.objects.all())
-    cours = gsb_field.CurField()
-    nombre = forms.DecimalField(localize=True)
-    frais = forms.DecimalField(localize=True, required=False)
-
-
-class ajout_ope_date_form(gsb_forms.Baseform):
-
-    """second form utilise ajout_ope_titre_bulk"""
-    date = forms.DateField()
 
 
 @transaction.atomic
@@ -836,10 +829,10 @@ def ajout_ope_titre_bulk(request, cpt_id):
     titres_forms = []
     if request.method == 'POST':
         i = 0
-        date_ope_form = ajout_ope_date_form(request.POST, initial={'date': gsb.utils.today})
+        date_ope_form = gsb_forms.ajout_ope_date_form(request.POST, initial={'date': gsb.utils.today})
         for titre in titre_compte:
             i += 1
-            titres_forms.append(ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'titre': titre, 'nombre': 0, 'montant': 0}))
+            titres_forms.append(gsb_forms.ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'titre': titre, 'nombre': 0, 'montant': 0}))
         if all([form.is_valid() for form in titres_forms]) and date_ope_form.is_valid():
             date_ope = date_ope_form.cleaned_data['date']
             for form in titres_forms:
@@ -855,7 +848,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
                                                                                               date_ope,
-                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
+                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
                                   )
                 else:
                     if nb < 0:
@@ -868,7 +861,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
                                                                                               date_ope,
-                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
+                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
                                   )
                     else:
                         if not nb and form.cleaned_data['cours']:
@@ -884,8 +877,8 @@ def ajout_ope_titre_bulk(request, cpt_id):
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         i = 0
-        date_ope_form = ajout_ope_date_form(initial={'date': gsb.utils.today})
+        date_ope_form = gsb_forms.ajout_ope_date_form(initial={'date': gsb.utils.today})
         for titre in titre_compte:
             i += 1
-            titres_forms.append(ajout_ope_bulk_form(prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
+            titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
     return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id, 'titre': u'opération sur les titres suivants'})

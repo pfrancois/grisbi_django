@@ -29,10 +29,13 @@
         </tr>
         </thead>
         <tfoot>
-        {% block footer %}
+        {% block footer %}{% if solde %}
             <tr class="footerbar">
-                <td colspan="100" class="cptLabel">Solde au {{ date_max }}: {{ solde|cur }}</td>
-            </tr>{% endblock footer %}
+                <td colspan="100" class="cptLabel">Solde au {% if date_max %} {{ date_max  }} {% else %} {% now "SHORT_DATE_FORMAT" %} {% endif %}: {{ solde|cur }}</td>
+            </tr>{% else %}
+            <tr class="footerbar">
+                <td colspan="100" class="cptLabel"></td>
+            </tr>{% endif %}{% endblock footer %}
         </tfoot>
         {% for ope in list_ope %}
             {% block ope %}

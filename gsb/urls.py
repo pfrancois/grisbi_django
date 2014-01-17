@@ -9,8 +9,7 @@ from .io.import_money_journal import Import_view_money_journal
 from .io import import_titre_csv as import_titres
 from django.conf import settings
 # les vues generales
-urlpatterns = patterns('gsb',
-                       url(r'^$', views.Index_view.as_view(), name='index'),
+urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),
 )
 
 # les vues relatives aux outils
@@ -20,10 +19,7 @@ urlpatterns += patterns('gsb.outils',
                             name="outils_index"
                         ),
                         # echeances echues
-                        url(r'^options/ech$',
-                            outils.Echeance_view.as_view(),
-                            name='gestion_echeances'
-                        ),
+                        url(r'^options/ech$', outils.Echeance_view.as_view(), name='gestion_echeances'),
                         # affiche config
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
@@ -111,7 +107,5 @@ if settings.DEBUG:
 try:
     import perso
     urlpatterns += patterns('', (r'^perso/', include(perso)),)
-
-
 except ImportError:
     pass

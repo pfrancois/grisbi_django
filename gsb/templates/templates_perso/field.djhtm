@@ -1,8 +1,0 @@
-<td class="{% if field.required %}required {% endif %}{% if field.errors %}error {% endif %}">{% if field.errors %}
-    <ul class="{{ field.error_css_class }}">
-        {% for error in field.errors %}
-            <li>{{ error|escape }}</li>{% endfor %}
-    </ul>
-{% endif %}
-    {{ field }}
-</td>

@@ -232,4 +232,4 @@ class Majtitre(Baseform):
 class SearchForm(Baseform):
     compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
     date_min = forms.DateField(label='date_min', widget=forms.DateInput)
-    date_max = forms.DateField(label='date_max', widget=forms.DateInput)
+    date_max = forms.DateField(label='date_max', widget=forms.DateInput, required=False)

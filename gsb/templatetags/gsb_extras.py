@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 # from django.utils.http import urlquote
 from django.conf import settings
 # import logging
+from django.template import Library, Node, TemplateSyntaxError
 
 register = template.Library()
 
@@ -59,3 +60,4 @@ def centimes(value):
     @type value:comme on veut
     """
     return unicode(Decimal(force_unicode(value)) * Decimal(100))
+
