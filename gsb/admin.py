@@ -285,8 +285,8 @@ class Cat_admin(Modeladmin_perso):
 
     """classe admin pour les categories"""
     actions = ['fusionne', ]
-    list_editable = ('nom',)
-    list_display = ('id', 'nom', 'type', 'nb_opes')
+    list_editable = ('nom', 'couleur')
+    list_display = ('id', 'nom', 'type', 'nb_opes', 'couleur')
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.HORIZONTAL}
@@ -327,9 +327,10 @@ class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
     actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
-              'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut'))
-    list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope')
+              'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut', 'couleur'))
+    list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope', 'couleur')
     list_filter = ('type', 'banque', 'ouvert')
+    list_editable = ('couleur',)
     radio_fields = {'type': admin.HORIZONTAL,
                     'moyen_debit_defaut': admin.VERTICAL,
                     'moyen_credit_defaut': admin.VERTICAL}

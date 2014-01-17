@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+{% load l10n %}{% localize off %}<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -14,7 +14,7 @@
 				<integer>8</integer>
 			</dict>
 			<key>action</key>
-			<integer>1</integer>
+			<integer>{{ action }}</integer>
 			<key>device</key>
 			<dict>
 				<key>CF$UID</key>
@@ -36,7 +36,7 @@
 			<key>account</key>
 			<integer>0</integer>
 			<key>amount</key>
-			<real>{{ montant|floatformat:-2|default_if_none:0 }}</real>
+			<real>{{ montant|floatformat:-2 }}</real>
 			<key>category</key>
 			<integer>{{ cat_id }}</integer>
 			<key>currency</key>
@@ -133,4 +133,4 @@
 	<key>$version</key>
 	<integer>100000</integer>
 </dict>
-</plist>
+</plist>{% endlocalize %}

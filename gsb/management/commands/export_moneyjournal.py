@@ -88,12 +88,7 @@ def proc_sql_export(sql, log=None):
         nbcat = nbcat + 1
         param['id'] = cat.id
         param['name'] = cat.nom
-        if cat.type == 'r':
-            param['type'] = 1
-            param['color'] = 35840
-        else:
-            param['type'] = 2
-            param['color'] = 13369344
+        param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = nbcat
         param['lastupdate'] = time.mktime(cat.lastupdate.timetuple())
         cur.execute(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
@@ -134,7 +129,7 @@ def proc_sql_export(sql, log=None):
         param['id'] = cpt.id
         param['name'] = cpt.nom
         param['symbol'] = i
-        param['color'] = utils.idtostr(cpt, membre="color", defaut="35840")
+        param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = i
         param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
         cur.execute(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)

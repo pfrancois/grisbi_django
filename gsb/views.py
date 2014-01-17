@@ -156,12 +156,12 @@ class Cpt_detail_view(Mytemplateview):
                 sort_t['montant'] = "montant"
             sort_t['actuel'] = "?sort=%s" % sort
             # gestion des ope anciennes
-            if not (self.all or self.rapp) and not settings.ANCIEN:
+            if not (self.all or self.rapp):
                     q = q.filter(date__gte=gsb.utils.today().replace(year=gsb.utils.today().year - 1))
             #q = q.filter(date__gte=gsb.utils.today().replace(year=2005, month=1))
             opes = q.select_related('tiers', 'cat', 'rapp')
             # nb ope rapp
-            nb_ope_rapp = q.count()
+            nb_ope_rapp = Ope.non_meres().filter(compte=compte).order_by('-date').filter(rapp__isnull=False).count()
             context = self.get_context_data(compte=compte, opes=opes, nb_ope_rapp=nb_ope_rapp, sort=sort_t)
 
         else:
@@ -227,7 +227,8 @@ class Cpt_detail_view(Mytemplateview):
             solde_p_neg = 0
         if self.espece:
             # gestion pagination
-            if self.all:
+            if self.all and compte.type != 't':
+                print compte.type
                 list_opes = self.cpt_espece_pagination(opes)
             else:
                 list_opes = opes
@@ -534,7 +535,7 @@ def ope_titre_detail(request, pk):
         if form.is_valid():
             try:
                 form.save()
-                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2)))
+                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
             except IntegrityError as e:
                 messages.error(request, e.unicode())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
@@ -626,7 +627,7 @@ def ope_titre_achat(request, cpt_id):
                                                                           titre.nom,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date'],
-                                                                          round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2)))
+                                                                          '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -740,7 +741,7 @@ def ope_titre_vente(request, cpt_id):
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
                                                                           form.cleaned_data['date']),
-                         round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
+                                                                        '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -786,7 +787,7 @@ def search_opes(request):
             else:
                 solde = 0
 
-            return render(request, 'templates_perso/search.djhtm', {'form': form,
+            return render(request, 'gsb/search.djhtm', {'form': form,
                                                                     'list_ope': q,
                                                                     'titre': titre,
                                                                     "sort": sort_get,
@@ -799,7 +800,7 @@ def search_opes(request):
         date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
         form = gsb_forms.SearchForm(initial={'date_min': date_min, 'date_max': date_max})
 
-    return render(request, 'templates_perso/search.djhtm', {'form': form,
+    return render(request, 'gsb/search.djhtm', {'form': form,
                                                             'list_ope': None,
                                                             'titre': 'recherche',
                                                             "sort": "",
@@ -854,7 +855,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
                                                                                               date_ope,
-                                                                                              round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
+                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
                                   )
                 else:
                     if nb < 0:
@@ -867,7 +868,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                                                                                               form.cleaned_data['titre'].nom,
                                                                                               form.cleaned_data['cours'],
                                                                                               date_ope,
-                                                                                              round(form.cleaned_data['cours'] * form.cleaned_data['nombre'], 2))
+                                                                                              '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])
                                   )
                     else:
                         if not nb and form.cleaned_data['cours']:
