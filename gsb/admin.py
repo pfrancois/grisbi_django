@@ -637,13 +637,13 @@ class Cours_admin(Modeladmin_perso):
     list_filter = ('date', 'titre')
     fields = ('date', 'titre', 'valeur')
     ordering = ('-date',)
-
+    date_hierarchy = 'date'
 
 class Titre_admin(Modeladmin_perso):
 
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne']
-    list_display = ('nom', 'isin', 'type', 'last_cours')
+    list_display = ('id','nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
@@ -743,6 +743,7 @@ class Ope_titre_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)
+    date_hierarchy = 'date'
 
     def show_ope(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_ost.id,))
