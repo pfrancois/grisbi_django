@@ -231,5 +231,20 @@ class Majtitre(Baseform):
 
 class SearchForm(Baseform):
     compte = forms.ModelChoiceField(Compte.objects.all(), required=False)
-    date_min = forms.DateField(label='date_min', widget=forms.DateInput)
+    date_min = forms.DateField(label='date_min', widget=forms.DateInput, required=False)
     date_max = forms.DateField(label='date_max', widget=forms.DateInput, required=False)
+
+
+class ajout_ope_bulk_form(Baseform):
+
+    """premier form utilise ajout_ope_titre_bulk"""
+    titre = forms.ModelChoiceField(Titre.objects.all())
+    cours = gsb_field.CurField()
+    nombre = forms.DecimalField(localize=True)
+    frais = forms.DecimalField(localize=True, required=False)
+
+
+class ajout_ope_date_form(Baseform):
+
+    """second form utilise ajout_ope_titre_bulk"""
+    date = forms.DateField()

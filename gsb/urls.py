@@ -83,7 +83,8 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/rapp$', 'titre_detail_cpt', {'rapp': True}, name="gsb_cpt_titre_detail_rapp"),
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
-                        url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende")
+                        url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
+                        url(r'^titres$', views.Rdt_titres_view.as_view(), name="Rdt_titres_view"),
 )
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static

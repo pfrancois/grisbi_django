@@ -6,9 +6,9 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed, Echeance
-from . import forms as gsb_forms
+import gsb.forms as gsb_forms
 from django import forms
-from django.db import models
+from django.db import models, connection
 import decimal
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage, PageNotAnInteger
@@ -16,6 +16,8 @@ from django.views import generic
 from django.db import IntegrityError
 import gsb.utils
 from django.db import transaction
+from django.utils.datastructures import SortedDict
+import datetime
 
 
 class Mytemplateview(generic.TemplateView):
@@ -740,8 +742,8 @@ def ope_titre_vente(request, cpt_id):
                                                                           form.cleaned_data['titre'],
                                                                           settings.DEVISE_GENERALE,
                                                                           form.cleaned_data['cours'],
-                                                                          form.cleaned_data['date']),
-                                                                        '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']))
+                                                                          form.cleaned_data['date'],
+                                                                        '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -765,13 +767,11 @@ def search_opes(request):
         if form.is_valid():
             data = form.cleaned_data
             compte = data['compte']
-            print data['date_max']
             if compte:
-                q = Ope.objects.filter(compte=compte, date__gte=data['date_min'])
-            else:
-                q = Ope.objects.filter(date__gte=data['date_min'])
+                q = Ope.objects.filter(compte=compte)
+            q = q.filter(date__gte=data['date_min'])
             if data['date_max']:
-                q.filter(date__lte=data['date_max'])
+                q = q.filter(date__lte=data['date_max'])
             sort = request.GET.get('sort')
             if sort:
                 sort = unicode(sort)
@@ -787,18 +787,18 @@ def search_opes(request):
                 titre = u'recherche des %s premières opérations' % q.count()
             if compte:
                 if data['date_max']:
-                    solde = compte.solde(datel=data['date_max'],espece=True)
+                    solde = compte.solde(datel=data['date_max'], espece=True)
                 else:
                     solde = compte.solde(espece=True)
             else:
                 solde = 0
 
             return render(request, 'gsb/search.djhtm', {'form': form,
-                                                                    'list_ope': q,
-                                                                    'titre': titre,
-                                                                    "sort": sort_get,
-                                                                    'date_max': data['date_max'],
-                                                                    'solde': solde})
+                                                        'list_ope': q,
+                                                        'titre': titre,
+                                                        "sort": sort_get,
+                                                        'date_max': data['date_max'],
+                                                        'solde': solde})
         else:
             date_max = Ope.objects.aggregate(element=models.Max('date'))['element']
     else:
@@ -807,15 +807,11 @@ def search_opes(request):
         form = gsb_forms.SearchForm(initial={'date_min': date_min, 'date_max': date_max})
 
     return render(request, 'gsb/search.djhtm', {'form': form,
-                                                            'list_ope': None,
-                                                            'titre': 'recherche',
-                                                            "sort": "",
-                                                            'date_max': date_max,
-                                                            'solde': None})
-
-
-
-
+                                                'list_ope': None,
+                                                'titre': 'recherche',
+                                                "sort": "",
+                                                'date_max': date_max,
+                                                'solde': None})
 
 
 @transaction.atomic
@@ -882,3 +878,119 @@ def ajout_ope_titre_bulk(request, cpt_id):
             i += 1
             titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i), initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today, 'nombre': 0, 'montant': 0}))
     return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id, 'titre': u'opération sur les titres suivants'})
+
+
+class Rdt_titres_view(Myformview):
+    template_name = 'titre.djhtm'
+    form_class = gsb_forms.SearchForm
+    requete = None
+    desc = None
+    titre = "rendement des titres"
+
+    def form_valid(self, form):
+        if form.cleaned_data['date_max']:
+            datel = form.cleaned_data['date_max']
+            titre = "%s au %s" % (self.titre, datel.strftime('%d %m %Y'))
+        else:
+            datel = gsb.utils.today()
+            titre = "%s au %s" % (titre, gsb.utils.today().strftime('%d %m %Y'))
+        if form.cleaned_data['compte']:
+            titre = "%s sur le compte %s" % (titre, form.cleaned_data['compte'].nom)
+            retour = self.sql_solde_compte(compte_id=form.cleaned_data['compte'].id, datel=datel)
+        else:
+            retour = self.sql_solde(datel=datel)
+        self.titre = titre
+        final = list()
+        for ligne in retour[1]:
+            toto = SortedDict()
+            for champ in retour[0]:
+                toto[champ] = ligne[champ]
+            final.append(toto)
+        self.requete = final
+        self.desc = retour[0]
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(Rdt_titres_view, self).get_context_data(**kwargs)
+        context.update({'titre': self.titre})
+        context.update({'requete': self.requete, 'desc': self.desc})
+        return context
+
+    def get_initial(self):
+        return {'date_min': None, 'date_max': None}
+
+    def sql_solde(self, datel=None):
+        requete = """select
+        t_cours.date_cours,
+        gsb_titre.nom,
+        t_nombre.nb as nb,
+        round(t_cours.cours,2) as cours,
+        round(t_cours.cours * t_nombre.nb,2) as montant,
+        round(t_invest.investi,2) as investi,
+        (round(((t_cours.cours * t_nombre.nb) - t_invest.investi )/t_invest.investi,4)*100)||"%" as rendement
+from (
+    SELECT sum(gsb_ope.montant)*-1 as investi,  gsb_tiers.titre_id
+    FROM  gsb_ope
+    left outer join gsb_tiers on gsb_ope.tiers_id=gsb_tiers.id
+    left outer join gsb_compte on gsb_ope.compte_id=gsb_compte.id
+    where gsb_ope.cat_id not in (3,4,46)
+    and gsb_compte.type = 't'
+    and gsb_ope.date <= %s
+    group by gsb_tiers.titre_id having (investi) > 0.001) t_invest
+left outer join (
+    SELECT max(gsb_cours.date) as date_cours, gsb_cours.titre_id, gsb_cours.valeur as cours
+    FROM gsb_cours
+    WHERE gsb_cours.date <= %s
+    group by gsb_cours.titre_id) t_cours on t_cours.titre_id=t_invest.titre_id
+left outer join (
+    SELECT gsb_ope_titre.titre_id, sum(gsb_ope_titre.nombre) as nb
+    FROM gsb_ope_titre
+    where gsb_ope_titre.date <= %s
+    group by gsb_ope_titre.titre_id) t_nombre on t_invest.titre_id=t_nombre.titre_id
+left outer join gsb_titre on gsb_titre.id = t_invest.titre_id
+order by gsb_titre.nom"""
+        if datel is None:
+            datel = utils.today().strftime("%Y-%m-%d")
+        cursor = connection.cursor()
+        cursor.execute(requete, [datel, datel, datel])
+        desc = [col[0] for col in cursor.description]
+        result = [dict(zip(desc, row)) for row in cursor.fetchall()]
+        return (desc, result)
+
+    def sql_solde_compte(self, compte_id, datel=None):
+        requete = """select
+        t_cours.date_cours,
+        gsb_titre.nom,
+        t_nombre.nb as nb,
+        round(t_cours.cours,2) as cours,
+        round(t_cours.cours * t_nombre.nb,2) as montant,
+        round(t_invest.investi,2) as investi,
+        (round(((t_cours.cours * t_nombre.nb) - t_invest.investi )/t_invest.investi,4)*100)||"%" as rendement
+from (
+    SELECT sum(gsb_ope.montant)*-1 as investi,  gsb_tiers.titre_id
+    FROM  gsb_ope
+    left outer join gsb_tiers on gsb_ope.tiers_id=gsb_tiers.id
+    left outer join gsb_compte on gsb_ope.compte_id=gsb_compte.id
+    where gsb_ope.cat_id not in (3,4,46)
+    and gsb_compte.type = 't' and gsb_ope.compte_id = %s
+    and gsb_ope.date <= %s
+    group by gsb_tiers.titre_id having (investi) > 0.001) t_invest
+left outer join (
+    SELECT max(gsb_cours.date) as date_cours, gsb_cours.titre_id, gsb_cours.valeur as cours
+    FROM gsb_cours
+    WHERE gsb_cours.date <= %s
+    group by gsb_cours.titre_id) t_cours on t_cours.titre_id=t_invest.titre_id
+left outer join (
+    SELECT gsb_ope_titre.titre_id, sum(gsb_ope_titre.nombre) as nb
+    FROM gsb_ope_titre
+    where gsb_ope_titre.date <= %s  and gsb_ope_titre.compte_id = %s
+    group by gsb_ope_titre.titre_id) t_nombre on t_invest.titre_id=t_nombre.titre_id
+left outer join gsb_titre on gsb_titre.id = t_invest.titre_id
+order by gsb_titre.nom"""
+        if datel is None:
+            datel = gsb.utils.today().strftime("%Y-%m-%d")
+        cursor = connection.cursor()
+        cursor.execute(requete, [compte_id, datel, datel, datel, compte_id])
+        desc = [col[0] for col in cursor.description]
+        result = [dict(zip(desc, row)) for row in cursor.fetchall()]
+        return (desc, result)

@@ -61,3 +61,11 @@ def centimes(value):
     """
     return unicode(Decimal(force_unicode(value)) * Decimal(100))
 
+from django.template.defaultfilters import floatformat
+
+
+@register.filter
+def percent(value):
+    if value is None:
+        return None
+    return floatformat(value * 100.0, 2) + '%'
