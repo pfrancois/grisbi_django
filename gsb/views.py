@@ -537,7 +537,7 @@ def ope_titre_detail(request, pk):
         if form.is_valid():
             try:
                 form.save()
-                messages.info(request, u"opération titre (%s) modifiée soit %e EUR" % (ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
+                messages.info(request, u"opération titre ({}) modifiée soit {} EUR".format(ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
             except IntegrityError as e:
                 messages.error(request, e.unicode())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
@@ -782,7 +782,7 @@ def search_opes(request):
                 q = q.order_by('-date')
             q = q.select_related('tiers', 'cat', 'rapp', 'moyen', 'jumelle', 'ope')[:100]
             if compte:
-                titre = u'recherche des %s dernieres opérations du compte %s' % (q.count(), compte.nom)
+                titre = u'recherche des %s dernières opérations du compte %s' % (q.count(), compte.nom)
             else:
                 titre = u'recherche des %s premières opérations' % q.count()
             if compte:
@@ -921,6 +921,7 @@ class Rdt_titres_view(Myformview):
 
     def sql_solde(self, datel=None):
         requete = """select
+        gsb_titre.id,
         t_cours.date_cours,
         gsb_titre.nom,
         t_nombre.nb as nb,
@@ -955,15 +956,24 @@ order by gsb_titre.nom"""
         cursor.execute(requete, [datel, datel, datel])
         desc = [col[0] for col in cursor.description]
         result = [dict(zip(desc, row)) for row in cursor.fetchall()]
+        # montant total place
+        for titre in desc:
+            if titre == "montant_place":
+                total[titre] = sum([o['montant_place'] for o in result])
+            elif titre == "nom":
+                total[titre] = u"montant total placé"
+            else:
+                total[titre] = " "
+        result.append(total)
         return (desc, result)
 
     def sql_solde_compte(self, compte_id, datel=None):
         requete = """select
-        t_cours.date_cours,
+        gsb_titre.id,t_cours.date_cours,
         gsb_titre.nom,
         t_nombre.nb as nb,
         round(t_cours.cours,2) as cours,
-        round(t_cours.cours * t_nombre.nb,2) as montant,
+        round(t_cours.cours * t_nombre.nb,2) as montant_place,
         round(t_invest.investi,2) as investi,
         (round(((t_cours.cours * t_nombre.nb) - t_invest.investi )/t_invest.investi,4)*100)||"%" as rendement
 from (
@@ -993,4 +1003,24 @@ order by gsb_titre.nom"""
         cursor.execute(requete, [compte_id, datel, datel, datel, compte_id])
         desc = [col[0] for col in cursor.description]
         result = [dict(zip(desc, row)) for row in cursor.fetchall()]
+        total = dict()
+        # montant total place
+        for titre in desc:
+            if titre == "montant_place":
+                total[titre] = sum([o['montant_place'] for o in result])
+            elif titre == "nom":
+                total[titre] = u"montant total placé"
+            else:
+                total[titre] = " "
+        result.append(total)
+        total = dict()
+        # solde espece
+        for titre in desc:
+            if titre == "montant_place":
+                total[titre] = Compte.objects.get(id=compte_id).solde(datel=data['date_max'], espece=True)
+            elif titre == "nom":
+                total[titre] = u"solde du compte espèces"
+            else:
+                total[titre] = " "
+        result.append(total)
         return (desc, result)

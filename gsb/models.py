@@ -288,6 +288,22 @@ class Titre(models.Model):
         else:
             return 0  # comme pas d'ope, pas d'encours
 
+    def ajustement(self, datel, montant_vrai, cours):
+        compte_id = self.ope_titre_set.all().order_by('compte').values_list('compte', flat=True).distinct()[0]
+        datel = utils.strpdate(datel)
+        montant_theorique = Ope_titre.objects.filter(titre_id=self.id, date__lte=datel, compte_id=compte_id).aggregate(nombre=models.Sum('nombre'))['nombre']
+        montant_a_corriger = decimal.Decimal(str(montant_vrai)) - montant_theorique
+        cours = decimal.Decimal(str(cours))
+        if montant_a_corriger != 0:
+            ope_titre = Ope_titre.objects.create(titre=self,
+                                             compte_id=compte_id,
+                                             nombre=montant_a_corriger,
+                                             date=datel,
+                                             cours=cours)
+            print u"opération titre ({}) modifiée soit {} EUR".format(ope_titre, '{0:.2f}'.format(cours * montant_a_corriger))
+        else:
+            print "rien a modifier"
+
 
 class Cours(models.Model):
 
@@ -520,7 +536,7 @@ class Compte(models.Model):
         """renvoie le solde du compte
             @param datel : date date limite de calcul du solde
             @param rapp : boolean faut il prendre uniquement les opération rapproches
-            @param espece : si c'est un compte espece d'un compte titre
+            @param espece : si c'est un compte espece d'un compte titre (fonctionne egalement pour les comptes normaux)
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
         if rapp:
@@ -763,6 +779,26 @@ class Compte(models.Model):
             return self.moyen_credit_defaut
         else:
             return Moyen.objects.get(id=settings.MD_CREDIT)
+
+    def ajustement(self, datel, montant_vrai, cat_nom="Ajustements", rapp=False, pointe=False):
+        cat_id = Cat.objects.get_or_create(nom=cat_nom, defaults={"nom": cat_nom, "type": "d"})[0].id
+        datel = utils.strpdate(datel)
+        montant_theorique = self.solde(espece=True, datel=datel, rapp=rapp, pointe=pointe)
+        montant_a_corriger = decimal.Decimal(str(montant_vrai)) - montant_theorique
+        if montant_a_corriger != 0:
+            if montant_a_corriger > 0:
+                moyen
+            ope = Ope.objects.create(compte=self,
+                                     tiers=Tiers.objects.get_or_create(nom="ajustement", defaults={"nom": "ajustement"})[0],
+                                     montant=montant_a_corriger,
+                                     date=datel,
+                                     moyen=self.moyen_debit() if montant_a_corriger < 0 else self.moyen_credit(),
+                                     automatique=True,
+                                     notes="ajustement le %s" % utils.today()
+                                     )
+            print u"opération ({}) crée ".format(ope)
+        else:
+            print "rien a modifier"
 
 
 class Ope_titre(models.Model):
