@@ -893,7 +893,7 @@ class Rdt_titres_view(Myformview):
             titre = "%s au %s" % (self.titre, datel.strftime('%d %m %Y'))
         else:
             datel = gsb.utils.today()
-            titre = "%s au %s" % (titre, gsb.utils.today().strftime('%d %m %Y'))
+            titre = "%s au %s" % (self.titre, gsb.utils.today().strftime('%d %m %Y'))
         if form.cleaned_data['compte']:
             titre = "%s sur le compte %s" % (titre, form.cleaned_data['compte'].nom)
             retour = self.sql_solde_compte(compte_id=form.cleaned_data['compte'].id, datel=datel)
@@ -949,7 +949,7 @@ left outer join (
     where gsb_ope_titre.date <= %s
     group by gsb_ope_titre.titre_id) t_nombre on t_invest.titre_id=t_nombre.titre_id
 left outer join gsb_titre on gsb_titre.id = t_invest.titre_id
-order by gsb_titre.nom"""
+order by gsb_titre.id"""
         if datel is None:
             datel = utils.today().strftime("%Y-%m-%d")
         cursor = connection.cursor()
@@ -996,7 +996,7 @@ left outer join (
     where gsb_ope_titre.date <= %s  and gsb_ope_titre.compte_id = %s
     group by gsb_ope_titre.titre_id) t_nombre on t_invest.titre_id=t_nombre.titre_id
 left outer join gsb_titre on gsb_titre.id = t_invest.titre_id
-order by gsb_titre.nom"""
+order by gsb_titre.id"""
         if datel is None:
             datel = gsb.utils.today().strftime("%Y-%m-%d")
         cursor = connection.cursor()
@@ -1017,7 +1017,7 @@ order by gsb_titre.nom"""
         # solde espece
         for titre in desc:
             if titre == "montant_place":
-                total[titre] = Compte.objects.get(id=compte_id).solde(datel=data['date_max'], espece=True)
+                total[titre] = Compte.objects.get(id=compte_id).solde(datel=datel, espece=True)
             elif titre == "nom":
                 total[titre] = u"solde du compte espèces"
             else:

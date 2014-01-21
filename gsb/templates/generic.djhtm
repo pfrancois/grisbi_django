@@ -29,7 +29,7 @@
             </tr>
             </thead>
             {% for ligne in requete %}
-            <tr>
+            <tr class="item hover {% cycle 'creditElement' 'debitElement' %}">
                 {% for key, value in ligne.items %}
                 <td class="opDebit"> {{ value }}</td>
                 {% endfor %}
