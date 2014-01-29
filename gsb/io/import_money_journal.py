@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 #import re
-#from django.conf import settings  # @Reimport
+# from django.conf import settings  # @Reimport
 
 #from django.contrib import messages
 #from gsb import models
@@ -16,6 +16,7 @@ from gsb.io import import_csv
 
 
 class money_journal_csv(csv.Dialect):
+
     """fichier csv de money journal"""
     delimiter = ','
     quotechar = '"'
@@ -26,7 +27,8 @@ class money_journal_csv(csv.Dialect):
 
 
 class csv_money_journal_reader(import_csv.Csv_unicode_reader_ope_sans_jumelle_et_ope_mere):
-    champs = ["Date", "Type", "Paiement", "Catégorie", "Pièce jointe", "Mémo", "Montant", "Répéter"]
+    champs = ["Date", "Type", "Paiement", u"Catégorie", u"Pièce jointe", u"Mémo", "Montant", u"Répéter"]
+    champ_test = u'Catégorie'
 
     def __init__(self, fich, dialect=money_journal_csv, encoding="utf-8", **kwds):
         super(csv_money_journal_reader, self).__init__(fich=fich, dialect=dialect, encoding=encoding, **kwds)

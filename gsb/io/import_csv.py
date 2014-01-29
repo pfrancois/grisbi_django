@@ -229,7 +229,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
                 else:
                     verif_format = True
-
             ope = dict()
             ope['ligne'] = row.ligne
             # verification pour les lignes
@@ -238,7 +237,14 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 continue
             # compte
             try:
+                created = self.comptes.nb_created
                 ope['compte_id'] = self.comptes.goc(row.cpt)
+                if self.comptes.nb_created != created:  # il y a eu une creation
+                    if row.ope_titre and (settings.CONVERSION_CPT_TITRE or settings.TEST):
+                        cpt = models.Compte.objects.get(id=ope['compte_id'])
+                        if cpt.type != 't':
+                            cpt.type = 't'
+                            cpt.save()
             except import_base.ImportException:
                 self.erreur.append(u"cpt inconnu (%s) à la ligne %s" % (row.cpt, row.ligne))
                 continue

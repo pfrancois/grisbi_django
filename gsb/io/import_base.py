@@ -179,6 +179,10 @@ class Table(object):
                     argument_def = self.arg_def(nom, obj)
                     try:
                         with transaction.atomic():
+                            if obj is not None and 'id' in obj.keys():
+                                requete = self.element.objects.filter(id=obj['id'])
+                                if requete.exists() and requete[0].nom != obj['nom']:
+                                    raise ImportException("attention probleme dans import obj %s, un obj avec meme id mais pas meme nom a déja ete cree" % obj)
                             created = self.element.objects.create(**argument_def)
                             self.nb_created += 1
                     except IntegrityError as e:
@@ -188,7 +192,7 @@ class Table(object):
                     self.create_item.append(created)
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
-                    raise ImportException(u"%s '%s' non créée alors que c'est read only" % (self.element._meta.object_name, nom))
+                    raise ImportException(u"%s '%s' non créée parce que c'est read only" % (self.element._meta.object_name, nom))
         return pk
 
     def arg_def(self, nom, obj=None):

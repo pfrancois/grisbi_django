@@ -91,6 +91,10 @@ def proc_sql_export(sql, log=None):
         param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = nbcat
         param['lastupdate'] = time.mktime(cat.lastupdate.timetuple())
+        if cat.type == 'd':
+            param['type'] = 2
+        else:
+            param['type'] = 1
         cur.execute(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
     sql.commit()
     log('cat et sous cat')
@@ -121,7 +125,6 @@ def proc_sql_export(sql, log=None):
     cur.executescript(chaine)
     sql.commit()
     param = {}
-    # on ne prend que les comptes bancaire ou cash
     liste_compte = models.Compte.objects.all()
     i = 0
     for cpt in liste_compte:
@@ -173,7 +176,7 @@ def proc_sql_export(sql, log=None):
         param['photo'] = 0
         param['voice'] = 0
         param['payee'] = None
-        param['note'] = ''
+        param['note'] = None
         param['account'] = 0
         if ope.moyen.type == 'r':
             param['type'] = 1

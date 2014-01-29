@@ -26,7 +26,7 @@ __all__ = ['Test_export']
 class Test_export(Test_view_base):
 
     def test_csv_global(self):
-        #on recupere un compte
+        # on recupere un compte
         models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
                                compte_dest=models.Compte.objects.get(nom='cptb3'),
                                montant=100,
@@ -41,7 +41,7 @@ class Test_export(Test_view_base):
         o = models.Ope.objects.get(id=17)
         o.pointe = True
         o.save()
-        #on rapproche l'ope mere
+        # on rapproche l'ope mere
         ope_mere = models.Ope.objects.get(id=11)
         ope_mere.rapp = models.Rapp.objects.get(id=1)
         ope_mere.save()
@@ -152,42 +152,6 @@ class Test_export(Test_view_base):
         form = ex_csv.Exportform_Compte_titre(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-
-    def test_sql_money_iphone(self):
-        # on cree ce les entree de la vue
-        reponse_recu = self.client.post(reverse('export_sql_money_iphone'),
-                                        data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
-                                        ).content
-        # on remplace pour que ca marche 'version special du mock'
-        chaine1 = r'INSERT INTO "category" VALUES\(68,\'placement\',2,13369344,8,\d+.\d+\);'
-        chaine2 = 'INSERT INTO "category" VALUES(68,\'placement\',2,13369344,8,1375886177.0);'
-        reponse_recu = re.sub(chaine1, chaine2, reponse_recu)
-        #on recreer un fichier unicode
-        reponse_recu = reponse_recu.decode('utf-8')
-        # on coupe ligne par ligne
-        self.assertfileequal(reponse_recu, "money_iphone.txt", nom="csv_sql_money_iphone", unicode_encoding='cp1252')
-
-    def test_csv_pocket_money_iphone(self):
-        reponse_recu = self.client.post(reverse('export_csv_pocket_money'),
-                                        data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"}
-                                         ).content
-
-        reponse_attendu = u""""account name","date","ChkNum","Payee","Category","Class","Memo","Amount","Cleared","CurrencyCode","ExchangeRate"
-"cpte1","11/08/11","","tiers1","cat1","","","-100.00","*","EUR","1"
-"cpte1","11/08/11","","tiers1","cat2","","","10.00","*","EUR","1"
-"cpte1","11/08/11","","tiers1","cat1","ib1","","10.00","","EUR","1"
-"cpte1","21/08/11","","tiers2","cat2","ib2","fusion avec ope1","10.00","","EUR","1"
-"cpt_titre2","29/10/11","","titre_ t2","Opération sur titre","","20@5","-100.00","*","EUR","1"
-"cpte1","30/10/11","","<cptb3>","Virement","","","-100.00","","EUR","1"
-"cptb3","30/10/11","","<cpte1>","Virement","","","100.00","","EUR","1"
-"cpt_titre2","30/11/11","","titre_ t2","Opération sur titre","","150@10","-1500.00","","EUR","1"
-"cpt_titre1","18/12/11","","titre_ t1","Opération sur titre","","1@1","-1.00","","EUR","1"
-"cpt_titre1","24/09/12","","titre_ autre","Opération sur titre","","5@1","-5.00","","EUR","1"
-"cpte1","24/09/12","","tiers2","cat1","","","99.00","","EUR","1"
-"cpte1","24/09/12","","tiers2","cat2","","","1.00","","EUR","1"
-"""
-        reponse_recu = unicode(reponse_recu, 'latin-1')
-        self.assertreponsequal(reponse_recu, reponse_attendu, nom="test_csv_pocket_money_iphone", unicode_encoding='cp1252')
 
     def test_export_cours(self):
         reponse_recu = self.client.post(reverse('export_cours'),

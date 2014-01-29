@@ -1156,18 +1156,11 @@ class Test_models(TestCase):
         o = Ope.objects.get(id=8)
         self.assertRaises(IntegrityError, o.delete)
 
-    def test_pre_delete_ope_mere_avec_fille(self):
-        o = Ope.objects.get(id=11)
-        self.assertRaises(IntegrityError, o.delete)
-
     def test_pre_delete_ope_rapp_jumelle(self):
         o = Ope.objects.get(id=9)
         o.rapp_id = 1
         o.save()
         self.assertRaises(IntegrityError, Ope.objects.get(id=8).delete)
-
-    def test_pre_delete_ope_mere_erreur(self):
-        self.assertRaises(IntegrityError, Ope.objects.get(id=11).delete)
 
     def test_pre_delete_ope_titre_rapp(self):
         Compte.objects.get(id=5).achat(titre=Titre.objects.get(id=1), nombre=20, date='2011-01-01')

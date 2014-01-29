@@ -9,13 +9,15 @@ from .test_base import TestCase
 from django.core.urlresolvers import reverse
 import os.path
 from django.conf import settings
+from django.test.utils import override_settings
 import gsb.utils as utils
-# import mock
-# import datetime
+import mock
+import datetime
 from .. import models
 from django.contrib.auth.models import User
 from ..io import import_base
 import glob
+import pytz
 
 __all__ = ['Test_import_csv', 'Test_import_base']
 
@@ -32,6 +34,7 @@ class Test_import_abstract(TestCase):
         os.remove(nomfich)
 
 
+@override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv(Test_import_abstract):
 
     def test_import_csv_simple_ok(self):
@@ -105,9 +108,9 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:interets").id, 68)
         self.assertEqual(models.Cat.objects.get(nom=u'Impôts:Cotisations sociales').id, 54)
         self.assertEqual(models.Cat.objects.get(nom=u'Virement').id, 65)
-        self.assertEqual(models.Cat.objects.get(nom=u"Opération Ventilée").id, 66)
-        self.assertEqual(models.Cat.objects.get(nom=u"Frais bancaires").id, 69)
-        self.assertEqual(models.Cat.objects.get(nom=u"Non affecté").id, 70)
+        self.assertEqual(models.Cat.objects.get(nom=u"Opération Ventilée").id, 69)
+        self.assertEqual(models.Cat.objects.get(nom=u"Frais bancaires").id, 70)
+        self.assertEqual(models.Cat.objects.get(nom=u"Non affecté").id, 71)
 
     def test_cat_cache2(self):
         """test avec definition de l'ensemble avec nom defini"""
@@ -145,7 +148,7 @@ class Test_import_base(Test_import_abstract):
         cats.readonly = True
         with self.assertRaises(import_base.ImportException) as exc:
             cats.goc("cat1")
-        self.assertEqual(exc.exception.msg, u"Cat 'cat1' non créée alors que c'est read only")
+        self.assertEqual(exc.exception.msg, u"Cat 'cat1' non créée parce que c'est read only")
 
     def test_cat_cache6(self):
         """on teste si on peut bien recuperer une cat deja existante"""
@@ -276,22 +279,24 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(m.date_fin, utils.today())
         self.assertEqual(m.nom, 'test2')
 
-    def test_titre_cache(self):
+    @mock.patch('gsb.utils.now')
+    def test_titre_cache(self, now_mock):
+        # on cree
+        now_mock.return_value = datetime.datetime(2013, 1, 1, 0, 0, 0).replace(tzinfo=pytz.utc)
         cache = import_base.Titre_cache(self.request_get('toto'))
         tata = cache.goc("titre1")
         self.assertEqual(tata, 1)
-        self.assertEqual(cache.goc(isin="%s%s" % (1, utils.today())), 1)
+        # on regarde si il existe effectivement
         m = models.Titre.objects.get(id=1)
         self.assertEqual(m.nom, 'titre1')
         self.assertEqual(m.type, 'ZZZ')
-        self.assertEqual(m.isin, "%s%s" % (1, utils.today()))
-        self.assertEqual(cache.goc(isin="isin1"), 2)
-        self.assertEqual(cache.goc("inconnu%s%s" % (2, utils.today())), 2)
-        m = models.Titre.objects.get(id=2)
-        self.assertEqual(m.nom, "inconnu%s%s" % (2, utils.today()))
-        self.assertEqual(m.type, 'ZZZ')
-        self.assertEqual(m.isin, 'isin1')
-        self.assertEqual(cache.goc("titre_ titre1"), 1)
+        self.assertEqual(m.isin, now_mock.return_value.isoformat())
+        # on essaye de le rappeller
+        self.assertEqual(cache.goc("titre1"), 1)
+
+    def test_titre_cache_obj(self):
+        """on essaye avec les objects"""
+        cache = import_base.Titre_cache(self.request_get('toto'))
         self.assertEqual(cache.goc('titre3', obj={"nom": 'titre3', "isin": 'ceci est un isin', "type": "ZZZ", 'id': 23553}), 23553)
         m = models.Titre.objects.get(id=23553)
         self.assertEqual(m.nom, 'titre3')
@@ -305,11 +310,6 @@ class Test_import_base(Test_import_abstract):
         with self.assertRaises(import_base.ImportException):
             cache.goc("titre1")
 
-    def test_titre_cache3(self):
-        """interogation sans parametre"""
-        cache = import_base.Titre_cache(self.request_get('toto'))
-        self.assertEqual(cache.goc(), None)
-
     def test_cours_cache(self):
         # version avec nom titre
         titres = import_base.Titre_cache(self.request_get('toto'))
@@ -322,25 +322,14 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(m.date, utils.strpdate("2011-01-01"))
         self.assertEqual(cache.goc("titre1", utils.strpdate("2011-01-01"), 150), 1)
 
-    def test_cours_cache2(self):
-        # version avec isin
-        titres = import_base.Titre_cache(self.request_get('toto'))
-        cache = import_base.Cours_cache(self.request_get('toto'), titres)
-        self.assertEqual(cache.goc("isin1", utils.strpdate("2011-01-01"), 150, methode='isin'), 1)
-        self.assertEqual(titres.goc(isin="isin1"), 1)
-        m = models.Cours.objects.get(id=1)
-        self.assertEqual(m.valeur, 150)
-        self.assertEqual(m.titre.isin, "isin1")
-        self.assertEqual(m.date, utils.strpdate("2011-01-01"))
-
     def test_cours_cache3(self):
         # meme date, cours different
         titres = import_base.Titre_cache(self.request_get('toto'))
         cache = import_base.Cours_cache(self.request_get('toto'), titres)
-        cache.goc("titre1", utils.strpdate("2011-01-01"), 150, methode='isin')
+        cache.goc("titre1", utils.strpdate("2011-01-01"), 150)
         del cache.id[1]
         with self.assertRaises(import_base.ImportException):
-            cache.goc("titre1", utils.strpdate("2011-01-01"), 200, methode='isin')
+            cache.goc("titre1", utils.strpdate("2011-01-01"), 200)
 
     def test_rapp_cache(self):
         cache = import_base.Rapp_cache(self.request_get("/outils"))

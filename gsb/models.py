@@ -18,7 +18,8 @@ from django.utils.safestring import mark_safe
 from colorful.fields import RGBColorField
 
 
-__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre', 'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
+__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre',
+          'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
 
 
 class Gsb_exc(Exception):
@@ -32,7 +33,7 @@ class Ex_jumelle_neant(Exception):
 def has_changed(instance, fields):
     if not getattr(instance, "pk", False):
         return False
-    if isinstance(fields, basestring):  # si c'est une chaine de caraceteres on le transforme en tupple
+    if isinstance(fields, basestring):  # si c'est une chaine de caracteres on le transforme en tupple
         fields = (fields,)
     changed = False
     obj = instance.__class__._default_manager.get(pk=instance.pk)
@@ -59,6 +60,9 @@ class config(models.Model):
 
     class Meta:
         db_table = 'gsb_config'
+
+    def __unicode__(self):
+        return u"%s" % self.id
 
 
 class Tiers(models.Model):
@@ -300,9 +304,9 @@ class Titre(models.Model):
                                              nombre=montant_a_corriger,
                                              date=datel,
                                              cours=cours)
-            print u"opération titre ({}) modifiée soit {} EUR".format(ope_titre, '{0:.2f}'.format(cours * montant_a_corriger))
+            return u"opération titre ({}) modifiée soit {} EUR".format(ope_titre, '{0:.2f}'.format(cours * montant_a_corriger))
         else:
-            print "rien a modifier"
+            return "rien a modifier"
 
 
 class Cours(models.Model):
@@ -794,11 +798,12 @@ class Compte(models.Model):
                                      date=datel,
                                      moyen=self.moyen_debit() if montant_a_corriger < 0 else self.moyen_credit(),
                                      automatique=True,
-                                     notes="ajustement le %s" % utils.today()
+                                     notes="ajustement le %s" % utils.today(),
+                                     cat=Tiers.objects.get_or_create(nom="ajustements", defaults={"nom": "ajustements", "type": "d"})[0],
                                      )
-            print u"opération ({}) crée ".format(ope)
+            return u"opération ({}) crée ".format(ope)
         else:
-            print "rien a modifier"
+            return "rien a modifier"
 
 
 class Ope_titre(models.Model):

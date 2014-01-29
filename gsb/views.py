@@ -215,6 +215,8 @@ class Cpt_detail_view(Mytemplateview):
         }
         solde_espece = compte.solde(espece=True)
         solde_r_esp = compte.solde(rapp=True, espece=True)
+        if self.type != "nrapp":
+            nb_ope_rapp = 0
         try:
             solde_p_pos = Ope.non_meres().filter(compte__id__exact=compte.id).filter(pointe=True).filter(montant__gte=0).aggregate(solde=models.Sum('montant'))['solde']
         except TypeError:
@@ -230,7 +232,6 @@ class Cpt_detail_view(Mytemplateview):
         if self.espece:
             # gestion pagination
             if self.all and compte.type != 't':
-                print compte.type
                 list_opes = self.cpt_espece_pagination(opes)
             else:
                 list_opes = opes
