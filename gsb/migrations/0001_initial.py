@@ -216,7 +216,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'gsb', ['Ope'])
 
-
     def backwards(self, orm):
         # Removing unique constraint on 'Cours', fields ['titre', 'date']
         db.delete_unique('gsb_cours', ['titre_id', 'date'])
@@ -262,7 +261,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Ope'
         db.delete_table('gsb_ope')
-
 
     models = {
         u'gsb.banque': {

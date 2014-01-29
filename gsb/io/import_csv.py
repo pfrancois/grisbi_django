@@ -225,7 +225,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 for attr in liste_colonnes:
                     if not hasattr(row, attr):
                         colonnes_oublies.append(attr)
-                print colonnes_oublies, len(colonnes_oublies)
                 if len(colonnes_oublies) > 0:
                     raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
                 else:
