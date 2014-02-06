@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .. import models
-from .. import utils
-
 from django.http import HttpResponse
 from django.conf import settings
+
+from .. import models
+from .. import utils
 # pour les vues
 from . import export_base
 from ..models import Ope_titre, Compte
@@ -51,12 +51,12 @@ class Export_ope_csv(Export_view_csv_base):
         for ope in query:
             if ope.jumelle is not None and ope.montant > 0:
                 continue  # c'est l'autre coté du virement qui est pris en compte
-            # id compte date montant
-            ligne = {'id': ope.id, 'cpt': ope.compte.nom}
+                # id compte date montant
+            ligne = {'id': ope.id, 'cpt': ope.compte.nom,
+                     'date': utils.datetostr(ope.date),
+                     'montant': utils.floattostr(ope.montant, nb_digit=2)}
             # date
-            ligne['date'] = utils.datetostr(ope.date)
             # montant
-            ligne['montant'] = utils.floattostr(ope.montant, nb_digit=2)
             # rapp
             if ope.rapp is not None:
                 ligne['r'] = ope.rapp.nom
@@ -65,7 +65,7 @@ class Export_ope_csv(Export_view_csv_base):
                     ligne['r'] = ope.mere.rapp.nom
                 else:
                     ligne['r'] = ''
-            # pointee
+                # pointee
             ligne['p'] = utils.booltostr(ope.pointe)
             # moyen
             ligne['moyen'] = utils.idtostr(ope.moyen, defaut='', membre="nom")
@@ -81,7 +81,7 @@ class Export_ope_csv(Export_view_csv_base):
                         ligne['notes'] = ligne['notes'] + u'>R' + ope.jumelle.rapp.nom
                 if ope.jumelle.pointe:  # jumelle pointee
                     if '>P' not in ligne['notes']:
-                        ligne['notes'] = ligne['notes'] + u'>P'
+                        ligne['notes'] += u'>P'
                 ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
             ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
@@ -92,8 +92,7 @@ class Export_ope_csv(Export_view_csv_base):
         return self.export_csv_view(data=data)
 
 
-class pocket_csv(csv.Dialect):
-
+class pocket_csv(object, csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ','
     quotechar = '"'
@@ -107,7 +106,8 @@ class Export_ope_pocket_money_csv_view(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ("account name", "date", "ChkNum", "Payee", "Category", "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
+    fieldnames = (
+    "account name", "date", "ChkNum", "Payee", "Category", "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
     class_csv_dialect = pocket_csv
     titre = "export_pocketmoney"
 
@@ -116,14 +116,15 @@ class Export_ope_pocket_money_csv_view(Export_view_csv_base):
         fonction principale
         """
         data = []
-        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen", "jumelle")
+        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp",
+                                                                                                    "ope", "ope_pmv", "moyen", "jumelle")
         for ope in query:
             # id compte date montant
-            ligne = {'account name': ope.compte.nom}
+            ligne = {'account name': ope.compte.nom,
+                     'date': utils.datetostr(ope.date, param='%d/%m/%y'),
+                     'ChkNum': ope.num_cheque}
             # date
-            ligne['date'] = utils.datetostr(ope.date, param='%d/%m/%y')
             # checknum
-            ligne['ChkNum'] = ope.num_cheque
             # tiers
             tiers = utils.idtostr(ope.tiers, defaut='', membre="nom")
             if utils.idtostr(ope.cat, defaut='', membre="nom") == "Virement":
@@ -148,8 +149,8 @@ class Export_ope_pocket_money_csv_view(Export_view_csv_base):
 
 class Exportform_cours(export_base.Exportform_ope):
     collection = export_base.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False, label="Titres")
-    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True,)
-    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True,)
+    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True, )
+    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True, )
     model_initial = models.Cours
     model_collec = models.Titre
 
@@ -184,8 +185,8 @@ class Export_cours_csv(Export_view_csv_base):
 
 class Exportform_Compte_titre(export_base.Exportform_ope):
     collection = export_base.forms.ModelMultipleChoiceField(Compte.objects.filter(type='t'), required=False)
-    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True,)
-    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True,)
+    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True, )
+    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True, )
     model_initial = Ope_titre
     model_collec = Compte
 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from django.db import models
 import datetime
 import decimal
+
+from django.db import models
 from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -11,15 +12,16 @@ from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.utils.encoding import smart_unicode, force_unicode
-import gsb.model_field as models_gsb
-from gsb import utils
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+
+import gsb.model_field as models_gsb
+from gsb import utils
 from colorful.fields import RGBColorField
 
 
 __all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre',
-          'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
+           'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
 
 
 class Gsb_exc(Exception):
@@ -36,6 +38,7 @@ def has_changed(instance, fields):
     if isinstance(fields, basestring):  # si c'est une chaine de caracteres on le transforme en tupple
         fields = (fields,)
     changed = False
+    # noinspection PyProtectedMember
     obj = instance.__class__._default_manager.get(pk=instance.pk)
     for field in fields:
         old_value = getattr(obj, field)
@@ -45,6 +48,7 @@ def has_changed(instance, fields):
             # the same as the filename that's already there even though there may
             # be different file contents.
             from django.core.files.uploadedfile import UploadedFile
+
             if isinstance(new_value.file, UploadedFile):
                 changed = isinstance(new_value.file, UploadedFile)
         if not getattr(instance, field) == old_value:
@@ -53,12 +57,10 @@ def has_changed(instance, fields):
 
 
 class config(models.Model):
-
     """model generique pour tout ce qui est modifiable"""
     derniere_import_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
-    derniere_export_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_config'
 
     def __unicode__(self):
@@ -66,7 +68,6 @@ class config(models.Model):
 
 
 class Tiers(models.Model):
-
     """
     un tiers, c'est a dire une personne ou un titre
     pour les titres, c'est remplis dans le champ note avec TYPE@ISIN
@@ -80,7 +81,7 @@ class Tiers(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_tiers'
         verbose_name_plural = u'tiers'
         ordering = ['nom']
@@ -108,7 +109,6 @@ class Tiers(models.Model):
 
 
 class Titre(models.Model):
-
     """²
     les titres englobe les actifs financiers
     afin de pouvoir faire le lien dans les operations, il y a un ligne vers les tiers
@@ -129,7 +129,7 @@ class Titre(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = u'gsb_titre'
         ordering = ['nom']
 
@@ -213,7 +213,7 @@ class Titre(models.Model):
                 if self.tiers.notes != u"%s@%s" % (self.isin, self.type):
                     self.tiers.notes = u"%s@%s" % (self.isin, self.type)
                     tiers_save = True
-        # comme ca a ete obligatoirement cree au dessus
+            # comme ca a ete obligatoirement cree au dessus
         if 'force_insert' in kwargs.keys():
             del kwargs['force_insert']
             kwargs['force_update'] = True
@@ -276,7 +276,7 @@ class Titre(models.Model):
         # si pas d'operation existante
         if datel is None:
             datel = utils.today()
-        # definition de la population des ope
+            # definition de la population des ope
         nb = self.nb(compte=compte, rapp=rapp, datel=datel)
         if nb > 0:
             if rapp:
@@ -286,7 +286,7 @@ class Titre(models.Model):
                 date_cours = opes.latest('date').date
             else:
                 date_cours = datel
-            # recupere le dernier cours
+                # recupere le dernier cours
             cours = self.last_cours(datel=date_cours)
             return nb * cours
         else:
@@ -300,17 +300,16 @@ class Titre(models.Model):
         cours = decimal.Decimal(str(cours))
         if montant_a_corriger != 0:
             ope_titre = Ope_titre.objects.create(titre=self,
-                                             compte_id=compte_id,
-                                             nombre=montant_a_corriger,
-                                             date=datel,
-                                             cours=cours)
+                                                 compte_id=compte_id,
+                                                 nombre=montant_a_corriger,
+                                                 date=datel,
+                                                 cours=cours)
             return u"opération titre ({}) modifiée soit {} EUR".format(ope_titre, '{0:.2f}'.format(cours * montant_a_corriger))
         else:
             return "rien a modifier"
 
 
 class Cours(models.Model):
-
     """cours des titres"""
     date = models.DateField(default=utils.today, db_index=True)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
@@ -319,7 +318,7 @@ class Cours(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_cours'
         verbose_name_plural = u'cours'
         unique_together = ("titre", "date")
@@ -334,7 +333,6 @@ class Cours(models.Model):
 
 
 class Banque(models.Model):
-
     """banques"""
     cib = models.CharField(max_length=5, blank=True, db_index=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
@@ -342,7 +340,7 @@ class Banque(models.Model):
     lastupdate = models_gsb.ModificationDateTimeField()
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_banque'
         ordering = ['nom']
 
@@ -365,7 +363,6 @@ class Banque(models.Model):
 
 
 class Cat(models.Model):
-
     """categories
     les sous categories n'existent pas en tant que tel, ce sont justes des categories plus longues"""
     typesdep = (
@@ -379,7 +376,7 @@ class Cat(models.Model):
     uuid = models_gsb.uuidfield(auto=True, add=True)
     couleur = RGBColorField(default="#FFFFFF")
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_cat'
         verbose_name = u"catégorie"
         ordering = ['nom']
@@ -407,7 +404,6 @@ class Cat(models.Model):
 
 
 class Ib(models.Model):
-
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
@@ -416,7 +412,7 @@ class Ib(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_ib'
         verbose_name = u"imputation budgétaire"
         verbose_name_plural = u'imputations budgétaires'
@@ -445,7 +441,6 @@ class Ib(models.Model):
 
 
 class Exercice(models.Model):
-
     """listes des exercices des comptes
     attention, il ne faut confondre exercice et rapp. les exercices sont les même pour tous les comptes alors q'un rapp est pour un seul compte
     """
@@ -456,7 +451,7 @@ class Exercice(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_exercice'
         ordering = ['-date_debut']
         get_latest_by = 'date_debut'
@@ -486,7 +481,6 @@ class Exercice(models.Model):
 
 
 class Compte(models.Model):
-
     """
     comptes (normal)
     """
@@ -529,7 +523,7 @@ class Compte(models.Model):
     uuid = models_gsb.uuidfield(auto=True, add=True)
     couleur = RGBColorField(default="#FFFFFF")
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_compte'
         ordering = ['nom']
 
@@ -557,8 +551,11 @@ class Compte(models.Model):
         else:
             solde = decimal.Decimal(req)
         if self.type == 't' and espece is False:
-            solde = solde + self.solde_titre(datel, rapp)
+            solde += self.solde_titre(datel, rapp)
         return solde
+
+    def solde_espece(self, datel=None):
+        return self.solde(datel=datel, espece=True)
 
     @transaction.atomic
     def fusionne(self, new):
@@ -572,7 +569,7 @@ class Compte(models.Model):
             raise TypeError(u"pas la même classe d'objet")
         if new.type != self.type:
             raise Gsb_exc(u"attention ce ne sont pas deux compte de même type")
-        if not(self.ouvert and new.ouvert):
+        if not (self.ouvert and new.ouvert):
             raise Gsb_exc(u"attention un des deux comptes est fermé")
         nb_change = Echeance.objects.filter(compte=self).update(compte=new)
         nb_change += Echeance.objects.filter(compte_virement=self).update(compte_virement=new)
@@ -635,7 +632,7 @@ class Compte(models.Model):
                                     notes=u"Frais %s@%s" % (nombre, prix),
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                                    )
+                )
                 # gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
@@ -672,7 +669,7 @@ class Compte(models.Model):
             nb_titre_avant = titre.nb(compte=self, datel=date)
             if not nb_titre_avant or nb_titre_avant < nombre:
                 raise Titre.DoesNotExist(u'titre pas en portefeuille au %s' % date)
-            # compta matiere
+                # compta matiere
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
                                                  nombre=decimal.Decimal(force_unicode(nombre)) * -1,
@@ -690,7 +687,7 @@ class Compte(models.Model):
                                     notes="frais -%s@%s" % (nombre, prix),
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                                    )
+                )
             if virement_vers:
                 vir = Virement()
                 vir.create(compte_origine=self,
@@ -733,7 +730,7 @@ class Compte(models.Model):
                                     notes="frais revenu",
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                                    )
+                )
             if virement_vers:
                 vir = Virement()
                 vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)) - frais, date)
@@ -758,7 +755,7 @@ class Compte(models.Model):
                 datel = min(datel, utils.today())
         else:
             datel = utils.today()
-        # si il n'y a pas d'operations
+            # si il n'y a pas d'operations
         try:
             if self.ope_set.latest('date').date > datel:
                 return 0
@@ -790,8 +787,6 @@ class Compte(models.Model):
         montant_theorique = self.solde(espece=True, datel=datel, rapp=rapp, pointe=pointe)
         montant_a_corriger = decimal.Decimal(str(montant_vrai)) - montant_theorique
         if montant_a_corriger != 0:
-            if montant_a_corriger > 0:
-                moyen
             ope = Ope.objects.create(compte=self,
                                      tiers=Tiers.objects.get_or_create(nom="ajustement", defaults={"nom": "ajustement"})[0],
                                      montant=montant_a_corriger,
@@ -799,15 +794,14 @@ class Compte(models.Model):
                                      moyen=self.moyen_debit() if montant_a_corriger < 0 else self.moyen_credit(),
                                      automatique=True,
                                      notes="ajustement le %s" % utils.today(),
-                                     cat=Tiers.objects.get_or_create(nom="ajustements", defaults={"nom": "ajustements", "type": "d"})[0],
-                                     )
+                                     cat_id=cat_id
+            )
             return u"opération ({}) crée ".format(ope)
         else:
             return "rien a modifier"
 
 
 class Ope_titre(models.Model):
-
     """ope titre en compta matiere"""
     titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     compte = models.ForeignKey(Compte, verbose_name=u"compte titre", limit_choices_to={'type': 't'})
@@ -818,7 +812,7 @@ class Ope_titre(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_ope_titre'
         verbose_name_plural = u'Opérations titres(compta_matiere)'
         verbose_name = u'Opération titres(compta_matiere)'
@@ -866,7 +860,8 @@ class Ope_titre(models.Model):
                 Cours.objects.get(titre=self.titre, date=old_date).delete()
             except Cours.DoesNotExist:
                 pass
-        Cours.objects.get_or_create(titre=self.titre, date=self.date, defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
+        Cours.objects.get_or_create(titre=self.titre, date=self.date,
+                                    defaults={'titre': self.titre, 'date': self.date, 'valeur': self.cours})
         if self.nombre >= 0:  # on doit separer because gestion des plues ou moins value
             if utils.is_onexist(self, 'ope_pmv'):
                 self.ope_pmv.delete()  # comme achat, il n'y a pas de plus ou moins value exteriosée donc on efface
@@ -879,7 +874,7 @@ class Ope_titre(models.Model):
                                              moyen=self.compte.moyen_debit(),
                                              compte=self.compte,
                                              ope_titre_ost=self
-                                             )
+                )
                 self.ope_ost = ope_ost
             else:  # la modifier juste
                 ope_ost = self.ope_ost
@@ -907,7 +902,7 @@ class Ope_titre(models.Model):
                                    moyen=self.compte.moyen_credit(),
                                    compte=self.compte,
                                    ope_titre_ost=self
-                                   )
+                )
             else:
                 self.ope_ost.date = self.date
                 self.ope_ost.montant = ost
@@ -925,7 +920,7 @@ class Ope_titre(models.Model):
                                    moyen=self.compte.moyen_credit(),
                                    compte=self.compte,
                                    ope_titre_pmv=self
-                                   )
+                )
             else:
                 # on modifie tout
                 self.ope_pmv.date = self.date
@@ -937,7 +932,8 @@ class Ope_titre(models.Model):
                 self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
         if shortcut:
-            for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date, compte=self.compte).exclude(pk=self.id).order_by('-date'):
+            for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date, compte=self.compte).exclude(pk=self.id).order_by(
+                    '-date'):
                 ope.save(shortcut=False)
 
     def get_absolute_url(self):
@@ -948,10 +944,11 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
-        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+        chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (
+        self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
-
+# noinspection PyUnusedLocal
 @receiver(pre_delete, sender=Ope_titre, weak=False)
 def verif_opetitre_rapp(sender, **kwargs):
     instance = kwargs['instance']
@@ -965,7 +962,6 @@ def verif_opetitre_rapp(sender, **kwargs):
 
 
 class Moyen(models.Model):
-
     """moyen de paiements
     commun à l'ensembles des comptes
     actuellement, les comptes ont tous les moyens sans possiblite de faire le tri
@@ -974,14 +970,14 @@ class Moyen(models.Model):
     typesdep = (('v', u'virement'),
                 ('d', u'depense'),
                 ('r', u'recette'),
-                )
+    )
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d')
     lastupdate = models_gsb.ModificationDateTimeField()
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_moyen'
         verbose_name = u"moyen de paiment"
         verbose_name_plural = u"moyens de paiment"
@@ -1018,7 +1014,6 @@ class Moyen(models.Model):
 
 
 class Rapp(models.Model):
-
     """rapprochement d'un compte"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     date = models.DateField(null=True, blank=True, default=utils.today)
@@ -1026,7 +1021,7 @@ class Rapp(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_rapp'
         verbose_name = u"rapprochement"
         ordering = ['-date']
@@ -1069,7 +1064,6 @@ class Rapp(models.Model):
 
 
 class Echeance(models.Model):
-
     """echeance 'opération future prevue
     soit unique
     soit repete
@@ -1102,7 +1096,7 @@ class Echeance(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_echeance'
         verbose_name = u"échéance"
         verbose_name_plural = u"echéances"
@@ -1119,6 +1113,7 @@ class Echeance(models.Model):
         else:
             return u"(%s) %s à %s de %s (ech:%s)" % (self.id, self.compte, self.tiers, self.montant, self.date.strftime('%d/%m/%Y'))
 
+    # noinspection PyTypeChecker
     def calcul_next(self):
         """
         calcul la prochaine date d'echeance
@@ -1166,7 +1161,7 @@ class Echeance(models.Model):
                                           compte_dest=ech.compte_virement,
                                           montant=ech.montant,
                                           date=ech.date
-                                          )
+                    )
                     vir.auto = True
                     vir.exercice = ech.exercice
                     vir.save()
@@ -1182,7 +1177,7 @@ class Echeance(models.Model):
                                              ib_id=ech.ib_id,
                                              moyen_id=ech.moyen_id,
                                              exercice_id=ech.exercice_id
-                                             )
+                    )
                     if request is not None:
                         messages.info(request, u'opération "%s" crée' % ope)
                 if ech.calcul_next():
@@ -1208,11 +1203,12 @@ class Echeance(models.Model):
     def verif(request):
         date_min = Echeance.objects.filter(valide=True).aggregate(models.Min('date'))['date__min']
         if date_min is not None and date_min < utils.today():
-            messages.info(request, u"attention une ou plusieurs echeances sont arrivées a maturités <a href='%s'> cliquer ici pour les integrer</A>" % mark_safe(reverse('gestion_echeances')))
+            messages.info(request,
+                          u"attention une ou plusieurs echeances sont arrivées a maturités <a href='%s'> cliquer ici pour les integrer</A>" % mark_safe(
+                              reverse('gestion_echeances')))
 
 
 class Ope(models.Model):
-
     """operation"""
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=utils.today, db_index=True)
@@ -1227,8 +1223,10 @@ class Ope(models.Model):
     rapp = models.ForeignKey(Rapp, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u'Rapprochement')
     exercice = models.ForeignKey(Exercice, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     ib = models.ForeignKey(Ib, null=True, blank=True, on_delete=models.SET_NULL, default=None, verbose_name=u"projet")
-    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None, editable=False, on_delete=models.CASCADE)
-    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.CASCADE, verbose_name=u'Mere')
+    jumelle = models.OneToOneField('self', null=True, blank=True, related_name='jumelle_set', default=None, editable=False,
+                                   on_delete=models.CASCADE)
+    mere = models.ForeignKey('self', null=True, blank=True, related_name='filles_set', default=None, on_delete=models.CASCADE,
+                             verbose_name=u'Mere')
     automatique = models.BooleanField(default=False, help_text=u'si cette opération est crée a cause d\'une echeance')
     piece_comptable = models.CharField(max_length=20, blank=True, default='')
     lastupdate = models_gsb.ModificationDateTimeField()
@@ -1245,7 +1243,7 @@ class Ope(models.Model):
                                          on_delete=models.CASCADE,
                                          related_name="ope_pmv")  # null=true cr tt les operation d'achat sont null"""
 
-    class Meta:
+    class Meta(object):
         db_table = 'gsb_ope'
         get_latest_by = 'date'
         order_with_respect_to = 'compte'
@@ -1376,10 +1374,11 @@ class Ope(models.Model):
             if self.montant < 0:
                 self.moyen = self.compte.moyen_debit()
         if self.moyen.type == u'd' and self.montant > 0:
-            self.montant = self.montant * -1
+            self.montant *= -1
         super(Ope, self).save(*args, **kwargs)
 
 
+# noinspection PyUnusedLocal
 @receiver(post_save, sender=Ope, weak=False)
 def ope_fille(sender, **kwargs):
     if kwargs['raw']:
@@ -1387,10 +1386,10 @@ def ope_fille(sender, **kwargs):
     self = kwargs['instance']
     if self.is_fille:
         if self.mere.tot_fille != self.mere.montant:
-            self.mere.montant == self.mere.tot_fille
+            self.mere.montant = self.mere.tot_fille
             self.mere.save()
 
-
+# noinspection PyUnusedLocal
 @receiver(pre_delete, sender=Ope, weak=False)
 def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
@@ -1406,7 +1405,6 @@ def verif_ope_rapp(sender, **kwargs):
 
 
 class Virement(object):
-
     """raccourci pour creer un virement entre deux comptes"""
 
     def __init__(self, ope=None):

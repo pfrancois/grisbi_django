@@ -131,13 +131,13 @@ class Test_SmartIf(SimpleTestCase):
 
     def test_template(self):
         rendered = Template("{% load smart_if %}"
-                          "{% if 3 < 5 %}...{% endif %}").render(Context())
+                            "{% if 3 < 5 %}...{% endif %}").render(Context())
         self.assertEqual(rendered, '...')
         rendered = Template("{% load smart_if %}"
-                          "{% if 3 > 5 %}...{% endif %}").render(Context())
+                            "{% if 3 > 5 %}...{% endif %}").render(Context())
         self.assertEqual(rendered, '')
         rendered = Template("{% load smart_if %}"
-                          "{% if 3 > 5 %}...{% else %}   {% endif %}").render(Context())
+                            "{% if 3 > 5 %}...{% else %}   {% endif %}").render(Context())
         self.assertEqual(rendered, '   ')
         rendered = Template("{% load smart_if %}{% if 2 == 2 or 3 <= 5 %} {% endif %}").render(Context())
         self.assertEqual(rendered, ' ')
@@ -149,7 +149,7 @@ class Test_SmartIf(SimpleTestCase):
         self.assertEqual(rendered, ' ')
 
     def test_parsing_errors(self):
-        "There are various ways that the flatpages template tag won't parse"
+        """There are various ways that the flatpages template tag won't parse"""
         render = lambda t: Template(t).render(Context())
         self.assertRaises(TemplateSyntaxError, render, "{% load smart_if %}{% if 3 > 5 %}")
         self.assertRaises(TemplateSyntaxError, render, "{% load smart_if %}{% if 3>5 %}{% endif %}")

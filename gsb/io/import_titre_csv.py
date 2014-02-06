@@ -104,10 +104,10 @@ class Import_csv_ope_titre(import_base.Import_base):
                         messages.info(self.request, 'cours du titre %s a la date du %s ajoute' % (row.titre, ope["date"]))
                 retour = True
                 #------------------fin boucle
-        except (import_base.ImportException) as e:
+        except import_base.ImportException as e:
             messages.error(self.request, "attention traitement interrompu parce que %s" % e)
             retour = False
-        # gestion des erreurs
+            # gestion des erreurs
         if len(self.erreur) or retour is False:
             for err in self.erreur:
                 messages.warning(self.request, err)
@@ -129,5 +129,5 @@ class Import_csv_ope_titre(import_base.Import_base):
             nb_ope += 1
         messages.info(self.request, u"%s opés titres crées" % nb_ope)
         if self.titres.nb_created > 0:
-            messages.info(self.request, u"%s titres crées" % (self.titres.nb_created))
+            messages.info(self.request, u"%s titres crées" % self.titres.nb_created)
         return True

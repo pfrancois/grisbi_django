@@ -1,9 +1,12 @@
 # -*- coding: utf-8
 from __future__ import absolute_import
+
 from django import forms
+from django.utils.safestring import mark_safe
+
 from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre, Ib, Rapp)
 from . import widgets as gsb_field
-from django.utils.safestring import mark_safe
+
 
 
 # import decimal
@@ -34,9 +37,9 @@ class OperationForm(Basemodelform):
     rapp = forms.ModelChoiceField(Rapp.objects.all(), required=False)
     nouveau_tiers = forms.CharField(required=False)
 
-    class Meta:
+    class Meta(object):
         model = Ope
-        exclude = ('jumelle', 'mere')  # car sinon c'est un virement
+        exclude = ('jumelle', 'mere', 'date_val')  # car sinon c'est un virement
 
     def __init__(self, *args, **kwargs):
         super(OperationForm, self).__init__(*args, **kwargs)
@@ -44,12 +47,13 @@ class OperationForm(Basemodelform):
         self.fields['operation_mere'] = gsb_field.ReadonlyField(instance, 'mere', required=False)
 
     def clean(self):
-        self.cleaned_data = super(OperationForm, self).clean()
-        data = self.cleaned_data
+        data = super(OperationForm, self).clean()
         if data['tiers'] is None:
             if data['nouveau_tiers'] == "":
-                self._errors['tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'", ])
-                self._errors['nouveau_tiers'] = self.error_class(["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
+                self._errors['tiers'] = self.error_class(
+                    ["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'", ])
+                self._errors['nouveau_tiers'] = self.error_class(
+                    ["si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau", ])
                 del data['nouveau_tiers']
         if 'moyen' in data.keys() and data['moyen'].type == u'd' and data['montant'] > 0:
             data['montant'] *= -1
@@ -77,6 +81,7 @@ class VirementForm(Baseform):
             del data['compte_destination']
         return data
 
+    # noinspection PyArgumentList
     def __init__(self, ope=None, *args, **kwargs):
         self.ope = ope
         if ope:
@@ -84,11 +89,14 @@ class VirementForm(Baseform):
             super(VirementForm, self).__init__(initial=vir.init_form(), *args, **kwargs)
         else:
             super(VirementForm, self).__init__(*args, **kwargs)
-        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt origine"))
+        self.fields['rapp_origine'] = gsb_field.ReadonlyField(ope, 'rapp', required=False,
+                                                              label=mark_safe(u"rapproché dans <br/> cpt origine"))
         if ope:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope.jumelle, 'rapp', required=False,
+                                                                      label=mark_safe(u"rapproché dans <br/> cpt destination"))
         else:
-            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp', required=False, label=mark_safe(u"rapproché dans <br/> cpt destination"))
+            self.fields['rapp_destination'] = gsb_field.ReadonlyField(ope, 'rapp', required=False,
+                                                                      label=mark_safe(u"rapproché dans <br/> cpt destination"))
 
     def save(self):
         if self.ope is None:
@@ -97,7 +105,7 @@ class VirementForm(Baseform):
                                              self.cleaned_data['montant'],
                                              self.cleaned_data['date'],
                                              self.cleaned_data['notes']
-                                             )
+            )
         else:
             virement_objet = Virement(self.ope)
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
@@ -123,7 +131,7 @@ class Ope_titre_addForm(Baseform):
     cours = forms.DecimalField(initial='1', required=True, localize=True, min_value=0)
     frais = forms.DecimalField(initial='0', required=False, localize=True)
 
-    class Meta:
+    class Meta(object):
         widgets = {
             'my_decimal_field': forms.TextInput(attrs={'localization': True}),
         }
@@ -134,7 +142,7 @@ class Ope_titre_addForm(Baseform):
             self._errors['nombre'] = self.error_class([u'le nombre de titre ne peut être nul', ])
             del self.cleaned_data['nombre']
         if self.cleaned_data['frais'] > 0:
-            self.cleaned_data['frais'] = self.cleaned_data['frais'] * -1
+            self.cleaned_data['frais'] *= -1
         return self.cleaned_data
 
 
@@ -173,7 +181,6 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
 
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
-
     def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
@@ -208,7 +215,7 @@ class Ope_titreForm(Basemodelform):
         self.fields['titre'] = gsb_field.ReadonlyField(instance, 'titre')
         self.fields['compte'] = gsb_field.ReadonlyField(instance, 'compte')
 
-    class Meta:
+    class Meta(object):
         model = Ope_titre
 
 
@@ -236,7 +243,6 @@ class SearchForm(Baseform):
 
 
 class ajout_ope_bulk_form(Baseform):
-
     """premier form utilise ajout_ope_titre_bulk"""
     titre = forms.ModelChoiceField(Titre.objects.all())
     cours = gsb_field.CurField()
@@ -245,6 +251,5 @@ class ajout_ope_bulk_form(Baseform):
 
 
 class ajout_ope_date_form(Baseform):
-
     """second form utilise ajout_ope_titre_bulk"""
     date = forms.DateField()

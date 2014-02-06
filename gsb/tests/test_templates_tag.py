@@ -3,9 +3,12 @@
 test models
 """
 from __future__ import absolute_import
-from django.test import SimpleTestCase
-from ..templatetags import gsb_extras
 from decimal import Decimal
+
+from django.test import SimpleTestCase
+
+from ..templatetags import gsb_extras
+
 
 __all__ = ['Test_templates_tags']
 

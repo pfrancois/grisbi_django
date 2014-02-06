@@ -14,13 +14,6 @@ from .models import Compte, Cat, Tiers, Moyen, Echeance
 from .io import import_base
 
 
-def gestion_echeances(request):
-    """vue qui gere les echeances"""
-    Echeance.check(request)
-    return render_to_response('gsb/options.djhtm', {'titre': u'integration des échéances échues', },
-                              context_instance=RequestContext(request))
-
-
 def verif_element_config(element, request, collection=None):
     id_elem = getattr(settings, element, None)
     if id_elem is None:

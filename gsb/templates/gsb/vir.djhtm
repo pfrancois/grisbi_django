@@ -1,69 +1,69 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block content %}
-    {% load gsb_extras %}
-    {% if ope %}
-        <table style=" width: 100%;">
-            <tr class="boutton">
-                <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
-            </tr>
-        </table>
-        <form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">{% csrf_token %}</form>
-        <table style=" width: 100%;" summary="bouton effacer">
-            <tr class="boutton">
-                <td width="100%">
-                    <a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
-            </tr>
-        </table>
-    {% else %}
-        <table style=" width: 100%;">
-            <tr class="boutton">
-                {% if cpt %}
-                    <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
-                {% else %}
-                    <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url 'index' %}">retour compte</a></td>
-                {% endif %}
-            </tr>
-        </table>
-    {% endif %}
+{% load gsb_extras %}
+{% if ope %}
+<table style=" width: 100%;">
+    <tr class="boutton">
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
+    </tr>
+</table>
+<form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">{% csrf_token %}</form>
+<table style=" width: 100%;" summary="bouton effacer">
+    <tr class="boutton">
+        <td width="100%">
+            <a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
+    </tr>
+</table>
+{% else %}
+<table style=" width: 100%;">
+    <tr class="boutton">
+        {% if cpt %}
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
+        {% else %}
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{% url 'index' %}">retour compte</a></td>
+        {% endif %}
+    </tr>
+</table>
+{% endif %}
 
-    <form id='form1' action="" method="post">
-        {% csrf_token %}
-        <fieldset class="operationMainTable">
-            <table>
-                {{ form }}
-            </table>
-        </fieldset>
-    </form>
-    {% if ope %}
-        <table style=" width: 100%;" summary="boutons">
-            <tr class="boutton">
-                <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
-            </tr>
+<form id='form1' action="" method="post">
+    {% csrf_token %}
+    <fieldset class="operationMainTable">
+        <table>
+            {{ form }}
         </table>
-        <form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
-            {% csrf_token %}
-        </form>
-        <table style=" width: 100%;" summary="bouton effacer">
-            <tr class="boutton">
-                <td width="100%">
-                    <a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
-            </tr>
-        </table>
-    {% else %}
-        <table style=" width: 100%;" summary="boutons">
-            <tr class="boutton">
-                {% if cpt %}
-                    <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
-                {% else %}
-                    <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-                    <td width="50%"><a href="{% url 'index' %}">retour index</a></td>
-                {% endif %}
-            </tr>
-        </table>
-    {% endif %}
+    </fieldset>
+</form>
+{% if ope %}
+<table style=" width: 100%;" summary="boutons">
+    <tr class="boutton">
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
+    </tr>
+</table>
+<form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
+    {% csrf_token %}
+</form>
+<table style=" width: 100%;" summary="bouton effacer">
+    <tr class="boutton">
+        <td width="100%">
+            <a href="javascript:document.forms['form2'].submit();">supprimer le virement</a></td>
+    </tr>
+</table>
+{% else %}
+<table style=" width: 100%;" summary="boutons">
+    <tr class="boutton">
+        {% if cpt %}
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{{ cpt.get_absolute_url }}">retour compte</a></td>
+        {% else %}
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{% url 'index' %}">retour index</a></td>
+        {% endif %}
+    </tr>
+</table>
+{% endif %}
 {% endblock content %}

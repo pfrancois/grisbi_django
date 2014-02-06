@@ -23,6 +23,9 @@ urlpatterns += patterns('gsb.outils',
                         # affiche config
                         url(r'^options/verif_config$', 'verif_config', name='verif_config'),
 )
+urlpatterns += patterns('gsb.lecture_plist',
+                        url(r'^options/maj$', 'gestion_maj', name='gestion_maj_iphone'),
+)
 # export index
 urlpatterns += patterns('gsb',
                         url(r'^options/export$', views.Mytemplateview.as_view(template_name="gsb/export_index.djhtm"), name='export_index'),
@@ -39,7 +42,8 @@ urlpatterns += patterns('gsb',
                         # export en sql vers money iphone
                         #url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone'),
                         # export en csv vers pocket money iphone
-                        url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(), name='export_csv_pocket_money'),
+                        url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(),
+                            name='export_csv_pocket_money'),
                         # export sql brut
                         url(r'^options/export/sql/all', export_fsb.export_fsb_view.as_view(), name="export_fsb"),
 
@@ -49,7 +53,8 @@ urlpatterns += patterns('gsb',
 urlpatterns += patterns('gsb.io.import_gsb', url(r'options/import/gsb$', 'import_gsb_0_5_x', name="import_gsb"))
 
 urlpatterns += patterns('',
-                        url(r'options/import/csv/simple$', import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(), name="import_csv_ope_simple"),
+                        url(r'options/import/csv/simple$', import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(),
+                            name="import_csv_ope_simple"),
                         url(r'options/import/csv/titres$', import_titres.Import_csv_ope_titre.as_view(), name="import_csv_ope_titre_all"),
                         url(r'options/import/csv/money_journal$', Import_view_money_journal.as_view(), name="import_csv_ope_money_journal"),
 )
@@ -74,13 +79,17 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/$', views.Cpt_detail_view.as_view(), name='gsb_cpt_detail'),
                         url(r'^compte/(?P<cpt_id>\d+)/rapp$', views.Cpt_detail_view.as_view(rapp=True), name='gsb_cpt_detail_rapp'),
                         url(r'^compte/(?P<cpt_id>\d+)/all$', views.Cpt_detail_view.as_view(all=True), name='gsb_cpt_detail_all'),
-                        url(r'^compte/(?P<cpt_id>\d+)/especes$', views.Cpt_detail_view.as_view(cpt_titre_espece=True), name="gsb_cpt_titre_espece"),
-                        url(r'^compte/(?P<cpt_id>\d+)/especes/all$', views.Cpt_detail_view.as_view(cpt_titre_espece=True, all=True), name="gsb_cpt_titre_espece_all"),
-                        url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$', views.Cpt_detail_view.as_view(cpt_titre_espece=True, rapp=True), name="gsb_cpt_titre_espece_rapp"),
+                        url(r'^compte/(?P<cpt_id>\d+)/especes$', views.Cpt_detail_view.as_view(cpt_titre_espece=True),
+                            name="gsb_cpt_titre_espece"),
+                        url(r'^compte/(?P<cpt_id>\d+)/especes/all$', views.Cpt_detail_view.as_view(cpt_titre_espece=True, all=True),
+                            name="gsb_cpt_titre_espece_all"),
+                        url(r'^compte/(?P<cpt_id>\d+)/especes/rapp$', views.Cpt_detail_view.as_view(cpt_titre_espece=True, rapp=True),
+                            name="gsb_cpt_titre_espece_rapp"),
                         url(r'^compte/(?P<cpt_id>\d+)/new$', 'ope_new', name="gsb_cpt_ope_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/vir/new$', 'vir_new', name="gsb_cpt_vir_new"),
                         url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)$', 'titre_detail_cpt', name="gsb_cpt_titre_detail"),
-                        url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/rapp$', 'titre_detail_cpt', {'rapp': True}, name="gsb_cpt_titre_detail_rapp"),
+                        url(r'^compte/(?P<cpt_id>\d+)/titre/(?P<titre_id>\d+)/rapp$', 'titre_detail_cpt', {'rapp': True},
+                            name="gsb_cpt_titre_detail_rapp"),
                         url(r'^compte/(?P<cpt_id>\d+)/achat$', 'ope_titre_achat', name="cpt_titre_achat"),
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
@@ -88,12 +97,13 @@ urlpatterns += patterns('gsb.views',
 )
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
+
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     urlpatterns = patterns('',
-        (r'^500.html$', 'django.views.defaults.server_error'),
-        (r'^404.html$', TemplateView.as_view(template_name='404.html')),
+                           (r'^500.html$', 'django.views.defaults.server_error'),
+                           (r'^404.html$', TemplateView.as_view(template_name='404.html')),
     ) + urlpatterns
 # gestion de mes trucs perso
 # form tester
@@ -106,7 +116,9 @@ if settings.DEBUG:
 # )
 # import gsb.forms_perso
 try:
+    # noinspection PyUnresolvedReferences
     import perso
-    urlpatterns += patterns('', (r'^perso/', include(perso)),)
+
+    urlpatterns += patterns('', (r'^perso/', include(perso)), )
 except ImportError:
     pass

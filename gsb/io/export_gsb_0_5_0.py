@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
 from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
 
 from ..models import (Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre)
-from django.http import HttpResponse
+
 # from django.core.exceptions import ObjectDoesNotExist
 # import decimal
 # import datetime
@@ -22,8 +24,8 @@ liste_type_compte = Compte.typescpt
 
 
 def _export(request):
-    # creation des id pour IB
-            #####generalites###
+# creation des id pour IB
+#####generalites###
     xml_root = et.Element("Grisbi")
     xml_generalites = et.SubElement(xml_root, "Generalites")
     et.SubElement(xml_generalites, "Version_fichier").text = "0.5.0"
@@ -101,7 +103,8 @@ def _export(request):
             et.SubElement(xml_detail, "Date_dernier_releve")
             et.SubElement(xml_detail, "Solde_dernier_releve").text = utils.floattostr(0)
             et.SubElement(xml_detail, "Dernier_no_de_rapprochement").text = str(0)
-        et.SubElement(xml_detail, "Compte_cloture").text = utils.booltostr(not cpt.ouvert)  # attention, on gere les comptes ouverts et non les comptes clotures
+        et.SubElement(xml_detail, "Compte_cloture").text = utils.booltostr(
+            not cpt.ouvert)  # attention, on gere les comptes ouverts et non les comptes clotures
         et.SubElement(xml_detail, "Affichage_r").text = "1"  # NOT IN BDD
         et.SubElement(xml_detail, "Nb_lignes_ope").text = "3"  # NOT IN BDD
         et.SubElement(xml_detail, "Commentaires").text = cpt.notes
@@ -200,7 +203,7 @@ def _export(request):
                 xml_element.set('Va', str(ope.mere_id))
                 # raison pour lesquelles il y a des attributs non modifiables
                 # Fc: si besoin dans ce cas, ce sera une operation ventilée avec frais de change comme categorie et l'autre categorie
-    ###Echeances###
+        ###Echeances###
     xml_echeances_root = et.SubElement(xml_root, "Echeances")
     xml_generalite = et.SubElement(xml_echeances_root, "Generalites")
     et.SubElement(xml_generalite, "Nb_echeances").text = str(Echeance.objects.count())

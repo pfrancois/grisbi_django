@@ -3,21 +3,23 @@
 test utils
 """
 from __future__ import absolute_import
-from .test_base import TestCase
-from django.test import SimpleTestCase
-from ..import utils
 import datetime
-from ..models import Exercice, Cat, Ope
 import decimal
-import mock
 import time
+
+from django.test import SimpleTestCase
+import mock
 import django.utils.timezone as timezone
+
+from .test_base import TestCase
+from .. import utils
+from ..models import Exercice, Cat, Ope
+
 
 __all__ = ['Test_utils1', 'Test_utils']
 
 
 class Test_utils1(SimpleTestCase):
-
     def test_utils_uuid(self):
         self.assertEquals(len(utils.uuid()), 36)
 
@@ -100,7 +102,7 @@ class Test_utils1(SimpleTestCase):
         self.assertEquals(utils.typetostr(liste, 'a'), '1')
         self.assertEquals(utils.typetostr(liste, 'jhk'), '0')
 
-# test des formats d'entree
+    # test des formats d'entree
     def test_tostr(self):
         self.assertEquals(utils.to_unicode(None), u'')
         self.assertEquals(utils.to_unicode(3), u'3')
@@ -140,7 +142,8 @@ class Test_utils1(SimpleTestCase):
         compfr = utils.Compfr()
         self.assertEquals(sorted([4, 3, 1, 0], cmp=compfr), [0, 1, 3, 4])
         self.assertEquals(sorted(['pêche', 'PÈCHE', 'PÊCHE', 'pèche'], cmp=compfr), ['pèche', 'PÈCHE', 'pêche', 'PÊCHE'])
-        self.assertEquals(sorted([u'vice' + u'\xA0' + u'versa', 'pêche', 'PÈCHE', 'PÊCHE'], cmp=compfr), ['PÈCHE', 'pêche', 'PÊCHE', u'vice' + u'\xA0' + u'versa'])
+        self.assertEquals(sorted([u'vice' + u'\xA0' + u'versa', 'pêche', 'PÈCHE', 'PÊCHE'], cmp=compfr),
+                          ['PÈCHE', 'pêche', 'PÊCHE', u'vice' + u'\xA0' + u'versa'])
 
 
 class Test_utils(TestCase):
@@ -148,7 +151,8 @@ class Test_utils(TestCase):
 
     def setUp(self):
         super(Test_utils, self).setUp()
-# test des formats de sortie
+
+    # test des formats de sortie
 
     def test_maxtostr(self):
         self.assertEquals(utils.maxtostr(Exercice.objects.all(), champ='date_fin'), "2011-12-31")

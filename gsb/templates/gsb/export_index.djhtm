@@ -1,10 +1,10 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% block titre %}<h1>export des autres données totales</h1>{% endblock titre %}
 {% block content %}
-    <a href="{% url 'export_gsb_050' %}" class="progress"> exporter sous format 0.5.0</a><br/>
-    <a href="{% url 'export_csv' %}" class="progress"> exporter les opérations au format csv </a><br/>
-    <a href="{% url 'export_qif' %}" class="progress"> exporter format qif </a><br/>
-    <a href="{% url 'export_cours' %}" class="progress"> exporter les cours au format csv</a><br/>
-    <a href="{% url 'export_ope_titre' %}" class="progress"> exporter les operations titres</a><br/>
-    <a href="{% url 'outils_index' %}" class="progress"> retour vers le menu outils</a><br/>
+<a href="{% url 'export_gsb_050' %}" class="progress"> exporter sous format 0.5.0</a><br/>
+<a href="{% url 'export_csv' %}" class="progress"> exporter les opérations au format csv </a><br/>
+<a href="{% url 'export_qif' %}" class="progress"> exporter format qif </a><br/>
+<a href="{% url 'export_cours' %}" class="progress"> exporter les cours au format csv</a><br/>
+<a href="{% url 'export_ope_titre' %}" class="progress"> exporter les operations titres</a><br/>
+<a href="{% url 'outils_index' %}" class="progress"> retour vers le menu outils</a><br/>
 {% endblock content %}

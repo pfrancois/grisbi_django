@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 import logging
+import os
+import codecs
+
 from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
 from django.test.client import RequestFactory
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.conf import settings
+
 from gsb import utils
-import os
-import codecs
 
 #from operator import attrgetter
 
@@ -70,11 +71,13 @@ class TestCase(Test_Case_django):
         setattr(request, '_messages', messages)
         return request
 
+    # noinspection PyProtectedMember
     def assertcountmessage(self, request, nb):
         actual = len([e.message for e in request._messages])
         if actual != nb:
             self.fail('Message count was %d, expected %d' % (actual, nb))
 
+    # noinspection PyProtectedMember
     def assertmessagecontains(self, request, text, level=None):
         messages = request._messages
         matches = [m for m in messages if text in m.message]
@@ -108,8 +111,8 @@ class TestCase(Test_Case_django):
         try:
             fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w', "utf-8")
             for l in rr_iter:
-                    fichier.write(l)
-                    fichier.write('\n')
+                fichier.write(l)
+                fichier.write('\n')
             fichier.close()
             fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w', unicode_encoding)
             for l in ra_iter:

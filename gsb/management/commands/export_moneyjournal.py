@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+import time
+import os
+import sqlite3 as sqlite
 
 from django.core.management.base import BaseCommand
-from ... import models
-from ... import utils
 from django.db import transaction
 from django.conf import settings
 from django.db import models as models_agg
-import time
-import os
-
 import dateutil.rrule as rrule
 from dateutil.relativedelta import relativedelta
 
-import sqlite3 as sqlite
+from ... import models
+from ... import utils
 
 
 class Command(BaseCommand):
@@ -36,7 +35,7 @@ def proc_sql_export(sql, log=None):
     cur = sql.cursor()
     if log is None:
         log = lambda x: None
-            # attention ce n'est pas les comptes
+        # attention ce n'est pas les comptes
     s = ("""DROP TABLE IF EXISTS account;
             CREATE TABLE account (id INTEGER PRIMARY KEY,
                                 name TEXT,
@@ -58,12 +57,12 @@ def proc_sql_export(sql, log=None):
     date_min = models.Ope.objects.aggregate(element=models_agg.Min('date'))['element']
     date_max = models.Ope.objects.aggregate(element=models_agg.Max('date'))['element']
     for dt in rrule.rrule(rrule.MONTHLY, dtstart=date_min + relativedelta(day=1), until=date_max + relativedelta(day=1)):
-        nb_bud = nb_bud + 1
+        nb_bud += 1
         cur.execute("insert into budget VALUES(:id,:month,:year,:amount,:lastupdate);", {'id': nb_bud,
-                                                                                       'month': dt.month,
-                                                                                       'year': dt.year,
-                                                                                       'amount': 0,
-                                                                                       'lastupdate': time.mktime(dt.timetuple())})
+                                                                                         'month': dt.month,
+                                                                                         'year': dt.year,
+                                                                                         'amount': 0,
+                                                                                         'lastupdate': time.mktime(dt.timetuple())})
     sql.commit()
     log('budget')
     # les categories
@@ -85,7 +84,7 @@ def proc_sql_export(sql, log=None):
     param = {}
     nbcat = 0
     for cat in models.Cat.objects.order_by('nom'):
-        nbcat = nbcat + 1
+        nbcat += 1
         param['id'] = cat.id
         param['name'] = cat.nom
         param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="FFFFFF")[1:], 16)
@@ -125,13 +124,14 @@ def proc_sql_export(sql, log=None):
     cur.executescript(chaine)
     sql.commit()
     param = {}
-    liste_compte = models.Compte.objects.all()
+    liste_compte = models.Compte.objects.all().order_by('id')
     i = 0
+    typescpt = [b[0] for b in models.Compte.typescpt]
     for cpt in liste_compte:
-        i = i + 1
+        i += 1
         param['id'] = cpt.id
         param['name'] = cpt.nom
-        param['symbol'] = i
+        param['symbol'] = typescpt.index(cpt.type)
         param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = i
         param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
@@ -159,7 +159,7 @@ def proc_sql_export(sql, log=None):
                     place INTEGER,
                     lastupdate DOUBLE,
                     day INTEGER);"""
-            )
+    )
     param = {}
     nbope = 0
     for ope in models.Ope.objects.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen"):
@@ -191,7 +191,7 @@ def proc_sql_export(sql, log=None):
         param['place'] = None
         param['day'] = ope.date.strftime('%Y%m%d')
         param['lastupdate'] = time.mktime(ope.lastupdate.timetuple())
-        if ope.cat.nom in ('Virement', u"Opération Ventilée"):
+        if ope.cat.nom in (u"Opération Ventilée",):
             param['amount'] = 0
         cur.execute(u"""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
             :amount,:date,:photo,:voice,:payee,:note,:account,:type,:repeat,:place,:lastupdate,:day);""", param)

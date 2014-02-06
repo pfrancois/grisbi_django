@@ -23,7 +23,6 @@ __all__ = ['Test_import_csv', 'Test_import_base']
 
 
 class Test_import_abstract(TestCase):
-
     def setUp(self):
         super(Test_import_abstract, self).setUp()
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
@@ -36,23 +35,25 @@ class Test_import_abstract(TestCase):
 
 @override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv(Test_import_abstract):
-
     def test_import_csv_simple_ok(self):
         """test import csv version sans jumelle ni ope mere bref en ne gerant pas les id mais gere les virement et les ope titre"""
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export.csv")) as file_test:
             r = self.client.post(reverse('import_csv_ope_simple'), {'nom_du_fichier': file_test})
-            for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
+            for name in glob.glob(
+                    os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):  # on efface les fichier crée par le test
                 os.remove(name)
-        # self.assertcountmessage(self.client.request(),36)
+            # self.assertcountmessage(self.client.request(),36)
         self.assertEqual(r.status_code, 302)
-        self.assertQueryset_list(models.Tiers.objects.all(), [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'secu', u'titre_ t1', u'titre_ t2'], 'nom')  # ne pas oublier le tiers cree automatiquement
+        self.assertQueryset_list(models.Tiers.objects.all(),
+                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'secu', u'titre_ t1', u'titre_ t2'],
+                                 'nom')  # ne pas oublier le tiers cree automatiquement
         self.assertEquals(models.Ope.objects.all().count(), 16)
         self.assertQueryset_list(models.Cat.objects.all(),
                                  [u'cat1', u'cat2',
                                   u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
                                   u"Revenus de placements:Plus-values", u'Impôts:Cotisations sociales',
                                   u'Revenus de placements:interets', u'Virement', u"Non affecté"],
-                                'nom')  # ne pas oublier les cat cree automatiquement
+                                 'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["cpt_titre2201101", "cpte1201101"], "nom")
         self.assertEqual(models.Rapp.objects.get(nom="cpte1201101").solde, 10)
         self.assertEqual(models.Compte.objects.get(nom="cpte1").solde(), -270)
@@ -65,7 +66,6 @@ class Test_import_csv(Test_import_abstract):
 
 
 class Test_import_base(Test_import_abstract):
-
     def test_import_base(self):
         """verification des property"""
         prop = import_base.property_ope_base()
@@ -138,7 +138,7 @@ class Test_import_base(Test_import_abstract):
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'c'})
         with self.assertRaises(KeyError):
-            cats.id['test']
+            toto=cats.id['test']
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1216, 'type': 'c'})
 
@@ -349,7 +349,8 @@ class Test_import_base(Test_import_abstract):
         moyens = import_base.Moyen_cache(self.request_get("/outils"))
         # on cree les deux comptes utiles
         models.Compte.objects.create(nom="sansrien")
-        models.Compte.objects.create(nom="les2", moyen_credit_defaut_id=moyens.goc("uniquement_credit", montant=10), moyen_debit_defaut_id=moyens.goc("uniquement_debit", montant=-10))
+        models.Compte.objects.create(nom="les2", moyen_credit_defaut_id=moyens.goc("uniquement_credit", montant=10),
+                                     moyen_debit_defaut_id=moyens.goc("uniquement_debit", montant=-10))
         cache = import_base.moyen_defaut_cache()
         self.assertEqual(cache.goc("sansrien", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("sansrien", -10), settings.MD_DEBIT)

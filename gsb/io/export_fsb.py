@@ -4,16 +4,15 @@
 # from mysite.gsb.models import Tiers, Titre, Cat, Ope, Banque, Ib, Exercice, Rapp, Moyen, Echeance, Compte, ope_titres, Virement, Cours
 #
 from django.http import HttpResponse
-
 from django.conf import settings  # @Reimport
 from django.contrib.admin.views.decorators import staff_member_required
-from sql.pg import sqlite_db
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 
+from sql.pg import sqlite_db
+
 
 class export_fsb_view(View):
-
     @method_decorator(staff_member_required)
     def dispatch(self, *args, **kwargs):
         """on a besoin pour le method decorator"""

@@ -1,818 +1,819 @@
 <?xml version="1.0" encoding="UTF-8"?><!-- edited with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by pegory (personel) -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified" version="1.1">
-<xsd:annotation>
-    <xsd:documentation>
-        version 2009-04-09 1.3.2
-        ajout des special gribsi 5.7
-        mise a jour de qq commentaires
-    </xsd:documentation>
-</xsd:annotation>
-<xsd:simpleType name="vide">
-    <xsd:restriction base="xsd:string">
-        <xsd:enumeration value=""/>
-    </xsd:restriction>
-</xsd:simpleType>
-<xsd:simpleType name="liste_barre">
-    <xsd:union memberTypes="vide">
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:pattern value="(\d/)*\d"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-    </xsd:union>
-</xsd:simpleType>
-<xsd:simpleType name="ma_date">
-    <xsd:union>
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:pattern value="\d?\d/\d?\d/\d{4}"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:enumeration value="0/0/0"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:enumeration value=""/>
-            </xsd:restriction>
-        </xsd:simpleType>
-    </xsd:union>
-</xsd:simpleType>
-<xsd:simpleType name="index">
-    <xsd:restriction base="xsd:int">
-        <xsd:minInclusive value="0"/>
-    </xsd:restriction>
-</xsd:simpleType>
-<xsd:simpleType name="nombres">
-    <xsd:restriction base="xsd:string">
-        <xsd:pattern value="-?\d*,\d{6,7}">
-            <xsd:annotation>
-                <xsd:documentation>7 chiffre pour tout les nombre sauf le change ou c'est 6</xsd:documentation>
-            </xsd:annotation>
-        </xsd:pattern>
-    </xsd:restriction>
-</xsd:simpleType>
-<xsd:complexType name="T_generalite">
-    <xsd:all>
-        <xsd:element name="Version_fichier" type="xsd:string" fixed="0.5.0"/>
-        <xsd:element name="Backup" type="xsd:string"/>
-        <xsd:element name="Version_grisbi" type="xsd:string"/>
-        <xsd:element name="Fichier_ouvert" type="xsd:boolean">
-            <xsd:annotation>
-                <xsd:documentation>1 si normalement le fichier n' a pas été fermé</xsd:documentation>
-            </xsd:annotation>
-        </xsd:element>
-        <xsd:element name="Titre" type="xsd:string"/>
-        <xsd:element name="Adresse_commune" type="xsd:string"/>
-        <xsd:element name="Adresse_secondaire" type="xsd:string"/>
-        <xsd:element name="Utilise_exercices" type="xsd:boolean"/>
-        <xsd:element name="Utilise_IB" type="xsd:boolean"/>
-        <xsd:element name="Utilise_PC" type="xsd:boolean">
-            <xsd:annotation>
-                <xsd:documentation>1 si utilisation des pieces comptables</xsd:documentation>
-            </xsd:annotation>
-        </xsd:element>
-        <xsd:element name="Utilise_info_BG" type="xsd:boolean"/>
-        <xsd:element name="Numero_devise_totaux_tiers" type="xsd:unsignedInt"/>
-        <xsd:element name="Numero_devise_totaux_categ" type="xsd:unsignedInt" minOccurs="0"/>
-        <xsd:element name="Numero_devise_totaux_ib" type="xsd:unsignedInt" minOccurs="0"/>
-        <xsd:element name="Type_affichage_des_echeances" type="xsd:unsignedInt"/>
-        <xsd:element name="Affichage_echeances_perso_nb_libre" type="xsd:boolean"/>
-        <xsd:element name="Type_affichage_perso_echeances" type="xsd:boolean"/>
-        <xsd:element name="Numero_derniere_operation" type="index"/>
-        <xsd:element name="Echelle_date_import" type="xsd:unsignedInt" minOccurs="0"/>
-        <xsd:element name="Utilise_logo" type="xsd:boolean" minOccurs="0"/>
-        <xsd:element name="Chemin_logo" type="xsd:string"/>
-        <xsd:element name="Affichage_opes">
+    <xsd:annotation>
+        <xsd:documentation>
+            version 2009-04-09 1.3.2
+            ajout des special gribsi 5.7
+            mise a jour de qq commentaires
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:simpleType name="vide">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value=""/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="liste_barre">
+        <xsd:union memberTypes="vide">
             <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
-                    <xsd:pattern value="(\d?\d-){27}\d?\d"/>
+                    <xsd:pattern value="(\d/)*\d"/>
                 </xsd:restriction>
             </xsd:simpleType>
-        </xsd:element>
-        <xsd:element name="Rapport_largeur_col">
+        </xsd:union>
+    </xsd:simpleType>
+    <xsd:simpleType name="ma_date">
+        <xsd:union>
             <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
-                    <xsd:pattern value="(\d?\d-){6}\d?\d"/>
+                    <xsd:pattern value="\d?\d/\d?\d/\d{4}"/>
                 </xsd:restriction>
             </xsd:simpleType>
-        </xsd:element>
-        <xsd:element name="Ligne_aff_une_ligne">
             <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
-                    <xsd:pattern value="\d?\d"/>
+                    <xsd:enumeration value="0/0/0"/>
                 </xsd:restriction>
             </xsd:simpleType>
-        </xsd:element>
-        <xsd:element name="Lignes_aff_deux_lignes">
             <xsd:simpleType>
                 <xsd:restriction base="xsd:string">
-                    <xsd:pattern value="(\d?\d-){1}\d"/>
+                    <xsd:enumeration value=""/>
                 </xsd:restriction>
             </xsd:simpleType>
-        </xsd:element>
-        <xsd:element name="Lignes_aff_trois_lignes">
-            <xsd:simpleType>
-                <xsd:restriction base="xsd:string">
-                    <xsd:pattern value="(\d?\d-){2}\d"/>
-                </xsd:restriction>
-            </xsd:simpleType>
-        </xsd:element>
-    </xsd:all>
-</xsd:complexType>
-<xsd:complexType name="T_Comptes">
-<xsd:sequence>
-<xsd:element name="Generalites">
-    <xsd:complexType>
-        <xsd:sequence>
-            <xsd:element name="Ordre_des_comptes">
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:pattern value="(\d?\d-){0,}\d?\d"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:element>
-            <xsd:element name="Compte_courant" type="index"/>
-        </xsd:sequence>
-    </xsd:complexType>
-</xsd:element>
-<xsd:element name="Compte" maxOccurs="unbounded">
-<xsd:complexType>
-<xsd:sequence>
-<xsd:element name="Details">
-    <xsd:complexType>
-        <xsd:sequence>
-            <xsd:element name="Nom" type="xsd:string"/>
-            <xsd:element name="Id_compte" type="xsd:string" minOccurs="0"/>
-            <xsd:element name="No_de_compte" type="index">
+        </xsd:union>
+    </xsd:simpleType>
+    <xsd:simpleType name="index">
+        <xsd:restriction base="xsd:int">
+            <xsd:minInclusive value="0"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="nombres">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="-?\d*,\d{6,7}">
                 <xsd:annotation>
-                    <xsd:documentation>numero interne de grisbi</xsd:documentation>
+                    <xsd:documentation>7 chiffre pour tout les nombre sauf le change ou c'est 6</xsd:documentation>
+                </xsd:annotation>
+            </xsd:pattern>
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:complexType name="T_generalite">
+        <xsd:all>
+            <xsd:element name="Version_fichier" type="xsd:string" fixed="0.5.0"/>
+            <xsd:element name="Backup" type="xsd:string"/>
+            <xsd:element name="Version_grisbi" type="xsd:string"/>
+            <xsd:element name="Fichier_ouvert" type="xsd:boolean">
+                <xsd:annotation>
+                    <xsd:documentation>1 si normalement le fichier n' a pas été fermé</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="Titulaire" type="xsd:string"/>
-            <xsd:element name="Type_de_compte">
+            <xsd:element name="Titre" type="xsd:string"/>
+            <xsd:element name="Adresse_commune" type="xsd:string"/>
+            <xsd:element name="Adresse_secondaire" type="xsd:string"/>
+            <xsd:element name="Utilise_exercices" type="xsd:boolean"/>
+            <xsd:element name="Utilise_IB" type="xsd:boolean"/>
+            <xsd:element name="Utilise_PC" type="xsd:boolean">
+                <xsd:annotation>
+                    <xsd:documentation>1 si utilisation des pieces comptables</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="Utilise_info_BG" type="xsd:boolean"/>
+            <xsd:element name="Numero_devise_totaux_tiers" type="xsd:unsignedInt"/>
+            <xsd:element name="Numero_devise_totaux_categ" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:element name="Numero_devise_totaux_ib" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:element name="Type_affichage_des_echeances" type="xsd:unsignedInt"/>
+            <xsd:element name="Affichage_echeances_perso_nb_libre" type="xsd:boolean"/>
+            <xsd:element name="Type_affichage_perso_echeances" type="xsd:boolean"/>
+            <xsd:element name="Numero_derniere_operation" type="index"/>
+            <xsd:element name="Echelle_date_import" type="xsd:unsignedInt" minOccurs="0"/>
+            <xsd:element name="Utilise_logo" type="xsd:boolean" minOccurs="0"/>
+            <xsd:element name="Chemin_logo" type="xsd:string"/>
+            <xsd:element name="Affichage_opes">
                 <xsd:simpleType>
-                    <xsd:restriction base="xsd:integer">
-                        <xsd:minInclusive value="0"/>
-                        <xsd:maxInclusive value="4"/>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="(\d?\d-){27}\d?\d"/>
                     </xsd:restriction>
                 </xsd:simpleType>
             </xsd:element>
-            <xsd:element name="Nb_operations" type="index"/>
-            <xsd:element name="Devise" type="index"/>
-            <xsd:element name="Banque" type="index"/>
-            <xsd:element name="Guichet"/>
-            <xsd:element name="No_compte_banque"/>
-            <xsd:element name="Cle_du_compte"/>
-            <xsd:element name="Solde_initial" type="nombres"/>
-            <xsd:element name="Solde_mini_voulu" type="nombres"/>
-            <xsd:element name="Solde_mini_autorise" type="nombres"/>
-            <xsd:element name="Solde_courant" type="nombres"/>
-            <xsd:element name="Date_dernier_releve"/>
-            <xsd:element name="Solde_dernier_releve" type="nombres"/>
-            <xsd:element name="Dernier_no_de_rapprochement" type="index"/>
-            <xsd:element name="Compte_cloture" type="xsd:boolean"/>
-            <xsd:element name="Affichage_r"/>
-            <xsd:element name="Nb_lignes_ope"/>
-            <xsd:element name="Commentaires"/>
-            <xsd:element name="Adresse_du_titulaire"/>
-            <xsd:element name="Nombre_de_types"/>
-            <xsd:element name="Type_defaut_debit" type="index"/>
-            <xsd:element name="Type_defaut_credit" type="index"/>
-            <xsd:element name="Tri_par_type"/>
-            <xsd:element name="Neutres_inclus"/>
-            <xsd:element name="Ordre_du_tri" type="liste_barre"/>
-        </xsd:sequence>
+            <xsd:element name="Rapport_largeur_col">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="(\d?\d-){6}\d?\d"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="Ligne_aff_une_ligne">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="\d?\d"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="Lignes_aff_deux_lignes">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="(\d?\d-){1}\d"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="Lignes_aff_trois_lignes">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string">
+                        <xsd:pattern value="(\d?\d-){2}\d"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:all>
     </xsd:complexType>
-</xsd:element>
-<xsd:element name="Detail_de_Types">
-    <xsd:complexType>
+    <xsd:complexType name="T_Comptes">
         <xsd:sequence>
-            <xsd:element name="Type" minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="Generalites">
                 <xsd:complexType>
-                    <xsd:attribute name="No" type="index"/>
-                    <xsd:attribute name="Nom"/>
-                    <xsd:attribute name="Signe">
-                        <xsd:annotation>
-                            <xsd:documentation>0 virement, 1 negatif, 2 positif</xsd:documentation>
-                        </xsd:annotation>
-                        <xsd:simpleType>
-                            <xsd:restriction base="xsd:integer">
-                                <xsd:minInclusive value="0"/>
-                                <xsd:maxInclusive value="2"/>
-                            </xsd:restriction>
-                        </xsd:simpleType>
-                    </xsd:attribute>
-                    <xsd:attribute name="Affiche_entree"/>
-                    <xsd:attribute name="Numerotation_auto" type="xsd:boolean"/>
-                    <xsd:attribute name="No_en_cours">
-                        <xsd:annotation>
-                            <xsd:documentation>attention a ne pas mettre en int car des bq int des numeros alpha
-                            </xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
+                    <xsd:sequence>
+                        <xsd:element name="Ordre_des_comptes">
+                            <xsd:simpleType>
+                                <xsd:restriction base="xsd:string">
+                                    <xsd:pattern value="(\d?\d-){0,}\d?\d"/>
+                                </xsd:restriction>
+                            </xsd:simpleType>
+                        </xsd:element>
+                        <xsd:element name="Compte_courant" type="index"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Compte" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Details">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="Nom" type="xsd:string"/>
+                                    <xsd:element name="Id_compte" type="xsd:string" minOccurs="0"/>
+                                    <xsd:element name="No_de_compte" type="index">
+                                        <xsd:annotation>
+                                            <xsd:documentation>numero interne de grisbi</xsd:documentation>
+                                        </xsd:annotation>
+                                    </xsd:element>
+                                    <xsd:element name="Titulaire" type="xsd:string"/>
+                                    <xsd:element name="Type_de_compte">
+                                        <xsd:simpleType>
+                                            <xsd:restriction base="xsd:integer">
+                                                <xsd:minInclusive value="0"/>
+                                                <xsd:maxInclusive value="4"/>
+                                            </xsd:restriction>
+                                        </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="Nb_operations" type="index"/>
+                                    <xsd:element name="Devise" type="index"/>
+                                    <xsd:element name="Banque" type="index"/>
+                                    <xsd:element name="Guichet"/>
+                                    <xsd:element name="No_compte_banque"/>
+                                    <xsd:element name="Cle_du_compte"/>
+                                    <xsd:element name="Solde_initial" type="nombres"/>
+                                    <xsd:element name="Solde_mini_voulu" type="nombres"/>
+                                    <xsd:element name="Solde_mini_autorise" type="nombres"/>
+                                    <xsd:element name="Solde_courant" type="nombres"/>
+                                    <xsd:element name="Date_dernier_releve"/>
+                                    <xsd:element name="Solde_dernier_releve" type="nombres"/>
+                                    <xsd:element name="Dernier_no_de_rapprochement" type="index"/>
+                                    <xsd:element name="Compte_cloture" type="xsd:boolean"/>
+                                    <xsd:element name="Affichage_r"/>
+                                    <xsd:element name="Nb_lignes_ope"/>
+                                    <xsd:element name="Commentaires"/>
+                                    <xsd:element name="Adresse_du_titulaire"/>
+                                    <xsd:element name="Nombre_de_types"/>
+                                    <xsd:element name="Type_defaut_debit" type="index"/>
+                                    <xsd:element name="Type_defaut_credit" type="index"/>
+                                    <xsd:element name="Tri_par_type"/>
+                                    <xsd:element name="Neutres_inclus"/>
+                                    <xsd:element name="Ordre_du_tri" type="liste_barre"/>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="Detail_de_Types">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="Type" minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="No" type="index"/>
+                                            <xsd:attribute name="Nom"/>
+                                            <xsd:attribute name="Signe">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>0 virement, 1 negatif, 2 positif</xsd:documentation>
+                                                </xsd:annotation>
+                                                <xsd:simpleType>
+                                                    <xsd:restriction base="xsd:integer">
+                                                        <xsd:minInclusive value="0"/>
+                                                        <xsd:maxInclusive value="2"/>
+                                                    </xsd:restriction>
+                                                </xsd:simpleType>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Affiche_entree"/>
+                                            <xsd:attribute name="Numerotation_auto" type="xsd:boolean"/>
+                                            <xsd:attribute name="No_en_cours">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>attention a ne pas mettre en int car des bq int des numeros alpha
+                                                    </xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="Detail_des_operations">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="Operation" minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="No" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>numero de l'opération</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Id" use="optional">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>attention, cet atttibut a disparu avec la version 5.7
+                                                    </xsd:documentation>
+                                                </xsd:annotation>
+                                                <xsd:simpleType>
+                                                    <xsd:union memberTypes="vide index"/>
+                                                </xsd:simpleType>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="D" type="ma_date" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>date de l'opération</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Db" type="ma_date" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>date de valeur de l'opération</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="M" type="nombres" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>montant</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="De" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>devise utilisée</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Rdc" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>inconnu TODO</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Tc" type="nombres" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>taux de change</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Fc" type="nombres" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>frais de change</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="T" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>index du tiers</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="C" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>index de la categorie</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Sc" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>index de la sous-categorie</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Ov" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>1 si operation ventilee mere</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="N" type="xsd:string" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>notes et commentaires</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Ty" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>type de paiment de l'operation</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Ct" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>numero du cheque</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="P" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>pointée ou rapprochée TODO verifier les cas possibles
+                                                    </xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="A" use="required"/>
+                                            <xsd:attribute name="R" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>numero de rapprochement</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="E" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>numero de l'exercice</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="I" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>index de l'imputation budgetaire</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Si" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>index de la sous imputation budgetaire</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Pc" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>numero piece comptable</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Ibg" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>id banque</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Ro" type="index" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>transaction jumelle dans le cadre d'un virement</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Rc" use="required">
+                                                <xsd:annotation>
+                                                    <xsd:documentation>compte en relation pour les virements</xsd:documentation>
+                                                </xsd:annotation>
+                                            </xsd:attribute>
+                                            <xsd:attribute name="Va" use="required"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
-</xsd:element>
-<xsd:element name="Detail_des_operations">
-    <xsd:complexType>
+    <xsd:complexType name="T_Echeances">
         <xsd:sequence>
-            <xsd:element name="Operation" minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="Generalites">
                 <xsd:complexType>
-                    <xsd:attribute name="No" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>numero de l'opération</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Id" use="optional">
-                        <xsd:annotation>
-                            <xsd:documentation> attention, cet atttibut a disparu avec la version 5.7
-                            </xsd:documentation>
-                        </xsd:annotation>
-                        <xsd:simpleType>
-                            <xsd:union memberTypes="vide index"/>
-                        </xsd:simpleType>
-                    </xsd:attribute>
-                    <xsd:attribute name="D" type="ma_date" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>date de l'opération</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Db" type="ma_date" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>date de valeur de l'opération</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="M" type="nombres" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>montant</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="De" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>devise utilisée</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Rdc" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>inconnu TODO</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Tc" type="nombres" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>taux de change</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Fc" type="nombres" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>frais de change</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="T" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>index du tiers</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="C" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>index de la categorie</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Sc" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>index de la sous-categorie</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Ov" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>1 si operation ventilee mere</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="N" type="xsd:string" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>notes et commentaires</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Ty" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>type de paiment de l'operation</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Ct" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>numero du cheque</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="P" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>pointée ou rapprochée TODO verifier les cas possibles</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="A" use="required"/>
-                    <xsd:attribute name="R" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>numero de rapprochement</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="E" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>numero de l'exercice</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="I" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>index de l'imputation budgetaire</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Si" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>index de la sous imputation budgetaire</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Pc" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>numero piece comptable</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Ibg" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>id banque</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Ro" type="index" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>transaction jumelle dans le cadre d'un virement</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Rc" use="required">
-                        <xsd:annotation>
-                            <xsd:documentation>compte en relation pour les virements</xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="Va" use="required"/>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_echeances" type="xsd:integer"/>
+                        <xsd:element name="No_derniere_echeance" type="index"/>
+                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-        </xsd:sequence>
-    </xsd:complexType>
-</xsd:element>
-</xsd:sequence>
-</xsd:complexType>
-</xsd:element>
-</xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Echeances">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_echeances" type="xsd:integer"/>
-                    <xsd:element name="No_derniere_echeance" type="index"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_echeances">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Echeance" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index" use="required"/>
-                            <xsd:attribute name="Date" type="ma_date" use="required"/>
-                            <xsd:attribute name="Compte" type="index" use="required"/>
-                            <xsd:attribute name="Montant" type="nombres" use="required"/>
-                            <xsd:attribute name="Devise" type="index" use="required"/>
-                            <xsd:attribute name="Tiers" type="index" use="required"/>
-                            <xsd:attribute name="Categorie" type="index" use="required"/>
-                            <xsd:attribute name="Sous-categorie" type="index" use="required"/>
-                            <xsd:attribute name="Virement_compte" type="index" use="required"/>
-                            <xsd:attribute name="Type" type="index" use="required"/>
-                            <xsd:attribute name="Type_contre_ope" type="index" use="optional">
+            <xsd:element name="Detail_des_echeances">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Echeance" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index" use="required"/>
+                                <xsd:attribute name="Date" type="ma_date" use="required"/>
+                                <xsd:attribute name="Compte" type="index" use="required"/>
+                                <xsd:attribute name="Montant" type="nombres" use="required"/>
+                                <xsd:attribute name="Devise" type="index" use="required"/>
+                                <xsd:attribute name="Tiers" type="index" use="required"/>
+                                <xsd:attribute name="Categorie" type="index" use="required"/>
+                                <xsd:attribute name="Sous-categorie" type="index" use="required"/>
+                                <xsd:attribute name="Virement_compte" type="index" use="required"/>
+                                <xsd:attribute name="Type" type="index" use="required"/>
+                                <xsd:attribute name="Type_contre_ope" type="index" use="optional">
+                                    <xsd:annotation>
+                                        <xsd:documentation>existe dans le version 5.7</xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                                <xsd:attribute name="Contenu_du_type" use="required"/>
+                                <xsd:attribute name="Exercice" type="xsd:int" use="required">
+                                    <xsd:annotation>
+                                        <xsd:documentation>ce n'est pas un index</xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                                <xsd:attribute name="Imputation" type="index" use="required"/>
+                                <xsd:attribute name="Sous-imputation" type="index" use="required"/>
+                                <xsd:attribute name="Notes" type="xsd:string" use="required"/>
+                                <xsd:attribute name="Automatique" type="xsd:boolean" use="required"/>
+                                <xsd:attribute name="Periodicite" use="required"/>
                                 <xsd:annotation>
-                                    <xsd:documentation>existe dans le version 5.7</xsd:documentation>
+                                    <xsd:documentation>0=jours,1=mois,2=années</xsd:documentation>
                                 </xsd:annotation>
-                            </xsd:attribute>
-                            <xsd:attribute name="Contenu_du_type" use="required"/>
-                            <xsd:attribute name="Exercice" type="xsd:int" use="required">
+                                <xsd:attribute name="Intervalle_periodicite" use="required"/>
                                 <xsd:annotation>
-                                    <xsd:documentation>ce n'est pas un index</xsd:documentation>
-                                </xsd:annotation>
-                            </xsd:attribute>
-                            <xsd:attribute name="Imputation" type="index" use="required"/>
-                            <xsd:attribute name="Sous-imputation" type="index" use="required"/>
-                            <xsd:attribute name="Notes" type="xsd:string" use="required"/>
-                            <xsd:attribute name="Automatique" type="xsd:boolean" use="required"/>
-                            <xsd:attribute name="Periodicite" use="required"/>
-                            <xsd:annotation>
-                                <xsd:documentation>0=jours,1=mois,2=années</xsd:documentation>
-                            </xsd:annotation>
-                            <xsd:attribute name="Intervalle_periodicite" use="required"/>
-                            <xsd:annotation>
-                                <xsd:documentation>le nombre de jours/mois/années quand la périodicité est
-                                    personnalisée
-                                </xsd:documentation>
-                            </xsd:annotation>
-                            <xsd:attribute name="Periodicite_personnalisee" use="required"/>
-                            <xsd:annotation>
-                                <xsd:documentation>0=unefois,1=jour,2=mensuel,3=annuel,4=personnalisé
-                                </xsd:documentation>
-                            </xsd:annotation>
-                            <xsd:attribute name="Date_limite">
-                                <xsd:annotation>
-                                    <xsd:documentation>elle peut etre vide</xsd:documentation>
-                                </xsd:annotation>
-                                <xsd:simpleType>
-                                    <xsd:union memberTypes="vide nombres"/>
-                                </xsd:simpleType>
-                            </xsd:attribute>
-                            <xsd:attribute name="Ech_ventilee" use="optional">
-                                <xsd:annotation>
-                                    <xsd:documentation>existe dans le version 5.7</xsd:documentation>
-                                </xsd:annotation>
-                            </xsd:attribute>
-                            <xsd:attribute name="No_ech_associee" use="optional">
-                                <xsd:annotation>
-                                    <xsd:documentation>existe dans le version 5.7</xsd:documentation>
-                                </xsd:annotation>
-                            </xsd:attribute>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Tiers">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_tiers" type="xsd:integer"/>
-                    <xsd:element name="No_dernier_tiers" type="xsd:integer"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_tiers">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Tiers" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom"/>
-                            <xsd:attribute name="Informations"/>
-                            <xsd:attribute name="Liaison"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Categories">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_categories" type="xsd:integer"/>
-                    <xsd:element name="No_derniere_categorie" type="xsd:integer"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_categories">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Categorie" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="Sous-categorie" minOccurs="0" maxOccurs="unbounded">
-                                    <xsd:complexType>
-                                        <xsd:attribute name="No" type="index"/>
-                                        <xsd:attribute name="Nom"/>
-                                    </xsd:complexType>
-                                </xsd:element>
-                            </xsd:sequence>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom"/>
-                            <xsd:attribute name="Type">
-                                <xsd:annotation>
-                                    <xsd:documentation>0 pour les revenus 1 pour les depenses</xsd:documentation>
-                                </xsd:annotation>
-                                <xsd:simpleType>
-                                    <xsd:restriction base="xsd:unsignedInt">
-                                        <xsd:minInclusive value="0"/>
-                                        <xsd:maxInclusive value="1"/>
-                                    </xsd:restriction>
-                                </xsd:simpleType>
-                            </xsd:attribute>
-                            <xsd:attribute name="No_derniere_sous_cagegorie" type="index">
-                                <xsd:annotation>
-                                    <xsd:documentation>attention, il y a une 'erreur' de frappe dans le nom. mais c'est
-                                        bien ca j'ai verifié
+                                    <xsd:documentation>le nombre de jours/mois/années quand la périodicité est
+                                        personnalisée
                                     </xsd:documentation>
                                 </xsd:annotation>
-                            </xsd:attribute>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Imputations">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_imputations" type="xsd:integer"/>
-                    <xsd:element name="No_derniere_imputation" type="xsd:integer"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_imputations">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Imputation" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="Sous-imputation" minOccurs="0" maxOccurs="unbounded">
-                                    <xsd:complexType>
-                                        <xsd:attribute name="No" type="index"/>
-                                        <xsd:attribute name="Nom"/>
-                                    </xsd:complexType>
-                                </xsd:element>
-                            </xsd:sequence>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom"/>
-                            <xsd:attribute name="Type">
+                                <xsd:attribute name="Periodicite_personnalisee" use="required"/>
                                 <xsd:annotation>
-                                    <xsd:documentation>0 pour les revenus 1 pour les depenses</xsd:documentation>
+                                    <xsd:documentation>0=unefois,1=jour,2=mensuel,3=annuel,4=personnalisé
+                                    </xsd:documentation>
                                 </xsd:annotation>
-                                <xsd:simpleType>
-                                    <xsd:restriction base="xsd:unsignedInt">
-                                        <xsd:minInclusive value="0"/>
-                                        <xsd:maxInclusive value="1"/>
-                                    </xsd:restriction>
-                                </xsd:simpleType>
-                            </xsd:attribute>
-                            <xsd:attribute name="No_derniere_sous_imputation" type="index"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Devises">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_devises" type="xsd:integer"/>
-                    <xsd:element name="No_derniere_devise" type="xsd:integer"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_devises">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Devise" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom"/>
-                            <xsd:attribute name="Code"/>
-                            <xsd:attribute name="IsoCode"/>
-                            <xsd:attribute name="Passage_euro" type="xsd:boolean"/>
-                            <xsd:attribute name="Date_dernier_change" type="ma_date"/>
-                            <xsd:attribute name="Rapport_entre_devises"/>
-                            <xsd:attribute name="Devise_en_rapport"/>
-                            <xsd:attribute name="Change" type="nombres"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Banques">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_banques" type="xsd:integer"/>
-                    <xsd:element name="No_derniere_banque" type="index">
-                        <xsd:annotation>
-                            <xsd:documentation>attention, le numero n'est pas totalement juste, il peut etre inferieur à
-                                nb banques
-                            </xsd:documentation>
-                        </xsd:annotation>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_banques">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Banque" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom" type="xsd:string"/>
-                            <xsd:attribute name="Code"/>
-                            <xsd:attribute name="Adresse"/>
-                            <xsd:attribute name="Tel"/>
-                            <xsd:attribute name="Mail"/>
-                            <xsd:attribute name="Web" type="xsd:anyURI"/>
-                            <xsd:attribute name="Nom_correspondant"/>
-                            <xsd:attribute name="Fax_correspondant"/>
-                            <xsd:attribute name="Tel_correspondant"/>
-                            <xsd:attribute name="Mail_correspondant"/>
-                            <xsd:attribute name="Remarques"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Exercices">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Nb_exercices" type="xsd:integer"/>
-                    <xsd:element name="No_dernier_exercice" type="xsd:integer"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_exercices">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Exercice" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom" type="xsd:string"/>
-                            <xsd:attribute name="Date_debut" type="ma_date"/>
-                            <xsd:attribute name="Date_fin" type="ma_date"/>
-                            <xsd:attribute name="Affiche" type="xsd:boolean"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Rapprochements">
-    <xsd:sequence>
-        <xsd:element name="Detail_des_rapprochements">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Rapprochement" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="No" type="index"/>
-                            <xsd:attribute name="Nom"/>
-                            <xsd:attribute name="Date_debut" type="ma_date"/>
-                            <xsd:attribute name="Date_fin" type="ma_date"/>
-                            <xsd:attribute name="Affiche" type="xsd:boolean"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_Etats">
-    <xsd:sequence>
-        <xsd:element name="Generalites">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="No_dernier_etat" type="index"/>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-        <xsd:element name="Detail_des_etats">
-            <xsd:complexType>
-                <xsd:sequence>
-                    <xsd:element name="Etat" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="No" type="index" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Nom" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Type_classement" minOccurs="1" maxOccurs="1">
+                                <xsd:attribute name="Date_limite">
+                                    <xsd:annotation>
+                                        <xsd:documentation>elle peut etre vide</xsd:documentation>
+                                    </xsd:annotation>
                                     <xsd:simpleType>
-                                        <xsd:restriction base="xsd:string">
-                                            <xsd:pattern value="(\d/){5}\d"/>
+                                        <xsd:union memberTypes="vide nombres"/>
+                                    </xsd:simpleType>
+                                </xsd:attribute>
+                                <xsd:attribute name="Ech_ventilee" use="optional">
+                                    <xsd:annotation>
+                                        <xsd:documentation>existe dans le version 5.7</xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                                <xsd:attribute name="No_ech_associee" use="optional">
+                                    <xsd:annotation>
+                                        <xsd:documentation>existe dans le version 5.7</xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Tiers">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_tiers" type="xsd:integer"/>
+                        <xsd:element name="No_dernier_tiers" type="xsd:integer"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_tiers">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Tiers" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom"/>
+                                <xsd:attribute name="Informations"/>
+                                <xsd:attribute name="Liaison"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Categories">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_categories" type="xsd:integer"/>
+                        <xsd:element name="No_derniere_categorie" type="xsd:integer"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_categories">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Categorie" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="Sous-categorie" minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="No" type="index"/>
+                                            <xsd:attribute name="Nom"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom"/>
+                                <xsd:attribute name="Type">
+                                    <xsd:annotation>
+                                        <xsd:documentation>0 pour les revenus 1 pour les depenses</xsd:documentation>
+                                    </xsd:annotation>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:unsignedInt">
+                                            <xsd:minInclusive value="0"/>
+                                            <xsd:maxInclusive value="1"/>
                                         </xsd:restriction>
                                     </xsd:simpleType>
-                                </xsd:element>
-                                <xsd:element name="Aff_r" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_nb_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_no_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_date_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_tiers_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_categ_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_ss_categ_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_type_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_ib_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_ss_ib_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_cheque_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_notes_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_pc_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_verif_ope" minOccurs="0" maxOccurs="1" type="xsd:boolean">
+                                </xsd:attribute>
+                                <xsd:attribute name="No_derniere_sous_cagegorie" type="index">
                                     <xsd:annotation>
-                                        <xsd:documentation>grisbi 5.7</xsd:documentation>
+                                        <xsd:documentation>attention, il y a une 'erreur' de frappe dans le nom. mais c'est
+                                            bien ca j'ai verifié
+                                        </xsd:documentation>
                                     </xsd:annotation>
-                                </xsd:element>
-                                <xsd:element name="Aff_rappr_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_infobd_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_exo_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Class_ope" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_titres_col" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_titres_chgt" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Pas_detail_ventil" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Sep_rev_dep" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Devise_gen" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Incl_tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Ope_click" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Exo_date" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_exo" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_exo" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Plage_date" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Date_debut" type="ma_date" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Date_fin" type="ma_date" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Utilise_plages" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Sep_plages" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Sep_exo" minOccurs="0" maxOccurs="1" type="xsd:boolean">
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Imputations">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_imputations" type="xsd:integer"/>
+                        <xsd:element name="No_derniere_imputation" type="xsd:integer"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_imputations">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Imputation" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="Sous-imputation" minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="No" type="index"/>
+                                            <xsd:attribute name="Nom"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom"/>
+                                <xsd:attribute name="Type">
                                     <xsd:annotation>
-                                        <xsd:documentation>grisbi 5.7</xsd:documentation>
+                                        <xsd:documentation>0 pour les revenus 1 pour les depenses</xsd:documentation>
                                     </xsd:annotation>
-                                </xsd:element>
-                                <xsd:element name="Deb_sem_plages" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_comptes" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_comptes" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Grp_ope_compte" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Total_compte" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_nom_compte" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Type_vir" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_comptes_virements" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Exclure_non_vir" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Exclut_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Total_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_ss_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_pas_ss_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Total_ss_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Devise_categ" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_nom_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="IB" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Exclut_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Total_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_ss_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Aff_pas_ss_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Total_ss_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Devise_ib" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_nom_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="No_tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Total_tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Devise_tiers" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Aff_nom_tiers" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
-                                <xsd:element name="Texte" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Texte_comp" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Montant" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Montant_devise" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Montant_comp" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Excl_nul" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Detail_mod_paie" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="Liste_mod_paie" minOccurs="1" maxOccurs="1"/>
-                            </xsd:sequence>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-            </xsd:complexType>
-        </xsd:element>
-    </xsd:sequence>
-</xsd:complexType>
-<xsd:complexType name="T_GRISBI">
-    <xsd:all>
-        <xsd:element name="Generalites" type="T_generalite"/>
-        <xsd:element name="Comptes" type="T_Comptes"/>
-        <xsd:element name="Echeances" type="T_Echeances"/>
-        <xsd:element name="Tiers" type="T_Tiers"/>
-        <xsd:element name="Categories" type="T_Categories"/>
-        <xsd:element name="Imputations" type="T_Imputations"/>
-        <xsd:element name="Devises" type="T_Devises"/>
-        <xsd:element name="Banques" type="T_Banques"/>
-        <xsd:element name="Exercices" type="T_Exercices"/>
-        <xsd:element name="Rapprochements" type="T_Rapprochements"/>
-        <xsd:element name="Etats" type="T_Etats"/>
-    </xsd:all>
-</xsd:complexType>
-<xsd:element name="Grisbi" type="T_GRISBI"/>
+                                    <xsd:simpleType>
+                                        <xsd:restriction base="xsd:unsignedInt">
+                                            <xsd:minInclusive value="0"/>
+                                            <xsd:maxInclusive value="1"/>
+                                        </xsd:restriction>
+                                    </xsd:simpleType>
+                                </xsd:attribute>
+                                <xsd:attribute name="No_derniere_sous_imputation" type="index"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Devises">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_devises" type="xsd:integer"/>
+                        <xsd:element name="No_derniere_devise" type="xsd:integer"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_devises">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Devise" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom"/>
+                                <xsd:attribute name="Code"/>
+                                <xsd:attribute name="IsoCode"/>
+                                <xsd:attribute name="Passage_euro" type="xsd:boolean"/>
+                                <xsd:attribute name="Date_dernier_change" type="ma_date"/>
+                                <xsd:attribute name="Rapport_entre_devises"/>
+                                <xsd:attribute name="Devise_en_rapport"/>
+                                <xsd:attribute name="Change" type="nombres"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Banques">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_banques" type="xsd:integer"/>
+                        <xsd:element name="No_derniere_banque" type="index">
+                            <xsd:annotation>
+                                <xsd:documentation>attention, le numero n'est pas totalement juste, il peut etre inferieur à
+                                    nb banques
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_banques">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Banque" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom" type="xsd:string"/>
+                                <xsd:attribute name="Code"/>
+                                <xsd:attribute name="Adresse"/>
+                                <xsd:attribute name="Tel"/>
+                                <xsd:attribute name="Mail"/>
+                                <xsd:attribute name="Web" type="xsd:anyURI"/>
+                                <xsd:attribute name="Nom_correspondant"/>
+                                <xsd:attribute name="Fax_correspondant"/>
+                                <xsd:attribute name="Tel_correspondant"/>
+                                <xsd:attribute name="Mail_correspondant"/>
+                                <xsd:attribute name="Remarques"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Exercices">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Nb_exercices" type="xsd:integer"/>
+                        <xsd:element name="No_dernier_exercice" type="xsd:integer"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_exercices">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Exercice" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom" type="xsd:string"/>
+                                <xsd:attribute name="Date_debut" type="ma_date"/>
+                                <xsd:attribute name="Date_fin" type="ma_date"/>
+                                <xsd:attribute name="Affiche" type="xsd:boolean"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Rapprochements">
+        <xsd:sequence>
+            <xsd:element name="Detail_des_rapprochements">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Rapprochement" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="No" type="index"/>
+                                <xsd:attribute name="Nom"/>
+                                <xsd:attribute name="Date_debut" type="ma_date"/>
+                                <xsd:attribute name="Date_fin" type="ma_date"/>
+                                <xsd:attribute name="Affiche" type="xsd:boolean"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_Etats">
+        <xsd:sequence>
+            <xsd:element name="Generalites">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="No_dernier_etat" type="index"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="Detail_des_etats">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Etat" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="No" type="index" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Nom" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Type_classement" minOccurs="1" maxOccurs="1">
+                                        <xsd:simpleType>
+                                            <xsd:restriction base="xsd:string">
+                                                <xsd:pattern value="(\d/){5}\d"/>
+                                            </xsd:restriction>
+                                        </xsd:simpleType>
+                                    </xsd:element>
+                                    <xsd:element name="Aff_r" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_nb_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_no_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_date_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_tiers_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_categ_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_ss_categ_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_type_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_ib_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_ss_ib_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_cheque_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_notes_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_pc_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_verif_ope" minOccurs="0" maxOccurs="1" type="xsd:boolean">
+                                        <xsd:annotation>
+                                            <xsd:documentation>grisbi 5.7</xsd:documentation>
+                                        </xsd:annotation>
+                                    </xsd:element>
+                                    <xsd:element name="Aff_rappr_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_infobd_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_exo_ope" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Class_ope" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_titres_col" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_titres_chgt" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Pas_detail_ventil" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Sep_rev_dep" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Devise_gen" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Incl_tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Ope_click" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Exo_date" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_exo" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_exo" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Plage_date" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Date_debut" type="ma_date" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Date_fin" type="ma_date" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Utilise_plages" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Sep_plages" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Sep_exo" minOccurs="0" maxOccurs="1" type="xsd:boolean">
+                                        <xsd:annotation>
+                                            <xsd:documentation>grisbi 5.7</xsd:documentation>
+                                        </xsd:annotation>
+                                    </xsd:element>
+                                    <xsd:element name="Deb_sem_plages" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_comptes" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_comptes" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Grp_ope_compte" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Total_compte" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_nom_compte" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Type_vir" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_comptes_virements" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Exclure_non_vir" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Exclut_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Total_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_ss_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_pas_ss_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Total_ss_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Devise_categ" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_nom_categ" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="IB" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Exclut_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Total_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_ss_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Aff_pas_ss_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Total_ss_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Devise_ib" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_nom_ib" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="No_tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Total_tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Devise_tiers" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Aff_nom_tiers" minOccurs="1" maxOccurs="1" type="xsd:boolean"/>
+                                    <xsd:element name="Texte" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Texte_comp" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Montant" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Montant_devise" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Montant_comp" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Excl_nul" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Detail_mod_paie" minOccurs="1" maxOccurs="1"/>
+                                    <xsd:element name="Liste_mod_paie" minOccurs="1" maxOccurs="1"/>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="T_GRISBI">
+        <xsd:all>
+            <xsd:element name="Generalites" type="T_generalite"/>
+            <xsd:element name="Comptes" type="T_Comptes"/>
+            <xsd:element name="Echeances" type="T_Echeances"/>
+            <xsd:element name="Tiers" type="T_Tiers"/>
+            <xsd:element name="Categories" type="T_Categories"/>
+            <xsd:element name="Imputations" type="T_Imputations"/>
+            <xsd:element name="Devises" type="T_Devises"/>
+            <xsd:element name="Banques" type="T_Banques"/>
+            <xsd:element name="Exercices" type="T_Exercices"/>
+            <xsd:element name="Rapprochements" type="T_Rapprochements"/>
+            <xsd:element name="Etats" type="T_Etats"/>
+        </xsd:all>
+    </xsd:complexType>
+    <xsd:element name="Grisbi" type="T_GRISBI"/>
 </xsd:schema>

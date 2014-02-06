@@ -1,447 +1,499 @@
 <?xml version="1.0"?>
 <Grisbi>
-  <Generalites>
-    <Version_fichier>0.5.0</Version_fichier>
-    <Version_grisbi>0.5.9 for Windows (GTK&gt;=2.6.9)</Version_grisbi>
-    <Fichier_ouvert>0</Fichier_ouvert>
-    <Backup>sauvegarde.gsb</Backup>
-    <Titre>20040701_django.gsb</Titre>
-    <Adresse_commune></Adresse_commune>
-    <Adresse_secondaire></Adresse_secondaire>
-    <Utilise_exercices>0</Utilise_exercices>
-    <Utilise_IB>1</Utilise_IB>
-    <Utilise_PC>0</Utilise_PC>
-    <Utilise_info_BG>0</Utilise_info_BG>
-    <Numero_devise_totaux_tiers>1</Numero_devise_totaux_tiers>
-    <Numero_devise_totaux_categ>1</Numero_devise_totaux_categ>
-    <Numero_devise_totaux_ib>1</Numero_devise_totaux_ib>
-    <Type_affichage_des_echeances>3</Type_affichage_des_echeances>
-    <Affichage_echeances_perso_nb_libre>0</Affichage_echeances_perso_nb_libre>
-    <Type_affichage_perso_echeances>0</Type_affichage_perso_echeances>
-    <Numero_derniere_operation>14</Numero_derniere_operation>
-    <Echelle_date_import>2</Echelle_date_import>
-    <Utilise_logo>1</Utilise_logo>
-    <Chemin_logo>g:/Program Files/Grisbi/pixmaps/grisbi-logo.png</Chemin_logo>
-    <Affichage_opes>18-1-3-13-5-6-7-0-0-12-0-9-8-0-0-0-15-0-0-0-0-0-0-0-0-0-0-0</Affichage_opes>
-    <Rapport_largeur_col>7-9-33-2-10-9-7</Rapport_largeur_col>
-    <Ligne_aff_une_ligne>0</Ligne_aff_une_ligne>
-    <Lignes_aff_deux_lignes>0-1</Lignes_aff_deux_lignes>
-    <Lignes_aff_trois_lignes>0-1-2</Lignes_aff_trois_lignes>
-  </Generalites>
-  <Comptes>
     <Generalites>
-      <Ordre_des_comptes>6-4-5-2-3-1-7</Ordre_des_comptes>
-      <Compte_courant>0</Compte_courant>
+        <Version_fichier>0.5.0</Version_fichier>
+        <Version_grisbi>0.5.9 for Windows (GTK&gt;=2.6.9)</Version_grisbi>
+        <Fichier_ouvert>0</Fichier_ouvert>
+        <Backup>sauvegarde.gsb</Backup>
+        <Titre>20040701_django.gsb</Titre>
+        <Adresse_commune></Adresse_commune>
+        <Adresse_secondaire></Adresse_secondaire>
+        <Utilise_exercices>0</Utilise_exercices>
+        <Utilise_IB>1</Utilise_IB>
+        <Utilise_PC>0</Utilise_PC>
+        <Utilise_info_BG>0</Utilise_info_BG>
+        <Numero_devise_totaux_tiers>1</Numero_devise_totaux_tiers>
+        <Numero_devise_totaux_categ>1</Numero_devise_totaux_categ>
+        <Numero_devise_totaux_ib>1</Numero_devise_totaux_ib>
+        <Type_affichage_des_echeances>3</Type_affichage_des_echeances>
+        <Affichage_echeances_perso_nb_libre>0</Affichage_echeances_perso_nb_libre>
+        <Type_affichage_perso_echeances>0</Type_affichage_perso_echeances>
+        <Numero_derniere_operation>14</Numero_derniere_operation>
+        <Echelle_date_import>2</Echelle_date_import>
+        <Utilise_logo>1</Utilise_logo>
+        <Chemin_logo>g:/Program Files/Grisbi/pixmaps/grisbi-logo.png</Chemin_logo>
+        <Affichage_opes>18-1-3-13-5-6-7-0-0-12-0-9-8-0-0-0-15-0-0-0-0-0-0-0-0-0-0-0</Affichage_opes>
+        <Rapport_largeur_col>7-9-33-2-10-9-7</Rapport_largeur_col>
+        <Ligne_aff_une_ligne>0</Ligne_aff_une_ligne>
+        <Lignes_aff_deux_lignes>0-1</Lignes_aff_deux_lignes>
+        <Lignes_aff_trois_lignes>0-1-2</Lignes_aff_trois_lignes>
     </Generalites>
-    <Compte>
-      <Details>
-        <Nom>cpte1</Nom>
-        <Id_compte/>
-        <No_de_compte>1</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>2</Type_de_compte>
-        <Nb_operations>8</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>1</Banque>
-        <Guichet>12345</Guichet>
-        <No_compte_banque>01234567890</No_compte_banque>
-        <Cle_du_compte>72</Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>-70,0000000</Solde_courant>
-        <Date_dernier_releve>12/8/2011</Date_dernier_releve>
-        <Solde_dernier_releve>-90,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>1</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>1</Type_defaut_debit>
-        <Type_defaut_credit>4</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
-        <Operation No="4" Id="" D="11/8/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1" Sc="0" Ov="0" N="" Ty="1" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="5" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="2" Sc="0" Ov="0" N="" Ty="4" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="6" Id="" D="21/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2" Sc="0" Ov="0" N="fusion avec ope1" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="2" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="7" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1" Sc="0" Ov="0" N="" Ty="4" Ct="" P="1" A="0" R="0" E="0" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="8" Id="" D="30/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65" Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="9" Rc="3" Va="0"/>
-        <Operation No="11" Id="" D="24/9/2012" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="66" Sc="0" Ov="1" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="12" Id="" D="24/9/2012" Db="0/0/0" M="99,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="1" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
-        <Operation No="13" Id="" D="24/9/2012" Db="0/0/0" M="1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>cptb2</Nom>
-        <Id_compte/>
-        <No_de_compte>2</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>1</Type_de_compte>
-        <Nb_operations>0</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>2</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>0,0000000</Solde_courant>
-        <Date_dernier_releve/>
-        <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>1</Type_defaut_debit>
-        <Type_defaut_credit>4</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations/>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>cptb3</Nom>
-        <Id_compte/>
-        <No_de_compte>3</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>1</Type_de_compte>
-        <Nb_operations>1</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>2</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>100,0000000</Solde_courant>
-        <Date_dernier_releve/>
-        <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>1</Type_defaut_debit>
-        <Type_defaut_credit>4</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
-        <Operation No="9" Id="" D="30/10/2011" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65" Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="8" Rc="1" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>cpt_titre1</Nom>
-        <Id_compte/>
-        <No_de_compte>4</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>4</Type_de_compte>
-        <Nb_operations>2</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>2</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>0,0000000</Solde_courant>
-        <Date_dernier_releve/>
-        <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>2</Type_defaut_debit>
-        <Type_defaut_credit>4</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
-        <Operation No="1" Id="" D="18/12/2011" Db="0/0/0" M="-1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="64" Sc="0" Ov="0" N="1@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="10" Id="" D="24/9/2012" Db="0/0/0" M="-5,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="3" C="64" Sc="0" Ov="0" N="5@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>cpt_titre2</Nom>
-        <Id_compte/>
-        <No_de_compte>5</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>4</Type_de_compte>
-        <Nb_operations>2</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>2</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>100,0000000</Solde_courant>
-        <Date_dernier_releve>30/10/2011</Date_dernier_releve>
-        <Solde_dernier_releve>-100,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>2</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>3</Type_defaut_debit>
-        <Type_defaut_credit>4</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
-        <Operation No="2" Id="" D="30/11/2011" Db="0/0/0" M="-1500,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64" Sc="0" Ov="0" N="150@10" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-        <Operation No="3" Id="" D="29/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64" Sc="0" Ov="0" N="20@5" Ty="3" Ct="" P="2" A="0" R="2" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>cpt_ferme</Nom>
-        <Id_compte/>
-        <No_de_compte>6</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>1</Type_de_compte>
-        <Nb_operations>0</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>1</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>0,0000000</Solde_courant>
-        <Date_dernier_releve/>
-        <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
-        <Compte_cloture>1</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>0</Type_defaut_debit>
-        <Type_defaut_credit>0</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations/>
-    </Compte>
-    <Compte>
-      <Details>
-        <Nom>test</Nom>
-        <Id_compte/>
-        <No_de_compte>7</No_de_compte>
-        <Titulaire></Titulaire>
-        <Type_de_compte>1</Type_de_compte>
-        <Nb_operations>1</Nb_operations>
-        <Devise>1</Devise>
-        <Banque>0</Banque>
-        <Guichet></Guichet>
-        <No_compte_banque></No_compte_banque>
-        <Cle_du_compte></Cle_du_compte>
-        <Solde_initial>0,0000000</Solde_initial>
-        <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
-        <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
-        <Solde_courant>0,0000000</Solde_courant>
-        <Date_dernier_releve/>
-        <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
-        <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
-        <Compte_cloture>0</Compte_cloture>
-        <Affichage_r>1</Affichage_r>
-        <Nb_lignes_ope>3</Nb_lignes_ope>
-        <Commentaires></Commentaires>
-        <Adresse_du_titulaire></Adresse_du_titulaire>
-        <Nombre_de_types>5</Nombre_de_types>
-        <Type_defaut_debit>0</Type_defaut_debit>
-        <Type_defaut_credit>0</Type_defaut_credit>
-        <Tri_par_type>0</Tri_par_type>
-        <Neutres_inclus>0</Neutres_inclus>
-        <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
-      </Details>
-      <Detail_de_Types>
-        <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-        <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
-      </Detail_de_Types>
-      <Detail_des_operations>
-        <Operation No="14" Id="" D="13/8/2011" Db="13/8/2011" M="0,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="0" C="0" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-      </Detail_des_operations>
-    </Compte>
-  </Comptes>
-  <Echeances>
-    <Generalites>
-      <Nb_echeances>11</Nb_echeances>
-      <No_derniere_echeance>11</No_derniere_echeance>
-    </Generalites>
-    <Detail_des_echeances>
-      <Echeance No="1" Date="30/10/2011" Compte="1" Montant="10,0000000" Devise="1" Tiers="2" Categorie="2" Sous-categorie="0" Virement_compte="2" Type="5" Type_contre_ope="3" Contenu_du_type="" Exercice="1" Imputation="1" Sous-imputation="0" Notes="avec virement et exercice" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="2" Date="30/11/2011" Compte="2" Montant="10,0000000" Devise="1" Tiers="2" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="5" Type_contre_ope="0" Contenu_du_type="" Exercice="2" Imputation="2" Sous-imputation="0" Notes="sans date limite" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="3" Date="30/10/2011" Compte="1" Montant="-20,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="4" Date="30/10/2011" Compte="1" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="14" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="5" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="2" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="6" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="3" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="7" Date="30/10/2011" Compte="1" Montant="30,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="8" Date="30/9/2011" Compte="2" Montant="50,0000000" Devise="1" Tiers="2" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Date_limite="30/9/2011" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="9" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="10" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-      <Echeance No="11" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="7" Periodicite_personnalisee="1" Periodicite="4" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-    </Detail_des_echeances>
-  </Echeances>
-  <Tiers>
-    <Generalites>
-      <Nb_tiers>8</Nb_tiers>
-      <No_dernier_tiers>8</No_dernier_tiers>
-    </Generalites>
-    <Detail_des_tiers>
-      <Tiers No="1" Nom="tiers1" Informations="" Liaison="0"/>
-      <Tiers No="2" Nom="tiers2" Informations="" Liaison="0"/>
-      <Tiers No="3" Nom="titre_ autre" Informations="a@" Liaison="0"/>
-      <Tiers No="4" Nom="titre_ t1" Informations="1@ACT" Liaison="0"/>
-      <Tiers No="5" Nom="titre_ t2" Informations="2@OBL" Liaison="0"/>
-      <Tiers No="6" Nom="titre_ t4" Informations="aaa@CSL" Liaison="0"/>
-      <Tiers No="7" Nom="virement" Informations="" Liaison="0"/>
-      <Tiers No="8" Nom="titre_ autre 2" Informations="svjkdfkjh@" Liaison="0"/>
-    </Detail_des_tiers>
-  </Tiers>
-  <Categories>
-    <Generalites>
-      <Nb_categories>8</Nb_categories>
-      <No_derniere_categorie>67</No_derniere_categorie>
-    </Generalites>
-    <Detail_des_categories>
-      <Categorie No="1" Nom="cat1" Type="1" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="2" Nom="cat2" Type="1" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="3" Nom="cat3" Type="2" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="4" Nom="cat4" Type="3" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="64" Nom="Op&#xE9;ration sur titre" Type="2" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="65" Nom="Virement" Type="2" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="66" Nom="Op&#xE9;ration Ventil&#xE9;e" Type="2" No_derniere_sous_cagegorie="0"/>
-      <Categorie No="67" Nom="Revenus de placement:Plus-values" Type="2" No_derniere_sous_cagegorie="0"/>
-    </Detail_des_categories>
-  </Categories>
-  <Imputations>
-    <Generalites>
-      <Nb_imputations>3</Nb_imputations>
-      <No_derniere_imputation>3</No_derniere_imputation>
-    </Generalites>
-    <Detail_des_imputations>
-      <Imputation No="1" Nom="ib1" Type="1" No_derniere_sous_imputation="0"/>
-      <Imputation No="2" Nom="ib2" Type="1" No_derniere_sous_imputation="0"/>
-      <Imputation No="3" Nom="ib3" Type="2" No_derniere_sous_imputation="0"/>
-    </Detail_des_imputations>
-  </Imputations>
-  <Devises>
-    <Generalites>
-      <Nb_devises>1</Nb_devises>
-      <No_derniere_devise>1</No_derniere_devise>
-    </Generalites>
-    <Detail_des_devises>
-      <Devise No="1" Nom="EUR" Code="EUR" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0" Devise_en_rapport="0" Change="0,0000000"/>
-    </Detail_des_devises>
-  </Devises>
-  <Banques>
-    <Generalites>
-      <Nb_banques>2</Nb_banques>
-      <No_derniere_banque>2</No_derniere_banque>
-    </Generalites>
-    <Detail_des_banques>
-      <Banque No="1" Nom="banque1" Code="10001" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
-      <Banque No="2" Nom="banque2" Code="99999" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
-    </Detail_des_banques>
-  </Banques>
-  <Exercices>
-    <Generalites>
-      <Nb_exercices>2</Nb_exercices>
-      <No_dernier_exercice>2</No_dernier_exercice>
-    </Generalites>
-    <Detail_des_exercices>
-      <Exercice No="1" Nom="exo1" Date_debut="1/1/2010" Date_fin="31/12/2010" Affiche="1"/>
-      <Exercice No="2" Nom="exo2" Date_debut="1/1/2011" Date_fin="31/12/2011" Affiche="1"/>
-    </Detail_des_exercices>
-  </Exercices>
-  <Rapprochements>
-    <Detail_des_rapprochements>
-      <Rapprochement No="1" Nom="cpte1201101"/>
-      <Rapprochement No="2" Nom="cpt_titre2201101"/>
-      <Rapprochement No="3" Nom="rapp sans rien"/>
-    </Detail_des_rapprochements>
-  </Rapprochements>
-  <Etats>
-    <Generalites>
-      <No_dernier_etat>0</No_dernier_etat>
-    </Generalites>
-    <Detail_des_etats/>
-  </Etats>
+    <Comptes>
+        <Generalites>
+            <Ordre_des_comptes>6-4-5-2-3-1-7</Ordre_des_comptes>
+            <Compte_courant>0</Compte_courant>
+        </Generalites>
+        <Compte>
+            <Details>
+                <Nom>cpte1</Nom>
+                <Id_compte/>
+                <No_de_compte>1</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>2</Type_de_compte>
+                <Nb_operations>8</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>1</Banque>
+                <Guichet>12345</Guichet>
+                <No_compte_banque>01234567890</No_compte_banque>
+                <Cle_du_compte>72</Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>-70,0000000</Solde_courant>
+                <Date_dernier_releve>12/8/2011</Date_dernier_releve>
+                <Solde_dernier_releve>-90,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>1</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>1</Type_defaut_debit>
+                <Type_defaut_credit>4</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations>
+                <Operation No="4" Id="" D="11/8/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1"
+                           Sc="0" Ov="0" N="" Ty="1" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="5" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="2"
+                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="6" Id="" D="21/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2"
+                           Sc="0" Ov="0" N="fusion avec ope1" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="2" Si="0" Pc="" Ibg="" Ro="0" Rc="0"
+                           Va="0"/>
+                <Operation No="7" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1"
+                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="1" A="0" R="0" E="0" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="8" Id="" D="30/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65"
+                           Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="9" Rc="3" Va="0"/>
+                <Operation No="11" Id="" D="24/9/2012" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="66"
+                           Sc="0" Ov="1" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="12" Id="" D="24/9/2012" Db="0/0/0" M="99,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="1"
+                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
+                <Operation No="13" Id="" D="24/9/2012" Db="0/0/0" M="1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2"
+                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
+            </Detail_des_operations>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>cptb2</Nom>
+                <Id_compte/>
+                <No_de_compte>2</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>1</Type_de_compte>
+                <Nb_operations>0</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>2</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>0,0000000</Solde_courant>
+                <Date_dernier_releve/>
+                <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>1</Type_defaut_debit>
+                <Type_defaut_credit>4</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations/>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>cptb3</Nom>
+                <Id_compte/>
+                <No_de_compte>3</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>1</Type_de_compte>
+                <Nb_operations>1</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>2</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>100,0000000</Solde_courant>
+                <Date_dernier_releve/>
+                <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>1</Type_defaut_debit>
+                <Type_defaut_credit>4</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations>
+                <Operation No="9" Id="" D="30/10/2011" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65"
+                           Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="8" Rc="1" Va="0"/>
+            </Detail_des_operations>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>cpt_titre1</Nom>
+                <Id_compte/>
+                <No_de_compte>4</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>4</Type_de_compte>
+                <Nb_operations>2</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>2</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>0,0000000</Solde_courant>
+                <Date_dernier_releve/>
+                <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>2</Type_defaut_debit>
+                <Type_defaut_credit>4</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations>
+                <Operation No="1" Id="" D="18/12/2011" Db="0/0/0" M="-1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="64"
+                           Sc="0" Ov="0" N="1@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="10" Id="" D="24/9/2012" Db="0/0/0" M="-5,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="3" C="64"
+                           Sc="0" Ov="0" N="5@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+            </Detail_des_operations>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>cpt_titre2</Nom>
+                <Id_compte/>
+                <No_de_compte>5</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>4</Type_de_compte>
+                <Nb_operations>2</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>2</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>100,0000000</Solde_courant>
+                <Date_dernier_releve>30/10/2011</Date_dernier_releve>
+                <Solde_dernier_releve>-100,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>2</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>3</Type_defaut_debit>
+                <Type_defaut_credit>4</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations>
+                <Operation No="2" Id="" D="30/11/2011" Db="0/0/0" M="-1500,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5"
+                           C="64" Sc="0" Ov="0" N="150@10" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0"
+                           Va="0"/>
+                <Operation No="3" Id="" D="29/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64"
+                           Sc="0" Ov="0" N="20@5" Ty="3" Ct="" P="2" A="0" R="2" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+            </Detail_des_operations>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>cpt_ferme</Nom>
+                <Id_compte/>
+                <No_de_compte>6</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>1</Type_de_compte>
+                <Nb_operations>0</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>1</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>0,0000000</Solde_courant>
+                <Date_dernier_releve/>
+                <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
+                <Compte_cloture>1</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>0</Type_defaut_debit>
+                <Type_defaut_credit>0</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations/>
+        </Compte>
+        <Compte>
+            <Details>
+                <Nom>test</Nom>
+                <Id_compte/>
+                <No_de_compte>7</No_de_compte>
+                <Titulaire></Titulaire>
+                <Type_de_compte>1</Type_de_compte>
+                <Nb_operations>1</Nb_operations>
+                <Devise>1</Devise>
+                <Banque>0</Banque>
+                <Guichet></Guichet>
+                <No_compte_banque></No_compte_banque>
+                <Cle_du_compte></Cle_du_compte>
+                <Solde_initial>0,0000000</Solde_initial>
+                <Solde_mini_voulu>0,0000000</Solde_mini_voulu>
+                <Solde_mini_autorise>0,0000000</Solde_mini_autorise>
+                <Solde_courant>0,0000000</Solde_courant>
+                <Date_dernier_releve/>
+                <Solde_dernier_releve>0,0000000</Solde_dernier_releve>
+                <Dernier_no_de_rapprochement>0</Dernier_no_de_rapprochement>
+                <Compte_cloture>0</Compte_cloture>
+                <Affichage_r>1</Affichage_r>
+                <Nb_lignes_ope>3</Nb_lignes_ope>
+                <Commentaires></Commentaires>
+                <Adresse_du_titulaire></Adresse_du_titulaire>
+                <Nombre_de_types>5</Nombre_de_types>
+                <Type_defaut_debit>0</Type_defaut_debit>
+                <Type_defaut_credit>0</Type_defaut_credit>
+                <Tri_par_type>0</Tri_par_type>
+                <Neutres_inclus>0</Neutres_inclus>
+                <Ordre_du_tri>1/2/3/4/5</Ordre_du_tri>
+            </Details>
+            <Detail_de_Types>
+                <Type No="1" Nom="moyen_dep1" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="2" Nom="moyen_dep2" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="3" Nom="moyen_dep3" Signe="2" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="4" Nom="moyen_rec1" Signe="3" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+                <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
+            </Detail_de_Types>
+            <Detail_des_operations>
+                <Operation No="14" Id="" D="13/8/2011" Db="13/8/2011" M="0,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="0" C="0"
+                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+            </Detail_des_operations>
+        </Compte>
+    </Comptes>
+    <Echeances>
+        <Generalites>
+            <Nb_echeances>11</Nb_echeances>
+            <No_derniere_echeance>11</No_derniere_echeance>
+        </Generalites>
+        <Detail_des_echeances>
+            <Echeance No="1" Date="30/10/2011" Compte="1" Montant="10,0000000" Devise="1" Tiers="2" Categorie="2" Sous-categorie="0"
+                      Virement_compte="2" Type="5" Type_contre_ope="3" Contenu_du_type="" Exercice="1" Imputation="1" Sous-imputation="0"
+                      Notes="avec virement et exercice" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="2" Date="30/11/2011" Compte="2" Montant="10,0000000" Devise="1" Tiers="2" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="5" Type_contre_ope="0" Contenu_du_type="" Exercice="2" Imputation="2" Sous-imputation="0"
+                      Notes="sans date limite" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1"
+                      Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="3" Date="30/10/2011" Compte="1" Montant="-20,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0"
+                      Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="4" Date="30/10/2011" Compte="1" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0"
+                      Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="14" Periodicite="4" Periodicite_personnalisee="1" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="5" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="2" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="6" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="3" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="7" Date="30/10/2011" Compte="1" Montant="30,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0"
+                      No_ech_associee="0"/>
+            <Echeance No="8" Date="30/9/2011" Compte="2" Montant="50,0000000" Devise="1" Tiers="2" Categorie="3" Sous-categorie="0"
+                      Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Date_limite="30/9/2011"
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="9" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="10" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="11" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
+                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
+                      Notes="" Automatique="0" Intervalle_periodicite="7" Periodicite_personnalisee="1" Periodicite="4" Date_limite=""
+                      Ech_ventilee="0" No_ech_associee="0"/>
+        </Detail_des_echeances>
+    </Echeances>
+    <Tiers>
+        <Generalites>
+            <Nb_tiers>8</Nb_tiers>
+            <No_dernier_tiers>8</No_dernier_tiers>
+        </Generalites>
+        <Detail_des_tiers>
+            <Tiers No="1" Nom="tiers1" Informations="" Liaison="0"/>
+            <Tiers No="2" Nom="tiers2" Informations="" Liaison="0"/>
+            <Tiers No="3" Nom="titre_ autre" Informations="a@" Liaison="0"/>
+            <Tiers No="4" Nom="titre_ t1" Informations="1@ACT" Liaison="0"/>
+            <Tiers No="5" Nom="titre_ t2" Informations="2@OBL" Liaison="0"/>
+            <Tiers No="6" Nom="titre_ t4" Informations="aaa@CSL" Liaison="0"/>
+            <Tiers No="7" Nom="virement" Informations="" Liaison="0"/>
+            <Tiers No="8" Nom="titre_ autre 2" Informations="svjkdfkjh@" Liaison="0"/>
+        </Detail_des_tiers>
+    </Tiers>
+    <Categories>
+        <Generalites>
+            <Nb_categories>8</Nb_categories>
+            <No_derniere_categorie>67</No_derniere_categorie>
+        </Generalites>
+        <Detail_des_categories>
+            <Categorie No="1" Nom="cat1" Type="1" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="2" Nom="cat2" Type="1" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="3" Nom="cat3" Type="2" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="4" Nom="cat4" Type="3" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="64" Nom="Op&#xE9;ration sur titre" Type="2" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="65" Nom="Virement" Type="2" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="66" Nom="Op&#xE9;ration Ventil&#xE9;e" Type="2" No_derniere_sous_cagegorie="0"/>
+            <Categorie No="67" Nom="Revenus de placement:Plus-values" Type="2" No_derniere_sous_cagegorie="0"/>
+        </Detail_des_categories>
+    </Categories>
+    <Imputations>
+        <Generalites>
+            <Nb_imputations>3</Nb_imputations>
+            <No_derniere_imputation>3</No_derniere_imputation>
+        </Generalites>
+        <Detail_des_imputations>
+            <Imputation No="1" Nom="ib1" Type="1" No_derniere_sous_imputation="0"/>
+            <Imputation No="2" Nom="ib2" Type="1" No_derniere_sous_imputation="0"/>
+            <Imputation No="3" Nom="ib3" Type="2" No_derniere_sous_imputation="0"/>
+        </Detail_des_imputations>
+    </Imputations>
+    <Devises>
+        <Generalites>
+            <Nb_devises>1</Nb_devises>
+            <No_derniere_devise>1</No_derniere_devise>
+        </Generalites>
+        <Detail_des_devises>
+            <Devise No="1" Nom="EUR" Code="EUR" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0"
+                    Devise_en_rapport="0" Change="0,0000000"/>
+        </Detail_des_devises>
+    </Devises>
+    <Banques>
+        <Generalites>
+            <Nb_banques>2</Nb_banques>
+            <No_derniere_banque>2</No_derniere_banque>
+        </Generalites>
+        <Detail_des_banques>
+            <Banque No="1" Nom="banque1" Code="10001" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant=""
+                    Tel_correspondant="" Mail_correspondant="" Remarques=""/>
+            <Banque No="2" Nom="banque2" Code="99999" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant=""
+                    Tel_correspondant="" Mail_correspondant="" Remarques=""/>
+        </Detail_des_banques>
+    </Banques>
+    <Exercices>
+        <Generalites>
+            <Nb_exercices>2</Nb_exercices>
+            <No_dernier_exercice>2</No_dernier_exercice>
+        </Generalites>
+        <Detail_des_exercices>
+            <Exercice No="1" Nom="exo1" Date_debut="1/1/2010" Date_fin="31/12/2010" Affiche="1"/>
+            <Exercice No="2" Nom="exo2" Date_debut="1/1/2011" Date_fin="31/12/2011" Affiche="1"/>
+        </Detail_des_exercices>
+    </Exercices>
+    <Rapprochements>
+        <Detail_des_rapprochements>
+            <Rapprochement No="1" Nom="cpte1201101"/>
+            <Rapprochement No="2" Nom="cpt_titre2201101"/>
+            <Rapprochement No="3" Nom="rapp sans rien"/>
+        </Detail_des_rapprochements>
+    </Rapprochements>
+    <Etats>
+        <Generalites>
+            <No_dernier_etat>0</No_dernier_etat>
+        </Generalites>
+        <Detail_des_etats/>
+    </Etats>
 </Grisbi>

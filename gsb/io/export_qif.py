@@ -28,7 +28,6 @@ def convert_type2qif(type_a_transformer):
 
 
 class QifWriter(Writer_base):
-
     """
     A pseudofile which will write rows to file "f",
     which is encoded in the given encoding.
@@ -36,7 +35,8 @@ class QifWriter(Writer_base):
 
     def __init__(self, encoding="utf-8"):
         """ Redirect output to a queue
-        """
+            """
+        super(QifWriter, self).__init__()
         self.queue = cStringIO.StringIO()
         self.stream = cStringIO.StringIO()
         self.encoding = encoding
@@ -147,7 +147,7 @@ class Export_qif(ExportViewBase):
                 qif.w("N", utils.idtostr(ib, defaut='', membre="nom"))
                 qif.w('D', '')
                 qif.end_record()
-            # boucle export ope
+                # boucle export ope
         cpt = ""
         for ope in opes:
             if ope.compte.nom != cpt:

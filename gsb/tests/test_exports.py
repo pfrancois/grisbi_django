@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*
-'''
+"""
 Created on 25 mars 2013
 
 @author: francois
-'''
+"""
 
 from __future__ import absolute_import
 from django.test import RequestFactory
@@ -17,14 +17,12 @@ import gsb.io.export_csv as ex_csv
 from .. import models
 from .. import utils
 
-import re
 from .test_view import Test_view_base
 
 __all__ = ['Test_export']
 
 
 class Test_export(Test_view_base):
-
     def test_csv_global(self):
         # on recupere un compte
         models.Virement.create(compte_origine=models.Compte.objects.get(nom='cpte1'),
@@ -45,7 +43,8 @@ class Test_export(Test_view_base):
         ope_mere = models.Ope.objects.get(id=11)
         ope_mere.rapp = models.Rapp.objects.get(id=1)
         ope_mere.save()
-        rep = self.client.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
+        rep = self.client.post(reverse('export_csv'),
+                               data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;08\r
@@ -68,7 +67,8 @@ class Test_export(Test_view_base):
     def test_csv_debug(self):
         # on cree ce les entree de la vue
         req = RequestFactory()
-        request = req.post(reverse('export_csv'), data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
+        request = req.post(reverse('export_csv'),
+                           data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2012-09-24"})
         # initialisation de la vue
         view = self.setup_view(ex_csv.Export_ope_csv(), request)
         # choix des parametre du test proprement dit
@@ -79,7 +79,7 @@ class Test_export(Test_view_base):
         final = dict()
         for d, h in zip(data, header):
             final[h] = d
-        # on compare a ce qui est attendu
+            # on compare a ce qui est attendu
         reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 """
@@ -88,9 +88,9 @@ class Test_export(Test_view_base):
     def test_export_form1(self):
         # test normal avec aucune selection
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': ""
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': ""
+        }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
@@ -98,9 +98,9 @@ class Test_export(Test_view_base):
     def test_export_form1bis(self):
         # test normal avec selection de tous comptes
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': (1, 2, 3, 4, 5, 6)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (1, 2, 3, 4, 5, 6)
+        }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
@@ -108,9 +108,9 @@ class Test_export(Test_view_base):
     def test_export_form2(self):
         # test normal avec selection de certains comptes
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': (1, 2, 3, 6)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (1, 2, 3, 6)
+        }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
@@ -118,9 +118,9 @@ class Test_export(Test_view_base):
     def test_export_form3(self):
         # test normal avec aucune operation
         form_data = {'date_min': "01/01/2013",
-                   'date_max': "31/12/2013",
-                   'collection': (1, 2, 3, 6)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (1, 2, 3, 6)
+        }
         form = export_base.Exportform_ope(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
@@ -128,27 +128,27 @@ class Test_export(Test_view_base):
 
     def test_export_formcours1(self):
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': (1, 2, 3, 4)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (1, 2, 3, 4)
+        }
         form = ex_csv.Exportform_cours(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
 
     def test_export_formcpt_titre1(self):
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': (4, 5)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (4, 5)
+        }
         form = ex_csv.Exportform_Compte_titre(data=form_data)
         r = form.is_valid()
         self.assertTrue(r)
 
     def test_export_formcpt_titre2(self):
         form_data = {'date_min': "01/01/2010",
-                   'date_max': "31/12/2013",
-                   'collection': (4, 6)
-                   }
+                     'date_max': "31/12/2013",
+                     'collection': (4, 6)
+        }
         form = ex_csv.Exportform_Compte_titre(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
@@ -156,7 +156,7 @@ class Test_export(Test_view_base):
     def test_export_cours(self):
         reponse_recu = self.client.post(reverse('export_cours'),
                                         data={'collection': (1, 2, 3, 4, 5), "date_min": "2011-01-01", "date_max": "2012-09-24"}
-                                         ).content
+        ).content
 
         reponse_attendu = """id;date;nom;isin;cours
 1;24/09/2012;autre;a;1,0000000
@@ -173,7 +173,7 @@ class Test_export(Test_view_base):
         c.vente(titre=t, nombre=10, prix=20, date="2011-12-01")
         reponse_recu = self.client.post(reverse('export_ope_titre'),
                                         data={'collection': (4, 5), "date_min": "2011-01-01", "date_max": "2012-09-24"}
-                                         ).content
+        ).content
 
         reponse_attendu = """id;date;compte;nom;isin;sens;nombre;cours;montant_ope
 1;18/12/2011;cpt_titre1;t1;1;achat;1,0000000;1,0000000;1,0000000
@@ -187,9 +187,12 @@ class Test_export(Test_view_base):
     def test_export_gsb_0_5_0(self):
         c = models.Compte.objects.create(nom='test')
         models.Ope.objects.create(date=utils.strpdate('2011-08-13'), compte=c, date_val=utils.strpdate('2011-08-13'))
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='j')
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='m')
-        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1, intervalle=1, periodicite='s')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1,
+                                       intervalle=1, periodicite='j')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1,
+                                       intervalle=1, periodicite='m')
+        models.Echeance.objects.create(date=utils.strpdate('2011-08-13'), compte=c, montant=-10, tiers_id=1, cat_id=1, moyen_id=1,
+                                       intervalle=1, periodicite='s')
         reponse_recu = self.client.get(reverse('export_gsb_050')).content
         self.assertfileequal(reponse_recu, "export_050.xml", nom="test_gsb")
 

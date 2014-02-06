@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte
+
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
@@ -12,8 +12,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.conf import settings  # @Reimport
-
 from django.utils.translation import ugettext_lazy as _
+
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, config
+
 #from django.db.models import Q
 # import decimal
 from django.contrib.admin import DateFieldListFilter
@@ -30,7 +32,6 @@ from . import model_field
 
 #-------------ici les classes generiques------
 class Date_perso_filter(DateFieldListFilter):
-
     """filtre date perso
     """
 
@@ -55,7 +56,7 @@ class Date_perso_filter(DateFieldListFilter):
             }),
             ('Les trois derniers mois', {
                 self.lookup_kwarg_since: str(troismois),
-                self.lookup_kwarg_until: str(today.replace(day=15)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
+                self.lookup_kwarg_until: str(today.replace(day=15)), # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
@@ -184,23 +185,26 @@ class Modeladmin_perso(admin.ModelAdmin):
                 raise ImproperlyConfigured
             else:
                 return super(Modeladmin_perso, self).queryset(request).extra(select={
-                    'nb_opes': 'select count(*) from gsb_ope WHERE (gsb_ope.%s = %s.id AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (self.id_ope, self.table_annexe), },)
+                    'nb_opes': 'select count(*) from gsb_ope WHERE (gsb_ope.%s = %s.id AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (
+                        self.id_ope, self.table_annexe), }, )
         else:
             return super(Modeladmin_perso, self).queryset(request)
 
     def nb_opes(self, inst):
         return inst.nb_opes
+
     nb_opes.admin_order_field = 'nb_opes'
 
     def fusionne(self, request, queryset):
         """fonction générique de fusion entre 2 objets"""
+        # noinspection PyProtectedMember
         nom_module = queryset[0]._meta.module_name
         if queryset.count() < 2:
             messages.error(request,
                            u"attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
                                'n': queryset.count(),
                                'type': nom_module}
-                           )
+            )
             return
         obj_a = queryset[0]
         for obj_b in queryset:
@@ -226,7 +230,6 @@ class Modeladmin_perso(admin.ModelAdmin):
 
 
 class formsetreadonly(BaseInlineFormSet):
-
     def __init__(self, *args, **kwargs):
         super(formsetreadonly, self).__init__(*args, **kwargs)
         self.can_delete = False
@@ -251,12 +254,13 @@ class ope_inline_admin(admin.TabularInline):
         if self.related is not None:
             args = self.related
             qs = qs.select_related(*args)
-    # gestion du orderby
+            # gestion du orderby
         if self.orderby is not None:
             args = self.orderby
             qs = qs.order_by(*args)
         return qs
-    # afin de pouvoir avoir des inline readonly
+
+        # afin de pouvoir avoir des inline readonly
 
     def has_add_permission(self, request, obj=None):
         if self.readonly:
@@ -277,12 +281,10 @@ class ope_inline_admin(admin.TabularInline):
 
 
 class ope_cat(ope_inline_admin):
-
     fk_name = 'cat'
 
 
 class Cat_admin(Modeladmin_perso):
-
     """classe admin pour les categories"""
     actions = ['fusionne', ]
     list_editable = ('nom', 'couleur')
@@ -309,7 +311,6 @@ class ope_ib(ope_inline_admin):
 
 
 class Ib_admin(Modeladmin_perso):
-
     """admin pour les ib"""
     actions = ['fusionne', ]
     list_editable = ('nom',)
@@ -323,12 +324,12 @@ class Ib_admin(Modeladmin_perso):
 
 
 class Compte_admin(Modeladmin_perso):
-
     """admin pour les comptes normaux"""
     actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
-              'solde_mini_autorise'), ('moyen_debit_defaut', 'moyen_credit_defaut', 'couleur'))
-    list_display = ('id', 'nom', 'type', 'ouvert', 'solde', 'solde_rappro', 'date_rappro', 'nb_ope', 'couleur')
+                                                                                             'solde_mini_autorise'),
+              ('moyen_debit_defaut', 'moyen_credit_defaut', 'couleur'))
+    list_display = ('id', 'nom', 'type', 'ouvert', 'solde_espece', 'solde_rappro', 'date_rappro', 'nb_ope', 'couleur')
     list_filter = ('type', 'banque', 'ouvert')
     list_editable = ('couleur',)
     radio_fields = {'type': admin.HORIZONTAL,
@@ -336,7 +337,8 @@ class Compte_admin(Modeladmin_perso):
                     'moyen_credit_defaut': admin.VERTICAL}
 
     def nb_ope(self, obj):
-        return '%s(%s non rapp)' % (obj.ope_set.exclude(filles_set__isnull=False).count(), obj.ope_set.exclude(filles_set__isnull=False).filter(rapp__isnull=True).count())
+        return '%s(%s non rapp)' % (obj.ope_set.exclude(filles_set__isnull=False).count(),
+                                    obj.ope_set.exclude(filles_set__isnull=False).filter(rapp__isnull=True).count())
 
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
@@ -400,7 +402,7 @@ class Compte_admin(Modeladmin_perso):
 
     action_transformer_pointee_rapp.short_description = "Rapprocher un compte"
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'moyen_debit_defaut':
             kwargs['queryset'] = Moyen.objects.filter(type='d')
         else:
@@ -421,21 +423,22 @@ class ope_ope(ope_inline_admin):
 
 
 class Ope_changelist_Form(forms.ModelForm):
-
-    class Meta:
+    class Meta(object):
         model = Ope
+
     date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
 
 
 class Ope_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les opes"""
     fields = (
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
         ('show_jumelle', 'mere', 'is_mere'), 'oper_titre', 'num_cheque', 'notes')
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'cat', "moyen", 'num_cheque', 'rapp', "mere")
-    list_filter = ('compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter, 'moyen__type', 'cat__type', 'cat__nom')
+    list_filter = (
+        'compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter,
+        'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
@@ -579,12 +582,12 @@ class Ope_admin(Modeladmin_perso):
         # ok c'est bon on peut commencer a creer
         if mere is None:
             mere = Ope.objects.create(date=date_ope,
-                                     montant=montant,
-                                     tiers_id=tiers_id,
-                                     cat=Cat.objects.get(nom=u"Opération Ventilée"),
-                                     moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
-                                     compte_id=compte_id
-                                    )
+                                      montant=montant,
+                                      tiers_id=tiers_id,
+                                      cat=Cat.objects.get(nom=u"Opération Ventilée"),
+                                      moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
+                                      compte_id=compte_id
+            )
             messages.success(request, u"ope mere crée '%s' " % mere)
         else:
             messages.info(request, u"on va utiliser cette operation mere '%s' " % mere)
@@ -630,7 +633,6 @@ class Ope_admin(Modeladmin_perso):
 
 
 class Cours_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
@@ -639,15 +641,14 @@ class Cours_admin(Modeladmin_perso):
     ordering = ('-date',)
     date_hierarchy = 'date'
 
-class Titre_admin(Modeladmin_perso):
 
+class Titre_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne']
-    list_display = ('id','nom', 'isin', 'type', 'last_cours')
+    list_display = ('id', 'nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
     list_filter = ('type',)
-    formfield_overrides = {models.TextField: {'widget': admin.widgets.AdminTextInputWidget}, }
 
     def show_tiers(self, obj):
         if obj.tiers:
@@ -660,7 +661,6 @@ class Titre_admin(Modeladmin_perso):
 
 
 class Moyen_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne']
     list_filter = ('type',)
@@ -676,7 +676,6 @@ class ope_tiers(ope_inline_admin):
 
 
 class Tiers_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne']
     list_editable = ('nom',)
@@ -698,11 +697,11 @@ class Tiers_admin(Modeladmin_perso):
 
 
 class Ech_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
-    fields = ('date', 'date_limite', ('intervalle', 'periodicite'), 'valide', 'compte', ('montant', 'tiers'), ('cat', 'moyen', 'ib'), ('compte_virement', 'moyen_virement'), 'exercice', 'notes')
+    fields = ('date', 'date_limite', ('intervalle', 'periodicite'), 'valide', 'compte', ('montant', 'tiers'), ('cat', 'moyen', 'ib'),
+              ('compte_virement', 'moyen_virement'), 'exercice', 'notes')
     actions = ['check_ech']
     radio_fields = {'periodicite': admin.HORIZONTAL}
 
@@ -713,7 +712,6 @@ class Ech_admin(Modeladmin_perso):
 
 
 class Banque_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne']
 
@@ -723,7 +721,6 @@ class ope_rapp(ope_inline_admin):
 
 
 class Rapp_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
@@ -731,7 +728,6 @@ class Rapp_admin(Modeladmin_perso):
 
 
 class Exo_admin(Modeladmin_perso):
-
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')
@@ -771,6 +767,16 @@ class Ope_titre_admin(Modeladmin_perso):
         return True
 
 
+class Config_admin(Modeladmin_perso):
+    list_display = ('derniere_import_money_journal',)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+
 admin.site.register(Tiers, Tiers_admin)
 admin.site.register(Cat, Cat_admin)
 admin.site.register(Compte, Compte_admin)
@@ -784,3 +790,4 @@ admin.site.register(Rapp, Rapp_admin)
 admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Ope_titre, Ope_titre_admin)
+admin.site.register(config, Config_admin)

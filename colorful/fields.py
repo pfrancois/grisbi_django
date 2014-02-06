@@ -9,7 +9,6 @@ RGB_REGEX = re.compile('^#?((?:[0-F]{3}){1,2})$', re.IGNORECASE)
 
 
 class RGBColorField(CharField):
-
     widget = ColorFieldWidget
 
     def __init__(self, *args, **kwargs):
@@ -18,11 +17,12 @@ class RGBColorField(CharField):
 
     def formfield(self, **kwargs):
         kwargs.update({
-                      'form_class': RegexField,
-                     'widget': self.widget,
-                     'regex': RGB_REGEX
-                       })
+            'form_class': RegexField,
+            'widget': self.widget,
+            'regex': RGB_REGEX
+        })
         return super(RGBColorField, self).formfield(**kwargs)
+
 
 try:
     from south.modelsinspector import add_introspection_rules

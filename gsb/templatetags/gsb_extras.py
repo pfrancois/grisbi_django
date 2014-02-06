@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from django import template
 from decimal import Decimal, InvalidOperation
 
+from django import template
 from django.utils import formats
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
+
 # from django.utils.http import urlquote
 from django.conf import settings
 # import logging
-from django.template import Library, Node, TemplateSyntaxError
 
 register = template.Library()
 
@@ -35,8 +35,8 @@ def cur(value, symbol=None):
             val_decim = Decimal(0)
         else:
             val_decim = Decimal(input_val)
-#   except UnicodeEncodeError:
-#       val_decim = Decimal(0)
+        #   except UnicodeEncodeError:
+        #       val_decim = Decimal(0)
     except InvalidOperation:
         try:
             val_decim = Decimal(force_unicode(float(value)))
@@ -60,6 +60,7 @@ def centimes(value):
     @type value:comme on veut
     """
     return unicode(Decimal(force_unicode(value)) * Decimal(100))
+
 
 from django.template.defaultfilters import floatformat
 

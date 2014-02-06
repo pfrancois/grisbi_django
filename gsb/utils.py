@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import datetime
-from django.utils import timezone
 import time
 import decimal
 import csv
 import codecs
 import math
+
+from django.utils import timezone
+
 #from inspector_panel.panels.inspector import debug
 import locale
+
 try:
     from django.db.models import Max
     from django.core.exceptions import ObjectDoesNotExist
@@ -16,6 +19,7 @@ try:
 except ImportError:
     pass
 from uuid import uuid4
+
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
@@ -23,7 +27,6 @@ __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_nu
 
 
 class FormatException(Exception):
-
     def __init__(self, message):
         super(FormatException, self).__init__(message)
         self.msg = message
@@ -37,7 +40,6 @@ def uuid():
 
 
 class Compfr(object):
-
     def __init__(self, decod='utf-8'):
         self.decod = decod
         self.loc = locale.getlocale()  # stocker la locale courante
@@ -356,7 +358,6 @@ def nulltostr(s):
 
 #------------------fonction basiques pour lecture ecriture------"""
 class UTF8Recoder(object):
-
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
@@ -371,8 +372,7 @@ class UTF8Recoder(object):
         return self.reader.next().encode("utf-8")
 
 
-class Excel_csv(csv.Dialect):
-
+class Excel_csv(object, csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ';'
     quotechar = '"'
@@ -381,11 +381,11 @@ class Excel_csv(csv.Dialect):
     lineterminator = "\r\n"
     quoting = csv.QUOTE_MINIMAL
 
+
 csv.register_dialect("excel_csv", Excel_csv)
 
 
 class Csv_unicode_reader(object):
-
     """
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
@@ -417,7 +417,6 @@ def is_onexist(objet, attribut):
 
 
 class switch(object):
-
     """http://code.activestate.com/recipes/410692/"""
 
     def __init__(self, value):

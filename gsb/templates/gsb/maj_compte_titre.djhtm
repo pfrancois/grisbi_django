@@ -1,11 +1,16 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
-    <form method="post" action="" id="form1">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        {{ date_ope_form }}
-        <table>
-        <tr><th> titre </th> <th> cours </th> <th> nombre </th> <th> Frais </th> </tr>
+<form method="post" action="" id="form1">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ date_ope_form }}
+    <table>
+        <tr>
+            <th> titre</th>
+            <th> cours</th>
+            <th> nombre</th>
+            <th> Frais</th>
+        </tr>
         {% for form in forms %}
         <tr>
             {% for field in form %}
@@ -16,16 +21,16 @@
             {% endfor %}
         </tr>
         {% empty %}
-            aucun titre
+        aucun titre
         {% endfor %}
-        </table>
-    </form>
-
-
-    <table style=" width: 100%;" summary="bouton">
-        <tr class="boutton">
-            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%"><a href="{% url 'gsb_cpt_detail' cpt_id=compte_id %}">Annuler</a></td>
-        </tr>
     </table>
+</form>
+
+
+<table style=" width: 100%;" summary="bouton">
+    <tr class="boutton">
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{% url 'gsb_cpt_detail' cpt_id=compte_id %}">Annuler</a></td>
+    </tr>
+</table>
 {% endblock content %}

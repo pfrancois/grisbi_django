@@ -15,8 +15,7 @@ from gsb.io import import_csv
 #import os
 
 
-class money_journal_csv(csv.Dialect):
-
+class money_journal_csv(object, csv.Dialect):
     """fichier csv de money journal"""
     delimiter = ','
     quotechar = '"'

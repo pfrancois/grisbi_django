@@ -6,15 +6,18 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 from __future__ import absolute_import
-from .test_base import TestCase as Tcd
-from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, Cat, Ib, Exercice, Moyen, Rapp
-from ..io.import_gsb import import_gsb_050
-from ..io.import_base import ImportException
 import decimal
 import datetime
 import os
 import glob
+
 from django.db import models
+
+from .test_base import TestCase as Tcd
+from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, Cat, Ib, Exercice, Moyen, Rapp
+from ..io.import_gsb import import_gsb_050
+from ..io.import_base import ImportException
+
 #from operator import attrgetter
 from django.conf import settings
 import os.path
@@ -25,10 +28,12 @@ __all__ = ['Test_import_gsb050', 'Test_import_gsb050_post']
 
 class Test_import_gsb050(Tcd):
     def test_mauvais_format(self):
-        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"), self.request_post('toto'))
-        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"), self.request_post('toto'))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais.gsb"),
+                          self.request_post('toto'))
+        self.assertRaises(ImportException, import_gsb_050, os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "mauvais3.gsb"),
+                          self.request_post('toto'))
         for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'mauvais*')):
-                os.remove(name)
+            os.remove(name)
 
 
 class Test_import_gsb050_post(Tcd):
@@ -42,7 +47,7 @@ class Test_import_gsb050_post(Tcd):
     @classmethod
     def teardownClass(cls):
         for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'test_original*')):
-                os.remove(name)
+            os.remove(name)
 
     def test_tiers_properties(self):
         obj = Tiers.objects.get(id=1)

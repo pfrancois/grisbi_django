@@ -14,7 +14,6 @@ class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unico
 
 
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
-
     """seuls cat cpt date montant obligatoire, mais moyen et tiers sont fortement recommande"""
     champs = None  # c'est a dire qu'il prend la premiere ligne
     champ_test = 'cat'
@@ -146,15 +145,15 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 #---------------------- boucle
                 retour = self.tableau(fich, moyen_virement)
                 #------------------fin boucle
-        except (import_base.ImportException) as e:
+        except import_base.ImportException as e:
             messages.error(self.request, "attention traitement interrompu parce que %s" % e)
             retour = False
-        # gestion des erreurs
+            # gestion des erreurs
         if len(self.erreur) or retour is False:
             for err in self.erreur:
                 messages.warning(self.request, err)
             return False
-        # maintenant on sauvegarde les operations
+            # maintenant on sauvegarde les operations
         for ope in self.opes.create_item:
             virement = ope.pop('virement', False)
             ope_titre = ope.pop('ope_titre', False)
@@ -163,9 +162,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             if virement or ope_titre:
                 if virement:
                     vir = models.Virement.create(compte_origine=models.Compte.objects.get(id=ope['compte_id']),
-                        compte_dest=models.Compte.objects.get(id=ope['dest_id']),
-                        montant=ope['montant'] * -1,  # -1 car la premiere ope est negative alors que le virement est positif
-                        date=ope['date'])
+                                                 compte_dest=models.Compte.objects.get(id=ope['dest_id']),
+                                                 montant=ope['montant'] * -1,
+                                                 # -1 car la premiere ope est negative alors que le virement est positif
+                                                 date=ope['date'])
                     # on definit le detail des virement
                     vir.origine.pointe = ope['pointe']
                     vir.notes = ope['notes']
@@ -203,9 +203,11 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             else:
                 ope_gsb = models.Ope.objects.create(**ope)
                 messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
-        # on gere le nombre de truc annex crée
-        for obj in(self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
+            # on gere le nombre de truc annex crée
+        for obj in (
+        self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
             if obj.nb_created > 0:
+                # noinspection PyProtectedMember
                 messages.info(self.request, u"%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
         return True
 
@@ -218,7 +220,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 messages.info(self.request, u'ligne %s %s sauté car pas de champ %s' % (row.row, row.line_num, row.champ_test))
                 continue
             if not verif_format:  # on verifie a la premiere ligne
-                liste_colonnes = ['id', 'automatique', 'cat', 'cpt', 'date', "ib", "ligne", "moyen", "montant", "notes", "num_cheque", "piece_comptable", "rapp", "tiers"]
+                liste_colonnes = ['id', 'automatique', 'cat', 'cpt', 'date', "ib", "ligne", "moyen", "montant", "notes", "num_cheque",
+                                  "piece_comptable", "rapp", "tiers"]
                 if settings.UTILISE_EXERCICES is True:
                     liste_colonnes.append('exercice')
                 colonnes_oublies = []
@@ -235,7 +238,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             if row.monnaie != settings.DEVISE_GENERALE:
                 self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
                 continue
-            # compte
+                # compte
             try:
                 created = self.comptes.nb_created
                 ope['compte_id'] = self.comptes.goc(row.cpt)
@@ -253,7 +256,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             except import_base.ImportException:
                 self.erreur.append(u"la cat %s est inconnu à la ligne %s" % (row.cat, row.ligne))
                 continue
-            # date
+                # date
             try:
                 ope['date'] = row.date
                 if ope['date'] is None:
@@ -262,7 +265,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             except utils.FormatException as e:
                 self.erreur.append(u"date au mauvais format %s est inconnu à la ligne %s" % (e, row.ligne))
                 raise e
-            # virement
+                # virement
             if row.jumelle:
                 virement = True
                 origine = row.tiers.split("=>")[0]
@@ -274,7 +277,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                         self.erreur.append('attention, virement impossible entre le meme compte à la ligne' % row.ligne)
                     if self.comptes.goc(dest) != ope['compte_id'] and self.comptes.goc(origine) != ope['compte_id']:
                         self.erreur.append('le compte doit dans le virement' % row.ligne)
-                    # si on est du cote de l'operation receptrice, verification que l'on ne s'est pas trompe dans le tiers
+                        # si on est du cote de l'operation receptrice, verification que l'on ne s'est pas trompe dans le tiers
                     if self.comptes.goc(dest) == ope['compte_id'] and row.montant < 0:
                         origine, dest = dest, origine
                         messages.info(self.request, "swap %s=%s" % origine, dest)
@@ -308,7 +311,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 ope['ib_id'] = self.ibs.goc(row.ib)
             else:
                 ope['ib_id'] = None
-            # montant
+                # montant
             if virement is False:
                 ope['montant'] = row.montant
             else:

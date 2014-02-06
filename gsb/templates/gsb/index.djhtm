@@ -1,53 +1,54 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block titre %}<h1 class="survol"><a href="{% url 'outils_index' %}">Comptes</a>
-    </h1>{% endblock titre %}
+</h1>{% endblock titre %}
 {% block content %} <h2>comptes esp&egrave;ces ou bancaires</h2>
-    <table id="banques" class="table">
-        {% for cpt in liste_cpt_bq %}
-            <tr class="item padding">
-                {% spaceless %}
-<td class="cptLabel"><a href="{{ cpt.url }}">{{ cpt.nom|escape }}
-                    {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
-                <td class="cptSolde"><a href="{{ cpt.url }}">{{ cpt.solde|cur }}</a></td>
-                {% endspaceless %}
-            </tr>
-        {% empty %}
-            <tr class="item padding">
-                <td class="cptLabel" colspan="2"> aucun compte esp&egrave;ce ou bancaire</td>
-            </tr>
-        {% endfor %}
-        <tr class="bar">
-            <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
-            <td class="cptSolde">{{ total_bq|cur }}</td>
-        </tr>
-    </table>
-    <h2>Comptes titres</h2>
-    <table id="placements" class="table">
-        {% for cpt in liste_cpt_pl %}
-            <tr class="item padding">
-                <td class="cptLabel"><a href="{{ cpt.url }}">{{ cpt.nom|escape }}
-                    {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
-                <td class="cptSolde"><a href="{{ cpt.url }}">{{ cpt.solde|cur }}</a></td>
-            </tr>
-        {% empty %}
-            <tr class="item padding">
-                <td class="cptLabel" colspan="2"> aucun Compte titre</td>
-            </tr>
-        {% endfor %}
-        <tr class="bar">
-            <td class="cptLabel">Solde des comptes titre</td>
-            <td class="cptSolde">{{ total_pla|cur }}</td>
-        </tr>
-    </table>
-    <table id="total" class="table">
-        <tr class="footerbar total_general">
-            <td class="cptLabel">Solde global</td>
-            <td class="cptSolde">{{ total|cur }}</td>
-        </tr>
-    </table>
-    {% if nb_clos > 0 %}
-        <p>
-            PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos{% if clos_caches %} non affich&eacute;{% if clos_caches > 1 %}s{% endif %}{% endif %}. </p>
-    {% endif %}
+<table id="banques" class="table">
+    {% for cpt in liste_cpt_bq %}
+    <tr class="item padding">
+        {% spaceless %}
+        <td class="cptLabel"><a href="{{ cpt.url }}">{{ cpt.nom|escape }}
+            {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
+        <td class="cptSolde"><a href="{{ cpt.url }}">{{ cpt.solde|cur }}</a></td>
+        {% endspaceless %}
+    </tr>
+    {% empty %}
+    <tr class="item padding">
+        <td class="cptLabel" colspan="2"> aucun compte esp&egrave;ce ou bancaire</td>
+    </tr>
+    {% endfor %}
+    <tr class="bar">
+        <td class="cptLabel">Solde comptes banques et comptes esp&egrave;ces</td>
+        <td class="cptSolde">{{ total_bq|cur }}</td>
+    </tr>
+</table>
+<h2>Comptes titres</h2>
+<table id="placements" class="table">
+    {% for cpt in liste_cpt_pl %}
+    <tr class="item padding">
+        <td class="cptLabel"><a href="{{ cpt.url }}">{{ cpt.nom|escape }}
+            {% if not cpt.ouvert %}(clotur&eacute;){% endif %}</a></td>
+        <td class="cptSolde"><a href="{{ cpt.url }}">{{ cpt.solde|cur }}</a></td>
+    </tr>
+    {% empty %}
+    <tr class="item padding">
+        <td class="cptLabel" colspan="2"> aucun Compte titre</td>
+    </tr>
+    {% endfor %}
+    <tr class="bar">
+        <td class="cptLabel">Solde des comptes titre</td>
+        <td class="cptSolde">{{ total_pla|cur }}</td>
+    </tr>
+</table>
+<table id="total" class="table">
+    <tr class="footerbar total_general">
+        <td class="cptLabel">Solde global</td>
+        <td class="cptSolde">{{ total|cur }}</td>
+    </tr>
+</table>
+{% if nb_clos > 0 %}
+<p>
+    PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos{% if clos_caches %} non affich&eacute;{% if clos_caches > 1 %}s{%
+    endif %}{% endif %}. </p>
+{% endif %}
 
 {% endblock content %}

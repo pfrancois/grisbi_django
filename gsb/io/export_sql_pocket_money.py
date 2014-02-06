@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from .. import models
-from django.db import models as models_agg
 import time
-from .. import utils
 
+from django.db import models as models_agg
+
+from .. import models
+from .. import utils
 from . import export_base
+
 # from django.core import exceptions as django_exceptions
 from django.http import HttpResponse
 from sql.pg import sqlite_db as db
@@ -66,10 +68,11 @@ class Export_view_sql_pocket_money(export_base.ExportViewBase):
     'serverID'          TEXT                                    -- db version 20
     );""")
         i = 0
-        soldes = models.Compte.objects.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models_agg.Sum('ope__montant')).order_by('id')
+        soldes = models.Compte.objects.select_related('ope').filter(ope__filles_set__isnull=True).annotate(
+            solde=models_agg.Sum('ope__montant')).order_by('id')
         table_de_passage_type_compte = {"b": 0, "e": 1, "p": 6, "t": 7, "a": 3}
         for cpt in soldes:
-            i = i + 1
+            i += 1
             param = {}
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
@@ -107,7 +110,8 @@ class Export_view_sql_pocket_money(export_base.ExportViewBase):
                                                      :accountNumber,:institution,:phone,:expirationDate,:checkNumber,:notes,
                                                      :iconFileName,:url, :ofxid, :ofxurl,:password, :fee, :fixedPercent,
                                                      :limitAmount, :noLimit, :totalWorth, :exchangeRate, :currencyCode, :lastSyncTime,
-                                                     :routingNumber, :overdraftAccountID, :keepTheChangeAccountID, :keepChangeRoundTo, :serverID);""", param)
+                                                     :routingNumber, :overdraftAccountID, :keepTheChangeAccountID, :keepChangeRoundTo, :serverID);""",
+                      param)
 
         return HttpResponse(sql.dump(), content_type="text/plain")
 
@@ -168,13 +172,14 @@ CREATE TABLE accounts
     'keepChangeRoundTo'     REAL,                                   -- db version 26
     'serverID'          TEXT                                    -- db version 20
     );"""
-            )
+        )
         sql.w(s)
         i = 0
-        soldes = models.Compte.objects.select_related('ope').filter(ope__filles_set__isnull=True).annotate(solde=models_agg.Sum('ope__montant')).order_by('id')
+        soldes = models.Compte.objects.select_related('ope').filter(ope__filles_set__isnull=True).annotate(
+            solde=models_agg.Sum('ope__montant')).order_by('id')
         table_de_passage_type_compte = {"b": 0, "e": 1, "p": 6, "t": 7, "a": 3}
         for cpt in soldes:
-            i = i + 1
+            i += 1
             param = {}
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
@@ -208,9 +213,10 @@ CREATE TABLE accounts
             param['keepTheChangeAccountID'] = ''
             param['keepChangeRoundTo'] = ''
             param['serverID'] = utils.uuid()
-            s = u"INSERT INTO 'accounts' VALUES({deleted}, {timestamp}, {accountID}, {displayOrder}, '{account}', {balanceOverall}, {balanceCleared}, {type}, '{accountNumber}', '{institution}', '{phone}', '{expirationDate}', '{checkNumber}', '{notes}', '{iconFileName}', '{url}', '{ofxid}', '{ofxurl}', '{password}', {fee}, {fixedPercent}, {limitAmount}, {noLimit}, {totalWorth}, {exchangeRate}, '{currencyCode}', {lastSyncTime}, '{routingNumber}', {overdraftAccountID}, {keepTheChangeAccountID}, {keepChangeRoundTo}, '{serverID}');".format(**param)
+            s = u"INSERT INTO 'accounts' VALUES({deleted}, {timestamp}, {accountID}, {displayOrder}, '{account}', {balanceOverall}, {balanceCleared}, {type}, '{accountNumber}', '{institution}', '{phone}', '{expirationDate}', '{checkNumber}', '{notes}', '{iconFileName}', '{url}', '{ofxid}', '{ofxurl}', '{password}', {fee}, {fixedPercent}, {limitAmount}, {noLimit}, {totalWorth}, {exchangeRate}, '{currencyCode}', {lastSyncTime}, '{routingNumber}', {overdraftAccountID}, {keepTheChangeAccountID}, {keepChangeRoundTo}, '{serverID}');".format(
+                **param)
             sql.w(s)
-        # TODO gerer les splits
+            # TODO gerer les splits
         s = ("""CREATE TABLE splits
     (
     'splitID'           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -244,7 +250,7 @@ CREATE TABLE accounts
         sql.w(s)
         i = 0
         for cat in models.Cat.objects.exclude(type='v').order_by('id'):
-            i = i + 1
+            i += 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['categoryID'] = cat.id
@@ -258,7 +264,8 @@ CREATE TABLE accounts
             param['includeSubcategories'] = 0
             param['rollover'] = 0
             param['serverID'] = utils.uuid()
-            s = u"INSERT INTO 'categories' VALUES(0, {timestamp}, {categoryID}, '{category}', {type}, {budgetPeriod}, {budgetLimit}, {includeSubcategories}, {rollover}, '{serverID}');".format(**param)
+            s = u"INSERT INTO 'categories' VALUES(0, {timestamp}, {categoryID}, '{category}', {type}, {budgetPeriod}, {budgetLimit}, {includeSubcategories}, {rollover}, '{serverID}');".format(
+                **param)
             sql.w(s)
         sql.w("""
 CREATE TABLE payees
@@ -273,7 +280,7 @@ CREATE TABLE payees
     );""")
         i = 0
         for tiers in models.Tiers.objects.order_by('id'):
-            i = i + 1
+            i += 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['payeeID'] = tiers.id
@@ -303,7 +310,7 @@ CREATE TABLE payees
     );""")
         i = 0
         for ib in models.Ib.objects.order_by('id'):
-            i = i + 1
+            i += 1
             param['deleted'] = 0
             param['timestamp'] = utils.timestamp()
             param['classID'] = ib.id
@@ -440,7 +447,7 @@ INSERT INTO "exchangeRates" VALUES(0, 1366406972, 'TZS', '');
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"
             reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                            time.strftime("%d_%m_%Y-%H_%M_%S", utils.timestamp()),
-                                                                            self.extension_file
-                                                                            )
+                                                                                time.strftime("%d_%m_%Y-%H_%M_%S", utils.timestamp()),
+                                                                                self.extension_file
+            )
         return reponse

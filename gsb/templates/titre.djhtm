@@ -1,21 +1,21 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.compte.errors }}
-        <label for="id_compte">Compte:</label>
-        {{ form.compte }}
-        {{ form.date_min.errors }}
-        <label for="id_date_min">date de debut:</label>
-        {{ form.date_min }}
-        {{ form.date_max.errors }}
-        <label for="id_date_max">date de fin:</label>
-        {{ form.date_max }}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.compte.errors }}
+    <label for="id_compte">Compte:</label>
+    {{ form.compte }}
+    {{ form.date_min.errors }}
+    <label for="id_date_min">date de debut:</label>
+    {{ form.date_min }}
+    {{ form.date_max.errors }}
+    <label for="id_date_max">date de fin:</label>
+    {{ form.date_max }}
 
-        <input type="submit" value="Rechercher"/>
-    </form>
+    <input type="submit" value="Rechercher"/>
+</form>
 
-    <div class="progress">
-        <a href='{% url 'index' %}'>retour</a>
-    </div>
+<div class="progress">
+    <a href='{% url ' index' %}'>retour</a>
+</div>
 {% endblock content %}

@@ -3,20 +3,18 @@ from __future__ import absolute_import
 import csv
 import cStringIO
 import codecs
+import time
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from ..models import Compte, Ope
-
 from django.db import models as models_agg
 from django import forms
-import time
 
+from ..models import Compte, Ope
 from ..utils import Excel_csv
 from ..views import Myformview as FormView
 from .. import forms as gsb_forms
 from .. import widgets as gsb_field
-
 from .. import models
 
 
@@ -29,7 +27,7 @@ class Writer_base(object):
         self.queue = cStringIO.StringIO()
         self.encoder = codecs.getincrementalencoder(encoding)()
         self.stream = cStringIO.StringIO()
-            # Force BOM
+        # Force BOM
         #       if encoding=="utf-16":
         #           f.write(codecs.BOM_UTF16)
         self.encoding = encoding
@@ -52,7 +50,6 @@ class Writer_base(object):
 
 
 class Csv_unicode_writer(Writer_base):
-
     """
     A CSV writer which will write rows to CSV file "f",
     which is encoded in the given encoding.
@@ -86,8 +83,8 @@ class Csv_unicode_writer(Writer_base):
 
 class Exportform_ope(gsb_forms.Baseform):
     collection = forms.ModelMultipleChoiceField(Compte.objects.all(), required=False, label="Comptes")
-    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True,)
-    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True,)
+    date_min = gsb_field.DateFieldgsb(label='date minimum', localize=True, )
+    date_max = gsb_field.DateFieldgsb(label='date maximum', localize=True, )
     model_initial = Ope
     model_collec = Compte
 
@@ -157,7 +154,7 @@ class ExportViewBase(FormView):
             reponse["Cache-Control"] = "no-cache, must-revalidate"
             reponse['Pragma'] = "public"
             reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
-                                                                            time.strftime("%d_%m_%Y", time.localtime()),
-                                                                            self.extension_file
-                                                                            )
+                                                                                time.strftime("%d_%m_%Y", time.localtime()),
+                                                                                self.extension_file
+            )
         return reponse

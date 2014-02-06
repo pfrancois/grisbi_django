@@ -1,77 +1,93 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 
 {% block content %}
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.compte.errors }}
-        <label for="id_compte">Compte:</label>
-        {{ form.compte }}
-        {{ form.date_min.errors }}
-        <label for="id_date_min">date minimum:</label>
-        {{ form.date_min }}
-        {{ form.date_max.errors }}
-        <label for="id_date_max">date_maximum:</label>
-        {{ form.date_max }}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.compte.errors }}
+    <label for="id_compte">Compte:</label>
+    {{ form.compte }}
+    {{ form.date_min.errors }}
+    <label for="id_date_min">date minimum:</label>
+    {{ form.date_min }}
+    {{ form.date_max.errors }}
+    <label for="id_date_max">date_maximum:</label>
+    {{ form.date_max }}
 
-        <input type="submit" value="Rechercher"/>
-    </form>
-    <table id="main" class="table">
-        <thead class="entete">
-        <tr>
-            <th><a href="?sort=date">Date</a></th>
-            <th><a href="?sort=tiers">Tiers</a></th>
-            <th><a href="?sort=cat">Catégorie</a></th>
-            <th><a href="?sort=moyen">Moyen</a></th>
-            <th>pointée</th>
-            <th><a href="?sort=jumelle">jumelle</a></th>
-            <th><a href="?sort=ope__id">ope_titre</a></th>
-            <th><a href="?sort=montant">montant</a></th>
-        </tr>
-        </thead>
-        <tfoot>
-        {% block footer %}
-            <tr class="footerbar">
-                <td colspan="100" class="cptLabel">Solde au {% if date_max %} {{ date_max  }} {% else %} {% now "SHORT_DATE_FORMAT" %} {% endif %}: {{ solde|cur }}</td>
-            </tr>{% endblock footer %}
-        </tfoot>
-        {% for ope in list_ope %}
-            {% block ope %}
-                <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
-                    <td>
-                        <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a>
-                    </td>
-                    <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>
-                            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}
-                                {{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div>
-                    </td>
-                    <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</div>
-                    </td>
-                    <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.moyen.nom|default:"aucune moyen" }}</div>
-                    </td>
-                    <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R
-                            {% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
-                    </td>
-                    <td>{% if ope.jumelle %}<a href="{{ ope.jumelle.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.jumelle }}</a>
-                    	{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
-                    	{% endif %}</td>
-                    <td>{% if ope.opetitre %}<a href="{{ ope.opetitre.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.opetitre }}</a>
-                    	{% else %}<div {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
-                    	{% endif %}</td>
-                    <td>
-                        <div {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.montant|cur }}</div>
-                    </td>
-                </tr>
-            {% endblock ope %}
-        {% empty %}
-            <tr class="item">
-                <td colspan="8">
-                    aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+    <input type="submit" value="Rechercher"/>
+</form>
+<table id="main" class="table">
+    <thead class="entete">
+    <tr>
+        <th><a href="?sort=date">Date</a></th>
+        <th><a href="?sort=tiers">Tiers</a></th>
+        <th><a href="?sort=cat">Catégorie</a></th>
+        <th><a href="?sort=moyen">Moyen</a></th>
+        <th>pointée</th>
+        <th><a href="?sort=jumelle">jumelle</a></th>
+        <th><a href="?sort=ope__id">ope_titre</a></th>
+        <th><a href="?sort=montant">montant</a></th>
+    </tr>
+    </thead>
+    <tfoot>
+    {% block footer %}
+    <tr class="footerbar">
+        <td colspan="100" class="cptLabel">Solde au {% if date_max %} {{ date_max }} {% else %} {% now "SHORT_DATE_FORMAT" %} {% endif %}:
+            {{ solde|cur }}
+        </td>
+    </tr>
+    {% endblock footer %}
+    </tfoot>
+    {% for ope in list_ope %}
+    {% block ope %}
+    <tr class="item hover{% if ope.montant > 0 %} creditElement{% endif %}{% if ope.montant < 0 %} debitElement{% endif %}">
+        <td>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.date }}</a>
+        </td>
+        <td>
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>
+            {% if ope.tiers.is_titre %}{{ ope.tiers.titre.nom }} {% else %}
+            {{ ope.tiers.nom|default:"aucun tiers" }}{% endif %}</div>
+        </td>
+        <td>
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.cat.nom|default:"aucune cat&eacute;gorie" }}</div>
+        </td>
+        <td>
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.moyen.nom|default:"aucune moyen" }}</div>
+        </td>
+        <td>
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>{% if ope.rapp %}R
+            {% else %}{% if ope.pointee %}P {% else %}N{% endif %}{% endif %}</div>
+        </td>
+        <td>{% if ope.jumelle %}<a href="{{ ope.jumelle.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.jumelle
+            }}</a>
+            {% else %}
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
+            {% endif %}
+        </td>
+        <td>{% if ope.opetitre %}<a href="{{ ope.opetitre.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}>{{
+            ope.opetitre }}</a>
+            {% else %}
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>-</div>
+            {% endif %}
+        </td>
+        <td>
+            <div
+            {% if ope.rapp %}class='rappElement' {% endif %}>{{ ope.montant|cur }}</div>
+        </td>
+    </tr>
+    {% endblock ope %}
+    {% empty %}
+    <tr class="item">
+        <td colspan="8">
+            aucune op&eacute;ration n&#39;est affich&eacute;e.<br/>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock content %}

@@ -1,15 +1,15 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
-    <form method="post" action="" id="form1">
-        {% csrf_token %}
-        <table>
-            {{ form }}
-        </table>
-    </form>
-    <table style=" width: 100%;" summary="bouton">
-        <tr class="boutton">
-            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
-        </tr>
+<form method="post" action="" id="form1">
+    {% csrf_token %}
+    <table>
+        {{ form }}
     </table>
+</form>
+<table style=" width: 100%;" summary="bouton">
+    <tr class="boutton">
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%"><a href="{{ cpt.get_absolute_url }}">Annuler</a></td>
+    </tr>
+</table>
 {% endblock content %}

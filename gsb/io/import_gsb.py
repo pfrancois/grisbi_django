@@ -38,7 +38,7 @@ def import_gsb_0_5_x(request):
             # renomage ok
             messages.info(request, "enregistrement fichier ok")
             # on recupere les info pour le nom
-                #-----------------------gestion des imports
+            #-----------------------gestion des imports
             try:
                 # on essaye d'ouvrir le fichier
                 destination = open(nomfich, 'r')
@@ -203,7 +203,8 @@ def import_gsb_050(nomfich, request, efface_table=True):
     for xml_bq in xml_tree.find('Banques/Detail_des_banques'):
         nb_bq += 1
         messages.info(request, "banque %s" % xml_bq.get('No'))
-        element, created = Banque.objects.get_or_create(nom=xml_bq.get('Nom'), defaults={'cib': xml_bq.get('Code'), 'notes': xml_bq.get('Remarques')})
+        element, created = Banque.objects.get_or_create(nom=xml_bq.get('Nom'),
+                                                        defaults={'cib': xml_bq.get('Code'), 'notes': xml_bq.get('Remarques')})
         tabl_correspondance_banque[xml_bq.get('No')] = element.id
     messages.info(request, u'%s banques' % nb_bq)
 
@@ -246,15 +247,16 @@ def import_gsb_050(nomfich, request, efface_table=True):
         if type_compte in ('t',):
             messages.info(request, "cpt_titre %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
-                                                            defaults={'nom': xml_cpt.find('Details/Nom').text, 'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)), }
-                                                            )
+                                                            defaults={'nom': xml_cpt.find('Details/Nom').text, 'ouvert': not bool(
+                                                                int(xml_cpt.find('Details/Compte_cloture').text)), }
+            )
         else:
             messages.info(request, "cpt %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
                                                             defaults={'nom': xml_cpt.find('Details/Nom').text,
                                                                       'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
-                                                                       }
-                                                            )
+                                                            }
+            )
 
         tabl_correspondance_compte[xml_cpt.find('Details/No_de_compte').text] = element.id
         if created:
@@ -298,17 +300,19 @@ def import_gsb_050(nomfich, request, efface_table=True):
             moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
                                                          defaults={'nom': xml_moyen.get('Nom'),
                                                                    'type': Moyen.typesdep[int(xml_moyen.get('Signe'))][0]
-                                                                   }
-                                                         )
+                                                         }
+            )
             if created:
                 nb_nx_moyens += 1
             tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_moyen.get('No')] = moyen.id
         try:
-            element.moyen_credit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_cpt.find('Details/Type_defaut_credit').text]
+            element.moyen_credit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][
+                xml_cpt.find('Details/Type_defaut_credit').text]
         except (KeyError, TypeError):
             element.moyen_credit_defaut_id = None
         try:
-            element.moyen_debit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_cpt.find('Details/Type_defaut_debit').text]
+            element.moyen_debit_defaut_id = tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][
+                xml_cpt.find('Details/Type_defaut_debit').text]
         except (KeyError, TypeError):
             element.moyen_debit_defaut_id = None
         element.save()
@@ -353,13 +357,13 @@ def import_gsb_050(nomfich, request, efface_table=True):
         nb_tot_ope += 1
         if nb_tot_ope == int(nb_ope_final * int("%s0" % percent) / 100):
             messages.info(request,
-                "ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
+                          "ope %s, ope %s sur %s soit %s%%" % (xml_ope.get('No'), nb_tot_ope, nb_ope_final, "%s0" % percent))
             percent += 1
         ope = Ope(compte=ope_cpt,
                   date=ope_date,
-                  date_val=ope_date_val,  # date de valeur
-                  montant=ope_montant,  # montant
-                  )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
+                  date_val=ope_date_val, # date de valeur
+                  montant=ope_montant, # montant
+        )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         compte_ferme = not ope.compte.ouvert
         if compte_ferme:
             ope.compte.ouvert = True
@@ -453,7 +457,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
         element = Echeance(date=utils.datefr2datesql(xml_ech.get('Date')),
                            montant=utils.fr2decimal(xml_ech.get('Montant')),
                            compte_id=tabl_correspondance_compte[xml_ech.get('Compte')],
-                           )
+        )
         tabl_correspondance_ech[xml_ech.get('No')] = element.id
         try:
             element.tiers_id = tabl_correspondance_tiers[xml_ech.get('Tiers')]
@@ -487,7 +491,8 @@ def import_gsb_050(nomfich, request, efface_table=True):
             element.compte_virement = None
             element.moyen_virement = None
         if int(xml_ech.get('Periodicite')) == 4:  # c'est le mode personalise
-            if int(xml_ech.get('Periodicite_personnalisee')) == 7 and int(xml_ech.get('Intervalle_periodicite')) == 0:  # on cree les semaine
+            if int(xml_ech.get('Periodicite_personnalisee')) == 7 and int(
+                    xml_ech.get('Intervalle_periodicite')) == 0:  # on cree les semaine
                 element.periodicite = 'h'
                 element.intervalle = 1
             else:

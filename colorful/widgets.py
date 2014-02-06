@@ -13,8 +13,7 @@ except AttributeError:
 
 
 class ColorFieldWidget(TextInput):
-
-    class Media:
+    class Media(object):
         css = {
             'all': ("%scolorful/colorPicker.css" % url,)
         }
@@ -22,7 +21,7 @@ class ColorFieldWidget(TextInput):
 
     input_type = 'color'
 
-    def render_script(self, id):
+    def render_script(self, id_script):
         return u'''<script type="text/javascript">
                     (function($){
                         $(document).ready(function(){
@@ -33,10 +32,11 @@ class ColorFieldWidget(TextInput):
                         });
                     })('django' in window ? django.jQuery: jQuery);
                 </script>
-                ''' % id
+                ''' % id_script
 
     def render(self, name, value, attrs={}):
         if not 'id' in attrs:
             attrs['id'] = "#id_%s" % name
         render = super(ColorFieldWidget, self).render(name, value, attrs)
+        # noinspection PyArgumentList
         return SafeUnicode(u"%s%s" % (render, self.render_script(attrs['id'])))

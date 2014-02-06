@@ -2,17 +2,19 @@
 
 import decimal
 import os
+
 from django.db import models
 from django import forms
-import gsb.utils as utils
 from django.db.models import DateTimeField
+
+import gsb.utils as utils
+
 #from south.modelsinspector import add_introspection_rules
 from south.modelsinspector import introspector
 
 
 # definition d'un moneyfield
 class CurField(models.DecimalField):
-
     """
     un champ decimal mais defini pour les monnaies
     """
@@ -29,16 +31,15 @@ class CurField(models.DecimalField):
         return decimal.Decimal(self) * decimal.Decimal(other)
 
     def south_field_triple(self):
-        "Returns a suitable description of this field for South."
+        """Returns a suitable description of this field for South."""
         # We'll just introspect ourselves, since we inherit.
 
         field_class = "django.db.models.fields.DecimalField"
         args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
+        return field_class, args, kwargs
 
 
 class ExtFileField(forms.FileField):
-
     """
     http://djangosnippets.org/snippets/977/
     Same as forms.FileField, but you can specify a file extension whitelist.
@@ -80,7 +81,6 @@ class ExtFileField(forms.FileField):
 
 
 class uuidfield(models.CharField):
-
     """tire de la
     https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
     """
@@ -110,17 +110,16 @@ class uuidfield(models.CharField):
         return value
 
     def south_field_triple(self):
-        "Returns a suitable description of this field for South."
+        """Returns a suitable description of this field for South."""
         # We'll just introspect the _actual_ field.
         field_class = "django.db.models.fields.CharField"
         args, kwargs = introspector(self)
         # That's our definition!
-        return (field_class, args, kwargs)
+        return field_class, args, kwargs
 
 
 # tire initialement de django extension"""
 class ModificationDateTimeField(DateTimeField):
-
     """ ModificationDateTimeField
 
     By default, sets editable=False, blank=True, default=datetime.now
@@ -142,8 +141,8 @@ class ModificationDateTimeField(DateTimeField):
         return "DateTimeField"
 
     def south_field_triple(self):
-        "Returns a suitable description of this field for South."
+        """Returns a suitable description of this field for South."""
         # We'll just introspect ourselves, since we inherit.
         field_class = "django.db.models.fields.DateTimeField"
         args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
+        return field_class, args, kwargs

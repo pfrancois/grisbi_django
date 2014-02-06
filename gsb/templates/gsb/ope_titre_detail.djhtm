@@ -1,40 +1,40 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
-    <form method="post" action="" id="form1">
-        {% csrf_token %}
-        <table>
-            {{ form }}
-            <tr>
-                <th>id opération:</th>
-                <td><a href="{{ ope.ope_ost.get_absolute_url }}"> {{ ope.ope_ost.id }}</a></td>
-            </tr>
-            
-            <tr>
-                <th>id opération pmv:</th>
-                <td>{% if ope.nombre < 0 %}<a href="{{ ope.ope_pmv.get_absolute_url }}"> {{ ope.ope_pmv.id }} {% else %}-{% endif %}</a></td>
-            </tr>
-            <tr>
-                <th>rapp:</th>
-                <td>{{ ope.rapp }}</td>
-            </tr>
-        </table>
-    </form>
-    <table style=" width: 100%;" summary="bouton">
-        <tr class="boutton">
-            <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
-            <td width="50%">
-                <a href="{% url 'gsb_cpt_titre_detail' ope.compte_id ope.titre_id %}">Annuler</a></td>
+<form method="post" action="" id="form1">
+    {% csrf_token %}
+    <table>
+        {{ form }}
+        <tr>
+            <th>id opération:</th>
+            <td><a href="{{ ope.ope_ost.get_absolute_url }}"> {{ ope.ope_ost.id }}</a></td>
+        </tr>
+
+        <tr>
+            <th>id opération pmv:</th>
+            <td>{% if ope.nombre < 0 %}<a href="{{ ope.ope_pmv.get_absolute_url }}"> {{ ope.ope_pmv.id }} {% else %}-{% endif %}</a></td>
+        </tr>
+        <tr>
+            <th>rapp:</th>
+            <td>{{ ope.rapp }}</td>
         </tr>
     </table>
-    {% if not rapp %}
-        <form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
-            {% csrf_token %}
-        </form>
-        <table style=" width: 100%;" summary="bouton effacer">
-            <tr class="boutton">
-                <td width="100%">
-                    <a href="javascript:document.forms['form2'].submit();">supprimer l'opération</a></td>
-            </tr>
-        </table>
-    {% endif %}
+</form>
+<table style=" width: 100%;" summary="bouton">
+    <tr class="boutton">
+        <td width="50%"><a href="javascript:document.forms['form1'].submit();">Ok</a></td>
+        <td width="50%">
+            <a href="{% url 'gsb_cpt_titre_detail' ope.compte_id ope.titre_id %}">Annuler</a></td>
+    </tr>
+</table>
+{% if not rapp %}
+<form id='form2' action="{% url 'ope_titre_delete' ope.id %}" method="post">
+    {% csrf_token %}
+</form>
+<table style=" width: 100%;" summary="bouton effacer">
+    <tr class="boutton">
+        <td width="100%">
+            <a href="javascript:document.forms['form2'].submit();">supprimer l'opération</a></td>
+    </tr>
+</table>
+{% endif %}
 {% endblock content %}

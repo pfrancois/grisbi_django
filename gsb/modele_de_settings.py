@@ -53,7 +53,7 @@ DIR_DROPBOX = "D:\Dropbox"
 ATOMIC_REQUESTS = True
 WSGI_APPLICATION = "gsb.wsgi.application"
 ADMINS = (
-    # ('toto', 'your_email@domain.com'),
+# ('toto', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
@@ -61,11 +61,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, 'grisbi.sqlite'),  # Or path to database file if using sqlite3.
-        'USER': 'root',  # Not used with sqlite3.
-        'PASSWORD': '',  # Not used with sqlite3.
-        'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
+        'NAME': os.path.join(PROJECT_PATH, 'grisbi.sqlite'), # Or path to database file if using sqlite3.
+        'USER': 'root', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 if 'testserver' in sys.argv:
@@ -119,9 +119,9 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+# Put strings here, like "/home/html/static" or "C:/www/django/static".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
@@ -139,6 +139,7 @@ except ImportError:
     SETTINGS_DIR = os.path.abspath(os.path.dirname(__file__))
     nomfich = os.path.join(PROJECT_PATH, 'secret_key.py')
     from random import choice
+
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
     fichier = open(nomfich, 'w')
     fichier.write("# -*- coding: utf-8 -*-")
@@ -154,11 +155,11 @@ TEMPLATE_LOADERS = (
 
 if DJANGO_TOOLBAR:
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',
-                         'django.contrib.sessions.middleware.SessionMiddleware',
-                         'django.middleware.common.CommonMiddleware',)
+                          'django.contrib.sessions.middleware.SessionMiddleware',
+                          'django.middleware.common.CommonMiddleware',)
 else:
     MIDDLEWARE_CLASSES = ('django.contrib.sessions.middleware.SessionMiddleware',
-                         'django.middleware.common.CommonMiddleware',)
+                          'django.middleware.common.CommonMiddleware',)
 
 MIDDLEWARE_CLASSES += (
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -237,11 +238,11 @@ if DJANGO_TOOLBAR:
                             'debug_toolbar.panels.logger.LoggingPanel',
                             'template_timings_panel.panels.TemplateTimings.TemplateTimings',
                             'inspector_panel.panels.inspector.InspectorPanel'
-                           )
+    )
     INSTALLED_APPS += ('debug_toolbar',
-                      'template_timings_panel',
-                      'inspector_panel'
-                        )
+                       'template_timings_panel',
+                       'inspector_panel'
+    )
     # https://github.com/santiagobasulto/debug-inspector-panel
     # https://github.com/orf/django-debug-toolbar-template-timings
     IGNORED_TEMPLATES = ["debug_toolbar/*"]
@@ -281,7 +282,7 @@ LOGGING = {
             # will need perms at location below:
             'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
             'when': 'D',
-            'backupCount': '30',  # approx 1 month worth
+            'backupCount': '30', # approx 1 month worth
         },
     },
     'loggers': {

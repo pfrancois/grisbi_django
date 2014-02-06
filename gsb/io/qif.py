@@ -30,7 +30,7 @@ tiers_perso = (
 )
 
 
-class qifitem:
+class qifitem(object):
     def __init__(self):
         self.order = ['date', 'amount', 'cleared', 'num', 'payee', 'memo', 'address', 'category', 'categoryinsplit',
                       'memoinsplit', 'amountofsplit']
@@ -114,6 +114,7 @@ def parseqif(infile):
             print >> sys.stderr, "Skipping unknown line:\n", line
         line = infile.readline()
     return items
+
 
 if __name__ == "__main__":
     # read from stdin and write CSV to stdout

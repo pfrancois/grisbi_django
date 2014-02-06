@@ -1,50 +1,52 @@
 {% extends "gsb/cpt_detail.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block bouton_haut %}
-    <table width="100%" id="boutons_haut" class="table">
-        {% if compte.ouvert %}
-            <tr class="boutton">
-                <td width="50%"><a href="{% url 'gsb_cpt_ope_new' compte.id %}">Nouvelle Op.</a></td>
-                <td width="50%">
-                    <a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a></td>
-            </tr>
-            <tr class="boutton">
-                <td width="100%" colspan="2">
-                    <a href="{% url 'gsb_cpt_vir_new' compte.id %}">Nouveau Virement vers {{ compte.nom|escape }}</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr class="boutton">
-                <td width="100%" colspan="2">
-                    <a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a>
-                </td>
-            </tr>
-        {% endif %}
-    </table>
+<table width="100%" id="boutons_haut" class="table">
+    {% if compte.ouvert %}
+    <tr class="boutton">
+        <td width="50%"><a href="{% url 'gsb_cpt_ope_new' compte.id %}">Nouvelle Op.</a></td>
+        <td width="50%">
+            <a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a></td>
+    </tr>
+    <tr class="boutton">
+        <td width="100%" colspan="2">
+            <a href="{% url 'gsb_cpt_vir_new' compte.id %}">Nouveau Virement vers {{ compte.nom|escape }}</a>
+        </td>
+    </tr>
+    {% else %}
+    <tr class="boutton">
+        <td width="100%" colspan="2">
+            <a href="{{ compte.get_absolute_url }}">retour detail {{ compte.nom|escape }}</a>
+        </td>
+    </tr>
+    {% endif %}
+</table>
 {% endblock bouton_haut %}
 
 {% block boutons_bas %}
-    <table width="100%" id="boutons_bas" class="table">
-        <tr class="boutton">
-            {% if type != "all" %}
-                <td width="{% if type == "rapp" %}100{% else %}50{% endif %}%">
-                <a href="{% url 'gsb_cpt_titre_espece_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a>
-                </td>
-            {% endif %}
-            {% if type != "rapp" %}
-                <td width="{% if type == "all" %}100{% else %}50{% endif %}%">
-                    <a href="{% url 'gsb_cpt_titre_espece_rapp' cpt_id=compte.id %}">
-                        voir uniquement les op&eacute;rations rapproch&eacute;es
-                    </a>
-                </td>{% endif %}
-        </tr>
-        {% if type != "nrapp" %}
-            <tr class="boutton">
-                <td width="100%" colspan="2">
-                    <a href="{% url 'gsb_cpt_titre_espece' cpt_id=compte.id %}">
-                        voir uniquement les opérations non rapprochées
-                    </a>
-                </td>
-            </tr>
+<table width="100%" id="boutons_bas" class="table">
+    <tr class="boutton">
+        {% if type != "all" %}
+        <td width="{% if type == " rapp
+        " %}100{% else %}50{% endif %}%">
+        <a href="{% url 'gsb_cpt_titre_espece_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a>
+        </td>
         {% endif %}
-    </table>
+        {% if type != "rapp" %}
+        <td width="{% if type == " all
+        " %}100{% else %}50{% endif %}%">
+        <a href="{% url 'gsb_cpt_titre_espece_rapp' cpt_id=compte.id %}">
+            voir uniquement les op&eacute;rations rapproch&eacute;es
+        </a>
+        </td>{% endif %}
+    </tr>
+    {% if type != "nrapp" %}
+    <tr class="boutton">
+        <td width="100%" colspan="2">
+            <a href="{% url 'gsb_cpt_titre_espece' cpt_id=compte.id %}">
+                voir uniquement les opérations non rapprochées
+            </a>
+        </td>
+    </tr>
+    {% endif %}
+</table>
 {% endblock boutons_bas %}

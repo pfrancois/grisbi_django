@@ -2,16 +2,16 @@
 {% block title %}importation d'un fichier{% endblock title %}
 {% block titre %}<h1>importation d'un fichier</h1>{% endblock %}
 {% block content %}
-    <form enctype="multipart/form-data" action="" method="post">
-        <table>
-            {{ form.as_table }}
-        </table>
-        {% csrf_token %}
-        <p>
-            <input type="submit" value="importer"/>
-        </p>
-    </form>
+<form enctype="multipart/form-data" action="" method="post">
+    <table>
+        {{ form.as_table }}
+    </table>
+    {% csrf_token %}
     <p>
-        <a href="{% url 'outils_index' %}">retour options</a>
+        <input type="submit" value="importer"/>
     </p>
+</form>
+<p>
+    <a href="{% url 'outils_index' %}">retour options</a>
+</p>
 {% endblock content %}

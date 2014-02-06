@@ -1,72 +1,73 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
-    <table width="100%" id="boutons" class="table">
-        {% if compte.ouvert %}
-	        {% if titres %}
-	        <tr class="boutton">
-	            <td width="30%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
-	            <td width="30%"><a href="{% url 'cpt_titre_vente' compte.id %}">vente</a></td>
-	            <td width="30%"><a href="{% url 'titre_bulk' compte.id %}">bulk</a></td>
-	        </tr>
-	        {% else %}
-	            <tr class="boutton">
-	                <td width="100%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
-	            </tr>
-	        {% endif %}
-             <tr class="boutton">
-                <td width="100%" colspan="3"><a href="{% url 'index' %}">retour liste comptes</a></td>
-             </tr>
-        {% else %}
-            <tr class="boutton">
-                <td width="100%" colspan="3"><a href="{% url 'index' %}">retour liste comptes</a></td>
-            </tr>
-        {% endif %}
-    </table>
-    <br/>
-    <table width="100%" id="main">
-        <thead>
-        <tr>
-            <th>placement</th>
-            <th> nb</th>
-            <th>dernier cours</th>
-            <th align="right">montant plac&eacute;</th>
-            <th>+/- values</th>
-            <th>total</th>
-        </tr>
-        </thead>
-        {% for titre in titres %}
-            <tr class="item hover{% if titre.pmv < 0 %} creditElement{% else %} debitElement{% endif %}">
-                <td class="opTier">
-                    <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom|escape }}
-                        ( {{ titre.type|escape }} )</a> |
-                    <a href="{% url 'maj_cours' titre.id %}">MAJ cours</a></td>
-                <td> {{ titre.nb|floatformat:3 }}</td>
-                <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>
-                <td class="opDebit">{{ titre.investi|cur }}</td>
-                <td class="opCredit">{{ titre.pmv|cur }}</td>
-                <td class="opDebit">{{ titre.total|cur }}</td>
-            </tr>
-        {% empty %}
-            <tr class="item">
-                <td colspan="7"> aucun placement.
-                    <br/>
-                </td>
-            </tr>
-        {% endfor %}
-        <tr class="bar">
-            <td class="opTier" colspan="5">solde titre</td>
-            <td class="opDebit">{{ compte.solde_titre|cur }}</td>
-        </tr>
-        <tr class="item hover">
-            <td class="opTier" colspan="5">
-                <a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a>
-            </td>
-            <td class="opDebit">{{ especes|cur }}</td>
-        </tr>
+<table width="100%" id="boutons" class="table">
+    {% if compte.ouvert %}
+    {% if titres %}
+    <tr class="boutton">
+        <td width="30%"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
+        <td width="30%"><a href="{% url 'cpt_titre_vente' compte.id %}">vente</a></td>
+        <td width="30%"><a href="{% url 'titre_bulk' compte.id %}">bulk</a></td>
+    </tr>
+    {% else %}
+    <tr class="boutton">
+        <td width="50"><a href="{% url 'cpt_titre_achat' compte.id %}">achat</a></td>
+        <td width="50%"><a href="{% url 'titre_bulk' compte.id %}">bulk</a></td>
+    </tr>
+    {% endif %}
+    <tr class="boutton">
+        <td width="100%" colspan="3"><a href="{% url 'index' %}">retour liste comptes</a></td>
+    </tr>
+    {% else %}
+    <tr class="boutton">
+        <td width="100%" colspan="3"><a href="{% url 'index' %}">retour liste comptes</a></td>
+    </tr>
+    {% endif %}
+</table>
+<br/>
+<table width="100%" id="main">
+    <thead>
+    <tr>
+        <th>placement</th>
+        <th> nb</th>
+        <th>dernier cours</th>
+        <th align="right">montant plac&eacute;</th>
+        <th>+/- values</th>
+        <th>total</th>
+    </tr>
+    </thead>
+    {% for titre in titres %}
+    <tr class="item hover{% if titre.pmv < 0 %} creditElement{% else %} debitElement{% endif %}">
+        <td class="opTier">
+            <a href="{% url 'gsb_cpt_titre_detail' compte.id titre.id %}">{{ titre.nom|escape }}
+                ( {{ titre.type|escape }} )</a> |
+            <a href="{% url 'maj_cours' titre.id %}">MAJ cours</a></td>
+        <td> {{ titre.nb|floatformat:3 }}</td>
+        <td>{{ titre.t.last_cours|cur }} ({{ titre.t.last_cours_date }})</td>
+        <td class="opDebit">{{ titre.investi|cur }}</td>
+        <td class="opCredit">{{ titre.pmv|cur }}</td>
+        <td class="opDebit">{{ titre.total|cur }}</td>
+    </tr>
+    {% empty %}
+    <tr class="item">
+        <td colspan="7"> aucun placement.
+            <br/>
+        </td>
+    </tr>
+    {% endfor %}
+    <tr class="bar">
+        <td class="opTier" colspan="5">solde titre</td>
+        <td class="opDebit">{{ compte.solde_titre|cur }}</td>
+    </tr>
+    <tr class="item hover">
+        <td class="opTier" colspan="5">
+            <a href="{% url 'gsb_cpt_titre_espece' compte.id %}">compte esp&egrave;ce</a>
+        </td>
+        <td class="opDebit">{{ especes|cur }}</td>
+    </tr>
 
-        <tr class="footerbar">
-            <td colspan="5" class="cptLabel">Solde global</td>
-            <td colspan="1" class="cptSolde">{{ solde|cur }}</td>
-        </tr>
-    </table>
+    <tr class="footerbar">
+        <td colspan="5" class="cptLabel">Solde global</td>
+        <td colspan="1" class="cptSolde">{{ solde|cur }}</td>
+    </tr>
+</table>
 {% endblock content %}
