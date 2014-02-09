@@ -6,24 +6,24 @@ import decimal
 import csv
 import codecs
 import math
-
+import pprint
+import os
+import fnmatch
 from django.utils import timezone
 
 #from inspector_panel.panels.inspector import debug
 import locale
-
-try:
-    from django.db.models import Max
-    from django.core.exceptions import ObjectDoesNotExist
-    from django.utils.encoding import force_unicode
-except ImportError:
-    pass
+from django.db.models import Max
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.encoding import force_unicode
+from django.contrib import messages
 from uuid import uuid4
 
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr']
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr','log_factory',
+           'find_files']
 
 
 class FormatException(Exception):
@@ -143,7 +143,8 @@ def fr2decimal(s):
 
 
 def strpdate(end_date, fmt="%Y-%m-%d"):
-    """@param s: YYYY-MM-DD
+    """@param end_date: date
+        @param fmt: format de la date
     attention si s est None ou impossible renvoie None"""
     if isinstance(end_date, datetime.date) or isinstance(end_date, datetime.datetime):
         end_date = end_date.strftime(fmt)
@@ -161,6 +162,10 @@ def today():
 
 # utilise pour mock et les test
 def now(utc=True):
+    """
+    renvoi
+    @type utc: bool
+    """
     now = timezone.now()
     if utc:
         return now
@@ -437,3 +442,19 @@ class switch(object):
             return True
         else:
             return False
+
+def log_factory(request=None, debug=False):
+    if request is None:
+            return lambda x: pprint.pprint("%s" % x)
+    if debug is False:
+        return lambda x: messages.info(request, "<PRE>%s</PRE>" % (pprint.pformat(x)))
+    else:
+        return lambda x: messages.info(request, "%s" % x)
+
+def find_files(path,recherche='*.*'):
+    """trouve recursivement les fichiers voulus"""
+    for root, dirs, files in path:
+        for basename in files:
+            if fnmatch.fnmatch(basename, recherche):
+                filename = os.path.join(root, basename)
+                yield filename

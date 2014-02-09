@@ -21,10 +21,11 @@ urlpatterns += patterns('gsb.outils',
                         # echeances echues
                         url(r'^options/ech$', outils.Echeance_view.as_view(), name='gestion_echeances'),
                         # affiche config
-                        url(r'^options/verif_config$', 'verif_config', name='verif_config'),
+                        url(r'^outils/verif_config$', 'verif_config', name='verif_config'),
 )
 urlpatterns += patterns('gsb.lecture_plist',
                         url(r'^options/maj$', 'gestion_maj', name='gestion_maj_iphone'),
+                        url(r'^outils/plist$', 'affiche_plist', name='affichage plist iphone'),
 )
 # export index
 urlpatterns += patterns('gsb',

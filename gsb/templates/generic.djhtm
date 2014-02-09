@@ -14,7 +14,7 @@
     <title>{% block title %}{{ titre|escape }}{% endblock title %}</title>
 </head>
 <body {% block body_js %}{% endblock body_js %}>
-{% block titre %}<h1><a href="{% url 'index' %}">{% if titre_long %}{{ titre_long|escape }}{% else %}{{ titre|escape }}{% endif %}</a></h1>{% endblock titre %}
+{% block titre %}<h1><a href="{% url 'index' %}">{{ titre|escape }}</a></h1>{% endblock titre %}
 {% block messages %}{% if messages %}{% render_messages messages %}{% endif %}{% endblock messages %}
 {% block content %}{% if resultat %}<div><pre>{{ resultat|pprint|escape }}</pre></div>{% endif %}
 {% if requete %}<div>

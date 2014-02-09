@@ -30,7 +30,7 @@ class Mytemplateview(generic.TemplateView):
         Echeance.verif(self.request)
         if lecture_plist.check():
             messages.info(self.request,
-                          u"attention maj pour iphone à effectuer <a href='%s'> cliquer ici pour les intégrer</A>" % mark_safe(
+                          u"attention maj pour iphone à effectuer <a href='%s'> cliquer ici pour les intégrer</a>" % mark_safe(
                               reverse('gestion_maj_iphone')))
         context = super(Mytemplateview, self).get_context_data(**kwargs)
         context.update({'titre': self.titre})
