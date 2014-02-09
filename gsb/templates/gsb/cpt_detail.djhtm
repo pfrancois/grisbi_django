@@ -1,12 +1,10 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
-{% block content %}
-{% block bouton_haut %}
+{% block content %}{% block bouton_haut %}
 <table width="100%" id="boutons_haut" class="table">
     {% if compte.ouvert %}
     <tr class="boutton">
         <td width="50%"><a href="{% url 'gsb_cpt_ope_new' compte.id %}">Nouvelle Op.</a></td>
-        <td width="50%"><a href="{% url 'gsb_cpt_vir_new' compte.id %}"> Nouveau Virement
-            vers {{ compte.nom|escape }} </a></td>
+        <td width="50%"><a href="{% url 'gsb_cpt_vir_new' compte.id %}"> Nouveau Virement vers {{ compte.nom|escape }} </a></td>
     </tr>
     <tr class="boutton">
         <td width="100%" colspan="2">
@@ -39,9 +37,7 @@
         <td colspan="2" class="cptSolde">{{ solde|cur }}</td>
     </tr>
     <tr>
-        <td colspan="3" class="cptLabel">Solde rapproché
-            au {{ date_r|date:"SHORT_DATE_FORMAT"|default:"-" }} :
-        </td>
+        <td colspan="3" class="cptLabel">Solde rapproché au {{ date_r|date:"SHORT_DATE_FORMAT"|default:"-" }} : </td>
         <td colspan="2" class="cptSolde">{{ solde_r|cur }}</td>
     </tr>
     <tr>
@@ -77,17 +73,18 @@
             </a>
         </td>
         <td class="opTier">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {%
-            endif %}>{{ ope.cat.nom|default:"aucune catégorie"|escape }}</a>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}
+                                                 {% if ope.pointe %}class='poiElement' {% endif %} >
+            {{ ope.cat.nom|default:"aucune catégorie"|escape }}</a>
         </td>
         <td class="opCredit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {%
-            endif %}>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}
+                                                 {% if ope.pointe %}class='poiElement' {% endif %}>
             {% if ope.montant > 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}
             </a>
         <td class="opDebit">
-            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}{% if ope.pointe %}class='poiElement' {%
-            endif %}>
+            <a href="{{ ope.get_absolute_url }}" {% if ope.rapp %}class='rappElement' {% endif %}
+                                                 {% if ope.pointe %}class='poiElement' {% endif %}>
             {% if ope.montant < 0 %}{{ ope.montant|cur }}{% else %} - {% endif %}
             </a>
         </td>
@@ -132,22 +129,18 @@
 {% block boutons_bas %}
 <table width="100%" id="boutons_bas" class="table">
     <tr class="boutton">
-        {% if type != "all" %}
-        <td width="{% if type == " rapp
-        " %}100{% else %}50{% endif %}%">
+        {% if type != "all" %} <td width="{% if type == 'rapp' %}100{% else %}50{% endif %}%">
         <a href="{% url 'gsb_cpt_detail_all' cpt_id=compte.id %}">voir toutes les opérations</a>
         </td>{% endif %}
         {% if type != "rapp" %}
-        <td width="{% if type == " all
-        " %}100{% else %}50{% endif %}%">
+        <td width="{% if type == 'all' %}100{% else %}50{% endif %}%">
         <a href="{% url 'gsb_cpt_detail_rapp' cpt_id=compte.id %}">voir uniquement les opérations
             rapprochées</a></td>{% endif %}
     </tr>
     {% if type != "nrapp" %}
     <tr class="boutton">
         <td width="100%" colspan="2">
-            <a href="{% url 'gsb_cpt_detail' cpt_id=compte.id %}">voir uniquement les opérations non
-                rapprochées</a>
+            <a href="{% url 'gsb_cpt_detail' cpt_id=compte.id %}">voir uniquement les opérations non rapprochées</a>
         </td>
     </tr>
     {% endif %}

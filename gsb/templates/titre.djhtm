@@ -16,6 +16,6 @@
 </form>
 
 <div class="progress">
-    <a href='{% url ' index' %}'>retour</a>
+    <a href='{% url "index" %}'>retour</a>
 </div>
 {% endblock content %}

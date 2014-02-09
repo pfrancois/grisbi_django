@@ -1,6 +1,4 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
-{% block titre %}<h1 class="survol"><a href="{% url 'outils_index' %}">Comptes</a>
-</h1>{% endblock titre %}
 {% block content %} <h2>comptes esp&egrave;ces ou bancaires</h2>
 <table id="banques" class="table">
     {% for cpt in liste_cpt_bq %}
@@ -47,8 +45,8 @@
 </table>
 {% if nb_clos > 0 %}
 <p>
-    PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos{% if clos_caches %} non affich&eacute;{% if clos_caches > 1 %}s{%
-    endif %}{% endif %}. </p>
+    PS: il y a {{ nb_clos }} compte{% if nb_clos > 1 %}s{% endif %} clos
+    {% if clos_caches %} non affich&eacute;{% if nb_clos > 1 %}s{% endif %}{% endif %}. </p>
 {% endif %}
 
 {% endblock content %}
