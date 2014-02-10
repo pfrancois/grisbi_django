@@ -945,8 +945,9 @@ class Ope_titre(models.Model):
         else:
             sens = "vente"
         chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (
-        self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+            self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
         return chaine
+
 
 # noinspection PyUnusedLocal
 @receiver(pre_delete, sender=Ope_titre, weak=False)
@@ -1388,6 +1389,7 @@ def ope_fille(sender, **kwargs):
         if self.mere.tot_fille != self.mere.montant:
             self.mere.montant = self.mere.tot_fille
             self.mere.save()
+
 
 # noinspection PyUnusedLocal
 @receiver(pre_delete, sender=Ope, weak=False)

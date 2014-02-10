@@ -1,6 +1,5 @@
 # -*- coding: utf-8
 from django import template
-from django.utils.text import normalize_newlines
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_text
 
@@ -33,7 +32,6 @@ class MessagesNode(template.Node):
                 if m.tags != tag_prec:
                     out_str += u'<div class="messages %s">\n<ul class="messages-list-%s">' % (m.tags, m.tags)
                     tag_prec = m.tags
-                value = normalize_newlines(u"%s" % m)
                 out_str += u'<li>%s</li>' % m
             out_str += u'</ul>\n</div>\n'
             return out_str

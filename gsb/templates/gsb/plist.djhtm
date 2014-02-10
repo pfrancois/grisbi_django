@@ -1,0 +1,30 @@
+{% extends "generic.djhtm" %}{# coding: utf-8 #}{% load gsb_extras %}
+{% block content %}
+<ul>
+    {% for fichier in reponses %}
+        <li class="item hover">
+            <dl>
+                <dt>{{ fichier.filename }}<BR>
+                    {{ fichier.date }}</dt>
+                <dd><dl>
+                        <dt>action</dt>
+                        <dd>{{ fichier.data_plist.action }}</dd>
+                    </dl>
+                    <dl>
+                        <dt>device</dt>
+                        <dd>{{ fichier.data_plist.device }}</dd>
+                    </dl>
+                    <dl>
+                        <dt>data provenant de la plist</dt>
+                        <dd><PRE>{{ fichier.data_plist.objet|pprint }}</PRE></dd>
+                    </dl>
+                    <dl>
+                        <dt>data corrigées</dt>
+                        <dd><PRE>{{ fichier.data_gsb|pprint }}</PRE></dd>
+                    </dl>
+                </dd>
+            </dl>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

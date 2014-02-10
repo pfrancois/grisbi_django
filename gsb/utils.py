@@ -6,7 +6,6 @@ import decimal
 import csv
 import codecs
 import math
-import pprint
 import os
 import fnmatch
 from django.utils import timezone
@@ -16,13 +15,12 @@ import locale
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import force_unicode
-from django.contrib import messages
 from uuid import uuid4
 
 __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
            'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
            'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr','log_factory',
+           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr',
            'find_files']
 
 
@@ -443,15 +441,8 @@ class switch(object):
         else:
             return False
 
-def log_factory(request=None, debug=False):
-    if request is None:
-            return lambda x: pprint.pprint("%s" % x)
-    if debug is False:
-        return lambda x: messages.info(request, "<PRE>%s</PRE>" % (pprint.pformat(x)))
-    else:
-        return lambda x: messages.info(request, "%s" % x)
 
-def find_files(path,recherche='*.*'):
+def find_files(path, recherche='*.*'):
     """trouve recursivement les fichiers voulus"""
     for root, dirs, files in path:
         for basename in files:
