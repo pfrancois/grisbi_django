@@ -8,7 +8,7 @@ import pytz
 from django.db import transaction
 from django.conf import settings
 import django.utils
-
+import calendar
 from . import models
 from . import utils
 
@@ -212,7 +212,7 @@ def import_items(lastmaj, request=None, dry=False):
             #on transforme en un truc lisible
             reponse = simplification(liste_obj, objects, 1)
             del reponse['$class']
-            if reponse['device'] == 'tototototo': #c'est une operation provenant de ce pc
+            if reponse['device'] == 'totototo': #c'est une operation provenant de ce pc
                 continue
             else:
                 del reponse['device']
@@ -283,9 +283,8 @@ def import_items(lastmaj, request=None, dry=False):
 
 
 def export(lastmaj, request=None, dry=False):
-    import calendar
 
-    log = Log_factory(request)
+    #log = Log_factory(request)
     nb = 0
     with transaction.atomic():
         for ope in models.Ope.objects.filter(lastupdate__gte=lastmaj).order_by('lastupdate'):
@@ -465,7 +464,7 @@ def export(lastmaj, request=None, dry=False):
                 filename = os.path.join(directory, "{0:d}.log".format(ref_temp * 1000))
                 if not os.path.exists(directory):
                     os.makedirs(directory)
-            log.log(os.path.join(filename))
+            #log.log(os.path.join(filename))
             with open(os.path.join(filename), 'wb') as f:
                 if not dry:
                     f.write(final)
