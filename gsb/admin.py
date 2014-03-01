@@ -445,7 +445,7 @@ class Ope_admin(Modeladmin_perso):
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
-    inlines = [ope_ope]
+    #inlines = [ope_ope]
     raw_id_fields = ('mere',)
     date_hierarchy = 'date'
     formfield_overrides = {

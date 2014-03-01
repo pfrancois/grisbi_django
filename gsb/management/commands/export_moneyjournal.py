@@ -28,6 +28,7 @@ class Command(BaseCommand):
             pass
         sql = sqlite.connect(nomfich)
         retour = proc_sql_export(sql, self.stdout.write)
+
         self.stdout.write(retour)
 
 
