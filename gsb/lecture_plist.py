@@ -17,15 +17,14 @@ from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 import pprint
-from inspector_panel.panels.inspector import debug
 from django.utils.encoding import smart_unicode
 
 
 class Log_factory(object):
-    def __init__(self, request=None, debug=False, pprint=False):
+    def __init__(self, request=None, debug=False, pprint_flag=False):
         self.debug = True if debug else False
         self.request = request
-        self.pprint = True if pprint else False
+        self.pprint = True if pprint_flag else False
         self.toolbar = True if settings.DJANGO_TOOLBAR else False
 
     def log(self, text):
@@ -80,9 +79,9 @@ def affiche_plist(request):
         reponse = simplification(liste_obj, objects, 1)
         datemaj = datetime.datetime.utcfromtimestamp(int(os.path.splitext(os.path.basename(fichier))[0]) / 1000)
         typeaction = ['ajout', 'modif', 'delete']
-        data = {'action': typeaction[reponse['action']-1]}
-        data['device'] = reponse['device']
-        data['objet'] = reponse['object0']
+        data = {'action': typeaction[reponse['action'] - 1],
+                'device': reponse['device'],
+                'objet': reponse['object0']}
         type_obj = data['objet']["$class"]["$classname"]
         ensemble_obj = Objets()
         obj = getattr(ensemble_obj, type_obj.lower())(data['objet'])
@@ -120,18 +119,17 @@ class Objets(object):
         return retour
 
     def payment(self, obj):
-        retour = {'couleur': obj['color']}
-        retour['lastupdate'] = datetime.datetime.fromtimestamp(obj['lastUpdate'])
-        retour['nom'] = obj['name']
-        retour['id'] = obj['pk']
+        retour = {'couleur': obj['color'],
+                  'lastupdate': datetime.datetime.fromtimestamp(obj['lastUpdate']),
+                  'nom': obj['name'],
+                  'id': obj['pk']}
         return retour
 
     def category(self, obj):
-        retour = {'couleur': obj['color']}
-        retour['lastupdate'] = datetime.datetime.fromtimestamp(obj['lastUpdate'])
-        retour['nom'] = obj['name']
-        retour['id'] = obj['pk']
-        retour['type'] = ('revenu', 'depense')[obj['pk']-1]
+        retour = {'couleur': obj['color'],
+                  'lastupdate': datetime.datetime.fromtimestamp(obj['lastUpdate']),
+                  'nom': obj['name'],
+                  'id': obj['pk'], 'type': ('revenu', 'depense')[obj['pk'] - 1]}
         return retour
 
 
@@ -250,7 +248,7 @@ def import_items(lastmaj, request=None, dry=False):
                             raise Lecture_plist_exception("attention l'ope %s n'existait pas alors qu'on demande de la modifier" % retour['id'])
                         ope = opes[0]
                         if not ope.is_editable or ope.jumelle:
-                            log.log("operation non editable" % retour['id'])
+                            log.log("operation non editable n° %s " % retour['id'])
                             continue
                         if not dry:
                             ope.montant = retour['montant']
@@ -469,3 +467,50 @@ def export(lastmaj, request=None, dry=False):
                 if not dry:
                     f.write(final)
     return nb
+
+
+# noinspection PyStatementEffect
+"""note sur le truc
+pour le classement en repertoire:
+c'est les trois premier chiffre de la datetime de maj:
+    puis chiffre puis chiffre (un 100000 fais a peu pres 2 jours)
+
+
+
+si action = 1 : creation
+si action = 2 : modification
+device: identifiant du truc qui a cree l'operation
+prendre le classname:
+    si "Payment": nom de compte
+        color: RGB hex to int int("00FFFF",16)
+        lastupdate: timestamp
+        name: nom du compte
+        pk: identifiant
+        place: ordre en commencant par 0
+        symbol: 0 rond, 1 carre, 2 rectangle, 3 triangle
+    si "Category": categorie
+        color : idem
+        lastupdate: idem
+        name: idem
+        pk:idem
+        place: idem
+        type: 1 => revenu 2 => depenses
+    si "Record":
+        account: 0
+        amount: montant
+        catgorie: pk de la categorie
+        currency: pk de la currency (en l'occurence 2 pour euro)
+        date: 0.0
+        day dict avec day, month YEAR
+        lastupdate: idem
+        memo: nom du tiers
+        note: "$null"
+        payee: "$null"
+        payment: id du compte
+        photo: 0
+        pk: pk de l'operation
+        place: 0
+        repeat: 0
+        type:1 => revenu 2 => depenses
+        voice: 0
+"""

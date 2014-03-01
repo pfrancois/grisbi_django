@@ -18,8 +18,6 @@ import gsb.utils
 from django.db import transaction
 from django.utils.datastructures import SortedDict
 #import datetime
-from gsb import lecture_plist
-from django.utils.safestring import mark_safe
 
 
 class Mytemplateview(generic.TemplateView):
@@ -28,10 +26,6 @@ class Mytemplateview(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         Echeance.verif(self.request)
-        if lecture_plist.check():
-            messages.info(self.request,
-                          u"attention maj pour iphone à effectuer <a href='%s'> cliquer ici pour les intégrer</a>" % mark_safe(
-                              reverse('gestion_maj_iphone')))
         context = super(Mytemplateview, self).get_context_data(**kwargs)
         context.update({'titre': self.titre})
         return context
@@ -43,7 +37,6 @@ class Myformview(generic.FormView):
     titre = ""
 
     def get_context_data(self, **kwargs):
-        Echeance.verif(self.request)
         context = super(Myformview, self).get_context_data(**kwargs)
         context.update({'titre': self.titre})
         return context
