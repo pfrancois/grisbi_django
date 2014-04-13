@@ -33,8 +33,9 @@ class sqlite_db(object):
             retour = "%s\n%s" % (retour, line)
         return retour
 
-    def query_base(self, query, args=()):
-        self.conn.commit()
+    def query_base(self, query, args=(),commit=True):
+        if commit:
+            self.conn.commit()
         # on gere les variables
         if not isinstance(args, Iterable) or isinstance(args, basestring):
             args = (args,)
