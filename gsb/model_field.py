@@ -92,6 +92,7 @@ class uuidfield(models.CharField):
         if auto:
             kwargs['blank'] = True
             kwargs['editable'] = kwargs.get('editable', False)
+            kwargs['unique'] = True
         super(uuidfield, self).__init__(**kwargs)
 
     def get_internal_type(self):
@@ -116,6 +117,14 @@ class uuidfield(models.CharField):
         args, kwargs = introspector(self)
         # That's our definition!
         return field_class, args, kwargs
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': forms.CharField,
+            'max_length': self.max_length,
+        }
+        defaults.update(kwargs)
+        return super(uuidfield, self).formfield(**defaults)
 
 
 # tire initialement de django extension"""

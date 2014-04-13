@@ -489,7 +489,7 @@ class Compte(models.Model):
         ('e', u'espece'),
         ('p', u'passif'),
         ('t', u'titre'),
-        ('a', u'autre actif'))
+        ('a', u'autre actifs'))
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     titulaire = models.CharField(max_length=40, blank=True, default='')
     type = models.CharField(max_length=1, choices=typescpt, default='b')
