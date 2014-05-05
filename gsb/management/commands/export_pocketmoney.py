@@ -6,13 +6,15 @@ import sqlite3
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db import models
+from django.db.models import Max
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from ... import models
 from ... import utils
 from ...io import sqlite
-
+import pprint
 
 def dec2float(d):
     return float(str(d))
@@ -25,20 +27,24 @@ def time2int(t):
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
 
+    def log(self,msg):
+        self.stdout.write(unicode(pprint.pformat(msg),'latin1'))
+
     @transaction.atomic
     def handle(self, *args, **options):
-        nomfich = os.path.join(settings.PROJECT_PATH, "Untitled.pocketmoney", "PocketMoneyDB.sql")
+        nomfich = os.path.join(settings.PROJECT_PATH, "Untitled.pocketmoney", "test.sql")
         try:
             os.remove(nomfich)
-            self.stdout.write('db effacee')
-        except OSError as e:
-            self.stdout.write(str(e))
+            self.log('db pocketmoney efface')
+        except (OSError,WindowsError) as e:
+            self.log(e)
+            quit()
         sql = sqlite.sqlite_db(db_file=nomfich)
         config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
         lastmaj = config.derniere_import_money_journal
-        log = self.stdout.write
+        log = self.log
         log('test preablables')
-        log('pas deux nom de tiers identiques')
+        log('test pas deux nom de tiers identiques en cours')
         verif = list(models.Tiers.objects.values_list('nom', flat=True))
         doublons = [row for row in verif if verif.count(row.lower()) > 1]
         if len(doublons) > 0:
@@ -65,8 +71,7 @@ class Command(BaseCommand):
                    "'serverID'   TEXT,         -- db version 20\n"
                    "'sendLocalNotifications' INTEGER,        -- db version 29\n"
                    "'notifyDaysInAdvance'  INTEGER         -- db version 29\n"
-                   ")\n"
-        )
+                   ");\n")
         log('preference ok')
         sql.script(
             "CREATE TABLE accounts(\n"
@@ -104,10 +109,22 @@ class Command(BaseCommand):
             "'serverID'   TEXT         -- db version 20\n"
             ")\n"
         )
-        table_de_passage_type_compte = {"b": 0, "e": 1, "p": 6, "t": 7, "a": 3}
         i = 0
-        for cpt in models.Compte.objects.all():
+        for cpt in models.Compte.objects.order_by('id'):
             i += 1
+            cpt_type=None
+            if cpt.type == "b":
+                cpt_type = 0
+            if cpt.type == "e":
+                cpt_type = 1
+            if cpt.type == "a":
+                cpt_type = 6
+            if cpt.type == "t":
+                cpt_type = 9
+            if models.Ope.objects.filter(compte_id=cpt.id).exists():
+                cpt_chknumber="%s" % models.Ope.objects.filter(compte_id=cpt.id).aggregate(Max('num_cheque'))['num_cheque__max']
+            else:
+                cpt_chknumber=''
             param = {'deleted': 0,
                      'timestamp': time2int(cpt.lastupdate),
                      'accountID': cpt.id,
@@ -115,12 +132,12 @@ class Command(BaseCommand):
                      'account': utils.idtostr(cpt, membre='nom', defaut=''),
                      'balanceOverall': 0.0,
                      'balanceCleared': 0.0,
-                     'type': table_de_passage_type_compte[cpt.type],
+                     'type': cpt_type,
                      'accountNumber': utils.idtostr(cpt, membre='num_compte', defaut=''),
                      'institution': utils.idtostr(cpt.banque, membre='nom', defaut=''),
                      'phone': '',
                      'expirationDate': '',
-                     'checkNumber': '',
+                     'checkNumber': cpt_chknumber,
                      'notes': utils.idtostr(cpt, membre='notes', defaut=''),
                      'iconFileName': '',
                      'url': '',
@@ -131,14 +148,14 @@ class Command(BaseCommand):
                      'fixedPercent': 0,
                      'limitAmount': 0,
                      'noLimit': 0,
-                     'totalWorth': 1,
+                     'totalWorth': dec2float(cpt.solde_espece()),
                      'exchangeRate': 1,
                      'currencyCode': 'EUR',
                      'lastSyncTime': time2int(lastmaj),
                      'routingNumber': '',
-                     'overdraftAccountID': 0,
-                     'keepTheChangeAccountID': 0,
-                     'keepChangeRoundTo': 0,
+                     'overdraftAccountID': None,
+                     'keepTheChangeAccountID': None,
+                     'keepChangeRoundTo': None,
                      'serverID': cpt.uuid
             }
             sql.param("""insert into accounts VALUES(:deleted, :timestamp, :accountID, :displayOrder, :account,
@@ -174,6 +191,8 @@ class Command(BaseCommand):
             param['timestamp'] = time2int(cat.lastupdate)
             param['categoryID'] = cat.id
             param['category'] = utils.idtostr(cat, membre="nom", defaut="")
+            if param['category'] == u"Opération Ventilée":
+                param['category']="<--Splits-->"
             if cat.type == 'r':
                 param['type'] = 1
             else:
@@ -238,13 +257,13 @@ class Command(BaseCommand):
         log("tiers ok")
         log('ib')
         sql.script("""CREATE TABLE classes
-    (
-    'deleted'               BOOLEAN DEFAULT 0,
-    'timestamp'             INTEGER,
-    'classID'               INTEGER PRIMARY KEY AUTOINCREMENT,
-    'class'                 TEXT UNIQUE,
-    'serverID'              TEXT                                    -- db version 20
-    );""")
+                    (
+                    'deleted'               BOOLEAN DEFAULT 0,
+                    'timestamp'             INTEGER,
+                    'classID'               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    'class'                 TEXT UNIQUE,
+                    'serverID'              TEXT                                    -- db version 20
+                    );""")
         param = {}
         for ib in models.Ib.objects.order_by('id'):
             i += 1
@@ -422,7 +441,7 @@ class Command(BaseCommand):
                     " 'deleted'        BOOLEAN DEFAULT 0,\n"
                     " 'transactionID'  INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                     " 'timestamp'      INTEGER,\n"
-                    " 'type'           INTEGER, -- inconnu\n"
+                    " 'type'           INTEGER, -- 0 depense 1 recette 2 vir envoye 3 vir recu\n"
                     " 'date'           INTEGER, -- date au format timestamp\n"
                     " 'cleared'        BOOLEAN, -- si c'est rapp ou non\n"
                     " 'accountID'      INTEGER,\n"
@@ -440,7 +459,7 @@ class Command(BaseCommand):
             try:
                 if ope.id % 1000 == 0:
                     log("%s" % ope.id)
-                if not ope.is_fille:
+                if not ope.is_fille:# dans ce cas, on cree une transaction (c'est pour les stand alone et les mere)
                     param = {
                         'transactionID': ope.id,
                         'deleted': 0,
@@ -451,6 +470,7 @@ class Command(BaseCommand):
                         'payee': ope.tiers.nom,
                         'checkNumber': ope.num_cheque,
                         'subTotal': dec2float(ope.montant),
+                        'image':'',
                         'ofxID': '',
                         'serverID': ope.uuid,
                         'overdraftID': ''
@@ -460,10 +480,11 @@ class Command(BaseCommand):
                     if ope.moyen.type == "r":
                         param['type'] = 1
                     if ope.moyen.type == "v":
-                        param['payee'] = ope.jumelle.compte.nom
                         if ope.montant < 0:
+                        #ope virement branche origine
                             param['type'] = 2
                         else:
+                        #ope virement branche destination
                             param['type'] = 3
                     if not param["cleared"] and ope.is_mere:
                         filles = ope.filles_set.all()
@@ -471,30 +492,85 @@ class Command(BaseCommand):
                             if o['rapp'] is not None:
                                 log("attention l'ope %s n'est pas rapproche alors q'une de ses filles l'est " % ope.id)
                                 param['cleared'] = True
+                    type="transact"
                     chaine = u"INSERT INTO transactions (deleted, transactionID, timestamp,type, date, cleared, accountID, " \
-                             u" payee, checkNumber, subTotal, ofxID, serverID, overdraftID) " \
+                             u" payee, checkNumber, subTotal, ofxID, image, serverID, overdraftID) " \
                              u"   VALUES(0, :transactionID, :timestamp, :type, :date," \
-                             u" :cleared, :accountID, :payee, :checkNumber, :subTotal, :ofxID, :serverID, :overdraftID);"
+                             u" :cleared, :accountID, :payee, :checkNumber, :subTotal, :ofxID, :image, :serverID, :overdraftID);"
                     sql.param(chaine, param, commit=False)
-                if not (ope.is_mere or ope.is_fille):
+                if not (ope.is_mere):
                     param['amount'] = dec2float(ope.montant)
-                    param['xrate'] = 0
-                    param['categoryID'] = ope.cat.nom
+                    param['xrate'] = 1
+                    if ope.cat.nom == u"Opération Ventilée":
+                        param['categoryID']="<--Splits-->"
+                    else:
+                        param['categoryID']= ope.cat.nom
                     param['classID'] = utils.idtostr(ope.ib, 'nom', '')
                     param['memo'] = ope.notes
-                    param['transferToAccountID'] = utils.idtostr(ope.jumelle, "compte_id", 0)
-                    param['currencyCode'] = ''
+                    param['transferToAccountID'] = utils.idtostr(ope.jumelle, "compte_id", '')
+                    param['currencyCode'] = 'EUR'
                     param['ofxid'] = ""
                     if ope.is_fille:
+                        type="split_fille"
                         param['splitID'] = ope.id
-                        param['transactionID'] = ope.mere.id,
+                        param['transactionID'] = ope.mere.id
                     else:
+                        type="split_alone"
                         param['splitID'] = ope.id
                     chaine = u"INSERT INTO splits  " \
                              u"   VALUES(:splitID, :transactionID, :amount, :xrate, :categoryID, :classID," \
                              u" :memo, :transferToAccountID, :currencyCode, :ofxid);"
                     sql.param(chaine, param, commit=False)
             except Exception as e:
+                print type
+                log(param)
                 print ope.id
+                print ope
                 raise e
         sql.commit()
+        sql.script("CREATE TABLE categoryBudgets -- db version 29\n"
+                   "(\n"
+                   "'categoryBudgetID' 		INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                   "'deleted' 			BOOLEAN DEFAULT 0,\n"
+                   "'serverID' 			TEXT,\n"
+                   "'timestamp' 			INTEGER,\n"
+                   "'categoryName' 			TEXT,\n"
+                   "'date' 				INTEGER,\n"
+                   "'budgetLimit' 			REAL,\n"
+                   "'resetRollover' 		BOOLEAN DEFAULT 0\n"
+                   ");\n" )
+        sql.script("""CREATE TABLE databaseSyncList
+	                ('databaseID'	TEXT PRIMARY KEY,
+	                'lastSyncTime'	INTEGER    );""")
+        sql.script("INSERT INTO databaseSyncList VALUES('1928cc8254761f60874d3cccae2e88abf01080ed',1396478218);")
+        sql.script(("CREATE INDEX accountDisplayOrder ON accounts (displayOrder);\n"
+                    "CREATE INDEX accountNames ON accounts (account);\n"
+                    "CREATE INDEX accountServerIDs ON accounts (serverID);\n"
+                    "CREATE INDEX categoryIDs ON categories (categoryID);\n"
+                    "CREATE INDEX categoryName ON categories (category);\n"
+                    "CREATE INDEX categoryServerIDs ON categories (serverID);\n"
+                    "CREATE INDEX classIDs ON classes (classID);\n"
+                    "CREATE INDEX className ON classes (class);\n"
+                    "CREATE INDEX classServerIDs ON classes (serverID);\n"
+                    "CREATE INDEX cpCategoryIDs ON categorypayee (categoryID);\n"
+                    "CREATE INDEX cpPayeeIDs ON categorypayee (payeeID);\n"
+                    "CREATE INDEX currencyCodes ON exchangeRates (currencyCode);\n"
+                    "CREATE INDEX idIDs ON ids (idID);\n"
+                    "CREATE INDEX idName ON ids (id);\n"
+                    "CREATE INDEX idServerIDs ON ids (serverID);\n"
+                    "CREATE INDEX payeeIDs ON payees (payeeID);\n"
+                    "CREATE INDEX payeeName ON payees (payee);\n"
+                    "CREATE INDEX payeeServerIDs ON payees (serverID);\n"
+                    "CREATE INDEX repeatingIDs ON repeatingTransactions (repeatingID);\n"
+                    "CREATE INDEX repeatingTransactionServerIDs ON repeatingTransactions (serverID);\n"
+                    "CREATE INDEX splitCategories ON splits (categoryID);\n"
+                    "CREATE INDEX transactionIDs ON transactions (transactionID);\n"
+                    "CREATE INDEX transactionOFXIDs ON transactions (ofxID);\n"
+                    "CREATE INDEX transactionPayees ON transactions (payee);\n"
+                    "CREATE INDEX transactionServerIDs ON transactions (serverID);\n"
+                    "CREATE INDEX transactionSplitIDs ON splits (transactionID);\n"
+                    "CREATE INDEX transactionTypes ON transactions (type);\n"
+                    "CREATE INDEX transactionsByAccount ON transactions (accountID, date);\n"
+                    "CREATE INDEX transactionsByDate ON transactions (date);\n"
+                    "CREATE INDEX typeaccount ON accounts (type, account);"
+        ))
