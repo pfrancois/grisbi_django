@@ -1379,6 +1379,13 @@ class Ope(models.Model):
         super(Ope, self).save(*args, **kwargs)
 
 
+class db_log(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True, null=True)
+    datamodel = models.CharField(null=False,max_length=20)
+    id_model = models.IntegerField()
+    uuid = models.CharField(null=False,max_length=255)
+    memo = models.CharField(null=False,max_length=255)
+
 # noinspection PyUnusedLocal
 @receiver(post_save, sender=Ope, weak=False)
 def ope_fille(sender, **kwargs):
@@ -1389,6 +1396,13 @@ def ope_fille(sender, **kwargs):
         if self.mere.tot_fille != self.mere.montant:
             self.mere.montant = self.mere.tot_fille
             self.mere.save()
+
+@receiver(pre_delete,weak=False)
+def db_log_delete(sender,**kwargs):
+    db_log.objects.create(datamodel=sender.__name__,
+                          id_model=sender.id,
+                          memo="%s"%sender,
+                          uuid=sender.uuid)
 
 
 # noinspection PyUnusedLocal
