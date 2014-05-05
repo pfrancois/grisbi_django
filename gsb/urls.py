@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.views.generic import TemplateView
 # from django.conf.urls import include #non utilise actuellement
 from . import views, outils
-from .io import import_csv, export_csv, export_qif, export_fsb
+from .io import import_csv, export_csv, export_qif
 from .io.import_money_journal import Import_view_money_journal
 from .io import import_titre_csv as import_titres
 from django.conf import settings
@@ -45,9 +45,6 @@ urlpatterns += patterns('gsb',
                         # export en csv vers pocket money iphone
                         url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(),
                             name='export_csv_pocket_money'),
-                        # export sql brut
-                        url(r'^options/export/sql/all', export_fsb.export_fsb_view.as_view(), name="export_fsb"),
-
 )
 
 # version grisbi 0.5.0

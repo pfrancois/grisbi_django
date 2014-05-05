@@ -196,6 +196,3 @@ class Test_export(Test_view_base):
         reponse_recu = self.client.get(reverse('export_gsb_050')).content
         self.assertfileequal(reponse_recu, "export_050.xml", nom="test_gsb")
 
-    def test_export_fsb(self):
-        reponse_recu = self.client.get(reverse('export_fsb')).content
-        self.assertfileequal(reponse_recu, "test_fsb_attendu.txt", nom="test_fsb")
