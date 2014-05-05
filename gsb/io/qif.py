@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding=utf-8
 """
 A simple class to represent a Quicken (QIF) file, and a parser to
 load a QIF file into a sequence of those classes.
@@ -69,7 +70,8 @@ def parseqif(infile):
     Parse a qif file and return a list of entries.
     infile should be open file-like object (supporting readline() ).
     """
-    initem = False  # @UnusedVariable
+    # noinspection PyUnusedLocal
+    initem = False
     items = []
     current_item = qifitem()
     line = infile.readline()

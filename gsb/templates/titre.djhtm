@@ -1,5 +1,6 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}{% load gsb_extras %}
 {% block content %}
+<!--suppress XmlInvalidId -->
 <form action="" method="post">
     {% csrf_token %}
     {{ form.compte.errors }}

@@ -92,6 +92,7 @@ class Readonlywidget(forms.Widget):
         text = force_unicode(self.text)
         return mark_safe("<div>%s%s</div>" % (hidden, text))
 
+    # noinspection PyUnusedLocal
     def _has_changed(self, initial, data):
         return False
 

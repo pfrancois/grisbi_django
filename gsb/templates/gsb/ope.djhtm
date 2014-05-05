@@ -63,7 +63,7 @@
     </tr>
 </table>
 
-<form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
+<form id='form2bis' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
     {% csrf_token %}
 </form>
 

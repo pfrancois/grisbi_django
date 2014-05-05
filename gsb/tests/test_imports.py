@@ -138,7 +138,7 @@ class Test_import_base(Test_import_abstract):
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'c'})
         with self.assertRaises(KeyError):
-            toto=cats.id['test']
+            _=cats.id['test']
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1216, 'type': 'c'})
 
@@ -261,7 +261,7 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(m.nom, 'test2')
 
     def test_exercice_cache(self):
-        cache = import_base.Exercice_cache(self.request_get('toto'))
+        cache = import_base.Exercice_cache(self.request_get('url_exemple'))
         self.assertEqual(cache.goc("exo1"), 1)
         m = models.Exercice.objects.get(id=1)
         self.assertEqual(m.nom, 'exo1')
@@ -283,9 +283,9 @@ class Test_import_base(Test_import_abstract):
     def test_titre_cache(self, now_mock):
         # on cree
         now_mock.return_value = datetime.datetime(2013, 1, 1, 0, 0, 0).replace(tzinfo=pytz.utc)
-        cache = import_base.Titre_cache(self.request_get('toto'))
-        tata = cache.goc("titre1")
-        self.assertEqual(tata, 1)
+        cache = import_base.Titre_cache(self.request_get('url_exemple'))
+        
+        self.assertEqual(cache.goc("titre1"), 1)
         # on regarde si il existe effectivement
         m = models.Titre.objects.get(id=1)
         self.assertEqual(m.nom, 'titre1')
@@ -296,7 +296,7 @@ class Test_import_base(Test_import_abstract):
 
     def test_titre_cache_obj(self):
         """on essaye avec les objects"""
-        cache = import_base.Titre_cache(self.request_get('toto'))
+        cache = import_base.Titre_cache(self.request_get('url_exemple'))
         self.assertEqual(cache.goc('titre3', obj={"nom": 'titre3', "isin": 'ceci est un isin', "type": "ZZZ", 'id': 23553}), 23553)
         m = models.Titre.objects.get(id=23553)
         self.assertEqual(m.nom, 'titre3')
@@ -305,15 +305,15 @@ class Test_import_base(Test_import_abstract):
 
     def test_titre_cache2(self):
         """essai de creer un titre alors qu'on est en read only"""
-        cache = import_base.Titre_cache(self.request_get('toto'))
+        cache = import_base.Titre_cache(self.request_get('url_exemple'))
         cache.readonly = True
         with self.assertRaises(import_base.ImportException):
             cache.goc("titre1")
 
     def test_cours_cache(self):
         # version avec nom titre
-        titres = import_base.Titre_cache(self.request_get('toto'))
-        cache = import_base.Cours_cache(self.request_get('toto'), titres)
+        titres = import_base.Titre_cache(self.request_get('url_exemple'))
+        cache = import_base.Cours_cache(self.request_get('url_exemple'), titres)
         self.assertEqual(cache.goc("titre1", utils.strpdate("2011-01-01"), 150), 1)
         self.assertEqual(titres.goc("titre1"), 1)
         m = models.Cours.objects.get(id=1)
@@ -324,8 +324,8 @@ class Test_import_base(Test_import_abstract):
 
     def test_cours_cache3(self):
         # meme date, cours different
-        titres = import_base.Titre_cache(self.request_get('toto'))
-        cache = import_base.Cours_cache(self.request_get('toto'), titres)
+        titres = import_base.Titre_cache(self.request_get('url_exemple'))
+        cache = import_base.Cours_cache(self.request_get('url_exemple'), titres)
         cache.goc("titre1", utils.strpdate("2011-01-01"), 150)
         del cache.id[1]
         with self.assertRaises(import_base.ImportException):

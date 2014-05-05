@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!--suppress CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, XmlUnboundNsPrefix, XmlUnboundNsPrefix -->
 <Grisbi>
     <Generalites>
         <Version_fichier>0.5.0</Version_fichier>

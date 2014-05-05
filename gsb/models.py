@@ -632,7 +632,7 @@ class Compte(models.Model):
                                     notes=u"Frais %s@%s" % (nombre, prix),
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                )
+                                    )
                 # gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
@@ -1397,6 +1397,8 @@ def ope_fille(sender, **kwargs):
             self.mere.montant = self.mere.tot_fille
             self.mere.save()
 
+
+# noinspection PyUnusedLocal
 @receiver(pre_delete,weak=False)
 def db_log_delete(sender,**kwargs):
     db_log.objects.create(datamodel=sender.__name__,

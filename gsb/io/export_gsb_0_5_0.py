@@ -23,6 +23,7 @@ liste_type_moyen = Moyen.typesdep
 liste_type_compte = Compte.typescpt
 
 
+# noinspection PyUnusedLocal
 def _export(request):
 # creation des id pour IB
 #####generalites###

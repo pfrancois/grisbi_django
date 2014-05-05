@@ -22,7 +22,6 @@ from .. import utils
 
 @login_required
 def import_gsb_0_5_x(request):
-    nomfich = ""
     if request.method == 'POST':
         form = ImportForm1(request.POST, request.FILES)
         form.extension = "gsb"

@@ -132,7 +132,7 @@ class TestCase(Test_Case_django):
         if msg != u"":
             raise self.fail(msg)
 
-    def assertfileequal(self, reponse_recu, fichier, split_ra=None, unicode_encoding=None, nom=""):
+    def assertfileequal(self, reponse_recu, fichier, unicode_encoding=None, nom=""):
         fichier = open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", fichier), 'r')
         attendu = fichier.readlines()
         fichier.close()

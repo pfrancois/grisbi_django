@@ -2,11 +2,11 @@
 from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
 
+    # noinspection PyUnusedLocal
     def forwards(self, orm):
         # Adding model 'db_log'
         db.create_table(u'gsb_db_log', (
@@ -62,6 +62,7 @@ class Migration(SchemaMigration):
         db.create_unique('gsb_ib', ['uuid'])
 
 
+    # noinspection PyUnusedLocal
     def backwards(self, orm):
         # Removing unique constraint on 'Ib', fields ['uuid']
         db.delete_unique('gsb_ib', ['uuid'])

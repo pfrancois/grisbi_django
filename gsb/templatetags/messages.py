@@ -39,6 +39,7 @@ class MessagesNode(template.Node):
             return ''
 
 
+# noinspection PyUnusedLocal
 @register.tag(name='render_messages')
 def render_messages(parser, token):
     parts = token.split_contents()

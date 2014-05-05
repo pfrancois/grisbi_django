@@ -5,6 +5,7 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 
+# noinspection PyUnusedLocal,PyUnusedLocal
 class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'config'

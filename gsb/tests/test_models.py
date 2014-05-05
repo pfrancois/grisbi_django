@@ -685,7 +685,7 @@ class Test_models(TestCase):
         r = Rapp.objects.get(id=1)
         o.ope_pmv.rapp = r
         o.ope_pmv.save()
-        o = Ope_titre.objects.get(id=o_id)
+        _ = Ope_titre.objects.get(id=o_id)
         self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
 
     def test_ope_titre_get_absolute_url(self):

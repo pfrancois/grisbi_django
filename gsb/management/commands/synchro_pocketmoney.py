@@ -192,7 +192,6 @@ class Command(BaseCommand):
         nbsplits={}
         for rep in sql.rep("select transactionId,count(splitId) as nb_split,type from splits group by transactionId;"):
             nbsplits[rep['transactionId']]={'nbsplits':rep['nb_split'],"type":rep['type']}
-
         for obj_poc in rep:
             try:
                 obj_gsb=models.Ib.objects.get(uuid=obj_poc['serverID'])

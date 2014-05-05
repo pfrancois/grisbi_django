@@ -164,11 +164,10 @@ def now(utc=True):
     renvoi
     @type utc: bool
     """
-    now = timezone.now()
     if utc:
-        return now
+        return timezone.now()
     else:
-        return timezone.localtime(now)
+        return timezone.localtime(timezone.now())
 
 
 def timestamp():
@@ -449,3 +448,4 @@ def find_files(path, recherche='*.*'):
             if fnmatch.fnmatch(basename, recherche):
                 filename = os.path.join(root, basename)
                 yield filename
+

@@ -37,6 +37,7 @@ class Test_import_gsb050(Tcd):
 
 
 class Test_import_gsb050_post(Tcd):
+    # noinspection PyMethodOverriding
     @mock.patch('gsb.utils.today')
     def setUp(self, today_mock):
         today_mock.return_value = datetime.date(2013, 1, 1)

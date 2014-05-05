@@ -18,4 +18,4 @@ urlpatterns = patterns('',
                        (r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete'),
                        # attention catch all vers gsb le mettre en dernier
                        (r'^', include(gsb.urls)),
-)
+                )

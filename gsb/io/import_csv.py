@@ -131,6 +131,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     encoding = "iso-8859-1"
     extensions = ('.csv', )
 
+    # noinspection PyUnresolvedReferences
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
         self.init_cache()

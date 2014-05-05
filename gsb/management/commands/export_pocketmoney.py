@@ -6,7 +6,6 @@ import sqlite3
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db import models
 from django.db.models import Max
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -454,6 +453,7 @@ class Command(BaseCommand):
                     " 'overdraftID'    TEXT         -- db version 23\n"
                     " )"
         ))
+        type_ope=""
         for ope in models.Ope.objects.order_by('id').select_related('cat', 'moyen', 'tiers', 'ib'):
             param = {}
             try:
@@ -492,13 +492,13 @@ class Command(BaseCommand):
                             if o['rapp'] is not None:
                                 log("attention l'ope %s n'est pas rapproche alors q'une de ses filles l'est " % ope.id)
                                 param['cleared'] = True
-                    type="transact"
+                    type_ope="transact"
                     chaine = u"INSERT INTO transactions (deleted, transactionID, timestamp,type, date, cleared, accountID, " \
                              u" payee, checkNumber, subTotal, ofxID, image, serverID, overdraftID) " \
                              u"   VALUES(0, :transactionID, :timestamp, :type, :date," \
                              u" :cleared, :accountID, :payee, :checkNumber, :subTotal, :ofxID, :image, :serverID, :overdraftID);"
                     sql.param(chaine, param, commit=False)
-                if not (ope.is_mere):
+                if not ope.is_mere:
                     param['amount'] = dec2float(ope.montant)
                     param['xrate'] = 1
                     if ope.cat.nom == u"Opération Ventilée":
@@ -511,18 +511,18 @@ class Command(BaseCommand):
                     param['currencyCode'] = 'EUR'
                     param['ofxid'] = ""
                     if ope.is_fille:
-                        type="split_fille"
+                        type_ope="split_fille"
                         param['splitID'] = ope.id
                         param['transactionID'] = ope.mere.id
                     else:
-                        type="split_alone"
+                        type_ope="split_alone"
                         param['splitID'] = ope.id
                     chaine = u"INSERT INTO splits  " \
                              u"   VALUES(:splitID, :transactionID, :amount, :xrate, :categoryID, :classID," \
                              u" :memo, :transferToAccountID, :currencyCode, :ofxid);"
                     sql.param(chaine, param, commit=False)
             except Exception as e:
-                print type
+                print type_ope
                 log(param)
                 print ope.id
                 print ope

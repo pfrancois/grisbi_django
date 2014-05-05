@@ -18,7 +18,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 import pprint
 from django.utils.encoding import smart_unicode
-
+if settings.DJANGO_TOOLBAR:
+    from inspector_panel.panels.inspector import debug
 
 class Log_factory(object):
     def __init__(self, request=None, debug=False, pprint_flag=False):

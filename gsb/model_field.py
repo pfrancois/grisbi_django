@@ -85,6 +85,7 @@ class uuidfield(models.CharField):
     https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
     """
 
+    # noinspection PyUnusedLocal
     def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):
         kwargs['max_length'] = 36
         self.auto = auto

@@ -48,6 +48,7 @@ class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
         return utils.to_unicode(self.row['isin'])
 
 
+# noinspection PyUnresolvedReferences
 class Import_csv_ope_titre(import_base.Import_base):
     titre = "import titre csv"
     encoding = "iso-8859-1"
@@ -87,10 +88,7 @@ class Import_csv_ope_titre(import_base.Import_base):
                     ope['ligne'] = row.ligne
                     ope['date'] = row.date
                     ope['compte_id'] = self.comptes.goc(row.compte)
-                    if row.isin:
-                        ope["titre_id"] = self.titres.goc(isin=row.isin)
-                    else:
-                        ope["titre_id"] = self.titres.goc(nom=row.titre)
+                    ope["titre_id"] = self.titres.goc(nom=row.titre)
                     ope['nombre'] = row.nombre
                     ope['cours'] = row.cours
                     if row.frais:

@@ -44,7 +44,7 @@
         <td width="50%"><a href="{{ ope.compte.get_absolute_url }}">retour compte</a></td>
     </tr>
 </table>
-<form id='form2' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
+<form id='form2bis' action="{% url 'gsb_ope_delete' ope.id %}" method="post">
     {% csrf_token %}
 </form>
 <table style=" width: 100%;" summary="bouton effacer">
