@@ -70,8 +70,6 @@ def parseqif(infile):
     Parse a qif file and return a list of entries.
     infile should be open file-like object (supporting readline() ).
     """
-    # noinspection PyUnusedLocal
-    initem = False
     items = []
     current_item = qifitem()
     line = infile.readline()
@@ -81,20 +79,21 @@ def parseqif(infile):
         elif line[0] == '^':  # end of item
             # save the item
             items.append(current_item)
+            # new item
             current_item = qifitem()
-        elif line[0] == 'D':
+        elif line[0] == 'D':#date
             current_item.date = strpdate(datefr2datesql(line[1:-1]))
-        elif line[0] == 'T':
+        elif line[0] == 'T':#nom du tiers
             current_item.amount = decimal.Decimal(str(line[1:-1]))
-        elif line[0] == 'C':
+        elif line[0] == 'C':#pointee ou pas
             current_item.cleared = line[1:-1]
         elif line[0] == 'P':
             pass  # on n'en a pas besoin
-        elif line[0] == 'M':
+        elif line[0] == 'M':#montant de l'operation
             current_item.payee = line[1:-1]
         elif line[0] == 'A':  # inutile mais bon
             current_item.address = line[1:-1]
-        elif line[0] == 'L':
+        elif line[0] == 'L':#category
             current_item.category = line[1:-1]
         elif line[0] == 'S':
             try:

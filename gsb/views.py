@@ -908,10 +908,10 @@ class Rdt_titres_view(Myformview):
         self.titre = titre
         final = list()
         for ligne in retour[1]:
-            toto = SortedDict()
+            liste_champ = SortedDict()
             for champ in retour[0]:
-                toto[champ] = ligne[champ]
-            final.append(toto)
+                liste_champ[champ] = ligne[champ]
+            final.append(liste_champ)
         self.requete = final
         self.desc = retour[0]
         return self.render_to_response(self.get_context_data(form=form))

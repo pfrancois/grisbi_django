@@ -274,7 +274,6 @@ class Command(BaseCommand):
             chaine = "INSERT INTO 'classes' VALUES(0, :timestamp, :classID, :class, :serverID);"
             try:
                 sql.param(chaine, param, commit=False)
-                pass
             except sqlite3.IntegrityError:
                 print "-%s-" % param
                 raise ValidationError(param)

@@ -185,7 +185,10 @@ class Modeladmin_perso(admin.ModelAdmin):
                 raise ImproperlyConfigured
             else:
                 return super(Modeladmin_perso, self).queryset(request).extra(select={
-                    'nb_opes': 'select count(*) from gsb_ope WHERE (gsb_ope.%s = %s.id AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (
+                    'nb_opes': 'select count(*) from gsb_ope'
+                                'WHERE (gsb_ope.%s = %s.id '
+                                        'AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope '
+                                        'WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (
                         self.id_ope, self.table_annexe), }, )
         else:
             return super(Modeladmin_perso, self).queryset(request)
@@ -262,7 +265,7 @@ class ope_inline_admin(admin.TabularInline):
 
         # afin de pouvoir avoir des inline readonly
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request):
         if self.readonly:
             return False
         return True

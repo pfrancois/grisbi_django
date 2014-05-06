@@ -44,14 +44,6 @@ class ExtFileField(forms.FileField):
     http://djangosnippets.org/snippets/977/
     Same as forms.FileField, but you can specify a file extension whitelist.
 
-    >>> from django.core.files.uploadedfile import SimpleUploadedFile
-    >>>
-    >>> t = ExtFileField(ext_whitelist=(".pdf", ".txt"))
-    >>>
-    >>> t.clean(SimpleUploadedFile('filename.pdf', 'Some File Content'))
-    >>> t.clean(SimpleUploadedFile('filename.txt', 'Some File Content'))
-    >>>
-    >>> t.clean(SimpleUploadedFile('filename.exe', 'Some File Content'))
     Traceback (most recent call last):
     ...
     ValidationError: [u'Not allowed filetype!']

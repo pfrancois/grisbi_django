@@ -80,7 +80,7 @@ class Command(BaseCommand):
                     maj=True
             else:
                 if cpt_gsb.banque.nom!=cpt['institution']:
-                    created, cpt_gsb.banque=models.Banque.objects.get_or_create(nom=cpt['institution'])
+                    cpt_gsb.banque=models.Banque.objects.get_or_create(nom=cpt['institution'])[0]
                     log('cpt %s:banque %s cree'%(cpt['id'],cpt['institution']))
                     maj=True
             if cpt['notes'] != cpt_gsb.notes:
@@ -221,7 +221,7 @@ class Command(BaseCommand):
                                                                 'pointe': obj_poc['cleared'],
                                                                 'ib': models.Cat.objects.get(nom=ope['classID'])
                                                             }
-                                                        )
+                                                        )[0]
 
 
 
