@@ -147,7 +147,7 @@ class Test_utils1(SimpleTestCase):
 
 
 class Test_utils(TestCase):
-    fixtures = ['test.json']
+    fixtures = ['test.yaml']
 
     def setUp(self):
         super(Test_utils, self).setUp()

@@ -27,7 +27,7 @@ __all__ = ['Test_models', 'Test_models2']
 
 
 class Test_models(TestCase):
-    fixtures = ['test.json']
+    fixtures = ['test.yaml']
 
     def setUp(self):
         super(Test_models, self).setUp()
@@ -1285,14 +1285,6 @@ class Test_models(TestCase):
                'moyen_destination': 6
         }
         self.assertEquals(tab, v.init_form())
-
-    def test_log_delete(self):
-        o = Tiers.objects.get(pk=7)
-        o.delete()
-        log = db_log.objects.get(id_model=7)
-        self.assertEqual(log.datamodel, "Tiers")
-        self.assertEqual(log.uuid, "51a6674d-7f28-427b-8cf7-25ad2ac07f79")
-
 
 class Test_models2(TestCase):
     def setUp(self):

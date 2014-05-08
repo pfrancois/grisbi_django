@@ -1,0 +1,917 @@
+gsb.banque:
+    1:
+        cib: '10001'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: banque1
+        notes: ''
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07801
+    2:
+        cib: '99999'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: banque2
+        notes: ''
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07802
+gsb.cat:
+    1:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cat1
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07901
+    2:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cat2
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07902
+    3:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cat3
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07903
+    4:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cat4
+        type: v
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07904
+    64:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: "Op\xE9ration sur titre"
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07964
+    65:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: Virement
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07965
+    66:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: "Op\xE9ration Ventil\xE9e"
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07966
+    67:
+        couleur: '#FFFFFF'
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: Revenus de placement:Plus-values
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07967
+gsb.compte:
+    1:
+        banque: 1
+        cle_compte: 72
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: '12345'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 1
+        nom: cpte1
+        notes: ''
+        num_compte: 01234567890
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: e
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07301
+    2:
+        banque: 2
+        cle_compte: 0
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: ''
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 1
+        nom: cptb2
+        notes: ''
+        num_compte: ''
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: b
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07302
+    3:
+        banque: 2
+        cle_compte: 0
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: ''
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 1
+        nom: cptb3
+        notes: ''
+        num_compte: ''
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: b
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07303
+    4:
+        banque: 2
+        cle_compte: 0
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: ''
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 2
+        nom: cpt_titre1
+        notes: ''
+        num_compte: ''
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: t
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07304
+    5:
+        banque: 2
+        cle_compte: 0
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: ''
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 3
+        nom: cpt_titre2
+        notes: ''
+        num_compte: ''
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: t
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07305
+    6:
+        banque: 1
+        cle_compte: 0
+        couleur: '#FFFFFF'
+        date_created: null
+        guichet: ''
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        moyen_credit_defaut: null
+        moyen_debit_defaut: null
+        nom: cpt_ferme
+        notes: ''
+        num_compte: ''
+        ouvert: false
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: b
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07306
+gsb.cours:
+    1:
+        date: 2011-12-18
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        titre: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07701
+        valeur: '1'
+    2:
+        date: 2011-11-30
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        titre: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07702
+        valeur: '10'
+    3:
+        date: 2011-10-29
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        titre: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07703
+        valeur: '5'
+    4:
+        date: 2012-09-24
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        titre: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07704
+        valeur: '1'
+    5:
+        date: 2012-09-23
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        titre: 5
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07705
+        valeur: '2'
+gsb.echeance:
+    1:
+        cat: 2
+        compte: 1
+        compte_virement: 2
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: 1
+        ib: 1
+        inscription_automatique: false
+        intervalle: 1
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '10'
+        moyen: 5
+        moyen_virement: 3
+        notes: avec virement et exercice
+        periodicite: u
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d01
+        valide: true
+    2:
+        cat: 1
+        compte: 2
+        compte_virement: null
+        date: 2011-11-30
+        date_created: null
+        date_limite: null
+        exercice: 2
+        ib: 2
+        inscription_automatique: false
+        intervalle: 2
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '10'
+        moyen: 5
+        moyen_virement: null
+        notes: sans date limite
+        periodicite: j
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d02
+        valide: true
+    3:
+        cat: 3
+        compte: 1
+        compte_virement: null
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 2
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '-20'
+        moyen: 3
+        moyen_virement: null
+        notes: ''
+        periodicite: j
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d03
+        valide: true
+    4:
+        cat: 3
+        compte: 1
+        compte_virement: null
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 2
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '-10'
+        moyen: 2
+        moyen_virement: null
+        notes: ''
+        periodicite: s
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d04
+        valide: true
+    5:
+        cat: 1
+        compte: 1
+        compte_virement: null
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 2
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '20'
+        moyen: 4
+        moyen_virement: null
+        notes: ''
+        periodicite: m
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d05
+        valide: true
+    6:
+        cat: 1
+        compte: 1
+        compte_virement: null
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 2
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '20'
+        moyen: 4
+        moyen_virement: null
+        notes: ''
+        periodicite: a
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d06
+        valide: true
+    7:
+        cat: 1
+        compte: 1
+        compte_virement: null
+        date: 2011-10-30
+        date_created: null
+        date_limite: null
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 1
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '30'
+        moyen: 4
+        moyen_virement: null
+        notes: ''
+        periodicite: u
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d07
+        valide: false
+    8:
+        cat: 3
+        compte: 2
+        compte_virement: null
+        date: 2011-09-30
+        date_created: null
+        date_limite: 2011-09-30
+        exercice: null
+        ib: null
+        inscription_automatique: false
+        intervalle: 1
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        montant: '50'
+        moyen: 2
+        moyen_virement: null
+        notes: ''
+        periodicite: a
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07d08
+        valide: true
+gsb.exercice:
+    1:
+        date_created: null
+        date_debut: 2010-01-01
+        date_fin: 2010-12-31
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: exo1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07201
+    2:
+        date_created: null
+        date_debut: 2011-01-01
+        date_fin: 2011-12-31
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: exo2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07202
+gsb.ib:
+    1:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: ib1
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07101
+    2:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: ib2
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07102
+    3:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: ib3
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07903
+gsb.moyen:
+    1:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_dep1
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b01
+    2:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_dep2
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b02
+    3:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_dep3
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b03
+    4:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_rec1
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b04
+    5:
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_vir4
+        type: v
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b05
+gsb.ope:
+    1:
+        _order: 0
+        automatique: false
+        cat: 64
+        compte: 4
+        date: 2011-12-18
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-1'
+        moyen: 2
+        notes: 1@1
+        num_cheque: ''
+        ope_titre_ost: 1
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 4
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a01
+    2:
+        _order: 0
+        automatique: false
+        cat: 64
+        compte: 5
+        date: 2011-11-30
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-1500'
+        moyen: 3
+        notes: 150@10
+        num_cheque: ''
+        ope_titre_ost: 2
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 5
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a02
+    3:
+        _order: 1
+        automatique: false
+        cat: 64
+        compte: 5
+        date: 2011-10-29
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 3
+        notes: 20@5
+        num_cheque: ''
+        ope_titre_ost: 3
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: 2
+        tiers: 5
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a03
+    4:
+        _order: 0
+        automatique: false
+        cat: 1
+        compte: 1
+        date: 2011-08-11
+        date_created: null
+        date_val: null
+        exercice: 1
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 1
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: 1
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a04
+    5:
+        _order: 1
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2011-08-11
+        date_created: null
+        date_val: null
+        exercice: 1
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '10'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: 1
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a05
+    6:
+        _order: 2
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2011-08-21
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: 2
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '10'
+        moyen: 4
+        notes: fusion avec ope1
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a06
+    7:
+        _order: 3
+        automatique: false
+        cat: 1
+        compte: 1
+        date: 2011-08-11
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: 1
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '10'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: true
+        rapp: null
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a07
+    8:
+        _order: 4
+        automatique: false
+        cat: 65
+        compte: 1
+        date: 2011-10-30
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 9
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 7
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a08
+    9:
+        _order: 0
+        automatique: false
+        cat: 65
+        compte: 3
+        date: 2011-10-30
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 8
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 7
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a09
+    10:
+        _order: 1
+        automatique: false
+        cat: 64
+        compte: 4
+        date: 2012-09-24
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-5'
+        moyen: 2
+        notes: 5@1
+        num_cheque: ''
+        ope_titre_ost: 4
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a10
+    11:
+        _order: 5
+        automatique: false
+        cat: 66
+        compte: 1
+        date: 2012-09-24
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a11
+    12:
+        _order: 6
+        automatique: false
+        cat: 1
+        compte: 1
+        date: 2012-09-24
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-05-08 19:34:34.344000+00:00
+        mere: 11
+        montant: '99'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a12
+    13:
+        _order: 7
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2012-09-24
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: 11
+        montant: '1'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a13
+gsb.ope_titre:
+    1:
+        compte: 4
+        cours: '1'
+        date: 2011-12-18
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nombre: '1'
+        titre: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07401
+    2:
+        compte: 5
+        cours: '10'
+        date: 2011-11-30
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nombre: '150'
+        titre: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07402
+    3:
+        compte: 5
+        cours: '5'
+        date: 2011-10-29
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nombre: '20'
+        titre: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07403
+    4:
+        compte: 4
+        cours: '1'
+        date: 2012-09-24
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nombre: '5'
+        titre: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07404
+gsb.rapp:
+    1:
+        date: 2011-08-12
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cpte1201101
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07c01
+    2:
+        date: 2011-10-30
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cpt_titre2201101
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07c02
+    3:
+        date: 2012-09-22
+        date_created: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: rapp sans rien
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07c03
+gsb.tiers:
+    1:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: tiers1
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f01
+    2:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: tiers2
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f02
+    3:
+        date_created: null
+        is_titre: true
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ autre
+        notes: a@
+        titre: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f03
+    4:
+        date_created: null
+        is_titre: true
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ t1
+        notes: 1@ACT
+        titre: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f04
+    5:
+        date_created: null
+        is_titre: true
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ t2
+        notes: 2@OBL
+        titre: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f05
+    6:
+        date_created: null
+        is_titre: true
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ t4
+        notes: aaa@CSL
+        titre: 4
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f06
+    7:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: virement
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f07
+    8:
+        date_created: null
+        is_titre: true
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ autre 2
+        notes: svjkdfkjh@
+        titre: 5
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f08
+gsb.titre:
+    1:
+        date_created: null
+        isin: a
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: autre
+        type: ''
+        uuid: 61a6674d-7f28-427b-8cf7-25ad2ac07f01
+    2:
+        date_created: null
+        isin: '1'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: t1
+        type: ACT
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07602
+    3:
+        date_created: null
+        isin: '2'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: t2
+        type: OBL
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07603
+    4:
+        date_created: null
+        isin: aaa
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: t4
+        type: CSL
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07604
+    5:
+        date_created: null
+        isin: svjkdfkjh
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: autre 2
+        type: ''
+        uuid: 61a6674d-7f28-427b-8cf7-25ad2ac07f05

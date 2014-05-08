@@ -21,7 +21,7 @@ __all__ = ['Test_urls', 'Test_views_general', 'Test_forms']
 
 
 class Test_view_base(TestCase):
-    fixtures = ['test.json', 'auth.json']
+    fixtures = ['test.yaml', 'auth.json']
 
     def setUp(self):
         super(Test_view_base, self).setUp()

@@ -6,6 +6,26 @@ from django.core.serializers.pyyaml import Serializer as YamlSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.utils.encoding import smart_unicode
 
+try:
+    from yaml import CSafeDumper as SafeDumper
+except ImportError:
+    from yaml import SafeLoader, SafeDumper
+import decimal
+import datetime
+
+#dump les decimal en string
+#https://code.google.com/p/google-app-engine-django/source/browse/trunk/appengine_django/serializer/pyyaml.py?r=97
+class DjangoSafeDumper_perso(SafeDumper):
+    def represent_decimal(self, data):
+        return self.represent_scalar('tag:yaml.org,2002:str', str(data))
+    def represent_time(self, data):
+        value = '1970-01-01 %s' % unicode(data.isoformat())
+        return self.represent_scalar('tag:yaml.org,2002:timestamp', value)
+
+DjangoSafeDumper_perso.add_representer(decimal.Decimal, DjangoSafeDumper_perso.represent_decimal)
+DjangoSafeDumper_perso.add_representer(datetime.time, DjangoSafeDumper_perso.represent_time)
+
+
 class Serializer (YamlSerializer):
     """
     Serialize database objects as nested dicts, indexed first by
@@ -26,6 +46,8 @@ class Serializer (YamlSerializer):
         self.objects[model][pk] = self._current
         self._current = None
 
+    def end_serialization(self):
+        yaml.dump(self.objects, self.stream, Dumper=DjangoSafeDumper_perso,  default_flow_style=False, **self.options)
 
 def Deserializer(stream_or_string, **options):
     """
