@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<!--suppress CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, CheckTagEmptyBody, XmlUnboundNsPrefix, XmlUnboundNsPrefix -->
 <Grisbi>
     <Generalites>
         <Version_fichier>0.5.0</Version_fichier>
@@ -74,23 +73,14 @@
                 <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
             </Detail_de_Types>
             <Detail_des_operations>
-                <Operation No="4" Id="" D="11/8/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1"
-                           Sc="0" Ov="0" N="" Ty="1" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-                <Operation No="5" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="2"
-                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-                <Operation No="6" Id="" D="21/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2"
-                           Sc="0" Ov="0" N="fusion avec ope1" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="2" Si="0" Pc="" Ibg="" Ro="0" Rc="0"
-                           Va="0"/>
-                <Operation No="7" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1"
-                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="1" A="0" R="0" E="0" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-                <Operation No="8" Id="" D="30/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65"
-                           Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="9" Rc="3" Va="0"/>
-                <Operation No="11" Id="" D="24/9/2012" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="66"
-                           Sc="0" Ov="1" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-                <Operation No="12" Id="" D="24/9/2012" Db="0/0/0" M="99,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="1"
-                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
-                <Operation No="13" Id="" D="24/9/2012" Db="0/0/0" M="1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2"
-                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
+                <Operation No="4" Id="" D="11/8/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1" Sc="0" Ov="0" N="" Ty="1" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="5" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="2" Sc="0" Ov="0" N="" Ty="4" Ct="" P="2" A="0" R="1" E="1" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="6" Id="" D="21/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2" Sc="0" Ov="0" N="fusion avec ope1" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="2" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="7" Id="" D="11/8/2011" Db="0/0/0" M="10,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="1" C="1" Sc="0" Ov="0" N="" Ty="4" Ct="" P="1" A="0" R="0" E="0" I="1" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="8" Id="" D="30/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65" Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="9" Rc="3" Va="0"/>
+                <Operation No="11" Id="" D="24/9/2012" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="66" Sc="0" Ov="1" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="12" Id="" D="24/9/2012" Db="0/0/0" M="99,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="1" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
+                <Operation No="13" Id="" D="24/9/2012" Db="0/0/0" M="1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="2" C="2" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="11"/>
             </Detail_des_operations>
         </Compte>
         <Compte>
@@ -174,8 +164,7 @@
                 <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
             </Detail_de_Types>
             <Detail_des_operations>
-                <Operation No="9" Id="" D="30/10/2011" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65"
-                           Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="8" Rc="1" Va="0"/>
+                <Operation No="9" Id="" D="30/10/2011" Db="0/0/0" M="100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="7" C="65" Sc="0" Ov="0" N="" Ty="5" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="8" Rc="1" Va="0"/>
             </Detail_des_operations>
         </Compte>
         <Compte>
@@ -218,10 +207,8 @@
                 <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
             </Detail_de_Types>
             <Detail_des_operations>
-                <Operation No="1" Id="" D="18/12/2011" Db="0/0/0" M="-1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="64"
-                           Sc="0" Ov="0" N="1@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
-                <Operation No="10" Id="" D="24/9/2012" Db="0/0/0" M="-5,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="3" C="64"
-                           Sc="0" Ov="0" N="5@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="1" Id="" D="18/12/2011" Db="0/0/0" M="-1,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="4" C="64" Sc="0" Ov="0" N="1@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="10" Id="" D="24/9/2012" Db="0/0/0" M="-5,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="3" C="64" Sc="0" Ov="0" N="5@1" Ty="2" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
             </Detail_des_operations>
         </Compte>
         <Compte>
@@ -264,11 +251,8 @@
                 <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
             </Detail_de_Types>
             <Detail_des_operations>
-                <Operation No="2" Id="" D="30/11/2011" Db="0/0/0" M="-1500,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5"
-                           C="64" Sc="0" Ov="0" N="150@10" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0"
-                           Va="0"/>
-                <Operation No="3" Id="" D="29/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64"
-                           Sc="0" Ov="0" N="20@5" Ty="3" Ct="" P="2" A="0" R="2" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="2" Id="" D="30/11/2011" Db="0/0/0" M="-1500,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64" Sc="0" Ov="0" N="150@10" Ty="3" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="3" Id="" D="29/10/2011" Db="0/0/0" M="-100,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="5" C="64" Sc="0" Ov="0" N="20@5" Ty="3" Ct="" P="2" A="0" R="2" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
             </Detail_des_operations>
         </Compte>
         <Compte>
@@ -352,8 +336,7 @@
                 <Type No="5" Nom="moyen_vir4" Signe="1" Affiche_entree="0" Numerotation_auto="0" No_en_cours="0"/>
             </Detail_de_Types>
             <Detail_des_operations>
-                <Operation No="14" Id="" D="13/8/2011" Db="13/8/2011" M="0,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="0" C="0"
-                           Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
+                <Operation No="14" Id="" D="13/8/2011" Db="13/8/2011" M="0,0000000" De="1" Rdc="0" Tc="0,0000000" Fc="0,0000000" T="0" C="0" Sc="0" Ov="0" N="" Ty="4" Ct="" P="0" A="0" R="0" E="0" I="0" Si="0" Pc="" Ibg="" Ro="0" Rc="0" Va="0"/>
             </Detail_des_operations>
         </Compte>
     </Comptes>
@@ -363,50 +346,17 @@
             <No_derniere_echeance>11</No_derniere_echeance>
         </Generalites>
         <Detail_des_echeances>
-            <Echeance No="1" Date="30/10/2011" Compte="1" Montant="10,0000000" Devise="1" Tiers="2" Categorie="2" Sous-categorie="0"
-                      Virement_compte="2" Type="5" Type_contre_ope="3" Contenu_du_type="" Exercice="1" Imputation="1" Sous-imputation="0"
-                      Notes="avec virement et exercice" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="2" Date="30/11/2011" Compte="2" Montant="10,0000000" Devise="1" Tiers="2" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="5" Type_contre_ope="0" Contenu_du_type="" Exercice="2" Imputation="2" Sous-imputation="0"
-                      Notes="sans date limite" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1"
-                      Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="3" Date="30/10/2011" Compte="1" Montant="-20,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0"
-                      Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="4" Date="30/10/2011" Compte="1" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0"
-                      Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="14" Periodicite="4" Periodicite_personnalisee="1" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="5" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="2" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="6" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="3" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="7" Date="30/10/2011" Compte="1" Montant="30,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0"
-                      No_ech_associee="0"/>
-            <Echeance No="8" Date="30/9/2011" Compte="2" Montant="50,0000000" Devise="1" Tiers="2" Categorie="3" Sous-categorie="0"
-                      Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Date_limite="30/9/2011"
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="9" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="10" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
-            <Echeance No="11" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0"
-                      Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0"
-                      Notes="" Automatique="0" Intervalle_periodicite="7" Periodicite_personnalisee="1" Periodicite="4" Date_limite=""
-                      Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="1" Date="30/10/2011" Compte="1" Montant="10,0000000" Devise="1" Tiers="2" Categorie="2" Sous-categorie="0" Virement_compte="2" Type="5" Type_contre_ope="3" Contenu_du_type="" Exercice="1" Imputation="1" Sous-imputation="0" Notes="avec virement et exercice" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="2" Date="30/11/2011" Compte="2" Montant="10,0000000" Devise="1" Tiers="2" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="5" Type_contre_ope="0" Contenu_du_type="" Exercice="2" Imputation="2" Sous-imputation="0" Notes="sans date limite" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="3" Date="30/10/2011" Compte="1" Montant="-20,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="3" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="4" Date="30/10/2011" Compte="1" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="14" Periodicite="4" Periodicite_personnalisee="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="5" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="2" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="6" Date="30/10/2011" Compte="1" Montant="20,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="2" Periodicite="4" Periodicite_personnalisee="3" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="7" Date="30/10/2011" Compte="1" Montant="30,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="4" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Periodicite="0" Intervalle_periodicite="0" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="8" Date="30/9/2011" Compte="2" Montant="50,0000000" Devise="1" Tiers="2" Categorie="3" Sous-categorie="0" Virement_compte="0" Type="2" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Date_limite="30/9/2011" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="9" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="10" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="1" Periodicite_personnalisee="0" Periodicite="1" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
+            <Echeance No="11" Date="13/8/2011" Compte="7" Montant="-10,0000000" Devise="1" Tiers="1" Categorie="1" Sous-categorie="0" Virement_compte="0" Type="1" Type_contre_ope="0" Contenu_du_type="" Exercice="0" Imputation="0" Sous-imputation="0" Notes="" Automatique="0" Intervalle_periodicite="7" Periodicite_personnalisee="1" Periodicite="4" Date_limite="" Ech_ventilee="0" No_ech_associee="0"/>
         </Detail_des_echeances>
     </Echeances>
     <Tiers>
@@ -458,8 +408,7 @@
             <No_derniere_devise>1</No_derniere_devise>
         </Generalites>
         <Detail_des_devises>
-            <Devise No="1" Nom="EUR" Code="EUR" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0"
-                    Devise_en_rapport="0" Change="0,0000000"/>
+            <Devise No="1" Nom="EUR" Code="EUR" IsoCode="EUR" Passage_euro="0" Date_dernier_change="" Rapport_entre_devises="0" Devise_en_rapport="0" Change="0,0000000"/>
         </Detail_des_devises>
     </Devises>
     <Banques>
@@ -468,10 +417,8 @@
             <No_derniere_banque>2</No_derniere_banque>
         </Generalites>
         <Detail_des_banques>
-            <Banque No="1" Nom="banque1" Code="10001" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant=""
-                    Tel_correspondant="" Mail_correspondant="" Remarques=""/>
-            <Banque No="2" Nom="banque2" Code="99999" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant=""
-                    Tel_correspondant="" Mail_correspondant="" Remarques=""/>
+            <Banque No="1" Nom="banque1" Code="10001" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
+            <Banque No="2" Nom="banque2" Code="99999" Adresse="" Tel="" Mail="" Web="" Nom_correspondant="" Fax_correspondant="" Tel_correspondant="" Mail_correspondant="" Remarques=""/>
         </Detail_des_banques>
     </Banques>
     <Exercices>

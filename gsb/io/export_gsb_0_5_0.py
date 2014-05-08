@@ -412,6 +412,7 @@ def _export(request):
     for car in avant:
         xml = xml.replace(car, apres[avant.index(car)])
     xml = xml.replace("xml version='1.0' encoding='ASCII'", 'xml version="1.0"')
+    xml = xml.replace("  ", '    ')
     return xml
 
 

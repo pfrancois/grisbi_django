@@ -660,6 +660,7 @@ class Test_models(TestCase):
         self.assertEqual(t.encours(c), 0)
 
     def test_ope_titre_delete(self):
+        """creation puis effacement d'une operation_titre"""
         t = Titre.objects.create(nom="t3", isin="xxxxxxx")
         c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4),
                                   moyen_debit_defaut=Moyen.objects.get(id=2))
@@ -667,26 +668,43 @@ class Test_models(TestCase):
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on l'efface
-        o.delete()
 
+        o.delete()
+        #on verifie que l'ope titre a bien ete efface
         self.assertFalse(Ope_titre.objects.filter(id=o_id).exists())
-        # on la recree
+        #on verifie que l'ope sous jacente a bien ete efface
+        self.assertEqual(Ope.objects.count(),13)
+
+    def test_ope_titre_delete2(self):
+        """verification des test d'integrite, test ope si achat"""
+        t = Titre.objects.create(nom="t3", isin="xxxxxxx")
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4),
+                                  moyen_debit_defaut=Moyen.objects.get(id=2))
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
         # on rapproche son ope
         o.ope_ost.rapp_id = 1
         o.ope_ost.save()
-        with transaction.atomic():
-            Ope_titre.objects.filter(id=o_id).delete()
-            # on la recree mais avec une vente comme ca il y a des plus values
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Ope_titre.objects.filter(id=o_id).delete()
+
+    def test_ope_titre_delete3(self):
+        """verification des test d'integrite, test ope si vente"""
+        t = Titre.objects.create(nom="t3", isin="xxxxxxx")
+        c = Compte.objects.create(type="t", nom="c_test", moyen_credit_defaut=Moyen.objects.get(id=4),
+                                  moyen_debit_defaut=Moyen.objects.get(id=2))
+        #comme on teste une vente, il faut d'abord acheter
+        Ope_titre.objects.create(titre=t, compte=c, nombre=15, date=utils.strpdate('2011-01-01'), cours=10)
+        # avec une vente comme ca il y a des plus values
         o = Ope_titre.objects.create(titre=t, compte=c, nombre=-5, date=utils.strpdate('2011-01-01'), cours=10)
         o_id = o.id
-        # on rapproche son ope
-        r = Rapp.objects.get(id=1)
-        o.ope_pmv.rapp = r
+        # on rapproche son ope pmv
+        o.ope_pmv.rapp = Rapp.objects.get(id=1)
         o.ope_pmv.save()
-        _ = Ope_titre.objects.get(id=o_id)
-        self.assertRaises(IntegrityError, Ope_titre.objects.get(id=o_id).delete)
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Ope_titre.objects.filter(id=o_id).delete()
 
     def test_ope_titre_get_absolute_url(self):
         self.assertEqual(Ope_titre.objects.get(id=1).get_absolute_url(), '/ope_titre/1/')

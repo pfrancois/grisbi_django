@@ -26,14 +26,12 @@
 <table width="100%" id="boutons_bas" class="table">
     <tr class="boutton">
         {% if type != "all" %}
-        <td width="{% if type == " rapp
-        " %}100{% else %}50{% endif %}%">
+        <td width="{% if type == " rapp " %}100{% else %}50{% endif %}%">
         <a href="{% url 'gsb_cpt_titre_espece_all' cpt_id=compte.id %}">voir toutes les op&eacute;rations</a>
         </td>
         {% endif %}
         {% if type != "rapp" %}
-        <td width="{% if type == " all
-        " %}100{% else %}50{% endif %}%">
+        <td width="{% if type == " all " %}100{% else %}50{% endif %}%">
         <a href="{% url 'gsb_cpt_titre_espece_rapp' cpt_id=compte.id %}">
             voir uniquement les op&eacute;rations rapproch&eacute;es
         </a>
