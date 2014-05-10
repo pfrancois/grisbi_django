@@ -23,7 +23,7 @@ urlpatterns += patterns('gsb.outils',
                         # affiche config
                         url(r'^outils/verif_config$', 'verif_config', name='verif_config'),
 )
-urlpatterns += patterns('gsb.lecture_plist',
+urlpatterns += patterns('gsb.io.lecture_plist',
                         url(r'^options/maj$', 'gestion_maj', name='gestion_maj_iphone'),
                         url(r'^outils/plist$', 'affiche_plist', name='affichage plist iphone'),
 )

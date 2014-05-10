@@ -1399,7 +1399,7 @@ def ope_fille(sender, **kwargs):
 
 
 # noinspection PyUnusedLocal
-@receiver(pre_delete,weak=False)
+#@receiver(pre_delete,weak=False)
 def db_log_delete(sender,**kwargs):
     db_log.objects.create(datamodel=sender.__name__,
                           id_model=sender.id,

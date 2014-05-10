@@ -40,7 +40,6 @@ secret_key.py
 *.kpf
 .pydevproject
 perso
-coverage
 *.qif
 *.7z
 *.wpr
@@ -53,4 +52,4 @@ reset.bat
 sql
 old
 .coverage
-coverage_html_report
+covhtml

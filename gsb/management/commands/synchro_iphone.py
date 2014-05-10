@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.db import transaction
 from django.core.management.base import BaseCommand
-from ... import lecture_plist
+
 from ... import models
 from ... import utils
+from gsb.io import lecture_plist
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list

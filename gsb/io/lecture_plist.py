@@ -9,8 +9,8 @@ from django.db import transaction
 from django.conf import settings
 import django.utils
 import calendar
-from . import models
-from . import utils
+from .. import models
+from .. import utils
 
 #gestion des vues
 from django.contrib import messages

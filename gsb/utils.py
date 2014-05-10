@@ -25,6 +25,7 @@ __all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_nu
 
 
 class FormatException(Exception):
+    """une classe exception qui permet d'affcher tranquillement ce que l'on veut"""
     def __init__(self, message):
         super(FormatException, self).__init__(message)
         self.msg = message
@@ -34,16 +35,19 @@ class FormatException(Exception):
 
 
 def uuid():
+    """raccourci vers uuid4"""
     return str(uuid4())
 
 
 class Compfr(object):
+    """operateur de comparaison avec des trucs francais"""
     def __init__(self, decod='utf-8'):
         self.decod = decod
         self.loc = locale.getlocale()  # stocker la locale courante
         self.espinsec = u'\xA0'  # espace insécable
 
     def __call__(self, v1, v2):
+        """appel effectif de l'operateur"""
         if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
             # on convertit en unicode si nécessaire
             if isinstance(v1, str):
@@ -153,17 +157,15 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
         return datetime.date(1, 1, 1)
 
 
-# utilise pour mock et les test
+
 def today():
+    """date utilise pour mock et les test
+    """
     return now().date()
 
 
-# utilise pour mock et les test
 def now(utc=True):
-    """
-    renvoi
-    @type utc: bool
-    """
+    """ now utilise pour mock dans les tests """
     if utc:
         return timezone.now()
     else:
@@ -171,15 +173,18 @@ def now(utc=True):
 
 
 def timestamp():
+    """ le timestamp de now utilise pour mock dans les tests """
     return dt2timestamp(now())
 
 
 def dt2timestamp(date):
+    """renvoi le timestamp d'une datetime"""
     return time.mktime(date.timetuple())
 
 
 #------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
+    """a partir d'une unicode"""
     try:
         if var is None:
             return defaut
@@ -198,6 +203,7 @@ def to_unicode(var, defaut=''):
 
 
 def to_id(var):
+    """renvoie un entier positif"""
     try:
         if var is None:
             return None
@@ -214,6 +220,7 @@ def to_id(var):
 
 
 def to_bool(var):
+    """renvoie un bool"""
     try:
         if var is None:
             return False
@@ -233,6 +240,7 @@ def to_bool(var):
 
 
 def to_decimal(var):
+    """renvoie un decimal"""
     try:
         if var is None:
             return 0
@@ -246,6 +254,7 @@ def to_decimal(var):
 
 
 def to_date(var, format_date="%d/%m/%Y"):
+    """renvoie une date"""
     try:
         return strpdate(var, format_date)
     except ValueError:
@@ -372,7 +381,6 @@ class UTF8Recoder(object):
 
     def next(self):
         return self.reader.next().encode("utf-8")
-
 
 class Excel_csv(object, csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
