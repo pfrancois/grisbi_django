@@ -54,7 +54,7 @@ class Log_factory(object):
 def gestion_maj(request):
     """vue qui gere les maj"""
     with transaction.atomic():
-        config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
+        config = models.Config.objects.get_or_create(id=1, defaults={'id': 1})[0]
         lastmaj = config.derniere_import_money_journal
         nb_export = export(lastmaj, request)
         retour = import_items(lastmaj, request)
@@ -162,7 +162,7 @@ def simplification(obj, objects, level):
 
 
 def check():
-    config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
+    config = models.Config.objects.get_or_create(id=1, defaults={'id': 1})[0]
     lastmaj = config.derniere_import_money_journal
     for fichier in utils.find_files(os.walk(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log'))):
         datemaj = pytz.utc.localize(datetime.datetime.utcfromtimestamp(int(os.path.splitext(os.path.basename(fichier))[0]) / 1000))

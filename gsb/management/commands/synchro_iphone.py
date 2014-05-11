@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            config = models.config.objects.get_or_create(id=1, defaults={'id': 1})[0]
+            config = models.Config.objects.get_or_create(id=1, defaults={'id': 1})[0]
             lastmaj = config.derniere_import_money_journal
             self.stdout.write('export')
             nb_export = lecture_plist.export(lastmaj,dry=True)

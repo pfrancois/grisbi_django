@@ -20,10 +20,6 @@ from gsb import utils
 from colorful.fields import RGBColorField
 
 
-__all__ = ['Tiers', 'Titre', 'Cours', 'Banque', 'Cat', 'Ib', 'Exercice', 'Compte', 'Ope_titre',
-           'Moyen', 'Rapp', 'Echeance', 'Ope', 'Virement', 'has_changed', "Gsb_exc", "Ex_jumelle_neant"]
-
-
 class Gsb_exc(Exception):
     pass
 
@@ -56,7 +52,7 @@ def has_changed(instance, fields):
     return changed
 
 
-class config(models.Model):
+class Config(models.Model):
     """model generique pour tout ce qui est modifiable"""
     derniere_import_money_journal = models.DateTimeField(default=datetime.datetime.utcfromtimestamp(0))
 

@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.conf import settings  # @Reimport
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, config
+from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
 
 #from django.db.models import Q
 # import decimal
@@ -793,4 +793,4 @@ admin.site.register(Rapp, Rapp_admin)
 admin.site.register(Moyen, Moyen_admin)
 admin.site.register(Echeance, Ech_admin)
 admin.site.register(Ope_titre, Ope_titre_admin)
-admin.site.register(config, Config_admin)
+admin.site.register(Config, Config_admin)
