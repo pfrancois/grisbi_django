@@ -72,7 +72,7 @@ def gestion_maj(request):
 def affiche_plist(request):
     reponses = []
     decimal.getcontext().prec = 6
-    for fichier in utils.find_files(os.walk(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')), "*.log"):
+    for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log'), "*.log"):
         plistdict = plistlib.readPlist(fichier)
         objects = plistdict['$objects']
         liste_obj = objects[plistdict['$top']['$0']['CF$UID']]

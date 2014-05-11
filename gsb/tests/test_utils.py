@@ -6,24 +6,36 @@ from __future__ import absolute_import
 import datetime
 import decimal
 import time
+import os
 
 from django.test import SimpleTestCase
 import mock
 import django.utils.timezone as timezone
+import pytz
 
 from .test_base import TestCase
 from .. import utils
 from ..models import Exercice, Cat, Ope
-
+from django.conf import settings
 
 __all__ = ['Test_utils1', 'Test_utils']
 
 
 class Test_utils1(SimpleTestCase):
+    """test de utils sans bdd"""
+
+    def test_FormatException(self):
+        with self.assertRaises(utils.FormatException) as exc:
+            raise utils.FormatException('texte a tester')
+
+        self.assertEqual("%s"%exc.exception,'texte a tester')
+
     def test_utils_uuid(self):
+        #on peut pas vraiment tester car justement on lui demande un nouveau uuid a chaque fois
         self.assertEquals(len(utils.uuid()), 36)
 
     def test_utils_valid_rib(self):
+        """test pour verifier la validite des rib"""
         self.assertEquals(utils.validrib(30004, 12345, 12312345678, 30), True)
         self.assertEquals(utils.validrib(30004, 12345, "123A2345678", 30), True)
         self.assertRaises(ValueError, utils.validrib, 300044, 12345, 12312345678, 3)
@@ -32,6 +44,7 @@ class Test_utils1(SimpleTestCase):
         self.assertRaises(ValueError, utils.validrib, 30004, 1234, 12312345678, 356)
 
     def test_validinsee(self):
+        """"test pour verifier la validite des numero insee"""
         self.assertEquals(utils.validinsee(2810275000151, 92), True)
 
     def test_date2sql(self):
@@ -55,18 +68,21 @@ class Test_utils1(SimpleTestCase):
 
     def test_strpdate(self):
         self.assertEquals(utils.strpdate("2011-12-31"), datetime.date(2011, 12, 31))
+        self.assertEquals(utils.strpdate(datetime.date(2011, 12, 31)), datetime.date(2011, 12, 31))
+        self.assertEquals(utils.strpdate(datetime.datetime(2011, 12, 31,0,0,0)), datetime.date(2011, 12, 31))
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
         self.assertRaises(ValueError, utils.strpdate, "2011-12-52")
 
     @mock.patch('django.utils.timezone.now')
-    def test_now(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
-        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()))
+    def test_now_utc(self, today_mock):
+        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.utc)
+        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, tzinfo=timezone.utc))
+        self.assertEquals(utils.now(utc=False), datetime.datetime(2010, 1, 1, tzinfo=pytz.utc).astimezone(pytz.timezone('Europe/Paris')))
 
     @mock.patch('django.utils.timezone.now')
     def test_timestamp(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
-        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone()).timetuple()))
+        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.utc)
+        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, tzinfo=timezone.utc).timetuple()))
 
     @mock.patch('django.utils.timezone.now')
     def test_today(self, today_mock):
@@ -124,6 +140,7 @@ class Test_utils1(SimpleTestCase):
     def test_to_bool(self):
         self.assertEquals(utils.to_bool(True), True)
         self.assertEquals(utils.to_bool(False), False)
+        self.assertEquals(utils.to_bool(None), False)
         self.assertEquals(utils.to_bool(0), False)
         self.assertEquals(utils.to_bool(1), True)
         self.assertEquals(utils.to_bool("True"), True)
@@ -139,21 +156,40 @@ class Test_utils1(SimpleTestCase):
         self.assertRaises(utils.FormatException, utils.to_date, 'toto')
 
     def test_compfr(self):
+        """trie des chiffres"""
         compfr = utils.Compfr()
-        self.assertEquals(sorted([4, 3, 1, 0], cmp=compfr), [0, 1, 3, 4])
+        self.assertEquals(sorted([4, 4, 0, 1], cmp=compfr), [0, 1, 4, 4])
+    def test_compfr2(self):
+        """trie de l'alpha"""
+        compfr = utils.Compfr()
         self.assertEquals(sorted(['pêche', 'PÈCHE', 'PÊCHE', 'pèche'], cmp=compfr), ['pèche', 'PÈCHE', 'pêche', 'PÊCHE'])
+    def test_compfr3(self):
+        """trie avec des caractere unicodes"""
+        compfr = utils.Compfr()
         self.assertEquals(sorted([u'vice' + u'\xA0' + u'versa', 'pêche', 'PÈCHE', 'PÊCHE'], cmp=compfr),
                           ['PÈCHE', 'pêche', 'PÊCHE', u'vice' + u'\xA0' + u'versa'])
+    def test_compfr4(self):
+        """trie avec des chiffre te des lettres"""
+        compfr = utils.Compfr()
+        self.assertEquals(sorted([4, 'a', 0, 1], cmp=compfr), [0, 1, 4, 'a'])
+    def test_nulltostr(self):
+        self.assertEquals(utils.nulltostr(''),'NULL')
+        self.assertEquals(utils.nulltostr(136554),136554)
+        self.assertEqual(utils.nulltostr('test'),'test')
+    def test_find_files(self):
+        self.assertEqual([os.path.join(settings.PROJECT_PATH,'gsb','fixtures','auth.json'),
+                          os.path.join(settings.PROJECT_PATH,'gsb','fixtures','test.yaml')],
+                         [x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'))])
+        self.assertEqual([],[x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'),'*.txt')])
+        self.assertEqual(['D:\\django\\gsb\\gsb\\fixtures\\auth.json'],
+                              [x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'),'*.json')])
 
 
 class Test_utils(TestCase):
+    """test avec bdd"""
     fixtures = ['test.yaml']
 
-    def setUp(self):
-        super(Test_utils, self).setUp()
-
     # test des formats de sortie
-
     def test_maxtostr(self):
         self.assertEquals(utils.maxtostr(Exercice.objects.all(), champ='date_fin'), "2011-12-31")
         self.assertEquals(utils.maxtostr(Exercice.objects.none(), champ='date_fin'), "0")
@@ -164,6 +200,7 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(None, defaut='toto'), 'toto')
         self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), u'Opération sur titre')
         self.assertEquals(utils.idtostr(Cat.objects.get(id=64), membre='nom'), u'Opération sur titre')
+        self.assertEquals(utils.idtostr(Ope.objects.get(id=1), membre='num_cheque',defaut="test"), '')
         Cat.objects.create(nom="test:", id=999)
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999), membre='nom'), 'test')
         self.assertEquals(utils.idtostr(Cat.objects.get(id=999)), "999")
@@ -172,3 +209,7 @@ class Test_utils(TestCase):
         self.assertEquals(utils.idtostr(Ope.objects.get(id=1), defaut='', membre='id'), "1")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=1).rapp, defaut='', membre='nom'), "")
         self.assertEquals(utils.idtostr(Ope.objects.get(id=3).rapp, defaut='', membre='nom'), "cpt_titre2201101")
+
+    def test_is_one_exist(self):
+        self.assertEqual(utils.is_onexist(Cat.objects.get(id=64),attribut='nom'),True)
+        self.assertEqual(utils.is_onexist(Cat.objects.get(id=64),attribut='gfjdjh'),False)

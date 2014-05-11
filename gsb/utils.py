@@ -40,7 +40,8 @@ def uuid():
 
 
 class Compfr(object):
-    """operateur de comparaison avec des trucs francais"""
+    """operateur de comparaison avec un alphabet francais afin de pouvoir trier selon la norme francaise
+       que cela soit texte ou unicode"""
     def __init__(self, decod='utf-8'):
         self.decod = decod
         self.loc = locale.getlocale()  # stocker la locale courante
@@ -50,10 +51,18 @@ class Compfr(object):
         """appel effectif de l'operateur"""
         if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
             # on convertit en unicode si nécessaire
-            if isinstance(v1, str):
-                v1 = v1.decode(self.decod)
-            if isinstance(v2, str):
-                v2 = v2.decode(self.decod)
+            if not(isinstance(v1, unicode)):
+                if isinstance(v1, str):
+                    v1 = v1.decode(self.decod)
+                else:
+                    v1 = "%s"%v1
+                    v1 = v1.decode(self.decod)
+            if not(isinstance(v2, unicode)):
+                if isinstance(v2, str):
+                    v2 = v2.decode(self.decod)
+                else:
+                    v2 = "%s"%v2
+                    v2 = v2.decode(self.decod)
 
             # on retire les tirets et les blancs insécables
             v1 = v1.replace(u'-', u'')
@@ -157,13 +166,6 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
         return datetime.date(1, 1, 1)
 
 
-
-def today():
-    """date utilise pour mock et les test
-    """
-    return now().date()
-
-
 def now(utc=True):
     """ now utilise pour mock dans les tests """
     if utc:
@@ -171,6 +173,11 @@ def now(utc=True):
     else:
         return timezone.localtime(timezone.now())
 
+
+def today():
+    """date utilise pour mock et les test
+    """
+    return now().date()
 
 def timestamp():
     """ le timestamp de now utilise pour mock dans les tests """
@@ -185,71 +192,56 @@ def dt2timestamp(date):
 #------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
     """a partir d'une unicode"""
-    try:
-        if var is None:
-            return defaut
-        var = force_unicode(var).strip()
-        if var == "":
-            return defaut
-        try:
-            if float(var) == 0:
-                return defaut
-            else:
-                return var
-        except ValueError:
-            return var
-    except KeyError:
+    if var is None:
         return defaut
+    var = force_unicode(var).strip()
+    if var == "":
+        return defaut
+    try:
+        if float(var) == 0:
+            return defaut
+        else:
+            return var
+    except ValueError:
+        return var
 
 
 def to_id(var):
     """renvoie un entier positif"""
-    try:
-        if var is None:
-            return None
-        var = force_unicode(var).strip()
-        try:
-            if var == "" or int(var) == 0 or var == "False":
-                return None
-            else:
-                return int(var)
-        except ValueError:
-            raise FormatException('probleme: "%s" n\'est pas un nombre entier' % var)
-    except KeyError:
+    if var is None:
         return None
+    var = force_unicode(var).strip()
+    try:
+        if var == "" or int(var) == 0 or var == "False":
+            return None
+        else:
+            return int(var)
+    except ValueError:
+        raise FormatException('probleme: "%s" n\'est pas un nombre entier' % var)
 
 
 def to_bool(var):
     """renvoie un bool"""
-    try:
-        if var is None:
-            return False
-        if var is True or var is False:
-            return var
-
-        var = force_unicode(var).strip()
-        try:
-            if var == "" or var == 0 or var == "0" or bool(var) is False:
-                return False
-            else:
-                return True
-        except ValueError:
-            return False
-    except KeyError:
+    if var is None:
         return False
+    if var is True or var is False:
+        return var
+
+    var = force_unicode(var).strip()
+    if var == "" or var == 0 or var == "0" or bool(var) is False:
+        return False
+    else:
+        return True
 
 
 def to_decimal(var):
     """renvoie un decimal"""
+    if var is None:
+        return 0
+    var = force_unicode(var).strip()
     try:
-        if var is None:
-            return 0
-        var = force_unicode(var).strip()
-        try:
-            return fr2decimal(var)  # si il y a une exception il est renvoyé 0
-        except decimal.InvalidOperation:
-            return 0
-    except KeyError:
+        return fr2decimal(var)  # si il y a une exception il est renvoyé 0
+    except decimal.InvalidOperation:
         return 0
 
 
@@ -259,8 +251,6 @@ def to_date(var, format_date="%d/%m/%Y"):
         return strpdate(var, format_date)
     except ValueError:
         raise FormatException('"%s" n\'en pas est une date' % var)
-    except KeyError:
-        return None
 
 
 #-------------------------------format de sortie-----------------------------
@@ -346,10 +336,8 @@ def idtostr(obj, membre='id', defaut='0'):
     try:
         if getattr(obj, membre) is not None:
             retour = unicode(getattr(obj, membre))
-            if retour == '':
-                retour = defaut
-            else:
-                if retour[-1] == ":":
+            if retour != '':
+                if retour[-1] == ":":#cas des categories
                     retour = retour[0:-1]
         else:
             retour = unicode(defaut)
@@ -426,32 +414,10 @@ def is_onexist(objet, attribut):
         return False
 
 
-class switch(object):
-    """http://code.activestate.com/recipes/410692/"""
-
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args:  # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
-
-
+    # switch http://code.activestate.com/recipes/410692/"""
 def find_files(path, recherche='*.*'):
     """trouve recursivement les fichiers voulus"""
-    for root, dirs, files in path:
+    for root, dirs, files in os.walk(path):
         for basename in files:
             if fnmatch.fnmatch(basename, recherche):
                 filename = os.path.join(root, basename)
