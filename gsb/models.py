@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.utils.encoding import smart_unicode, force_unicode
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
+from django.db.models import Q
 
 import gsb.model_field as models_gsb
 from gsb import utils
@@ -288,23 +289,6 @@ class Titre(models.Model):
         else:
             return 0  # comme pas d'ope, pas d'encours
 
-    def ajustement(self, datel, montant_vrai, cours):
-        compte_id = self.ope_titre_set.all().order_by('compte').values_list('compte', flat=True).distinct()[0]
-        datel = utils.strpdate(datel)
-        montant_theorique = Ope_titre.objects.filter(titre_id=self.id, date__lte=datel, compte_id=compte_id).aggregate(nombre=models.Sum('nombre'))['nombre']
-        montant_a_corriger = decimal.Decimal(str(montant_vrai)) - montant_theorique
-        cours = decimal.Decimal(str(cours))
-        if montant_a_corriger != 0:
-            ope_titre = Ope_titre.objects.create(titre=self,
-                                                 compte_id=compte_id,
-                                                 nombre=montant_a_corriger,
-                                                 date=datel,
-                                                 cours=cours)
-            return u"opération titre ({}) modifiée soit {} EUR".format(ope_titre, '{0:.2f}'.format(cours * montant_a_corriger))
-        else:
-            return "rien a modifier"
-
-
 class Cours(models.Model):
     """cours des titres"""
     date = models.DateField(default=utils.today, db_index=True)
@@ -526,17 +510,18 @@ class Compte(models.Model):
     def __unicode__(self):
         return self.nom
 
-    def solde(self, datel=None, rapp=False, espece=False, pointe=False):
+    def solde(self, datel=None, rapp=False, espece=False, pointe_rapp=False):
         """renvoie le solde du compte
             @param datel : date date limite de calcul du solde
             @param rapp : boolean faut il prendre uniquement les opération rapproches
+            @param pointe: boolean
             @param espece : si c'est un compte espece d'un compte titre (fonctionne egalement pour les comptes normaux)
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
-        if rapp:
+        if rapp and not pointe_rapp:
             query = query.filter(rapp__id__isnull=False)
-        if pointe:
-            query = query.filter(pointe=True)
+        if pointe_rapp:
+            query = query.filter(Q(rapp__id__isnull=False)|Q(pointe=True))
         if datel is not None:
             query = query.filter(date__lte=datel)
         req = query.aggregate(total=models.Sum('montant'))['total']
@@ -581,10 +566,10 @@ class Compte(models.Model):
     def solde_rappro(self, espece=False):
         return self.solde(rapp=True, espece=espece)
 
-    def solde_pointe(self, espece=False):
+    def solde_pointe_rapp(self, espece=False):
         """renvoie le solde du compte pour les operations pointees
         """
-        solde = self.solde(espece=espece, pointe=True)
+        solde = self.solde(espece=espece, pointe_rapp=True)
         return solde
 
     solde_rappro.short_description = u"solde rapproché"
@@ -777,10 +762,10 @@ class Compte(models.Model):
         else:
             return Moyen.objects.get(id=settings.MD_CREDIT)
 
-    def ajustement(self, datel, montant_vrai, cat_nom="Ajustements", rapp=False, pointe=False):
+    def ajustement(self, datel, montant_vrai, cat_nom="Ajustements", rapp=False, pointe_rapp=False):
         cat_id = Cat.objects.get_or_create(nom=cat_nom, defaults={"nom": cat_nom, "type": "d"})[0].id
         datel = utils.strpdate(datel)
-        montant_theorique = self.solde(espece=True, datel=datel, rapp=rapp, pointe=pointe)
+        montant_theorique = self.solde(espece=True, datel=datel, rapp=rapp, pointe_rapp=pointe_rapp)
         montant_a_corriger = decimal.Decimal(str(montant_vrai)) - montant_theorique
         if montant_a_corriger != 0:
             ope = Ope.objects.create(compte=self,
