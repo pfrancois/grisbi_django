@@ -288,10 +288,7 @@ def _export(request):
         xml_sub.set("No", str(tier.id))
         xml_sub.set("Nom", tier.nom)
         if tier.is_titre:  # #integration des donnees sur les titres afin de garder une consistence
-            try:
-                xml_sub.set("Informations", "%s@%s" % (tier.titre.isin, tier.titre.type))
-            except Titre.DoesNotExist:
-                xml_sub.set("Informations", "%s@%s" % ("00000", "XXX"))
+            xml_sub.set("Informations", "%s@%s" % (tier.titre.isin, tier.titre.type))
         else:
             xml_sub.set("Informations", tier.notes)
         xml_sub.set("Liaison", "0")

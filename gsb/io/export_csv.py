@@ -92,60 +92,6 @@ class Export_ope_csv(Export_view_csv_base):
         return self.export_csv_view(data=data)
 
 
-class pocket_csv(object, csv.Dialect):
-    """Describe the usual properties of Excel-generated CSV files."""
-    delimiter = ','
-    quotechar = '"'
-    doublequote = True
-    skipinitialspace = False
-    lineterminator = "\r\n"
-    quoting = csv.QUOTE_NONNUMERIC
-
-
-class Export_ope_pocket_money_csv_view(Export_view_csv_base):
-    form_class = export_base.Exportform_ope
-    model_initial = models.Ope
-    nomfich = "export_ope"
-    fieldnames = (
-    "account name", "date", "ChkNum", "Payee", "Category", "Class", "Memo", "Amount", "Cleared", "CurrencyCode", "ExchangeRate")
-    class_csv_dialect = pocket_csv
-    titre = "export_pocketmoney"
-
-    def export(self, query):
-        """
-        fonction principale
-        """
-        data = []
-        query = query.exclude(cat__nom=u'Opération Ventilée').order_by('date', 'id').select_related('cat', "compte", "tiers", "ib", "rapp",
-                                                                                                    "ope", "ope_pmv", "moyen", "jumelle")
-        for ope in query:
-            # id compte date montant
-            ligne = {'account name': ope.compte.nom,
-                     'date': utils.datetostr(ope.date, param='%d/%m/%y'),
-                     'ChkNum': ope.num_cheque}
-            # date
-            # checknum
-            # tiers
-            tiers = utils.idtostr(ope.tiers, defaut='', membre="nom")
-            if utils.idtostr(ope.cat, defaut='', membre="nom") == "Virement":
-                tiers = "<%s>" % ope.jumelle.compte
-            ligne['Payee'] = tiers
-            # cat
-            ligne['Category'] = utils.idtostr(ope.cat, defaut='', membre="nom")
-            ligne['Class'] = utils.idtostr(ope.ib, defaut='', membre="nom")
-            ligne['Memo'] = ope.notes
-            # montant
-            ligne['Amount'] = str.strip("%10.2f" % ope.montant)
-            # rapp
-            if ope.rapp is not None:
-                ligne['Cleared'] = '*'
-            else:
-                ligne['Cleared'] = ''
-            ligne["CurrencyCode"] = "EUR"
-            ligne["ExchangeRate"] = "1"
-            data.append(ligne)
-        return self.export_csv_view(data=data)
-
 
 class Exportform_cours(export_base.Exportform_ope):
     collection = export_base.forms.ModelMultipleChoiceField(models.Titre.objects.all(), required=False, label="Titres")

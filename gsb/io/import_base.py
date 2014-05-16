@@ -20,6 +20,8 @@ from .. import utils
 
 
 class ImportException(Exception):
+    """exception specifique pour les import
+    a part signifier que c'est un import pas grand chose de different"""
     def __init__(self, message):
         super(ImportException, self).__init__(message)
         self.msg = message
@@ -29,11 +31,12 @@ class ImportException(Exception):
 
 
 class ImportForm1(gsb_forms.Baseform):
+    """form d'importation, defini juste un fichier"""
     nom_du_fichier = gsb_forms.forms.FileField()
 
 
 class property_ope_base(object):
-    """defini toutes les proprietes d'ope"""
+    """defini toutes les proprietes d'une ope"""
 
     @property
     def id(self):
@@ -130,17 +133,29 @@ class property_ope_base(object):
 
 
 class Table(object):
-    """obj avec cache"""
+    """obj avec cache
+    c'est l'object abstract sur lequel tt les autres se reposes
+    """
+    #nom de l'objet effectif
     element = None
+    #si readonly, pas possible d'en ceer de nouveau
     readonly = False
 
     def auto(self):
+        """les objets a creer automatiquement dans tt les cas"""
         return None
 
     # noinspection PyProtectedMember
     def __init__(self, request):
+        if self.element is None:
+            raise NotImplementedError("table de l'element non choisi")
+        else:
+            self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
+        #dict qui referme juste les id (cache)
         self.id = dict()
+        #dict qui renferme les objects a creer
         self.create_item = list()
+        #la requete qui demande ca, utile pour les messages
         self.request = request
         if self.auto() is not None:
             # noinspection PyTypeChecker
@@ -150,21 +165,24 @@ class Table(object):
                 if created:
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, c))
 
-        if self.element is None:
-            raise NotImplementedError("table de l'element non choisi")
-        else:
-            self.last_id_db = self.element.objects.aggregate(id_max=Max('id'))['id_max']
         self.nb_created = 0
 
     def goc(self, nom, obj=None):
+        """remvoie un obj a partir du cache en prenant un nom ou en le creant"""
+        #verif qu'il n'y a pas de nom vide ou d'objet
+        #indispensable car utilisable par deux possiblite
         if nom == "" or nom is None:
             if not obj is None:
                 nom = obj['nom']
             else:
                 return None
+        #sinon c'est on peut commencer
         try:
+            #dans le cas le plus simple, c'est deja ds le cache
             pk = self.id[nom]
+            #si c'est pas dans le cache
         except KeyError:
+            #on essaye de voir si l'objet existe ds la base de donne
             try:
                 if obj is None:
                     arguments = {"nom": nom}
@@ -173,12 +191,15 @@ class Table(object):
                 with transaction.atomic():
                     pk = self.element.objects.get(**arguments).id
                 self.id[nom] = pk
+            #on cree un objet
             except self.element.DoesNotExist:
                 if not self.readonly:  # on cree donc l'element
                     argument_def = self.arg_def(nom, obj)
                     created=None
                     try:
                         with transaction.atomic():
+                            #permet de creer un objet avec un id defini
+                            #donc on verifie avant s'il n'existe pas deja
                             if obj is not None and 'id' in obj.keys():
                                 requete = self.element.objects.filter(id=obj['id'])
                                 if requete.exists() and requete[0].nom != obj['nom']:
@@ -188,17 +209,20 @@ class Table(object):
                             self.nb_created += 1
                     except IntegrityError as e:
                         raise ImportException("%s" % e)
+                    #une fois cree on met a jour le cache
                     pk = created.pk
                     self.id[nom] = pk
                     self.create_item.append(created)
                     # noinspection PyProtectedMember
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
+                    #pas possible de creer un objet read only
                     # noinspection PyProtectedMember
                     raise ImportException(u"%s '%s' non créée parce que c'est read only" % (self.element._meta.object_name, nom))
         return pk
 
     def arg_def(self, nom, obj=None):
+        """fonction qui renvoi les element de l'objet a creer"""
         raise NotImplementedError("methode arg_def non defini")
 
 
