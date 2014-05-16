@@ -103,6 +103,7 @@ class Rapprochement_filter(SimpleListFilter):
         if self.value() == 'rien':
             return queryset.filter(rapp__isnull=True, pointe=False)
         if self.value() == 'pr':
+            #comme il y a trois position, si l'on exclue les ni rapprocche ni pointe on a les rapproche ou pointe
             return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
             return queryset.filter(rapp__isnull=True)
@@ -162,7 +163,9 @@ class verifmere_filter(ouinonfilter):
     def queryset(self, request, queryset):
         if self.value() == '1':
             messages.info(request, "attention sur l'ensemble de la base")
+            #les filles pointe alors que les mere non
             merep = Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
+            #les mere pointe alors que les filles non
             fillep = Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
             listep = list(merep) + list(fillep)
             return Ope.objects.filter(id__in=listep)
