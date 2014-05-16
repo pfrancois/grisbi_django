@@ -811,20 +811,6 @@ class Ope_titre(models.Model):
     def invest(self):
         return self.nombre * self.cours
 
-    def clean(self):
-        super(Ope_titre, self).clean()
-        # verification qu'il n'y pas pointe et rapprochee
-        if utils.is_onexist(self, "ope_ost"):
-            if self.ope_ost.rapp is not None and has_changed(self.ope_ost, ('titre', 'compte', 'nombre', 'cours')):
-                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est rapprochée")
-            if self.ope_ost.pointe is True and has_changed(self.ope_ost, ('titre', 'compte', 'nombre', 'cours')):
-                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération sous jacente est pointée")
-        if utils.is_onexist(self, "ope_pmv"):
-            if self.ope_pmv.rapp is not None and has_changed(self.ope_pmv, ('titre', 'compte', 'nombre', 'cours')):
-                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est rapprochée")
-            if self.ope_pmv.pointe is True and has_changed(self.ope_pmv, ('titre', 'compte', 'nombre', 'cours')):
-                raise ValidationError(u"cette opération ne peut pas etre modifié car son opération pmv est pointée")
-
     @transaction.atomic
     def save(self, shortcut=False, *args, **kwargs):
         self.cours = decimal.Decimal(self.cours)
@@ -913,9 +899,11 @@ class Ope_titre(models.Model):
                 self.ope_pmv.moyen = self.compte.moyen_credit()
                 self.ope_pmv.save()
         if shortcut:
-            for ope in Ope_titre.objects.filter(nombre__lte=0, date__gte=self.date, compte=self.compte).exclude(pk=self.id).order_by(
-                    '-date'):
-                ope.save(shortcut=False)
+            #useful if running total
+            for ope_ti in Ope_titre.objects.filter(nombre__lte=0,
+                                                   date__gte=self.date,
+                                                   compte=self.compte).exclude(pk=self.id).order_by('-date'):
+                ope_ti.save(shortcut=False)
 
     def get_absolute_url(self):
         return reverse('ope_titre_detail', kwargs={'pk': str(self.id)})

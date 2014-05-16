@@ -36,7 +36,7 @@ class Test_models(TestCase):
 
     def test_models_unicode(self):
         """on test les sortie unicode"""
-        #self.assertEquals(models.Config.objects.get(id=1).__unicode__(), u"1")
+        self.assertEquals(models.Config.objects.get(id=1).__unicode__(), u"1")
         self.assertEquals(models.Tiers.objects.get(nom="tiers1").__unicode__(), u"tiers1")
         self.assertEquals(models.Titre.objects.get(nom="t1").__unicode__(), u"t1 (1)")
         self.assertEquals(models.Banque.objects.get(nom="banque1").__unicode__(), u"banque1")
@@ -45,7 +45,6 @@ class Test_models(TestCase):
         self.assertEquals(models.Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
         self.assertEquals(models.Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
         self.assertEquals(models.Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
-        self.assertEquals(models.Ope_titre.objects.get(id=1).__unicode__(), u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
         self.assertEquals(models.Ope_titre.objects.get(id=1).__unicode__(), u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
         self.assertEquals(models.Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
         self.assertEquals(models.Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
@@ -311,13 +310,14 @@ class Test_models(TestCase):
         self.assertEqual(c.date_rappro(), utils.strpdate('2011-08-12'))
         self.assertEqual(models.Compte.objects.get(id=3).date_rappro(), None)
 
-    def test_compte_solde_pointe(self):
-        self.assertEqual(models.Compte.objects.get(id=1).solde_pointe(), 10)
+    def test_compte_solde_pointe_rapp(self):
+        self.assertEqual(models.Compte.objects.get(id=1).solde_pointe_rapp(), -80)
         o = models.Ope.objects.get(id=6)
         o.pointe = True
         o.save()
-        self.assertEqual(models.Compte.objects.get(id=1).solde_pointe(), 20)
-        self.assertEqual(models.Compte.objects.get(id=2).solde_pointe(), 0)
+        self.assertEqual(models.Compte.objects.get(id=1).solde_pointe_rapp(), -70)
+        self.assertEqual(models.Compte.objects.get(id=1).solde(pointe_rapp=True), -70)
+        self.assertEqual(models.Compte.objects.get(id=2).solde_pointe_rapp(), 0)
 
     def test_compte_absolute_url(self):
         c = models.Compte.objects.get(id=1)
@@ -561,6 +561,18 @@ class Test_models(TestCase):
         v.dest.rapp = models.Rapp.objects.get(id=1)
         v.save()
         self.assertEqual(models.Compte.objects.get(id=5).solde_rappro(), 20)
+    def test_compte_solde_espece(self):
+        self.assertEqual(models.Compte.objects.get(id=1).solde_espece(), -70)
+        self.assertEqual(models.Compte.objects.get(id=4).solde_espece(), -6)
+    def test_compte_ajustement_normal(self):
+        c=models.Compte.objects.get(id=1)
+        c.ajustement(datel=datetime.date(2012, 11, 30),montant_vrai=0)
+        self.assertEqual(models.Ope.objects.filter(compte_id=1).count(),9)
+        self.assertEqual(models.Ope.objects.get(id=14).__unicode__(),u"(14) le 30/11/2012 : 70 EUR a ajustement cpt: cpte1")
+        #on verifie que si on fait un ajustement et qu'il est deja fait, on fait rien
+        c.ajustement(datel=datetime.date(2012, 12, 30),montant_vrai=0)
+        self.assertEqual(models.Ope.objects.filter(compte_id=1).count(),9)
+
 
     def test_ope_titre_invest(self):
         """invest est le montant"""
@@ -844,7 +856,7 @@ class Test_models(TestCase):
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
         self.assertEquals(o.moyen_id, 1)
 
-    def test_uuid1(self):
+    def test_uuid_ope(self):
         """on verifie que l'uuid ne change pas si on sauve"""
         o = models.Ope.objects.get(pk=4)
         o.montant = 245
@@ -854,6 +866,7 @@ class Test_models(TestCase):
         self.assertEqual(o.uuid, uuid)
 
     def test_uuid_cree(self):
+        """on verifie que c'est un uuid qui est bien renseigne et qu'il ne change pas si il est sauve"""
         o = models.Ope.objects.create(tiers_id=1, compte_id=1, cat_id=1, moyen_id=1, date=utils.now())
         uuid = o.uuid
         o.save()
@@ -1150,18 +1163,44 @@ class Test_models(TestCase):
         self.assertRaises(IntegrityError, models.Ope.objects.get(id=3).delete)
 
     def test_ope_ope_titre(self):
-        o = models.Ope.objects.get(pk=10)
-        self.assertEqual(o.opetitre.id, 4)
+        """verfication qu'un ope a bien une ope titre"""
+        self.assertEqual(models.Ope.objects.get(pk=10).opetitre.id, 4)
+        self.assertEqual(models.Ope.objects.get(pk=11).opetitre, None)
 
     def test_ope_ope_titre2(self):
+        """test si vente"""
         t = models.Titre.objects.get(id=1)
         c = models.Compte.objects.get(id=4)
         c.vente(t, 2)
         o = models.Ope.objects.get(pk=15)
         self.assertEqual(o.opetitre.id, 5)
 
-    def test_ope_ope_titre3(self):
-        self.assertEqual(models.Ope.objects.get(pk=11).opetitre, None)
+    def test_ope_titre_3(self):
+        """test titres encours"""
+        t = models.Titre.objects.get(id=1)
+        c = models.Compte.objects.get(id=4)
+        models.Cours.objects.get(id=1).delete()
+        o=models.Ope_titre.objects.get(id=1)
+        o.cours=5
+        o.save()
+
+
+    def test_pre_delete_ope_titre_rapp_ope_ost(self):
+        #on rapproche l'ope ost
+        o = models.Ope_titre.objects.get(id=4)
+        o.ope_ost.rapp_id = 1
+        o.save()
+        self.assertRaises(IntegrityError, models.Ope_titre.objects.get(id=4).delete)
+    def test_pre_delete_ope_titre_rapp_ope_pmv(self):
+        t = models.Titre.objects.get(id=1)
+        c = models.Compte.objects.get(id=4)
+        c.vente(t, 2)
+        #on rapproche l'ope ost
+        o = models.Ope_titre.objects.get(id=5)
+        o.ope_pmv.rapp_id = 1
+        o.save()
+        self.assertRaises(IntegrityError, models.Ope_titre.objects.get(id=5).delete)
+
 
     def test_pre_delete_ope_mere(self):
         o = models.Ope.objects.get(id=8)
@@ -1283,6 +1322,11 @@ class Test_models(TestCase):
         self.assertEqual(models.Compte.objects.get(id=2).solde(), 40)
         self.assertEqual(v.date, '2010-01-01')
         self.assertEqual(v.notes, 'test_notes')
+    @mock.patch('gsb.utils.today')
+    def test_virement_create_avec_probleme(self, today_mock):
+        today_mock.return_value = datetime.date(2012, 10, 14)
+        self.assertRaises(TypeError, models.Virement.create,models.Compte.objects.get(id=2), models.Compte.objects.get(id=2), 20)
+
 
     def test_virement_delete(self):
         v = models.Virement.create(models.Compte.objects.get(id=1), models.Compte.objects.get(id=2), 20)

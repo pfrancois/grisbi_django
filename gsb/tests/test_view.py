@@ -290,6 +290,19 @@ class Test_forms(Test_view_base):
         self.assertTrue(r)
         self.assertEqual(form.cleaned_data['frais'], -10)
 
+    def test_Ope_titre_dividendeForm1(self):
+        """ajout dividende normal avec un compte non titre"""
+        form_data = {'date': "02/09/2012",
+                     'titre': "3",
+                     'compte_titre': '5',
+                     'compte_espece': '2',
+                     'montant': '10'
+        }
+        cpt_titre = models.Compte.objects.get(id=1)
+        form = gsb_forms.Ope_titre_dividendeForm(data=form_data, cpt=cpt_titre)
+        r = form.is_valid()
+        self.assertTrue(r)
+
     def test_Ope_titre_dividendeForm2(self):
         """ajout dividende normal"""
         form_data = {'date': "02/09/2012",

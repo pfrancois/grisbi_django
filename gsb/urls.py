@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.views.generic import TemplateView
 # from django.conf.urls import include #non utilise actuellement
 from . import views, outils
-from .io import import_csv, export_csv, export_qif
+from .io import import_csv, export_csv
 from .io.import_money_journal import Import_view_money_journal
 from .io import import_titre_csv as import_titres
 from django.conf import settings
@@ -34,17 +34,10 @@ urlpatterns += patterns('gsb',
                         url(r'^options/export/gsb050$', 'io.export_gsb_0_5_0.export', name='export_gsb_050'),
                         # export au format general en csv
                         url(r'^options/export/csv/ope$', export_csv.Export_ope_csv.as_view(), name='export_csv'),
-                        # export en qif
-                        url(r'^options/export/qif$', export_qif.Export_qif.as_view(), name='export_qif'),
                         # export des ope titres
                         url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
                         # export des cours
-                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
-                        # export en sql vers money iphone
-                        #url(r'^options/export/sql/money_iphone$', export_sql_money.Export_view_sql.as_view(), name='export_sql_money_iphone'),
-                        # export en csv vers pocket money iphone
-                        url(r'^options/export/csv/pocket_money$', export_csv.Export_ope_pocket_money_csv_view.as_view(),
-                            name='export_csv_pocket_money'),
+                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours')
 )
 
 # version grisbi 0.5.0

@@ -915,3 +915,6 @@ gsb.titre:
         nom: autre 2
         type: ''
         uuid: 61a6674d-7f28-427b-8cf7-25ad2ac07f05
+gsb.config:
+    1:
+        derniere_import_money_journal: 2013-05-22 18:51:40.571000+00:00
