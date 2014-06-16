@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 # from django.conf.urls import include #non utilise actuellement
 from . import views, outils
 from .io import import_csv, export_csv
-from .io.import_money_journal import Import_view_money_journal
 from .io import import_titre_csv as import_titres
 from django.conf import settings
 # les vues generales
@@ -47,7 +46,6 @@ urlpatterns += patterns('',
                         url(r'options/import/csv/simple$', import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(),
                             name="import_csv_ope_simple"),
                         url(r'options/import/csv/titres$', import_titres.Import_csv_ope_titre.as_view(), name="import_csv_ope_titre_all"),
-                        url(r'options/import/csv/money_journal$', Import_view_money_journal.as_view(), name="import_csv_ope_money_journal"),
 )
 
 

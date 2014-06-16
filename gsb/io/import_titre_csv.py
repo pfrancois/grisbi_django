@@ -21,7 +21,7 @@ class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException("erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
+            raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
 
     @property
     def titre(self):
@@ -110,7 +110,7 @@ class Import_csv_ope_titre(import_base.Import_base):
             for err in self.erreur:
                 messages.warning(self.request, err)
             return False
-        for ope in self.opes.create_item:
+        for ope in self.opes.created_items:
             compte = models.Compte.objects.get(id=ope['compte_id'])
             if compte.type != 't':
                 messages.warning(self.request, u'attention, compte non compte_titre %s ligne %s' % (compte.nom, ope['ligne']))

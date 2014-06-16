@@ -129,13 +129,13 @@ def import_gsb_050(nomfich, request, efface_table=True):
                 # dans les notes ISIN@TYPE
                 if not s[1]:  # pas de @ et donc pas de type
                     if s[0] == '':
-                        titre.isin = "ZZ%sN%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
+                        titre.isin = import_base.isin_default()
                     else:
                         titre.isin = s[0]
                     titre.type = "ZZZ"
                 else:
                     if s[0] == '':  # pas d'isin
-                        titre.isin = "XX%sN%s" % (utils.today().strftime('%d%m%Y'), nb_titre)
+                        titre.isin = import_base.isin_default()
                     else:
                         titre.isin = s[0]
                     if s[2] in liste_type_titre:  # verification que le type existe

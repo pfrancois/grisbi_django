@@ -1,0 +1,11 @@
+id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois
+1234;cpte1;2013/18/12;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12
+1436547;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;
+2;cpte1;;-100,00;cpte1201101;0;moyen_dep1;Non affecté;tiers1;;;12345678
+6;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 =>;;
+7;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cpte1;;
+8;cpt_titre2;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;
+9;cptb3;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12
+1436548;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;t1;1@1;;
+
+9;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12

@@ -18,6 +18,9 @@ from .. import models
 from .. import views
 from .. import utils
 
+def isin_default():
+    nb=max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'],0)+1
+    return "ZZ_%s"%nb
 
 class ImportException(Exception):
     """exception specifique pour les import
@@ -154,7 +157,7 @@ class Table(object):
         #dict qui referme juste les id (cache)
         self.id = dict()
         #dict qui renferme les objects a creer
-        self.create_item = list()
+        self.created_items = list()
         #la requete qui demande ca, utile pour les messages
         self.request = request
         if self.auto() is not None:
@@ -182,7 +185,7 @@ class Table(object):
             pk = self.id[nom]
             #si c'est pas dans le cache
         except KeyError:
-            #on essaye de voir si l'objet existe ds la base de donne
+            #on essaye de voir si l'objet existe ds la base de donnee
             try:
                 if obj is None:
                     arguments = {"nom": nom}
@@ -212,7 +215,7 @@ class Table(object):
                     #une fois cree on met a jour le cache
                     pk = created.pk
                     self.id[nom] = pk
-                    self.create_item.append(created)
+                    self.created_items.append(created)
                     # noinspection PyProtectedMember
                     messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
@@ -223,7 +226,10 @@ class Table(object):
 
     def arg_def(self, nom, obj=None):
         """fonction qui renvoi les element de l'objet a creer"""
-        raise NotImplementedError("methode arg_def non defini")
+        if obj is not None:
+            return obj
+        else:
+            raise NotImplementedError("methode arg_def non defini")
 
 
 class Cat_cache(Table):
@@ -240,9 +246,12 @@ class Cat_cache(Table):
                 {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
                 {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
                 {'nom': u"Non affecté", 'defaults': {'nom': u"Non affecté", 'type': 'd'}},
-        ]
+                {'nom': u"Avance", 'defaults': {'nom': u"Avance", 'type': 'd'}},
+                {'nom': u"Remboursement", 'defaults': {'nom': u"Remboursement", 'type': 'r'}},]
 
     def arg_def(self, nom, obj=None):
+        """definition des argument par defaut
+        on prend le nom et lq categorie depense"""
         if obj is None:
             return {"nom": nom, "type": 'd'}
         else:
@@ -251,29 +260,21 @@ class Cat_cache(Table):
 
 class Moyen_cache(Table):
     element = models.Moyen
-
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
                 {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
                 {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
+                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'v'}},
         ]
 
-    def goc(self, nom, obj=None, montant=None):
+    def goc(self, nom="", obj=None, montant=-1):
+        #pas besoin d'argdef car comme on redefini cette methode
         if obj is not None:
             return super(Moyen_cache, self).goc('', obj=obj)
-        if montant is None:
-            raise ValueError('attention, vous devez remplir soit obj soit montant')
         if montant > 0:
             return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "r"})
         else:
             return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "d"})
-
-    def arg_def(self, nom, obj=None):
-        if obj is None:
-            return {"nom": nom, "type": 'd'}
-        else:
-            return obj
-
 
 class IB_cache(Table):
     element = models.Ib
@@ -287,7 +288,6 @@ class IB_cache(Table):
 
 class Compte_cache(Table):
     element = models.Compte
-
     def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'b', 'moyen_credit_defaut_id': settings.MD_CREDIT, 'moyen_debit_defaut_id': settings.MD_DEBIT}
@@ -333,7 +333,7 @@ class Titre_cache(Table):
 
     def arg_def(self, nom, obj=None):
         if obj is None:
-            return {"nom": nom, 'isin': utils.now().isoformat(), "type": "ZZZ"}
+            return {"nom": nom, 'isin':isin_default(), "type": "ZZZ"}
         else:
             return obj
 
@@ -360,7 +360,7 @@ class Cours_cache(Table):
             except self.element.DoesNotExist:
                 arg_def = {'titre_id': titre_id, 'date': date, "valeur": montant}
                 el = models.Cours.objects.create(**arg_def)
-                self.create_item.append(el)
+                self.created_items.append(el)
                 self.nb_created += 1
                 pk = el.id
         if self.id.get(titre_id) is not None:
@@ -378,7 +378,7 @@ class Ope_cache(Table):
         raise NotImplementedError("methode goc non defini")
 
     def create(self, ope):
-        self.create_item.append(ope)
+        self.created_items.append(ope)
         self.nb_created += 1
 
 
@@ -406,6 +406,7 @@ class Rapp_cache(Table):
             return None
 
     def arg_def(self, nom, obj=None):
+
         if not obj:
             return {"nom": nom, 'date': self.date_en_cours}
         else:
@@ -425,16 +426,7 @@ class moyen_defaut_cache(object):
     def __init__(self):
         self.id = {}
         for c in models.Compte.objects.all():
-            try:
-                credit = c.moyen_credit().id
-            except models.Moyen.DoesNotExist:
-                credit = None
-            try:
-                debit = c.moyen_debit().id
-            except models.Moyen.DoesNotExist:
-                debit = None
-
-            self.id[c.nom] = {"c": credit, "d": debit}
+            self.id[c.nom] = {"c": c.moyen_credit().id, "d": c.moyen_debit().id}
 
     def goc(self, compte, montant):
         if compte in self.id.keys():

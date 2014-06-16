@@ -63,8 +63,7 @@ def _export(request):
     #####comptes###
     xml_comptes = et.SubElement(xml_root, "Comptes")
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
-    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(
-        ["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
+    et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0)  # NOT IN BDD
     nb_compte = 0
     # --boucle des comptes

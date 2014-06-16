@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import datetime
+import calendar
 import time
 import decimal
 import csv
@@ -14,25 +15,17 @@ from django.utils import timezone
 import locale
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_unicode, smart_unicode
 from uuid import uuid4
-
-__all__ = ['FormatException', 'validrib', 'validinsee', 'datefr2datesql', 'is_number', 'fr2decimal',
-           'strpdate', 'today', 'now', 'timestamp', 'to_unicode', 'to_id', 'to_bool', 'to_decimal',
-           'to_date', 'datetostr', 'booltostr', 'floattostr', 'typetostr', 'idtostr', 'UTF8Recoder', 'Excel_csv',
-           'Csv_unicode_reader', 'uuid', 'Excel_csv', 'nulltostr', 'is_onexist', 'switch', 'Compfr',
-           'find_files']
-
 
 class FormatException(Exception):
     """une classe exception qui permet d'affcher tranquillement ce que l'on veut"""
     def __init__(self, message):
         super(FormatException, self).__init__(message)
-        self.msg = message
+        self.msg = smart_unicode(message)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.msg
-
 
 def uuid():
     """raccourci vers uuid4"""
@@ -278,6 +271,11 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y', gsb=False):
         else:
             raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 
+def datetotimestamp(s):
+    if s:
+        return calendar.timegm(s.timetuple())
+    else:
+        return 0
 
 def booltostr(s, defaut='0'):
     """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
@@ -391,7 +389,7 @@ class Csv_unicode_reader(object):
     champs = None
 
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
-        self.line_num = 0
+        self.line_num = 1
         fich = UTF8Recoder(fich, encoding)
         self.reader = csv.DictReader(fich, dialect=dialect, fieldnames=self.champs, **kwds)
 

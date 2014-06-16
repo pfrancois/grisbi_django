@@ -1,0 +1,10 @@
+id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq
+10;cpte1;01/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;memonormal;;
+11;cpte1;02/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;
+13;cpte1;03/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;
+14;cpte1;04/12/2012;-100,00;Rapp;0;moyen_vir4;Virement;cpte1 => cptb3;memonormal;;
+15;cpte1;05/12/2013;-100,00;Rapp;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;
+16;cpte1;06/12/2013;-100,00;Rapp;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;
+17;cpte1;07/12/2013;-100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;memonormal;;
+18;cpte1;08/12/2013;-100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;
+19;cpte1;09/12/2013;-100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;>P;;

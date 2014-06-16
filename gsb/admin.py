@@ -187,16 +187,23 @@ class Modeladmin_perso(admin.ModelAdmin):
             if (self.id_ope is None) or (self.table_annexe is None):
                 raise ImproperlyConfigured
             else:
-                return super(Modeladmin_perso, self).queryset(request).extra(select={
-                    'nb_opes': 'select count(*) from gsb_ope'
-                                'WHERE (gsb_ope.%s = %s.id '
-                                        'AND NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope '
-                                        'WHERE (id IS NOT NULL AND mere_id IS NOT NULL))))' % (
-                        self.id_ope, self.table_annexe), }, )
+                sql = """select count(*) from gsb_ope
+                         WHERE (gsb_ope.%s = %s.id AND
+                                 NOT (gsb_ope.id IN (SELECT mere_id FROM gsb_ope
+                                                      WHERE (id IS NOT NULL AND mere_id IS NOT NULL)
+                                                     )
+                                      )
+                                )""" % (self.id_ope, self.table_annexe)
+                return super(Modeladmin_perso, self).queryset(request).extra(select={'nb_opes': sql , }, )
         else:
             return super(Modeladmin_perso, self).queryset(request)
 
     def nb_opes(self, inst):
+        """
+        renvoie le nombre d'ope pour l'objet instancie
+        @param inst: object instancie
+        @return: integer
+        """
         return inst.nb_opes
 
     nb_opes.admin_order_field = 'nb_opes'
@@ -303,12 +310,16 @@ class Cat_admin(Modeladmin_perso):
     table_annexe = "gsb_cat"
 
     def has_delete_permission(self, request, obj=None):
+        """verification des permission"""
         if obj is None:
             return True
+        #si l'id fait partie des id decide en setting pas le droit
         if obj.id in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
             return False
+        #idem mais label
         if obj.nom in (u"Frais bancaires", u"Opération Ventilée"):
             return False
+        #sinon c'est possible
         return True
 
 

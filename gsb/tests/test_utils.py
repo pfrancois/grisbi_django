@@ -213,3 +213,6 @@ class Test_utils(TestCase):
     def test_is_one_exist(self):
         self.assertEqual(utils.is_onexist(Cat.objects.get(id=64),attribut='nom'),True)
         self.assertEqual(utils.is_onexist(Cat.objects.get(id=64),attribut='gfjdjh'),False)
+    def test_datetotimestamp(self):
+        self.assertEqual(utils.datetotimestamp(None),0)
+        self.assertEqual(utils.datetotimestamp(datetime.date(1999, 1, 10)),915926400)

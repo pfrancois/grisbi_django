@@ -270,7 +270,7 @@ class Test_models(TestCase):
     def test_cat_fusionne(self):
         models.Cat.objects.get(nom="cat2").fusionne(models.Cat.objects.get(nom="cat1"))
         # on verfie qu'elle est effface
-        self.assertQuerysetEqual(models.Cat.objects.all().order_by('id'), [1, 3, 4, 54, 64, 65, 66, 67, 68, 69, 70], attrgetter("id"))
+        self.assertQuerysetEqual(models.Cat.objects.all().order_by('id'), [1, 3, 4, 54, 64, 65, 66, 67, 68, 69, 70, 71, 72], attrgetter("id"))
         self.assertQuerysetEqual(models.Ope.objects.filter(cat__nom="cat1").order_by('id'), [4, 5, 6, 7, 12, 13], attrgetter("id"))
         self.assertQuerysetEqual(models.Echeance.objects.filter(cat__nom="cat1").order_by('id'), [1, 2, 5, 6, 7], attrgetter("id"))
 
@@ -742,7 +742,7 @@ class Test_models(TestCase):
 
     def test_moyen_fusionne(self):
         models.Moyen.objects.get(id=3).fusionne(models.Moyen.objects.get(id=2))
-        self.assertQuerysetEqual(models.Moyen.objects.order_by('id'), [1, 2, 4, 5, 6], attrgetter("id"))
+        self.assertQuerysetEqual(models.Moyen.objects.order_by('id'), [1, 2, 4, 5, 6, 7], attrgetter("id"))
         self.assertQuerysetEqual(models.Compte.objects.filter(moyen_credit_defaut__id=2).order_by('id'), [], attrgetter("id"))
         self.assertQuerysetEqual(models.Compte.objects.filter(moyen_debit_defaut__id=2).order_by('id'), [4, 5], attrgetter("id"))
         self.assertQuerysetEqual(models.Echeance.objects.filter(moyen__id=2).order_by('id'), [3, 4, 8], attrgetter("id"))
