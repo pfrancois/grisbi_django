@@ -19,13 +19,14 @@ from django.db.models import Q
 import gsb.model_field as models_gsb
 from gsb import utils
 from colorful.fields import RGBColorField
+#from audit_log.models.fields import LastUserField
+from audit_log.models.managers import AuditLog
 
-
-class Gsb_exc(Exception):
+class Gsb_exc(utils.utils_Exception):
     pass
 
 
-class Ex_jumelle_neant(Exception):
+class Ex_jumelle_neant(utils.utils_Exception):
     pass
 
 
@@ -382,6 +383,14 @@ class Cat(models.Model):
         self.delete()
         return nb_change
 
+    @property
+    def is_editable(self):
+        if self.pk in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV,
+                       settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
+            return False
+        if self.nom in (u"Opération Ventilée",u"Frais bancaires", u"Non affecté", u"Avance", u"Remboursement"):
+            return False
+        return True
 
 class Ib(models.Model):
     """imputations budgetaires
@@ -514,7 +523,7 @@ class Compte(models.Model):
         """renvoie le solde du compte
             @param datel : date date limite de calcul du solde
             @param rapp : boolean faut il prendre uniquement les opération rapproches
-            @param pointe: boolean
+            @param pointe_rapp: boolean
             @param espece : si c'est un compte espece d'un compte titre (fonctionne egalement pour les comptes normaux)
         """
         query = Ope.non_meres().filter(compte__id__exact=self.id)
@@ -780,7 +789,6 @@ class Compte(models.Model):
             return u"opération ({}) crée ".format(ope)
         else:
             return "rien a modifier"
-
 
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
@@ -1319,15 +1327,18 @@ class Ope(models.Model):
     def is_editable(self):
         if self.is_mere:
             return False
-        if self.rapp:
+        if self.rapp is not None:
             return False
         if self.compte.ouvert is False:
             return False
-        else:
-            if self.jumelle:
-                if self.jumelle.rapp:
-                    return False
-            return True
+        if self.jumelle:
+            if self.jumelle.rapp:
+                return False
+        if self.ope_titre_ost is not None or self.ope_titre_pmv is not None:
+            return False
+        if self.jumelle is not None and (self.jumelle.pointe or self.jumelle.rapp is not None):
+            return False
+        return True
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -1348,12 +1359,16 @@ class Ope(models.Model):
         super(Ope, self).save(*args, **kwargs)
 
 
-class db_log(models.Model):
+class Db_log(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     datamodel = models.CharField(null=False,max_length=20)
     id_model = models.IntegerField()
     uuid = models.CharField(null=False,max_length=255)
     memo = models.CharField(null=False,max_length=255)
+
+    def __unicode__(self):
+        actions={'I':u"insert",'U':u"update",'D':u"delete"}
+        return u"({obj.id}) {action} le {obj.date_created} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],obj=self)
 
 # noinspection PyUnusedLocal
 @receiver(post_save, sender=Ope, weak=False)
@@ -1366,14 +1381,6 @@ def ope_fille(sender, **kwargs):
             self.mere.montant = self.mere.tot_fille
             self.mere.save()
 
-
-# noinspection PyUnusedLocal
-#@receiver(pre_delete,weak=False)
-def db_log_delete(sender,**kwargs):
-    db_log.objects.create(datamodel=sender.__name__,
-                          id_model=sender.id,
-                          memo="%s"%sender,
-                          uuid=sender.uuid)
 
 
 # noinspection PyUnusedLocal

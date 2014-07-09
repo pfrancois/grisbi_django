@@ -13,7 +13,8 @@ from dateutil.relativedelta import relativedelta
 
 from ... import models
 from ... import utils
-
+from django.utils.encoding import smart_unicode
+import pprint
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
@@ -28,7 +29,6 @@ class Command(BaseCommand):
             pass
         sql = sqlite.connect(nomfich)
         retour = proc_sql_export(sql, self.stdout.write)
-
         self.stdout.write(retour)
 
 
@@ -83,18 +83,17 @@ def proc_sql_export(sql, log=None):
             lastupdate DOUBLE);
         """)
     param = {}
-    nbcat = 0
+    list_cat_id=list(models.Cat.objects.order_by('id').values_list('id',flat=True))
     for cat in models.Cat.objects.order_by('nom'):
-        nbcat += 1
         param['id'] = cat.id
-        param['name'] = cat.nom
-        param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="FFFFFF")[1:], 16)
-        param['place'] = nbcat
-        param['lastupdate'] = time.mktime(cat.lastupdate.timetuple())
-        if cat.type == 'd':
-            param['type'] = 2
-        else:
+        param['name'] = smart_unicode(cat.nom)
+        param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="#FFFFFF")[1:], 16)
+        param['place'] = list_cat_id.index(cat.id)
+        param['lastupdate'] = utils.datetotimestamp(cat.lastupdate)
+        if cat.type == 'r':
             param['type'] = 1
+        else:
+            param['type'] = 2
         cur.execute(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
     sql.commit()
     log('cat et sous cat')
@@ -127,15 +126,14 @@ def proc_sql_export(sql, log=None):
     param = {}
     liste_compte = models.Compte.objects.all().order_by('id')
     i = 0
-    typescpt = [b[0] for b in models.Compte.typescpt]
     for cpt in liste_compte:
         i += 1
         param['id'] = cpt.id
-        param['name'] = cpt.nom
-        param['symbol'] = typescpt.index(cpt.type)
+        param['name'] = smart_unicode(cpt.nom)
+        param['symbol'] = i//9
         param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = i
-        param['lastupdate'] = time.mktime(cpt.lastupdate.timetuple())
+        param['lastupdate'] = utils.datetotimestamp(cpt.lastupdate)
         cur.execute(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
     sql.commit()
     log('comptes')
@@ -163,14 +161,16 @@ def proc_sql_export(sql, log=None):
     )
     param = {}
     nbope = 0
-    for ope in models.Ope.objects.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "ope_pmv", "moyen"):
+    pk_avance=models.Cat.objects.get_or_create(nom='Avance',  defaults={"nom":'Avance'})[0]
+    pk_remboursement=models.Cat.objects.get_or_create(nom='remboursement',  defaults={"nom":'remboursement'})[0]
+    for ope in models.Ope.objects.select_related('cat', "compte", "tiers", "moyen"):
         nbope += 1
         param['id'] = ope.id
         # gestion des paiments on recupere l'id qui va bien
         param['payment'] = ope.compte.id
         param['category'] = utils.nulltostr(ope.cat.id)
         param['memo'] = ope.tiers.nom
-        param['amount'] = abs(float(str(ope.montant)))
+        param['amount'] = abs(float(utils.idtostr(ope, membre="montant",defaut=0)))
         param['subcategory'] = None
         param['currency'] = 2
         param['date'] = 0
@@ -192,7 +192,19 @@ def proc_sql_export(sql, log=None):
         param['place'] = None
         param['day'] = ope.date.strftime('%Y%m%d')
         param['lastupdate'] = time.mktime(ope.lastupdate.timetuple())
-        if ope.cat.nom in (u"Opération Ventilée",):
+        if ope.cat.nom not in (u"Opération Ventilée","Virement"):
+            if ope.montant > 0:
+                if ope.cat.type == 'r':
+                    param['category'] = utils.nulltostr(ope.cat.id)
+                else:
+                    param['category'] = utils.nulltostr(pk_avance.pk)
+            else:
+                if ope.cat.type == 'd':
+                    param['category'] = utils.nulltostr(ope.cat.id)
+                else:
+                    param['category'] = utils.nulltostr(pk_remboursement.pk)
+        else:
+            param['category'] = utils.nulltostr(ope.cat.id)
             param['amount'] = 0
         cur.execute(u"""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
             :amount,:date,:photo,:voice,:payee,:note,:account,:type,:repeat,:place,:lastupdate,:day);""", param)

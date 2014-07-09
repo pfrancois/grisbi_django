@@ -13,6 +13,8 @@ from django.contrib.messages import get_messages
 from django.conf import settings
 from unittest.util import safe_repr
 from gsb import utils
+from django.utils.encoding import smart_unicode
+from testfixtures import compare
 
 #from operator import attrgetter
 
@@ -88,8 +90,12 @@ class TestCase(Test_Case_django):
 
     # noinspection PyProtectedMember
     def assertmessagecontains(self, request, text, level=None):
+
         messages = get_messages(request)
-        matches = [m for m in messages if text == m.message]
+        matches=[]
+        for m in messages:
+            if text == m.message:
+                matches.append(m)
         if len(matches) > 0:
             msg = matches[0]
             if level is not None and msg.level != level:
@@ -97,51 +103,64 @@ class TestCase(Test_Case_django):
             else:
                 return
         else:
-            messages_str = pprint.pformat(['"%s"' % m for m in messages],indent=4)
-            self.fail("No message contained text '%s', messages were: \n%s" % (text, messages_str))
+            messages_str = u"[\n"
+            for m in messages:
+                messages_str +=  u"\t'"+m.message + u"',\n"
+            messages_str += u"]"
+            self.fail(u"No message contained text '%s', messages were: \n%s" % (text, messages_str))
 
     def assertreponsequal(self, reponse_recu, reponse_attendu, fichier=False, unicode_encoding=None, nom=""):
+        rr_iter=list()
+        ra_iter=list()
         if nom != "":
             nom = "%s_" % nom
         if unicode_encoding is None:
             unicode_encoding = "utf-8"
-        rr_iter = reponse_recu.splitlines()
+        try:
+            for l in reponse_recu.splitlines():
+                rr_iter.append(smart_unicode(l,unicode_encoding))
+        except AttributeError:
+            for l in reponse_recu:
+                rr_iter.append(smart_unicode(l,unicode_encoding))
         if not fichier:
-            ra_iter = reponse_attendu.splitlines()
+            try:
+                for l in reponse_attendu.splitlines():
+                    ra_iter.append(smart_unicode(l,unicode_encoding))
+            except AttributeError:
+                for l in reponse_attendu:
+                    ra_iter.append(smart_unicode(l,unicode_encoding))
         else:  # c'est le cas des fichier par exemple
             ra_iter = []
-            for r in reponse_attendu:
-                if not isinstance(r, unicode):
-                    r = r.decode(unicode_encoding)
-                r = r.replace('\n', '')
-                r = r.replace('\r', '')
-                ra_iter.append(r)
+            for l in reponse_attendu:
+                l = l.replace('\n', '')
+                l = l.replace('\r', '')
+                ra_iter.append(smart_unicode(l,unicode_encoding))
         try:
-            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%srecu.txt" % nom), 'w', "utf-8")
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%s_recu.txt" % nom), 'w', "utf-8")
             for l in rr_iter:
                 fichier.write(l)
                 fichier.write('\n')
             fichier.close()
-            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%sattendu.txt" % nom), 'w', unicode_encoding)
+            fichier = codecs.open(os.path.join(settings.PROJECT_PATH, "upload", "%s_attendu.txt" % nom), 'w', unicode_encoding)
             for l in ra_iter:
                 fichier.write(l)
                 fichier.write('\n')
         finally:
             fichier.close()
-        if len(ra_iter) != len(rr_iter):
-            msg = "nb ligne recu:%s != nb ligne attendu:%s" % (len(rr_iter), len(ra_iter))
-            raise self.fail(msg)
-        msg = u""
-        for ra, rr in zip(ra_iter, rr_iter):
-            if not isinstance(ra, unicode):
-                ra = unicode(ra, unicode_encoding)
-            if rr != ra:
-                msg = u"%s\nrecu:'%s'\natt :'%s'" % (msg, rr, ra)
-        if msg != u"":
-            raise self.fail(msg)
+        compare("\n".join(reponse_recu),"\n".join(reponse_attendu))
 
-    def assertfileequal(self, reponse_recu, fichier, unicode_encoding=None, nom=""):
+    def assertfileequal(self, reponse_recu, fichier, nom="", unicode_encoding=None):
         fichier = open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", fichier), 'r')
         attendu = fichier.readlines()
         fichier.close()
         self.assertreponsequal(reponse_recu, attendu, True, unicode_encoding, nom)
+    def assert2filesequal(self,nom_fichier_recu, nom_fichier_attendu, nom="", unicode_encoding=None):
+        if not os.path.isfile(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_recu)):
+            self.fail(nom_fichier_recu)
+        if not os.path.isfile(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_attendu)):
+            self.fail(nom_fichier_attendu)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_recu), 'r') as fichier_recu:
+            reponse_recu = fichier_recu.read().splitlines()
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_attendu), 'r') as fichier_attendu:
+            attendu = fichier_attendu.read().splitlines()
+        self.assertreponsequal(reponse_recu, attendu, False, unicode_encoding, nom)

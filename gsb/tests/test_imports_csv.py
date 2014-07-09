@@ -21,7 +21,7 @@ import gsb.utils as utils
 from gsb import models
 from gsb.io import import_base
 from  gsb.io import import_csv
-import shutil
+#import shutil
 __all__ = ['Test_import_csv1', 'Test_import_base','Test_import_csv2']
 
 
@@ -528,11 +528,3 @@ class Test_import_base(Test_import_abstract):
         opes.create("opes")
         self.assertEqual(opes.created_items,["opes",])
         self.assertEqual(opes.nb_created,1)
-
-#@override_settings(DIR_DROPBOX=r"D:\django\gsb\gsb\test_files")
-class Test_import_money_journal(Test_import_abstract):
-    def tearDown(self):
-        shutil.rmtree(os.path.join(r"D:\django\gsb\gsb\test_files\export_plist", 'Applications', 'Money Journal', 'log'),ignore_errors=True)
-    def test_money_journal_element(self):
-        pass
-

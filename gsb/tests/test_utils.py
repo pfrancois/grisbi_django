@@ -5,13 +5,11 @@ test utils
 from __future__ import absolute_import
 import datetime
 import decimal
-import time
 import os
 
 from django.test import SimpleTestCase
-import mock
+from testfixtures import Replacer,test_datetime
 import django.utils.timezone as timezone
-import pytz
 
 from .test_base import TestCase
 from .. import utils
@@ -73,21 +71,15 @@ class Test_utils1(SimpleTestCase):
         self.assertEquals(utils.strpdate(None), datetime.date(1, 1, 1))
         self.assertRaises(ValueError, utils.strpdate, "2011-12-52")
 
-    @mock.patch('django.utils.timezone.now')
-    def test_now_utc(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.utc)
-        self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1, tzinfo=timezone.utc))
-        self.assertEquals(utils.now(utc=False), datetime.datetime(2010, 1, 1, tzinfo=pytz.utc).astimezone(pytz.timezone('Europe/Paris')))
+    def test_now_utc(self):
+        with Replacer() as r:
+            r.replace('gsb.utils.datetime.datetime',test_datetime(2010, 1, 1,0,0,0,tzinfo=timezone.utc))
+            self.assertEquals(utils.now(), datetime.datetime(2010, 1, 1,0,0,0, tzinfo=timezone.utc))
 
-    @mock.patch('django.utils.timezone.now')
-    def test_timestamp(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.utc)
-        self.assertEquals(utils.timestamp(), time.mktime(datetime.datetime(2010, 1, 1, tzinfo=timezone.utc).timetuple()))
-
-    @mock.patch('django.utils.timezone.now')
-    def test_today(self, today_mock):
-        today_mock.return_value = datetime.datetime(2010, 1, 1, tzinfo=timezone.get_current_timezone())
-        self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
+    def test_today(self):
+        with Replacer() as r:
+            r.replace('gsb.utils.datetime.datetime',test_datetime(2010, 1, 1,0,0,0,tzinfo=timezone.utc))
+            self.assertEquals(utils.today(), datetime.date(2010, 1, 1))
 
     def test_datetostr(self):
         d = utils.strpdate('2011-01-01')
@@ -168,20 +160,24 @@ class Test_utils1(SimpleTestCase):
         compfr = utils.Compfr()
         self.assertEquals(sorted([u'vice' + u'\xA0' + u'versa', 'pêche', 'PÈCHE', 'PÊCHE'], cmp=compfr),
                           ['PÈCHE', 'pêche', 'PÊCHE', u'vice' + u'\xA0' + u'versa'])
+
     def test_compfr4(self):
         """trie avec des chiffre te des lettres"""
         compfr = utils.Compfr()
         self.assertEquals(sorted([4, 'a', 0, 1], cmp=compfr), [0, 1, 4, 'a'])
+
     def test_nulltostr(self):
         self.assertEquals(utils.nulltostr(''),'NULL')
         self.assertEquals(utils.nulltostr(136554),136554)
         self.assertEqual(utils.nulltostr('test'),'test')
+
     def test_find_files(self):
         self.assertEqual([os.path.join(settings.PROJECT_PATH,'gsb','fixtures','auth.json'),
-                          os.path.join(settings.PROJECT_PATH,'gsb','fixtures','test.yaml')],
+                          os.path.join(settings.PROJECT_PATH,'gsb','fixtures','test.yaml'),
+                          os.path.join(settings.PROJECT_PATH,'gsb','fixtures','test_money_journal.yaml')],
                          [x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'))])
         self.assertEqual([],[x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'),'*.txt')])
-        self.assertEqual(['D:\\django\\gsb\\gsb\\fixtures\\auth.json'],
+        self.assertEqual([os.path.join(settings.PROJECT_PATH,'gsb','fixtures','auth.json')],
                               [x for x in utils.find_files(os.path.join(settings.PROJECT_PATH,'gsb','fixtures'),'*.json')])
 
 

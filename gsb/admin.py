@@ -314,10 +314,7 @@ class Cat_admin(Modeladmin_perso):
         if obj is None:
             return True
         #si l'id fait partie des id decide en setting pas le droit
-        if obj.id in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
-            return False
-        #idem mais label
-        if obj.nom in (u"Frais bancaires", u"Opération Ventilée"):
+        if not obj.is_editable:
             return False
         #sinon c'est possible
         return True

@@ -22,15 +22,8 @@ def isin_default():
     nb=max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'],0)+1
     return "ZZ_%s"%nb
 
-class ImportException(Exception):
-    """exception specifique pour les import
-    a part signifier que c'est un import pas grand chose de different"""
-    def __init__(self, message):
-        super(ImportException, self).__init__(message)
-        self.msg = message
-
-    def __str__(self):
-        return self.msg
+class ImportException(utils.utils_Exception):
+   pass
 
 
 class ImportForm1(gsb_forms.Baseform):
@@ -239,7 +232,7 @@ class Cat_cache(Table):
         return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': u'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
                 {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
                 {'id': settings.ID_CAT_PMV,
-                 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
+                        'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
                 {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
                 {'id': settings.ID_CAT_COTISATION,
                  'defaults': {'nom': u'Impôts:Cotisations sociales', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
@@ -264,7 +257,7 @@ class Moyen_cache(Table):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
                 {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
                 {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
-                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'v'}},
+                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'd'}},
         ]
 
     def goc(self, nom="", obj=None, montant=-1):

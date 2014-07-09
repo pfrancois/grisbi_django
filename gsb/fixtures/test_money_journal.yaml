@@ -1,0 +1,154 @@
+gsb.config:
+    1:
+        derniere_import_money_journal: 2013-12-22 18:51:40.571000+00:00
+gsb.banque:
+    1:
+        cib: '10001'
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: banque1
+        notes: 'ceci est une note'
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07801
+    2:
+        cib: '99999'
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: banque2
+        notes: ''
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07802
+gsb.cat:
+    1:
+        couleur: '#00000'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        nom: cat_modifie
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07901
+    2:
+        couleur: '#FFFF00'
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        nom: cat_cree
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07902
+    3:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: cat3
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07903
+    4:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: cat4
+        type: v
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07904
+    54:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: "Imp\xF4ts:Cotisations sociales"
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07954
+    64:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: "Op\xE9ration sur titre"
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07964
+    65:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: Virement
+        type: v
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07965
+    66:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: "Op\xE9ration Ventil\xE9e"
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07966
+    67:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: Revenus de placements:interets
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07967
+    68:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: "Non affect\xE9"
+        type: d
+        uuid: 51a7774d-7f28-427b-8cf7-44ad2ac07968
+    69:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: Avance
+        type: d
+        uuid: 51a8884d-7f28-427b-8cf7-44ad2ac07969
+    70:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: Frais bancaires
+        type: d
+        uuid: 51a9994d-7f28-427b-8cf7-44ad2ac07970
+    71:
+        couleur: '#FFFFFF'
+        date_created: 2013-05-23 18:51:40.571000+00:00
+        lastupdate: 2013-05-23 18:51:40.571000+00:00
+        nom: Remboursement
+        type: r
+        uuid: 51a0004d-7f28-427b-8cf7-44ad2ac07971
+    72:
+        couleur: '#FFFFFF'
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        nom: nouvel_cat
+        type: r
+        uuid: 51a0004d-7f28-427b-8cf7-44ad2ac07972
+gsb.compte:
+    1:
+        banque: 1
+        cle_compte: 72
+        couleur: '#00000'
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        guichet: '12345'
+        lastupdate: 2013-06-23 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 1
+        nom: cpte_cree
+        notes: 'compte a updater'
+        num_compte: 01234567890
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: e
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07301
+    2:
+        banque: 1
+        cle_compte: 72
+        couleur: '#00001'
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        guichet: '12346'
+        lastupdate: 2013-06-23 18:51:40.571000+00:00
+        moyen_credit_defaut: 4
+        moyen_debit_defaut: 1
+        nom: cpte_modifie
+        notes: 'compte a updater'
+        num_compte: 01234567890
+        ouvert: true
+        solde_init: '0'
+        solde_mini_autorise: '0'
+        solde_mini_voulu: '0'
+        titulaire: ''
+        type: b
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07302

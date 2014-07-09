@@ -9,8 +9,7 @@ import codecs
 import math
 import os
 import fnmatch
-from django.utils import timezone
-
+import pytz
 #from inspector_panel.panels.inspector import debug
 import locale
 from django.db.models import Max
@@ -18,14 +17,17 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import force_unicode, smart_unicode
 from uuid import uuid4
 
-class FormatException(Exception):
+class utils_Exception(Exception):
     """une classe exception qui permet d'affcher tranquillement ce que l'on veut"""
     def __init__(self, message):
-        super(FormatException, self).__init__(message)
+        super(utils_Exception, self).__init__(message)
         self.msg = smart_unicode(message)
 
     def __unicode__(self):
         return self.msg
+
+class FormatException(utils_Exception):
+    pass
 
 def uuid():
     """raccourci vers uuid4"""
@@ -159,28 +161,15 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
         return datetime.date(1, 1, 1)
 
 
-def now(utc=True):
+def now():
     """ now utilise pour mock dans les tests """
-    if utc:
-        return timezone.now()
-    else:
-        return timezone.localtime(timezone.now())
-
+    dt=datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    return dt
 
 def today():
     """date utilise pour mock et les test
     """
     return now().date()
-
-def timestamp():
-    """ le timestamp de now utilise pour mock dans les tests """
-    return dt2timestamp(now())
-
-
-def dt2timestamp(date):
-    """renvoi le timestamp d'une datetime"""
-    return time.mktime(date.timetuple())
-
 
 #------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
@@ -413,11 +402,20 @@ def is_onexist(objet, attribut):
 
 
     # switch http://code.activestate.com/recipes/410692/"""
-def find_files(path, recherche='*.*'):
+def find_files(path, recherche='*.*',directory_ouptut=False):
     """trouve recursivement les fichiers voulus"""
+    fichiers={}
     for root, dirs, files in os.walk(path):
         for basename in files:
             if fnmatch.fnmatch(basename, recherche):
                 filename = os.path.join(root, basename)
-                yield filename
+                fichiers[basename]=filename
+    for key in sorted(fichiers):
+        yield fichiers[key]
+
+class AttrDict(dict):
+    """http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python"""
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
