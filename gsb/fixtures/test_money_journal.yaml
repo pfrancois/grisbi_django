@@ -152,3 +152,372 @@ gsb.compte:
         titulaire: ''
         type: b
         uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07302
+gsb.moyen:
+    1:
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: DEBIT
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b01
+    2:
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_dep2
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b02
+    3:
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: VISA
+        type: d
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b03
+    4:
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: CREDIT
+        type: r
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b04
+    5:
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: moyen_vir4
+        type: v
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07b05
+gsb.tiers:
+    1:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: tiers1
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f01
+    2:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: tiers2
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f02
+    3:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: Virement
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f03
+gsb.ope:
+    1:
+        _order: 0
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2011-12-18
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 1
+        notes: modifie negatif
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a01
+    2:
+        _order: 0
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2011-12-18
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 4
+        notes: modifie positif
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a02
+    3:
+        _order: 0
+        automatique: false
+        cat: 64
+        compte: 2
+        date: 2011-12-18
+        date_created: null
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        mere: null
+        montant: '-1'
+        moyen: 2
+        notes: 1@1
+        num_cheque: ''
+        ope_titre_ost: 1
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 4
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a03
+    8:
+        _order: 4
+        automatique: false
+        cat: 65
+        compte: 1
+        date: 2011-10-30
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 9
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a08
+    9:
+        _order: 0
+        automatique: false
+        cat: 65
+        compte: 3
+        date: 2011-10-30
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 8
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a09
+    11:
+        _order: 5
+        automatique: false
+        cat: 66
+        compte: 1
+        date: 2012-09-24
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a11
+    12:
+        _order: 6
+        automatique: false
+        cat: 1
+        compte: 1
+        date: 2012-09-24
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: 11
+        montant: '99'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a12
+    13:
+        _order: 7
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2012-09-24
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: 11
+        montant: '1'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a13
+    14:
+        _order: 4
+        automatique: false
+        cat: 65
+        compte: 1
+        date: 2011-10-30
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 15
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a14
+    15:
+        _order: 0
+        automatique: false
+        cat: 65
+        compte: 3
+        date: 2011-10-30
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: 14
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 5
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 3
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a15
+    16:
+        _order: 5
+        automatique: false
+        cat: 66
+        compte: 1
+        date: 2012-09-24
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '100'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a16
+    17:
+        _order: 6
+        automatique: false
+        cat: 1
+        compte: 1
+        date: 2012-09-24
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: 16
+        montant: '99'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a17
+    18:
+        _order: 7
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2012-09-24
+        date_created: 2014-06-23 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: 16
+        montant: '1'
+        moyen: 4
+        notes: ''
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 2
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a18

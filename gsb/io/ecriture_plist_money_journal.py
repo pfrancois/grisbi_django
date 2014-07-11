@@ -22,7 +22,8 @@ class export_icompta_plist(object):
         self.carte_bancaire = carte_bancaire_id
         self.code_device = settings.CODE_DEVICE_POCKET_MONEY
     def ope_unique(self, obj,action_type):
-        print obj
+        action=self.actions[action_type]
+        #print obj
 
     def cat_unique(self, obj,action_type):
         action=self.actions[action_type]
@@ -61,7 +62,8 @@ class export_icompta_plist(object):
         return None
 
     def compte_unique(self, obj,action_type):
-        print obj
+        action=self.actions[action_type]
+        #print obj
     @property
     def filename(self):
         ref_temp = int(utils.datetotimestamp(utils.now()))
@@ -81,8 +83,8 @@ class export_icompta_plist(object):
         return filename
     def all_since_date(self, lastmaj):
         nb=collections.Counter()
-        dict_do=dict()
-        for element in models.Db_log.objects.all().filter(date_created__gte=utils.strpdate(lastmaj)).order_by('date_created'):
+        dict_do={u"ope":list(),u"cat":list(),u'compte':list()}
+        for element in models.Db_log.objects.all().filter(date_created__gte=utils.strpdate(lastmaj)).order_by('id'):
             print element
             nb[element.datamodel]+=1
             if element.datamodel == "ope":
@@ -91,13 +93,10 @@ class export_icompta_plist(object):
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
-                        try:
-                            if element.id_model in dict_do[element.datamodel]:
-                                nb[element.datamodel]-=1
-                            else:
-                                dict_do[element.datamodel].append(element.id_model)
-                        except KeyError:
-                            dict_do[element.datamodel]=[element.id_model,]
+                        if element.id_model in dict_do[element.datamodel]:
+                            nb[element.datamodel]-=1
+                        else:
+                            dict_do[element.datamodel].append(element.id_model)
                 except models.Ope.DoesNotExist:
                     obj=utils.AttrDict()
                     #self.ope_unique(obj)
@@ -107,13 +106,10 @@ class export_icompta_plist(object):
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
-                        try:
-                            if element.id_model in dict_do[element.datamodel]:
-                                nb[element.datamodel]-=1
-                            else:
-                                dict_do[element.datamodel].append(element.id_model)
-                        except KeyError:
-                            dict_do[element.datamodel]=[element.id_model,]
+                        if element.id_model in dict_do[element.datamodel]:
+                            nb[element.datamodel]-=1
+                        else:
+                            dict_do[element.datamodel].append(element.id_model)
                 except models.Cat.DoesNotExist:
                         obj=utils.AttrDict()
                         obj.couleur="#FFFFFF"
@@ -128,13 +124,10 @@ class export_icompta_plist(object):
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
-                        try:
-                            if element.id_model in dict_do[element.datamodel]:
-                                nb[element.datamodel]-=1
-                            else:
-                                dict_do[element.datamodel].append(element.id_model)
-                        except KeyError:
-                            dict_do[element.datamodel]=[element.id_model,]
+                        if element.id_model in dict_do[element.datamodel]:
+                            nb[element.datamodel]-=1
+                        else:
+                            dict_do[element.datamodel].append(element.id_model)
                 except models.Compte.DoesNotExist:
                     obj=utils.AttrDict()
                     #self.compte_unique()
