@@ -762,11 +762,13 @@ class Test_import_money_journal_export(Test_import_abstract):
             for root, dirs, files in os.walk(attendu, topdown=False):
                 for name in files:
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
-            #compare(list_fic_recu,list_fic_attendu)
+
             #compare chaque fichier
-            #self.rep('1403558714000.log',"export_plist_cat_modif")
-            #self.rep('1403558774000.log',"export_plist_cat_crea")
-            #self.rep('1403558834000.log',"export_plist_cat_vir")
-            #compare(nb,collections.Counter({u'cat':4,u'compte':2}))
+            self.rep('1403559794000.log',"export_plist_cat_modif")
+            self.rep('1403559854000.log',"export_plist_cat_crea")
+            self.rep('1403559914000.log',"export_plist_cat_vir")
+            self.rep('1403559974000.log',"export_plist_cat_vir_eff")
+            compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
+            #compare(list_fic_recu,list_fic_attendu)
 
 

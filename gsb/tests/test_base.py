@@ -156,9 +156,9 @@ class TestCase(Test_Case_django):
         self.assertreponsequal(reponse_recu, attendu, True, unicode_encoding, nom)
     def assert2filesequal(self,nom_fichier_recu, nom_fichier_attendu, nom="", unicode_encoding=None):
         if not os.path.isfile(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_recu)):
-            self.fail(nom_fichier_recu)
+            self.fail("%s inexistant"%nom_fichier_recu)
         if not os.path.isfile(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_attendu)):
-            self.fail(nom_fichier_attendu)
+             self.fail("%s inexistant"%nom_fichier_attendu)
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_recu), 'r') as fichier_recu:
             reponse_recu = fichier_recu.read().splitlines()
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_attendu), 'r') as fichier_attendu:
