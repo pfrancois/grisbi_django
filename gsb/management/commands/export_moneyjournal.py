@@ -132,7 +132,7 @@ def proc_sql_export(sql, log=None):
         param['name'] = smart_unicode(cpt.nom)
         param['symbol'] = i//9
         param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
-        param['place'] = i
+        param['place'] = i//9
         param['lastupdate'] = utils.datetotimestamp(cpt.lastupdate)
         cur.execute(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
     sql.commit()

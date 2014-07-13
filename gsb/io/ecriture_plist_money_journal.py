@@ -25,6 +25,41 @@ class export_icompta_plist(object):
         action=self.actions[action_type]
         #print obj
 
+    def compte_unique(self, obj,action_type):
+        action=self.actions[action_type]
+        with open(os.path.join(settings.PROJECT_PATH,'gsb','templates','export_plist','modele_compte.log'))as template:
+            fichier=template.read()
+            #type d'action (IUD)
+            fichier=fichier.replace(u"{{action}}",u"%s"%action)
+            #device code
+            fichier=fichier.replace(u"{{device}}",u"%s"%self.code_device)
+            #couleur
+            color=int(utils.idtostr(obj, membre="couleur", defaut="#FFFFFF")[1:], 16)
+            fichier=fichier.replace(u"{{color}}",u"%s"%color)
+            #last update timestamp
+            if action_type=='I':
+                fichier=fichier.replace(u"{{last_update}}",u"%s"%0)
+            else:
+                fichier=fichier.replace(u"{{last_update}}",u"%s"%utils.datetotimestamp(obj.lastupdate))
+            #pk
+            fichier=fichier.replace(u"{{pk}}",u"%s"%obj.pk)
+            #symbol
+            if action_type  != "D":
+                symbol=list(models.Compte.objects.order_by('id').values_list('id',flat=True)).index(obj.pk)
+            else:
+                symbol=1
+            fichier=fichier.replace(u"{{symbol}}",u"%s"%(symbol//9))
+            #place
+            if action_type  != "D":
+                place=list(models.Compte.objects.order_by('id').values_list('id',flat=True)).index(obj.pk)
+            else:
+                place=1
+            fichier=fichier.replace(u"{{place}}",u"%s"%(place//9))
+            #nom cat
+            fichier=fichier.replace(u"{{nom_compte}}",u"%s"%obj.nom)
+            with codecs.open(os.path.join(self.filename), 'w', "utf-8") as f:
+                f.write(smart_unicode(fichier))
+
     def cat_unique(self, obj,action_type):
         action=self.actions[action_type]
         with open(os.path.join(settings.PROJECT_PATH,'gsb','templates','export_plist','modele_cat.log'))as template:
@@ -61,9 +96,6 @@ class export_icompta_plist(object):
                 f.write(smart_unicode(fichier))
         return None
 
-    def compte_unique(self, obj,action_type):
-        action=self.actions[action_type]
-        #print obj
     @property
     def filename(self):
         ref_temp = int(utils.datetotimestamp(utils.now()))
