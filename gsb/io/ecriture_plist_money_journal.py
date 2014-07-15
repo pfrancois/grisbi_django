@@ -162,7 +162,7 @@ class export_icompta_plist(object):
     def all_since_date(self, lastmaj):
         nb=collections.Counter()
         dict_do={u"ope":list(),u"cat":list(),u'compte':list()}
-        for element in models.Db_log.objects.all().filter(date_created__gte=utils.strpdate(lastmaj)).order_by('id'):
+        for element in models.Db_log.objects.filter(date_created__gte=utils.strpdate(lastmaj)).order_by('id'):
             print element
             nb[element.datamodel]+=1
             if element.datamodel == "ope":

@@ -729,6 +729,9 @@ class Test_import_money_journal_export(Test_import_abstract):
             models.Db_log.objects.create(datamodel="cat",id_model=1,memo="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07901", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.create(datamodel="cat",id_model=2,memo="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07902", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.create(datamodel="cat",id_model=72,memo="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
+            #du fait du auto_add dans le model besoin de deux etapes
+            models.Db_log.objects.create(datamodel="cat",id_model=35,memo="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972", date_created=self.strptime("2012-06-23 18:51:40.571000+00:00"))
+            models.Db_log.objects.filter(id_model=35).update(date_created=self.strptime("2012-06-23 18:51:40.571000+00:00"))
             #on modifie afin d'avoir les bons
             models.Cat.objects.filter(id=4).delete()#la cat 4 a ete efface
             models.Compte.objects.filter(id=1).update(nom="compte_modifie")
@@ -784,10 +787,8 @@ class Test_import_money_journal_export(Test_import_abstract):
             self.comp_file('1403560814000.log',"ope17_ope_fille_cree_1")
             self.comp_file('1403560874000.log',"ope18_ope_fille_cree_2")
             self.comp_file('1403560934000.log',"ope19_efface")
-
-
             compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
-            #compare(list_fic_recu,list_fic_attendu)
+            compare(list_fic_recu,list_fic_attendu)
 
 
 
