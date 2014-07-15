@@ -714,7 +714,7 @@ class Test_import_money_journal_export(Test_import_abstract):
         for d in sorted(efface):
             #print "%s efface"%d
             pass
-    def rep(self,filename,nom):
+    def comp_file(self,filename,nom):
         attendu=os.path.join("export_plist_attendu", 'Applications', 'Money Journal', 'log','140','3','5',filename)
         recu=os.path.join("export_plist", 'Applications', 'Money Journal', 'log','140','3','5',filename)
         self.assert2filesequal(recu,attendu,nom=nom)
@@ -764,11 +764,30 @@ class Test_import_money_journal_export(Test_import_abstract):
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
 
             #compare chaque fichier
-            self.rep('1403559794000.log',"export_plist_cat_modif")
-            self.rep('1403559854000.log',"export_plist_cat_crea")
-            self.rep('1403559914000.log',"export_plist_cat_vir")
-            self.rep('1403559974000.log',"export_plist_cat_vir_eff")
+            self.comp_file('1403559794000.log',"export_plist_cat_modif")
+            self.comp_file('1403559854000.log',"export_plist_cat_crea")
+            self.comp_file('1403559914000.log',"export_plist_cat_vir")
+            self.comp_file('1403559974000.log',"export_plist_cat_vir_eff")
+            self.comp_file('1403560034000.log',"export_plist_compte_update")
+            self.comp_file('1403560094000.log',"export_plist_compte_insert")
+            self.comp_file('1403560154000.log',"ope1_modifie_negatif")
+            self.comp_file('1403560214000.log',"ope2_modifie_positif")
+            self.comp_file('1403560274000.log',"ope3_ost")
+            self.comp_file('1403560334000.log',"ope8_virement_sortie")
+            self.comp_file('1403560394000.log',"ope9_virement_entree")
+            self.comp_file('1403560454000.log',"ope11_ope_ventile_mere")
+            self.comp_file('1403560514000.log',"ope12_ope_fille_1")
+            self.comp_file('1403560574000.log',"ope13_ope_fille_2")
+            self.comp_file('1403560634000.log',"ope14_vir_cree_sortie")
+            self.comp_file('1403560694000.log',"ope15_vir_cree_entree")
+            self.comp_file('1403560754000.log',"ope16_ope_mere_cree")
+            self.comp_file('1403560814000.log',"ope17_ope_fille_cree_1")
+            self.comp_file('1403560874000.log',"ope18_ope_fille_cree_2")
+            self.comp_file('1403560934000.log',"ope19_efface")
+
+
             compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
             #compare(list_fic_recu,list_fic_attendu)
+
 
 

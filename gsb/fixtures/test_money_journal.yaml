@@ -296,7 +296,7 @@ gsb.ope:
         mere: null
         montant: '-100'
         moyen: 5
-        notes: ''
+        notes: virement_sortie
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -320,7 +320,7 @@ gsb.ope:
         mere: null
         montant: '100'
         moyen: 5
-        notes: ''
+        notes: virement_entree
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -344,7 +344,7 @@ gsb.ope:
         mere: null
         montant: '100'
         moyen: 4
-        notes: ''
+        notes: ope_ventilee_mere
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -368,7 +368,7 @@ gsb.ope:
         mere: 11
         montant: '99'
         moyen: 4
-        notes: ''
+        notes: ope_fille_1
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -392,7 +392,7 @@ gsb.ope:
         mere: 11
         montant: '1'
         moyen: 4
-        notes: ''
+        notes: ope_fille_2
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -416,7 +416,7 @@ gsb.ope:
         mere: null
         montant: '-100'
         moyen: 5
-        notes: ''
+        notes: vir_cree_sortie
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -440,7 +440,7 @@ gsb.ope:
         mere: null
         montant: '100'
         moyen: 5
-        notes: ''
+        notes: vir cree entree
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -464,7 +464,7 @@ gsb.ope:
         mere: null
         montant: '100'
         moyen: 4
-        notes: ''
+        notes: ope_mere_cree
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -488,7 +488,7 @@ gsb.ope:
         mere: 16
         montant: '99'
         moyen: 4
-        notes: ''
+        notes: ope_fille_cree_1
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -512,7 +512,7 @@ gsb.ope:
         mere: 16
         montant: '1'
         moyen: 4
-        notes: ''
+        notes: ope_fille_cree_2
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
@@ -521,3 +521,27 @@ gsb.ope:
         rapp: null
         tiers: 2
         uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a18
+    19:
+        _order: 0
+        automatique: false
+        cat: 2
+        compte: 1
+        date: 2011-12-18
+        date_created: 2013-05-22 18:51:40.571000+00:00
+        date_val: null
+        exercice: null
+        ib: null
+        jumelle: null
+        lastupdate: 2014-06-23 18:51:40.571000+00:00
+        mere: null
+        montant: '-100'
+        moyen: 1
+        notes: a effacer
+        num_cheque: ''
+        ope_titre_ost: null
+        ope_titre_pmv: null
+        piece_comptable: ''
+        pointe: false
+        rapp: null
+        tiers: 1
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a19
