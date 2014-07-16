@@ -14,7 +14,7 @@ import pytz
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-#from . import import_base
+from .ecriture_plist_money_journal import  export_icompta_plist
 
 #class Gestion_maj_money_journal(import_base):
 #   pass
@@ -436,5 +436,8 @@ def import_items(lastmaj, request=None):
 def export(lastmaj, request):
     nb=collections.Counter()
     with transaction.atomic():
+        remb=models.Cat.objects.get_or_create(nom="Remboursement",defaults={"nom":"Remboursement",'type':'r'})[0]
+        avance=models.Cat.objects.get_or_create(nom="Avance",defaults={"nom":"avance",'type':'d'})[0]
+        nb=export_icompta_plist(remboursement_id=remb.id,avance_id=avance)
         return nb
 

@@ -208,6 +208,14 @@ gsb.tiers:
         notes: ''
         titre: null
         uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f03
+    4:
+        date_created: null
+        is_titre: false
+        lastupdate: 2013-05-22 18:51:40.571000+00:00
+        nom: titre_ test
+        notes: ''
+        titre: null
+        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07f04
 gsb.ope:
     1:
         _order: 0
@@ -521,27 +529,3 @@ gsb.ope:
         rapp: null
         tiers: 2
         uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a18
-    19:
-        _order: 0
-        automatique: false
-        cat: 2
-        compte: 1
-        date: 2011-12-18
-        date_created: 2013-05-22 18:51:40.571000+00:00
-        date_val: null
-        exercice: null
-        ib: null
-        jumelle: null
-        lastupdate: 2014-06-23 18:51:40.571000+00:00
-        mere: null
-        montant: '-100'
-        moyen: 1
-        notes: a effacer
-        num_cheque: ''
-        ope_titre_ost: null
-        ope_titre_pmv: null
-        piece_comptable: ''
-        pointe: false
-        rapp: null
-        tiers: 1
-        uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07a19

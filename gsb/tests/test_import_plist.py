@@ -19,7 +19,7 @@ from gsb.io.lecture_plist import Lecture_plist_exception
 from gsb.io.ecriture_plist_money_journal import export_icompta_plist
 from testfixtures import Replacer,test_datetime,compare
 from dateutil.parser import parse
-from django.utils.encoding import force_unicode, smart_unicode
+from django.utils.encoding import force_unicode
 import warnings
 warnings.filterwarnings("ignore", category=UnicodeWarning)
 import collections
@@ -715,15 +715,14 @@ class Test_import_money_journal_export(Test_import_abstract):
             #print "%s efface"%d
             pass
     def comp_file(self,filename,nom):
-        attendu=os.path.join("export_plist_attendu", 'Applications', 'Money Journal', 'log','140','3','5',filename)
-        recu=os.path.join("export_plist", 'Applications', 'Money Journal', 'log','140','3','5',filename)
-        self.assert2filesequal(recu,attendu,nom=nom)
+        attendu=os.path.join("export_plist_attendu", 'Applications', 'Money Journal', 'log','140','3','4',filename)
+        recu=os.path.join("export_plist", 'Applications', 'Money Journal', 'log','140','3','4',filename)
+        self.assert2filesequal(attendu,recu,nom=nom)
     def strptime(self,txt):
         txt=force_unicode(txt)
         return  parse(txt)
     def test_global(self):
         with Replacer() as r:
-            r.replace('gsb.utils.datetime.datetime',test_datetime(2014,06,23,21,25,14,delta=1,delta_type='minutes'))
             #on efface la table db_log
             models.Db_log.objects.all().delete()
             models.Db_log.objects.create(datamodel="cat",id_model=1,memo="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07901", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
@@ -750,7 +749,8 @@ class Test_import_money_journal_export(Test_import_abstract):
             models.Db_log.objects.create(datamodel="ope",id_model=17,memo="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a16", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.create(datamodel="ope",id_model=18,memo="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a17", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.create(datamodel="ope",id_model=19,memo="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a18", date_created=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-
+            t=test_datetime(2014,06,23,00,00,00,delta=1,delta_type='minutes')
+            r.replace('gsb.utils.datetime.datetime',t)
             #test effectif
             nb=self.exp.all_since_date(pytz.utc.localize(datetime.datetime(2014, 01, 21, 19, 27, 14)))
             print nb
@@ -767,26 +767,26 @@ class Test_import_money_journal_export(Test_import_abstract):
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
 
             #compare chaque fichier
-            self.comp_file('1403559794000.log',"export_plist_cat_modif")
-            self.comp_file('1403559854000.log',"export_plist_cat_crea")
-            self.comp_file('1403559914000.log',"export_plist_cat_vir")
-            self.comp_file('1403559974000.log',"export_plist_cat_vir_eff")
-            self.comp_file('1403560034000.log',"export_plist_compte_update")
-            self.comp_file('1403560094000.log',"export_plist_compte_insert")
-            self.comp_file('1403560154000.log',"ope1_modifie_negatif")
-            self.comp_file('1403560214000.log',"ope2_modifie_positif")
-            self.comp_file('1403560274000.log',"ope3_ost")
-            self.comp_file('1403560334000.log',"ope8_virement_sortie")
-            self.comp_file('1403560394000.log',"ope9_virement_entree")
-            self.comp_file('1403560454000.log',"ope11_ope_ventile_mere")
-            self.comp_file('1403560514000.log',"ope12_ope_fille_1")
-            self.comp_file('1403560574000.log',"ope13_ope_fille_2")
-            self.comp_file('1403560634000.log',"ope14_vir_cree_sortie")
-            self.comp_file('1403560694000.log',"ope15_vir_cree_entree")
-            self.comp_file('1403560754000.log',"ope16_ope_mere_cree")
-            self.comp_file('1403560814000.log',"ope17_ope_fille_cree_1")
-            self.comp_file('1403560874000.log',"ope18_ope_fille_cree_2")
-            self.comp_file('1403560934000.log',"ope19_efface")
+            self.comp_file('1403481600000.log',"export_plist_cat_modif")
+            self.comp_file('1403481660000.log',"export_plist_cat_crea")
+            self.comp_file('1403481720000.log',"export_plist_cat_vir")
+            self.comp_file('1403481780000.log',"export_plist_cat_vir_eff")
+            self.comp_file('1403481840000.log',"export_plist_compte_update")
+            self.comp_file('1403481900000.log',"export_plist_compte_insert")
+            self.comp_file('1403481960000.log',"export_plist_ope1_modifie_negatif")
+            self.comp_file('1403482020000.log',"export_plist_ope2_modifie_positif")
+            self.comp_file('1403482080000.log',"export_plist_ope3_ost")
+            self.comp_file('1403482140000.log',"export_plist_ope8_virement_sortie")
+            self.comp_file('1403482200000.log',"export_plist_ope9_virement_entree")
+            self.comp_file('1403482260000.log',"export_plist_ope11_ope_ventile_mere")
+            self.comp_file('1403482320000.log',"export_plist_ope12_ope_fille_1")
+            self.comp_file('1403482380000.log',"export_plist_ope13_ope_fille_2")
+            self.comp_file('1403482440000.log',"export_plist_ope14_vir_cree_sortie")
+            self.comp_file('1403482500000.log',"export_plist_ope15_vir_cree_entree")
+            self.comp_file('1403482560000.log',"export_plist_ope16_ope_mere_cree")
+            self.comp_file('1403482620000.log',"export_plist_ope17_ope_fille_cree_1")
+            self.comp_file('1403482680000.log',"export_plist_ope18_ope_fille_cree_2")
+            self.comp_file('1403482740000.log',"export_plist_ope19_efface")
             compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
             compare(list_fic_recu,list_fic_attendu)
 

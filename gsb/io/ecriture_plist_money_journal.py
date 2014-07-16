@@ -4,11 +4,11 @@ from django.conf import settings
 from gsb import models
 import time
 
-from lxml import etree as et
 from gsb import utils
 from django.utils.encoding import smart_unicode
 import collections
 import codecs
+import datetime
 
 class export_icompta_plist(object):
     actions={'I':1,'U':2,'D':3}
@@ -33,7 +33,7 @@ class export_icompta_plist(object):
             fichier=fichier.replace(u"{{pk}}",u"%s"%obj.pk)
             if utils.idtostr(obj.cat, membre="nom",defaut=0) not in (u"Opération Ventilée",u"Virement"):
                 montant=abs(float(utils.idtostr(obj, membre="montant",defaut=0)))
-                type_cat=utils.idtostr(obj.cat, membre="type",defaut="")
+                type_cat=utils.idtostr(obj.cat, membre="type",defaut="d")
                 if obj.montant > 0:
                     if type_cat == 'r':
                         categorie_id = obj.cat_id
@@ -47,8 +47,16 @@ class export_icompta_plist(object):
             else:
                 categorie_id = obj.cat_id
                 montant = 0
-            fichier=fichier.replace(u"{{montant}}",u"%s"%montant)
-            fichier=fichier.replace(u"{{categorie_id}}",u"%s"%categorie_id)
+            fichier=fichier.replace(u"{{amount}}",u"%s"%montant)
+            fichier=fichier.replace(u"{{cat_id}}",u"%s"%categorie_id)
+            #date_ope
+            fichier=fichier.replace(u"{{jour}}",u"%s"%obj.date.day)
+            fichier=fichier.replace(u"{{mois}}",u"%s"%obj.date.month)
+            fichier=fichier.replace(u"{{annee}}",u"%s"%obj.date.year)
+
+            tiers=utils.idtostr(obj.tiers, membre="nom", defaut="rien")
+            fichier=fichier.replace(u"{{tiers}}",u"%s"%tiers)
+
             type_moyen=utils.idtostr(obj.moyen, membre="type",defaut="")
             if type_moyen == 'r':
                 type_ope = 1
@@ -179,10 +187,13 @@ class export_icompta_plist(object):
                     obj=utils.AttrDict()
                     obj.pk=element.id_model
                     obj.cat=0
+                    obj.cat_id=0
                     obj.montant=0
                     obj.moyen=0
                     obj.lastupdate=0
                     obj.compte_id=0
+                    obj.date=datetime.datetime(2000,1,1)
+                    obj.tiers="rien"
                     self.ope_unique(obj,action_type=element.memo)
             if element.datamodel == "cat":
                 try:
