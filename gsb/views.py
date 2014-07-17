@@ -887,7 +887,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
 
 
 class Rdt_titres_view(Myformview):
-    template_name = 'titre.djhtm'
+    template_name = 'maj_cpt_titre.djhtm'
     form_class = gsb_forms.SearchForm
     requete = None
     desc = None
