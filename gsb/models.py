@@ -19,8 +19,6 @@ from django.db.models import Q
 import gsb.model_field as models_gsb
 from gsb import utils
 from colorful.fields import RGBColorField
-#from audit_log.models.fields import LastUserField
-from audit_log.models.managers import AuditLog
 
 class Gsb_exc(utils.utils_Exception):
     pass
@@ -1368,7 +1366,10 @@ class Db_log(models.Model):
 
     def __unicode__(self):
         actions={'I':u"insert",'U':u"update",'D':u"delete"}
-        return u"({obj.id}) {action} le {obj.date_created} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],obj=self)
+        date_created=self.date_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
+        return u"({obj.id}) {action} le {date_created} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],
+                                                                                                        obj=self,
+                                                                                                        obj_date=date_created)
 
 # noinspection PyUnusedLocal
 @receiver(post_save, sender=Ope, weak=False)
