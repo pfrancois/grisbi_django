@@ -434,10 +434,10 @@ def import_items(lastmaj, request=None):
 
 
 def export(lastmaj, request):
-    nb=collections.Counter()
     with transaction.atomic():
         remb=models.Cat.objects.get_or_create(nom="Remboursement",defaults={"nom":"Remboursement",'type':'r'})[0]
         avance=models.Cat.objects.get_or_create(nom="Avance",defaults={"nom":"avance",'type':'d'})[0]
-        nb=export_icompta_plist(remboursement_id=remb.id,avance_id=avance)
-        return nb
+        export_cls=export_icompta_plist(remboursement_id=remb.id,avance_id=avance)
+        nb=export_cls.all_since_date(lastmaj)
+    return nb
 
