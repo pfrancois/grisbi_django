@@ -1358,7 +1358,7 @@ class Ope(models.Model):
 
 
 class Db_log(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True, null=True)
+    date_time_created = models.DateTimeField(auto_now_add=True, null=True)
     datamodel = models.CharField(null=False,max_length=20)
     id_model = models.IntegerField()
     uuid = models.CharField(null=False,max_length=255)
@@ -1366,8 +1366,8 @@ class Db_log(models.Model):
 
     def __unicode__(self):
         actions={'I':u"insert",'U':u"update",'D':u"delete"}
-        date_created=self.date_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
-        return u"({obj.id}) {action} le {date_created} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],
+        date_created=self.date_time_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
+        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],
                                                                                                         obj=self,
                                                                                                         obj_date=date_created)
 

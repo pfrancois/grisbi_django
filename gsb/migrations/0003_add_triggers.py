@@ -8,19 +8,20 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        db.rename_column(u'gsb_db_log', 'date_created','date_time_created')
         template_update="""create trigger update_{type} after update on gsb_{type}
         begin
-            insert into gsb_db_log (datamodel,date_created,id_model,memo,uuid)
+            insert into gsb_db_log (datamodel,date_time_created,id_model,memo,uuid)
                 values ('{type}',datetime('NOW'),old.id, 'U',old.uuid);
         end;""".format
         template_insert="""create trigger insert_{type} after insert on gsb_{type}
         begin
-            insert into gsb_db_log (datamodel,date_created,id_model,memo,uuid)
+            insert into gsb_db_log (datamodel,date_time_created,id_model,memo,uuid)
                 values ('{type}',datetime('NOW'),new.id, 'I',new.uuid);
         end;""".format
         template_delete="""create trigger delete_{type} delete on gsb_{type}
         begin
-            insert into gsb_db_log (datamodel,date_created,id_model,memo,uuid)
+            insert into gsb_db_log (datamodel,date_time_created,id_model,memo,uuid)
                 values ('{type}',datetime('NOW'),old.id, 'D',old.uuid);
         end;
         """.format
@@ -41,6 +42,7 @@ class Migration(SchemaMigration):
             db.execute(query)
             query="drop trigger delete_{type};".format(type=element)
             db.execute(query)
+        db.rename_column(u'gsb_db_log', 'date_time_created','date_created')
 
 
     models = {

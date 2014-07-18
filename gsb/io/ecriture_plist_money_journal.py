@@ -9,6 +9,7 @@ from django.utils.encoding import smart_unicode
 import collections
 import codecs
 import datetime
+from django.contrib import messages
 
 class export_icompta_plist(object):
     actions={'I':1,'U':2,'D':3}
@@ -16,11 +17,12 @@ class export_icompta_plist(object):
     type_depense = 2
     type_virement = 3
 
-    def __init__(self, remboursement_id, avance_id, carte_bancaire_id=None):
+    def __init__(self, remboursement_id, avance_id ,request , carte_bancaire_id=None):
         self.remboursement = remboursement_id
         self.avance = avance_id
         self.carte_bancaire = carte_bancaire_id
         self.code_device = settings.CODE_DEVICE_POCKET_MONEY
+        self.request=request
     def ope_unique(self, obj,action_type):
         action=self.actions[action_type]
         with open(os.path.join(settings.PROJECT_PATH,'gsb','templates','export_plist','modele_ope.log'))as template:
@@ -145,7 +147,9 @@ class export_icompta_plist(object):
             fichier=fichier.replace(u"{{type_cat}}",u"%s"%type_cat)
             #nom cat
             fichier=fichier.replace(u"{{nom_cat}}",u"%s"%obj.nom)
-            with codecs.open(os.path.join(self.filename), 'w', "utf-8") as f:
+            filename=self.filename
+            messages.success(self.request,"dans fichier %s"%filename)
+            with codecs.open(os.path.join(filename), 'w', "utf-8") as f:
                 f.write(smart_unicode(fichier))
         return None
 
@@ -170,12 +174,12 @@ class export_icompta_plist(object):
     def all_since_date(self, lastmaj):
         nb=collections.Counter()
         dict_do={u"ope":list(),u"cat":list(),u'compte':list()}
-        for element in models.Db_log.objects.filter(date_created__gte=utils.strpdate(lastmaj)).order_by('id'):
-            print element
+        for element in models.Db_log.objects.filter(date_time_created__gte=lastmaj,datamodel__in=['ope','cat','compte']).order_by('id'):
+            messages.success(self.request, u"%s"%element)
             nb[element.datamodel]+=1
             if element.datamodel == "ope":
                 try:
-                    self.ope_unique(models.Ope.objects.get(id=element.id_model),action_type=element.memo)
+                    self.ope_unique(models.Ope.objects.get(id=element.id_model),action_type=element.memo,)
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:

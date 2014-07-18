@@ -23,7 +23,7 @@ urlpatterns += patterns('gsb.outils',
                         url(r'^outils/verif_config$', 'verif_config', name='verif_config'),
 )
 urlpatterns += patterns('gsb.io.lecture_plist',
-                        url(r'^options/maj$', 'gestion_maj', name='gestion_maj_iphone_money_journal'),
+                        url(r'^options/maj_money_journal$', 'gestion_maj', name='gestion_maj_iphone_money_journal'),
 )
 # export index
 urlpatterns += patterns('gsb',

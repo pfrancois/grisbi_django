@@ -18,7 +18,7 @@ from .test_imports_csv import Test_import_abstract
 from gsb.io.lecture_plist import Lecture_plist_exception
 from gsb.io.ecriture_plist_money_journal import export_icompta_plist
 from testfixtures import Replacer,test_datetime,compare
-from dateutil.parser import parse
+import dateutil.parser
 from django.utils.encoding import force_unicode
 import warnings
 warnings.filterwarnings("ignore", category=UnicodeWarning)
@@ -188,10 +188,10 @@ class Test_import_money_journal_import_item_first_part(Test_import_abstract):
         """avec crea, modif de cat et compte"""
         self.assertEqual(lecture_plist.import_items( lastmaj=self.lastmaj, request=self.request).most_common(),
                          [('compte', 1), ('categorie', 1)])
-        self.assertmessagecontains(self.request,u"fichier: 1403040634000.log")
-        self.assertmessagecontains(self.request,u"fichier: 1403040635000.log")
-        self.assertmessagecontains(self.request,u"fichier: 1403049014000.log")
-        self.assertmessagecontains(self.request,u"fichier: 1403049014010.log")
+        self.assertmessagecontains(self.request,u"fichier lu pour être importé: 1403040634000.log")
+        self.assertmessagecontains(self.request,u"fichier lu pour être importé: 1403040635000.log")
+        self.assertmessagecontains(self.request,u"fichier lu pour être importé: 1403049014000.log")
+        self.assertmessagecontains(self.request,u"fichier lu pour être importé: 1403049014010.log")
         self.assertmessagecontains(self.request,u"catégorie (16) 'Cat aded(d)' créée")
         self.assertmessagecontains(self.request,u"compte (7) 'Ghh' créé")
 class Test_import_money_journal_import_item_modif_effectives_cote_cat(Test_import_abstract):
@@ -696,6 +696,7 @@ class Test_import_money_journal_export(Test_import_abstract):
         self.request = self.request_get('outils')
         self.exp=export_icompta_plist(72,69,3)
         self.nettoyage()
+        self.request = self.request_get('outils')
     def __tearDown(self):
         self.nettoyage()
 
@@ -720,7 +721,7 @@ class Test_import_money_journal_export(Test_import_abstract):
         self.assert2filesequal(attendu,recu,nom=nom)
     def strptime(self,txt):
         txt=force_unicode(txt)
-        return  parse(txt)
+        return  dateutil.parser.parse(txt)
     def test_global(self):
         with Replacer() as r:
             #on efface la table db_log
@@ -752,7 +753,7 @@ class Test_import_money_journal_export(Test_import_abstract):
             t=test_datetime(2014,06,23,00,00,00,delta=1,delta_type='minutes')
             r.replace('gsb.utils.datetime.datetime',t)
             #test effectif
-            nb=self.exp.all_since_date(pytz.utc.localize(datetime.datetime(2014, 01, 21, 19, 27, 14)))
+            nb=self.exp.all_since_date(pytz.utc.localize(datetime.datetime(2014, 01, 21, 19, 27, 14)),self.request)
             print nb
             #compare la liste des fichier
             attendu=os.path.join(settings.PROJECT_PATH,"gsb","test_files","export_plist_attendu", 'Applications', 'Money Journal')

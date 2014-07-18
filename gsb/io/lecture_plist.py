@@ -94,28 +94,32 @@ def gestion_maj(request):
     try:
         with transaction.atomic():
             config = models.Config.objects.get_or_create(id=1, defaults={'id': 1})[0]
-            lastmaj = pytz.utc.localize(config.derniere_import_money_journal)
-            nb_import = import_items(lastmaj, request)
-            msg_list=list()
-            if nb_import['ope']>0:
-                msg_list.append(u"opérations importées: {nb['ope']}".format(nb=nb_import))
-            if nb_import['compte']>0:
-                msg_list.append(u"comptes importés: {nb['compte']}".format(nb=nb_import))
-            if nb_import['cat']>0:
-                msg_list.append(u"catégories importées: {nb['cat']}".format(nb=nb_import))
+            lastmaj = config.derniere_import_money_journal
+            if lastmaj.tzinfo is None:
+                lastmaj = pytz.utc.localize(lastmaj)
+            messages.info(request, u"dernière mise à jour: %s"%lastmaj.astimezone(utils.pytz.timezone(settings.TIME_ZONE)))
             nb_export =  export(lastmaj, request)
-            if nb_export['ope']>0:
-                msg_list.append(u"opérations exportées: {nb['ope']}".format(nb=nb_export))
+            if int(nb_export['ope'])>0:
+                messages.success(request,u"opérations exportées: {nb['ope']}".format(nb=nb_export))
             if nb_export['compte']>0:
-                msg_list.append(u"comptes exportés: {nb['compte']}".format(nb=nb_export))
+                messages.success(request,u"comptes exportés: {nb['compte']}".format(nb=nb_export))
             if nb_export['cat']>0:
-                msg_list.append(u"catégories exportées: {nb['cat']}".format(nb=nb_export))
+                messages.success(request,u"catégories exportées: {nb['cat']}".format(nb=nb_export))
+            nb_import = import_items(lastmaj, request)
+            if nb_import['deja']>0:
+                messages.info(request,u"%s éléments déja mises à jours"%nb_import['deja'])
+            if int(nb_import['ope'])>0:
+                messages.success(request,u"opérations importées: {nb['ope']}".format(nb=nb_import))
+            if nb_import['compte']>0:
+                messages.success(request,u"comptes importés: {nb['compte']}".format(nb=nb_import))
+            if nb_import['cat']>0:
+                messages.success(request,u"catégories importées: {nb['cat']}".format(nb=nb_import))
+
             #on gere ceux qu'on elimine car deja pris en en compte
 
             config.derniere_import_money_journal = utils.now()
             config.save()
 
-            messages.success(request, u", ".join(msg_list))
     except Lecture_plist_exception as exc:
         messages.error(request,exc.msg)
     return render_to_response('generic.djhtm', {'titre': u'intégration des maj recues', }, context_instance=RequestContext(request))
@@ -189,12 +193,13 @@ def import_items(lastmaj, request=None):
     list_ele['budget']=dict()
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         ele=Element(fichier)
-        messages.info(request,u"fichier: %s" %  os.path.basename(fichier))
         if ele.device == settings.CODE_DEVICE_POCKET_MONEY: #c'est une operation provenant de ce pc
+            nb['deja'] += 1
             continue
         if ele.lastup < lastmaj:
             nb['deja'] += 1
             continue
+        messages.info(request,u"fichier lu pour être importé: %s" %  os.path.basename(fichier))
         if ele.action =='c':
             nb[ele.type] += 1
             if not settings.TESTING:
@@ -436,8 +441,8 @@ def import_items(lastmaj, request=None):
 def export(lastmaj, request):
     with transaction.atomic():
         remb=models.Cat.objects.get_or_create(nom="Remboursement",defaults={"nom":"Remboursement",'type':'r'})[0]
-        avance=models.Cat.objects.get_or_create(nom="Avance",defaults={"nom":"avance",'type':'d'})[0]
-        export_cls=export_icompta_plist(remboursement_id=remb.id,avance_id=avance)
+        avance=models.Cat.objects.get_or_create(nom="Avance",defaults={"nom":"Avance",'type':'d'})[0]
+        export_cls=export_icompta_plist(remboursement_id=remb.id,avance_id=avance.id,request=request)
         nb=export_cls.all_since_date(lastmaj)
     return nb
 

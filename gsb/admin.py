@@ -14,8 +14,8 @@ from django.shortcuts import render
 from django.conf import settings  # @Reimport
 from django.utils.translation import ugettext_lazy as _
 
-from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
-
+#from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
+from . import models as gsbmodels
 #from django.db.models import Q
 # import decimal
 from django.contrib.admin import DateFieldListFilter
@@ -164,11 +164,11 @@ class verifmere_filter(ouinonfilter):
         if self.value() == '1':
             messages.info(request, "attention sur l'ensemble de la base")
             #les filles pointe alors que les mere non
-            merep = Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
+            merep = gsbmodels.Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
             #les mere pointe alors que les filles non
-            fillep = Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
+            fillep = gsbmodels.Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
             listep = list(merep) + list(fillep)
-            return Ope.objects.filter(id__in=listep)
+            return gsbmodels.Ope.objects.filter(id__in=listep)
         else:
             return queryset
 
@@ -249,7 +249,7 @@ class formsetreadonly(BaseInlineFormSet):
 
 
 class ope_inline_admin(admin.TabularInline):
-    model = Ope
+    model = gsbmodels.Ope
     fields = ('lien', 'date', 'compte', 'montant', 'cat', 'tiers', 'ib', 'notes')
     readonly_fields = fields
     extra = 0
@@ -357,7 +357,7 @@ class Compte_admin(Modeladmin_perso):
     def action_supprimer_pointe(self, request, queryset):
         liste_id = queryset.values_list('id', flat=True)
         try:
-            Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
+            gsbmodels.Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
             messages.success(request, u'suppression des statuts "pointé" dans les comptes %s' % queryset)
         except Exception as err:
             messages.error(request, err)
@@ -371,12 +371,12 @@ class Compte_admin(Modeladmin_perso):
         sinon on decide automatiquement du nom
         """
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-        rapp_ = forms.ModelChoiceField(Rapp.objects.all(), required=False)
+        rapp_ = forms.ModelChoiceField(gsbmodels.Rapp.objects.all(), required=False)
         date = forms.DateField(label="date du rapprochement")
 
     def action_transformer_pointee_rapp(self, request, queryset):
         form = None
-        query_ope = Ope.objects.filter(pointe=True, compte__in=queryset).order_by('-date')
+        query_ope = gsbmodels.Ope.objects.filter(pointe=True, compte__in=queryset).order_by('-date')
         if query_ope.filter(cat__nom="Non affecté").exists():
             self.message_user(request, u"attention, au moins une operation n'est pas encore affectée")
             return HttpResponseRedirect(request.get_full_path())
@@ -387,14 +387,14 @@ class Compte_admin(Modeladmin_perso):
                     rapp = form.cleaned_data['rapp_']
                     if not rapp:
                         rapp_date = form.cleaned_data['date'].year
-                        last = Rapp.objects.filter(date__year=rapp_date).filter(ope__compte__in=queryset).distinct()
+                        last = gsbmodels.Rapp.objects.filter(date__year=rapp_date).filter(ope__compte__in=queryset).distinct()
                         if last.exists():
                             last = last.latest('date')
                             rapp_id = int(last.nom[-2:]) + 1
                         else:
                             rapp_id = 1
                         nomrapp = "%s%s_%02d" % (queryset[0].nom, rapp_date, rapp_id)
-                        rapp = Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
+                        rapp = gsbmodels.Rapp.objects.create(nom=nomrapp, date=form.cleaned_data['date'])
                     count = 0
                     for article in query_ope:
                         article.pointe = False
@@ -418,10 +418,10 @@ class Compte_admin(Modeladmin_perso):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'moyen_debit_defaut':
-            kwargs['queryset'] = Moyen.objects.filter(type='d')
+            kwargs['queryset'] = gsbmodels.Moyen.objects.filter(type='d')
         else:
             if db_field.name == 'moyen_credit_defaut':
-                kwargs['queryset'] = Moyen.objects.filter(type='r')
+                kwargs['queryset'] = gsbmodels.Moyen.objects.filter(type='r')
         return super(Compte_admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_delete_permission(self, request, obj=None):
@@ -438,7 +438,7 @@ class ope_ope(ope_inline_admin):
 
 class Ope_changelist_Form(forms.ModelForm):
     class Meta(object):
-        model = Ope
+        model = gsbmodels.Ope
 
     date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
 
@@ -595,10 +595,10 @@ class Ope_admin(Modeladmin_perso):
         compte_id = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('compte', flat=True)))[0]
         # ok c'est bon on peut commencer a creer
         if mere is None:
-            mere = Ope.objects.create(date=date_ope,
+            mere = gsbmodels.Ope.objects.create(date=date_ope,
                                       montant=montant,
                                       tiers_id=tiers_id,
-                                      cat=Cat.objects.get(nom=u"Opération Ventilée"),
+                                      cat=gsbmodels.Cat.objects.get(nom=u"Opération Ventilée"),
                                       moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
                                       compte_id=compte_id
             )
@@ -720,7 +720,7 @@ class Ech_admin(Modeladmin_perso):
     radio_fields = {'periodicite': admin.HORIZONTAL}
 
     def check_ech(self, request, queryset):
-        Echeance.check(request=request, queryset=queryset)
+        gsbmodels.Echeance.check(request=request, queryset=queryset)
 
     check_ech.short_description = u"Verifier si des echeances sont à enregistrer"
 
@@ -790,18 +790,18 @@ class Config_admin(Modeladmin_perso):
     def has_add_permission(self, request):
         return False
 
-
-admin.site.register(Tiers, Tiers_admin)
-admin.site.register(Cat, Cat_admin)
-admin.site.register(Compte, Compte_admin)
-admin.site.register(Ope, Ope_admin)
-admin.site.register(Titre, Titre_admin)
-admin.site.register(Banque, Banque_admin)
-admin.site.register(Cours, Cours_admin)
-admin.site.register(Ib, Ib_admin)
-admin.site.register(Exercice, Exo_admin)
-admin.site.register(Rapp, Rapp_admin)
-admin.site.register(Moyen, Moyen_admin)
-admin.site.register(Echeance, Ech_admin)
-admin.site.register(Ope_titre, Ope_titre_admin)
-admin.site.register(Config, Config_admin)
+admin.site.register(gsbmodels.Tiers, Tiers_admin)
+admin.site.register(gsbmodels.Cat, Cat_admin)
+admin.site.register(gsbmodels.Compte, Compte_admin)
+admin.site.register(gsbmodels.Ope, Ope_admin)
+admin.site.register(gsbmodels.Titre, Titre_admin)
+admin.site.register(gsbmodels.Banque, Banque_admin)
+admin.site.register(gsbmodels.Cours, Cours_admin)
+admin.site.register(gsbmodels.Ib, Ib_admin)
+admin.site.register(gsbmodels.Exercice, Exo_admin)
+admin.site.register(gsbmodels.Rapp, Rapp_admin)
+admin.site.register(gsbmodels.Moyen, Moyen_admin)
+admin.site.register(gsbmodels.Echeance, Ech_admin)
+admin.site.register(gsbmodels.Ope_titre, Ope_titre_admin)
+admin.site.register(gsbmodels.Config, Config_admin)
+admin.site.register(gsbmodels.Db_log)
