@@ -163,7 +163,7 @@ def proc_sql_export(sql, log=None):
     nbope = 0
     pk_avance=models.Cat.objects.get_or_create(nom='Avance',  defaults={"nom":'Avance'})[0]
     pk_remboursement=models.Cat.objects.get_or_create(nom='remboursement',  defaults={"nom":'remboursement'})[0]
-    for ope in models.Ope.objects.select_related('cat', "compte", "tiers", "moyen"):
+    for ope in models.Ope.objects.filter(date__year=utils.now().year).select_related('cat', "compte", "tiers", "moyen"):
         nbope += 1
         param['id'] = ope.id
         # gestion des paiments on recupere l'id qui va bien

@@ -100,20 +100,20 @@ def gestion_maj(request):
             messages.info(request, u"dernière mise à jour: %s"%lastmaj.astimezone(utils.pytz.timezone(settings.TIME_ZONE)))
             nb_export =  export(lastmaj, request)
             if int(nb_export['ope'])>0:
-                messages.success(request,u"opérations exportées: {nb['ope']}".format(nb=nb_export))
+                messages.success(request,u"opérations exportées: %s"%nb_export['ope'])
             if nb_export['compte']>0:
-                messages.success(request,u"comptes exportés: {nb['compte']}".format(nb=nb_export))
+                messages.success(request,u"comptes exportés: %s"%nb_export['compte'])
             if nb_export['cat']>0:
-                messages.success(request,u"catégories exportées: {nb['cat']}".format(nb=nb_export))
+                messages.success(request,u"catégories exportées: %s"%nb_export['cat'])
             nb_import = import_items(lastmaj, request)
             if nb_import['deja']>0:
-                messages.info(request,u"%s éléments déja mises à jours"%nb_import['deja'])
+                messages.info(request,u"%s éléments du repetoire money journal déja mises à jours"%nb_import['deja'])
             if int(nb_import['ope'])>0:
-                messages.success(request,u"opérations importées: {nb['ope']}".format(nb=nb_import))
+                messages.success(request,u"opérations importées: %s"%nb_import['ope'])
             if nb_import['compte']>0:
-                messages.success(request,u"comptes importés: {nb['compte']}".format(nb=nb_import))
+                messages.success(request,u"comptes importés: %s"%nb_import['compte'])
             if nb_import['cat']>0:
-                messages.success(request,u"catégories importées: {nb['cat']}".format(nb=nb_import))
+                messages.success(request,u"catégories importées: %s"%nb_import['cat'])
 
             #on gere ceux qu'on elimine car deja pris en en compte
 

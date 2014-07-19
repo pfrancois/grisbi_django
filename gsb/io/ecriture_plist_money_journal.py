@@ -77,7 +77,9 @@ class export_icompta_plist(object):
                 fichier=fichier.replace(u"{{last_update}}",u"%s"%utils.datetotimestamp(obj.lastupdate))
             #compte
             fichier=fichier.replace(u"{{compte_id}}",u"%s"%obj.compte_id)
-            with codecs.open(os.path.join(self.filename), 'w', "utf-8") as f:
+            filename=self.filename
+            messages.success(self.request,"dans fichier %s"%filename)
+            with codecs.open(os.path.join(filename), 'w', "utf-8") as f:
                 f.write(smart_unicode(fichier))
 
     def compte_unique(self, obj,action_type):
@@ -112,7 +114,9 @@ class export_icompta_plist(object):
             fichier=fichier.replace(u"{{place}}",u"%s"%(place%9))
             #nom compte
             fichier=fichier.replace(u"{{nom_compte}}",u"%s"%obj.nom)
-            with codecs.open(os.path.join(self.filename), 'w', "utf-8") as f:
+            filename=self.filename
+            messages.success(self.request,"dans fichier %s"%filename)
+            with codecs.open(os.path.join(filename), 'w', "utf-8") as f:
                 f.write(smart_unicode(fichier))
 
     def cat_unique(self, obj,action_type):
@@ -169,7 +173,6 @@ class export_icompta_plist(object):
             filename = os.path.join(directory, "{0:d}.log".format(ref_temp * 1000))
             if not os.path.exists(directory):
                 os.makedirs(directory)
-        print filename
         return filename
     def all_since_date(self, lastmaj):
         nb=collections.Counter()

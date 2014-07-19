@@ -4,7 +4,7 @@
 <a href="{% url 'export_index' %}" class="progress"> exporter </a><br/>
 <a href="{% url 'import_gsb' %}" class="progress"> import de fichiers gsb dans l'application</a><br/>
 <a href="{% url 'import_csv_ope_simple' %}" class="progress"> import de fichiers csv d'opérations dans l'application</a><br/>
-<a href="{% url 'gestion_maj_iphone_money_journal' %}" class="progress"> synchronisation de fihciers money journal via dropbox</a><br/>
+<a href="{% url 'gestion_maj_iphone_money_journal' %}" class="progress"> synchronisation de money journal via dropbox</a><br/>
 <a href="{% url 'import_csv_ope_titre_all' %}" class="progress"> import de fichiers csv d'opérations titres dans l'application</a><br/>
 <a href="{% url 'gestion_echeances' %}" class="progress"> enregistrer les échéances qui sont échues</a><br/>
 <a href="{% url 'g_search_ope' %}" class="progress"> recherche d'opérations </a><br/>
