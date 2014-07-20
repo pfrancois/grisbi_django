@@ -147,7 +147,7 @@ class TestCase(Test_Case_django):
                 fichier.write('\n')
         finally:
             fichier.close()
-        compare("\n".join(reponse_recu),"\n".join(reponse_attendu))
+        compare("\n".join(rr_iter),"\n".join(ra_iter))
 
     def assertfileequal(self, reponse_recu, fichier, nom="", unicode_encoding=None):
         fichier = open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", fichier), 'r')
