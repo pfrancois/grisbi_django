@@ -1,4 +1,4 @@
-id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq
+id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque
 10;cpte1;01/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;memonormal;;
 11;cpte1;02/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;
 13;cpte1;03/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;

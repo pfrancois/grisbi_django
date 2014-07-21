@@ -37,7 +37,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'projet', 'numchq', 'mois')
+    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'ib', 'num_cheque', 'mois')
     titre = "Export des operations au format csv"
 
     def export(self, query):
@@ -45,12 +45,14 @@ class Export_ope_csv(Export_view_csv_base):
         fonction principale
         """
         data = []
-        query = query.order_by('date', 'id').exclude(cat__id=settings.ID_CAT_PMV).exclude(filles_set__isnull=False)
+        #on exclue les ope mere car cela fait doublon
+        query = query.exclude(filles_set__isnull=False)
+        query = query.order_by('date', 'id')
+        #on elemine la seconde jambe des virement
+        query = query.exclude(jumelle__isnull=False,montant__gte=0)
         query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
 
         for ope in query:
-            if ope.jumelle is not None and ope.montant > 0:
-                continue  # c'est l'autre coté du virement qui est pris en compte
                 # id compte date montant
             ligne = {'id': ope.id, 'cpt': ope.compte.nom,
                      'date': utils.datetostr(ope.date),
@@ -83,9 +85,9 @@ class Export_ope_csv(Export_view_csv_base):
                     if '>P' not in ligne['notes']:
                         ligne['notes'] += u'>P'
                 ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
-            ligne['projet'] = utils.idtostr(ope.ib, defaut='', membre="nom")
+            ligne['ib'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
-            ligne['numchq'] = ope.num_cheque
+            ligne['num_cheque'] = ope.num_cheque
             ligne['mois'] = utils.datetostr(ope.date, param='%m')
             data.append(ligne)
 

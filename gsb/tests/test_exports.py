@@ -45,7 +45,7 @@ class Test_export(Test_view_base):
         ope_mere.save()
         rep = self.client.post(reverse('export_csv'),
                                data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
+        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;08\r
 7;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;;08\r
@@ -62,7 +62,7 @@ class Test_export(Test_view_base):
 """
         # on coupe ligne par ligne
         reponse_recu = unicode(rep.content, 'latin-1')
-        self.assertreponsequal(reponse_recu, reponse_attendu, unicode_encoding='cp1252', nom="csv_global")
+        self.assertreponsequal(reponse_recu, reponse_attendu, nom="csv_global")
 
     def test_csv_debug(self):
         # on cree ce les entree de la vue
@@ -80,7 +80,7 @@ class Test_export(Test_view_base):
         for d, h in zip(data, header):
             final[h] = d
             # on compare a ce qui est attendu
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq;mois\r
+        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque;mois\r
 4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
 """
         self.assertreponsequal(view.export_csv_view(data=[final]).content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")

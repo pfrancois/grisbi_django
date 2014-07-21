@@ -1,4 +1,4 @@
-id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq
+id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque
 9;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;
 10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;5@1;;
 11;cpt_titre1;25/09/2012;5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;-5@1;;

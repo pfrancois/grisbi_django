@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import logging
 import os
 import codecs
-import pprint
 
 from django.test import TestCase as Test_Case_django
 from django.test.utils import override_settings
@@ -16,7 +15,6 @@ from gsb import utils
 from django.utils.encoding import smart_unicode
 from testfixtures import compare
 
-#from operator import attrgetter
 
 __all__ = ['TestCase']
 
@@ -32,6 +30,8 @@ __all__ = ['TestCase']
 @override_settings(ID_CAT_VIR=65)
 class TestCase(Test_Case_django):
     #reset_sequences = True
+    def compare(self,x,y,**kw):
+        return compare(x,y,**kw)
     def setUp(self):
         # supprime l'affichage des probleme de 404
         logger = logging.getLogger('django.request')
@@ -76,19 +76,19 @@ class TestCase(Test_Case_django):
         diff = ([x for x in list(items) if x not in liste], [x for x in liste if x not in list(items)])
         return self.assertEqual(sorted(items), sorted(liste), diff)
 
-    # noinspection PyProtectedMember
     def assertcountmessage(self, request, nb, liste=False):
         messages = get_messages(request)
         actual = len([e.message for e in messages])
         if actual != nb:
             if liste:
-                messages_str = pprint.pformat(['"%s"' % m for m in messages],indent=4)
-                self.fail('Message count was %s, expected %s. list of messages: \n %s' % (actual, nb,
-                                                                                         messages_str))
+                messages_str = u"[\n"
+                for m in messages:
+                    messages_str +=  u"\t'"+m.message + u"',\n"
+                    messages_str += u"]"
+                self.fail(u'Message count was %s, expected %s. list of messages: \n %s' % (actual, nb, messages_str))
             else:
-                self.fail('Message count was %s, expected %s' % (safe_repr(actual), safe_repr(nb)))
+                self.fail(u'Message count was %s, expected %s' % (safe_repr(actual), safe_repr(nb)))
 
-    # noinspection PyProtectedMember
     def assertmessagecontains(self, request, text, level=None):
 
         messages = get_messages(request)
@@ -147,13 +147,14 @@ class TestCase(Test_Case_django):
                 fichier.write('\n')
         finally:
             fichier.close()
-        compare("\n".join(rr_iter),"\n".join(ra_iter))
+        compare("\n".join(ra_iter),"\n".join(rr_iter))
 
     def assertfileequal(self, reponse_recu, fichier, nom="", unicode_encoding=None):
         fichier = open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", fichier), 'r')
         attendu = fichier.readlines()
         fichier.close()
         self.assertreponsequal(reponse_recu, attendu, True, unicode_encoding, nom)
+
     def assert2filesequal(self,nom_fichier_recu, nom_fichier_attendu, nom="", unicode_encoding=None):
         if not os.path.isfile(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", nom_fichier_recu)):
             self.fail("%s inexistant"%nom_fichier_recu)

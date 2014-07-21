@@ -39,6 +39,7 @@ class Test_import_csv1(Test_import_abstract):
         super(Test_import_csv1, self).setUp()
         self.cl=import_csv.Import_csv_ope_sans_jumelle_et_ope_mere()
         self.cl.request = self.request_get('outils')
+        self.maxDiff=None
 
     def test_import_isin_defaut(self):
         self.assertEqual(import_base.isin_default(),"ZZ_1")
@@ -52,13 +53,12 @@ class Test_import_csv1(Test_import_abstract):
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
             cl.tableau(fich,self.moyen_virement)
-        self.assertEqual(cl.erreur,[u"erreur de date '2013/18/12' à la ligne 2",
+        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 2",
                                     u"erreur de date '' à la ligne 4",
-                                    "attention il faut deux bout a un virement ligne 5",
-                                    u'attention, virement impossible entre le meme compte à la ligne 6',
-                                    u"le compte designe doit etre un des deux comptes 'tiers' ligne 7",
-                                    u"il faudrait swap cptb3 et cpte1 a la ligne 8",
-                                    u"ce tiers 't1' ne peut etre un titre a la ligne 9"])
+                                    u"attention il faut deux bouts à un virement ligne 5",
+                                    u'attention, virement impossible entre le même compte à la ligne 6',
+                                    u"le compte designé doit être un des deux comptes 'tiers' ligne 7",
+                                    u"Ce tiers 't1' ne peut être un titre à la ligne 9"],cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type,'t')
     def test_import_erreur_champ_incomplet(self):
         self.cl.init_cache()
@@ -81,9 +81,9 @@ class Test_import_csv1(Test_import_abstract):
             cl.tableau(fich,self.moyen_virement)
         attendu=[
             #depense de 100E non p , rapproche, sans notes
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
             #recette de 10E rapproche
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10'), 'date_val': None, 'tiers_id': 257, 'ligne': 3, 'rapp_id': 1, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 4, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10'), 'date_val': None, 'tiers_id': 257, 'ligne': 3, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 4, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
             ]
         self.assertEqual(attendu,cl.opes.created_items)
     def test_erreur_import_file(self):
@@ -91,13 +91,12 @@ class Test_import_csv1(Test_import_abstract):
         nomfich=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")
         retour=cl.import_file(nomfich)
         self.assertEqual(retour,False)
-        self.assertEqual(cl.erreur,[u"erreur de date '2013/18/12' à la ligne 2",
+        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 2",
                                     u"erreur de date '' à la ligne 4",
-                                    "attention il faut deux bout a un virement ligne 5",
-                                    u'attention, virement impossible entre le meme compte à la ligne 6',
-                                    u"le compte designe doit etre un des deux comptes 'tiers' ligne 7",
-                                    u"il faudrait swap cptb3 et cpte1 a la ligne 8",
-                                    u"ce tiers 't1' ne peut etre un titre a la ligne 9"])
+                                    u"attention il faut deux bouts à un virement ligne 5",
+                                    u'attention, virement impossible entre le même compte à la ligne 6',
+                                    u"le compte designé doit être un des deux comptes 'tiers' ligne 7",
+                                    u"Ce tiers 't1' ne peut être un titre à la ligne 9"],cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type,'t')
     def test_import_file_vir(self):
         cl=self.cl
@@ -178,21 +177,21 @@ class Test_import_csv1(Test_import_abstract):
             cl.tableau(fich,self.moyen_virement)
         attendu=[
             #depense de 100E non p , rapproche, sans notes
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False,  'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
             #recette de 10E rapproche
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 3, 'rapp_id': 1, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 3, 'rapp_id': 1, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
             ##recette poitee de 10E
-            {'ope_titre': False, 'pointe': True, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 4, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': 1},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 5, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 21), 'notes': u'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 6, 'rapp_id': 2, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 10, 29), 'titre_id': 1, 'notes': u'20@5', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 7, 'dest_id': 3, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2011, 10, 30), 'notes': '', 'cat_id': 65, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1500.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 8, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 11, 30), 'titre_id': 1, 'notes': u'150@10', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1.00'), 'date_val': None, 'tiers_id': 261, 'ligne': 9, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2011, 12, 18), 'titre_id': 2, 'notes': u'1@1', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-5.00'), 'date_val': None, 'tiers_id': 262, 'ligne': 10, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2012, 9, 24), 'titre_id': 3, 'notes': u'5@1', 'cat_id':64, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('99.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 11, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 74, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('1.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 12, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 75, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 13, 'dest_id': 3, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2012, 12, 18), 'notes': u'>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 14, 'dest_id': 3, 'rapp_id': None, 'automatique': False, 'piece_comptable': '', 'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2013, 12, 18), 'notes': u'>P', 'cat_id': 65, 'ib_id': None}
+            {'ope_titre': False, 'pointe': True, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 4, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': 1},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 5, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 21), 'notes': u'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
+            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 6, 'rapp_id': 2, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 10, 29), 'titre_id': 1, 'notes': u'20@5', 'cat_id': 64, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 7, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2011, 10, 30), 'notes': '', 'cat_id': 65, 'ib_id': None},
+            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1500.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 8, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 11, 30), 'titre_id': 1, 'notes': u'150@10', 'cat_id': 64, 'ib_id': None},
+            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1.00'), 'date_val': None, 'tiers_id': 261, 'ligne': 9, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2011, 12, 18), 'titre_id': 2, 'notes': u'1@1', 'cat_id': 64, 'ib_id': None},
+            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-5.00'), 'date_val': None, 'tiers_id': 262, 'ligne': 10, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2012, 9, 24), 'titre_id': 3, 'notes': u'5@1', 'cat_id':64, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('99.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 11, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 74, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('1.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 12, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 75, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 13, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2012, 12, 18), 'notes': u'>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
+            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 14, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2013, 12, 18), 'notes': u'>P', 'cat_id': 65, 'ib_id': None}
         ]
         self.assertEqual(attendu,cl.opes.created_items)
 

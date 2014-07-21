@@ -1,4 +1,4 @@
-id;cpt;date;montant;r;p;moyen;cat;tiers;notes;projet;numchq
+id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque
 1;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;12345678
 2;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;
 3;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;

@@ -34,23 +34,29 @@ class export_icompta_plist(object):
             #pk
             fichier=fichier.replace(u"{{pk}}",u"%s"%obj.pk)
             if utils.idtostr(obj.cat, membre="nom",defaut=0) not in (u"Opération Ventilée",u"Virement"):
-                montant=abs(float(utils.idtostr(obj, membre="montant",defaut=0)))
+                montant=float(utils.idtostr(obj, membre="montant",defaut=0))
                 type_cat=utils.idtostr(obj.cat, membre="type",defaut="d")
                 if obj.montant > 0:
+                    type_ope = 1
                     if type_cat == 'r':
                         categorie_id = obj.cat_id
                     else:
-                        categorie_id = self.avance
+                        categorie_id = self.remboursement
                 else:
+                    montant=abs(montant)
+                    type_ope = 2
                     if type_cat == 'd':
                         categorie_id = obj.cat_id
                     else:
-                        categorie_id = self.remboursement
+                        categorie_id = self.avance
             else:
+                type_ope = 2
                 categorie_id = obj.cat_id
                 montant = 0
             fichier=fichier.replace(u"{{amount}}",u"%s"%montant)
             fichier=fichier.replace(u"{{cat_id}}",u"%s"%categorie_id)
+            fichier=fichier.replace(u"{{type_ope}}",u"%s"%type_ope)
+
             #date_ope
             fichier=fichier.replace(u"{{jour}}",u"%s"%obj.date.day)
             fichier=fichier.replace(u"{{mois}}",u"%s"%obj.date.month)
@@ -58,18 +64,6 @@ class export_icompta_plist(object):
 
             tiers=utils.idtostr(obj.tiers, membre="nom", defaut="rien")
             fichier=fichier.replace(u"{{tiers}}",u"%s"%tiers)
-
-            type_moyen=utils.idtostr(obj.moyen, membre="type",defaut="")
-            if type_moyen == 'r':
-                type_ope = 1
-            elif type_moyen == 'd':
-                type_ope = 2
-            else:
-                if obj.montant > 0:
-                    type_ope = 1
-                else:
-                    type_ope = 2
-            fichier=fichier.replace(u"{{type_ope}}",u"%s"%type_ope)
             #last update timestamp
             if action_type=='I':
                 fichier=fichier.replace(u"{{last_update}}",u"%s"%0)
@@ -91,7 +85,10 @@ class export_icompta_plist(object):
             #device code
             fichier=fichier.replace(u"{{device}}",u"%s"%self.code_device)
             #couleur
-            color=int(utils.idtostr(obj, membre="couleur", defaut="#FFFFFF")[1:], 16)
+            color_hexa=utils.idtostr(obj, membre="couleur", defaut="#FFFFFF")[1:]
+            if color_hexa==u'' or color_hexa=='':
+                color_hexa="0"
+            color=int(color_hexa, 16)
             fichier=fichier.replace(u"{{color}}",u"%s"%color)
             #last update timestamp
             if action_type=='I':
@@ -128,7 +125,10 @@ class export_icompta_plist(object):
             #device code
             fichier=fichier.replace(u"{{device}}",u"%s"%self.code_device)
             #couleur
-            color=int(utils.idtostr(obj, membre="couleur", defaut="#FFFFFF")[1:], 16)
+            color_hexa=utils.idtostr(obj, membre="couleur", defaut="#FFFFFF")[1:]
+            if color_hexa==u'' or color_hexa=='':
+                color_hexa="0"
+            color=int(color_hexa, 16)
             fichier=fichier.replace(u"{{color}}",u"%s"%color)
             #last update timestamp
             if action_type=='I':
