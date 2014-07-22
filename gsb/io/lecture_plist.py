@@ -107,7 +107,7 @@ def gestion_maj(request):
                 messages.success(request,u"catégories exportées: %s"%nb_export['cat'])
             nb_import = import_items(lastmaj, request)
             if nb_import['deja']>0:
-                messages.info(request,u"%s éléments du repetoire money journal déja mises à jours"%nb_import['deja'])
+                messages.info(request,u"%s éléments du répertoire money journal déja mises à jour"%nb_import['deja'])
             if int(nb_import['ope'])>0:
                 messages.success(request,u"opérations importées: %s"%nb_import['ope'])
             if nb_import['compte']>0:
