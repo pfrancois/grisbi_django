@@ -31,59 +31,69 @@ class Element(object):
         self.datemaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.fromtimestamp(int(os.path.splitext(os.path.basename(fichier))[0]) / 1000))
         self.plistdict = bplist.readPlist(fichier)
         root=self.plistdict['$objects'][self.plistdict['$top']['$0']['CF$UID']]
-        reponse = simp_NSKeyedArchiver(objects=self.plistdict, top=root, level=1,filtre=True)
-        self.device=reponse['device']
-        self.action=self.actions[reponse['action']]
-        self.obj = reponse['object0']
-        self.type = self.types[self.obj['$class']]
-        self.is_ope = self.type == "ope"
-        self.is_cat = self.type == "categorie"
-        self.is_compte = self.type == "compte"
-        self.is_budget = self.type == "budget"
-        self.is_budget=False
-        self.lastup = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.fromtimestamp(self.obj['lastUpdate'])) if self.obj['lastUpdate'] != 0 else self.datemaj
-        self.id = self.obj['pk']
-        if self.is_ope:
-            self.sens_element = self.sens[self.obj['type']]
-            self.cat = self.obj['category']
-            self.automatique = False #ameliorer la gestion du truc
-            self.cpt = self.obj['payment']
-            self.date = self.obj['day']
-            if self.sens_element == 'r':
-                self.montant = decimal.Decimal(self.obj['amount'])
-            else:
-                self.montant = decimal.Decimal(self.obj['amount'])*-1
-            try:
-                self.tiers = self.obj['memo']['NS.string']
-            except TypeError:
-                self.tiers = self.obj['memo']
-        if self.is_cat or self.is_compte:
-            self.couleur = self.obj['color']
-            try:
-                self.nom = self.obj['name']['NS.string']
-            except TypeError:
-                self.nom = self.obj['name']
-            self.place = self.obj['place']
-        if self.is_cat:
-            self.type_cat=self.sens[self.obj['type']]
-        if self.is_compte:
-            self.symbol = self.obj['symbol']
+        reponse_initiale = simp_NSKeyedArchiver(objects=self.plistdict, top=root, level=1,filtre=True)
+        self.el=list()
+        for key in reponse_initiale:
+            if 'object' in key:
+                i=utils.AttrDict()
+                i.fichier=fichier
+                i.device=reponse_initiale['device']
+                i.action=self.actions[reponse_initiale['action']]
+                i.datemaj=self.datemaj
+                i.obj = reponse_initiale[key]
+                i.type = self.types[i.obj['$class']]
+                i.is_ope = i.type == "ope"
+                i.is_cat = i.type == "categorie"
+                i.is_compte = i.type == "compte"
+                i.is_budget = i.type == "budget"
+                i.is_budget=False
+                i.lastup = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.fromtimestamp(i.obj['lastUpdate'])) if i.obj['lastUpdate'] != 0 else self.datemaj
+                i.id = i.obj['pk']
+                if i.is_ope:
+                    i.sens_element = self.sens[i.obj['type']]
+                    i.cat = i.obj['category']
+                    i.automatique = False #ameliorer la gestion du truc
+                    i.cpt = i.obj['payment']
+                    i.date = i.obj['day']
+                    if i.sens_element == 'r':
+                        i.montant = decimal.Decimal(i.obj['amount'])
+                    else:
+                        i.montant = decimal.Decimal(i.obj['amount'])*-1
+                    try:
+                        i.tiers = i.obj['memo']['NS.string']
+                    except TypeError:
+                        i.tiers = i.obj['memo']
+                if i.is_cat or i.is_compte:
+                    i.couleur = "#%s"%i.obj['color']
+                    try:
+                        i.nom = i.obj['name']['NS.string']
+                    except TypeError:
+                        i.nom = i.obj['name']
+                    i.place = i.obj['place']
+                if i.is_cat:
+                    i.type_cat = self.sens[i.obj['type']]
+                if i.is_compte:
+                    i.symbol = i.obj['symbol']
+                self.el.append(i)
     def __unicode__(self):
-        if self.is_ope:
+        if len(self.el) >1:
+            return u"plusieurs éléments"
+        i =1
+        if self.el[i].is_ope:
             return u"OPE (%s) le %s : %s %s a %s cpt: %s" % (
-                self.id,
-                self.date.strftime('%d/%m/%Y'),
-                self.montant,
+                self.el[i].id,
+                self.el[i].date.strftime('%d/%m/%Y'),
+                self.el[i].montant,
                 settings.DEVISE_GENERALE,
-                self.tiers,
-                self.cpt
+                self.el[i].tiers,
+                self.el[i].cpt
             )
-        if self.is_compte:
-            return u"COMPTE (%s) '%s'" % (self.id,self.nom)
-        if self.is_cat:
-            return u"CAT (%s) '%s' type:%s" % (self.id, self.nom, self.type_cat)
-        if self.is_budget:
-            return u"BUDGET %s" % self.id
+        if self.el[i].is_compte:
+            return u"COMPTE (%s) '%s'" % (self.el[i].id,self.el[i].nom)
+        if self.el[i].is_cat:
+            return u"CAT (%s) '%s' type:%s" % (self.el[i].id, self.el[i].nom, self.el[i].type_cat)
+        if self.el[i].is_budget:
+            return u"BUDGET %s" % self.el[i].id
     def __str__(self):
         return unicode(self).encode('utf-8')
     def __repr__(self):
@@ -172,12 +182,13 @@ def check():
     #verif si des operations sont a importer
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         ele = Element(fichier)
-        if ele.device == 'tototototo':#c'est une operation provenant de ce pc
-            continue
-        if ele.lastup > lastmaj and ele.sens_element != "d":
-            return True
-        if ele.datemaj > lastmaj and ele.sens_element == "d":
-            return True
+        for el in ele.el:
+            if el.device == 'tototototo':#c'est une operation provenant de ce pc
+                continue
+            if el.lastup > lastmaj and el.sens_element != "d":
+                return True
+            if ele.datemaj > lastmaj and el.sens_element == "d":
+                return True
     #verif si des operations sont a exporter
     if models.Ope.objects.filter(lastupdate__gte=lastmaj).order_by('lastupdate').count() > 0:
         return True
@@ -193,47 +204,44 @@ def import_items(lastmaj, request=None):
     list_ele['budget']=dict()
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         ele=Element(fichier)
-        if ele.device == settings.CODE_DEVICE_POCKET_MONEY: #c'est une operation provenant de ce pc
-            nb['deja'] += 1
-            continue
-        if ele.lastup < lastmaj:
-            nb['deja'] += 1
-            continue
-        messages.info(request,u"fichier lu pour être importé: %s" %  os.path.basename(fichier))
-        if ele.action =='c':
-            nb[ele.type] += 1
-            if not settings.TESTING:
-                print "ajout %s (%s) dans le fichier %s" % (ele.type,ele.id,os.path.basename(fichier))
-            list_ele[ele.type][ele.id]=ele
-        if ele.action=="m":#modif
-            if not settings.TESTING:
-                print "modif %s (%s) dans le fichier %s" % (ele.type,ele.id,os.path.basename(fichier))
-            if ele.id in list_ele[ele.type].keys():
-                if list_ele[ele.type][ele.id].action=='c':
-                    list_ele[ele.type][ele.id]=ele
-                    list_ele[ele.type][ele.id].action='c'
+        for el in ele.el:
+            if el.device == settings.CODE_DEVICE_POCKET_MONEY: #c'est une operation provenant de ce pc
+                nb['deja'] += 1
+                continue
+            if el.lastup < lastmaj:
+                nb['deja'] += 1
+                continue
+            if hasattr(el,'date'):
+                if el.date > utils.today():
+                    continue
+            if el.action =='c':
+                nb[el.type] += 1
+                list_ele[el.type][el.id]=el
+            if el.action=="m":#modif
+                if el.id in list_ele[el.type].keys():
+                    if list_ele[el.type][el.id].action=='c':
+                        list_ele[el.type][el.id]=el
+                        list_ele[el.type][el.id].action='c'
+                    else:
+                        list_ele[el.type][el.id]=el
                 else:
-                    list_ele[ele.type][ele.id]=ele
-            else:
-                nb[ele.type] += 1
-                list_ele[ele.type][ele.id]=ele
-        if ele.action =="d":
-            if not settings.TESTING:
-                print "suppr %s (%s) dans le fichier %s" % (ele.type,ele.id,os.path.basename(fichier))
-            if ele.id in list_ele[ele.type].keys():
-                if list_ele[ele.type][ele.id].action=='c':
-                    del list_ele[ele.type][ele.id]
-                    nb[ele.type] -= 1
+                    nb[el.type] += 1
+                    list_ele[el.type][el.id]=el
+            if el.action =="d":
+                if el.id in list_ele[el.type].keys():
+                    if list_ele[el.type][el.id].action=='c':
+                        del list_ele[el.type][el.id]
+                        nb[el.type] -= 1
+                    else:
+                        list_ele[el.type][el.id].action="d"
                 else:
-                    list_ele[ele.type][ele.id].action="d"
-            else:
-                nb[ele.type] += 1
-                list_ele[ele.type][ele.id]=ele
-    #import pprint
-    #pprint.pprint(list_ele)
+                    nb[el.type] += 1
+                    list_ele[el.type][el.id]=el
+
     for ele in list_ele['categorie'].values():
         diff=dict()
         texte=""
+        messages.info(request, u"gestion du fichier %s"%ele.fichier)
         if ele.action =='c':
             if not models.Cat.objects.filter(id=ele.id).exists():
                 cat=models.Cat.objects.create(
@@ -243,14 +251,15 @@ def import_items(lastmaj, request=None):
                     couleur=ele.couleur)
                 messages.success(request,u"catégorie (%s) '%s' créée" % (cat.pk,cat))
             else:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) existait déja alors qu'on demande de la créer" % ele.id)
+                raise Lecture_plist_exception(u"attention la catégorie (%s) existait déja alors qu'on demande de la créer" % ele.nom)
         if ele.action=="m":#modif
             try:
                 cat = models.Cat.objects.get(id=ele.id)
             except models.Cat.DoesNotExist:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existait pas alors qu'on demande de la modifier" % ele.id)
-            if not cat.is_editable:
-                raise  Lecture_plist_exception(u"impossible de modifier la cat (%s) car elle est par defaut"%cat.id)
+                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existait pas alors qu'on demande de la modifier" % ele.nom)
+            if not cat.is_editable and (cat.type != ele.type_cat or cat.nom != ele.nom):
+                messages.error(request,u"impossible de modifier la cat (%s)"%cat.nom)
+                continue
             if cat.nom != ele.nom:
                 diff['nom']=u"nom: %s => %s" % (cat.nom, ele.nom)
                 cat.nom = ele.nom
@@ -285,6 +294,7 @@ def import_items(lastmaj, request=None):
             gsb.delete()
             messages.success(request,texte)
     for ele in list_ele['compte'].values():
+        messages.info(request, u"gestion du fichier %s"%ele.fichier)
         diff=dict()
         texte=""
         if ele.action =='c':
@@ -331,6 +341,7 @@ def import_items(lastmaj, request=None):
             gsb.delete()
             messages.success(request,texte)
     for ele in list_ele['ope'].values():
+        messages.info(request, u"gestion du fichier %s"%ele.fichier)
         texte=""
         if ele.cpt in list_ele['compte'] and list_ele['compte'][ele.cpt].action=='c':
             compte = ele.cpt
@@ -370,19 +381,19 @@ def import_items(lastmaj, request=None):
             except models.Ope.DoesNotExist:
                 raise Lecture_plist_exception(u"attention cette opé '%s' n'existait pas alors qu'on demande de le modifier" % ele.id)
             if gsb.is_mere:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est mère"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est mère"%gsb)
             if gsb.is_fille:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est fille"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est fille"%gsb)
             if gsb.rapp is not None:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est rapprochée"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est rapprochée"%gsb)
             if gsb.compte.ouvert is False:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car son compte est fermé"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car son compte est fermé"%gsb)
             if gsb.jumelle:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est jumellée"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est jumellée"%gsb)
             if gsb.ope_titre_ost is not None or gsb.ope_titre_pmv is not None: # pragma: no cover because trop chiant a tester
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est support d'une opé titre"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est support d'une opé titre"%gsb)
             if gsb.pointe:
-                raise Lecture_plist_exception(u"impossible de modifier cette opé '%s' car elle est pointée"%gsb)
+                messages.error(request,u"impossible de modifier cette opé '%s' car elle est pointée"%gsb)
             if gsb.compte_id != compte:
                 texte=u"compte: %s => %s\n" % (gsb.compte_id, compte)
                 gsb.compte_id = compte

@@ -213,7 +213,7 @@ class Test_import_csv2(Test_import_abstract):
         self.assertQueryset_list(models.Cat.objects.all(),
                                  [u'cat1', u'cat2',
                                   u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
-                                  u"Revenus de placements:Plus-values", u'Impôts:Cotisations sociales',
+                                  u"Revenus de placements:Plus-values", u'Impôts',
                                   u'Revenus de placements:interets', u'Virement', u"Non affecté", u"Avance", u"Remboursement"],
                                  'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["cpt_titre2201101", "cpte1201101"], "nom")
@@ -267,7 +267,7 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(models.Cat.objects.get(nom=u"Opération sur titre").id, 64)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:Plus-values").id, 67)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:interets").id, 68)
-        self.assertEqual(models.Cat.objects.get(nom=u'Impôts:Cotisations sociales').id, 54)
+        self.assertEqual(models.Cat.objects.get(nom=u'Impôts').id, 54)
         self.assertEqual(models.Cat.objects.get(nom=u'Virement').id, 65)
         self.assertEqual(models.Cat.objects.get(nom=u"Opération Ventilée").id, 69)
         self.assertEqual(models.Cat.objects.get(nom=u"Frais bancaires").id, 70)

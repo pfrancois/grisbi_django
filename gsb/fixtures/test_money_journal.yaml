@@ -47,7 +47,7 @@ gsb.cat:
         couleur: '#FFFFFF'
         date_created: 2013-05-23 18:51:40.571000+00:00
         lastupdate: 2013-05-23 18:51:40.571000+00:00
-        nom: "Imp\xF4ts:Cotisations sociales"
+        nom: "Imp\xF4ts"
         type: d
         uuid: 51a6674d-7f28-427b-8cf7-25ad2ac07954
     64:
@@ -256,7 +256,7 @@ gsb.ope:
         mere: null
         montant: '100'
         moyen: 4
-        notes: modifie positif
+        notes: modifie positif mais utilisation avance
         num_cheque: ''
         ope_titre_ost: null
         ope_titre_pmv: null
