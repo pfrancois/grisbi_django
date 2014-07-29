@@ -21,6 +21,28 @@ from .ecriture_plist_money_journal import  export_icompta_plist
 class Lecture_plist_exception(utils.utils_Exception):
     pass
 
+class Subelement(utils.AttrDict):
+    def __unicode__(self):
+        if self.is_ope:
+            return u"(%s) le %s : %s %s a %s cpt: %s" % (
+                self.id,
+                self.date.strftime('%d/%m/%Y'),
+                self.montant,
+                settings.DEVISE_GENERALE,
+                self.tiers,
+                self.cpt
+            )
+        if self.is_compte:
+            return u"(%s) '%s'" % (self.id,self.nom)
+        if self.is_cat:
+            return u"(%s) '%s' type:%s" % (self.id, self.nom, self.type_cat)
+        if self.is_budget:
+            return u"%s" % self.id
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+    def __repr__(self):
+        return self.__str__()
+
 class Element(object):
     actions={1:'c', 2:'m', 3:'d'}
     sens={1:"r",2:"d","3":"v"}
@@ -35,7 +57,7 @@ class Element(object):
         self.el=list()
         for key in reponse_initiale:
             if 'object' in key:
-                i=utils.AttrDict()
+                i=Subelement()
                 i.fichier=fichier
                 i.device=reponse_initiale['device']
                 i.action=self.actions[reponse_initiale['action']]
@@ -75,29 +97,6 @@ class Element(object):
                 if i.is_compte:
                     i.symbol = i.obj['symbol']
                 self.el.append(i)
-    def __unicode__(self):
-        if len(self.el) >1:
-            return u"plusieurs éléments"
-        i =1
-        if self.el[i].is_ope:
-            return u"OPE (%s) le %s : %s %s a %s cpt: %s" % (
-                self.el[i].id,
-                self.el[i].date.strftime('%d/%m/%Y'),
-                self.el[i].montant,
-                settings.DEVISE_GENERALE,
-                self.el[i].tiers,
-                self.el[i].cpt
-            )
-        if self.el[i].is_compte:
-            return u"COMPTE (%s) '%s'" % (self.el[i].id,self.el[i].nom)
-        if self.el[i].is_cat:
-            return u"CAT (%s) '%s' type:%s" % (self.el[i].id, self.el[i].nom, self.el[i].type_cat)
-        if self.el[i].is_budget:
-            return u"BUDGET %s" % self.el[i].id
-    def __str__(self):
-        return unicode(self).encode('utf-8')
-    def __repr__(self):
-        return self.__str__()
 
 def gestion_maj(request):
     """vue qui gere les maj"""
@@ -202,6 +201,7 @@ def import_items(lastmaj, request=None):
     list_ele['compte']=dict()
     list_ele['categorie']=dict()
     list_ele['budget']=dict()
+    #on parcourt les fichier
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         ele=Element(fichier)
         for el in ele.el:
@@ -239,26 +239,27 @@ def import_items(lastmaj, request=None):
                     list_ele[el.type][el.id]=el
 
     for ele in list_ele['categorie'].values():
+        ref=ele.__unicode__()
         diff=dict()
         texte=""
         messages.info(request, u"gestion du fichier %s"%ele.fichier)
         if ele.action =='c':
             if not models.Cat.objects.filter(id=ele.id).exists():
-                cat=models.Cat.objects.create(
+                models.Cat.objects.create(
                     pk=ele.id,
                     nom=ele.nom,
                     type=ele.type_cat,
                     couleur=ele.couleur)
-                messages.success(request,u"catégorie (%s) '%s' créée" % (cat.pk,cat))
+                messages.success(request,u"catégorie %s créée" % ref)
             else:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) existait déja alors qu'on demande de la créer" % ele.nom)
+                raise Lecture_plist_exception(u"attention la catégorie %s existe déja alors qu'on demande de la créer" % ref)
         if ele.action=="m":#modif
             try:
                 cat = models.Cat.objects.get(id=ele.id)
             except models.Cat.DoesNotExist:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existait pas alors qu'on demande de la modifier" % ele.nom)
+                raise Lecture_plist_exception(u"attention la catégorie %s n'existe pas alors qu'on demande de la modifier" % ref)
             if not cat.is_editable and (cat.type != ele.type_cat or cat.nom != ele.nom):
-                messages.error(request,u"impossible de modifier la cat (%s)"%cat.nom)
+                messages.error(request,u"impossible de modifier la cat %s"%ref)
                 continue
             if cat.nom != ele.nom:
                 diff['nom']=u"nom: %s => %s" % (cat.nom, ele.nom)
@@ -277,41 +278,43 @@ def import_items(lastmaj, request=None):
                 if texte[0]==u",":
                     texte=texte[2:]
                 cat.save()
-                messages.success(request,u"catégorie (%s) modifiée comme ca: %s" % (cat.id,texte))
+                messages.success(request,u"catégorie %s modifiée comme ca: %s" % (ref,texte))
         if ele.action == 'd':
             #on regarde si la cat existe
             try:
                 gsb = models.Cat.objects.get(id=ele.id,nom=ele.nom)
             except models.Cat.DoesNotExist:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existait pas alors qu'on demande de la supprimer" % ele.id)
+                raise Lecture_plist_exception(u"attention la catégorie %s n'existe pas alors qu'on demande de la supprimer" % ref)
             #on regarde si la cat a des opes
             if (models.Echeance.objects.filter(cat=gsb).count() + models.Ope.objects.filter(cat=gsb).count()) >0:
-                raise Lecture_plist_exception(u"cat non supprimable '%s' car elle a des ope rattaches" % ele.__unicode__())
+                raise Lecture_plist_exception(u"catégorie non supprimable %s car elle a des opérations rattachées" % ref)
             #on regarde si la cat ne fait partie des cat reserves
             if not gsb.is_editable:
-                raise  Lecture_plist_exception(u"impossible de supprimer la catégorie (%s) car elle est par défaut"%gsb.id)
+                raise  Lecture_plist_exception(u"impossible de supprimer la catégorie (%s)"%gsb.id)
             texte = u"catégorie (%s) #%s supprimée" % (gsb.nom,gsb.pk)
             gsb.delete()
             messages.success(request,texte)
+
     for ele in list_ele['compte'].values():
+        ref=ele.__unicode__()
         messages.info(request, u"gestion du fichier %s"%ele.fichier)
         diff=dict()
         texte=""
         if ele.action =='c':
             if not models.Compte.objects.filter(id=ele.id).exists():
-                gsb=models.Compte.objects.create(
+                models.Compte.objects.create(
                     pk=ele.id,
                     nom=ele.nom,
                     couleur=ele.couleur)
-                messages.success(request,u"compte (%s) '%s' créé" % (gsb.pk, gsb))
+                messages.success(request,u"compte %s créé" % ref)
             else:
-                raise Lecture_plist_exception(u"attention le compte(%s) existait déja alors qu'on demande de le créer" % ele.id)
+                raise Lecture_plist_exception(u"attention le compte %s existe déja alors qu'on demande de le créer" % ref)
         if ele.action=="m":#modif
-            #on regarde si l'ope existe
+            #on regarde si l'opération existe
             try:
                 gsb = models.Compte.objects.get(id=ele.id)
             except models.Compte.DoesNotExist:
-                raise Lecture_plist_exception(u"attention le compte '%s' n'existait pas alors qu'on demande de le modifier" % ele.id)
+                raise Lecture_plist_exception(u"attention le compte %s n'existe pas alors qu'on demande de le modifier" % ref)
             if gsb.nom != ele.nom:
                 diff['nom']=u"nom: %s => %s" % (gsb.nom, ele.nom)
                 gsb.nom = ele.nom
@@ -325,22 +328,24 @@ def import_items(lastmaj, request=None):
                 if texte[0]==u",":
                     texte=texte[2:]
                 gsb.save()
-                messages.success(request,u"compte (%s) modifié comme ca: %s" % (gsb.id,texte))
+                messages.success(request,u"compte %s modifié comme ca: %s" % (ref,texte))
         if ele.action == 'd':
             #on regarde si le cpt existe
             try:
                 gsb = models.Compte.objects.get(id=ele.id,nom=ele.nom)
             except models.Compte.DoesNotExist:
-                raise Lecture_plist_exception(u"attention le compte '%s' n'existe pas pour ce nom (%s) alors qu'on demande de le supprimer" % (ele.id, ele.nom))
+                raise Lecture_plist_exception(u"attention le compte %s n'existe pas pour ce nom (%s) alors qu'on demande de le supprimer" % (ele.id, ele.nom))
             #on regarde si le cpt a des opes
             if sum((models.Echeance.objects.filter(compte=gsb).count(),
                     models.Echeance.objects.filter(compte_virement=gsb).count(),
                     models.Ope.objects.filter(compte=gsb).count())) >0:
-                raise Lecture_plist_exception(u"compte non supprimable '%s' # %s car il a des opérations ou des écheances rattachées" % (ele.nom,ele.id))
-            texte = u"compte '%s' #%s supprimé" % (gsb.nom,gsb.pk)
+                raise Lecture_plist_exception(u"compte non supprimable %s car il a des opérations ou des écheances rattachées" % ref)
+            texte = u"compte %s supprimé" % ref
             gsb.delete()
             messages.success(request,texte)
+
     for ele in list_ele['ope'].values():
+        ref=ele.__unicode__()
         messages.info(request, u"gestion du fichier %s"%ele.fichier)
         texte=""
         if ele.cpt in list_ele['compte'] and list_ele['compte'][ele.cpt].action=='c':
@@ -349,20 +354,20 @@ def import_items(lastmaj, request=None):
             try:
                 compte = models.Compte.objects.get(id=ele.cpt).id
             except models.Compte.DoesNotExist:
-                raise Lecture_plist_exception(u"attention le compte (%s) n'existait pas alors qu'on le demande pour l'ope #%s" % (ele.cpt,ele.id))
+                raise Lecture_plist_exception(u"attention le compte (%s) n'existe pas alors qu'on le demande pour l'opération %s" % (ele.cpt,ref))
         if ele.cat in list_ele['categorie'] and list_ele['categorie'][ele.cat].action=='c':
             cat=ele.cat
         else:
             try:
                 cat = models.Cat.objects.get(id=ele.cat).id
             except models.Cat.DoesNotExist:
-                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existait pas alors qu'on le demande pour l'ope #%s" % (ele.cat,ele.id))
+                raise Lecture_plist_exception(u"attention la catégorie (%s) n'existe pas alors qu'on le demande pour l'opération %s" % (ele.cat,ref))
         tiers,created=models.Tiers.objects.get_or_create(nom=ele.tiers,defaults={'nom':ele.tiers})
         if created:
             messages.success(request,u"tiers '%s' crée" % tiers)
         if ele.action =='c':
             if not models.Ope.objects.filter(id=ele.id).exists():
-                ope = models.Ope.objects.create(
+                models.Ope.objects.create(
                         pk=ele.id,
                         compte_id=compte,
                         cat_id = cat,
@@ -371,29 +376,36 @@ def import_items(lastmaj, request=None):
                         montant=ele.montant,
                         lastupdate=ele.lastup
                     )
-                messages.success(request,u"opération '%s' créée" % ope)
+                messages.success(request,u"opération %s créée" % ref)
             else:
-                raise Lecture_plist_exception(u"attention l'opération (%s) existe déja alors qu'on demande de le créer" % ele.id)
+                raise Lecture_plist_exception(u"attention l'opération %s existe déja alors qu'on demande de la créer" % ref)
 
         if ele.action=="m":#modif
             try:
                 gsb = models.Ope.objects.get(id=ele.id)
             except models.Ope.DoesNotExist:
-                raise Lecture_plist_exception(u"attention cette opé '%s' n'existait pas alors qu'on demande de le modifier" % ele.id)
+                raise Lecture_plist_exception(u"attention cette opération %s n'existe pas alors qu'on demande de la modifier" % ref)
             if gsb.is_mere:
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est mère"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est mère"%ref)
+                continue
             if gsb.is_fille:
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est fille"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est fille"%ref)
+                continue
             if gsb.rapp is not None:
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est rapprochée"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est rapprochée"%ref)
+                continue
             if gsb.compte.ouvert is False:
-                messages.error(request,u"impossible de modifier cette opé '%s' car son compte est fermé"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car son compte est fermé"%ref)
+                continue
             if gsb.jumelle:
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est jumellée"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est jumellée"%ref)
+                continue
             if gsb.ope_titre_ost is not None or gsb.ope_titre_pmv is not None: # pragma: no cover because trop chiant a tester
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est support d'une opé titre"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est support d'une opération titre"%ref)
+                continue
             if gsb.pointe:
-                messages.error(request,u"impossible de modifier cette opé '%s' car elle est pointée"%gsb)
+                messages.error(request,u"impossible de modifier cette opération %s car elle est pointée"%ref)
+                continue
             if gsb.compte_id != compte:
                 texte=u"compte: %s => %s\n" % (gsb.compte_id, compte)
                 gsb.compte_id = compte
@@ -420,30 +432,28 @@ def import_items(lastmaj, request=None):
             try:
                 gsb = models.Ope.objects.get(id=ele.id)
             except models.Ope.DoesNotExist:
-                raise Lecture_plist_exception(u"attention cette opé '%s' n'existait pas alors qu'on demande de le supprimer" % ele.id)
+                raise Lecture_plist_exception(u"attention cette opération %s n'existe pas alors qu'on demande de le supprimer" % ele.id)
             if gsb.is_mere:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est mère"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est mère"%ref)
             if gsb.is_fille:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est fille"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est fille"%ref)
             if gsb.rapp is not None:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est rapprochée"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est rapprochée"%ref)
             if gsb.compte.ouvert is False:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car son compte est fermé"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car son compte est fermé"%ref)
             if gsb.jumelle:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est jumellée"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est jumellée"%ref)
             if gsb.ope_titre_ost is not None or gsb.ope_titre_pmv is not None:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est support d'une opé titre"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est support d'une opération titre"%ref)
             if gsb.pointe:
-                raise Lecture_plist_exception(u"impossible de supprimer cette opé '%s' car elle est pointée"%gsb)
+                raise Lecture_plist_exception(u"impossible de supprimer cette opération %s car elle est pointée"%ref)
             if  gsb.compte_id != ele.cpt or gsb.date != ele.date or gsb.montant != ele.montant or gsb.tiers.nom != ele.tiers or gsb.cat_id != ele.cat:
                 diff=u""
                 for d,value in zip(((gsb.compte_id , ele.cpt), (gsb.date ,ele.date), (gsb.montant , ele.montant) ,(gsb.tiers.nom , ele.tiers) , (gsb.cat_id , ele.cat)),('CPT','DATE','montant','tiers','cat')):
-                    if d[0]==d[1]:
-                        diff=u"%s\n%s"%(diff,u"%s:\t%s==%s"%(value,d[0],d[1]))
-                    else:
+                    if d[0]!=d[1]:
                         diff=u"%s\n%s"%(diff,u"%s:\t%s!=%s"%(value,d[0],d[1]))
-                raise Lecture_plist_exception(u"attention cette opé '%s' existe alors qu'on demande de le supprimer mais elle est différente :%s" % (ele.id,diff))
-            texte = u"opération %s supprimée" % gsb
+                raise Lecture_plist_exception(u"attention cette opération %s existe alors qu'on demande de le supprimer mais elle est différente :%s" % (ele.id,diff))
+            texte = u"opération %s supprimée" % ref
             gsb.delete()
             messages.success(request,texte)
     return nb
