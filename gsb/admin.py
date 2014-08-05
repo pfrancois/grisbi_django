@@ -252,14 +252,17 @@ class ope_inline_admin(admin.TabularInline):
     model = gsbmodels.Ope
     fields = ('lien', 'date', 'compte', 'montant', 'cat', 'tiers', 'ib', 'notes')
     readonly_fields = fields
+    editable_fields = []
     extra = 0
+    max_num=0
     formfield_overrides = {
         models.TextField: {'widget': forms.TextInput, },
     }
     related = ('compte', 'cat', 'ib')
     readonly = True
     orderby = ('-date',)
-    formset = formsetreadonly
+    formset = formsetreadonly#afin de de ne pas pouvoir effacer un ope comme ca.
+    can_delete = False
 
     def queryset(self, request):
         qs = super(ope_inline_admin, self).queryset(request)
@@ -308,6 +311,8 @@ class Cat_admin(Modeladmin_perso):
     inlines = [ope_cat]
     id_ope = "cat_id"
     table_annexe = "gsb_cat"
+    class Media(object):
+        css = { "all" : ("css/hide_admin_original.css",) }
 
     def has_delete_permission(self, request, obj=None):
         """verification des permission"""
@@ -335,6 +340,8 @@ class Ib_admin(Modeladmin_perso):
     inlines = [ope_ib]
     id_ope = "ib_id"
     table_annexe = "gsb_ib"
+    class Media(object):
+        css = { "all" : ("css/hide_admin_original.css",) }
 
 
 class Compte_admin(Modeladmin_perso):
@@ -465,6 +472,8 @@ class Ope_admin(Modeladmin_perso):
     formfield_overrides = {
         model_field.CurField: {'widget': forms.TextInput(attrs={'size': '8'})},
     }
+    class Media(object):
+        css = { "all" : ("css/hide_admin_original.css",) }
 
     def get_changelist_form(self, request, **kwargs):
         return Ope_changelist_Form
@@ -708,6 +717,8 @@ class Tiers_admin(Modeladmin_perso):
         if obj.is_titre is True:
             return False
         return True
+    class Media(object):
+        css = { "all" : ("css/hide_admin_original.css",) }
 
 
 class Ech_admin(Modeladmin_perso):
@@ -739,6 +750,8 @@ class Rapp_admin(Modeladmin_perso):
     actions = ['fusionne']
     list_display = ('nom', 'date')
     inlines = [ope_rapp]
+    class Media(object):
+        css = { "all" : ("css/hide_admin_original.css",) }
 
 
 class Exo_admin(Modeladmin_perso):

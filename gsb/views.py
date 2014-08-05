@@ -634,7 +634,7 @@ def ope_titre_achat(request, cpt_id):
     titre = u' nouvel achat sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
                   {'titre_long': titre,
-                   'titre': u'modification',
+                   'titre': titre,
                    'form': form,
                    'cpt': compte,
                    'sens': 'achat'}
