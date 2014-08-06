@@ -260,9 +260,14 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y', gsb=False):
         else:
             raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 
-def datetotimestamp(s):
-    if s:
-        return calendar.timegm(s.timetuple())
+def datetotimestamp(d):
+    if type(d)== datetime.date:
+        return (d - datetime.date(1970,1,1)).total_seconds()
+    if hasattr(d,"tzinfo"):
+        if d.tzinfo is not None and d.tzinfo.utcoffset(None) is not None:
+            return (d - datetime.datetime(1970,1,1, tzinfo=pytz.utc)).total_seconds()
+        else:
+            return (d - datetime.datetime(1970,1,1)).total_seconds()
     else:
         return 0
 

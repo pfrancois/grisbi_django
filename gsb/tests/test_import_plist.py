@@ -92,7 +92,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6,  17, 23, 30, 34)))
         self.compare(el.id, 7)
-        self.compare(el.couleur,"#0")
+        self.compare(el.couleur,"#000000")
         self.compare(el.nom, " ")
         el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403040635000.log")).el[0]
         self.compare(el.device,'MyHpyVfqnK')
@@ -104,7 +104,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6,  17, 23, 30, 34,88255)))
         self.compare(el.id, 7)
-        self.compare(el.couleur,'#0')
+        self.compare(el.couleur,'#000000')
         self.compare(el.nom, "Ghh")
         self.compare(el.__unicode__(),u"(7) 'Ghh'")
         self.compare(el.__str__(),u"(7) 'Ghh'")
@@ -119,7 +119,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6,  17, 23, 30, 34,88255)))
         self.compare(el.id, 7)
-        self.compare(el.couleur,"#0")
+        self.compare(el.couleur,"#000000")
         self.compare(el.nom, "Ghh")
     def test_money_journal_element_cat(self):
         el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014000.log")).el[0]
@@ -132,7 +132,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
         self.compare(el.id, 16)
-        self.compare(el.couleur,'#0')
+        self.compare(el.couleur,'#000000')
         self.compare(el.nom, " ")
         self.compare(el.type_cat,"d")
         el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014010.log")).el[0]
@@ -145,7 +145,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14,10000)))
         self.compare(el.id, 16)
-        self.compare(el.couleur,'#0')
+        self.compare(el.couleur,'#000000')
         self.compare(el.nom, "Cat aded")
         self.compare(el.type_cat,"d")
         self.compare(el.__unicode__(),u"(16) 'Cat aded' type:d")
@@ -161,7 +161,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_budget, False)
         self.compare(el.lastup,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14,10000)))
         self.compare(el.id, 16)
-        self.compare(el.couleur,'#0')
+        self.compare(el.couleur,'#000000')
         self.compare(el.nom, "Cat aded")
         self.compare(el.type_cat,"d")
 
@@ -216,11 +216,11 @@ class Test_import_money_journal_import_item_modif_effectives_cote_cat(Test_impor
         self.cat.save()
         self.compare(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common(),
                          [('compte', 1), ('categorie', 1)])
-        self.assertmessagecontains(self.request,u"catégorie (16) 'Cat aded' type:d modifiée comme ca: nom: Cat initial => Cat aded, couleur: #FFFFFF => #0, type: r => d")
-        self.assertmessagecontains(self.request,u"compte (7) 'Ghh' modifié comme ca: nom: hjhjhkh => Ghh, couleur: #FFFFFF => #0")
+        self.assertmessagecontains(self.request,u"catégorie (16) 'Cat aded' type:d modifiée comme ca: nom: Cat initial => Cat aded, couleur: #FFFFFF => #000000, type: r => d")
+        self.assertmessagecontains(self.request,u"compte (7) 'Ghh' modifié comme ca: nom: hjhjhkh => Ghh, couleur: #FFFFFF => #000000")
         cat=models.Cat.objects.get(pk=16)
         self.compare(cat.nom,'Cat aded')
-        self.compare(cat.couleur,'#0')
+        self.compare(cat.couleur,'#000000')
         self.compare(cat.type,'d')
         obj=models.Compte.objects.get(pk=7)
         self.compare(obj.nom,'Ghh')
@@ -254,7 +254,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_cat(Test_impor
         self.cat.couleur='#FFFFFF'
         self.cat.save()
         lecture_plist.import_items(lastmaj=self.lastmaj,request=self.request)
-        self.assertmessagecontains(self.request,u"catégorie (16) 'Cat aded' type:d modifiée comme ca: couleur: #FFFFFF => #0, type: r => d")
+        self.assertmessagecontains(self.request,u"catégorie (16) 'Cat aded' type:d modifiée comme ca: couleur: #FFFFFF => #000000, type: r => d")
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist_10"))
     def test_money_journal_element_import10(self):
         """ttest si suppr alors que cat pas cree"""
@@ -323,7 +323,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_compte(Test_im
         self.cpt.couleur="#FFFFFF"
         self.cpt.save()
         lecture_plist.import_items(lastmaj=self.lastmaj,request=self.request)
-        self.assertmessagecontains(self.request,u"compte (7) 'hjhjhkh' modifié comme ca: couleur: #FFFFFF => #0")
+        self.assertmessagecontains(self.request,u"compte (7) 'hjhjhkh' modifié comme ca: couleur: #FFFFFF => #000000")
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist_14"))
     def test_money_journal_element_import14(self):
         """ttest si suppr alors que compte pas cree"""
@@ -724,7 +724,8 @@ class Test_import_money_journal_export(Test_import_abstract):
             for root, dirs, files in os.walk(attendu, topdown=False):
                 for name in files:
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
-
+            compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
+            compare(list_fic_recu,list_fic_attendu)
             #compare chaque fichier
             self.comp_file('1403481600000.log',"export_plist_cat_modif")
             self.comp_file('1403481660000.log',"export_plist_cat_crea")
@@ -746,8 +747,6 @@ class Test_import_money_journal_export(Test_import_abstract):
             self.comp_file('1403482620000.log',"export_plist_ope17_ope_fille_cree_1")
             self.comp_file('1403482680000.log',"export_plist_ope18_ope_fille_cree_2")
             self.comp_file('1403482740000.log',"export_plist_ope19_efface")
-            compare(nb,collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
-            compare(list_fic_recu,list_fic_attendu)
 
 
 

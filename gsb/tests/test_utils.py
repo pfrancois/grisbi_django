@@ -212,3 +212,5 @@ class Test_utils(TestCase):
     def test_datetotimestamp(self):
         self.assertEqual(utils.datetotimestamp(None),0)
         self.assertEqual(utils.datetotimestamp(datetime.date(1999, 1, 10)),915926400)
+        self.assertEqual(utils.datetotimestamp(datetime.datetime(1999, 1, 10)),915926400)
+        self.assertEqual(utils.datetotimestamp(datetime.datetime(1999, 1, 10, tzinfo=timezone.utc)),915926400)

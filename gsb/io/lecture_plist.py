@@ -86,7 +86,7 @@ class Element(object):
                     except TypeError:
                         i.tiers = i.obj['memo']
                 if i.is_cat or i.is_compte:
-                    i.couleur = "#%s"%i.obj['color']
+                    i.couleur = "#%s"%format(i.obj['color'],'06X')
                     try:
                         i.nom = i.obj['name']['NS.string']
                     except TypeError:
@@ -107,6 +107,7 @@ def gestion_maj(request):
             if lastmaj.tzinfo is None:
                 lastmaj = pytz.utc.localize(lastmaj)
             messages.info(request, u"dernière mise à jour: %s"%lastmaj.astimezone(utils.pytz.timezone(settings.TIME_ZONE)))
+            messages.info(request,"From PC to iphone")
             nb_export =  export(lastmaj, request)
             if int(nb_export['ope'])>0:
                 messages.success(request,u"opérations exportées: %s"%nb_export['ope'])
@@ -114,6 +115,9 @@ def gestion_maj(request):
                 messages.success(request,u"comptes exportés: %s"%nb_export['compte'])
             if nb_export['cat']>0:
                 messages.success(request,u"catégories exportées: %s"%nb_export['cat'])
+            if int(nb_export['ope']) == 0 and nb_export['compte'] == 0 and nb_export['cat'] == 0:
+                messages.success(request,"Nothing")
+            messages.info(request,"From iphone to PC")
             nb_import = import_items(lastmaj, request)
             if nb_import['deja']>0:
                 messages.info(request,u"%s éléments du répertoire money journal déja mises à jour"%nb_import['deja'])
@@ -123,7 +127,8 @@ def gestion_maj(request):
                 messages.success(request,u"comptes importés: %s"%nb_import['compte'])
             if nb_import['cat']>0:
                 messages.success(request,u"catégories importées: %s"%nb_import['cat'])
-
+            if int(nb_import['ope']) == 0 and nb_import['compte'] == 0 and nb_import['cat'] == 0:
+                messages.success(request,"Nothing")
             #on gere ceux qu'on elimine car deja pris en en compte
 
             config.derniere_import_money_journal = utils.now()

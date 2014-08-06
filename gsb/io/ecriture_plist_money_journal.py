@@ -50,6 +50,7 @@ class export_icompta_plist(object):
                     else:
                         categorie_id = self.avance
             else:
+            #si virement ou ope ventile
                 type_ope = 2
                 categorie_id = obj.cat_id
                 montant = 0
@@ -61,14 +62,13 @@ class export_icompta_plist(object):
             fichier=fichier.replace(u"{{jour}}",u"%s"%obj.date.day)
             fichier=fichier.replace(u"{{mois}}",u"%s"%obj.date.month)
             fichier=fichier.replace(u"{{annee}}",u"%s"%obj.date.year)
-
             tiers=utils.idtostr(obj.tiers, membre="nom", defaut="rien")
             fichier=fichier.replace(u"{{tiers}}",u"%s"%tiers)
             #last update timestamp
             if action_type=='I':
                 fichier=fichier.replace(u"{{last_update}}",u"%s"%0)
             else:
-                fichier=fichier.replace(u"{{last_update}}",u"%s"%utils.datetotimestamp(obj.lastupdate))
+                fichier=fichier.replace(u"{{last_update}}",u"%s"%int(utils.datetotimestamp(obj.lastupdate)))
             #compte
             fichier=fichier.replace(u"{{compte_id}}",u"%s"%obj.compte_id)
             filename=self.filename
@@ -94,7 +94,7 @@ class export_icompta_plist(object):
             if action_type=='I':
                 fichier=fichier.replace(u"{{last_update}}",u"%s"%0)
             else:
-                fichier=fichier.replace(u"{{last_update}}",u"%s"%utils.datetotimestamp(obj.lastupdate))
+                fichier=fichier.replace(u"{{last_update}}",u"%s"%int(utils.datetotimestamp(obj.lastupdate)))
             #pk
             fichier=fichier.replace(u"{{pk}}",u"%s"%obj.pk)
             #symbol
@@ -108,7 +108,7 @@ class export_icompta_plist(object):
                 place=list(models.Compte.objects.order_by('id').values_list('id',flat=True)).index(obj.pk)
             else:
                 place=0
-            fichier=fichier.replace(u"{{place}}",u"%s"%(place%9))
+            fichier=fichier.replace(u"{{place}}",u"%s"%place)
             #nom compte
             fichier=fichier.replace(u"{{nom_compte}}",u"%s"%obj.nom)
             filename=self.filename
@@ -134,7 +134,7 @@ class export_icompta_plist(object):
             if action_type=='I':
                 fichier=fichier.replace(u"{{last_update}}",u"%s"%0)
             else:
-                fichier=fichier.replace(u"{{last_update}}",u"%s"%utils.datetotimestamp(obj.lastupdate))
+                fichier=fichier.replace(u"{{last_update}}",u"%s"%int(utils.datetotimestamp(obj.lastupdate)))
             #pk
             fichier=fichier.replace(u"{{pk}}",u"%s"%obj.pk)
             #place
@@ -142,7 +142,7 @@ class export_icompta_plist(object):
                 place=list(models.Cat.objects.order_by('id').values_list('id',flat=True)).index(obj.pk)
             else:
                 place=0
-            fichier=fichier.replace(u"{{place}}",u"%s"%(place%9))
+            fichier=fichier.replace(u"{{place}}",u"%s"%place)
             #type cat (rd)
             if obj.type == 'r':
                 type_cat = self.type_revenu
@@ -159,14 +159,14 @@ class export_icompta_plist(object):
 
     @property
     def filename(self):
-        ref_temp = int(utils.datetotimestamp(utils.now()))
+        ref_temp = utils.datetotimestamp(utils.now())
         directory = os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log', str(ref_temp)[:3], str(ref_temp)[3:4],
                                  str(ref_temp)[4:5])
-        filename = os.path.join(directory, "{0:d}.log".format(ref_temp * 1000))
+        filename = os.path.join(directory,  "%d.log"%(ref_temp * 1000))
         if not os.path.exists(directory):
             os.makedirs(directory)
         if os.path.isfile(filename):
-            time.sleep(2)
+            time.sleep(1)
             ref_temp = int(utils.datetotimestamp(utils.now()))
             directory = os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log', str(ref_temp)[:3],
                                      str(ref_temp)[3:4], str(ref_temp)[4:5])
@@ -177,12 +177,16 @@ class export_icompta_plist(object):
     def all_since_date(self, lastmaj):
         nb=collections.Counter()
         dict_do={u"ope":list(),u"cat":list(),u'compte':list()}
-        for element in models.Db_log.objects.filter(date_time_created__gte=lastmaj,datamodel__in=['ope','cat','compte']).order_by('id'):
-            messages.success(self.request, u"%s"%element)
+        objs_a_parcourir=models.Db_log.objects.filter(date_time_created__gte=lastmaj,datamodel__in=['ope','cat','compte']).order_by('id')
+        Opes = dict ((ob.pk, ob) for ob in  models.Ope.objects.select_related('compte','tiers').filter(id__in=objs_a_parcourir.filter(datamodel="ope").values_list('id_model',flat=True)))
+        Cats = dict ((ob.pk, ob) for ob in  models.Cat.objects.order_by('id').all())
+        Cpts = dict ((ob.pk, ob) for ob in  models.Compte.objects.order_by('id').all())
+        for element in objs_a_parcourir:
+            messages.info(self.request, u"%s"%element)
             nb[element.datamodel]+=1
             if element.datamodel == "ope":
                 try:
-                    self.ope_unique(models.Ope.objects.get(id=element.id_model),action_type=element.memo,)
+                    self.ope_unique(Opes[element.id_model],action_type=element.memo,)
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
@@ -190,7 +194,7 @@ class export_icompta_plist(object):
                             nb[element.datamodel]-=1
                         else:
                             dict_do[element.datamodel].append(element.id_model)
-                except models.Ope.DoesNotExist:
+                except KeyError:
                     obj=utils.AttrDict()
                     obj.pk=element.id_model
                     obj.cat=0
@@ -204,7 +208,7 @@ class export_icompta_plist(object):
                     self.ope_unique(obj,action_type=element.memo)
             if element.datamodel == "cat":
                 try:
-                    self.cat_unique(models.Cat.objects.get(id=element.id_model),action_type=element.memo)
+                    self.cat_unique(Cats[element.id_model],action_type=element.memo)
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
@@ -212,7 +216,7 @@ class export_icompta_plist(object):
                             nb[element.datamodel]-=1
                         else:
                             dict_do[element.datamodel].append(element.id_model)
-                except models.Cat.DoesNotExist:
+                except KeyError:
                         obj=utils.AttrDict()
                         obj.couleur="#FFFFFF"
                         obj.lastupdate=lastmaj
@@ -222,8 +226,7 @@ class export_icompta_plist(object):
                         self.cat_unique(obj,action_type=element.memo)
             if element.datamodel == "compte":
                 try:
-                    obj=models.Compte.objects.get(id=element.id_model)
-                    self.compte_unique(obj,action_type=element.memo)
+                    self.compte_unique(Cpts[element.id_model],action_type=element.memo)
                     if element.memo=="I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
@@ -231,7 +234,7 @@ class export_icompta_plist(object):
                             nb[element.datamodel]-=1
                         else:
                             dict_do[element.datamodel].append(element.id_model)
-                except models.Compte.DoesNotExist:
+                except KeyError:
                     obj=utils.AttrDict()
                     obj.couleur="#FFFFFF"
                     obj.lastupdate=lastmaj
