@@ -38,6 +38,7 @@ def import_gsb_0_5_x(request):
             messages.info(request, "enregistrement fichier ok")
             # on recupere les info pour le nom
             #-----------------------gestion des imports
+            # noinspection PyBroadException
             try:
                 # on essaye d'ouvrir le fichier
                 destination = open(nomfich, 'r')
@@ -71,7 +72,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
     import_base.Ope_cache(request)
     titre_cache = import_base.Titre_cache(request)
     import_base.Cours_cache(request, titre_cache)
-    import_base.moyen_defaut_cache()
+    import_base.Moyen_defaut_cache()
     import_base.Rapp_cache(request)
     liste_type_period = Echeance.typesperiod
     liste_type_titre = [e[0] for e in Titre.typestitres]
@@ -248,14 +249,14 @@ def import_gsb_050(nomfich, request, efface_table=True):
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
                                                             defaults={'nom': xml_cpt.find('Details/Nom').text, 'ouvert': not bool(
                                                                 int(xml_cpt.find('Details/Compte_cloture').text)), }
-            )
+                                                           )
         else:
             messages.info(request, "cpt %s" % xml_cpt.find('Details/Nom').text)
             element, created = Compte.objects.get_or_create(nom=xml_cpt.find('Details/Nom').text,
                                                             defaults={'nom': xml_cpt.find('Details/Nom').text,
                                                                       'ouvert': not bool(int(xml_cpt.find('Details/Compte_cloture').text)),
-                                                            }
-            )
+                                                                     }
+                                                           )
 
         tabl_correspondance_compte[xml_cpt.find('Details/No_de_compte').text] = element.id
         if created:
@@ -299,8 +300,8 @@ def import_gsb_050(nomfich, request, efface_table=True):
             moyen, created = Moyen.objects.get_or_create(nom=xml_moyen.get('Nom'),
                                                          defaults={'nom': xml_moyen.get('Nom'),
                                                                    'type': Moyen.typesdep[int(xml_moyen.get('Signe'))][0]
-                                                         }
-            )
+                                                                  }
+                                                        )
             if created:
                 nb_nx_moyens += 1
             tabl_correspondance_moyen[xml_cpt.find('Details/No_de_compte').text][xml_moyen.get('No')] = moyen.id
@@ -362,7 +363,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
                   date=ope_date,
                   date_val=ope_date_val, # date de valeur
                   montant=ope_montant, # montant
-        )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
+                 )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         compte_ferme = not ope.compte.ouvert
         if compte_ferme:
             ope.compte.ouvert = True
@@ -456,7 +457,7 @@ def import_gsb_050(nomfich, request, efface_table=True):
         element = Echeance(date=utils.datefr2datesql(xml_ech.get('Date')),
                            montant=utils.fr2decimal(xml_ech.get('Montant')),
                            compte_id=tabl_correspondance_compte[xml_ech.get('Compte')],
-        )
+                          )
         tabl_correspondance_ech[xml_ech.get('No')] = element.id
         try:
             element.tiers_id = tabl_correspondance_tiers[xml_ech.get('Tiers')]

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import datetime
-import calendar
 import time
 import decimal
 import csv
@@ -9,16 +8,20 @@ import codecs
 import math
 import os
 import fnmatch
+
 import pytz
-#from inspector_panel.panels.inspector import debug
+
+# from inspector_panel.panels.inspector import debug
 import locale
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import force_unicode, smart_unicode
 from uuid import uuid4
 
+
 class utils_Exception(Exception):
     """une classe exception qui permet d'affcher tranquillement ce que l'on veut"""
+
     def __init__(self, message):
         super(utils_Exception, self).__init__(message)
         self.msg = smart_unicode(message)
@@ -26,8 +29,10 @@ class utils_Exception(Exception):
     def __unicode__(self):
         return self.msg
 
+
 class FormatException(utils_Exception):
     pass
+
 
 def uuid():
     """raccourci vers uuid4"""
@@ -37,6 +42,7 @@ def uuid():
 class Compfr(object):
     """operateur de comparaison avec un alphabet francais afin de pouvoir trier selon la norme francaise
        que cela soit texte ou unicode"""
+
     def __init__(self, decod='utf-8'):
         self.decod = decod
         self.loc = locale.getlocale()  # stocker la locale courante
@@ -46,17 +52,17 @@ class Compfr(object):
         """appel effectif de l'operateur"""
         if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
             # on convertit en unicode si nécessaire
-            if not(isinstance(v1, unicode)):
+            if not isinstance(v1, unicode):
                 if isinstance(v1, str):
                     v1 = v1.decode(self.decod)
                 else:
-                    v1 = "%s"%v1
+                    v1 = "%s" % v1
                     v1 = v1.decode(self.decod)
-            if not(isinstance(v2, unicode)):
+            if not isinstance(v2, unicode):
                 if isinstance(v2, str):
                     v2 = v2.decode(self.decod)
                 else:
-                    v2 = "%s"%v2
+                    v2 = "%s" % v2
                     v2 = v2.decode(self.decod)
 
             # on retire les tirets et les blancs insécables
@@ -163,13 +169,15 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
 
 def now():
     """ now utilise pour mock dans les tests """
-    dt=datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    dt = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     return dt
+
 
 def today():
     """date utilise pour mock et les test
     """
     return now().date()
+
 
 #------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
@@ -260,16 +268,18 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y', gsb=False):
         else:
             raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 
+
 def datetotimestamp(d):
-    if type(d)== datetime.date:
-        return (d - datetime.date(1970,1,1)).total_seconds()
-    if hasattr(d,"tzinfo"):
+    if type(d) == datetime.date:
+        return (d - datetime.date(1970, 1, 1)).total_seconds()
+    if hasattr(d, "tzinfo"):
         if d.tzinfo is not None and d.tzinfo.utcoffset(None) is not None:
-            return (d - datetime.datetime(1970,1,1, tzinfo=pytz.utc)).total_seconds()
+            return (d - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
         else:
-            return (d - datetime.datetime(1970,1,1)).total_seconds()
+            return (d - datetime.datetime(1970, 1, 1)).total_seconds()
     else:
         return 0
+
 
 def booltostr(s, defaut='0'):
     """format un bool en 0 ou 1 avec gestion des null et gestion des 0 sous forme de chaine de caractere
@@ -329,7 +339,7 @@ def idtostr(obj, membre='id', defaut='0'):
         if getattr(obj, membre) is not None:
             retour = unicode(getattr(obj, membre))
             if retour != '':
-                if retour[-1] == ":":#cas des categories
+                if retour[-1] == ":":  #cas des categories
                     retour = retour[0:-1]
         else:
             retour = unicode(defaut)
@@ -361,6 +371,7 @@ class UTF8Recoder(object):
 
     def next(self):
         return self.reader.next().encode("utf-8")
+
 
 class Excel_csv(object, csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
@@ -406,20 +417,24 @@ def is_onexist(objet, attribut):
         return False
 
 
-    # switch http://code.activestate.com/recipes/410692/"""
-def find_files(path, recherche='*.*',directory_ouptut=False):
+        # switch http://code.activestate.com/recipes/410692/"""
+
+
+def find_files(path, recherche='*.*', directory_ouptut=False):
     """trouve recursivement les fichiers voulus"""
-    fichiers={}
+    fichiers = {}
     for root, dirs, files in os.walk(path):
         for basename in files:
             if fnmatch.fnmatch(basename, recherche):
                 filename = os.path.join(root, basename)
-                fichiers[basename]=filename
+                fichiers[basename] = filename
     for key in sorted(fichiers):
         yield fichiers[key]
 
+
 class AttrDict(dict):
     """http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python"""
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self

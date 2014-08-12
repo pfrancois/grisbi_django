@@ -93,7 +93,7 @@ class Readonlywidget(forms.Widget):
         return mark_safe("<div>%s%s</div>" % (hidden, text))
 
     # noinspection PyUnusedLocal
-    def _has_changed(self, initial, data):
+    def _has_changed(self, initial, data):# @UnusedVariable
         return False
 
 
@@ -115,6 +115,8 @@ class ReadonlyField(forms.FileField):
             self.instance = None
 
     def clean(self, value, initial=None):
+        if initial:
+            return initial
         return getattr(self, 'initial', None)
 
 

@@ -14,7 +14,6 @@ from dateutil.relativedelta import relativedelta
 from ... import models
 from ... import utils
 from django.utils.encoding import smart_unicode
-import pprint
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list

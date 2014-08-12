@@ -19,11 +19,11 @@ from .. import views
 from .. import utils
 
 def isin_default():
-    nb=max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'],0)+1
+    nb = max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'], 0)+1
     return "ZZ_%s"%nb
 
 class ImportException(utils.utils_Exception):
-   pass
+    pass
 
 
 class ImportForm1(gsb_forms.Baseform):
@@ -31,7 +31,7 @@ class ImportForm1(gsb_forms.Baseform):
     nom_du_fichier = gsb_forms.forms.FileField()
 
 
-class property_ope_base(object):
+class Property_ope_base(object):
     """defini toutes les proprietes d'une ope"""
 
     @property
@@ -191,7 +191,7 @@ class Table(object):
             except self.element.DoesNotExist:
                 if not self.readonly:  # on cree donc l'element
                     argument_def = self.arg_def(nom, obj)
-                    created=None
+                    created = None
                     try:
                         with transaction.atomic():
                             #permet de creer un objet avec un id defini
@@ -232,9 +232,9 @@ class Cat_cache(Table):
         return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': u'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
                 {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
                 {'id': settings.ID_CAT_PMV,
-                        'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
+                 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
                 {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
-                {'id': settings.ID_CAT_COTISATION,'defaults': {'nom': u'Impôts', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
+                {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
                 {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
                 {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
                 {'nom': u"Non affecté", 'defaults': {'nom': u"Non affecté", 'type': 'd'}},
@@ -257,7 +257,7 @@ class Moyen_cache(Table):
                 {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
                 {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
                 {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'd'}},
-        ]
+               ]
 
     def goc(self, nom="", obj=None, montant=-1):
         #pas besoin d'argdef car comme on redefini cette methode
@@ -335,11 +335,11 @@ class Cours_cache(Table):
 
     def __init__(self, request, titre_cache):
         super(Cours_cache, self).__init__(request)
-        self.TC = titre_cache
+        self.tc = titre_cache
 
     # noinspection PyMethodOverriding
     def goc(self, titre, date, montant):
-        titre_id = self.TC.goc(nom=titre)
+        titre_id = self.tc.goc(nom=titre)
         try:
             pk = self.id[titre_id][date]
         except KeyError:
@@ -414,7 +414,7 @@ class Rapp_cache(Table):
                 messages.info(self.request, u"date pour le rapp %s mise a jour au %s" % (rapp, date_max))
 
 
-class moyen_defaut_cache(object):
+class Moyen_defaut_cache(object):
     def __init__(self):
         self.id = {}
         for c in models.Compte.objects.all():
@@ -453,13 +453,12 @@ class Import_base(views.Myformview):
     def form_valid(self, form):
         self.test = False
         nomfich = form.cleaned_data['nom_du_fichier'].name
-        nomfich, fileExtension = os.path.splitext(nomfich)
-        if fileExtension not in self.extensions:
-            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (
-            fileExtension, self.extensions))
+        nomfich, file_extension = os.path.splitext(nomfich)
+        if file_extension not in self.extensions:
+            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (file_extension, self.extensions))
             return self.form_invalid(form)
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload',
-                               "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), fileExtension[1:]))
+                               "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), file_extension[1:]))
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
         # si le repertoire n'existe pas on le crée
         try:
@@ -504,5 +503,5 @@ class Import_base(views.Myformview):
         self.opes = Ope_cache(self.request)
         self.titres = Titre_cache(self.request)
         self.cours = Cours_cache(self.request, self.titres)
-        self.moyen_par_defaut = moyen_defaut_cache()
+        self.moyen_par_defaut = Moyen_defaut_cache()
         self.rapps = Rapp_cache(self.request)

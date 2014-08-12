@@ -9,7 +9,7 @@ from . import import_base
 from .. import utils
 from django.db import transaction
 
-class Csv_unicode_reader_ope_base(import_base.property_ope_base, utils.Csv_unicode_reader):
+class Csv_unicode_reader_ope_base(import_base.Property_ope_base, utils.Csv_unicode_reader):
     pass
 
 
@@ -177,13 +177,12 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                                 messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
                                 messages.success(self.request, u"ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
                             except models.Titre.DoesNotExist:
-                                messages.error(self.request,"impossible de vendre car pas de titre en portefeuille ligne %s"% ligne)
+                                messages.error(self.request, "impossible de vendre car pas de titre en portefeuille ligne %s" % ligne)
                 else:
                     ope_gsb = models.Ope.objects.create(**ope)
                     messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
                 # on gere le nombre de truc annex crée
-            for obj in (
-                self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
+            for obj in (self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers, self.titres, self.rapps):
                 if obj.nb_created > 0:
                     # noinspection PyProtectedMember
                     messages.info(self.request, u"%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
@@ -194,13 +193,13 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         verif_format = False
         for row in fich:
             if not verif_format:  # on verifie a la premiere ligne
-                liste_colonnes = ['id', 'cpt', 'date', "montant", 'r',  'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
+                liste_colonnes = ['id', 'cpt', 'date', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
                 if settings.UTILISE_EXERCICES is True:
                     liste_colonnes.append('exercice')
                 colonnes_oublies = []
                 for attr in liste_colonnes:
                     try:
-                        if getattr(row,attr,"colonne inexistante") == "colonne inexistante":
+                        if getattr(row, attr, "colonne inexistante") == "colonne inexistante":
                             colonnes_oublies.append(attr)
                     except (import_base.ImportException, utils.FormatException):
                         pass
@@ -287,7 +286,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 if 'titre_ ' in row.tiers:
                     ope['titre_id'] = self.titres.goc(nom=row.tiers.replace('titre_ ', '').strip())
                 else:
-                    self.erreur.append(u"Ce tiers '%s' ne peut être un titre à la ligne %s" % (row.tiers,row.line_num))
+                    self.erreur.append(u"Ce tiers '%s' ne peut être un titre à la ligne %s" % (row.tiers, row.line_num))
                     continue
             else:
                 ope['ope_titre'] = False

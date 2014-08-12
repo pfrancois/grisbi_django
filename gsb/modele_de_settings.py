@@ -49,13 +49,13 @@ MD_CREDIT = 1
 MD_DEBIT = 2
 REV_PLAC = 5
 ID_CAT_VIR = 1
-DIR_DROPBOX = "D:\Dropbox"
+DIR_DROPBOX = r"D:\Dropbox"
+#code du pc pour pocket money
+CODE_DEVICE_POCKET_MONEY = 'totototo'
 #
 ATOMIC_REQUESTS = True
 WSGI_APPLICATION = "gsb.wsgi.application"
-ADMINS = (
-# ('toto', 'your_email@domain.com'),
-)
+ADMINS = ()
 
 MANAGERS = ADMINS
 DATABASES = {
@@ -120,9 +120,9 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-# Put strings here, like "/home/html/static" or "C:/www/django/static".
-# Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
@@ -238,12 +238,10 @@ if DJANGO_TOOLBAR:
                             'debug_toolbar.panels.signals.SignalDebugPanel',
                             'debug_toolbar.panels.logger.LoggingPanel',
                             'template_timings_panel.panels.TemplateTimings.TemplateTimings',
-                            'inspector_panel.panels.inspector.InspectorPanel'
-    )
+                            'inspector_panel.panels.inspector.InspectorPanel')
     INSTALLED_APPS += ('debug_toolbar',
                        'template_timings_panel',
-                       'inspector_panel'
-    )
+                       'inspector_panel')
     # https://github.com/santiagobasulto/debug-inspector-panel
     # https://github.com/orf/django-debug-toolbar-template-timings
     IGNORED_TEMPLATES = ["debug_toolbar/*"]

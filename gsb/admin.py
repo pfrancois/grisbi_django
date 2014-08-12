@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.conf import settings  # @Reimport
 from django.utils.translation import ugettext_lazy as _
 
-#from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
+# from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
 from . import models as gsbmodels
 #from django.db.models import Q
 # import decimal
@@ -56,7 +56,7 @@ class Date_perso_filter(DateFieldListFilter):
             }),
             ('Les trois derniers mois', {
                 self.lookup_kwarg_since: str(troismois),
-                self.lookup_kwarg_until: str(today.replace(day=15)), # fin du mois precedent car pour la sg c'est jusqu'au 6
+                self.lookup_kwarg_until: str(today.replace(day=15)),  # fin du mois precedent car pour la sg c'est jusqu'au 6
             }),
             (_('This year'), {
                 self.lookup_kwarg_since: str(today.replace(month=1, day=1)),
@@ -109,7 +109,7 @@ class Rapprochement_filter(SimpleListFilter):
             return queryset.filter(rapp__isnull=True)
 
 
-class ouinonfilter(SimpleListFilter):
+class Ouinonfilter(SimpleListFilter):
     title = None
     # Parameter for the filter that will be used in the URL query.
     parameter_name = None
@@ -128,7 +128,7 @@ class ouinonfilter(SimpleListFilter):
         )
 
 
-class mere_et_standalone_filter(ouinonfilter):
+class Mere_et_standalone_filter(Ouinonfilter):
     title = "elimination des filles"
     # Parameter for the filter that will be used in the URL query.
     parameter_name = 'elimfille'
@@ -140,7 +140,7 @@ class mere_et_standalone_filter(ouinonfilter):
             return queryset
 
 
-class sauf_visa_filter(ouinonfilter):
+class Sauf_visa_filter(Ouinonfilter):
     title = "tous les moyens sauf visa"
     parameter_name = 'visa'
 
@@ -156,7 +156,7 @@ class sauf_visa_filter(ouinonfilter):
             return queryset.filter(moyen_id=24)
 
 
-class verifmere_filter(ouinonfilter):
+class Verifmere_filter(Ouinonfilter):
     title = "fille oui mere non ou inverse"
     parameter_name = 'merep'
 
@@ -166,7 +166,8 @@ class verifmere_filter(ouinonfilter):
             #les filles pointe alors que les mere non
             merep = gsbmodels.Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
             #les mere pointe alors que les filles non
-            fillep = gsbmodels.Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id', flat=True)
+            fillep = gsbmodels.Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id',
+                                                                                                                                 flat=True)
             listep = list(merep) + list(fillep)
             return gsbmodels.Ope.objects.filter(id__in=listep)
         else:
@@ -181,8 +182,7 @@ class Modeladmin_perso(admin.ModelAdmin):
     list_select_related = True
 
     def get_queryset(self, request):
-    #    raise
-    # compte le nombre d'ope
+        # compte le nombre d'ope
         if 'nb_opes' in self.list_display and self.change_list:
             if (self.id_ope is None) or (self.table_annexe is None):
                 raise ImproperlyConfigured
@@ -194,7 +194,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                                                      )
                                       )
                                 )""" % (self.id_ope, self.table_annexe)
-                return super(Modeladmin_perso, self).queryset(request).extra(select={'nb_opes': sql , }, )
+                return super(Modeladmin_perso, self).queryset(request).extra(select={'nb_opes': sql, }, )
         else:
             return super(Modeladmin_perso, self).queryset(request)
 
@@ -217,7 +217,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                            u"attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
                                'n': queryset.count(),
                                'type': nom_module}
-            )
+                          )
             return
         obj_a = queryset[0]
         for obj_b in queryset:
@@ -242,30 +242,30 @@ class Modeladmin_perso(admin.ModelAdmin):
         return super(Modeladmin_perso, self).changelist_view(request, extra_context)
 
 
-class formsetreadonly(BaseInlineFormSet):
+class Formsetreadonly(BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
-        super(formsetreadonly, self).__init__(*args, **kwargs)
+        super(Formsetreadonly, self).__init__(*args, **kwargs)
         self.can_delete = False
 
 
-class ope_inline_admin(admin.TabularInline):
+class Ope_inline_admin(admin.TabularInline):
     model = gsbmodels.Ope
     fields = ('lien', 'date', 'compte', 'montant', 'cat', 'tiers', 'ib', 'notes')
     readonly_fields = fields
     editable_fields = []
     extra = 0
-    max_num=0
+    max_num = 0
     formfield_overrides = {
         models.TextField: {'widget': forms.TextInput, },
     }
     related = ('compte', 'cat', 'ib')
     readonly = True
     orderby = ('-date',)
-    formset = formsetreadonly#afin de de ne pas pouvoir effacer un ope comme ca.
+    formset = Formsetreadonly  #afin de de ne pas pouvoir effacer un ope comme ca.
     can_delete = False
 
     def queryset(self, request):
-        qs = super(ope_inline_admin, self).queryset(request)
+        qs = super(Ope_inline_admin, self).queryset(request)
         # on related pour les inlines
         if self.related is not None:
             args = self.related
@@ -293,10 +293,11 @@ class ope_inline_admin(admin.TabularInline):
 
     lien.short_description = u"ID"
 
+
 # ------------definition des classes
 
 
-class ope_cat(ope_inline_admin):
+class Ope_cat(Ope_inline_admin):
     fk_name = 'cat'
 
 
@@ -308,11 +309,12 @@ class Cat_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.HORIZONTAL}
-    inlines = [ope_cat]
+    inlines = [Ope_cat]
     id_ope = "cat_id"
     table_annexe = "gsb_cat"
+
     class Media(object):
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = {"all": ("css/hide_admin_original.css",)}
 
     def has_delete_permission(self, request, obj=None):
         """verification des permission"""
@@ -325,7 +327,7 @@ class Cat_admin(Modeladmin_perso):
         return True
 
 
-class ope_ib(ope_inline_admin):
+class Ope_ib(Ope_inline_admin):
     fk_name = 'ib'
 
 
@@ -337,11 +339,12 @@ class Ib_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('type',)
     radio_fields = {'type': admin.VERTICAL}
-    inlines = [ope_ib]
+    inlines = [Ope_ib]
     id_ope = "ib_id"
     table_annexe = "gsb_ib"
+
     class Media(object):
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = {"all": ("css/hide_admin_original.css",)}
 
 
 class Compte_admin(Modeladmin_perso):
@@ -438,11 +441,6 @@ class Compte_admin(Modeladmin_perso):
             return False
         return True
 
-
-class ope_ope(ope_inline_admin):
-    fk_name = 'mere'
-
-
 class Ope_changelist_Form(forms.ModelForm):
     class Meta(object):
         model = gsbmodels.Ope
@@ -458,7 +456,7 @@ class Ope_admin(Modeladmin_perso):
     readonly_fields = ('show_jumelle', 'show_mere', 'oper_titre', 'is_mere')
     list_display = ('id', 'pointe', 'compte', 'tiers', 'date', 'montant', 'cat', "moyen", 'num_cheque', 'rapp', "mere")
     list_filter = (
-        'compte', ('date', Date_perso_filter), Rapprochement_filter, sauf_visa_filter, mere_et_standalone_filter, verifmere_filter,
+        'compte', ('date', Date_perso_filter), Rapprochement_filter, Sauf_visa_filter, Mere_et_standalone_filter, Verifmere_filter,
         'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date')
@@ -466,14 +464,14 @@ class Ope_admin(Modeladmin_perso):
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
-    #inlines = [ope_ope]
     raw_id_fields = ('mere',)
     date_hierarchy = 'date'
     formfield_overrides = {
         model_field.CurField: {'widget': forms.TextInput(attrs={'size': '8'})},
     }
+
     class Media(object):
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = {"all": ("css/hide_admin_original.css",)}
 
     def get_changelist_form(self, request, **kwargs):
         return Ope_changelist_Form
@@ -605,12 +603,12 @@ class Ope_admin(Modeladmin_perso):
         # ok c'est bon on peut commencer a creer
         if mere is None:
             mere = gsbmodels.Ope.objects.create(date=date_ope,
-                                      montant=montant,
-                                      tiers_id=tiers_id,
-                                      cat=gsbmodels.Cat.objects.get(nom=u"Opération Ventilée"),
-                                      moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
-                                      compte_id=compte_id
-            )
+                                                montant=montant,
+                                                tiers_id=tiers_id,
+                                                cat=gsbmodels.Cat.objects.get(nom=u"Opération Ventilée"),
+                                                moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
+                                                compte_id=compte_id
+                                               )
             messages.success(request, u"ope mere crée '%s' " % mere)
         else:
             messages.info(request, u"on va utiliser cette operation mere '%s' " % mere)
@@ -694,7 +692,7 @@ class Moyen_admin(Modeladmin_perso):
     table_annexe = "gsb_moyen"
 
 
-class ope_tiers(ope_inline_admin):
+class Ope_tiers(Ope_inline_admin):
     fk_name = 'tiers'
 
 
@@ -706,7 +704,7 @@ class Tiers_admin(Modeladmin_perso):
     list_display_links = ('id',)
     list_filter = ('is_titre', ('lastupdate', Date_perso_filter),)
     search_fields = ['nom']
-    inlines = [ope_tiers]
+    inlines = [Ope_tiers]
     formfield_overrides = {models.TextField: {'widget': forms.TextInput}, }
     id_ope = "tiers_id"
     table_annexe = "gsb_tiers"
@@ -717,8 +715,9 @@ class Tiers_admin(Modeladmin_perso):
         if obj.is_titre is True:
             return False
         return True
+
     class Media(object):
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = {"all": ("css/hide_admin_original.css",)}
 
 
 class Ech_admin(Modeladmin_perso):
@@ -741,7 +740,7 @@ class Banque_admin(Modeladmin_perso):
     actions = ['fusionne']
 
 
-class ope_rapp(ope_inline_admin):
+class Ope_rapp(Ope_inline_admin):
     fk_name = 'rapp'
 
 
@@ -749,9 +748,10 @@ class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('nom', 'date')
-    inlines = [ope_rapp]
+    inlines = [Ope_rapp]
+
     class Media(object):
-        css = { "all" : ("css/hide_admin_original.css",) }
+        css = {"all": ("css/hide_admin_original.css",)}
 
 
 class Exo_admin(Modeladmin_perso):
@@ -802,6 +802,7 @@ class Config_admin(Modeladmin_perso):
 
     def has_add_permission(self, request):
         return False
+
 
 admin.site.register(gsbmodels.Tiers, Tiers_admin)
 admin.site.register(gsbmodels.Cat, Cat_admin)

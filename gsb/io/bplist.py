@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+#pylint: skip-file
 """biplist -- a library for reading and writing binary property list files.
 https://pypi.python.org/pypi/biplist/0.6
 Binary Property List (plist) files provide a faster and smaller serialization
-format for property lists on OS X. This is a library for generating binary
+bp_format for property lists on OS X. This is a library for generating binary
 plists which can be read by OS X, iOS, or other clients.
 
 The API models the plistlib API, and will call through to plistlib when
@@ -85,7 +86,7 @@ class Data(six.binary_type):
     pass
 
 class InvalidPlistException(Exception):
-    """Raised when the plist is incorrectly formatted."""
+    """Raised when the plist is incorrectly bp_formatted."""
     pass
 
 class NotBinaryPlistException(Exception):
@@ -228,18 +229,18 @@ class PlistReader(object):
         result = None
         tmp_byte = self.contents[self.currentOffset:self.currentOffset+1]
         marker_byte = unpack("!B", tmp_byte)[0]
-        format = (marker_byte >> 4) & 0x0f
+        bp_format = (marker_byte >> 4) & 0x0f
         extra = marker_byte & 0x0f
         self.currentOffset += 1
 
-        def proc_extra(extra):
-            if extra == 0b1111:
+        def proc_extra(bp_extra):
+            if bp_extra == 0b1111:
                 #self.currentOffset += 1
-                extra = self.readObject()
-            return extra
+                bp_extra = self.readObject()
+            return bp_extra
 
         # bool, null, or fill byte
-        if format == 0b0000:
+        if bp_format == 0b0000:
             if extra == 0b0000:
                 result = None
             elif extra == 0b1000:
@@ -251,53 +252,53 @@ class PlistReader(object):
             else:
                 raise InvalidPlistException("Invalid object found at offset: %d" % (self.currentOffset - 1))
         # int
-        elif format == 0b0001:
+        elif bp_format == 0b0001:
             extra = proc_extra(extra)
             result = self.readInteger(pow(2, extra))
         # real
-        elif format == 0b0010:
+        elif bp_format == 0b0010:
             extra = proc_extra(extra)
             result = self.readReal(extra)
         # date
-        elif format == 0b0011 and extra == 0b0011:
+        elif bp_format == 0b0011 and extra == 0b0011:
             result = self.readDate()
         # data
-        elif format == 0b0100:
+        elif bp_format == 0b0100:
             extra = proc_extra(extra)
             result = self.readData(extra)
         # ascii string
-        elif format == 0b0101:
+        elif bp_format == 0b0101:
             extra = proc_extra(extra)
             result = self.readAsciiString(extra)
         # Unicode string
-        elif format == 0b0110:
+        elif bp_format == 0b0110:
             extra = proc_extra(extra)
             result = self.readUnicode(extra)
         # uid
-        elif format == 0b1000:
+        elif bp_format == 0b1000:
             result = self.readUid(extra)
         # array
-        elif format == 0b1010:
+        elif bp_format == 0b1010:
             extra = proc_extra(extra)
             result = self.readArray(extra)
         # set
-        elif format == 0b1100:
+        elif bp_format == 0b1100:
             extra = proc_extra(extra)
             result = set(self.readArray(extra))
         # dict
-        elif format == 0b1101:
+        elif bp_format == 0b1101:
             extra = proc_extra(extra)
             result = self.readDict(extra)
         else:
-            raise InvalidPlistException("Invalid object found: {format: %s, extra: %s}" % (bin(format), bin(extra)))
+            raise InvalidPlistException("Invalid object found: {bp_format: %s, extra: %s}" % (bin(bp_format), bin(extra)))
         return result
 
-    def readInteger(self, bytes):
+    def readInteger(self, bp_bytes):
         result = 0
         original_offset = self.currentOffset
-        data = self.contents[self.currentOffset:self.currentOffset+bytes]
-        result = self.getSizedInteger(data, bytes)
-        self.currentOffset = original_offset + bytes
+        data = self.contents[self.currentOffset:self.currentOffset+bp_bytes]
+        result = self.getSizedInteger(data, bp_bytes)
+        self.currentOffset = original_offset + bp_bytes
         return result
 
     def readReal(self, length):
@@ -375,16 +376,16 @@ class PlistReader(object):
     def readUid(self, length):
         return Uid(self.readInteger(length+1))
 
-    def getSizedInteger(self, data, bytes):
+    def getSizedInteger(self, data, bp_bytes):
         result = 0
         # 1, 2, and 4 byte integers are unsigned
-        if bytes == 1:
+        if bp_bytes == 1:
             result = unpack('>B', data)[0]
-        elif bytes == 2:
+        elif bp_bytes == 2:
             result = unpack('>H', data)[0]
-        elif bytes == 4:
+        elif bp_bytes == 4:
             result = unpack('>L', data)[0]
-        elif bytes == 8:
+        elif bp_bytes == 8:
             result = unpack('>q', data)[0]
         else:
             raise InvalidPlistException("Encountered integer longer than 8 bytes.")
@@ -413,9 +414,9 @@ class PlistWriter(object):
     wrappedTrue = None
     wrappedFalse = None
 
-    def __init__(self, file):
+    def __init__(self, bp_file):
         self.reset()
-        self.file = file
+        self.file = bp_file
         self.wrappedTrue = BoolWrapper(True)
         self.wrappedFalse = BoolWrapper(False)
 
@@ -504,19 +505,19 @@ class PlistWriter(object):
     def incrementByteCount(self, field, incr=1):
         self.byteCounts = self.byteCounts._replace(**{field:self.byteCounts.__getattribute__(field) + incr})
 
-    def computeOffsets(self, obj, asReference=False, isRoot=False):
-        def check_key(key):
-            if key is None:
+    def computeOffsets(self, obj, asReference=False, isRoot=False):# @UnusedVariable
+        def check_key(bp_key):
+            if bp_key is None:
                 raise InvalidPlistException('Dictionary keys cannot be null in plists.')
-            elif isinstance(key, Data):
+            elif isinstance(bp_key, Data):
                 raise InvalidPlistException('Data cannot be dictionary keys in plists.')
-            elif not isinstance(key, (six.binary_type, six.text_type)):
+            elif not isinstance(bp_key, (six.binary_type, six.text_type)):
                 raise InvalidPlistException('Keys must be strings.')
 
-        def proc_size(size):
-            if size > 0b1110:
-                size += self.intSize(size)
-            return size
+        def proc_size(bp_size):
+            if bp_size > 0b1110:
+                bp_size += self.intSize(bp_size)
+            return bp_size
         # If this should be a reference, then we keep a record of it in the
         # uniques table.
         if asReference:
@@ -557,7 +558,6 @@ class PlistWriter(object):
                 size = proc_size(len(obj))
                 self.incrementByteCount('arrayBytes', incr=1+size)
                 for value in obj:
-                    asRef = True
                     self.computeOffsets(value, asReference=True)
             elif isinstance(obj, dict):
                 size = proc_size(len(obj))
@@ -579,10 +579,10 @@ class PlistWriter(object):
         position = self.positionOfObjectReference(obj)
         if position is None:
             self.writtenReferences[obj] = len(self.writtenReferences)
-            output += self.binaryInt(len(self.writtenReferences) - 1, bytes=self.trailer.objectRefSize)
+            output += self.binaryInt(len(self.writtenReferences) - 1, bp_bytes=self.trailer.objectRefSize)
             return (True, output)
         else:
-            output += self.binaryInt(position, bytes=self.trailer.objectRefSize)
+            output += self.binaryInt(position, bp_bytes=self.trailer.objectRefSize)
             return (False, output)
 
     def writeObject(self, obj, output, setReferencePosition=False):
@@ -590,13 +590,13 @@ class PlistWriter(object):
            If setReferencePosition is True, will set the position the
            object was written.
         """
-        def proc_variable_length(format, length):
+        def proc_variable_length(bp_bp_format, length):
             result = six.b('')
             if length > 0b1110:
-                result += pack('!B', (format << 4) | 0b1111)
+                result += pack('!B', (bp_bp_format << 4) | 0b1111)
                 result = self.writeObject(length, result)
             else:
-                result += pack('!B', (format << 4) | length)
+                result += pack('!B', (bp_bp_format << 4) | length)
             return result
 
         if isinstance(obj, six.text_type) and obj == six.u(''):
@@ -702,17 +702,17 @@ class PlistWriter(object):
         result = pack('>d', obj.value)
         return result
 
-    def binaryInt(self, obj, bytes=None):
+    def binaryInt(self, obj, bp_bytes=None):
         result = six.b('')
-        if bytes is None:
-            bytes = self.intSize(obj)
-        if bytes == 1:
+        if bp_bytes is None:
+            bp_bytes = self.intSize(obj)
+        if bp_bytes == 1:
             result += pack('>B', obj)
-        elif bytes == 2:
+        elif bp_bytes == 2:
             result += pack('>H', obj)
-        elif bytes == 4:
+        elif bp_bytes == 4:
             result += pack('>L', obj)
-        elif bytes == 8:
+        elif bp_bytes == 8:
             result += pack('>q', obj)
         else:
             raise InvalidPlistException("Core Foundation can't handle integers with size greater than 8 bytes.")

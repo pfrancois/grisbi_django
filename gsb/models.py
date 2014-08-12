@@ -386,7 +386,7 @@ class Cat(models.Model):
         if self.pk in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV,
                        settings.ID_CAT_PMV, settings.REV_PLAC, settings.ID_CAT_COTISATION):
             return False
-        if self.nom in (u"Opération Ventilée",u"Frais bancaires", u"Non affecté", u"Avance", u"Remboursement"):
+        if self.nom in (u"Opération Ventilée", u"Frais bancaires", u"Non affecté", u"Avance", u"Remboursement"):
             return False
         return True
 
@@ -620,7 +620,7 @@ class Compte(models.Model):
                                     notes=u"Frais %s@%s" % (nombre, prix),
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                                    )
+                                   )
                 # gestion compta matiere (et donc opération sous jacente et cours)
             ope_titre = Ope_titre.objects.create(titre=titre,
                                                  compte=self,
@@ -675,13 +675,14 @@ class Compte(models.Model):
                                     notes="frais -%s@%s" % (nombre, prix),
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                )
+                                   )
             if virement_vers:
                 vir = Virement()
                 vir.create(compte_origine=self,
                            compte_dest=virement_vers,
                            montant=decimal.Decimal(force_unicode(prix)) * decimal.Decimal(force_unicode(nombre)) - frais,
-                           date=date)
+                           date=date
+                          )
             return ope_titre
         else:
             raise TypeError("pas un titre")
@@ -705,7 +706,8 @@ class Compte(models.Model):
                                 notes="revenu",
                                 moyen=self.moyen_credit(),
                                 # on ne prend le moyen par defaut car ce n'est pas une OST
-                                automatique=True)
+                                automatique=True
+                               )
             if frais:
                 if not tiers_frais:
                     tiers_frais = titre.tiers
@@ -718,7 +720,7 @@ class Compte(models.Model):
                                     notes="frais revenu",
                                     moyen=self.moyen_debit(),
                                     automatique=True
-                )
+                                   )
             if virement_vers:
                 vir = Virement()
                 vir.create(self, virement_vers, decimal.Decimal(force_unicode(montant)) - frais, date)
@@ -783,7 +785,7 @@ class Compte(models.Model):
                                      automatique=True,
                                      notes="ajustement le %s" % utils.today(),
                                      cat_id=cat_id
-            )
+                                    )
             return u"opération ({}) crée ".format(ope)
         else:
             return "rien a modifier"
@@ -847,7 +849,7 @@ class Ope_titre(models.Model):
                                              moyen=self.compte.moyen_debit(),
                                              compte=self.compte,
                                              ope_titre_ost=self
-                )
+                                            )
                 self.ope_ost = ope_ost
             else:  # la modifier juste
                 ope_ost = self.ope_ost
@@ -875,7 +877,7 @@ class Ope_titre(models.Model):
                                    moyen=self.compte.moyen_credit(),
                                    compte=self.compte,
                                    ope_titre_ost=self
-                )
+                                  )
             else:
                 self.ope_ost.date = self.date
                 self.ope_ost.montant = ost
@@ -893,7 +895,7 @@ class Ope_titre(models.Model):
                                    moyen=self.compte.moyen_credit(),
                                    compte=self.compte,
                                    ope_titre_pmv=self
-                )
+                                  )
             else:
                 # on modifie tout
                 self.ope_pmv.date = self.date
@@ -946,7 +948,7 @@ class Moyen(models.Model):
     typesdep = (('v', u'virement'),
                 ('d', u'depense'),
                 ('r', u'recette'),
-    )
+               )
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     type = models.CharField(max_length=1, choices=typesdep, default='d')
     lastupdate = models_gsb.ModificationDateTimeField()
@@ -1137,7 +1139,7 @@ class Echeance(models.Model):
                                           compte_dest=ech.compte_virement,
                                           montant=ech.montant,
                                           date=ech.date
-                    )
+                                         )
                     vir.auto = True
                     vir.exercice = ech.exercice
                     vir.save()
@@ -1153,7 +1155,7 @@ class Echeance(models.Model):
                                              ib_id=ech.ib_id,
                                              moyen_id=ech.moyen_id,
                                              exercice_id=ech.exercice_id
-                    )
+                                            )
                     if request is not None:
                         messages.info(request, u'opération "%s" crée' % ope)
                 if ech.calcul_next():
@@ -1359,17 +1361,18 @@ class Ope(models.Model):
 
 class Db_log(models.Model):
     date_time_created = models.DateTimeField(auto_now_add=True, null=True)
-    datamodel = models.CharField(null=False,max_length=20)
+    datamodel = models.CharField(null=False, max_length=20)
     id_model = models.IntegerField()
-    uuid = models.CharField(null=False,max_length=255)
-    memo = models.CharField(null=False,max_length=255)
+    uuid = models.CharField(null=False, max_length=255)
+    memo = models.CharField(null=False, max_length=255)
 
     def __unicode__(self):
-        actions={'I':u"insert",'U':u"update",'D':u"delete"}
-        date_created=self.date_time_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
+        actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}
+        date_created = self.date_time_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
         return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],
-                                                                                                        obj=self,
-                                                                                                        obj_date=date_created)
+                                                                                                obj=self,
+                                                                                                obj_date=date_created
+                                                                                               )
 
 # noinspection PyUnusedLocal
 @receiver(post_save, sender=Ope, weak=False)

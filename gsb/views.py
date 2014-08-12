@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 # Create your views here.
 from __future__ import absolute_import
+
 from django import http
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
+
 from .models import Compte, Ope, Moyen, Titre, Cours, Tiers, Ope_titre, Cat, Virement, has_changed, Echeance
 import gsb.forms as gsb_forms
-#from django import forms
+
+# from django import forms
 from django.db import models, connection
 import decimal
 from django.contrib import messages
@@ -207,7 +210,12 @@ class Cpt_detail_view(Mytemplateview):
         except (EmptyPage, InvalidPage):
             return paginator.page(paginator.num_pages)
 
-    def get_context_data(self, compte=None, opes=None, nb_ope_rapp=None, sort=None):
+    def get_context_data(self, **kwargs):
+        compte = kwargs.get('compte', None)
+        opes = kwargs.get('opes', None)
+        nb_ope_rapp = kwargs.get('nb_ope_rapp', None)
+        sort = kwargs.get('sort', None)
+
         context = super(Cpt_detail_view, self).get_context_data()
         type_long = {
             "nrapp": u"Opérations non rapprochées",
@@ -252,7 +260,8 @@ class Cpt_detail_view(Mytemplateview):
                             "type": self.type,
                             "titre_long": "%s (%s)" % (compte.nom, type_long[self.type]),
                             "nb": opes.count()
-            })
+                           }
+                          )
         else:
             context.update({
                 'compte': compte,
@@ -296,8 +305,9 @@ def ope_detail(request, pk):
                       {'titre_long': u'modification virement interne %s' % ope.id,
                        'titre': u'modification',
                        'form': form,
-                       'ope': ope}
-        )
+                       'ope': ope
+                      }
+                     )
     #--------ope normale----------
     else:  # sinon c'est une operation normale
         if request.method == 'POST':
@@ -309,7 +319,7 @@ def ope_detail(request, pk):
                 if not form.cleaned_data['tiers']:  # TODO
                     form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
                                                                       defaults={'nom': form.cleaned_data['nouveau_tiers'], }
-                    )[0]
+                                                                     )[0]
                     messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
                 if not ope.rapp:
                     messages.success(request, u"opération modifiée")
@@ -317,8 +327,7 @@ def ope_detail(request, pk):
                 else:
                     # verification que les données essentielles ne sont pas modifiés
                     if has_changed(ope, 'montant') or has_changed(ope, 'compte'
-                    ) or has_changed(ope, 'pointe'
-                    ) or has_changed(ope, 'jumelle'
+                    ) or has_changed(ope, 'pointe') or has_changed(ope, 'jumelle'
                     ) or has_changed(ope, 'mere'):
                         messages.error(request, u"impossible de modifier l'opération car elle est rapprochée")
                     else:
@@ -332,7 +341,7 @@ def ope_detail(request, pk):
                        'titre': u'modification',
                        'form': form,
                        'ope': ope}
-        )
+                     )
 
 
 @transaction.atomic
@@ -350,7 +359,7 @@ def ope_new(request, cpt_id=None):
             if not form.cleaned_data['tiers']:
                 form.instance.tiers = Tiers.objects.get_or_create(nom=form.cleaned_data['nouveau_tiers'],
                                                                   defaults={'nom': form.cleaned_data['nouveau_tiers'], }
-                )[0]
+                                                                 )[0]
                 messages.info(request, u"tiers '%s' créé" % form.instance.tiers.nom)
             ope = form.save()
 
@@ -532,7 +541,7 @@ def ope_titre_detail(request, pk):
                 messages.info(request, u"opération titre ({}) modifiée soit {} EUR".format(ope, '{0:.2f}'.format(
                     form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
             except IntegrityError as e:
-                messages.error(request, e.unicode())
+                messages.error(request, e.__unicode__())
             return http.HttpResponseRedirect(reverse('gsb_cpt_titre_detail',
                                                      kwargs={'cpt_id': ope.compte.id, 'titre_id': ope.titre.id}
             )

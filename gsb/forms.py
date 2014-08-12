@@ -105,7 +105,7 @@ class VirementForm(Baseform):
                                              self.cleaned_data['montant'],
                                              self.cleaned_data['date'],
                                              self.cleaned_data['notes']
-            )
+                                            )
         else:
             virement_objet = Virement(self.ope)
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']

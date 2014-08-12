@@ -8,26 +8,27 @@ from .io import import_csv, export_csv
 from .io import import_titre_csv as import_titres
 from django.conf import settings
 # les vues generales
-urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),
-)
+urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),)
 
 # les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
                             views.Mytemplateview.as_view(template_name="gsb/options.djhtm", titre="liste des outils disponible"),
                             name="outils_index"
-                        ),
+                           ),
                         # echeances echues
                         url(r'^options/ech$', outils.Echeance_view.as_view(), name='gestion_echeances'),
                         # affiche config
                         url(r'^outils/verif_config$', 'verif_config', name='verif_config'),
-)
+                       )
 urlpatterns += patterns('gsb.io.lecture_plist',
                         url(r'^options/maj_money_journal$', 'gestion_maj', name='gestion_maj_iphone_money_journal'),
-)
+                       )
 # export index
 urlpatterns += patterns('gsb',
-                        url(r'^options/export$', views.Mytemplateview.as_view(template_name="gsb/export_index.djhtm"), name='export_index'),
+                        url(r'^options/export$',
+                            views.Mytemplateview.as_view(template_name="gsb/export_index.djhtm"),
+                            name='export_index'),
                         # export au format 0_5_0 grisbi
                         url(r'^options/export/gsb050$', 'io.export_gsb_0_5_0.export', name='export_gsb_050'),
                         # export au format general en csv
@@ -36,16 +37,19 @@ urlpatterns += patterns('gsb',
                         url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
                         # export des cours
                         url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours')
-)
+                       )
 
 # version grisbi 0.5.0
 urlpatterns += patterns('gsb.io.import_gsb', url(r'options/import/gsb$', 'import_gsb_0_5_x', name="import_gsb"))
 
 urlpatterns += patterns('',
-                        url(r'options/import/csv/simple$', import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(),
+                        url(r'options/import/csv/simple$',
+                            import_csv.Import_csv_ope_sans_jumelle_et_ope_mere.as_view(),
                             name="import_csv_ope_simple"),
-                        url(r'options/import/csv/titres$', import_titres.Import_csv_ope_titre.as_view(), name="import_csv_ope_titre_all"),
-)
+                        url(r'options/import/csv/titres$',
+                            import_titres.Import_csv_ope_titre.as_view(),
+                            name="import_csv_ope_titre_all"),
+                       )
 
 
 # les vues relatives aux operations
@@ -59,7 +63,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^search$', 'search_opes', name='g_search_ope'),
                         url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours'),
                         url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'ajout_ope_titre_bulk', name="titre_bulk"),
-)
+                       )
 
 
 # les vues relatives aux comptes
@@ -82,7 +86,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
                         url(r'^titres$', views.Rdt_titres_view.as_view(), name="Rdt_titres_view"),
-)
+                       )
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
 
@@ -92,7 +96,7 @@ if settings.DEBUG:
     urlpatterns = patterns('',
                            (r'^500.html$', 'django.views.defaults.server_error'),
                            (r'^404.html$', TemplateView.as_view(template_name='404.html')),
-    ) + urlpatterns
+                          ) + urlpatterns
 # gestion de mes trucs perso
 # form tester
 # if settings.DEBUG and perso:

@@ -26,7 +26,7 @@ DjangoSafeDumper_perso.add_representer(decimal.Decimal, DjangoSafeDumper_perso.r
 DjangoSafeDumper_perso.add_representer(datetime.time, DjangoSafeDumper_perso.represent_time)
 
 
-class Serializer (YamlSerializer):
+class Serializer(YamlSerializer):
     """
     Serialize database objects as nested dicts, indexed first by
     model name, then by primary key.
@@ -47,7 +47,7 @@ class Serializer (YamlSerializer):
         self._current = None
 
     def end_serialization(self):
-        yaml.dump(self.objects, self.stream, Dumper=DjangoSafeDumper_perso,  default_flow_style=False, **self.options)
+        yaml.dump(self.objects, self.stream, Dumper=DjangoSafeDumper_perso, default_flow_style=False, **self.options)
 
 def Deserializer(stream_or_string, **options):
     """

@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 
 from django.http import HttpResponse
-from django.conf import settings
 
 from .. import models
 from .. import utils
@@ -11,7 +10,6 @@ from . import export_base
 from ..models import Ope_titre, Compte
 #from django.core import exceptions as django_exceptions
 from ..utils import Excel_csv
-import csv
 from .. import widgets as gsb_field
 
 
@@ -49,7 +47,7 @@ class Export_ope_csv(Export_view_csv_base):
         query = query.exclude(filles_set__isnull=False)
         query = query.order_by('date', 'id')
         #on elemine la seconde jambe des virement
-        query = query.exclude(jumelle__isnull=False,montant__gte=0)
+        query = query.exclude(jumelle__isnull=False, montant__gte=0)
         query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
 
         for ope in query:
@@ -102,8 +100,8 @@ class Exportform_cours(export_base.Exportform_ope):
     model_initial = models.Cours
     model_collec = models.Titre
 
-    def verif_collec(self, query, ensemble):
-        return query.filter(titre__pk__in=ensemble)
+    def verif_collec(self, ensemble):
+        return self.query.filter(titre__pk__in=ensemble)
 
 
 class Export_cours_csv(Export_view_csv_base):
@@ -138,8 +136,8 @@ class Exportform_Compte_titre(export_base.Exportform_ope):
     model_initial = Ope_titre
     model_collec = Compte
 
-    def verif_collec(self, query, ensemble):
-        return query.filter(compte__pk__in=ensemble)
+    def verif_collec(self, ensemble):
+        return self.query.filter(compte__pk__in=ensemble)
 
 
 class Export_ope_titre_csv(Export_view_csv_base):

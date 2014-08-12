@@ -16,7 +16,7 @@ from gsb.io import lecture_plist
 from gsb import models
 from .test_imports_csv import Test_import_abstract
 from gsb.io.lecture_plist import Lecture_plist_exception
-from gsb.io.ecriture_plist_money_journal import export_icompta_plist
+from gsb.io.ecriture_plist_money_journal import Export_icompta_plist
 from testfixtures import Replacer,test_datetime,compare
 import dateutil.parser
 from django.utils.encoding import force_unicode
@@ -649,7 +649,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         )
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj,request=self.request)
-        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 existe alors qu'on demande de le supprimer mais elle est différente :\nDATE:\t2014-06-15!=2014-06-16",))
+        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 existe alors qu'on demande de le supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
 
 @override_settings(CODE_DEVICE_POCKET_MONEY='totototo')
 @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH,"gsb","test_files","export_plist"))
@@ -658,7 +658,7 @@ class Test_import_money_journal_export(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
         self.request = self.request_get('outils')
-        self.exp=export_icompta_plist(avance_id=69, remboursement_id=71, request=self.request)
+        self.exp=Export_icompta_plist(avance_id=69, remboursement_id=71, request=self.request)
         self.nettoyage()
 
     def nettoyage(self,file_only=True):

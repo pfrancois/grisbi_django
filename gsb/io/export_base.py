@@ -102,14 +102,13 @@ class Exportform_ope(gsb_forms.Baseform):
         if ensemble == [] or len(ensemble) == models.Compte.objects.count():
             pass
         else:
-            self.query = self.verif_collec(self.query, ensemble)
+            self.query = self.verif_collec(ensemble)
         if self.query.count() == 0:  # si des operations n'existent pas
             raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
         return data
 
-    def verif_collec(self, query, ensemble):
-        return query.filter(compte__pk__in=ensemble)
-
+    def verif_collec(self,ensemble):
+        return self.query.filter(compte__pk__in=ensemble)
 
 class ExportViewBase(FormView):
     template_name = 'gsb/param_export.djhtm'  # nom du template
@@ -155,6 +154,5 @@ class ExportViewBase(FormView):
             reponse['Pragma'] = "public"
             reponse["Content-Disposition"] = "attachment; filename=%s_%s.%s" % (self.nomfich,
                                                                                 time.strftime("%d_%m_%Y", time.localtime()),
-                                                                                self.extension_file
-            )
+                                                                                self.extension_file)
         return reponse

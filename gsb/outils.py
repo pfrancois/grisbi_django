@@ -35,7 +35,7 @@ def verif_config(request):
     import_base.Ope_cache(request)
     titres = import_base.Titre_cache(request)
     import_base.Cours_cache(request, titres)
-    import_base.moyen_defaut_cache()
+    import_base.Moyen_defaut_cache()
     import_base.Rapp_cache(request)
     verif_element_config("ID_CPT_M", request, Compte)
     verif_element_config("TAUX_VERSEMENT", request)

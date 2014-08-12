@@ -229,7 +229,7 @@ class Test_import_csv2(Test_import_abstract):
 class Test_import_base(Test_import_abstract):
     def test_import_base(self):
         """verification des property"""
-        prop = import_base.property_ope_base()
+        prop = import_base.Property_ope_base()
         self.assertEqual(prop.id, None)
         self.assertEqual(prop.cat, None)
         self.assertEqual(prop.automatique, False)
@@ -515,7 +515,7 @@ class Test_import_base(Test_import_abstract):
         models.Compte.objects.create(nom="sansrien")
         models.Compte.objects.create(nom="les2", moyen_credit_defaut_id=moyens.goc("uniquement_credit", montant=10),
                                      moyen_debit_defaut_id=moyens.goc("uniquement_debit", montant=-10))
-        cache = import_base.moyen_defaut_cache()
+        cache = import_base.Moyen_defaut_cache()
         self.assertEqual(cache.goc("sansrien", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("sansrien", -10), settings.MD_DEBIT)
         self.assertEqual(cache.goc("les2", 10), 7)
