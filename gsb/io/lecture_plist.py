@@ -87,7 +87,7 @@ class Element(object):
                     if i.sens_element == 'r':
                         i.montant = decimal.Decimal(i.obj['amount'])
                     else:
-                        i.montant = decimal.Decimal(i.obj['amount']) * -1
+                        i.montant = decimal.Decimal(str(round(i.obj['amount'],2))) * -1
                     try:
                         i.tiers = i.obj['memo']['NS.string']
                     except TypeError:
@@ -124,7 +124,7 @@ def gestion_maj(request):
             if nb_export['cat'] > 0:
                 messages.success(request, u"catégories exportées: %s" % nb_export['cat'])
             if int(nb_export['ope']) == 0 and nb_export['compte'] == 0 and nb_export['cat'] == 0:
-                messages.success(request, "Nothing")
+                messages.success(request, u"Rien d'exporté")
             messages.info(request, "From iphone to PC")
             nb_import = import_items(lastmaj, request)
             if nb_import['deja'] > 0:
@@ -136,7 +136,7 @@ def gestion_maj(request):
             if nb_import['cat'] > 0:
                 messages.success(request, u"catégories importées: %s" % nb_import['cat'])
             if int(nb_import['ope']) == 0 and nb_import['compte'] == 0 and nb_import['cat'] == 0:
-                messages.success(request, "Nothing")
+                messages.success(request, "Rien d'importé")
             #on gere ceux qu'on elimine car deja pris en en compte
 
             config.derniere_import_money_journal = utils.now()
