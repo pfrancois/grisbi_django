@@ -129,7 +129,7 @@ class Ouinonfilter(SimpleListFilter):
 
 
 class Mere_et_standalone_filter(Ouinonfilter):
-    title = "elimination des filles"
+    title = "élimination des filles"
     # Parameter for the filter that will be used in the URL query.
     parameter_name = 'elimfille'
 
@@ -157,7 +157,7 @@ class Sauf_visa_filter(Ouinonfilter):
 
 
 class Verifmere_filter(Ouinonfilter):
-    title = "fille oui mere non ou inverse"
+    title = "fille pointée mere non ou inverse"
     parameter_name = 'merep'
 
     def queryset(self, request, queryset):
