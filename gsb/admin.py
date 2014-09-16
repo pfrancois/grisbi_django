@@ -103,7 +103,7 @@ class Rapprochement_filter(SimpleListFilter):
         if self.value() == 'rien':
             return queryset.filter(rapp__isnull=True, pointe=False)
         if self.value() == 'pr':
-            #comme il y a trois position, si l'on exclue les ni rapprocche ni pointe on a les rapproche ou pointe
+            #comme il y a trois position, si l'on exclue les ni rapproche ni pointe on a les rapproche ou pointe
             return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
             return queryset.filter(rapp__isnull=True)
@@ -747,8 +747,10 @@ class Ope_rapp(Ope_inline_admin):
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
-    list_display = ('nom', 'date')
+    list_display = ('id','nom', 'date')
+    list_editable=('nom',)
     inlines = [Ope_rapp]
+    ordering = ('nom',)
 
     class Media(object):
         css = {"all": ("css/hide_admin_original.css",)}
