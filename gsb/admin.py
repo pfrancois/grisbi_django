@@ -459,7 +459,7 @@ class Ope_admin(Modeladmin_perso):
         'compte', ('date', Date_perso_filter), Rapprochement_filter, Sauf_visa_filter, Mere_et_standalone_filter, Verifmere_filter,
         'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('montant', 'pointe', 'date')
+    list_editable = ('montant', 'pointe', 'date','moyen')
     actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
     save_on_top = True
     save_as = True
@@ -700,7 +700,7 @@ class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne']
     list_editable = ('nom',)
-    list_display = ('id', 'nom', 'notes', 'is_titre', 'nb_opes')
+    list_display = ('id', 'nom', 'notes', 'is_titre')
     list_display_links = ('id',)
     list_filter = ('is_titre', ('lastupdate', Date_perso_filter),)
     search_fields = ['nom']
