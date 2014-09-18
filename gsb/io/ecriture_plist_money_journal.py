@@ -10,6 +10,7 @@ import collections
 import codecs
 import datetime
 from django.contrib import messages
+from dateutil.relativedelta import relativedelta
 
 def filename_for_moneyjournal():
     ref_temp = utils.datetotimestamp(utils.now())
@@ -178,7 +179,10 @@ class Export_icompta_plist(object):
     def all_since_date(self, lastmaj):
         nb = collections.Counter()
         dict_do = {u"ope":list(), u"cat":list(), u'compte':list()}
-        objs_a_parcourir = models.Db_log.objects.filter(date_time_created__gte=lastmaj, datamodel__in=['ope', 'cat', 'compte']).order_by('id')
+        date_min=utils.today()+relativedelta(years=-1)
+        objs_a_parcourir = models.Db_log.objects.filter(date_time_action__gte=lastmaj,
+                                                        datamodel__in=['ope', 'cat', 'compte'],
+                                                        date_ref__gte=date_min).order_by('id')
         opes = dict((ob.pk, ob) for ob in models.Ope.objects.select_related('compte', 'tiers').filter(id__in=objs_a_parcourir.filter(datamodel="ope").values_list('id_model', flat=True)))
         cats = dict((ob.pk, ob) for ob in models.Cat.objects.order_by('id').all())
         cpts = dict((ob.pk, ob) for ob in models.Compte.objects.order_by('id').all())
@@ -187,8 +191,8 @@ class Export_icompta_plist(object):
             nb[element.datamodel] += 1
             if element.datamodel == "ope":
                 try:
-                    self.ope_unique(opes[element.id_model], action_type=element.memo)
-                    if element.memo == "I":
+                    self.ope_unique(opes[element.id_model], action_type=element.type_action)
+                    if element.type_action == "I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
                         if element.id_model in dict_do[element.datamodel]:
@@ -206,11 +210,11 @@ class Export_icompta_plist(object):
                     obj.compte_id = 0
                     obj.date = datetime.datetime(2000, 1, 1)
                     obj.tiers = "rien"
-                    self.ope_unique(obj, action_type=element.memo)
+                    self.ope_unique(obj, action_type=element.type_action)
             if element.datamodel == "cat":
                 try:
-                    self.cat_unique(cats[element.id_model], action_type=element.memo)
-                    if element.memo == "I":
+                    self.cat_unique(cats[element.id_model], action_type=element.type_action)
+                    if element.type_action == "I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
                         if element.id_model in dict_do[element.datamodel]:
@@ -224,11 +228,11 @@ class Export_icompta_plist(object):
                     obj.pk = element.id_model
                     obj.type = 'r'
                     obj.nom = ''
-                    self.cat_unique(obj, action_type=element.memo)
+                    self.cat_unique(obj, action_type=element.type_action)
             if element.datamodel == "compte":
                 try:
-                    self.compte_unique(cpts[element.id_model], action_type=element.memo)
-                    if element.memo == "I":
+                    self.compte_unique(cpts[element.id_model], action_type=element.type_action)
+                    if element.type_action == "I":
                         dict_do[element.datamodel].append(element.id_model)
                     else:
                         if element.id_model in dict_do[element.datamodel]:
@@ -242,5 +246,5 @@ class Export_icompta_plist(object):
                     obj.pk = element.id_model
                     obj.type = 'e'
                     obj.nom = ''
-                    self.compte_unique(obj, action_type=element.memo)
+                    self.compte_unique(obj, action_type=element.type_action)
         return nb

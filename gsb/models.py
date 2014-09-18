@@ -76,11 +76,12 @@ class Tiers(models.Model):
     lastupdate = models_gsb.ModificationDateTimeField()
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     uuid = models_gsb.uuidfield(auto=True, add=True)
+    sort_nom = models.CharField(max_length=40, db_index=True)
 
     class Meta(object):
         db_table = 'gsb_tiers'
         verbose_name_plural = u'tiers'
-        ordering = ['nom']
+        ordering = ['sort_nom']
 
     def __unicode__(self):
         return u"%s" % self.nom
@@ -92,7 +93,6 @@ class Tiers(models.Model):
         """
         if new == self:
             raise ValueError(u"un objet ne peut etre fusionné sur lui même")
-
         self.alters_data = True
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
@@ -102,6 +102,14 @@ class Tiers(models.Model):
         nb_tiers_change += Ope.objects.filter(tiers=self).update(tiers=new)
         self.delete()
         return nb_tiers_change
+
+    def save(self):
+        if self.nom:
+            self.nom = self.nom.strip()
+            self.sort_nom = self.nom.lower()
+        else:
+            self.sort_nom = ''
+        super(Tiers, self).save()
 
 
 class Titre(models.Model):
@@ -1360,18 +1368,20 @@ class Ope(models.Model):
 
 
 class Db_log(models.Model):
-    date_time_created = models.DateTimeField(auto_now_add=True, null=True)
+    date_time_action = models.DateTimeField(auto_now_add=True, null=True)
     datamodel = models.CharField(null=False, max_length=20)
     id_model = models.IntegerField()
     uuid = models.CharField(null=False, max_length=255)
-    memo = models.CharField(null=False, max_length=255)
+    type_action = models.CharField(null=False, max_length=255)
+    memo = models.CharField(max_length=255)
+    date_ref = models.DateField( default=datetime.date.today)
 
     def __unicode__(self):
         actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}
-        date_created = self.date_time_created.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
-        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.memo],
+        date_action = self.date_time_action.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
+        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.type_action],
                                                                                                 obj=self,
-                                                                                                obj_date=date_created
+                                                                                                obj_date=date_action, obj_memo=self.memo
                                                                                                )
 
 # noinspection PyUnusedLocal
