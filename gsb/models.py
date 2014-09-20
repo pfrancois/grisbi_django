@@ -7,7 +7,7 @@ from django.db import models
 from django.db import transaction, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models.signals import pre_delete, post_save
+from django.db.models import signals
 from django.dispatch import receiver
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -103,13 +103,13 @@ class Tiers(models.Model):
         self.delete()
         return nb_tiers_change
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False, using=None):
         if self.nom:
             self.nom = self.nom.strip()
             self.sort_nom = self.nom.lower()
         else:
             self.sort_nom = ''
-        super(Tiers, self).save()
+        super(Tiers, self).save(force_insert=force_insert, force_update=force_update, using=using)
 
 
 class Titre(models.Model):
@@ -935,7 +935,7 @@ class Ope_titre(models.Model):
 
 
 # noinspection PyUnusedLocal
-@receiver(pre_delete, sender=Ope_titre, weak=False)
+@receiver(signals.pre_delete, sender=Ope_titre, weak=False)
 def verif_opetitre_rapp(sender, **kwargs):
     instance = kwargs['instance']
     # on evite que cela soit une opération rapproche
@@ -1379,13 +1379,13 @@ class Db_log(models.Model):
     def __unicode__(self):
         actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}
         date_action = self.date_time_action.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
-        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model}".format(action=actions[self.type_action],
+        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model} memo: {obj.memo}".format(action=actions[self.type_action],
                                                                                                 obj=self,
-                                                                                                obj_date=date_action, obj_memo=self.memo
+                                                                                                obj_date=date_action
                                                                                                )
 
 # noinspection PyUnusedLocal
-@receiver(post_save, sender=Ope, weak=False)
+@receiver(signals.post_save, sender=Ope, weak=False)
 def ope_fille(sender, **kwargs):
     if kwargs['raw']:
         return
@@ -1398,7 +1398,7 @@ def ope_fille(sender, **kwargs):
 
 
 # noinspection PyUnusedLocal
-@receiver(pre_delete, sender=Ope, weak=False)
+@receiver(signals.pre_delete, sender=Ope, weak=False)
 def verif_ope_rapp(sender, **kwargs):
     instance = kwargs['instance']
     # on evite que cela soit une opération rapproche
@@ -1410,6 +1410,7 @@ def verif_ope_rapp(sender, **kwargs):
     if instance.mere:
         if instance.mere.rapp:
             raise IntegrityError(u"opération mere rapprochée")
+
 
 
 class Virement(object):
