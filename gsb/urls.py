@@ -96,7 +96,9 @@ if settings.DEBUG:
     urlpatterns = patterns('',
                            (r'^500.html$', 'django.views.defaults.server_error'),
                            (r'^404.html$', TemplateView.as_view(template_name='404.html')),
+                           url(r'^explorer/', include('explorer.urls')),
                           ) + urlpatterns
+                          
 # gestion de mes trucs perso
 # form tester
 # if settings.DEBUG and perso:
