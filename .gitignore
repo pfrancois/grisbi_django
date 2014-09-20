@@ -53,3 +53,5 @@ sql
 old
 .coverage
 covhtml
+restore.bat
+*.sqlite_bkp
