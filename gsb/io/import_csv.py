@@ -97,8 +97,14 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
 
     @property
     def ligne(self):
-        # on fait -1 pour sauter la premiere ligne
         return self.line_num
+     
+    @property
+    def jambe_gauche(self):
+        #permet d'eliminer les jambes gauches des virements
+        if self.jumelle and self.montant > 0:
+            return True
+        return False
 
 
 class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
@@ -210,6 +216,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     return False
                 else:
                     verif_format = True
+            if row.jambe_gauche:
+                continue
             ope = dict()
             ope['ligne'] = row.ligne
             # verification pour les lignes

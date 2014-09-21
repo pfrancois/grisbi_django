@@ -36,9 +36,9 @@
 			<key>account</key>
 			<integer>0</integer>
 			<key>amount</key>
-			<real>1.0</real>
+			<real>99.0</real>
 			<key>category</key>
-			<integer>71</integer>
+			<integer>1</integer>
 			<key>currency</key>
 			<integer>2</integer>
 			<key>date</key>
@@ -70,7 +70,7 @@
 			<key>photo</key>
 			<integer>0</integer>
 			<key>pk</key>
-			<integer>18</integer>
+			<integer>17</integer>
 			<key>place</key>
 			<integer>0</integer>
 			<key>repeat</key>

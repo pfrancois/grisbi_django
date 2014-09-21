@@ -14,7 +14,7 @@
 				<integer>7</integer>
 			</dict>
 			<key>action</key>
-			<integer>1</integer>
+			<integer>2</integer>
 			<key>device</key>
 			<dict>
 				<key>CF$UID</key>
@@ -34,20 +34,20 @@
 				<integer>6</integer>
 			</dict>
 			<key>color</key>
-			<integer>16777215</integer>
+			<integer>0</integer>
 			<key>lastUpdate</key>
-			<real>0</real>
+			<real>1372006300</real>
 			<key>name</key>
 			<dict>
 				<key>CF$UID</key>
 				<integer>4</integer>
 			</dict>
 			<key>pk</key>
-			<integer>3</integer>
+			<integer>1</integer>
 			<key>place</key>
-			<integer>2</integer>
+			<integer>0</integer>
 			<key>symbol</key>
-			<integer>2</integer>
+			<integer>0</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -56,7 +56,7 @@
 				<integer>5</integer>
 			</dict>
 			<key>NS.string</key>
-			<string>Compte nouveau</string>
+			<string>compte_modifie</string>
 		</dict>
 		<dict>
 			<key>$classes</key>

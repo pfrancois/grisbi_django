@@ -38,7 +38,7 @@
 			<key>amount</key>
 			<real>0</real>
 			<key>category</key>
-			<integer>66</integer>
+			<integer>65</integer>
 			<key>currency</key>
 			<integer>2</integer>
 			<key>date</key>
@@ -66,11 +66,11 @@
 				<integer>0</integer>
 			</dict>
 			<key>payment</key>
-			<integer>1</integer>
+			<integer>3</integer>
 			<key>photo</key>
 			<integer>0</integer>
 			<key>pk</key>
-			<integer>11</integer>
+			<integer>9</integer>
 			<key>place</key>
 			<integer>0</integer>
 			<key>repeat</key>
@@ -87,11 +87,11 @@
 				<integer>5</integer>
 			</dict>
 			<key>day</key>
-			<integer>24</integer>
+			<integer>30</integer>
 			<key>month</key>
-			<integer>9</integer>
+			<integer>10</integer>
 			<key>year</key>
-			<integer>2012</integer>
+			<integer>2011</integer>
 		</dict>
 		<dict>
 			<key>$classes</key>
@@ -109,7 +109,7 @@
 				<integer>7</integer>
 			</dict>
 			<key>NS.string</key>
-			<string>tiers2</string>
+			<string>Virement</string>
 		</dict>
 		<dict>
 			<key>$classes</key>

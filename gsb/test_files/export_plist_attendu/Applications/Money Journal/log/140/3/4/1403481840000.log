@@ -11,10 +11,10 @@
 			<key>$class</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>7</integer>
+				<integer>6</integer>
 			</dict>
 			<key>action</key>
-			<integer>2</integer>
+			<integer>3</integer>
 			<key>device</key>
 			<dict>
 				<key>CF$UID</key>
@@ -31,51 +31,33 @@
 			<key>$class</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>6</integer>
+				<integer>5</integer>
 			</dict>
 			<key>color</key>
-			<integer>0</integer>
+			<integer>16777215</integer>
 			<key>lastUpdate</key>
-			<real>1372006300</real>
+			<real>1390332434</real>
 			<key>name</key>
 			<dict>
 				<key>CF$UID</key>
 				<integer>4</integer>
 			</dict>
 			<key>pk</key>
-			<integer>1</integer>
+			<integer>4</integer>
 			<key>place</key>
 			<integer>0</integer>
-			<key>symbol</key>
-			<integer>0</integer>
+			<key>type</key>
+			<integer>1</integer>
 		</dict>
-		<dict>
-			<key>$class</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>5</integer>
-			</dict>
-			<key>NS.string</key>
-			<string>compte_modifie</string>
-		</dict>
+		<string></string>
 		<dict>
 			<key>$classes</key>
 			<array>
-				<string>NSMutableString</string>
-				<string>NSString</string>
+				<string>Category</string>
 				<string>NSObject</string>
 			</array>
 			<key>$classname</key>
-			<string>NSMutableString</string>
-		</dict>
-		<dict>
-			<key>$classes</key>
-			<array>
-				<string>Payment</string>
-				<string>NSObject</string>
-			</array>
-			<key>$classname</key>
-			<string>Payment</string>
+			<string>Category</string>
 		</dict>
 		<dict>
 			<key>$classes</key>

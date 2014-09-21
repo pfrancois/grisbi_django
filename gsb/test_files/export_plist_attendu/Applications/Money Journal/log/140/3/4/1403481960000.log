@@ -11,10 +11,10 @@
 			<key>$class</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>9</integer>
+				<integer>7</integer>
 			</dict>
 			<key>action</key>
-			<integer>2</integer>
+			<integer>1</integer>
 			<key>device</key>
 			<dict>
 				<key>CF$UID</key>
@@ -31,54 +31,23 @@
 			<key>$class</key>
 			<dict>
 				<key>CF$UID</key>
-				<integer>8</integer>
+				<integer>6</integer>
 			</dict>
-			<key>account</key>
-			<integer>0</integer>
-			<key>amount</key>
-			<real>100.0</real>
-			<key>category</key>
-			<integer>2</integer>
-			<key>currency</key>
-			<integer>2</integer>
-			<key>date</key>
-			<real>0.0</real>
-			<key>day</key>
+			<key>color</key>
+			<integer>16777215</integer>
+			<key>lastUpdate</key>
+			<real>0</real>
+			<key>name</key>
 			<dict>
 				<key>CF$UID</key>
 				<integer>4</integer>
 			</dict>
-			<key>lastUpdate</key>
-			<real>1403542300</real>
-			<key>memo</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>6</integer>
-			</dict>
-			<key>note</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>0</integer>
-			</dict>
-			<key>payee</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>0</integer>
-			</dict>
-			<key>payment</key>
-			<integer>1</integer>
-			<key>photo</key>
-			<integer>0</integer>
 			<key>pk</key>
-			<integer>1</integer>
+			<integer>3</integer>
 			<key>place</key>
-			<integer>0</integer>
-			<key>repeat</key>
-			<integer>0</integer>
-			<key>type</key>
 			<integer>2</integer>
-			<key>voice</key>
-			<integer>0</integer>
+			<key>symbol</key>
+			<integer>2</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -86,30 +55,8 @@
 				<key>CF$UID</key>
 				<integer>5</integer>
 			</dict>
-			<key>day</key>
-			<integer>18</integer>
-			<key>month</key>
-			<integer>12</integer>
-			<key>year</key>
-			<integer>2011</integer>
-		</dict>
-		<dict>
-			<key>$classes</key>
-			<array>
-				<string>Day</string>
-				<string>NSObject</string>
-			</array>
-			<key>$classname</key>
-			<string>Day</string>
-		</dict>
-		<dict>
-			<key>$class</key>
-			<dict>
-				<key>CF$UID</key>
-				<integer>7</integer>
-			</dict>
 			<key>NS.string</key>
-			<string>tiers1</string>
+			<string>Compte nouveau</string>
 		</dict>
 		<dict>
 			<key>$classes</key>
@@ -124,11 +71,11 @@
 		<dict>
 			<key>$classes</key>
 			<array>
-				<string>Record</string>
+				<string>Payment</string>
 				<string>NSObject</string>
 			</array>
 			<key>$classname</key>
-			<string>Record</string>
+			<string>Payment</string>
 		</dict>
 		<dict>
 			<key>$classes</key>

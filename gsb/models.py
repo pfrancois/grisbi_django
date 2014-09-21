@@ -1374,7 +1374,7 @@ class Db_log(models.Model):
     uuid = models.CharField(null=False, max_length=255)
     type_action = models.CharField(null=False, max_length=255)
     memo = models.CharField(max_length=255)
-    date_ref = models.DateField( default=datetime.date.today)
+    date_ref = models.DateField(default=datetime.date.today)
 
     def __unicode__(self):
         actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}

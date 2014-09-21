@@ -46,8 +46,8 @@ class Export_ope_csv(Export_view_csv_base):
         #on exclue les ope mere car cela fait doublon
         query = query.exclude(filles_set__isnull=False)
         query = query.order_by('date', 'id')
-        #on elemine la seconde jambe des virement
-        query = query.exclude(jumelle__isnull=False, montant__gte=0)
+        #initialement on elemine la seconde jambe des virement mais en fait il faut pas le faire car sinon pour l'autre jambe c'est pas bon
+        #query = query.exclude(jumelle__isnull=False, montant__gte=0)
         query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
 
         for ope in query:
@@ -82,7 +82,10 @@ class Export_ope_csv(Export_view_csv_base):
                 if ope.jumelle.pointe:  # jumelle pointee
                     if '>P' not in ligne['notes']:
                         ligne['notes'] += u'>P'
-                ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
+                if ope.montant < 0:
+                    ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
+                else:
+                    ligne['tiers'] = "%s => %s" % ( ope.jumelle.compte.nom, ope.compte.nom)
             ligne['ib'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['num_cheque'] = ope.num_cheque

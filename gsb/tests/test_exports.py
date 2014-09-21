@@ -52,13 +52,16 @@ class Test_export(Test_view_base):
 6;cpte1;21/08/2011;10,00;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;08\r
 3;cpt_titre2;29/10/2011;-100,00;cpt_titre2201101;0;moyen_dep3;Opération sur titre;titre_ t2;20@5;;;10\r
 8;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;;10\r
+9;cptb3;30/10/2011;100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;;10\r
 2;cpt_titre2;30/11/2011;-1500,00;;0;moyen_dep3;Opération sur titre;titre_ t2;150@10;;;11\r
 1;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;;12\r
 10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;5@1;;;09\r
 12;cpte1;24/09/2012;99,00;cpte1201101;0;moyen_rec1;cat1;tiers2;;;;09\r
 13;cpte1;24/09/2012;1,00;cpte1201101;0;moyen_rec1;cat2;tiers2;;;;09\r
 14;cpte1;18/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;;12\r
+15;cptb3;18/12/2012;100,00;cpte1201101;0;moyen_vir4;Virement;cpte1 => cptb3;;;;12\r
 16;cpte1;18/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12\r
+17;cptb3;18/12/2013;100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;;;;12\r
 """
         # on coupe ligne par ligne
         reponse_recu = unicode(rep.content, 'latin-1')

@@ -14,7 +14,7 @@
 				<integer>6</integer>
 			</dict>
 			<key>action</key>
-			<integer>3</integer>
+			<integer>1</integer>
 			<key>device</key>
 			<dict>
 				<key>CF$UID</key>
@@ -36,20 +36,20 @@
 			<key>color</key>
 			<integer>16777215</integer>
 			<key>lastUpdate</key>
-			<real>1390332434</real>
+			<real>0</real>
 			<key>name</key>
 			<dict>
 				<key>CF$UID</key>
 				<integer>4</integer>
 			</dict>
 			<key>pk</key>
-			<integer>4</integer>
+			<integer>72</integer>
 			<key>place</key>
-			<integer>0</integer>
+			<integer>12</integer>
 			<key>type</key>
 			<integer>1</integer>
 		</dict>
-		<string></string>
+		<string>nouvel_cat</string>
 		<dict>
 			<key>$classes</key>
 			<array>
