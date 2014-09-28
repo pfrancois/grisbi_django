@@ -1,4 +1,0 @@
-FAIRE que si on ajoute un tiers c'est pas possible de recreer un tiers
-
-probleme dans la table:
-titre devrait etre dans tiers et non ds titre

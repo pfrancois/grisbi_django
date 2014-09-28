@@ -1270,6 +1270,9 @@ class Ope(models.Model):
         return reverse('gsb_ope_detail', kwargs={'pk': str(self.id)})
 
     def clean(self):
+        """ verifie que :
+        1) une operation n'est pas a a la fois pointe et rapproche
+        2) que l'ope n'est pas modifie  (du mois  son montant) si rapproche ou pointe"""
         self.alters_data = True
         self.deja_clean = True
         super(Ope, self).clean()
@@ -1365,24 +1368,6 @@ class Ope(models.Model):
         if self.moyen.type == u'd' and self.montant > 0:
             self.montant *= -1
         super(Ope, self).save(*args, **kwargs)
-
-
-class Db_log(models.Model):
-    date_time_action = models.DateTimeField(auto_now_add=True, null=True)
-    datamodel = models.CharField(null=False, max_length=20)
-    id_model = models.IntegerField()
-    uuid = models.CharField(null=False, max_length=255)
-    type_action = models.CharField(null=False, max_length=255)
-    memo = models.CharField(max_length=255)
-    date_ref = models.DateField(default=datetime.date.today)
-
-    def __unicode__(self):
-        actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}
-        date_action = self.date_time_action.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
-        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model} memo: {obj.memo}".format(action=actions[self.type_action],
-                                                                                                obj=self,
-                                                                                                obj_date=date_action
-                                                                                               )
 
 # noinspection PyUnusedLocal
 @receiver(signals.post_save, sender=Ope, weak=False)
@@ -1570,3 +1555,21 @@ class Virement(object):
 
     def __unicode__(self):
         return u"%s => %s" % (self.origine.compte.nom, self.dest.compte.nom)
+
+ 
+class Db_log(models.Model):
+    date_time_action = models.DateTimeField(auto_now_add=True, null=True)
+    datamodel = models.CharField(null=False, max_length=20)
+    id_model = models.IntegerField()
+    uuid = models.CharField(null=False, max_length=255)
+    type_action = models.CharField(null=False, max_length=255)
+    memo = models.CharField(max_length=255)
+    date_ref = models.DateField(default=datetime.date.today)
+
+    def __unicode__(self):
+        actions = {'I':u"insert", 'U':u"update", 'D':u"delete"}
+        date_action = self.date_time_action.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
+        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model} memo: {obj.memo}".format(action=actions[self.type_action],
+                                                                                                obj=self,
+                                                                                                obj_date=date_action
+                                                                                               )

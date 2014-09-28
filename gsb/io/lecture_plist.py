@@ -62,6 +62,7 @@ class Element(object):
         self.plistdict = bplist.readPlist(fichier)
         root = self.plistdict['$objects'][self.plistdict['$top']['$0']['CF$UID']]
         reponse_initiale = simp_nskeyedarchiver(objects=self.plistdict, top=root, level=1, filtre=True)
+        self.device = reponse_initiale['device']
         self.el = list()
         for key in reponse_initiale:
             if 'object' in key:
@@ -127,7 +128,7 @@ def gestion_maj(request):
                 messages.success(request, u"Rien d'exporté")
             messages.info(request, "From iphone to PC")
             nb_import = import_items(lastmaj, request)
-            if nb_import['deja'] > 0:
+            if nb_import["deja"] > 0:
                 messages.info(request, u"%s éléments du répertoire money journal déja mises à jour" % nb_import['deja'])
             if int(nb_import['ope']) > 0:
                 messages.success(request, u"opérations importées: %s" % nb_import['ope'])
@@ -215,10 +216,10 @@ def import_items(lastmaj, request=None):
     #on parcourt les fichier
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         ele = Element(fichier)
+        if ele.device == settings.CODE_DEVICE_POCKET_MONEY:  #c'est une operation provenant de ce pc
+            nb['deja'] += 1
+            continue
         for el in ele.el:
-            if el.device == settings.CODE_DEVICE_POCKET_MONEY:  #c'est une operation provenant de ce pc
-                nb['deja'] += 1
-                continue
             if el.lastup < lastmaj:
                 nb['deja'] += 1
                 continue
