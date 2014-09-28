@@ -9,7 +9,7 @@ from .io import import_titre_csv as import_titres
 from django.conf import settings
 # les vues generales
 urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),)
-
+urlpatterns += patterns('',url(r'^rest/', include('gsb.rest.url')),)
 # les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
@@ -92,6 +92,7 @@ from django.conf.urls.static import static
 
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 if settings.DEBUG:
     urlpatterns = patterns('',
                            (r'^500.html$', 'django.views.defaults.server_error'),
@@ -112,7 +113,6 @@ if settings.DEBUG:
 try:
     # noinspection PyUnresolvedReferences
     import perso
-
     urlpatterns += patterns('', (r'^perso/', include(perso)), )
 except ImportError:
     pass
