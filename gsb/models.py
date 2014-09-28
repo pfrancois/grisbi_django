@@ -103,13 +103,10 @@ class Tiers(models.Model):
         self.delete()
         return nb_tiers_change
 
-    def save(self, force_insert=False, force_update=False, using=None):
-        if self.nom:
-            self.nom = self.nom.strip()
-            self.sort_nom = self.nom.lower()
-        else:
-            self.sort_nom = ''
-        super(Tiers, self).save(force_insert=force_insert, force_update=force_update, using=using)
+    def save(self, *args, **kwargs):
+        self.nom = self.nom.strip()
+        self.sort_nom = self.nom.lower()
+        super(Tiers, self).save(*args, **kwargs)
 
 
 class Titre(models.Model):
@@ -231,7 +228,7 @@ class Titre(models.Model):
         @param compte: Compte , si None, renvoie sur  l'ensemble des comptes titres
         @param datel: date, renvoie sur avant la date ou tout si none
         @param rapp: Bool, si true, renvoie uniquement les opération rapprochées
-        @param exclude: Ope_titre ope titre a exclure.attention c'ets bien ope et non ope_titre
+        @param exclude: Ope_titre ope titre a exclure.attention c'est bien ope et non ope_titre
         """
         query = Ope.non_meres().filter(tiers__nom="titre_ %s" % self.nom).exclude(cat_id=settings.ID_CAT_PMV)
         if compte:
