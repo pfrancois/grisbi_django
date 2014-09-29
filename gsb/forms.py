@@ -245,8 +245,8 @@ class SearchForm(Baseform):
 class ajout_ope_bulk_form(Baseform):
     """premier form utilise ajout_ope_titre_bulk"""
     titre = forms.ModelChoiceField(Titre.objects.all())
-    cours = gsb_field.CurField()
     nombre = forms.DecimalField(localize=True)
+    cours = gsb_field.CurField()
     frais = forms.DecimalField(localize=True, required=False)
 
 
