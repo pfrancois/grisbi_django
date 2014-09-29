@@ -759,7 +759,7 @@ def ope_titre_vente(request, cpt_id):
     titre = u' nouvelle vente sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
                   {'titre_long': titre,
-                   'titre': u'modification',
+                   'titre': u'VENTE',
                    'form': form,
                    'cpt': compte,
                    'sens': 'vente'}
