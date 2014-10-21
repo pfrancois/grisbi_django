@@ -701,7 +701,7 @@ def dividende(request, cpt_id):
     titre = u' nouveau dividende sur %s' % compte.nom
     return render(request, 'gsb/ope_titre_create.djhtm',
                   {'titre_long': titre,
-                   'titre': u'modification',
+                   'titre': u'dividende',
                    'form': form,
                    'cpt': compte,
                    'sens': 'vente'}
@@ -894,9 +894,47 @@ def ajout_ope_titre_bulk(request, cpt_id):
     return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id,
                                                           'titre': u'opération sur les titres suivants'})
 
+@transaction.atomic
+def ajustement_titre(request, cpt_id):
+    """permet d'ajuster les titres"""
+    compte = get_object_or_404(Compte.objects.select_related(), pk=cpt_id)
+    if compte.type != 't':
+        messages.error(request, "ce n'est pas un compte titre")
+        return http.HttpResponseRedirect(reverse("index"))
+    titre_compte = compte.titre.all().distinct().order_by('nom')
+    titres_forms = []
+    if request.method == 'POST':
+        i = 0
+        date_ope_form = gsb_forms.ajout_ope_date_form(request.POST, initial={'date': gsb.utils.today})
+        for titre in titre_compte:
+            i += 1
+            titres_forms.append(
+                gsb_forms.ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'titre': titre, 'nombre': 0, 'montant': 0}))
+        if all([form.is_valid() for form in titres_forms]) and date_ope_form.is_valid():
+            date_ope = date_ope_form.cleaned_data['date']
+            for form in titres_forms:
+                compte_titre = compte
+                nb = form.cleaned_data['nombre']
+                titre=form.cleaned_data['titre']
+                cours=form.cleaned_data['cours']
+                if nb > 0:
+                    compte_titre.ajustement_titre(date_ope,titre,nb,cours)
+                    messages.success(request, "ajustement effectue pour le titre %s"%titre)
+            return http.HttpResponseRedirect(compte.get_absolute_url())
+    else:
+        i = 0
+        date_ope_form = gsb_forms.ajout_ope_date_form(initial={'date': gsb.utils.today})
+        for titre in titre_compte:
+            i += 1
+            titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i),
+                                                              initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today,
+                                                                       'nombre': 0, 'montant': 0}))
+    return render(request, 'gsb/maj_compte_titre.djhtm', {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id,
+                                                          'titre': u'ajustement sur les titres suivants'})
 
+                                                          
 class Rdt_titres_view(Myformview):
-    template_name = 'gsb\rendement_titre.djhtm'
+    template_name = 'gsb/rendement_titre.djhtm'
     form_class = gsb_forms.SearchForm
     requete = None
     desc = None

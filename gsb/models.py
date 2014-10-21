@@ -794,6 +794,29 @@ class Compte(models.Model):
             return u"opération ({}) crée ".format(ope)
         else:
             return "rien a modifier"
+    
+    def ajustement_titre(self,datel,titre,nb_vrai,cours):
+        datel = utils.strpdate(datel)
+        nb_theorique=titre.nb(datel=datel, compte=self)
+        nb_a_corriger = nb_theorique - decimal.Decimal(str(nb_vrai))
+        if  nb_a_corriger > 0:
+            ope=self.vente(titre=titre, nombre=nb_a_corriger, prix=cours, date=datel, frais=cours*nb_a_corriger)
+        else:
+            if nb_a_corriger < 0:
+                ope=self.achat(titre=titre, nombre=nb_a_corriger*-1, prix=cours, date=datel)
+                self.ope_set.create(date=datel,
+                                    montant=decimal.Decimal(force_unicode(cours*nb_a_corriger)) * -1,
+                                    tiers=titre.tiers,
+                                    cat=Cat.objects.get(nom=u"Frais bancaires"),
+                                    notes=u"Frais %s@%s" % (nb_a_corriger, cours),
+                                    moyen=self.moyen_credit(),
+                                    automatique=True
+                                   )
+
+            else:
+                return "RAS"
+        return ope
+    
 
 class Ope_titre(models.Model):
     """ope titre en compta matiere"""
@@ -926,8 +949,9 @@ class Ope_titre(models.Model):
             sens = "achat"
         else:
             sens = "vente"
+        date_ope=utils.strpdate(self.date)
         chaine = u"(%s) %s de %s %s à %s %s le %s cpt:%s" % (
-            self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, self.date.strftime('%d/%m/%Y'), self.compte)
+            self.id, sens, abs(self.nombre), self.titre, self.cours, settings.DEVISE_GENERALE, date_ope.strftime('%d/%m/%Y'), self.compte)
         return chaine
 
 

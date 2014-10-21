@@ -61,8 +61,7 @@ urlpatterns += patterns('gsb.views',
                         url(r'^ope_titre/(?P<pk>\d+)/$', 'ope_titre_detail', name='ope_titre_detail'),
                         url(r'^ope_titre/(?P<pk>\d+)/delete$', 'ope_titre_delete', name='ope_titre_delete'),
                         url(r'^search$', 'search_opes', name='g_search_ope'),
-                        url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours'),
-                        url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'ajout_ope_titre_bulk', name="titre_bulk"),
+                        url(r'^majcours/(?P<pk>\d+)/$', 'maj_cours', name='maj_cours')
                        )
 
 
@@ -86,6 +85,8 @@ urlpatterns += patterns('gsb.views',
                         url(r'^compte/(?P<cpt_id>\d+)/vente$', 'ope_titre_vente', name="cpt_titre_vente"),
                         url(r'^compte/(?P<cpt_id>\d+)/dividende$', 'dividende', name="cpt_titre_dividende"),
                         url(r'^titres$', views.Rdt_titres_view.as_view(), name="Rdt_titres_view"),
+                        url(r'^compte/(?P<cpt_id>\d+)/titre_new$', 'ajout_ope_titre_bulk', name="titre_bulk"),
+                        url(r'^compte/(?P<cpt_id>\d+)/ajustement$', 'ajustement_titre', name="ajustement_titre"),
                        )
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static

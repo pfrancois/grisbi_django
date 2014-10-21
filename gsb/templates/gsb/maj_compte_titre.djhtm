@@ -2,7 +2,7 @@
 {% block content %}
 <form method="post" action="" id="form1">
     {% csrf_token %}
-    {{ form.non_field_errors }}
+    {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
     {{ date_ope_form }}
     <table>
         <tr>
