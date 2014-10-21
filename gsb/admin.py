@@ -28,7 +28,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from collections import OrderedDict
 from . import model_field
-
+from admin_exporter.actions import export_as_csv_action
 
 #-------------ici les classes generiques------
 class Date_perso_filter(DateFieldListFilter):
@@ -460,7 +460,7 @@ class Ope_admin(Modeladmin_perso):
         'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date','moyen')
-    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
+    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser',export_as_csv_action]
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
