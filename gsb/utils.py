@@ -420,17 +420,12 @@ def is_onexist(objet, attribut):
         # switch http://code.activestate.com/recipes/410692/"""
 
 
-def find_files(path, recherche='*.*', directory_ouptut=False):
+def find_files(path, recherche='*.*'):
     """trouve recursivement les fichiers voulus"""
-    fichiers = {}
     for root, dirs, files in os.walk(path):
-        for basename in files:
-            if fnmatch.fnmatch(basename, recherche):
-                filename = os.path.join(root, basename)
-                fichiers[basename] = filename
-    for key in sorted(fichiers):
-        yield fichiers[key]
-
+        for base_name in files:
+            if fnmatch.fnmatch(base_name, recherche):
+                yield os.path.join(root, base_name)
 
 class AttrDict(dict):
     """http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python"""
