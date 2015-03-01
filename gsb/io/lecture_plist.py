@@ -39,7 +39,7 @@ class Subelement(utils.AttrDict):
         if self.is_compte:
             return u"(%s) '%s'" % (self.id, self.nom)
         if self.is_cat:
-            return u"(%s) '%s' sens:%s" % (self.id, self.nom, self.sens_element)
+            return u"(%s) '%s' type:%s" % (self.id, self.nom, self.type_cat)
         if self.is_budget:
             return u"%s" % self.id
 
@@ -63,7 +63,7 @@ class collection_datas_decodes(object):
         root = self.plistdict['$objects'][self.plistdict['$top']['$0']['CF$UID']]
         reponse_initiale = simp_nskeyedarchiver(objects=self.plistdict, top=root, level=1, filtre=True)
         self.device = reponse_initiale['device']
-        self.list = list()
+        self.list_el = list()
         for key in reponse_initiale:
             if 'object' in key:
                 i = Subelement()
@@ -101,10 +101,10 @@ class collection_datas_decodes(object):
                         i.nom = i.obj['name']
                     i.place = i.obj['place']
                 if i.is_cat:
-                    i.sens_element = self.sens[i.obj['type']]
+                    i.type_cat = self.sens[i.obj['type']]
                 if i.is_compte:
                     i.symbol = i.obj['symbol']
-                self.list.append(i)
+                self.list_el.append(i)
 
 
 def gestion_maj(request):
@@ -192,7 +192,7 @@ def check():
     #verif si des operations sont a importer
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         datas = collection_datas_decodes(fichier)
-        for el in datas.list:
+        for el in datas.list_el:
             if el.device == 'tototototo':  #c'est une operation provenant de ce pc
                 continue
             if el.lastup > lastmaj and el.sens_element != "d":
@@ -219,7 +219,7 @@ def import_items(lastmaj, request=None):
         if datas.device == settings.CODE_DEVICE_POCKET_MONEY:  #c'est une operation provenant de ce pc
             nb['deja'] += 1
             continue
-        for el in datas.list:
+        for el in datas.list_el:
             if el.lastup < lastmaj:
                 nb['deja'] += 1
                 continue
@@ -260,7 +260,7 @@ def import_items(lastmaj, request=None):
                 models.Cat.objects.create(
                     pk=element_unitaire.id,
                     nom=element_unitaire.nom,
-                    type=element_unitaire.sens_element,
+                    type=element_unitaire.type_cat,
                     couleur=element_unitaire.couleur)
                 messages.success(request, u"catégorie %s créée" % ref)
             else:
@@ -270,7 +270,7 @@ def import_items(lastmaj, request=None):
                 cat = models.Cat.objects.get(id=element_unitaire.id)
             except models.Cat.DoesNotExist:
                 raise Lecture_plist_exception(u"attention la catégorie %s n'existe pas alors qu'on demande de la modifier" % ref)
-            if not cat.is_editable and (cat.type != element_unitaire.sens_element or cat.nom != element_unitaire.nom):
+            if not cat.is_editable and (cat.type != element_unitaire.type_cat or cat.nom != element_unitaire.nom):
                 messages.error(request, u"impossible de modifier la cat %s" % ref)
                 continue
             if cat.nom != element_unitaire.nom:
@@ -282,9 +282,9 @@ def import_items(lastmaj, request=None):
                 diff['couleur'] = u"couleur: %s => %s" % (cat.couleur, element_unitaire.couleur)
                 cat.couleur = element_unitaire.couleur
                 texte = "%s, %s" % (texte, diff['couleur'])
-            if cat.type != element_unitaire.sens_element:
-                diff['type'] = u"type: %s => %s" % (cat.type, element_unitaire.sens_element)
-                cat.type = element_unitaire.sens_element
+            if cat.type != element_unitaire.type_cat:
+                diff['type'] = u"type: %s => %s" % (cat.type, element_unitaire.type_cat)
+                cat.type = element_unitaire.type_cat
                 texte = "%s, %s" % (texte, diff['type'])
             if diff != dict():
                 if texte[0] == u",":

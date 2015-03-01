@@ -27,9 +27,9 @@ import collections
 class Test_import_money_journal_element(Test_import_abstract):
     def test_money_journal_element_ope(self):
         fich=os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1402954705000.log")
-        ele=lecture_plist.Element(fich)
+        ele=lecture_plist.collection_datas_decodes(fich)
         self.compare(ele.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 16, 23, 38, 25)))
-        el=ele.el[0]
+        el=ele.list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.action, 'c')
         self.compare(el.sens_element, 'd')
@@ -47,9 +47,9 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.__unicode__(),u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
         self.compare(el.__str__(),u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
         self.compare(el.__repr__(),u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
-        ele=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403036267000.log"))
+        ele=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403036267000.log"))
         self.compare(ele.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 17, 47)))
-        el=ele.el[0]
+        el=ele.list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.action, 'm')
         self.compare(el.sens_element, 'd')
@@ -64,9 +64,9 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.date,  datetime.date(2014, 6, 16))
         self.compare(el.montant, -55)
         self.compare(el.tiers, 'Ope standart')
-        ele=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403037219000.log"))
+        ele=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403037219000.log"))
         self.compare(ele.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 33, 39)))
-        el=ele.el[0]
+        el=ele.list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.action, 'd')
         self.compare(el.sens_element, 'd')
@@ -82,7 +82,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.montant, -55)
         self.compare(el.tiers, 'Ope standart')
     def test_money_journal_element_compte(self):
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403040634000.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403040634000.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 34)))
         self.compare(el.action, 'c')
@@ -94,7 +94,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.id, 7)
         self.compare(el.couleur,"#000000")
         self.compare(el.nom, " ")
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403040635000.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403040635000.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 35)))
         self.compare(el.action, 'm')
@@ -109,7 +109,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.__unicode__(),u"(7) 'Ghh'")
         self.compare(el.__str__(),u"(7) 'Ghh'")
         self.compare(el.__repr__(),u"(7) 'Ghh'")
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403045414000.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403045414000.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 00, 50, 14)))
         self.compare(el.action, 'd')
@@ -122,7 +122,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.couleur,"#000000")
         self.compare(el.nom, "Ghh")
     def test_money_journal_element_cat(self):
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014000.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014000.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
         self.compare(el.action, 'c')
@@ -135,7 +135,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.couleur,'#000000')
         self.compare(el.nom, " ")
         self.compare(el.type_cat,"d")
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014010.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014010.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
         self.compare(el.action, 'm')
@@ -151,7 +151,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.__unicode__(),u"(16) 'Cat aded' type:d")
         self.compare(el.__str__(),u"(16) 'Cat aded' type:d")
         self.compare(el.__repr__(),u"(16) 'Cat aded' type:d")
-        el=lecture_plist.Element(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014020.log")).el[0]
+        el=lecture_plist.collection_datas_decodes(os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist", 'Applications', 'Money Journal', 'log',"1403049014020.log")).list_el[0]
         self.compare(el.device,'MyHpyVfqnK')
         self.compare(el.datemaj,  pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
         self.compare(el.action, 'd')
@@ -540,7 +540,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj,request=self.request)
-        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 n'existe pas alors qu'on demande de le supprimer", ))
+        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 n'existe pas alors qu'on demande de la supprimer", ))
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH,"gsb","test_files","import_plist_31"))
     def test_money_journal_element_import32(self):
         """test supprimeer une mere"""
@@ -649,7 +649,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         )
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj,request=self.request)
-        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 existe alors qu'on demande de le supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
+        self.compare(exception_context_manager.exception.args, (u"attention cette opération 66 existe alors qu'on demande de la supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
 
 @override_settings(CODE_DEVICE_POCKET_MONEY='totototo')
 @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH,"gsb","test_files","export_plist"))
