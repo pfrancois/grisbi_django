@@ -9,7 +9,7 @@ from django.utils.encoding import smart_unicode
 try:
     from yaml import CSafeDumper as SafeDumper
 except ImportError:
-    from yaml import SafeLoader, SafeDumper
+    from yaml import SafeDumper
 import decimal
 import datetime
 

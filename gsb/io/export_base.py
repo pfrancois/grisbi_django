@@ -93,7 +93,7 @@ class Exportform_ope(gsb_forms.Baseform):
             raise NotImplementedError("model_collec non defini")
         super(Exportform_ope, self).clean()
         data = self.cleaned_data
-        if not 'collection' in data.keys():
+        if 'collection' not in data.keys():
             return data
         ensemble = [objet.id for objet in data["collection"]]  # liste des id des comptes
         date_min = data['date_min']

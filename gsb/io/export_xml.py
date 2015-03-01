@@ -108,58 +108,58 @@ class Export_xml(generic.View):
         return xml
 
     def export_ope(self,data):
-            xml_element=et.Element('operation')
-            xml_element.set('pk', utils.force_unicode(data.id))
-            xml_element.set('uuid', utils.force_unicode(data.uuid))
-            xml_element.set('date_ope', utils.datetostr(data.date,param=self.format_date,defaut=""))
-            xml_element.set('date_val', utils.datetostr(data.date_val,param=self.format_date,defaut=""))
-            xml_element.set('lastupdate', utils.datetostr(data.lastupdate,param=self.format_date,defaut=""))
-            xml_element.set('date_created', utils.datetostr(data.date_created,param=self.format_date,defaut=""))
-            if data.tiers is None:
-                xml_element.set('tiers', "")
-            else:
-                xml_element.set('tiers',utils.force_unicode(data.tiers.nom))
-            xml_element.set('montant', self.floattostr(data.montant))
-            xml_element.set('compte',utils.force_unicode(data.compte.nom))
-            if data.cat is None:
-                xml_element.set('cat', "")
-            else:
-                xml_element.set('cat',utils.force_unicode("%s(%s)"%(data.cat.nom,data.cat.type)))
-            if data.notes is None:
-                xml_element.text=""
-            else:
-                 xml_element.text=utils.force_unicode(data.notes)
-            if data.moyen is None:
-                xml_element.set('moyen', "")
-            else:
-                xml_element.set('moyen',utils.force_unicode("%s(%s)"%(data.moyen.nom,data.moyen.type)))
-            xml_element.text=utils.force_unicode(data.notes)
-            xml_element.set('num_cheque',utils.force_unicode(data.num_cheque))
-            xml_element.set('p',utils.booltostr(data.pointe))
-            if data.rapp is None:
-                xml_element.set('r', "0")
-                xml_element.set('r_nom', "")
-            else:
-                xml_element.set('r',"1")
-                xml_element.set('r_nom', utils.force_unicode(data.rapp.nom))
-            if data.jumelle is None:
-                xml_element.set("jumelle_uuid","")
-            else:
-                xml_element.set("jumelle_uuid",data.jumelle.uuid)
-            if data.mere is None:
-                xml_element.set("mere_uuid","")
-            else:
-                xml_element.set("mere_uuid",data.mere.uuid)
-            if data.ope_titre_ost is None:
-                xml_element.set("ope_titre_ost_uuid","")
-            else:
-                xml_element.set("ope_titre_ost_uuid",data.ope_titre_ost.uuid)
-            if data.ope_titre_pmv is None:
-                xml_element.set("ope_titre_pmv_uuid","")
-            else:
-                xml_element.set("ope_titre_pmv_uuid",data.ope_titre_pmv.uuid)
-            xml_element.text=utils.force_unicode(data.notes)
-            return xml_element
+        xml_element=et.Element('operation')
+        xml_element.set('pk', utils.force_unicode(data.id))
+        xml_element.set('uuid', utils.force_unicode(data.uuid))
+        xml_element.set('date_ope', utils.datetostr(data.date,param=self.format_date,defaut=""))
+        xml_element.set('date_val', utils.datetostr(data.date_val,param=self.format_date,defaut=""))
+        xml_element.set('lastupdate', utils.datetostr(data.lastupdate,param=self.format_date,defaut=""))
+        xml_element.set('date_created', utils.datetostr(data.date_created,param=self.format_date,defaut=""))
+        if data.tiers is None:
+            xml_element.set('tiers', "")
+        else:
+            xml_element.set('tiers',utils.force_unicode(data.tiers.nom))
+        xml_element.set('montant', self.floattostr(data.montant))
+        xml_element.set('compte',utils.force_unicode(data.compte.nom))
+        if data.cat is None:
+            xml_element.set('cat', "")
+        else:
+            xml_element.set('cat',utils.force_unicode("%s(%s)"%(data.cat.nom,data.cat.type)))
+        if data.notes is None:
+            xml_element.text=""
+        else:
+             xml_element.text=utils.force_unicode(data.notes)
+        if data.moyen is None:
+            xml_element.set('moyen', "")
+        else:
+            xml_element.set('moyen',utils.force_unicode("%s(%s)"%(data.moyen.nom,data.moyen.type)))
+        xml_element.text=utils.force_unicode(data.notes)
+        xml_element.set('num_cheque',utils.force_unicode(data.num_cheque))
+        xml_element.set('p',utils.booltostr(data.pointe))
+        if data.rapp is None:
+            xml_element.set('r', "0")
+            xml_element.set('r_nom', "")
+        else:
+            xml_element.set('r',"1")
+            xml_element.set('r_nom', utils.force_unicode(data.rapp.nom))
+        if data.jumelle is None:
+            xml_element.set("jumelle_uuid","")
+        else:
+            xml_element.set("jumelle_uuid",data.jumelle.uuid)
+        if data.mere is None:
+            xml_element.set("mere_uuid","")
+        else:
+            xml_element.set("mere_uuid",data.mere.uuid)
+        if data.ope_titre_ost is None:
+            xml_element.set("ope_titre_ost_uuid","")
+        else:
+            xml_element.set("ope_titre_ost_uuid",data.ope_titre_ost.uuid)
+        if data.ope_titre_pmv is None:
+            xml_element.set("ope_titre_pmv_uuid","")
+        else:
+            xml_element.set("ope_titre_pmv_uuid",data.ope_titre_pmv.uuid)
+        xml_element.text=utils.force_unicode(data.notes)
+        return xml_element
 
     def export_banque(self,data):
         xml_element=et.Element('banque')

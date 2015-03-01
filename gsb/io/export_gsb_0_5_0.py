@@ -25,8 +25,8 @@ liste_type_compte = Compte.typescpt
 
 # noinspection PyUnusedLocal
 def _export(request):
-# creation des id pour IB
-#####generalites###
+    # creation des id pour IB
+    #####generalites###
     xml_root = et.Element("Grisbi")
     xml_generalites = et.SubElement(xml_root, "Generalites")
     et.SubElement(xml_generalites, "Version_fichier").text = "0.5.0"
@@ -65,10 +65,8 @@ def _export(request):
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
     et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])
     et.SubElement(xml_generalites, "Compte_courant").text = str(0)  # NOT IN BDD
-    nb_compte = 0
     # --boucle des comptes
     for cpt in Compte.objects.all().order_by('id'):
-        nb_compte += 1
         xml_compte = et.SubElement(xml_comptes, "Compte")
         xml_detail = et.SubElement(xml_compte, "Details")
         et.SubElement(xml_detail, "Nom").text = cpt.nom
