@@ -1,0 +1,29 @@
+id: (int)
+cle de l'operation , si rien, pas pris en compte
+
+cpt:(string)
+nom du compte (attention a la casse; si n'existe pas, compte cree comme bancaire)
+
+date:(string)
+format %d/%m/%Y
+
+date_val:(string)
+idem
+
+montant:(decimal)
+decimal avec virgule ou point (et avec ou sans separateur de milliers espace)
+r:(boolean)
+0 ou 1
+p:(string)
+nom du rapprochement
+moyen:(string)
+nom du moyen
+cat:(string)
+
+tiers:(string)
+
+notes:(string)
+
+ib:(string)
+
+num_cheque:(int)

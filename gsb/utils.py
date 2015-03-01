@@ -240,7 +240,7 @@ def to_date(var, format_date="%d/%m/%Y"):
     try:
         return strpdate(var, format_date)
     except ValueError:
-        raise FormatException('"%s" n\'en pas est une date' % var)
+        raise FormatException('"%s" n\'est pas est une date' % var)
 
 
 #-------------------------------format de sortie-----------------------------
@@ -394,7 +394,7 @@ class Csv_unicode_reader(object):
     champs = None
 
     def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
-        self.line_num = 1
+        self.line_num = 0
         fich = UTF8Recoder(fich, encoding)
         self.reader = csv.DictReader(fich, dialect=dialect, fieldnames=self.champs, **kwds)
 

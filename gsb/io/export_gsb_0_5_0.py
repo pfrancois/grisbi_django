@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse
 
-from ..models import (Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp, Titre)
+from ..models import (Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exercice, Rapp)
 
 # from django.core.exceptions import ObjectDoesNotExist
 # import decimal
@@ -239,7 +239,6 @@ def _export(request):
         xml_element.set('Sous-imputation', str(0))
         xml_element.set('Notes', ech.notes)
         xml_element.set('Automatique', utils.booltostr(False))  # not in bdd
-        xml_element.set('Notes', str(ech.notes))
         if ech.periodicite is None or ech.periodicite == 'u':
             xml_element.set('Periodicite', str(0))
             xml_element.set('Intervalle_periodicite', '0')

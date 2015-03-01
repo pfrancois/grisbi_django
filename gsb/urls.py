@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from . import views, outils
 from .io import import_csv, export_csv
 from .io import import_titre_csv as import_titres
+from .io import export_xml
 from django.conf import settings
 # les vues generales
 urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),)
@@ -36,7 +37,9 @@ urlpatterns += patterns('gsb',
                         # export des ope titres
                         url(r'^options/export/csv/ope_titres$', export_csv.Export_ope_titre_csv.as_view(), name='export_ope_titre'),
                         # export des cours
-                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours')
+                        url(r'^options/export/csv/cours$', export_csv.Export_cours_csv.as_view(), name='export_cours'),
+                        # export xml
+                        url(r'^options/export/xml$', export_xml.Export_xml.as_view(), name='export_xml')
                        )
 
 # version grisbi 0.5.0

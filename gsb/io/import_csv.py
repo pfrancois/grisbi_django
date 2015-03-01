@@ -37,7 +37,13 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
             raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
-
+    @property
+    def date_val(self):
+        """obligatoire au format DD/MM/YYYY"""
+        try:
+            return utils.to_date(self.row['date_val'], "%d/%m/%Y")
+        except utils.FormatException:
+            raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
     @property
     def ib(self):
         """obligatoire"""
@@ -160,6 +166,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                             rapp = ope['notes'].split('>R')[1]
                             vir.notes = ope['notes'].split('>R')[0]
                             vir.dest.rapp = models.Rapp.objects.get_or_create(nom=rapp, defaults={'nom': rapp})[0]
+                        vir.date_val=ope['date_val']
                         vir.save()
                         self.opes.nb_created += 1
                         messages.success(self.request, u"virement ope: %s ligne %s" % (vir.origine, ligne))
@@ -199,7 +206,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         verif_format = False
         for row in fich:
             if not verif_format:  # on verifie a la premiere ligne
-                liste_colonnes = ['id', 'cpt', 'date', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
+                liste_colonnes = ['id', 'cpt', 'date','date_val', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
                 if settings.UTILISE_EXERCICES is True:
                     liste_colonnes.append('exercice')
                 colonnes_oublies = []
@@ -222,7 +229,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             ope['ligne'] = row.ligne
             # verification pour les lignes
             if row.monnaie != settings.DEVISE_GENERALE: # pragma: no cover
-                self.erreur.append(u"la devise du fichier n'est pas la meme que celui du fichier")
+                self.erreur.append(u"la devise du fichier n'est pas la même que celui de la base")
                 continue
             # compte
             nb_created_avant = self.comptes.nb_created
@@ -238,6 +245,11 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             # date
             try:
                 ope['date'] = row.date
+            except utils.FormatException as e:
+                self.erreur.append(u"%s" % e)
+                continue
+            try:
+                ope['date_val'] = row.date_val
             except utils.FormatException as e:
                 self.erreur.append(u"%s" % e)
                 continue
@@ -273,8 +285,6 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             ope['tiers_id'] = self.tiers.goc(row.tiers)
             # auto
             ope['automatique'] = row.automatique
-            # date_val
-            ope['date_val'] = row.date_val
             # ib
             if settings.UTILISE_IB is True:
                 ope['ib_id'] = self.ibs.goc(row.ib)

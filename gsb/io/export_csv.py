@@ -35,7 +35,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ('id', 'cpt', 'date', 'montant', 'r', 'p', 'moyen', 'cat', 'tiers', 'notes', 'ib', 'num_cheque', 'mois')
+    fieldnames = ['id', 'cpt', 'date','date_val', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
     titre = "Export des operations au format csv"
 
     def export(self, query):
@@ -52,8 +52,10 @@ class Export_ope_csv(Export_view_csv_base):
 
         for ope in query:
                 # id compte date montant
-            ligne = {'id': ope.id, 'cpt': ope.compte.nom,
+            ligne = {'id': ope.id,
+                     'cpt': ope.compte.nom,
                      'date': utils.datetostr(ope.date),
+                     'date_val': utils.datetostr(ope.date_val),
                      'montant': utils.floattostr(ope.montant, nb_digit=2)}
             # date
             # montant

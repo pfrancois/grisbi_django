@@ -1,15 +1,5 @@
 {% extends "generic.djhtm" %}{% comment %} coding: utf-8 {% endcomment %}
 {% load gsb_extras %}
 {% block content %}
-
-{% if form.errors %}<h1>Merci de corriger les erreurs suivantes</h1>
-{% else %}<h1>Remplissez les champs suivants</h1>{% endif %}
-<form id='form1' action="" method="post">
-    {% csrf_token %}
-    <fieldset class="operationMainTable">
-        <table>
-            {{ form }}
-        </table>
-    </fieldset>
-</form>
+<div><pre>{{ resultat|escape }}</pre>
 {% endblock %}
