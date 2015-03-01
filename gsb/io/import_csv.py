@@ -39,11 +39,13 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
             raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
     @property
     def date_val(self):
-        """obligatoire au format DD/MM/YYYY"""
+        """facultatif au format DD/MM/YYYY"""
         try:
             return utils.to_date(self.row['date_val'], "%d/%m/%Y")
         except utils.FormatException:
             raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
+        except KeyError:
+            return None
     @property
     def ib(self):
         """obligatoire"""
@@ -206,7 +208,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         verif_format = False
         for row in fich:
             if not verif_format:  # on verifie a la premiere ligne
-                liste_colonnes = ['id', 'cpt', 'date','date_val', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
+                liste_colonnes = ['id', 'cpt', 'date', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
                 if settings.UTILISE_EXERCICES is True:
                     liste_colonnes.append('exercice')
                 colonnes_oublies = []
