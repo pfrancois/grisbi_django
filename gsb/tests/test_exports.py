@@ -45,23 +45,23 @@ class Test_export(Test_view_base):
         ope_mere.save()
         rep = self.client.post(reverse('export_csv'),
                                data={'collection': (1, 2, 3, 4, 5, 6), "date_min": "2011-01-01", "date_max": "2014-09-24"})
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque;mois\r
-4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
-5;cpte1;11/08/2011;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;;08\r
-7;cpte1;11/08/2011;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;;08\r
-6;cpte1;21/08/2011;10,00;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;;08\r
-3;cpt_titre2;29/10/2011;-100,00;cpt_titre2201101;0;moyen_dep3;Opération sur titre;titre_ t2;20@5;;;10\r
-8;cpte1;30/10/2011;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;;10\r
-9;cptb3;30/10/2011;100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;;10\r
-2;cpt_titre2;30/11/2011;-1500,00;;0;moyen_dep3;Opération sur titre;titre_ t2;150@10;;;11\r
-1;cpt_titre1;18/12/2011;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;;12\r
-10;cpt_titre1;24/09/2012;-5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;5@1;;;09\r
-12;cpte1;24/09/2012;99,00;cpte1201101;0;moyen_rec1;cat1;tiers2;;;;09\r
-13;cpte1;24/09/2012;1,00;cpte1201101;0;moyen_rec1;cat2;tiers2;;;;09\r
-14;cpte1;18/12/2012;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;;12\r
-15;cptb3;18/12/2012;100,00;cpte1201101;0;moyen_vir4;Virement;cpte1 => cptb3;;;;12\r
-16;cpte1;18/12/2013;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;;12\r
-17;cptb3;18/12/2013;100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;;;;12\r
+        reponse_attendu = u"""id;cpt;date;date_val;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque\r
+4;cpte1;11/08/2011;;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;\r
+5;cpte1;11/08/2011;;10,00;cpte1201101;0;moyen_rec1;cat2;tiers1;;;\r
+7;cpte1;11/08/2011;;10,00;;1;moyen_rec1;cat1;tiers1;;ib1;\r
+6;cpte1;21/08/2011;;10,00;;0;moyen_rec1;cat2;tiers2;fusion avec ope1;ib2;\r
+3;cpt_titre2;29/10/2011;;-100,00;cpt_titre2201101;0;moyen_dep3;Opération sur titre;titre_ t2;20@5;;\r
+8;cpte1;30/10/2011;;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;\r
+9;cptb3;30/10/2011;;100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;;;\r
+2;cpt_titre2;30/11/2011;;-1500,00;;0;moyen_dep3;Opération sur titre;titre_ t2;150@10;;\r
+1;cpt_titre1;18/12/2011;;-1,00;;0;moyen_dep2;Opération sur titre;titre_ t1;1@1;;\r
+10;cpt_titre1;24/09/2012;;-5,00;;0;moyen_dep2;Opération sur titre;titre_ autre;5@1;;\r
+12;cpte1;24/09/2012;;99,00;cpte1201101;0;moyen_rec1;cat1;tiers2;;;\r
+13;cpte1;24/09/2012;;1,00;cpte1201101;0;moyen_rec1;cat2;tiers2;;;\r
+14;cpte1;18/12/2012;;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>Rcpte1201101;;\r
+15;cptb3;18/12/2012;;100,00;cpte1201101;0;moyen_vir4;Virement;cpte1 => cptb3;;;\r
+16;cpte1;18/12/2013;;-100,00;;0;moyen_vir4;Virement;cpte1 => cptb3;>P;;\r
+17;cptb3;18/12/2013;;100,00;;1;moyen_vir4;Virement;cpte1 => cptb3;;;\r
 """
         # on coupe ligne par ligne
         reponse_recu = unicode(rep.content, 'latin-1')
@@ -77,14 +77,14 @@ class Test_export(Test_view_base):
         # choix des parametre du test proprement dit
         view.debug = True
         # de la ligne d'export
-        data = u"4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08".split(";")
+        data = u"4;cpte1;11/08/2011;;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;".split(";")
         header = view.fieldnames
         final = dict()
         for d, h in zip(data, header):
             final[h] = d
             # on compare a ce qui est attendu
-        reponse_attendu = u"""id;cpt;date;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque;mois\r
-4;cpte1;11/08/2011;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;;08\r
+        reponse_attendu = u"""id;cpt;date;date_val;montant;r;p;moyen;cat;tiers;notes;ib;num_cheque\r
+4;cpte1;11/08/2011;;-100,00;cpte1201101;0;moyen_dep1;cat1;tiers1;;;\r
 """
         self.assertreponsequal(view.export_csv_view(data=[final]).content, reponse_attendu, unicode_encoding='cp1252', nom="csv_debug")
 

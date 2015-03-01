@@ -55,7 +55,7 @@ class Export_ope_csv(Export_view_csv_base):
             ligne = {'id': ope.id,
                      'cpt': ope.compte.nom,
                      'date': utils.datetostr(ope.date),
-                     'date_val': utils.datetostr(ope.date_val),
+                     'date_val': utils.datetostr(ope.date_val,defaut=""),
                      'montant': utils.floattostr(ope.montant, nb_digit=2)}
             # date
             # montant
@@ -91,7 +91,6 @@ class Export_ope_csv(Export_view_csv_base):
             ligne['ib'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['num_cheque'] = ope.num_cheque
-            ligne['mois'] = utils.datetostr(ope.date, param='%m')
             data.append(ligne)
 
         return self.export_csv_view(data=data)
