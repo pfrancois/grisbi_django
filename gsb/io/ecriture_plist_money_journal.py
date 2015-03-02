@@ -91,7 +91,7 @@ class Export_icompta_plist(object):
             #compte
             fichier = fichier.replace(u"{{compte_id}}", u"%s"%obj.compte_id)
             file_name = filename_for_moneyjournal()
-            messages.success(self.request, "dans fichier %s"%file_name)
+            messages.debug(self.request, "dans fichier %s"%file_name)
             with codecs.open(os.path.join(file_name), 'w', "utf-8") as f:
                 f.write(smart_unicode(fichier))
 
@@ -187,7 +187,7 @@ class Export_icompta_plist(object):
         cats = dict((ob.pk, ob) for ob in models.Cat.objects.order_by('id').all())
         cpts = dict((ob.pk, ob) for ob in models.Compte.objects.order_by('id').all())
         for element in objs_a_parcourir:
-            messages.info(self.request, u"%s"%element)
+            messages.debug(self.request, u"%s"%element)
             nb[element.datamodel] += 1
             if element.datamodel == "ope":
                 try:

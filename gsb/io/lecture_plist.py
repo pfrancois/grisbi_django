@@ -109,6 +109,7 @@ class collection_datas_decodes(object):
 
 def gestion_maj(request):
     """vue qui gere les maj"""
+    messages.set_level(request, messages.INFO)
     try:
         with transaction.atomic():
             config = models.Config.objects.get_or_create(id=1, defaults={'id': 1})[0]
@@ -128,8 +129,6 @@ def gestion_maj(request):
                 messages.success(request, u"Rien d'exporté")
             messages.info(request, "From iphone to PC")
             nb_import = import_items(lastmaj, request)
-            if nb_import["deja"] > 0:
-                messages.info(request, u"%s éléments du répertoire money journal déja mises à jour" % nb_import['deja'])
             if int(nb_import['ope']) > 0:
                 messages.success(request, u"opérations importées: %s" % nb_import['ope'])
             if nb_import['compte'] > 0:
@@ -137,7 +136,9 @@ def gestion_maj(request):
             if nb_import['cat'] > 0:
                 messages.success(request, u"catégories importées: %s" % nb_import['cat'])
             if int(nb_import['ope']) == 0 and nb_import['compte'] == 0 and nb_import['cat'] == 0:
-                messages.success(request, "Rien d'importé")
+                messages.success(request, u"Rien d'importé")
+            if nb_import["deja"] > 0:
+                messages.info(request, u"%s éléments du répertoire money journal déja mises à jour" % nb_import['deja'])
             #on gere ceux qu'on elimine car deja pris en en compte
 
             config.derniere_import_money_journal = utils.now()
@@ -359,7 +360,7 @@ def import_items(lastmaj, request=None):
 
     for element_unitaire in list_ele['ope'].values():
         ref = element_unitaire.__unicode__()
-        messages.info(request, u"gestion du fichier %s" % element_unitaire.fichier)
+        messages.debug(request, u"gestion du fichier %s" % element_unitaire.fichier)
         texte = ""
         if element_unitaire.cpt in list_ele['compte'] and list_ele['compte'][element_unitaire.cpt].action == 'c':
             compte = element_unitaire.cpt
@@ -391,7 +392,7 @@ def import_items(lastmaj, request=None):
                     montant=element_unitaire.montant,
                     lastupdate=element_unitaire.lastup
                 )
-                messages.success(request, u"opération %s créée" % ref)
+                messages.debug(request, u"opération %s créée" % ref)
             else:
                 raise Lecture_plist_exception(u"attention l'opération %s existe déja alors qu'on demande de la créer" % ref)
 
@@ -442,7 +443,7 @@ def import_items(lastmaj, request=None):
                     texte = texte[2:]
                 if texte[-1] == u"\n":
                     texte = texte[:-1]
-                messages.success(request, u"opération (%s) modifiée comme ca: %s" % (gsb.id, texte))
+                #messages.success(request, u"opération (%s) modifiée comme ca: %s" % (gsb.id, texte))
         if element_unitaire.action == 'd':
             try:
                 gsb = models.Ope.objects.get(id=element_unitaire.id)
