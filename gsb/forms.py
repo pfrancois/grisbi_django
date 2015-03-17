@@ -7,8 +7,6 @@ from django.utils.safestring import mark_safe
 from .models import (Compte, Cat, Moyen, Ope, Virement, Titre, Tiers, Ope_titre, Ib, Rapp)
 from . import widgets as gsb_field
 
-
-
 # import decimal
 ERROR_CSS_CLASS = ''
 REQUIRED_CSS_CLASS = 'required'

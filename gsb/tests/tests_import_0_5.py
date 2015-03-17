@@ -18,7 +18,7 @@ from ..models import Titre, Cours, Tiers, Banque, Ope, Echeance, Compte, Cat, Ib
 from ..io.import_gsb import import_gsb_050
 from ..io.import_base import ImportException
 
-#from operator import attrgetter
+# from operator import attrgetter
 from django.conf import settings
 import os.path
 import mock
@@ -71,7 +71,7 @@ class Test_import_gsb050_post(Tcd):
         self.assertEquals(obj.type, u'ACT')
         obj = Titre.objects.get(id=2)
         self.assertEquals(obj.nom, u'test1')
-        self.assertEquals(obj.isin, "ZZ_2"  )
+        self.assertEquals(obj.isin, "ZZ_2")
         self.assertEquals(obj.tiers.id, 6)
         self.assertEquals(obj.type, u'ZZZ')
         obj = Titre.objects.get(id=3)
@@ -81,12 +81,12 @@ class Test_import_gsb050_post(Tcd):
         self.assertEquals(obj.type, u'ZZZ')
         obj = Titre.objects.get(id=4)
         self.assertEquals(obj.nom, u'test3')
-        self.assertEquals(obj.isin, "ZZ_4"  )
+        self.assertEquals(obj.isin, "ZZ_4")
         self.assertEquals(obj.tiers.id, 8)
         self.assertEquals(obj.type, u'ACT')
         obj = Titre.objects.get(id=5)
         self.assertEquals(obj.nom, u'test4')
-        self.assertEquals(obj.isin, "ZZ_5"  )
+        self.assertEquals(obj.isin, "ZZ_5")
         self.assertEquals(obj.tiers.id, 9)
         self.assertEquals(obj.type, u'ZZZ')
         self.assertEquals(Titre.objects.get(isin=u'FR0000130809').nom, u'SG')

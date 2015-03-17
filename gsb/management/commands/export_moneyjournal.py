@@ -15,6 +15,7 @@ from ... import models
 from ... import utils
 from django.utils.encoding import smart_unicode
 
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list
 
@@ -58,11 +59,8 @@ def proc_sql_export(sql, log=None):
     date_max = models.Ope.objects.aggregate(element=models_agg.Max('date'))['element']
     for dt in rrule.rrule(rrule.MONTHLY, dtstart=date_min + relativedelta(day=1), until=date_max + relativedelta(day=1)):
         nb_bud += 1
-        cur.execute("insert into budget VALUES(:id,:month,:year,:amount,:lastupdate);", {'id': nb_bud,
-                                                                                         'month': dt.month,
-                                                                                         'year': dt.year,
-                                                                                         'amount': 0,
-                                                                                         'lastupdate': time.mktime(dt.timetuple())})
+        cur.execute("insert into budget VALUES(:id,:month,:year,:amount,:lastupdate);",
+                    {'id': nb_bud, 'month': dt.month, 'year': dt.year, 'amount': 0, 'lastupdate': time.mktime(dt.timetuple())})
     sql.commit()
     log('budget')
     # les categories
@@ -82,7 +80,7 @@ def proc_sql_export(sql, log=None):
             lastupdate DOUBLE);
         """)
     param = {}
-    list_cat_id=list(models.Cat.objects.order_by('id').values_list('id',flat=True))
+    list_cat_id = list(models.Cat.objects.order_by('id').values_list('id', flat=True))
     for cat in models.Cat.objects.order_by('nom'):
         param['id'] = cat.id
         param['name'] = smart_unicode(cat.nom)
@@ -129,7 +127,7 @@ def proc_sql_export(sql, log=None):
         i += 1
         param['id'] = cpt.id
         param['name'] = smart_unicode(cpt.nom)
-        param['symbol'] = i%9
+        param['symbol'] = i % 9
         param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = liste_compte.index(cpt.id)
         param['lastupdate'] = utils.datetotimestamp(cpt.lastupdate)
@@ -156,12 +154,11 @@ def proc_sql_export(sql, log=None):
                     repeat INTEGER,
                     place INTEGER,
                     lastupdate DOUBLE,
-                    day INTEGER);"""
-    )
+                    day INTEGER);""")
     param = {}
     nbope = 0
-    pk_avance=models.Cat.objects.get_or_create(nom='Avance',  defaults={"nom":'Avance'})[0]
-    pk_remboursement=models.Cat.objects.get_or_create(nom='remboursement',  defaults={"nom":'remboursement'})[0]
+    pk_avance = models.Cat.objects.get_or_create(nom='Avance', defaults={"nom": 'Avance'})[0]
+    pk_remboursement = models.Cat.objects.get_or_create(nom='remboursement', defaults={"nom": 'remboursement'})[0]
     for ope in models.Ope.objects.filter(date__year=utils.now().year).select_related('cat', "compte", "tiers", "moyen"):
         nbope += 1
         param['id'] = ope.id
@@ -169,7 +166,7 @@ def proc_sql_export(sql, log=None):
         param['payment'] = ope.compte.id
         param['category'] = utils.nulltostr(ope.cat.id)
         param['memo'] = ope.tiers.nom
-        param['amount'] = abs(float(utils.idtostr(ope, membre="montant",defaut=0)))
+        param['amount'] = abs(float(utils.idtostr(ope, membre="montant", defaut=0)))
         param['subcategory'] = None
         param['currency'] = 2
         param['date'] = 0
@@ -191,7 +188,7 @@ def proc_sql_export(sql, log=None):
         param['place'] = None
         param['day'] = ope.date.strftime('%Y%m%d')
         param['lastupdate'] = time.mktime(ope.lastupdate.timetuple())
-        if ope.cat.nom not in (u"Opération Ventilée","Virement"):
+        if ope.cat.nom not in (u"Opération Ventilée", "Virement"):
             if ope.montant > 0:
                 if ope.cat.type == 'r':
                     param['category'] = utils.nulltostr(ope.cat.id)

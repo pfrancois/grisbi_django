@@ -14,10 +14,7 @@ from django.shortcuts import render
 from django.conf import settings  # @Reimport
 from django.utils.translation import ugettext_lazy as _
 
-# from .models import Tiers, Titre, Cat, Ope, Banque, Cours, Ib, Exercice, Rapp, Moyen, Echeance, Ope_titre, Compte, Config
 from . import models as gsbmodels
-#from django.db.models import Q
-# import decimal
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import SimpleListFilter
 
@@ -30,7 +27,9 @@ from collections import OrderedDict
 from . import model_field
 from admin_exporter.actions import export_as_csv_action
 
-#-------------ici les classes generiques------
+# -------------ici les classes generiques------
+
+
 class Date_perso_filter(DateFieldListFilter):
     """filtre date perso
     """
@@ -103,7 +102,7 @@ class Rapprochement_filter(SimpleListFilter):
         if self.value() == 'rien':
             return queryset.filter(rapp__isnull=True, pointe=False)
         if self.value() == 'pr':
-            #comme il y a trois position, si l'on exclue les ni rapproche ni pointe on a les rapproche ou pointe
+            # comme il y a trois position, si l'on exclue les ni rapproche ni pointe on a les rapproche ou pointe
             return queryset.exclude(rapp__isnull=True, pointe=False)
         if self.value() == 'nrapp':
             return queryset.filter(rapp__isnull=True)
@@ -126,6 +125,9 @@ class Ouinonfilter(SimpleListFilter):
             ('1', u'oui'),
             ('0', u'non')
         )
+
+    def queryset(self, request, queryset):
+        raise NotImplementedError("il faut initialiser")
 
 
 class Mere_et_standalone_filter(Ouinonfilter):
@@ -162,10 +164,10 @@ class Verifmere_filter(Ouinonfilter):
 
     def queryset(self, request, queryset):
         if self.value() == '1':
-            messages.info(request, "attention sur l'ensemble de la base")
-            #les filles pointe alors que les mere non
+            messages.info(request, u"attention requête sur l'ensemble de la base")
+            # les filles pointe alors que les mere non
             merep = gsbmodels.Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
-            #les mere pointe alors que les filles non
+            # les mere pointe alors que les filles non
             fillep = gsbmodels.Ope.objects.filter(mere__isnull=False).filter(pointe=False).filter(mere__pointe=True).values_list('id',
                                                                                                                                  flat=True)
             listep = list(merep) + list(fillep)
@@ -261,7 +263,7 @@ class Ope_inline_admin(admin.TabularInline):
     related = ('compte', 'cat', 'ib')
     readonly = True
     orderby = ('-date',)
-    formset = Formsetreadonly  #afin de de ne pas pouvoir effacer un ope comme ca.
+    formset = Formsetreadonly  # afin de de ne pas pouvoir effacer un ope comme ca.
     can_delete = False
 
     def queryset(self, request):
@@ -320,10 +322,10 @@ class Cat_admin(Modeladmin_perso):
         """verification des permission"""
         if obj is None:
             return True
-        #si l'id fait partie des id decide en setting pas le droit
+        # si l'id fait partie des id decide en setting pas le droit
         if not obj.is_editable:
             return False
-        #sinon c'est possible
+        # sinon c'est possible
         return True
 
 
@@ -441,6 +443,7 @@ class Compte_admin(Modeladmin_perso):
             return False
         return True
 
+
 class Ope_changelist_Form(forms.ModelForm):
     class Meta(object):
         model = gsbmodels.Ope
@@ -459,8 +462,8 @@ class Ope_admin(Modeladmin_perso):
         'compte', ('date', Date_perso_filter), Rapprochement_filter, Sauf_visa_filter, Mere_et_standalone_filter, Verifmere_filter,
         'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
-    list_editable = ('montant', 'pointe', 'date','moyen')
-    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser',export_as_csv_action]
+    list_editable = ('montant', 'pointe', 'date', 'cat', 'moyen')
+    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser', export_as_csv_action]
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
@@ -747,8 +750,8 @@ class Ope_rapp(Ope_inline_admin):
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
-    list_display = ('id','nom', 'date')
-    list_editable=('nom',)
+    list_display = ('id', 'nom', 'date')
+    list_editable = ('nom',)
     inlines = [Ope_rapp]
     ordering = ('nom',)
 

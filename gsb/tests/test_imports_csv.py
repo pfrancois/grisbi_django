@@ -20,9 +20,9 @@ from .test_base import TestCase
 import gsb.utils as utils
 from gsb import models
 from gsb.io import import_base
-from  gsb.io import import_csv
-#import shutil
-__all__ = ['Test_import_csv1', 'Test_import_base','Test_import_csv2']
+from gsb.io import import_csv
+# import shutil
+__all__ = ['Test_import_csv1', 'Test_import_base', 'Test_import_csv2']
 
 
 class Test_import_abstract(TestCase):
@@ -35,186 +35,221 @@ class Test_import_abstract(TestCase):
 @override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv1(Test_import_abstract):
     """test import csv version sans jumelle ni ope mere bref en ne gerant pas les id mais gere les virement et les ope titre"""
+
     def setUp(self):
         super(Test_import_csv1, self).setUp()
-        self.cl=import_csv.Import_csv_ope_sans_jumelle_et_ope_mere()
+        self.cl = import_csv.Import_csv_ope_sans_jumelle_et_ope_mere()
         self.cl.request = self.request_get('outils')
-        self.maxDiff=None
+        self.maxDiff = None
 
     def test_import_isin_defaut(self):
-        self.assertEqual(import_base.isin_default(),"ZZ_1")
+        self.assertEqual(import_base.isin_default(), "ZZ_1")
 
     def test_import_erreur_tableau(self):
         self.cl.init_cache()
         self.cl.erreur = list()
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
-        self.maxDiff=None
-        cl=self.cl
+        self.maxDiff = None
+        cl = self.cl
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
-            cl.tableau(fich,self.moyen_virement)
-        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1",
-                                    u"erreur de date '' à la ligne 3",
-                                    u"attention il faut deux bouts à un virement ligne 4",
-                                    u'attention, virement impossible entre le même compte à la ligne 5',
-                                    u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                                    u"Ce tiers 't1' ne peut être un titre à la ligne 8"],cl.erreur)
-        self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type,'t')
+            cl.tableau(fich, self.moyen_virement)
+        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1", u"erreur de date '' à la ligne 3",
+                          u"attention il faut deux bouts à un virement ligne 4",
+                          u'attention, virement impossible entre le même compte à la ligne 5',
+                          u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
+                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"], cl.erreur)
+        self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
+
     def test_import_erreur_champ_incomplet(self):
         self.cl.init_cache()
         self.cl.erreur = list()
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
-        self.maxDiff=None
-        cl=self.cl
+        self.maxDiff = None
+        cl = self.cl
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
-            cl.tableau(fich,self.moyen_virement)
-        self.assertEqual(cl.erreur,[u"il manque la/les colonne(s) 'date'"])
+            cl.tableau(fich, self.moyen_virement)
+        self.assertEqual(cl.erreur, [u"il manque la/les colonne(s) 'date'"])
+
     def test_import_moyen_par_defaut(self):
         self.cl.init_cache()
         self.cl.erreur = list()
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
-        self.maxDiff=None
-        cl=self.cl
+        self.maxDiff = None
+        cl = self.cl
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_2_moyens.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
-            cl.tableau(fich,self.moyen_virement)
-        attendu=[
-            #depense de 100E non p , rapproche, sans notes
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100'), 'date_val': None, 'tiers_id': 257, 'ligne': 1, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
-            #recette de 10E rapproche
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 4, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
-            ]
-        self.assertEqual(attendu,cl.opes.created_items)
+            cl.tableau(fich, self.moyen_virement)
+        attendu = [  # depense de 100E non p , rapproche, sans notes
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100'), 'date_val': None, 'tiers_id': 257,
+                      'ligne': 1, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': u'12345678',
+                      'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74,
+                      'ib_id': None},  # recette de 10E rapproche
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('10'), 'date_val': None, 'tiers_id': 257,
+                      'ligne': 2, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 4,
+                      'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None}, ]
+        self.assertEqual(attendu, cl.opes.created_items)
+
     def test_erreur_import_file(self):
-        cl=self.cl
-        nomfich=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")
-        retour=cl.import_file(nomfich)
-        self.assertEqual(retour,False)
-        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1",
-                                    u"erreur de date '' à la ligne 3",
-                                    u"attention il faut deux bouts à un virement ligne 4",
-                                    u'attention, virement impossible entre le même compte à la ligne 5',
-                                    u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                                    u"Ce tiers 't1' ne peut être un titre à la ligne 8"],cl.erreur)
-        self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type,'t')
+        cl = self.cl
+        nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")
+        retour = cl.import_file(nomfich)
+        self.assertEqual(retour, False)
+        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1", u"erreur de date '' à la ligne 3",
+                          u"attention il faut deux bouts à un virement ligne 4",
+                          u'attention, virement impossible entre le même compte à la ligne 5',
+                          u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
+                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"], cl.erreur)
+        self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
+
     def test_import_file_vir(self):
-        cl=self.cl
-        nomfich=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_3.csv")
-        retour=cl.import_file(nomfich)
-        self.assertEqual(retour,True)
-        self.assertEqual(models.Ope.objects.count(),18)
-        #rine/rien
-        self.assertEqual(models.Ope.objects.get(pk=1).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=1).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=2).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=2).rapp_id,None)
-        #rien/rapp
-        self.assertEqual(models.Ope.objects.get(pk=3).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=3).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=4).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=4).rapp.nom,"cpte1201101")
-        #rien/pointee
-        self.assertEqual(models.Ope.objects.get(pk=5).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=5).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=6).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=6).rapp_id,None)
-        #rapp/rien
-        self.assertEqual(models.Ope.objects.get(pk=7).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=7).rapp.nom,"Rapp")
-        self.assertEqual(models.Ope.objects.get(pk=8).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=8).rapp_id,None)
-        #rapp/rapp
-        self.assertEqual(models.Ope.objects.get(pk=9).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=9).rapp.nom,"Rapp")
-        self.assertEqual(models.Ope.objects.get(pk=10).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=10).rapp.nom,"cpte1201101")
-        #rapp/pointee
-        self.assertEqual(models.Ope.objects.get(pk=11).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=11).rapp.nom,"Rapp")
-        self.assertEqual(models.Ope.objects.get(pk=12).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=12).rapp_id,None)
-        #pointee/rien
-        self.assertEqual(models.Ope.objects.get(pk=13).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=13).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=14).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=14).rapp_id,None)
-        #pointee/rapp
-        self.assertEqual(models.Ope.objects.get(pk=15).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=15).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=16).pointe,False)
-        self.assertEqual(models.Ope.objects.get(pk=16).rapp.nom,"cpte1201101")
+        cl = self.cl
+        nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_3.csv")
+        retour = cl.import_file(nomfich)
+        self.assertEqual(retour, True)
+        self.assertEqual(models.Ope.objects.count(), 18)
+        # rine/rien
+        self.assertEqual(models.Ope.objects.get(pk=1).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=1).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=2).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=2).rapp_id, None)
+        # rien/rapp
+        self.assertEqual(models.Ope.objects.get(pk=3).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=3).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=4).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=4).rapp.nom, "cpte1201101")
+        # rien/pointee
+        self.assertEqual(models.Ope.objects.get(pk=5).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=5).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=6).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=6).rapp_id, None)
+        # rapp/rien
+        self.assertEqual(models.Ope.objects.get(pk=7).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=7).rapp.nom, "Rapp")
+        self.assertEqual(models.Ope.objects.get(pk=8).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=8).rapp_id, None)
+        # rapp/rapp
+        self.assertEqual(models.Ope.objects.get(pk=9).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=9).rapp.nom, "Rapp")
+        self.assertEqual(models.Ope.objects.get(pk=10).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=10).rapp.nom, "cpte1201101")
+        # rapp/pointee
+        self.assertEqual(models.Ope.objects.get(pk=11).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=11).rapp.nom, "Rapp")
+        self.assertEqual(models.Ope.objects.get(pk=12).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=12).rapp_id, None)
+        # pointee/rien
+        self.assertEqual(models.Ope.objects.get(pk=13).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=13).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=14).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=14).rapp_id, None)
+        # pointee/rapp
+        self.assertEqual(models.Ope.objects.get(pk=15).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=15).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=16).pointe, False)
+        self.assertEqual(models.Ope.objects.get(pk=16).rapp.nom, "cpte1201101")
         #pointee/pointee
-        self.assertEqual(models.Ope.objects.get(pk=17).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=17).rapp_id,None)
-        self.assertEqual(models.Ope.objects.get(pk=18).pointe,True)
-        self.assertEqual(models.Ope.objects.get(pk=18).rapp_id,None)
-        self.assertEqual(models.Rapp.objects.count(),2)
-        self.assertmessagecontains(self.cl.request,"virement ope: (17) le 09/12/2013 : -100.00 EUR a cpte1 => cptb3 cpt: cpte1 ligne 9")
-        self.assertmessagecontains(self.cl.request,"virement ope: (18) le 09/12/2013 : 100.00 EUR a cpte1 => cptb3 cpt: cptb3 ligne 9")
+        self.assertEqual(models.Ope.objects.get(pk=17).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=17).rapp_id, None)
+        self.assertEqual(models.Ope.objects.get(pk=18).pointe, True)
+        self.assertEqual(models.Ope.objects.get(pk=18).rapp_id, None)
+        self.assertEqual(models.Rapp.objects.count(), 2)
+        self.assertmessagecontains(self.cl.request,
+                                   "virement ope: (17) le 09/12/2013 : -100.00 EUR a cpte1 => cptb3 cpt: cpte1 ligne 9")
+        self.assertmessagecontains(self.cl.request,
+                                   "virement ope: (18) le 09/12/2013 : 100.00 EUR a cpte1 => cptb3 cpt: cptb3 ligne 9")
 
     def test_import_file_ope_titre(self):
-        cl=self.cl
-        nomfich=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_4.csv")
-        retour=cl.import_file(nomfich)
-        self.assertEqual(retour,True)
-        self.assertEqual(models.Ope.objects.count(),4)
-        self.assertmessagecontains(self.cl.request,"ope_titre: (1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1 ligne 1")
-        self.assertmessagecontains(self.cl.request,"ope_titre: (2) le 24/09/2012 : -5 EUR a titre_ autre cpt: cpt_titre1 ligne 2")
-        self.assertmessagecontains(self.cl.request,"ope_titre: (3) le 25/09/2012 : 5.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
-        self.assertmessagecontains(self.cl.request,"ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
-        self.assertmessagecontains(self.cl.request,u"attention, fausse opération sur titre ligne 4")
-        self.assertmessagecontains(self.cl.request,"impossible de vendre car pas de titre en portefeuille ligne 5")
+        cl = self.cl
+        nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_4.csv")
+        retour = cl.import_file(nomfich)
+        self.assertEqual(retour, True)
+        self.assertEqual(models.Ope.objects.count(), 4)
+        self.assertmessagecontains(self.cl.request,
+                                   "ope_titre: (1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1 ligne 1")
+        self.assertmessagecontains(self.cl.request,
+                                   "ope_titre: (2) le 24/09/2012 : -5 EUR a titre_ autre cpt: cpt_titre1 ligne 2")
+        self.assertmessagecontains(self.cl.request,
+                                   "ope_titre: (3) le 25/09/2012 : 5.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
+        self.assertmessagecontains(self.cl.request,
+                                   "ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
+        self.assertmessagecontains(self.cl.request, u"attention, fausse opération sur titre ligne 4")
+        self.assertmessagecontains(self.cl.request, "impossible de vendre car pas de titre en portefeuille ligne 5")
 
     def test_import_tableau(self):
         self.cl.init_cache()
         self.cl.erreur = list()
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
-        self.maxDiff=None
-        cl=self.cl
+        self.maxDiff = None
+        cl = self.cl
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_1.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
-            cl.tableau(fich,self.moyen_virement)
-        attendu=[
-            #depense de 100E non p , rapproche, sans notes
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 1, 'rapp_id': 1, 'automatique': False,  'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': None},
-            #recette de 10E rapproche
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 2, 'rapp_id': 1, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
-            ##recette poitee de 10E
-            {'ope_titre': False, 'pointe': True, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 3, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74, 'ib_id': 1},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 4, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 21), 'notes': u'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 5, 'rapp_id': 2, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 10, 29), 'titre_id': 1, 'notes': u'20@5', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 6, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2011, 10, 30), 'notes': '', 'cat_id': 65, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1500.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 7, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 11, 30), 'titre_id': 1, 'notes': u'150@10', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1.00'), 'date_val': None, 'tiers_id': 261, 'ligne': 8, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2011, 12, 18), 'titre_id': 2, 'notes': u'1@1', 'cat_id': 64, 'ib_id': None},
-            {'ope_titre': True, 'pointe': False, 'montant': Decimal('-5.00'), 'date_val': None, 'tiers_id': 262, 'ligne': 9, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2012, 9, 24), 'titre_id': 3, 'notes': u'5@1', 'cat_id':64, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('99.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 10, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 74, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('1.00'), 'date_val': None, 'tiers_id': 258, 'ligne': 11, 'rapp_id': None, 'automatique': False,  'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 75, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 12, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2012, 12, 18), 'notes': u'>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
-            {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 13, 'dest_id': 3, 'rapp_id': None, 'automatique': False,  'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2013, 12, 18), 'notes': u'>P', 'cat_id': 65, 'ib_id': None}
-        ]
-        self.assertEqual(attendu,cl.opes.created_items)
+            cl.tableau(fich, self.moyen_virement)
+        attendu = [  # depense de 100E non p , rapproche, sans notes
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 1, 'rapp_id': 1, 'automatique': False,
+                      'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11),
+                      'notes': '', 'cat_id': 74, 'ib_id': None},  # recette de 10E rapproche
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257,
+                      'ligne': 2, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 8,
+                      'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 75, 'ib_id': None},
+                     ##recette poitee de 10E
+                     {'ope_titre': False, 'pointe': True, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257,
+                      'ligne': 3, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '',
+                      'cat_id': 74, 'ib_id': 1},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 258,
+                      'ligne': 4, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 21),
+                      'notes': u'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
+                     {'ope_titre': True, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 5, 'rapp_id': 2, 'automatique': False,
+                      'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 10, 29),
+                      'titre_id': 1, 'notes': u'20@5', 'cat_id': 64, 'ib_id': None},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 6, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
+                      'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2011, 10, 30), 'notes': '',
+                      'cat_id': 65, 'ib_id': None},
+                     {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1500.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 7, 'rapp_id': None, 'automatique': False,
+                      'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 11, 30),
+                      'titre_id': 1, 'notes': u'150@10', 'cat_id': 64, 'ib_id': None},
+                     {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1.00'), 'date_val': None, 'tiers_id': 261,
+                      'ligne': 8, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2011, 12, 18),
+                      'titre_id': 2, 'notes': u'1@1', 'cat_id': 64, 'ib_id': None},
+                     {'ope_titre': True, 'pointe': False, 'montant': Decimal('-5.00'), 'date_val': None, 'tiers_id': 262,
+                      'ligne': 9, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2012, 9, 24),
+                      'titre_id': 3, 'notes': u'5@1', 'cat_id': 64, 'ib_id': None},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('99.00'), 'date_val': None, 'tiers_id': 258,
+                      'ligne': 10, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '',
+                      'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 74,
+                      'ib_id': None},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('1.00'), 'date_val': None, 'tiers_id': 258,
+                      'ligne': 11, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '',
+                      'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 75,
+                      'ib_id': None},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 12, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
+                      'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2012, 12, 18),
+                      'notes': u'>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
+                     {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 13, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
+                      'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2013, 12, 18),
+                      'notes': u'>P', 'cat_id': 65, 'ib_id': None}]
+        self.assertEqual(attendu, cl.opes.created_items)
+
 
 @override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv2(Test_import_abstract):
-
     def test_import_csv_simple_ok_global(self):
         """test d'integration"""
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export.csv")) as file_test:
             r = self.client.post(reverse('import_csv_ope_simple'), {'nom_du_fichier': file_test})
             # on efface les fichier crée par le test
-            for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')): 
+            for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):
                 os.remove(name)
         self.assertEqual(r.status_code, 302)
         self.assertQueryset_list(models.Tiers.objects.all(),
-                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'secu', u'titre_ t1', u'titre_ t2'],
-                                 'nom')  # ne pas oublier le tiers cree automatiquement
+                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'secu', u'titre_ t1',
+                                  u'titre_ t2'], 'nom')  # ne pas oublier le tiers cree automatiquement
         self.assertEquals(models.Ope.objects.all().count(), 16)
         self.assertQueryset_list(models.Cat.objects.all(),
-                                 [u'cat1', u'cat2',
-                                  u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
-                                  u"Revenus de placements:Plus-values", u'Impôts',
-                                  u'Revenus de placements:interets', u'Virement', u"Non affecté", u"Avance", u"Remboursement"],
+                                 [u'cat1', u'cat2', u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
+                                  u"Revenus de placements:Plus-values", u'Impôts', u'Revenus de placements:interets',
+                                  u'Virement', u"Non affecté", u"Avance", u"Remboursement"],
                                  'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["cpt_titre2201101", "cpte1201101"], "nom")
         self.assertEqual(models.Rapp.objects.get(nom="cpte1201101").solde, 10)
@@ -225,6 +260,7 @@ class Test_import_csv2(Test_import_abstract):
         self.assertEqual(models.Ope.objects.get(id=1).rapp.id, 1)
         self.assertEqual(models.Ope.objects.get(id=3).ib.nom, 'ib1')
         self.assertEqual(models.Ope.objects.get(id=1).num_cheque, '12345678')
+
 
 class Test_import_base(Test_import_abstract):
     def test_import_base(self):
@@ -299,7 +335,7 @@ class Test_import_base(Test_import_abstract):
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'c'})
         with self.assertRaises(KeyError):
-            _=cats.id['test']
+            _ = cats.id['test']
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1216, 'type': 'c'})
 
@@ -364,7 +400,7 @@ class Test_import_base(Test_import_abstract):
 
     def test_moyen_cache7(self):
         cache = import_base.Moyen_cache(self.request_get("/outils"))
-        self.assertEqual(cache.goc(obj={'nom': 't', 'type':'d', 'id': 255}), 255)
+        self.assertEqual(cache.goc(obj={'nom': 't', 'type': 'd', 'id': 255}), 255)
 
     def test_ib_cache(self):
         ibs = import_base.IB_cache(self.request_get("/outils"))
@@ -522,8 +558,9 @@ class Test_import_base(Test_import_abstract):
         self.assertEqual(cache.goc("les2", -10), 8)
         self.assertEqual(cache.goc("test", 10), settings.MD_CREDIT)
         self.assertEqual(cache.goc("test", -10), settings.MD_DEBIT)
+
     def test_ope_cache(self):
         opes = import_base.Ope_cache(self.request_get("/outils"))
         opes.create("opes")
-        self.assertEqual(opes.created_items,["opes",])
-        self.assertEqual(opes.nb_created,1)
+        self.assertEqual(opes.created_items, ["opes", ])
+        self.assertEqual(opes.nb_created, 1)

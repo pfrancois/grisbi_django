@@ -10,8 +10,8 @@ from ..models import (Compte, Ope, Tiers, Cat, Moyen, Echeance, Ib, Banque, Exer
 # import decimal
 # import datetime
 from django.conf import settings  # @Reimport
-#from django.shortcuts import render_to_response
-#from django.template import RequestContext
+# from django.shortcuts import render_to_response
+# from django.template import RequestContext
 
 
 from lxml import etree as et
@@ -60,7 +60,7 @@ def _export(request):
     ordre_du_tri_des_moyens = '/'.join([str(o.id) for o in Moyen.objects.order_by('id')])
     moyens = Moyen.objects.all().order_by('id')
 
-    #####comptes###
+    # #### comptes###
     xml_comptes = et.SubElement(xml_root, "Comptes")
     xml_generalites = et.SubElement(xml_comptes, "Generalites")
     et.SubElement(xml_generalites, "Ordre_des_comptes").text = '-'.join(["%s" % i for i in Compte.objects.all().values_list('id', flat=True)])

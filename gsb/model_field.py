@@ -78,7 +78,7 @@ class uuidfield(models.CharField):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):# @UnusedVariable
+    def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):  # @UnusedVariable
         kwargs['max_length'] = 36
         self.auto = auto
         self.add = add

@@ -62,11 +62,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, 'grisbi.sqlite'), # Or path to database file if using sqlite3.
-        'USER': 'root', # Not used with sqlite3.
-        'PASSWORD': '', # Not used with sqlite3.
-        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        'NAME': os.path.join(PROJECT_PATH, 'grisbi.sqlite'),  # Or path to database file if using sqlite3.
+        'USER': 'root',  # Not used with sqlite3.
+        'PASSWORD': '',  # Not used with sqlite3.
+        'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
     }
 }
 if 'testserver' in sys.argv:
@@ -281,7 +281,7 @@ LOGGING = {
             # will need perms at location below:
             'filename': os.path.join(PROJECT_PATH, 'log', 'gsb_log.log'),
             'when': 'D',
-            'backupCount': '30', # approx 1 month worth
+            'backupCount': '30',  # approx 1 month worth
         },
     },
     'loggers': {

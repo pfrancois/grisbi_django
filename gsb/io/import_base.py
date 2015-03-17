@@ -18,9 +18,11 @@ from .. import models
 from .. import views
 from .. import utils
 
+
 def isin_default():
-    nb = max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'], 0)+1
-    return "ZZ_%s"%nb
+    nb = max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'], 0) + 1
+    return "ZZ_%s" % nb
+
 
 class ImportException(utils.utils_Exception):
     pass
@@ -132,7 +134,7 @@ class Table(object):
     """obj avec cache
     c'est l'object abstract sur lequel tt les autres se reposes
     """
-    #nom de l'objet effectif
+    # nom de l'objet effectif
     element = None
     #si readonly, pas possible d'en ceer de nouveau
     readonly = False
@@ -168,7 +170,7 @@ class Table(object):
         #verif qu'il n'y a pas de nom vide ou d'objet
         #indispensable car utilisable par deux possiblite
         if nom == "" or nom is None:
-            if not obj is None:
+            if obj is not None:
                 nom = obj['nom']
             else:
                 return None
@@ -239,7 +241,7 @@ class Cat_cache(Table):
                 {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
                 {'nom': u"Non affecté", 'defaults': {'nom': u"Non affecté", 'type': 'd'}},
                 {'nom': u"Avance", 'defaults': {'nom': u"Avance", 'type': 'd'}},
-                {'nom': u"Remboursement", 'defaults': {'nom': u"Remboursement", 'type': 'r'}},]
+                {'nom': u"Remboursement", 'defaults': {'nom': u"Remboursement", 'type': 'r'}}, ]
 
     def arg_def(self, nom, obj=None):
         """definition des argument par defaut
@@ -252,21 +254,22 @@ class Cat_cache(Table):
 
 class Moyen_cache(Table):
     element = models.Moyen
+
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
                 {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
                 {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
-                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'd'}},
-               ]
+                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'd'}}, ]
 
     def goc(self, nom="", obj=None, montant=-1):
-        #pas besoin d'argdef car comme on redefini cette methode
+        # pas besoin d'argdef car comme on redefini cette methode
         if obj is not None:
             return super(Moyen_cache, self).goc('', obj=obj)
         if montant > 0:
             return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "r"})
         else:
             return super(Moyen_cache, self).goc('', obj={"nom": nom, "type": "d"})
+
 
 class IB_cache(Table):
     element = models.Ib
@@ -280,6 +283,7 @@ class IB_cache(Table):
 
 class Compte_cache(Table):
     element = models.Compte
+
     def arg_def(self, nom, obj=None):
         if obj is None:
             return {"nom": nom, "type": 'b', 'moyen_credit_defaut_id': settings.MD_CREDIT, 'moyen_debit_defaut_id': settings.MD_DEBIT}
@@ -325,7 +329,7 @@ class Titre_cache(Table):
 
     def arg_def(self, nom, obj=None):
         if obj is None:
-            return {"nom": nom, 'isin':isin_default(), "type": "ZZZ"}
+            return {"nom": nom, 'isin': isin_default(), "type": "ZZZ"}
         else:
             return obj
 
@@ -347,8 +351,8 @@ class Cours_cache(Table):
                 el = models.Cours.objects.get(date=date, titre_id=titre_id)
                 pk = el.id
                 if el.valeur != montant:
-                    raise ImportException(
-                        u'difference de montant %s et %s pour le titre %s à la date %s' % (el.valeur, montant, el.titre.nom, date))
+                    raise ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (
+                        el.valeur, montant, el.titre.nom, date))
             except self.element.DoesNotExist:
                 arg_def = {'titre_id': titre_id, 'date': date, "valeur": montant}
                 el = models.Cours.objects.create(**arg_def)
@@ -455,7 +459,9 @@ class Import_base(views.Myformview):
         nomfich = form.cleaned_data['nom_du_fichier'].name
         nomfich, file_extension = os.path.splitext(nomfich)
         if file_extension not in self.extensions:
-            messages.error(self.request, u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (file_extension, self.extensions))
+            messages.error(self.request,
+                           u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (
+                               file_extension, self.extensions))
             return self.form_invalid(form)
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload',
                                "%s-%s.%s" % (nomfich, time.strftime("%Y-%b-%d_%H-%M-%S"), file_extension[1:]))

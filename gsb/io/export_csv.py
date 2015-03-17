@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 from django.http import HttpResponse
-
 from .. import models
 from .. import utils
 # pour les vues
 from . import export_base
 from ..models import Ope_titre, Compte
-#from django.core import exceptions as django_exceptions
 from ..utils import Excel_csv
 from .. import widgets as gsb_field
 
 
 class Export_view_csv_base(export_base.ExportViewBase):
+    def export(self, query):
+        raise NotImplementedError("il faut initialiser")
+
     extension_file = "csv"
     fieldnames = None
     csv_dialect = None
@@ -35,7 +35,7 @@ class Export_ope_csv(Export_view_csv_base):
     form_class = export_base.Exportform_ope
     model_initial = models.Ope
     nomfich = "export_ope"
-    fieldnames = ['id', 'cpt', 'date','date_val', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
+    fieldnames = ['id', 'cpt', 'date', 'date_val', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib", "num_cheque"]
     titre = "Export des operations au format csv"
 
     def export(self, query):
@@ -43,11 +43,11 @@ class Export_ope_csv(Export_view_csv_base):
         fonction principale
         """
         data = []
-        #on exclue les ope mere car cela fait doublon
+        # on exclue les ope mere car cela fait doublon
         query = query.exclude(filles_set__isnull=False)
         query = query.order_by('date', 'id')
-        #initialement on elemine la seconde jambe des virement mais en fait il faut pas le faire car sinon pour l'autre jambe c'est pas bon
-        #query = query.exclude(jumelle__isnull=False, montant__gte=0)
+        # initialement on elemine la seconde jambe des virement mais en fait il faut pas le faire car sinon pour l'autre jambe c'est pas bon
+        # query = query.exclude(jumelle__isnull=False, montant__gte=0)
         query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
 
         for ope in query:
@@ -55,7 +55,7 @@ class Export_ope_csv(Export_view_csv_base):
             ligne = {'id': ope.id,
                      'cpt': ope.compte.nom,
                      'date': utils.datetostr(ope.date),
-                     'date_val': utils.datetostr(ope.date_val,defaut=""),
+                     'date_val': utils.datetostr(ope.date_val, defaut=""),
                      'montant': utils.floattostr(ope.montant, nb_digit=2)}
             # date
             # montant
@@ -75,8 +75,8 @@ class Export_ope_csv(Export_view_csv_base):
             # tiers
             ligne['tiers'] = utils.idtostr(ope.tiers, defaut='', membre="nom")
             ligne['notes'] = ope.notes
-            #phase de verif des notes
-            #si c'est une ope jumelle pointe ou rapproche on rajoute une note
+            # phase de verif des notes
+            # si c'est une ope jumelle pointe ou rapproche on rajoute une note
             if ope.jumelle is not None:
                 if ope.jumelle.rapp is not None:  # jumelle rapprochee
                     if '>R' not in ligne['notes']:
@@ -87,14 +87,13 @@ class Export_ope_csv(Export_view_csv_base):
                 if ope.montant < 0:
                     ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
                 else:
-                    ligne['tiers'] = "%s => %s" % ( ope.jumelle.compte.nom, ope.compte.nom)
+                    ligne['tiers'] = "%s => %s" % (ope.jumelle.compte.nom, ope.compte.nom)
             ligne['ib'] = utils.idtostr(ope.ib, defaut='', membre="nom")
             # le reste
             ligne['num_cheque'] = ope.num_cheque
             data.append(ligne)
 
         return self.export_csv_view(data=data)
-
 
 
 class Exportform_cours(export_base.Exportform_ope):

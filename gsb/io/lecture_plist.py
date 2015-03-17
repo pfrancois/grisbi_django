@@ -19,8 +19,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from .ecriture_plist_money_journal import Export_icompta_plist
 
-#  class Gestion_maj_money_journal(import_base):
-#   pass
+
 class Lecture_plist_exception(utils.utils_Exception):
     pass
 
@@ -80,15 +79,15 @@ class collection_datas_decodes(object):
                 i.lastup = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime.fromtimestamp(i.obj['lastUpdate'])) if i.obj['lastUpdate'] != 0 else self.datemaj
                 i.id = i.obj['pk']
                 if i.is_ope:
-                    i.sens_element = self.sens[i.obj['type']]#depense recette ou virement
+                    i.sens_element = self.sens[i.obj['type']]  # depense recette ou virement
                     i.cat = i.obj['category']
-                    i.automatique = False  #ameliorer la gestion du truc
+                    i.automatique = False  # ameliorer la gestion du truc
                     i.cpt = i.obj['payment']
                     i.date = i.obj['day']
                     if i.sens_element == 'r':
                         i.montant = decimal.Decimal(i.obj['amount'])
                     else:
-                        i.montant = decimal.Decimal(str(round(i.obj['amount'],2))) * -1
+                        i.montant = decimal.Decimal(str(round(i.obj['amount'], 2))) * -1
                     try:
                         i.tiers = i.obj['memo']['NS.string']
                     except TypeError:
@@ -167,7 +166,7 @@ def simp_nskeyedarchiver(top, objects, level, filtre=False):
                 temp = objects['$objects'][element['CF$UID']]
             else:
                 temp = element
-            if hasattr(temp, '__iter__'):  #c'est soir une liste soit un dict
+            if hasattr(temp, '__iter__'):  # c'est soir une liste soit un dict
                 temp = simp_nskeyedarchiver(temp, objects, level + 1, filtre)
             if isinstance(temp, dict) and "$class" in temp and temp["$class"] == "Day":
                 temp = datetime.date(temp['year'], temp['month'], temp['day'])
@@ -194,7 +193,7 @@ def check():
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         datas = collection_datas_decodes(fichier)
         for el in datas.list_el:
-            if el.device == 'tototototo':  #c'est une operation provenant de ce pc
+            if el.device == 'tototototo':  # c'est une operation provenant de ce pc
                 continue
             if el.lastup > lastmaj and el.sens_element != "d":
                 return True
@@ -217,7 +216,7 @@ def import_items(lastmaj, request=None):
     #on parcourt les fichier
     for fichier in utils.find_files(os.path.join(settings.DIR_DROPBOX, 'Applications', 'Money Journal', 'log')):
         datas = collection_datas_decodes(fichier)
-        if datas.device == settings.CODE_DEVICE_POCKET_MONEY:  #c'est une operation provenant de ce pc
+        if datas.device == settings.CODE_DEVICE_POCKET_MONEY:  # c'est une operation provenant de ce pc
             nb['deja'] += 1
             continue
         for el in datas.list_el:
@@ -230,7 +229,7 @@ def import_items(lastmaj, request=None):
             if el.action == 'c':
                 nb[el.classe] += 1
                 list_ele[el.classe][el.id] = el
-            if el.action == "m":  #modif
+            if el.action == "m":  # modif
                 if el.id in list_ele[el.classe].keys():
                     if list_ele[el.classe][el.id].action == 'c':
                         list_ele[el.classe][el.id] = el
@@ -266,7 +265,7 @@ def import_items(lastmaj, request=None):
                 messages.success(request, u"catégorie %s créée" % ref)
             else:
                 raise Lecture_plist_exception(u"attention la catégorie %s existe déja alors qu'on demande de la créer" % ref)
-        if element_unitaire.action == "m":  #modif
+        if element_unitaire.action == "m":  # modif
             try:
                 cat = models.Cat.objects.get(id=element_unitaire.id)
             except models.Cat.DoesNotExist:

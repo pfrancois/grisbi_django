@@ -15,9 +15,12 @@ import datetime
 
 #dump les decimal en string
 #https://code.google.com/p/google-app-engine-django/source/browse/trunk/appengine_django/serializer/pyyaml.py?r=97
+
+
 class DjangoSafeDumper_perso(SafeDumper):
     def represent_decimal(self, data):
         return self.represent_scalar('tag:yaml.org,2002:str', str(data))
+
     def represent_time(self, data):
         value = '1970-01-01 %s' % unicode(data.isoformat())
         return self.represent_scalar('tag:yaml.org,2002:timestamp', value)
@@ -48,6 +51,7 @@ class Serializer(YamlSerializer):
 
     def end_serialization(self):
         yaml.dump(self.objects, self.stream, Dumper=DjangoSafeDumper_perso, default_flow_style=False, **self.options)
+
 
 def Deserializer(stream_or_string, **options):
     """

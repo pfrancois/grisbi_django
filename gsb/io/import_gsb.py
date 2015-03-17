@@ -361,8 +361,8 @@ def import_gsb_050(nomfich, request, efface_table=True):
             percent += 1
         ope = Ope(compte=ope_cpt,
                   date=ope_date,
-                  date_val=ope_date_val, # date de valeur
-                  montant=ope_montant, # montant
+                  date_val=ope_date_val,  # date de valeur
+                  montant=ope_montant,  # montant
                  )  # on cree toujours car la proba que ce soit un doublon est bien bien plus faible que celle que ce soit une autre
         compte_ferme = not ope.compte.ouvert
         if compte_ferme:

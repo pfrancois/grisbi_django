@@ -93,7 +93,7 @@ class Readonlywidget(forms.Widget):
         return mark_safe("<div>%s%s</div>" % (hidden, text))
 
     # noinspection PyUnusedLocal
-    def _has_changed(self, initial, data):# @UnusedVariable
+    def _has_changed(self, initial, data):  # @UnusedVariable
         return False
 
 

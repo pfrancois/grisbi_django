@@ -41,7 +41,7 @@ class MessagesNode(template.Node):
 
 # noinspection PyUnusedLocal
 @register.tag(name='render_messages')
-def render_messages(parser, token):# @UnusedVariable
+def render_messages(parser, token):  # @UnusedVariable
     parts = token.split_contents()
     if len(parts) != 2:
         raise template.TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])

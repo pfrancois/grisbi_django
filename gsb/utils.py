@@ -339,7 +339,7 @@ def idtostr(obj, membre='id', defaut='0'):
         if getattr(obj, membre) is not None:
             retour = unicode(getattr(obj, membre))
             if retour != '':
-                if retour[-1] == ":":  #cas des categories
+                if retour[-1] == ":":  # cas des categories
                     retour = retour[0:-1]
         else:
             retour = unicode(defaut)
@@ -416,7 +416,6 @@ def is_onexist(objet, attribut):
     except ObjectDoesNotExist:
         return False
 
-
         # switch http://code.activestate.com/recipes/410692/"""
 
 
@@ -433,4 +432,3 @@ class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
-

@@ -107,8 +107,9 @@ class Exportform_ope(gsb_forms.Baseform):
             raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
         return data
 
-    def verif_collec(self,ensemble):
+    def verif_collec(self, ensemble):
         return self.query.filter(compte__pk__in=ensemble)
+
 
 class ExportViewBase(FormView):
     template_name = 'gsb/param_export.djhtm'  # nom du template

@@ -7,5 +7,4 @@ from .test_exports import *
 from .test_templates_tag import *
 from .test_admin import *
 from .test_imports_csv import *
-from .test_import_plist import  *
-
+from .test_import_plist import *
