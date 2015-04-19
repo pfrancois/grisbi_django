@@ -721,12 +721,12 @@ def ajout_ope_titre_bulk(request, cpt_id):
                             titre = form.cleaned_data['titre']
                             if not Cours.objects.filter(titre=titre, date=date_ope).exists():
                                 titre.cours_set.create(valeur=form.cleaned_data['cours'], date=date_ope)
-                                messages.success(request, u"cours crée pour %s"%titre)
+                                messages.success(request, u"cours crée pour %s" % titre)
                             else:
                                 cours = titre.cours_set.get(date=date_ope)
                                 cours.valeur = form.cleaned_data['cours']
                                 cours.save()
-                                messages.success(request, u"cours maj pour %s"%titre)
+                                messages.success(request, u"cours maj pour %s" % titre)
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         i = 0
