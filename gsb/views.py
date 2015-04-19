@@ -684,20 +684,22 @@ def ajout_ope_titre_bulk(request, cpt_id):
     if compte.type != 't':
         messages.error(request, "ce n'est pas un compte titre")
         return http.HttpResponseRedirect(reverse("index"))
-    titre_compte = compte.titre.all().distinct().order_by('nom')
+    titre_compte = Titre.objects.filter(compte=compte.id).annotate(nombre_actuel=models.Sum('ope_titre__nombre'))
     titres_forms = []
     if request.method == 'POST':
         i = 0
         date_ope_form = gsb_forms.ajout_ope_date_form(request.POST, initial={'date': gsb.utils.today})
         for titre in titre_compte:
-            i += 1
-            titres_forms.append(gsb_forms.ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'titre': titre, 'nombre': 0, 'montant': 0}))
+            if titre.nombre_actuel > 0.001:  # on affiche pas ceux qui n'ont plus ds le portfeuille
+                i += 1
+                titres_forms.append(gsb_forms.ajout_ope_bulk_form(request.POST, prefix=str(i), initial={'titre': titre, 'nombre': 0, 'montant': 0}))
         if all([form.is_valid() for form in titres_forms]) and date_ope_form.is_valid():
             date_ope = date_ope_form.cleaned_data['date']
             for form in titres_forms:
                 compte_titre = compte
                 nb = form.cleaned_data['nombre']
                 if nb > 0:
+                    # on achete
                     compte_titre.achat(titre=form.cleaned_data['titre'], nombre=form.cleaned_data['nombre'],
                                        prix=form.cleaned_data['cours'], date=date_ope,
                                        frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
@@ -706,6 +708,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                         date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
                 else:
                     if nb < 0:
+                        #on vent
                         compte_titre.vente(titre=form.cleaned_data['titre'], nombre=form.cleaned_data['nombre'] * -1,
                                            prix=form.cleaned_data['cours'], date=date_ope,
                                            frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
@@ -713,6 +716,7 @@ def ajout_ope_titre_bulk(request, cpt_id):
                             form.cleaned_data['nombre'], form.cleaned_data['titre'].nom, form.cleaned_data['cours'],
                             date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
                     else:
+                        #uniquement mise a jour des cours
                         if not nb and form.cleaned_data['cours']:
                             titre = form.cleaned_data['titre']
                             if not Cours.objects.filter(titre=titre, date=date_ope).exists():
@@ -728,10 +732,11 @@ def ajout_ope_titre_bulk(request, cpt_id):
         i = 0
         date_ope_form = gsb_forms.ajout_ope_date_form(initial={'date': gsb.utils.today})
         for titre in titre_compte:
-            i += 1
-            titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i),
-                                                              initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today,
-                                                                       'nombre': 0, 'montant': 0}))
+            if titre.nombre_actuel > 0.001:
+                i += 1
+                titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i),
+                                                                  initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today,
+                                                                  'nombre': 0, 'montant': 0}))
     return render(request, 'gsb/maj_compte_titre.djhtm',
                   {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id, 'titre': u'opération sur les titres suivants'})
 

@@ -10,7 +10,7 @@ from .io import export_xml
 from django.conf import settings
 # les vues generales
 urlpatterns = patterns('gsb', url(r'^$', views.Index_view.as_view(), name='index'),)
-urlpatterns += patterns('',url(r'^rest/', include('gsb.rest.url')),)
+urlpatterns += patterns('', url(r'^rest/', include('gsb.rest.url')),)
 # les vues relatives aux outils
 urlpatterns += patterns('gsb.outils',
                         url(r'^options$',
