@@ -195,7 +195,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                                 messages.success(self.request, u"ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
                             except models.Titre.DoesNotExist:
                                 messages.error(self.request,
-                                               "impossible de vendre car pas de titre en portefeuille ligne %s" % ligne)
+                                               "impossible de vendre car le titre (%s) n'est pas en portefeuille ligne %s" % (titre,ligne))
                 else:
                     ope_gsb = models.Ope.objects.create(**ope)
                     messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))

@@ -183,8 +183,8 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.cleaned_data['compte_destination'].id, 2)
         form.save()
         self.assertEqual(models.Ope.objects.count(), 15)
-        self.assertEqual(str(models.Ope.objects.filter(id__in=(14, 15)).order_by('id')),
-                         "[<Ope: (14) le 02/09/2012 : -13.5 EUR a cpte1 => cptb2 cpt: cpte1>, <Ope: (15) le 02/09/2012 : 13.5 EUR a cpte1 => cptb2 cpt: cptb2>]")
+        self.assertEqual(unicode(models.Ope.objects.filter(id__in=(14, 15)).order_by('id')),
+                         u"[<Ope: (14) le 02/09/2012 : -13.5 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (15) le 02/09/2012 : 13.5 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms2(self):
         """edition d'un virement deja crée sans probleme"""
@@ -200,7 +200,7 @@ class Test_forms(Test_view_base):
         form.save()
         self.assertEqual(models.Ope.objects.count(), 13)
         self.assertEqual(str(models.Ope.objects.filter(id__in=(8, 9)).order_by('id')),
-                         "[<Ope: (8) le 02/09/2012 : -13.5 EUR a cpte1 => cptb2 cpt: cpte1>, <Ope: (9) le 02/09/2012 : 13.5 EUR a cpte1 => cptb2 cpt: cptb2>]")
+                         u"[<Ope: (8) le 02/09/2012 : -13.5 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (9) le 02/09/2012 : 13.5 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms_erreur(self):
         """ creation virement mais erreur car deux fois le meme compte"""

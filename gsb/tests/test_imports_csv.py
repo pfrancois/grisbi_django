@@ -156,9 +156,9 @@ class Test_import_csv1(Test_import_abstract):
         self.assertEqual(models.Ope.objects.get(pk=18).rapp_id, None)
         self.assertEqual(models.Rapp.objects.count(), 2)
         self.assertmessagecontains(self.cl.request,
-                                   "virement ope: (17) le 09/12/2013 : -100.00 EUR a cpte1 => cptb3 cpt: cpte1 ligne 9")
+                                   u"virement ope: (17) le 09/12/2013 : -100.00 EUR tiers: cpte1 => cptb3 cpt: cpte1 ligne 9")
         self.assertmessagecontains(self.cl.request,
-                                   "virement ope: (18) le 09/12/2013 : 100.00 EUR a cpte1 => cptb3 cpt: cptb3 ligne 9")
+                                   u"virement ope: (18) le 09/12/2013 : 100.00 EUR tiers: cpte1 => cptb3 cpt: cptb3 ligne 9")
 
     def test_import_file_ope_titre(self):
         cl = self.cl
@@ -167,15 +167,15 @@ class Test_import_csv1(Test_import_abstract):
         self.assertEqual(retour, True)
         self.assertEqual(models.Ope.objects.count(), 4)
         self.assertmessagecontains(self.cl.request,
-                                   "ope_titre: (1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1 ligne 1")
+                                   u"ope_titre: (1) le 18/12/2011 : -1 EUR tiers: titre_ t1 cpt: cpt_titre1 ligne 1")
         self.assertmessagecontains(self.cl.request,
-                                   "ope_titre: (2) le 24/09/2012 : -5 EUR a titre_ autre cpt: cpt_titre1 ligne 2")
+                                   u"ope_titre: (2) le 24/09/2012 : -5 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 2")
         self.assertmessagecontains(self.cl.request,
-                                   "ope_titre: (3) le 25/09/2012 : 5.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
+                                   u"ope_titre: (3) le 25/09/2012 : 5.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
         self.assertmessagecontains(self.cl.request,
-                                   "ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR a titre_ autre cpt: cpt_titre1 ligne 3")
+                                   u"ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
         self.assertmessagecontains(self.cl.request, u"attention, fausse opération sur titre ligne 4")
-        self.assertmessagecontains(self.cl.request, "impossible de vendre car pas de titre en portefeuille ligne 5")
+        self.assertmessagecontains(self.cl.request, "impossible de vendre car le titre (autre (ZZ_2)) n'est pas en portefeuille ligne 5")
 
     def test_import_tableau(self):
         self.cl.init_cache()

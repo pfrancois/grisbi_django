@@ -345,7 +345,6 @@ def idtostr(obj, membre='id', defaut='0'):
             retour = unicode(defaut)
     except (AttributeError, ObjectDoesNotExist):
         retour = unicode(defaut)
-
     retour = retour.strip()
     return retour
 

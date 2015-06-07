@@ -341,8 +341,8 @@ def vir_new(request, cpt_id=None):
         form = gsb_forms.VirementForm(data=request.POST)
         if form.is_valid():
             ope = form.save()
-            messages.success(request, u"virement crée %s=>%s de %s le %s" % (
-                ope.compte, ope.jumelle.compte, ope.jumelle.montant, ope.date.strftime('%d/%m/%Y')
+            messages.success(request, u"virement crée %s=>%s de %s %s le %s" % (
+                ope.compte, ope.jumelle.compte, ope.jumelle.montant, settings.DEVISE_GENERALE, ope.date.strftime('%d/%m/%Y')
             ))
             return http.HttpResponseRedirect(reverse('gsb_cpt_detail', args=(ope.compte.id,)))
         else:
@@ -521,8 +521,8 @@ def ope_titre_achat(request, cpt_id):
                 virement = None
             compte.achat(titre=titre, nombre=form.cleaned_data['nombre'], prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'], virement_de=virement, frais=form.cleaned_data['frais'])
-            messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s EUR" % (
-                form.cleaned_data['nombre'], titre.nom, form.cleaned_data['cours'], form.cleaned_data['date'], '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
+            messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s %s" % (
+                form.cleaned_data['nombre'], titre.nom, form.cleaned_data['cours'], form.cleaned_data['date'], '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']), settings.DEVISE_GENERALE))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -614,9 +614,10 @@ def ope_titre_vente(request, cpt_id):
                 virement = None
             compte.vente(titre=form.cleaned_data['titre'], nombre=form.cleaned_data['nombre'],
                          prix=form.cleaned_data['cours'], date=form.cleaned_data['date'], virement_vers=virement)
-            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s soit %s EUR" % (
+            messages.info(request, u"nouvel vente de %s %s @ %s %s le %s soit %s %s" % (
                 form.cleaned_data['nombre'], form.cleaned_data['titre'], settings.DEVISE_GENERALE,
-                form.cleaned_data['cours'], form.cleaned_data['date'], '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
+                form.cleaned_data['cours'], form.cleaned_data['date'], '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']),
+                settings.DEVISE_GENERALE))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -703,18 +704,20 @@ def ajout_ope_titre_bulk(request, cpt_id):
                     compte_titre.achat(titre=form.cleaned_data['titre'], nombre=form.cleaned_data['nombre'],
                                        prix=form.cleaned_data['cours'], date=date_ope,
                                        frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
-                    messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s EUR" % (
+                    messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s %s" % (
                         form.cleaned_data['nombre'], form.cleaned_data['titre'].nom, form.cleaned_data['cours'],
-                        date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
+                        date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']),
+                        settings.DEVISE_GENERALE))
                 else:
                     if nb < 0:
                         #on vent
                         compte_titre.vente(titre=form.cleaned_data['titre'], nombre=form.cleaned_data['nombre'] * -1,
                                            prix=form.cleaned_data['cours'], date=date_ope,
                                            frais=form.cleaned_data['frais'] if form.cleaned_data['frais'] else 0)
-                        messages.info(request, u"nouvel vente de %s %s @ %s le %s soit %s EUR" % (
+                        messages.info(request, u"nouvel vente de {0:s} {1:s} @ {2:s} le {3:s} soit {4:s} {5:s}".format(
                             form.cleaned_data['nombre'], form.cleaned_data['titre'].nom, form.cleaned_data['cours'],
-                            date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre'])))
+                            date_ope, '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']),
+                            settings.DEVISE_GENERALE))
                     else:
                         #uniquement mise a jour des cours
                         if not nb and form.cleaned_data['cours']:

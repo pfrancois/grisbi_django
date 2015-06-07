@@ -98,7 +98,8 @@ class Tiers(models.Model):
         if type(new) != type(self):
             raise TypeError(u"pas la même classe d'objet")
         if (self.is_titre or new.is_titre) and not ok_titre:
-            raise ValueError(u"un tiers suppport de titre ne peut etre fusionnné directement. vous devez fusionner les titres")
+            raise ValueError(
+                u"un tiers suppport de titre ne peut etre fusionnné directement. vous devez fusionner les titres")
         nb_tiers_change = Echeance.objects.filter(tiers=self).update(tiers=new)
         nb_tiers_change += Ope.objects.filter(tiers=self).update(tiers=new)
         self.delete()
@@ -383,8 +384,9 @@ class Cat(models.Model):
 
     @property
     def is_editable(self):
-        if self.pk in (settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.ID_CAT_PMV,
-                       settings.REV_PLAC, settings.ID_CAT_COTISATION):
+        if self.pk in (
+                settings.ID_CAT_OST, settings.ID_CAT_VIR, settings.ID_CAT_PMV, settings.ID_CAT_PMV, settings.REV_PLAC,
+                settings.ID_CAT_COTISATION):
             return False
         if self.nom in (u"Opération Ventilée", u"Frais bancaires", u"Non affecté", u"Avance", u"Remboursement"):
             return False
@@ -1181,9 +1183,9 @@ class Ope(models.Model):
         return q.aggregate(total=models.Sum('montant'))['total']
 
     def __unicode__(self):
-        return u"(%s) le %s : %s %s à %s cpt: %s" % (
-            self.id, self.date.strftime('%d/%m/%Y'), self.montant, settings.DEVISE_GENERALE, self.tiers, self.compte
-        )
+        return u"({0}) le {1} : {2} {3:s} tiers: {4:s} cpt: {5:s}".format(self.id, self.date.strftime('%d/%m/%Y'),
+                                                                          self.montant, settings.DEVISE_GENERALE,
+                                                                          self.tiers.nom, self.compte.nom)
 
     def get_absolute_url(self):
         return reverse('gsb_ope_detail', kwargs={'pk': str(self.id)})
@@ -1195,6 +1197,7 @@ class Ope(models.Model):
         self.alters_data = True
         self.deja_clean = True
         super(Ope, self).clean()
+        self.notes = self.notes.replace(u"\u2019", "'").replace(u"\u2018", "'")
         # verification qu'il n'y pas pointe et rapprochee
         if self.pointe and self.rapp is not None:
             raise ValidationError(u"cette opération ne peut pas etre à la fois pointée et rapprochée")

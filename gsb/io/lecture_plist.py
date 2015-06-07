@@ -27,7 +27,7 @@ class Lecture_plist_exception(utils.utils_Exception):
 class Subelement(utils.AttrDict):
     def __unicode__(self):
         if self.is_ope:
-            return u"(%s) le %s : %s %s a %s cpt: %s" % (
+            return u"(%s) le %s : %s %s tiers: %s cpt: %s" % (
                 self.id,
                 self.date.strftime('%d/%m/%Y'),
                 self.montant,
@@ -393,7 +393,8 @@ def import_items(lastmaj, request=None):
                 )
                 messages.debug(request, u"opération %s créée" % ref)
             else:
-                raise Lecture_plist_exception(u"attention l'opération %s existe déja alors qu'on demande de la créer" % ref)
+                mesage = u"attention l'opération %s existe déja alors qu'on demande de la créer" % ref
+                raise Lecture_plist_exception(mesage)
 
         if element_unitaire.action == "m":  # modif
             try:

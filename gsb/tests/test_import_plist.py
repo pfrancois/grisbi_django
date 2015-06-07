@@ -47,9 +47,9 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.date, datetime.date(2014, 6, 16))
         self.compare(el.montant, -10.25)
         self.compare(el.tiers, 'Ope standart')
-        self.compare(el.__unicode__(), u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
-        self.compare(el.__str__(), u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
-        self.compare(el.__repr__(), u"(66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1")
+        self.compare(el.__unicode__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
+        self.compare(el.__str__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
+        self.compare(el.__repr__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
         ele = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403036267000.log"))
@@ -396,7 +396,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention le compte (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1", ))
+            u"attention le compte (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_18"))
     def test_money_journal_element_import18(self):
@@ -406,7 +406,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention la catégorie (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1", ))
+            u"attention la catégorie (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_19"))
     def test_money_journal_element_import19(self):
@@ -414,7 +414,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention l'opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 existe déja alors qu'on demande de la créer", ))
+            u"attention l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 existe déja alors qu'on demande de la créer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_20"))
     def test_money_journal_element_import20(self):
@@ -423,8 +423,8 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.tiers.delete()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request, u"tiers 'Ope standart' crée")
-        self.assertmessagecontains(self.request,
-                                   u"opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 créée")
+        self.assertEqual(unicode(models.Ope.objects.get(id=66)),
+                         u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: Ghh")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_21"))
     def test_money_journal_element_import21(self):
@@ -433,8 +433,8 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.cat.delete()
         self.cpt.delete()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request,
-                                   u"opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 créée")
+        self.assertEqual(unicode(models.Ope.objects.get(id=66)),
+                         u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: hjhjhkh")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_22"))
     def test_money_journal_element_import22(self):
@@ -443,7 +443,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 n'existe pas alors qu'on demande de la modifier", ))
+            u"attention cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 n'existe pas alors qu'on demande de la modifier", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import23(self):
@@ -454,7 +454,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         fille.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est mère")
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import24(self):
@@ -465,7 +465,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est fille", )
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import25(self):
@@ -475,7 +475,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est rapprochée", )
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import26(self):
@@ -484,7 +484,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.cpt2.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car son compte est fermé", )
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import27(self):
@@ -495,7 +495,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est jumellée", )
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
     def test_money_journal_element_import28(self):
@@ -504,23 +504,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est pointée", )
-
-    @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import29(self):
-        """test si ope modifie sans probleme"""
-        lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request,
-                                   u"opération (66) modifiée comme ca: compte: 2 => 1\n, cat: 2 => 1\n, date: 2013-06-15 => 2014-06-16\n, montant: 25 => -10.25\n, tiers: tiers2 => Ope standart")
-
-    @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import30(self):
-        """test si ope modifie sans probleme avec le compte deja modifie"""
-        self.ope.compte = self.cpt
-        self.ope.save()
-        lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request,
-                                   u"opération (66) modifiée comme ca: cat: 2 => 1\n, date: 2013-06-15 => 2014-06-16\n, montant: 25 => -10.25\n, tiers: tiers2 => Ope standart")
+                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import31(self):
@@ -541,7 +525,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est mère", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import33(self):
@@ -553,7 +537,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est fille", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import34(self):
@@ -564,7 +548,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est rapprochée", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import35(self):
@@ -574,7 +558,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car son compte est fermé", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import36(self):
@@ -586,7 +570,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est jumellée", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import37(self):
@@ -596,7 +580,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 car elle est pointée", ))
+            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import38(self):
@@ -606,7 +590,7 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
                                              tiers=self.tiers, cat=self.cat, moyen=self.moyen_debit)
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"opération (66) le 16/06/2014 : -10.25 EUR a Ope standart cpt: 1 supprimée")
+                                   u"opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 supprimée")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
     def test_money_journal_element_import39(self):
@@ -664,7 +648,7 @@ class Test_import_money_journal_export(Test_import_abstract):
                                          date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.create(datamodel="cat", id_model=72, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972",
                                          date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            #du fait du auto_add dans le model besoin de deux etapes
+            # du fait du auto_add dans le model besoin de deux etapes
             models.Db_log.objects.create(datamodel="cat", id_model=35, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972",
                                          date_time_action=self.strptime("2012-06-23 18:51:40.571000+00:00"))
             models.Db_log.objects.filter(id_model=35).update(date_time_action=self.strptime("2012-06-23 18:51:40.571000+00:00"))
