@@ -305,7 +305,7 @@ class Ope_cat(Ope_inline_admin):
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
-    actions = ['fusionne', ]
+    actions = ['fusionne', export_as_csv_action]
     list_editable = ('nom', 'couleur')
     list_display = ('id', 'nom', 'type', 'nb_opes', 'couleur')
     list_display_links = ('id',)
@@ -335,7 +335,7 @@ class Ope_ib(Ope_inline_admin):
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
-    actions = ['fusionne', ]
+    actions = ['fusionne', export_as_csv_action]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_opes')
     list_display_links = ('id',)
@@ -351,7 +351,7 @@ class Ib_admin(Modeladmin_perso):
 
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
-    actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
+    actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp', export_as_csv_action]
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
                                                                                              'solde_mini_autorise'),
               ('moyen_debit_defaut', 'moyen_credit_defaut', 'couleur'))
@@ -664,11 +664,13 @@ class Cours_admin(Modeladmin_perso):
     fields = ('date', 'titre', 'valeur')
     ordering = ('-date',)
     date_hierarchy = 'date'
+    actions = [export_as_csv_action]
+    
 
 
 class Titre_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
     list_display = ('id', 'nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
@@ -686,7 +688,7 @@ class Titre_admin(Modeladmin_perso):
 
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
     list_filter = ('type',)
     fields = ['nom', 'type']
     list_display = ('nom', 'type', 'nb_opes')
@@ -701,7 +703,7 @@ class Ope_tiers(Ope_inline_admin):
 
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'notes', 'is_titre')
     list_display_links = ('id',)
@@ -729,7 +731,7 @@ class Ech_admin(Modeladmin_perso):
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
     fields = ('date', 'date_limite', ('intervalle', 'periodicite'), 'valide', 'compte', ('montant', 'tiers'), ('cat', 'moyen', 'ib'),
               ('compte_virement', 'moyen_virement'), 'exercice', 'notes')
-    actions = ['check_ech']
+    actions = ['check_ech',export_as_csv_action]
     radio_fields = {'periodicite': admin.HORIZONTAL}
 
     def check_ech(self, request, queryset):
@@ -740,7 +742,7 @@ class Ech_admin(Modeladmin_perso):
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
 
 
 class Ope_rapp(Ope_inline_admin):
@@ -749,7 +751,7 @@ class Ope_rapp(Ope_inline_admin):
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
     list_display = ('id', 'nom', 'date')
     list_editable = ('nom',)
     inlines = [Ope_rapp]
@@ -761,7 +763,7 @@ class Rapp_admin(Modeladmin_perso):
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
-    actions = ['fusionne']
+    actions = ['fusionne',export_as_csv_action]
     list_filter = ('date_debut', 'date_fin')
 
 
@@ -772,6 +774,7 @@ class Ope_titre_admin(Modeladmin_perso):
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)
     date_hierarchy = 'date'
+    actions = [export_as_csv_action]
 
     def show_ope(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_ost.id,))

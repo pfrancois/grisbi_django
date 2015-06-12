@@ -17,6 +17,7 @@ class Csv_unicode_reader_ope_base(import_base.Property_ope_base, utils.Csv_unico
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
     champs = None  # c'est a dire qu'il prend la premiere ligne
     champ_test = 'cat'
+    ligne_saut = 1
 
     @property
     def cat(self):
@@ -125,6 +126,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     titre = "import csv"
     encoding = "iso-8859-1"
     extensions = ('.csv', )
+    sauter_flag = False
 
     def import_file(self, nomfich):
         """renvoi un tableau complet de l'import"""
@@ -138,7 +140,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 fich = self.reader(f_non_encode, encoding=self.encoding)
                 # ---------------------- boucle
                 retour = self.tableau(fich, moyen_virement)
-                #------------------fin boucle
+                # ------------------fin boucle
             # gestion des erreurs
             if retour is False:
                 for err in self.erreur:
@@ -149,7 +151,17 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 virement = ope.pop('virement', False)
                 ope_titre = ope.pop('ope_titre', False)
                 ligne = ope.pop('ligne')
-                # gestions des cas speciaux
+                if self.sauter_flag:
+                    try:
+                        double = models.Ope.objects.get(tiers_id=ope['tiers_id'],
+                                                        compte_id=ope['compte_id'],
+                                                        montant=ope['montant'],
+                                                        date=ope['date'])
+                        messages.warning(self.request, 'operation potentiellement en double ligne %s avec l\'ope %s ' % (ope['ligne'], double.id))
+                        continue
+                    except models.Ope.DoesNotExist:
+                        pass
+                #  gestions des cas speciaux
                 if virement or ope_titre:
                     if virement:
                         vir = models.Virement.create(compte_origine=models.Compte.objects.get(id=ope['compte_id']),
@@ -195,7 +207,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                                 messages.success(self.request, u"ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
                             except models.Titre.DoesNotExist:
                                 messages.error(self.request,
-                                               "impossible de vendre car le titre (%s) n'est pas en portefeuille ligne %s" % (titre,ligne))
+                                               "impossible de vendre car le titre (%s) n'est pas en portefeuille ligne %s" % (
+                                                   titre, ligne))
                 else:
                     ope_gsb = models.Ope.objects.create(**ope)
                     messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
@@ -211,6 +224,8 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
         # lecture effective du fichier
         verif_format = False
         for row in fich:
+            if row.line_num <= row.ligne_saut:
+                continue
             if not verif_format:  # on verifie a la premiere ligne
                 liste_colonnes = ['id', 'cpt', 'date', "montant", 'r', 'p', "moyen", 'cat', "tiers", "notes", "ib",
                                   "num_cheque"]
@@ -289,7 +304,11 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             else:
                 ope['moyen_id'] = moyen_virement
             # tiers
-            ope['tiers_id'] = self.tiers.goc(row.tiers)
+            if row.tiers != "":
+                tiers = row.tiers
+            else:
+                tiers = "inconnu"
+            ope['tiers_id'] = self.tiers.goc(tiers)
             # auto
             ope['automatique'] = row.automatique
             # ib
