@@ -12,9 +12,9 @@ idem
 
 montant:(decimal)
 decimal avec virgule ou point (et avec ou sans separateur de milliers espace)
-r:(boolean)
+p:(boolean)
 0 ou 1
-p:(string)
+r:(string)
 nom du rapprochement
 moyen:(string)
 nom du moyen
