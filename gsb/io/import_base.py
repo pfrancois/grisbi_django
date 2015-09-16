@@ -315,7 +315,7 @@ class Tiers_cache(Table):
     element = models.Tiers
 
     def auto(self):
-        return [{'id': settings.ID_TIERS_COTISATION, 'defaults': {'nom': 'secu', 'id': settings.ID_TIERS_COTISATION}}, ]
+        return [{'id': settings.ID_TIERS_COTISATION, 'defaults': {'nom': 'Secu', 'id': settings.ID_TIERS_COTISATION}}, ]
 
     def arg_def(self, nom, obj=None):
         if obj is None:

@@ -522,7 +522,13 @@ def ope_titre_achat(request, cpt_id):
             compte.achat(titre=titre, nombre=form.cleaned_data['nombre'], prix=form.cleaned_data['cours'],
                          date=form.cleaned_data['date'], virement_de=virement, frais=form.cleaned_data['frais'])
             messages.info(request, u"nouvel achat de %s %s @ %s le %s soit %s %s" % (
-                form.cleaned_data['nombre'], titre.nom, form.cleaned_data['cours'], form.cleaned_data['date'], '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']), settings.DEVISE_GENERALE))
+                          form.cleaned_data['nombre'],
+                          titre.nom,
+                          form.cleaned_data['cours'],
+                          form.cleaned_data['date'],
+                          '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']),
+                          settings.DEVISE_GENERALE)
+            )
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:

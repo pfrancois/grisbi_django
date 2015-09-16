@@ -1488,6 +1488,4 @@ class Db_log(models.Model):
     def __unicode__(self):
         actions = {'I': u"insert", 'U': u"update", 'D': u"delete"}
         date_action = self.date_time_action.astimezone(utils.pytz.timezone(settings.TIME_ZONE))
-        return u"({obj.id}) {action} le {obj_date} d'un {obj.datamodel} #{obj.id_model} mémo: {obj.memo}".format(action=actions[self.type_action],
-                                                                                                                 obj=self,
-                                                                                                                 obj_date=date_action)
+        return u"({obj.id:d}) {action:s} le {obj_date:%Y-%m-%d %H:%M:%S%z} de {obj.datamodel:s} #{obj.id_model:d} memo:'{obj.memo:s}'".format(action=actions[self.type_action],obj=self,obj_date=date_action)

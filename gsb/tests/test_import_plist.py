@@ -10,17 +10,19 @@ from django.conf import settings
 import os.path
 import datetime
 import pytz
+import time
 
 from gsb.io import lecture_plist
-
 from gsb import models
+from gsb import utils
+
 from .test_imports_csv import Test_import_abstract
 from gsb.io.lecture_plist import Lecture_plist_exception
 from gsb.io.ecriture_plist_money_journal import Export_icompta_plist
 from testfixtures import Replacer, test_datetime, compare
-import dateutil.parser
 from django.utils.encoding import force_unicode
 import warnings
+import mock
 
 warnings.filterwarnings("ignore", category=UnicodeWarning)
 import collections
@@ -603,7 +605,6 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.compare(exception_context_manager.exception.args, (
             u"attention cette opération 66 existe alors qu'on demande de la supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
 
-
 @override_settings(CODE_DEVICE_POCKET_MONEY='totototo')
 @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist"))
 class Test_import_money_journal_export(Test_import_abstract):
@@ -612,10 +613,11 @@ class Test_import_money_journal_export(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
         self.request = self.request_get('outils')
-        self.exp = Export_icompta_plist(avance_id=69, remboursement_id=71, request=self.request)
+        self.exp = Export_icompta_plist(request=self.request)
         self.nettoyage()
 
     def nettoyage(self, file_only=True):
+        """delete all the folder in log"""
         directory = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist", 'Applications',
                                  'Money Journal', 'log')
         efface = list()
@@ -630,67 +632,44 @@ class Test_import_money_journal_export(Test_import_abstract):
                     os.rmdir(os.path.join(root, name))
 
     def comp_file(self, filename, nom):
+        """conveniance function to test between file"""
         attendu = os.path.join("export_plist_attendu", 'Applications', 'Money Journal', 'log', '140', '3', '4', filename)
         recu = os.path.join("export_plist", 'Applications', 'Money Journal', 'log', '140', '3', '4', filename)
-        self.assert2filesequal(recu, attendu, nom=nom)
-
-    def strptime(self, txt):
-        txt = force_unicode(txt)
-        return dateutil.parser.parse(txt)
 
     def test_global(self):
         with Replacer() as r:
             # on efface la table db_log
             models.Db_log.objects.all().delete()
-            models.Db_log.objects.create(datamodel="cat", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07901",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="cat", id_model=2, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07902",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="cat", id_model=72, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            # du fait du auto_add dans le model besoin de deux etapes
-            models.Db_log.objects.create(datamodel="cat", id_model=35, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972",
-                                         date_time_action=self.strptime("2012-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.filter(id_model=35).update(date_time_action=self.strptime("2012-06-23 18:51:40.571000+00:00"))
-            #on modifie afin d'avoir les bons
+            #cat modifie
+            models.Db_log.objects.create(datamodel="cat", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07901")
+            #cat cree
+            models.Db_log.objects.create(datamodel="cat", id_model=2, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07902")
+            models.Db_log.objects.create(datamodel="cat", id_model=72, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972")
+            # c'est une modification d'une operation qui a ete efface (donc qui ne vas pas etre maj)
+            models.Db_log.objects.create(datamodel="cat", id_model=35, type_action="I", uuid="51a0004d-7f28-427b-8cf7-44ad2ac07972")
             models.Cat.objects.filter(id=4).delete()  # la cat 4 a ete efface
-            models.Db_log.objects.create(datamodel="cat", id_model=4, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
+            models.Db_log.objects.create(datamodel="cat", id_model=4, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
             models.Compte.objects.filter(id=1).update(nom="compte_modifie")
             models.Compte.objects.create(nom="Compte nouveau")
-            models.Db_log.objects.create(datamodel="compte", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="compte", id_model=3, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
+            models.Db_log.objects.create(datamodel="compte", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
+            models.Db_log.objects.create(datamodel="compte", id_model=3, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
             #on mock les opes
-            models.Db_log.objects.create(datamodel="ope", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=2, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a02",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=3, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a03",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=8, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a08",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=9, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a09",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=11, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a10",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=12, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a11",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=13, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a12",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=14, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a13",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=15, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a14",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=16, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a15",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=17, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a16",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=18, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a17",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
-            models.Db_log.objects.create(datamodel="ope", id_model=19, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a18",
-                                         date_time_action=self.strptime("2014-06-23 18:51:40.571000+00:00"))
+            models.Db_log.objects.create(datamodel="ope", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
+            models.Db_log.objects.create(datamodel="ope", id_model=2, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a02")
+            models.Db_log.objects.create(datamodel="ope", id_model=3, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a03")
+            models.Db_log.objects.create(datamodel="ope", id_model=8, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a08")
+            models.Db_log.objects.create(datamodel="ope", id_model=9, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a09")
+            models.Db_log.objects.create(datamodel="ope", id_model=11, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a10")
+            models.Db_log.objects.create(datamodel="ope", id_model=12, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a11")
+            models.Db_log.objects.create(datamodel="ope", id_model=13, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a12")
+            models.Db_log.objects.create(datamodel="ope", id_model=14, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a13")
+            models.Db_log.objects.create(datamodel="ope", id_model=15, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a14")
+            models.Db_log.objects.create(datamodel="ope", id_model=16, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a15")
+            models.Db_log.objects.create(datamodel="ope", id_model=17, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a16")
+            models.Db_log.objects.create(datamodel="ope", id_model=18, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a17")
+            models.Db_log.objects.create(datamodel="ope", id_model=19, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a18")
+            date_time_action=datetime.datetime.fromtimestamp(time.mktime(time.strptime("2014-06-23 18:51:40","%Y-%m-%d %H:%M:%S")))
+            models.Db_log.objects.all().update(date_time_action=date_time_action)
             dt = pytz.utc.localize(datetime.datetime(2014, 01, 21, 19, 27, 14))
             time_mock = test_datetime(2014, 06, 23, 00, 00, 00, delta=1, delta_type='minutes')
             r.replace('gsb.utils.datetime.datetime', time_mock)
@@ -709,13 +688,13 @@ class Test_import_money_journal_export(Test_import_abstract):
             for root, dirs, files in os.walk(attendu, topdown=False):
                 for name in files:
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
-            compare(nb, collections.Counter({u'ope': 14, u'cat': 4, u'compte': 2}))
+            compare(nb, collections.Counter({u'global':20,u'ope': 14, u'cat': 4, u'compte': 2}))
             compare(list_fic_recu, list_fic_attendu)
             #compare chaque fichier
             self.comp_file('1403481660000.log', "export_plist_cat_modif")
             self.comp_file('1403481720000.log', "export_plist_cat_crea")
-            self.comp_file('1403481780000.log', "export_plist_cat_vir")
-            self.comp_file('1403481840000.log', "export_plist_cat_vir_eff")
+            self.comp_file('1403481780000.log', "export_plist_cat_vir_eff")
+            self.comp_file('1403481840000.log', "export_plist_cat_vir")
             self.comp_file('1403481900000.log', "export_plist_compte_update")
             self.comp_file('1403481960000.log', "export_plist_compte_insert")
             self.comp_file('1403482020000.log', "export_plist_ope1_modifie_negatif")

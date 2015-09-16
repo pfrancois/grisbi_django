@@ -17,7 +17,7 @@ class Csv_unicode_reader_ope_base(import_base.Property_ope_base, utils.Csv_unico
 class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_base):
     champs = None  # c'est a dire qu'il prend la premiere ligne
     champ_test = 'cat'
-    ligne_saut = 1
+    ligne_saut = 0
 
     @property
     def cat(self):
@@ -212,6 +212,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 else:
                     ope_gsb = models.Ope.objects.create(**ope)
                     messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
+                    last_id=ope_gsb.id
                     # on gere le nombre de truc annex crée
             for obj in (self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers,
                         self.titres, self.rapps):

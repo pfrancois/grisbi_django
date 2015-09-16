@@ -52,7 +52,7 @@ class Test_models(TestCase):
         self.assertEquals(models.Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:30/10/2011)")
         self.assertEquals(models.Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:30/10/2011)")
         self.assertEquals(models.Ope.objects.get(id=1).__unicode__(),
-                          u"(1) le 18/12/2011 : -1 EUR a titre_ t1 cpt: cpt_titre1")
+                          u"(1) le 18/12/2011 : -1 EUR tiers: titre_ t1 cpt: cpt_titre1")
 
     def test_models_unicode2(self):
         """sortie unicode d'une vente de titre"""
@@ -570,7 +570,7 @@ class Test_models(TestCase):
         c.ajustement(datel=datetime.date(2012, 11, 30), montant_vrai=0)
         self.assertEqual(models.Ope.objects.filter(compte_id=1).count(), 9)
         self.assertEqual(models.Ope.objects.get(id=14).__unicode__(),
-                         u"(14) le 30/11/2012 : 70 EUR a ajustement cpt: cpte1")
+                         u"(14) le 30/11/2012 : 70 EUR tiers: ajustement cpt: cpte1")
         # on verifie que si on fait un ajustement et qu'il est deja fait, on fait rien
         c.ajustement(datel=datetime.date(2012, 12, 30), montant_vrai=0)
         self.assertEqual(models.Ope.objects.filter(compte_id=1).count(), 9)

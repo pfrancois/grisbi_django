@@ -10,6 +10,8 @@ import os
 import fnmatch
 
 import pytz
+import mock
+
 
 # from inspector_panel.panels.inspector import debug
 import locale
@@ -110,7 +112,7 @@ def validrib(banque, guichet, compte, cle):
 
 
 def validinsee(insee, cle):
-    """fonction qui verifie la valide de la cle insee
+    """fonction qui verifie la validite de la cle insee
     @return bool"""
     # http://fr.wikipedia.org/wiki/Numero_de_Securite_sociale#Unicit.C3.A9
     # gestion numeros corses
@@ -155,7 +157,8 @@ def fr2decimal(s):
 
 
 def strpdate(end_date, fmt="%Y-%m-%d"):
-    """@param end_date: date
+    """ renvoie la date 
+    @param end_date: date
         @param fmt: format de la date
     attention si s est None ou impossible renvoie None"""
     if isinstance(end_date, datetime.date) or isinstance(end_date, datetime.datetime):

@@ -54,11 +54,13 @@ class Test_import_csv1(Test_import_abstract):
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")) as file_test:
             fich = cl.reader(file_test, encoding=cl.encoding)
             cl.tableau(fich, self.moyen_virement)
-        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1", u"erreur de date '' à la ligne 3",
+        self.assertEqual([u"erreur de date '2013/45/12' à la ligne 1",
+                          u"erreur de date '' à la ligne 3",
                           u"attention il faut deux bouts à un virement ligne 4",
                           u'attention, virement impossible entre le même compte à la ligne 5',
                           u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"], cl.erreur)
+                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"],
+                        cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
 
     def test_import_erreur_champ_incomplet(self):
@@ -96,11 +98,13 @@ class Test_import_csv1(Test_import_abstract):
         nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")
         retour = cl.import_file(nomfich)
         self.assertEqual(retour, False)
-        self.assertEqual([u"erreur de date '2013/18/12' à la ligne 1", u"erreur de date '' à la ligne 3",
+        self.assertEqual([u"erreur de date '2013/45/12' à la ligne 1",
+                          u"erreur de date '' à la ligne 3",
                           u"attention il faut deux bouts à un virement ligne 4",
                           u'attention, virement impossible entre le même compte à la ligne 5',
                           u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"], cl.erreur)
+                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"],
+                        cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
 
     def test_import_file_vir(self):
@@ -243,7 +247,7 @@ class Test_import_csv2(Test_import_abstract):
                 os.remove(name)
         self.assertEqual(r.status_code, 302)
         self.assertQueryset_list(models.Tiers.objects.all(),
-                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'secu', u'titre_ t1',
+                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'Secu', u'titre_ t1',
                                   u'titre_ t2'], 'nom')  # ne pas oublier le tiers cree automatiquement
         self.assertEquals(models.Ope.objects.all().count(), 16)
         self.assertQueryset_list(models.Cat.objects.all(),

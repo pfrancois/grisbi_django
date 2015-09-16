@@ -36,7 +36,7 @@
 			<key>account</key>
 			<integer>0</integer>
 			<key>amount</key>
-			<real>0.0</real>
+			<real>0</real>
 			<key>category</key>
 			<integer>0</integer>
 			<key>currency</key>
@@ -49,7 +49,7 @@
 				<integer>4</integer>
 			</dict>
 			<key>lastUpdate</key>
-			<real>0</real>
+			<real>1403542300</real>
 			<key>memo</key>
 			<dict>
 				<key>CF$UID</key>
@@ -87,11 +87,11 @@
 				<integer>5</integer>
 			</dict>
 			<key>day</key>
-			<integer>1</integer>
+			<integer>0</integer>
 			<key>month</key>
-			<integer>1</integer>
+			<integer>0</integer>
 			<key>year</key>
-			<integer>2000</integer>
+			<integer>0</integer>
 		</dict>
 		<dict>
 			<key>$classes</key>
@@ -109,7 +109,7 @@
 				<integer>7</integer>
 			</dict>
 			<key>NS.string</key>
-			<string>rien</string>
+			<string>inconnu_efface</string>
 		</dict>
 		<dict>
 			<key>$classes</key>
