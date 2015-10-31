@@ -120,9 +120,7 @@ if settings.DEBUG:
     urlpatterns = patterns('',
                            (r'^500.html$',
                             'django.views.defaults.server_error'),
-                           (r'^404.html$', TemplateView.as_view(
-                               template_name='404.html')),
-                           url(r'^explorer/', include('explorer.urls')),
+                           (r'^404.html$', TemplateView.as_view(template_name='404.html')),
                            ) + urlpatterns
 
 # gestion de mes trucs perso
@@ -135,9 +133,11 @@ if settings.DEBUG:
 #                       url(r'^test$', 'test.test')
 # )
 # import gsb.forms_perso
+"""
 try:
     # noinspection PyUnresolvedReferences
     import perso
     urlpatterns += patterns('', (r'^perso/', include(perso)), )
 except ImportError:
     pass
+"""
