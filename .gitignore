@@ -55,3 +55,4 @@ old
 covhtml
 restore.bat
 *.sqlite_bkp
+.__pycache__
