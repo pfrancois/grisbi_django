@@ -2,7 +2,7 @@
 """
 test models
 """
-from __future__ import absolute_import
+
 import datetime
 import time
 import decimal
@@ -36,29 +36,26 @@ class Test_models(TestCase):
 
     def test_models_unicode(self):
         """on test les sortie unicode"""
-        self.assertEquals(models.Config.objects.get(id=1).__unicode__(), u"1")
-        self.assertEquals(models.Tiers.objects.get(nom="tiers1").__unicode__(), u"tiers1")
-        self.assertEquals(models.Titre.objects.get(nom="t1").__unicode__(), u"t1 (1)")
-        self.assertEquals(models.Banque.objects.get(nom="banque1").__unicode__(), u"banque1")
-        self.assertEquals(models.Cours.objects.get(id=1).__unicode__(), u"le 18/12/2011, 1 t1 : 1 EUR")
-        self.assertEquals(models.Cat.objects.get(nom="cat1").__unicode__(), u"cat1(r)")
-        self.assertEquals(models.Ib.objects.get(nom="ib1").__unicode__(), u"ib1")
-        self.assertEquals(models.Exercice.objects.get(nom="exo1").__unicode__(), u"01/01/2010 au 31/12/2010")
-        self.assertEquals(models.Compte.objects.get(nom="cpte1").__unicode__(), u"cpte1")
-        self.assertEquals(models.Ope_titre.objects.get(id=1).__unicode__(),
-                          u"(1) achat de 1 t1 (1) à 1 EUR le 18/12/2011 cpt:cpt_titre1")
-        self.assertEquals(models.Moyen.objects.get(id=1).__unicode__(), u"moyen_dep1 (d)")
-        self.assertEquals(models.Rapp.objects.get(id=1).__unicode__(), u"cpte1201101")
-        self.assertEquals(models.Echeance.objects.get(id=1).__unicode__(), u"(1) cpte1=>cptb2 de 10 (ech:30/10/2011)")
-        self.assertEquals(models.Echeance.objects.get(id=3).__unicode__(), u"(3) cpte1 à tiers1 de -20 (ech:30/10/2011)")
-        self.assertEquals(models.Ope.objects.get(id=1).__unicode__(),
-                          u"(1) le 18/12/2011 : -1 EUR tiers: titre_ t1 cpt: cpt_titre1")
+        self.assertEqual(models.Config.objects.get(id=1).__str__(), "1")
+        self.assertEqual(models.Tiers.objects.get(nom="tiers1").__str__(), "tiers1")
+        self.assertEqual(models.Titre.objects.get(nom="t1").__str__(), "t1 (1)")
+        self.assertEqual(models.Banque.objects.get(nom="banque1").__str__(), "banque1")
+        self.assertEqual(models.Cours.objects.get(id=1).__str__(), "le 18/12/2011, 1 t1 : 1.000 EUR")
+        self.assertEqual(models.Cat.objects.get(nom="cat1").__str__(), "cat1(r)")
+        self.assertEqual(models.Ib.objects.get(nom="ib1").__str__(), "ib1")
+        self.assertEqual(models.Exercice.objects.get(nom="exo1").__str__(), "01/01/2010 au 31/12/2010")
+        self.assertEqual(models.Compte.objects.get(nom="cpte1").__str__(), "cpte1")
+        self.assertEqual(models.Ope_titre.objects.get(id=1).__str__(), "(1) achat de 1.00000 t1 (1) à 1.000000 EUR le 18/12/2011 cpt:cpt_titre1")
+        self.assertEqual(models.Moyen.objects.get(id=1).__str__(), "moyen_dep1 (d)")
+        self.assertEqual(models.Rapp.objects.get(id=1).__str__(), "cpte1201101")
+        self.assertEqual(models.Echeance.objects.get(id=1).__str__(), "(1) cpte1=>cptb2 de 10.00 (ech:30/10/2011)")
+        self.assertEqual(models.Echeance.objects.get(id=3).__str__(), "(3) cpte1 à tiers1 de -20.00 (ech:30/10/2011)")
+        self.assertEqual(models.Ope.objects.get(id=1).__str__(), "(1) le 18/12/2011 : -1.00 EUR tiers: titre_ t1 cpt: cpt_titre1")
 
     def test_models_unicode2(self):
         """sortie unicode d'une vente de titre"""
         models.Compte.objects.get(nom="cpt_titre1").vente(titre=models.Titre.objects.get(nom="t1"), nombre=1, date='2011-12-20')
-        self.assertEquals(models.Ope_titre.objects.get(id=5).__unicode__(),
-                          u"(5) vente de 1 t1 (1) à 1 EUR le 20/12/2011 cpt:cpt_titre1")
+        self.assertEqual(models.Ope_titre.objects.get(id=5).__str__(), "(5) vente de 1.00000 t1 (1) à 1.000000 EUR le 20/12/2011 cpt:cpt_titre1")
 
     def test_fusionne_error(self):
         """les erreur de fusions, toutes en un seul test"""
@@ -153,9 +150,9 @@ class Test_models(TestCase):
         dernier cours a une date et cours exist pas
         dernier cours a un dat et cours existe"""
         t = models.Titre.objects.get(nom="t2")
-        self.assertEquals(t.last_cours(), 10)
-        self.assertEquals(t.last_cours("2001-01-01"), 0)  # pas de cours possible
-        self.assertEquals(t.last_cours("2011-11-01"), 5)
+        self.assertEqual(t.last_cours(), 10)
+        self.assertEqual(t.last_cours("2001-01-01"), 0)  # pas de cours possible
+        self.assertEqual(t.last_cours("2011-11-01"), 5)
 
     def test_titre_last_date(self):
         """tests:
@@ -198,7 +195,7 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(models.Ope_titre.objects.filter(titre__nom='autre 2').order_by('id'), [4], attrgetter("id"))
         self.assertQuerysetEqual(t.ope_titre_set.all(), [4], attrgetter("id"))
         # verifier que les cours ont été fusionneés
-        self.assertEquals(t.cours_set.count(), 2)
+        self.assertEqual(t.cours_set.count(), 2)
 
     def test_titre_fusionne_error(self):
         """fusionnne deux titre avec des cours differents"""
@@ -211,36 +208,36 @@ class Test_models(TestCase):
         c1 = models.Compte.objects.get(id=4)
         c2 = models.Compte.objects.get(id=5)
         t = models.Titre.objects.get(nom="t2")
-        self.assertEquals(t.investi(), 1600)
-        self.assertEquals(t.investi(rapp=True), 100)
-        self.assertEquals(t.investi(compte=c1), 0)
-        self.assertEquals(t.investi(compte=c2), 1600)
-        self.assertEquals(t.investi(compte=c2, rapp=True), 100)
+        self.assertEqual(t.investi(), 1600)
+        self.assertEqual(t.investi(rapp=True), 100)
+        self.assertEqual(t.investi(compte=c1), 0)
+        self.assertEqual(t.investi(compte=c2), 1600)
+        self.assertEqual(t.investi(compte=c2, rapp=True), 100)
         # on achete 20 t @ 1
         c1.achat(titre=t, nombre=20, date='2011-01-01')
-        self.assertEquals(t.investi(), 1620)
-        self.assertEquals(t.investi(c1), 20)
-        self.assertEquals(t.investi(datel='2011-07-01'), 20)
-        self.assertEquals(t.investi(compte=c1, datel='2010-12-31'), 0)
-        self.assertEquals(t.investi(compte=c2, datel='2011-07-31'), 0)
-        self.assertEquals(t.investi(compte=c2, exclude=models.Ope_titre.objects.get(id=3)), 1500)
+        self.assertEqual(t.investi(), 1620)
+        self.assertEqual(t.investi(c1), 20)
+        self.assertEqual(t.investi(datel='2011-07-01'), 20)
+        self.assertEqual(t.investi(compte=c1, datel='2010-12-31'), 0)
+        self.assertEqual(t.investi(compte=c2, datel='2011-07-31'), 0)
+        self.assertEqual(t.investi(compte=c2, exclude=models.Ope_titre.objects.get(id=3)), 1500)
 
     def test_titre_nb(self):
         """test nb titre"""
         c1 = models.Compte.objects.get(id=4)
         c2 = models.Compte.objects.get(id=5)
         t = models.Titre.objects.get(nom="t2")
-        self.assertEquals(t.nb(), 170)
-        self.assertEquals(t.nb(c1), 0)
-        self.assertEquals(t.nb(datel='2011-07-01'), 0)
-        self.assertEquals(t.nb(datel='2011-11-01'), 20)
-        self.assertEquals(t.nb(compte=c2, datel='2011-07-01'), 0)
-        self.assertEquals(t.nb(compte=c2), 170)
-        self.assertEquals(t.nb(rapp=True), 20)
-        self.assertEquals(t.nb(rapp=True, datel='2010-01-01'), 0)
-        self.assertEquals(t.nb(rapp=True, datel='2011-11-01'), 20)
-        self.assertEquals(t.nb(compte=c2, exclude_id=2), 20)
-        self.assertEquals(t.nb(rapp=True, compte=c2), 20)
+        self.assertEqual(t.nb(), 170)
+        self.assertEqual(t.nb(c1), 0)
+        self.assertEqual(t.nb(datel='2011-07-01'), 0)
+        self.assertEqual(t.nb(datel='2011-11-01'), 20)
+        self.assertEqual(t.nb(compte=c2, datel='2011-07-01'), 0)
+        self.assertEqual(t.nb(compte=c2), 170)
+        self.assertEqual(t.nb(rapp=True), 20)
+        self.assertEqual(t.nb(rapp=True, datel='2010-01-01'), 0)
+        self.assertEqual(t.nb(rapp=True, datel='2011-11-01'), 20)
+        self.assertEqual(t.nb(compte=c2, exclude_id=2), 20)
+        self.assertEqual(t.nb(rapp=True, compte=c2), 20)
 
     @mock.patch('gsb.utils.today')
     def test_titre_encours(self, today_mock):
@@ -249,19 +246,19 @@ class Test_models(TestCase):
         c1 = models.Compte.objects.get(id=4)
         c2 = models.Compte.objects.get(id=5)
         t2 = models.Titre.objects.get(nom="t2")
-        self.assertEquals(t2.encours(datel='1900-01-01'), 0)
-        self.assertEquals(t2.encours(), 1700)
-        self.assertEquals(t2.encours(rapp=True, compte=c2), 100)
-        self.assertEquals(t2.encours(compte=c1), 0)
-        self.assertEquals(t2.encours(compte=c2), 1700)
+        self.assertEqual(t2.encours(datel='1900-01-01'), 0)
+        self.assertEqual(t2.encours(), 1700)
+        self.assertEqual(t2.encours(rapp=True, compte=c2), 100)
+        self.assertEqual(t2.encours(compte=c1), 0)
+        self.assertEqual(t2.encours(compte=c2), 1700)
         c1.achat(titre=t2, nombre=20, date='2011-01-01', prix=20)
-        self.assertEquals(t2.encours(rapp=True), 100)
-        self.assertEquals(t2.encours(), 1900)
-        self.assertEquals(t2.encours(c1), 200)
-        self.assertEquals(t2.encours(datel='2011-05-01'), 400)
-        self.assertEquals(t2.encours(compte=c1, datel='2010-07-01'), 0)
-        self.assertEquals(t2.encours(compte=c2, datel='2011-11-01'), 100)
-        self.assertEquals(t2.encours(rapp=True, datel='2011-01-01'), 0)
+        self.assertEqual(t2.encours(rapp=True), 100)
+        self.assertEqual(t2.encours(), 1900)
+        self.assertEqual(t2.encours(c1), 200)
+        self.assertEqual(t2.encours(datel='2011-05-01'), 400)
+        self.assertEqual(t2.encours(compte=c1, datel='2010-07-01'), 0)
+        self.assertEqual(t2.encours(compte=c2, datel='2011-11-01'), 100)
+        self.assertEqual(t2.encours(rapp=True, datel='2011-01-01'), 0)
 
     # pas de test specifique pour cours
 
@@ -294,8 +291,8 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(models.Exercice.objects.order_by('id'), [1], attrgetter("id"))
         # on verifie qu'il prend la totalite de la durée des 2 exo
         exo = models.Exercice.objects.get(id=1)
-        self.assertEquals(exo.date_debut, utils.strpdate('2010-1-1'))
-        self.assertEquals(exo.date_fin, utils.strpdate('2011-12-31'))
+        self.assertEqual(exo.date_debut, utils.strpdate('2010-1-1'))
+        self.assertEqual(exo.date_fin, utils.strpdate('2011-12-31'))
         # verification des liens
         self.assertQuerysetEqual(models.Ope.objects.filter(exercice__id=1).order_by('id'), [4, 5], attrgetter("id"))
         self.assertQuerysetEqual(models.Echeance.objects.filter(exercice__id=1).order_by('id'), [1, 2], attrgetter("id"))
@@ -348,8 +345,8 @@ class Test_models(TestCase):
         self.assertQuerysetEqual(models.Echeance.objects.filter(compte_virement__id=2).order_by('id'), [1], attrgetter("id"))
         # fusion de compte titre
         models.Compte.objects.get(id=4).fusionne(models.Compte.objects.get(id=5))
-        self.assertEquals(models.Ope.objects.get(id=1).compte_id, 5)
-        self.assertEquals(models.Ope_titre.objects.get(id=1).compte_id, 5)
+        self.assertEqual(models.Ope.objects.get(id=1).compte_id, 5)
+        self.assertEqual(models.Ope_titre.objects.get(id=1).compte_id, 5)
 
     def test_compte_achat_vente_error(self):
         c1 = models.Compte.objects.get(id=4)
@@ -361,9 +358,9 @@ class Test_models(TestCase):
 
     def test_solde_titre_nul(self):
         c = models.Compte.objects.get(id=4)
-        self.assertEquals(c.solde_titre(), 6)
-        self.assertEquals(c.solde_titre(datel='2001-01-01'), 0)
-        self.assertEquals(c.solde_titre(datel=datetime.date(2001, 1, 1)), 0)
+        self.assertEqual(c.solde_titre(), 6)
+        self.assertEqual(c.solde_titre(datel='2001-01-01'), 0)
+        self.assertEqual(c.solde_titre(datel=datetime.date(2001, 1, 1)), 0)
 
     def test_compte_solde(self):
         c = models.Compte.objects.get(id=4)
@@ -410,8 +407,8 @@ class Test_models(TestCase):
         o = models.Ope.objects.filter(compte=c, date='2011-07-01', notes__icontains='frais')[0]
         self.assertEqual(o.cat_id, 69)
         self.assertEqual(o.montant, -20)
-        self.assertEquals(o.notes, u"Frais 20@1")
-        self.assertEquals(o.moyen_id, 2)
+        self.assertEqual(o.notes, "Frais 20@1")
+        self.assertEqual(o.moyen_id, 2)
         # utilisa des cat et tiers donnes
         c.achat(titre=t, nombre=20, frais=20, cat_frais=models.Cat.objects.get(id=3),
                 tiers_frais=models.Tiers.objects.get(id=2), date='2011-07-02')
@@ -421,8 +418,8 @@ class Test_models(TestCase):
         self.assertEqual(o.tiers_id, 2)
         self.assertEqual(o.cat_id, 3)
         self.assertEqual(o.montant, -20)
-        self.assertEquals(o.notes, u"Frais 20@1")
-        self.assertEquals(o.moyen_id, 2)
+        self.assertEqual(o.notes, "Frais 20@1")
+        self.assertEqual(o.moyen_id, 2)
 
     def test_compte_achat_avec_virement(self):
         c = models.Compte.objects.get(id=5)
@@ -430,7 +427,7 @@ class Test_models(TestCase):
         c.achat(titre=t, nombre=20, date='2011-01-01', virement_de=models.Compte.objects.get(id=1))
         self.assertEqual(t.investi(c), 20)
         self.assertEqual(c.solde(), 120)
-        self.assertEquals(models.Ope.objects.filter(compte__id=c.id).count(), 4)
+        self.assertEqual(models.Ope.objects.filter(compte__id=c.id).count(), 4)
         self.assertEqual(models.Compte.objects.get(id=1).solde(), -90)
 
     def test_operation_titre_avec_moyen_defaut(self):
@@ -451,7 +448,7 @@ class Test_models(TestCase):
 
     def test_compte_vente_simple(self):
         c = models.Compte.objects.get(id=4)
-        self.assertEqual(c.nom, u'cpt_titre1')
+        self.assertEqual(c.nom, 'cpt_titre1')
         t = models.Titre.objects.get(nom='t1')
         self.assertEqual(t.investi(c), 1)
         self.assertRaises(models.Titre.DoesNotExist, lambda: c.vente(titre=t, nombre=20, date='2011-01-01'))  # trop tot
@@ -482,8 +479,8 @@ class Test_models(TestCase):
         o = models.Ope.objects.filter(compte=c, date='2011-11-01', notes__icontains='frais')[0]
         self.assertEqual(o.cat_id, 69)
         self.assertEqual(o.montant, -20)
-        self.assertEquals(o.notes, u"frais -5@5")
-        self.assertEquals(o.moyen_id, 2)
+        self.assertEqual(o.notes, "frais -5@5")
+        self.assertEqual(o.moyen_id, 2)
         # "utilisa des cat et tiers donnes
         c.vente(titre=t, nombre=5, frais=20, cat_frais=models.Cat.objects.get(id=3),
                 tiers_frais=models.Tiers.objects.get(id=2), date='2011-11-02', prix=10)
@@ -493,8 +490,8 @@ class Test_models(TestCase):
         self.assertEqual(o.tiers_id, 2)
         self.assertEqual(o.cat_id, 3)
         self.assertEqual(o.montant, -20)
-        self.assertEquals(o.notes, u"frais -5@10")
-        self.assertEquals(o.moyen_id, 2)
+        self.assertEqual(o.notes, "frais -5@10")
+        self.assertEqual(o.moyen_id, 2)
 
     def test_compte_vente_avec_virement(self):
         # on cree le compte
@@ -507,7 +504,7 @@ class Test_models(TestCase):
         self.assertEqual(t.investi(c), decimal.Decimal('100'))
         self.assertEqual(t.nb(c), 10)
         self.assertEqual(c.solde(), -100)
-        self.assertEquals(models.Ope.objects.filter(compte=c).count(), 4)
+        self.assertEqual(models.Ope.objects.filter(compte=c).count(), 4)
         self.assertEqual(models.Compte.objects.get(id=1).solde(), -70 + 25)  # montant de l'operation
 
     def test_compte_revenu_simple(self):
@@ -533,19 +530,19 @@ class Test_models(TestCase):
         c.revenu(titre=t, montant=20, frais=20, cat_frais=cat, tiers_frais=tiers, date='2011-12-21')
         self.assertEqual(t.investi(c), -29)
         self.assertEqual(c.solde(), 10)
-        self.assertEquals(models.Ope.objects.filter(compte=c).count(), 6)
+        self.assertEqual(models.Ope.objects.filter(compte=c).count(), 6)
 
     def test_compte_revenu_virement(self):
         c = models.Compte.objects.get(id=4)
         t = models.Titre.objects.get(nom="t1")
         c.revenu(titre=t, montant=20, date='2011-12-25', virement_vers=models.Compte.objects.get(id=1))
         self.assertEqual(c.solde(), 0)
-        self.assertEquals(models.Ope.objects.filter(compte=c).count(), 4)
+        self.assertEqual(models.Ope.objects.filter(compte=c).count(), 4)
         self.assertEqual(models.Compte.objects.get(id=1).solde(), -50)
 
     def test_compte_liste_titre(self):
         c = models.Compte.objects.get(id=4)
-        self.assertQuerysetEqual(c.liste_titre(), [u'autre', u't1'], attrgetter("nom"))
+        self.assertQuerysetEqual(c.liste_titre(), ['autre', 't1'], attrgetter("nom"))
 
     def test_compte_date_rappro(self):
         self.assertEqual(models.Compte.objects.get(id=5).date_rappro(), utils.strpdate('2011-10-30'))
@@ -569,8 +566,7 @@ class Test_models(TestCase):
         c = models.Compte.objects.get(id=1)
         c.ajustement(datel=datetime.date(2012, 11, 30), montant_vrai=0)
         self.assertEqual(models.Ope.objects.filter(compte_id=1).count(), 9)
-        self.assertEqual(models.Ope.objects.get(id=14).__unicode__(),
-                         u"(14) le 30/11/2012 : 70 EUR tiers: ajustement cpt: cpte1")
+        self.assertEqual(models.Ope.objects.get(id=14).__str__(), "(14) le 30/11/2012 : 70.00 EUR tiers: ajustement cpt: cpte1")
         # on verifie que si on fait un ajustement et qu'il est deja fait, on fait rien
         c.ajustement(datel=datetime.date(2012, 12, 30), montant_vrai=0)
         self.assertEqual(models.Ope.objects.filter(compte_id=1).count(), 9)
@@ -760,12 +756,12 @@ class Test_models(TestCase):
         self.assertRaises(IntegrityError, m.delete)
 
     def test_rapp_compte(self):
-        self.assertEquals(models.Rapp.objects.get(id=1).compte, 1)
-        self.assertEquals(models.Rapp.objects.get(id=3).compte, None)
+        self.assertEqual(models.Rapp.objects.get(id=1).compte, 1)
+        self.assertEqual(models.Rapp.objects.get(id=3).compte, None)
 
     def test_rapp_solde(self):
-        self.assertEquals(models.Rapp.objects.get(id=1).solde, -90)
-        self.assertEquals(models.Rapp.objects.get(id=3).solde, 0)
+        self.assertEqual(models.Rapp.objects.get(id=1).solde, -90)
+        self.assertEqual(models.Rapp.objects.get(id=3).solde, 0)
 
     def test_rapp_fusionne(self):
         models.Rapp.objects.get(id=1).fusionne(models.Rapp.objects.get(id=3))
@@ -780,25 +776,25 @@ class Test_models(TestCase):
                                                                                       id=1)))
 
     def test_echeance_calcul_next(self):
-        self.assertEquals(models.Echeance.objects.get(id=1).calcul_next(), None)
-        self.assertEquals(models.Echeance.objects.get(id=2).calcul_next(), utils.strpdate('2011-12-02'))
-        self.assertEquals(models.Echeance.objects.get(id=3).calcul_next(), utils.strpdate('2011-11-01'))
-        self.assertEquals(models.Echeance.objects.get(id=4).calcul_next(), utils.strpdate('2011-11-13'))
-        self.assertEquals(models.Echeance.objects.get(id=5).calcul_next(), utils.strpdate('2011-12-30'))
-        self.assertEquals(models.Echeance.objects.get(id=6).calcul_next(), utils.strpdate('2013-10-30'))
-        self.assertEquals(models.Echeance.objects.get(id=7).calcul_next(), None)
+        self.assertEqual(models.Echeance.objects.get(id=1).calcul_next(), None)
+        self.assertEqual(models.Echeance.objects.get(id=2).calcul_next(), utils.strpdate('2011-12-02'))
+        self.assertEqual(models.Echeance.objects.get(id=3).calcul_next(), utils.strpdate('2011-11-01'))
+        self.assertEqual(models.Echeance.objects.get(id=4).calcul_next(), utils.strpdate('2011-11-13'))
+        self.assertEqual(models.Echeance.objects.get(id=5).calcul_next(), utils.strpdate('2011-12-30'))
+        self.assertEqual(models.Echeance.objects.get(id=6).calcul_next(), utils.strpdate('2013-10-30'))
+        self.assertEqual(models.Echeance.objects.get(id=7).calcul_next(), None)
 
     def test_echeance_check1(self):
         """enregistre toutes les echaances jusqu'au 31/12/2011"""
         request = self.request_get('/options/check')
-        models.Echeance.check(to=utils.strpdate('2011-12-31'), request=request)
+        models.Echeance.check_if_necessary(to=utils.strpdate('2011-12-31'), request=request)
         self.assertcountmessage(request, 57)
         self.assertEqual(models.Ope.objects.count(), 71)
 
     def test_echeance_check2(self):
         """enregistre les echeance du compte 2 jusqu'au 09/12/2011"""
         request = self.request_get('/options/check')
-        models.Echeance.check(queryset=models.Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'), request=request)
+        models.Echeance.check_if_necessary(queryset=models.Echeance.objects.filter(id=2), to=utils.strpdate('2011-12-09'), request=request)
         self.assertEqual(models.Ope.objects.count(), 18)
 
     @mock.patch('gsb.utils.today')
@@ -806,7 +802,7 @@ class Test_models(TestCase):
         """enregistre les operation jusqu'a aujourdhui 'en fait le 31/12/2011'"""
         today_mock.return_value = datetime.date(2011, 12, 31)
         request = self.request_get('/options/check')
-        models.Echeance.check(request=request)
+        models.Echeance.check_if_necessary(request=request)
         self.assertcountmessage(request, 57)
         self.assertEqual(models.Ope.objects.count(), 71)
 
@@ -829,35 +825,35 @@ class Test_models(TestCase):
         # test pas defaut
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
         ide = o.id
-        self.assertEquals(o.pr, False)
+        self.assertEqual(o.pr, False)
         o.pointe = True
         o.save()
-        self.assertEquals(models.Ope.objects.get(id=ide).pr, True)
+        self.assertEqual(models.Ope.objects.get(id=ide).pr, True)
         o = models.Ope.objects.get(id=ide)
         o.rapp_id = 1
         o.pointe = False
         o.save()
-        self.assertEquals(models.Ope.objects.get(id=ide).pr, True)
+        self.assertEqual(models.Ope.objects.get(id=ide).pr, True)
 
     def test_ope_save(self):
         c = models.Compte.objects.get(id=1)
         t = models.Tiers.objects.get(id=1)
         # test avecmoyen par defaut credit
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
-        self.assertEquals(o.moyen_id, 4)
+        self.assertEqual(o.moyen_id, 4)
         # test avecmoyen par defaut debit
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
-        self.assertEquals(o.moyen_id, 1)
+        self.assertEqual(o.moyen_id, 1)
         # test avec moyen defini
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t, moyen=models.Moyen.objects.get(id=2))
-        self.assertEquals(o.moyen_id, 2)
+        self.assertEqual(o.moyen_id, 2)
         # test avec les moyens par defaut
         c.moyen_credit_defaut = None
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=20, tiers=t)
-        self.assertEquals(o.moyen_id, 4)
+        self.assertEqual(o.moyen_id, 4)
         c.moyen_debit_defaut = None
         o = models.Ope.objects.create(compte=c, date='2010-01-01', montant=-20, tiers=t)
-        self.assertEquals(o.moyen_id, 1)
+        self.assertEqual(o.moyen_id, 1)
 
     def test_uuid_ope(self):
         """on verifie que l'uuid ne change pas si on sauve"""
@@ -878,21 +874,14 @@ class Test_models(TestCase):
 
     def test_last_modif(self):
         o = models.Ope.objects.get(pk=4)
-        lup = o.lastupdate
         o.save()
+        lup=o.lastupdate
+        lc=o.date_created
+        time.sleep(3)
         o = models.Ope.objects.get(pk=4)
-        self.assertLess(lup, o.lastupdate)
-
-    def test_last_modif2(self):
-        """on verifie que last update est toujours modifie"""
-        o = models.Tiers.objects.create(nom="Test")
-        lup = o.lastupdate
-        pk = o.id
-        time.sleep(10)
-        o.nom = "Test2"
         o.save()
-        o = models.Tiers.objects.get(pk=pk)
         self.assertLess(lup, o.lastupdate)
+        self.assertEqual(lc, o.date_created)
 
     def test_ope_clean(self):
         o = models.Ope.objects.get(pk=4)
@@ -905,7 +894,7 @@ class Test_models(TestCase):
             ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {}, o),
             # normal
             ({'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'pointe': True, 'rapp': r.id,
-              'date': utils.now()}, {'__all__': [u"cette opération ne peut pas etre à la fois pointée et rapprochée", ]},
+              'date': utils.now()}, {'__all__': ["cette opération ne peut pas etre à la fois pointée et rapprochée", ]},
              o), (
                 {'tiers': t.id, 'compte': cpt.id, 'cat': c.id, 'montant': 120, 'moyen': m.id, 'date': utils.now()}, {},
                 models.Ope.objects.get(pk=11)))
@@ -927,7 +916,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est pointée", ]})
 
     def test_ope_clean_pointee2(self):
         """une fille pointee a le montant d'une autre fille changee"""
@@ -942,7 +931,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est pointée", ]})
 
     def test_ope_clean_pointee3(self):
         """une mere pointee a le montant d'une fille changee"""
@@ -957,7 +946,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est pointée", ]})
 
     def test_ope_clean_pointee4(self):
         """une mere pointee a son montant  changee"""
@@ -973,7 +962,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est pointée", ]})
 
     def test_ope_clean_pointee5(self):
         """une fille pointee a son montant  changee"""
@@ -989,7 +978,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est pointée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est pointée", ]})
 
     def test_ope_cleanrapp(self):
         """une fille rapp, mere changee"""
@@ -1005,7 +994,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est rapprochée", ]})
 
     def test_ope_cleanrapp2(self):
         """une fille rapp, une autre fille changee"""
@@ -1021,7 +1010,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est rapprochée", ]})
 
     def test_ope_clean_rapp3(self):
         """une mere rapp a le montant d'une fille changee"""
@@ -1037,7 +1026,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est rapprochée", ]})
 
     def test_ope_clean_rapp4(self):
         """une mere rapp a son montant  changee"""
@@ -1053,7 +1042,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=11))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est rapprochée", ]})
 
     def test_ope_clean_rapp5(self):
         """une mere pointee a son montant  changee"""
@@ -1069,7 +1058,7 @@ class Test_models(TestCase):
         form = forms.OperationForm(data, instance=models.Ope.objects.get(pk=13))
         form.is_valid()
         self.assertEqual(form.errors,
-                         {'__all__': [u"impossible de modifier l'opération car au moins une partie est rapprochée", ]})
+                         {'__all__': ["impossible de modifier l'opération car au moins une partie est rapprochée", ]})
 
     def test_tot_fille(self):
         o = models.Ope.objects.get(pk=11)
@@ -1114,7 +1103,7 @@ class Test_models(TestCase):
             self.assertEqual(form.errors, "")
         self.assertTrue(models.Ope.objects.get(pk=11).is_mere)
         self.assertEqual(models.Ope.objects.get(pk=11).montant, 100)
-        self.assertEqual(models.Ope.objects.get(pk=11).cat.nom, u"Opération Ventilée")
+        self.assertEqual(models.Ope.objects.get(pk=11).cat.nom, "Opération Ventilée")
 
     def test_ope_moyen_def_recette1(self):
         t = models.Tiers.objects.get(id=1)
@@ -1256,11 +1245,11 @@ class Test_models(TestCase):
         o.cat = models.Cat.objects.get(id=1)
         o.save()
         o = models.Ope.objects.get(id=11)
-        self.assertEquals(o.cat.nom, u"Opération Ventilée")
+        self.assertEqual(o.cat.nom, "Opération Ventilée")
         o.montant = 154563
         o.save()
         o = models.Ope.objects.get(id=11)
-        self.assertEquals(o.montant, 100)
+        self.assertEqual(o.montant, 100)
 
     def test_virement_error(self):
         # _non_ope
@@ -1278,41 +1267,41 @@ class Test_models(TestCase):
 
     def test_virement_verif_property(self):
         v = models.Virement(models.Ope.objects.get(id=8))
-        self.assertEquals(v.origine.id, 8)
-        self.assertEquals(v.dest.id, 9)
-        self.assertEquals(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
-        self.assertEquals(v.dest.compte, models.Compte.objects.get(nom='cptb3'))
-        self.assertEquals(v.date, utils.strpdate('2011-10-30'))
-        self.assertEquals(v.montant, v.origine.montant * -1)
-        self.assertEquals(v.montant, v.dest.montant)
-        self.assertEquals(v.montant, 100)
-        self.assertEquals(v.__unicode__(), u"cpte1 => cptb3")
-        self.assertEquals(v.auto, False)
-        self.assertEquals(v.exercice, None)
+        self.assertEqual(v.origine.id, 8)
+        self.assertEqual(v.dest.id, 9)
+        self.assertEqual(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
+        self.assertEqual(v.dest.compte, models.Compte.objects.get(nom='cptb3'))
+        self.assertEqual(v.date, utils.strpdate('2011-10-30'))
+        self.assertEqual(v.montant, v.origine.montant * -1)
+        self.assertEqual(v.montant, v.dest.montant)
+        self.assertEqual(v.montant, 100)
+        self.assertEqual(v.__str__(), "cpte1 => cptb3")
+        self.assertEqual(v.auto, False)
+        self.assertEqual(v.exercice, None)
         v.date_val = '2011-02-01'
         v.pointe = True
         v.save()
-        self.assertEquals(models.Virement(models.Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
-        self.assertEquals(models.Virement(models.Ope.objects.get(id=8)).pointe, True)
+        self.assertEqual(models.Virement(models.Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
+        self.assertEqual(models.Virement(models.Ope.objects.get(id=8)).pointe, True)
 
     def test_virement_inverse(self):
         v = models.Virement(models.Ope.objects.get(id=9))
-        self.assertEquals(v.origine.id, 8)
-        self.assertEquals(v.dest.id, 9)
-        self.assertEquals(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
-        self.assertEquals(v.dest.compte, models.Compte.objects.get(nom='cptb3'))
-        self.assertEquals(v.date, utils.strpdate('2011-10-30'))
-        self.assertEquals(v.montant, v.origine.montant * -1)
-        self.assertEquals(v.montant, v.dest.montant)
-        self.assertEquals(v.montant, 100)
-        self.assertEquals(v.__unicode__(), u"cpte1 => cptb3")
-        self.assertEquals(v.auto, False)
-        self.assertEquals(v.exercice, None)
+        self.assertEqual(v.origine.id, 8)
+        self.assertEqual(v.dest.id, 9)
+        self.assertEqual(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
+        self.assertEqual(v.dest.compte, models.Compte.objects.get(nom='cptb3'))
+        self.assertEqual(v.date, utils.strpdate('2011-10-30'))
+        self.assertEqual(v.montant, v.origine.montant * -1)
+        self.assertEqual(v.montant, v.dest.montant)
+        self.assertEqual(v.montant, 100)
+        self.assertEqual(v.__str__(), "cpte1 => cptb3")
+        self.assertEqual(v.auto, False)
+        self.assertEqual(v.exercice, None)
         v.date_val = '2011-02-01'
         v.pointe = True
         v.save()
-        self.assertEquals(models.Virement(models.Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
-        self.assertEquals(models.Virement(models.Ope.objects.get(id=8)).pointe, True)
+        self.assertEqual(models.Virement(models.Ope.objects.get(id=8)).date_val, utils.strpdate('2011-02-01'))
+        self.assertEqual(models.Virement(models.Ope.objects.get(id=8)).pointe, True)
 
     def test_virement_edit(self):
         v = models.Virement(models.Ope.objects.get(id=8))
@@ -1324,13 +1313,13 @@ class Test_models(TestCase):
         today_mock.return_value = datetime.date(2012, 10, 14)
         v = models.Virement.create(models.Compte.objects.get(id=1), models.Compte.objects.get(id=2), 20)
         self.assertEqual(models.Compte.objects.get(id=1).solde(), -90)
-        self.assertEquals(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
-        self.assertEquals(v.dest.compte, models.Compte.objects.get(nom='cptb2'))
-        self.assertEquals(v.origine.id, 14)
-        self.assertEquals(v.date, datetime.date(2012, 10, 14))
-        self.assertEquals(v.montant, v.origine.montant * -1)
-        self.assertEquals(v.montant, v.dest.montant)
-        self.assertEquals(v.montant, 20)
+        self.assertEqual(v.origine.compte, models.Compte.objects.get(nom='cpte1'))
+        self.assertEqual(v.dest.compte, models.Compte.objects.get(nom='cptb2'))
+        self.assertEqual(v.origine.id, 14)
+        self.assertEqual(v.date, datetime.date(2012, 10, 14))
+        self.assertEqual(v.montant, v.origine.montant * -1)
+        self.assertEqual(v.montant, v.dest.montant)
+        self.assertEqual(v.montant, 20)
         v = models.Virement.create(models.Compte.objects.get(id=1), models.Compte.objects.get(id=2), 20, '2010-01-01',
                                    'test_notes')
         self.assertEqual(models.Compte.objects.get(id=1).solde(), -110)
@@ -1346,15 +1335,15 @@ class Test_models(TestCase):
     def test_virement_delete(self):
         v = models.Virement.create(models.Compte.objects.get(id=1), models.Compte.objects.get(id=2), 20)
         v.delete()
-        self.assertEquals(models.Compte.objects.get(nom='cpte1').solde(), -70)
-        self.assertEquals(models.Compte.objects.get(nom='cptb2').solde(), 0)
+        self.assertEqual(models.Compte.objects.get(nom='cpte1').solde(), -70)
+        self.assertEqual(models.Compte.objects.get(nom='cptb2').solde(), 0)
 
     def test_virement_init_form(self):
         v = models.Virement.create(models.Compte.objects.get(id=1), models.Compte.objects.get(id=2), 20, '2010-01-01',
                                    'test_notes')
         tab = {'compte_origine': 1, 'compte_destination': 2, 'montant': 20, 'date': "2010-01-01", 'notes': 'test_notes',
                'pointe': False, 'moyen_origine': 6, 'moyen_destination': 6}
-        self.assertEquals(tab, v.init_form())
+        self.assertEqual(tab, v.init_form())
 
 
 class Test_models2(TestCase):
@@ -1380,10 +1369,10 @@ class Test_models2(TestCase):
         o.rapp = r
         o.save()
         cours = t.last_cours_date(rapp=True)
-        self.assertEquals(cours, utils.strpdate('2012-01-01'))
+        self.assertEqual(cours, utils.strpdate('2012-01-01'))
         models.Cours.objects.get(id=1).delete()
         cours = t.last_cours_date(rapp=True)
-        self.assertEquals(cours, None)
+        self.assertEqual(cours, None)
 
     def test_ope_titre_special3(self):
         """encours simple mais le cours a change entre temps"""

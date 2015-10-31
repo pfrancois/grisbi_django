@@ -1,16 +1,12 @@
 # -*- coding: utf-8
-
 import decimal
 import os
 
 from django.db import models
 from django import forms
 from django.db.models import DateTimeField
-
+from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 import gsb.utils as utils
-
-#from south.modelsinspector import add_introspection_rules
-from south.modelsinspector import introspector
 
 
 # definition d'un moneyfield
@@ -18,7 +14,7 @@ class CurField(models.DecimalField):
     """
     un champ decimal mais defini pour les monnaies
     """
-    description = u"A Monetary value"
+    description = "A Monetary value"
 
     # __metaclass__ = models.SubfieldBase # ca marche pas chez always data
     def __init__(self, verbose_name=None, name=None, max_digits=15, decimal_places=2, default=0.00, **kwargs):
@@ -30,14 +26,9 @@ class CurField(models.DecimalField):
     def __mul__(self, other):
         return decimal.Decimal(self) * decimal.Decimal(other)
 
-    def south_field_triple(self):
-        """Returns a suitable description of this field for South."""
-        # We'll just introspect ourselves, since we inherit.
-
-        field_class = "django.db.models.fields.DecimalField"
-        args, kwargs = introspector(self)
-        return field_class, args, kwargs
-
+    def deconstruct(self):
+        name, path, args, kwargs = super(CurField, self).deconstruct()
+        return name, path, args, kwargs
 
 class ExtFileField(forms.FileField):
     """
@@ -93,23 +84,15 @@ class uuidfield(models.CharField):
 
     def pre_save(self, model_instance, add):
         if self.auto and add:
-            value = unicode(utils.uuid())
+            value = str(utils.uuid())
             setattr(model_instance, self.attname, value)
             return value
         else:
             value = super(uuidfield, self).pre_save(model_instance, add)
             if self.auto and not value:
-                value = unicode(utils.uuid())
+                value = str(utils.uuid())
                 setattr(model_instance, self.attname, value)
         return value
-
-    def south_field_triple(self):
-        """Returns a suitable description of this field for South."""
-        # We'll just introspect the _actual_ field.
-        field_class = "django.db.models.fields.CharField"
-        args, kwargs = introspector(self)
-        # That's our definition!
-        return field_class, args, kwargs
 
     def formfield(self, **kwargs):
         defaults = {
@@ -118,33 +101,3 @@ class uuidfield(models.CharField):
         }
         defaults.update(kwargs)
         return super(uuidfield, self).formfield(**defaults)
-
-
-# tire initialement de django extension"""
-class ModificationDateTimeField(DateTimeField):
-    """ ModificationDateTimeField
-
-    By default, sets editable=False, blank=True, default=datetime.now
-
-    Sets value to datetime.now() on each save of the model.
-    """
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('editable', False)
-        kwargs.setdefault('blank', True)
-        DateTimeField.__init__(self, *args, **kwargs)
-
-    def pre_save(self, model, add):
-        value = utils.now()
-        setattr(model, self.attname, value)
-        return value
-
-    def get_internal_type(self):
-        return "DateTimeField"
-
-    def south_field_triple(self):
-        """Returns a suitable description of this field for South."""
-        # We'll just introspect ourselves, since we inherit.
-        field_class = "django.db.models.fields.DateTimeField"
-        args, kwargs = introspector(self)
-        return field_class, args, kwargs

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 from django.conf import settings  # @Reimport
 
 from django.contrib import messages
@@ -38,7 +38,7 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
+            raise utils.FormatException("erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
 
     @property
     def date_val(self):
@@ -46,7 +46,7 @@ class Csv_unicode_reader_ope_sans_jumelle_et_ope_mere(Csv_unicode_reader_ope_bas
         try:
             return utils.to_date(self.row['date_val'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
+            raise utils.FormatException("erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
         except KeyError:
             return None
 
@@ -124,11 +124,11 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
     type_f = "csv_version_totale"
     creation_de_compte = True
     titre = "import csv"
-    encoding = "iso-8859-1"
+    encoding = "utf-8"
     extensions = ('.csv', )
     sauter_flag = False
 
-    def import_file(self, nomfich):
+    def import_file(self, nomfich, encoding=None):
         """renvoi un tableau complet de l'import"""
         self.init_cache()
         with transaction.atomic():
@@ -136,8 +136,10 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             cache_titre = dict()
             # les moyens par defaut
             moyen_virement = self.moyens.goc(nom=None, obj={'nom': "Virement", 'type': 'v'})
-            with open(nomfich, 'r') as f_non_encode:
-                fich = self.reader(f_non_encode, encoding=self.encoding)
+            if encoding is None:
+                encoding = self.encoding
+            with open(nomfich, 'r', encoding=encoding) as fichier:
+                fich = self.reader(fichier)
                 # ---------------------- boucle
                 retour = self.tableau(fich, moyen_virement)
                 # ------------------fin boucle
@@ -176,7 +178,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                             vir.notes = ope['notes'].split('>P')[0]
                             vir.dest.pointe = True
                         # les rapp des jumelles
-                        if "rapp_id" in ope.keys() and ope['rapp_id'] is not None:  # rapp cote origine
+                        if "rapp_id" in list(ope.keys()) and ope['rapp_id'] is not None:  # rapp cote origine
                             vir.origine.rapp = models.Rapp.objects.get(id=ope['rapp_id'])
                         if ">R" in ope['notes']:  # rapp cote dest
                             rapp = ope['notes'].split('>R')[1]
@@ -185,40 +187,39 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                         vir.date_val = ope['date_val']
                         vir.save()
                         self.opes.nb_created += 1
-                        messages.success(self.request, u"virement ope: %s ligne %s" % (vir.origine, ligne))
-                        messages.success(self.request, u"virement ope: %s ligne %s" % (vir.dest, ligne))
+                        messages.success(self.request, "virement ope: %s ligne %s" % (vir.origine, ligne))
+                        messages.success(self.request, "virement ope: %s ligne %s" % (vir.dest, ligne))
                     if ope_titre:
                         compte = models.Compte.objects.get(id=ope['compte_id'])
                         nombre = utils.to_decimal(ope['notes'].split('@')[0])
                         cours = utils.to_decimal(ope['notes'].split('@')[1])
                         if nombre == 0 and cours == 0:
-                            messages.warning(self.request, u'attention, fausse opération sur titre ligne %s' % ligne)
+                            messages.warning(self.request, 'attention, fausse opération sur titre ligne %s' % ligne)
                             continue
-                        if ope['titre_id'] not in cache_titre.keys():
+                        if ope['titre_id'] not in list(cache_titre.keys()):
                             cache_titre[ope['titre_id']] = models.Titre.objects.get(id=ope['titre_id'])
                         titre = cache_titre[ope['titre_id']]
                         if nombre > 0:
                             ope_gsb = compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
-                            messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
+                            messages.success(self.request, "ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
                         else:
                             try:
                                 ope_gsb = compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'])
-                                messages.success(self.request, u"ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
-                                messages.success(self.request, u"ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
+                                messages.success(self.request, "ope_titre: %s ligne %s" % (ope_gsb.ope_ost, ligne))
+                                messages.success(self.request, "ope_titre(pmv): %s ligne %s" % (ope_gsb.ope_pmv, ligne))
                             except models.Titre.DoesNotExist:
                                 messages.error(self.request,
                                                "impossible de vendre car le titre (%s) n'est pas en portefeuille ligne %s" % (
                                                    titre, ligne))
                 else:
                     ope_gsb = models.Ope.objects.create(**ope)
-                    messages.success(self.request, u"opé créee: %s ligne %s" % (ope_gsb, ligne))
-                    last_id=ope_gsb.id
+                    messages.success(self.request, "opé créee: %s ligne %s" % (ope_gsb, ligne))
                     # on gere le nombre de truc annex crée
             for obj in (self.ibs, self.banques, self.cats, self.comptes, self.cours, self.exos, self.moyens, self.tiers,
                         self.titres, self.rapps):
                 if obj.nb_created > 0:
                     # noinspection PyProtectedMember
-                    messages.info(self.request, u"%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
+                    messages.info(self.request, "%s %s crées" % (obj.nb_created, obj.element._meta.object_name))
         return True
 
     def tableau(self, fich, moyen_virement):
@@ -242,7 +243,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                     except KeyError:
                         colonnes_oublies.append(attr)
                 if len(colonnes_oublies) > 0:
-                    self.erreur.append(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
+                    self.erreur.append("il manque la/les colonne(s) '%s'" % "','".join(colonnes_oublies))
                     return False
                 else:
                     verif_format = True
@@ -252,7 +253,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             ope['ligne'] = row.ligne
             # verification pour les lignes
             if row.monnaie != settings.DEVISE_GENERALE:  # pragma: no cover
-                self.erreur.append(u"la devise du fichier n'est pas la même que celui de la base")
+                self.erreur.append("la devise du fichier n'est pas la même que celui de la base")
                 continue
             # compte
             nb_created_avant = self.comptes.nb_created
@@ -269,12 +270,12 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
             try:
                 ope['date'] = row.date
             except utils.FormatException as e:
-                self.erreur.append(u"%s" % e)
+                self.erreur.append("%s" % e)
                 continue
             try:
                 ope['date_val'] = row.date_val
             except utils.FormatException as e:
-                self.erreur.append(u"%s" % e)
+                self.erreur.append("%s" % e)
                 continue
             # virement
             if row.jumelle:
@@ -285,15 +286,15 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 dest = dest.strip()
                 if origine and dest:
                     if dest == origine:
-                        self.erreur.append(u'attention, virement impossible entre le même compte à la ligne %s' % row.ligne)
+                        self.erreur.append('attention, virement impossible entre le même compte à la ligne %s' % row.ligne)
                         continue
                     if self.comptes.goc(dest) != ope['compte_id'] and self.comptes.goc(origine) != ope['compte_id']:
-                        self.erreur.append(u"le compte designé doit être un des deux comptes 'tiers' ligne %s" % row.ligne)
+                        self.erreur.append("le compte designé doit être un des deux comptes 'tiers' ligne %s" % row.ligne)
                         continue
                     ope['dest_id'] = self.comptes.goc(dest)
                     ope['compte_id'] = self.comptes.goc(origine)
                 else:
-                    self.erreur.append(u"attention il faut deux bouts à un virement ligne %s" % row.ligne)
+                    self.erreur.append("attention il faut deux bouts à un virement ligne %s" % row.ligne)
                     continue
             else:
                 ope['virement'] = False
@@ -331,7 +332,7 @@ class Import_csv_ope_sans_jumelle_et_ope_mere(import_base.Import_base):
                 if 'titre_ ' in row.tiers:
                     ope['titre_id'] = self.titres.goc(nom=row.tiers.replace('titre_ ', '').strip())
                 else:
-                    self.erreur.append(u"Ce tiers '%s' ne peut être un titre à la ligne %s" % (row.tiers, row.line_num))
+                    self.erreur.append("Ce tiers '%s' ne peut être un titre à la ligne %s" % (row.tiers, row.line_num))
                     continue
             else:
                 ope['ope_titre'] = False

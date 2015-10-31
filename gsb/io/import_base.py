@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 """"import_file : vue qui gere les import"""
-from __future__ import absolute_import
+
 import time
 # import logging
 import os
@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.db.models import Max
 from django.db import transaction
+from django.utils.encoding import smart_text
 
 from .. import forms as gsb_forms
 from .. import models
@@ -20,7 +21,11 @@ from .. import utils
 
 
 def isin_default():
-    nb = max(models.Titre.objects.all().aggregate(Max('pk'))['pk__max'], 0) + 1
+    pk = models.Titre.objects.all().aggregate(Max('pk'))['pk__max']
+    if pk is not None:
+        nb = max(pk, 0) + 1
+    else:
+        nb = 1
     return "ZZ_%s" % nb
 
 
@@ -161,7 +166,7 @@ class Table(object):
                 c, created = self.element.objects.get_or_create(**param)
                 self.id[c.nom] = c.pk
                 if created:
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, c))
+                    messages.info(self.request, 'création du %s "%s"' % (self.element._meta.object_name, c))
 
         self.nb_created = 0
 
@@ -198,7 +203,7 @@ class Table(object):
                         with transaction.atomic():
                             #permet de creer un objet avec un id defini
                             #donc on verifie avant s'il n'existe pas deja
-                            if obj is not None and 'id' in obj.keys():
+                            if obj is not None and 'id' in list(obj.keys()):
                                 requete = self.element.objects.filter(id=obj['id'])
                                 if requete.exists() and requete[0].nom != obj['nom']:
                                     raise ImportException(
@@ -212,11 +217,11 @@ class Table(object):
                     self.id[nom] = pk
                     self.created_items.append(created)
                     # noinspection PyProtectedMember
-                    messages.info(self.request, u'création du %s "%s"' % (self.element._meta.object_name, created))
+                    messages.info(self.request, 'création du %s "%s"' % (self.element._meta.object_name, created))
                 else:
                     #pas possible de creer un objet read only
                     # noinspection PyProtectedMember
-                    raise ImportException(u"%s '%s' non créée parce que c'est read only" % (self.element._meta.object_name, nom))
+                    raise ImportException("%s '%s' non créée parce que c'est read only" % (self.element._meta.object_name, nom))
         return pk
 
     def arg_def(self, nom, obj=None):
@@ -231,17 +236,17 @@ class Cat_cache(Table):
     element = models.Cat
 
     def auto(self):
-        return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': u'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
-                {'id': settings.ID_CAT_VIR, 'defaults': {'nom': u'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
+        return [{'id': settings.ID_CAT_OST, 'defaults': {'nom': 'Opération sur titre', 'id': settings.ID_CAT_OST, 'type': 'd'}},
+                {'id': settings.ID_CAT_VIR, 'defaults': {'nom': 'Virement', 'id': settings.ID_CAT_VIR, 'type': 'v'}},
                 {'id': settings.ID_CAT_PMV,
-                 'defaults': {'nom': u'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
-                {'id': settings.REV_PLAC, 'defaults': {'nom': u"Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
-                {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': u'Impôts', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
-                {'nom': u"Opération Ventilée", 'defaults': {'nom': u"Opération Ventilée", 'type': 'd'}},
-                {'nom': u"Frais bancaires", 'defaults': {'nom': u"Frais bancaires", 'type': 'd'}},
-                {'nom': u"Non affecté", 'defaults': {'nom': u"Non affecté", 'type': 'd'}},
-                {'nom': u"Avance", 'defaults': {'nom': u"Avance", 'type': 'd'}},
-                {'nom': u"Remboursement", 'defaults': {'nom': u"Remboursement", 'type': 'r'}}, ]
+                 'defaults': {'nom': 'Revenus de placements:Plus-values', 'id': settings.ID_CAT_PMV, 'type': 'r'}},
+                {'id': settings.REV_PLAC, 'defaults': {'nom': "Revenus de placements:interets", 'id': settings.REV_PLAC, 'type': 'r'}},
+                {'id': settings.ID_CAT_COTISATION, 'defaults': {'nom': 'Impôts', 'id': settings.ID_CAT_COTISATION, 'type': 'd'}},
+                {'nom': "Opération Ventilée", 'defaults': {'nom': "Opération Ventilée", 'type': 'd'}},
+                {'nom': "Frais bancaires", 'defaults': {'nom': "Frais bancaires", 'type': 'd'}},
+                {'nom': "Non affecté", 'defaults': {'nom': "Non affecté", 'type': 'd'}},
+                {'nom': "Avance", 'defaults': {'nom': "Avance", 'type': 'd'}},
+                {'nom': "Remboursement", 'defaults': {'nom': "Remboursement", 'type': 'r'}}, ]
 
     def arg_def(self, nom, obj=None):
         """definition des argument par defaut
@@ -258,8 +263,8 @@ class Moyen_cache(Table):
     def auto(self):
         return [{'id': settings.MD_CREDIT, 'defaults': {'nom': 'CREDIT', 'id': settings.MD_CREDIT, 'type': 'r'}},
                 {'id': settings.MD_DEBIT, 'defaults': {'nom': 'DEBIT', 'id': settings.MD_DEBIT, 'type': 'd'}},
-                {'nom': u"Virement", 'defaults': {'nom': u"Virement", 'type': 'v'}},
-                {'nom': u"carte bancaire", 'defaults': {'nom': u"carte bancaire", 'type': 'd'}}, ]
+                {'nom': "Virement", 'defaults': {'nom': "Virement", 'type': 'v'}},
+                {'nom': "carte bancaire", 'defaults': {'nom': "carte bancaire", 'type': 'd'}}, ]
 
     def goc(self, nom="", obj=None, montant=-1):
         # pas besoin d'argdef car comme on redefini cette methode
@@ -351,7 +356,7 @@ class Cours_cache(Table):
                 el = models.Cours.objects.get(date=date, titre_id=titre_id)
                 pk = el.id
                 if el.valeur != montant:
-                    raise ImportException(u'difference de montant %s et %s pour le titre %s à la date %s' % (
+                    raise ImportException('difference de montant %s et %s pour le titre %s à la date %s' % (
                         el.valeur, montant, el.titre.nom, date))
             except self.element.DoesNotExist:
                 arg_def = {'titre_id': titre_id, 'date': date, "valeur": montant}
@@ -409,13 +414,13 @@ class Rapp_cache(Table):
             return obj
 
     def sync_date(self):
-        for r in self.id.values():
+        for r in list(self.id.values()):
             date_max = max(self.dates[r])
             rapp = self.element.objects.get(pk=r)
             if rapp.date < date_max:
                 rapp.date = date_max
                 rapp.save()
-                messages.info(self.request, u"date pour le rapp %s mise a jour au %s" % (rapp, date_max))
+                messages.info(self.request, "date pour le rapp %s mise a jour au %s" % (rapp, date_max))
 
 
 class Moyen_defaut_cache(object):
@@ -425,7 +430,7 @@ class Moyen_defaut_cache(object):
             self.id[c.nom] = {"c": c.moyen_credit().id, "d": c.moyen_debit().id}
 
     def goc(self, compte, montant):
-        if compte in self.id.keys():
+        if compte in list(self.id.keys()):
             if montant > 0:
                 return self.id[compte]['c']
             else:
@@ -460,7 +465,7 @@ class Import_base(views.Myformview):
         nomfich, file_extension = os.path.splitext(nomfich)
         if file_extension not in self.extensions:
             messages.error(self.request,
-                           u"attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (
+                           "attention cette extension '%s' n'est pas compatible avec ce format d'import %s" % (
                                file_extension, self.extensions))
             return self.form_invalid(form)
         nomfich = os.path.join(settings.PROJECT_PATH, 'upload',
@@ -468,12 +473,13 @@ class Import_base(views.Myformview):
         # commme on peut avoir plusieurs extension on prend par defaut la premiere
         # si le repertoire n'existe pas on le crée
         try:
-            destination = open(nomfich, 'w+b')
+            destination = open(nomfich, 'w', encoding="utf-8", newline='')
         except IOError:  # pragma: no cover
             os.makedirs(os.path.join(settings.PROJECT_PATH, 'upload'))
-            destination = open(nomfich, 'w+b')
+            destination = open(nomfich, 'w', encoding="utf-8", newline='')
         for chunk in self.request.FILES['nom_du_fichier'].chunks():
-            destination.write(chunk)
+            t = smart_text(chunk, encoding="utf-8")
+            destination.write(t)
         destination.close()
         # renomage ok
         result = self.import_file(nomfich)
@@ -495,7 +501,7 @@ class Import_base(views.Myformview):
 
     def get_form(self, form_class):
         form = super(Import_base, self).get_form(form_class)
-        form.fields['nom_du_fichier'].label = u"nom_du_fichier %s" % self.type_f
+        form.fields['nom_du_fichier'].label = "nom_du_fichier %s" % self.type_f
         return form
 
     def init_cache(self):

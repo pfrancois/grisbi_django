@@ -2,38 +2,31 @@
 """
 test import
 """
-from __future__ import absolute_import
 
+import gsb.utils
 from django.test.utils import override_settings
 from django.conf import settings
 
 import os.path
 import datetime
-import pytz
-import time
+import django.utils.timezone as tz
 
 from gsb.io import lecture_plist
 from gsb import models
-from gsb import utils
 
 from .test_imports_csv import Test_import_abstract
 from gsb.io.lecture_plist import Lecture_plist_exception
 from gsb.io.ecriture_plist_money_journal import Export_icompta_plist
-from testfixtures import Replacer, test_datetime, compare
-from django.utils.encoding import force_unicode
-import warnings
 import mock
-
-warnings.filterwarnings("ignore", category=UnicodeWarning)
+from testfixtures import compare
 import collections
 
-
-class Test_import_money_journal_element(Test_import_abstract):
-    def test_money_journal_element_ope(self):
+class Test_element(Test_import_abstract):
+    def test_ope(self):
         fich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                             'log', "1402954705000.log")
         ele = lecture_plist.collection_datas_decodes(fich)
-        self.compare(ele.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 16, 23, 38, 25)))
+        self.compare(ele.datemaj, datetime.datetime(2014, 6, 16, 21, 38, 25, tzinfo=tz.utc))
         el = ele.list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
         self.compare(el.action, 'c')
@@ -42,20 +35,18 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 16, 23, 38, 25)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 16, 21, 38, 25, tzinfo=tz.utc))
         self.compare(el.id, 66)
         self.compare(el.cat, 1)
         self.compare(el.automatique, False)
         self.compare(el.date, datetime.date(2014, 6, 16))
         self.compare(el.montant, -10.25)
         self.compare(el.tiers, 'Ope standart')
-        self.compare(el.__unicode__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
-        self.compare(el.__str__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
-        self.compare(el.__repr__(), u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
+        self.compare(el.__str__(), "(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1")
         ele = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403036267000.log"))
-        self.compare(ele.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 17, 47)))
+        self.compare(ele.datemaj, datetime.datetime(2014, 6, 17, 20, 17, 47, tzinfo=tz.utc))
         el = ele.list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
         self.compare(el.action, 'm')
@@ -64,8 +55,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 17, 47, 95470)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 20, 17, 47, 95469, tzinfo=tz.utc))
         self.compare(el.id, 66)
         self.compare(el.cat, 1)
         self.compare(el.automatique, False)
@@ -75,7 +65,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         ele = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403037219000.log"))
-        self.compare(ele.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 33, 39)))
+        self.compare(ele.datemaj, datetime.datetime(2014, 6, 17, 20, 33, 39, tzinfo=tz.utc))
         el = ele.list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
         self.compare(el.action, 'd')
@@ -85,7 +75,7 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
         self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 22, 17, 47, 95470)))
+                     datetime.datetime(2014, 6, 17, 20, 17, 47, 95469, tzinfo=tz.utc))
         self.compare(el.id, 66)
         self.compare(el.cat, 1)
         self.compare(el.automatique, False)
@@ -93,18 +83,18 @@ class Test_import_money_journal_element(Test_import_abstract):
         self.compare(el.montant, -55)
         self.compare(el.tiers, 'Ope standart')
 
-    def test_money_journal_element_compte(self):
+    def test_compte(self):
         el = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403040634000.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 34)))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 21, 30, 34, tzinfo=tz.utc))
         self.compare(el.action, 'c')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, True)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 34)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, tzinfo=tz.utc))
         self.compare(el.id, 7)
         self.compare(el.couleur, "#000000")
         self.compare(el.nom, " ")
@@ -112,48 +102,44 @@ class Test_import_money_journal_element(Test_import_abstract):
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403040635000.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 35)))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 21, 30, 35, tzinfo=tz.utc))
         self.compare(el.action, 'm')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, True)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 34, 88255)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88254, tzinfo=tz.utc))
         self.compare(el.id, 7)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Ghh")
-        self.compare(el.__unicode__(), u"(7) 'Ghh'")
-        self.compare(el.__str__(), u"(7) 'Ghh'")
-        self.compare(el.__repr__(), u"(7) 'Ghh'")
+        self.compare(el.__str__(), "(7) 'Ghh'")
         el = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403045414000.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 00, 50, 14)))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 22, 50, 14, tzinfo=tz.utc))
         self.compare(el.action, 'd')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, True)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 17, 23, 30, 34, 88255)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88254, tzinfo=tz.utc))
         self.compare(el.id, 7)
         self.compare(el.couleur, "#000000")
         self.compare(el.nom, "Ghh")
 
-    def test_money_journal_element_cat(self):
+    def test_element_cat(self):
         el = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403049014000.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 23, 50, 14, tzinfo=tz.utc))
         self.compare(el.action, 'c')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, True)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 23, 50, 14, tzinfo=tz.utc))
         self.compare(el.id, 16)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, " ")
@@ -162,91 +148,87 @@ class Test_import_money_journal_element(Test_import_abstract):
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403049014010.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
         self.compare(el.action, 'm')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, True)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14, 10000)))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
         self.compare(el.id, 16)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Cat aded")
         self.compare(el.type_cat, "d")
-        self.compare(el.__unicode__(), u"(16) 'Cat aded' type:d")
-        self.compare(el.__str__(), u"(16) 'Cat aded' type:d")
-        self.compare(el.__repr__(), u"(16) 'Cat aded' type:d")
+        self.compare(el.__str__(), "(16) 'Cat aded' type:d")
         el = lecture_plist.collection_datas_decodes(
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403049014020.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14)))
+        self.compare(el.datemaj,  datetime.datetime(2014, 6, 17, 23, 50, 14, 19999, tzinfo=tz.utc))
         self.compare(el.action, 'd')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, True)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 18, 1, 50, 14, 10000)))
+        self.compare(el.lastup,  datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
         self.compare(el.id, 16)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Cat aded")
         self.compare(el.type_cat, "d")
 
 
-class Test_import_money_journal_check(Test_import_abstract):
+class Test_check(Test_import_abstract):
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist"))
-    def test_money_journal_element_check(self):
+    def test_element_check(self):
         self.compare(lecture_plist.check(), True)  # TODO improve it
 
 
-class Test_import_money_journal_import_item_first_part(Test_import_abstract):
+class Test_import_item_first_part(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
-        self.lastmaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 15, 00, 25, 14))
+        self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist"))
-    def test_money_journal_element_import(self):
+    def test_element_import(self):
         """normalement il n'y a aucune operation"""
-        self.lastmaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 20, 00, 25, 14))
-        self.compare(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common(), [('deja', 9)])
+        self.lastmaj = datetime.datetime(2014, 6, 20, 00, 25, 14, tzinfo=tz.utc)
+        self.compare(sorted(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common()), [('deja', 9)])
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist"))
-    def test_money_journal_element_import2(self):
+    def test_element_import2(self):
         """avec crea, modif et del de chaque type"""
-        self.compare(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common(),
-                     [('ope', 0), ('compte', 0), ('categorie', 0)])
+        self.compare(sorted(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common()),
+                     [('categorie', 0), ('compte', 0), ('ope', 0)])
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_2"))
-    def test_money_journal_element_import3(self):
+    def test_element_import3(self):
         """avec crea, modif de cat et compte"""
-        self.compare(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common(),
-                     [('compte', 1), ('categorie', 1)])
-        self.assertmessagecontains(self.request, u"catégorie (16) 'Cat aded' type:d créée")
-        self.assertmessagecontains(self.request, u"compte (7) 'Ghh' créé")
+        self.compare(sorted(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common()),
+                     [('categorie', 1), ('compte', 1)])
+        self.assertmessagecontains(self.request, "catégorie (16) 'Cat aded' type:d créée")
+        self.assertmessagecontains(self.request, "compte (7) 'Ghh' créé")
 
 
-class Test_import_money_journal_import_item_modif_effectives_cote_cat(Test_import_abstract):
+class Test_item_modif_effectives_cote_cat(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
-        self.lastmaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 15, 00, 25, 14))
-        self.cat = models.Cat.objects.create(pk=16, nom=u"Cat aded", type="d", couleur=0)
+        self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
+        self.cat = models.Cat.objects.create(pk=16, nom="Cat aded", type="d", couleur=0)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_3"))
-    def test_money_journal_element_import4(self):
+    def test_element_import4(self):
         """teste modification standart"""
         self.cpt = models.Compte.objects.create(pk=7, nom='hjhjhkh', couleur='#FFFFFF')
-        self.cat.nom = u"Cat initial"
+        self.cat.nom = "Cat initial"
         self.cat.type = 'r'
         self.cat.couleur = '#FFFFFF'
         self.cat.save()
-        self.compare(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common(),
-                     [('compte', 1), ('categorie', 1)])
+        self.compare(sorted(lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request).most_common()),
+                     [('categorie', 1), ('compte', 1)])
         self.assertmessagecontains(self.request,
-                                   u"catégorie (16) 'Cat aded' type:d modifiée comme ca: nom: Cat initial => Cat aded, couleur: #FFFFFF => #000000, type: r => d")
+                                   "catégorie (16) 'Cat aded' type:d modifiée comme ca: nom: Cat initial => Cat aded, couleur: #FFFFFF => #000000, type: r => d")
         self.assertmessagecontains(self.request,
-                                   u"compte (7) 'Ghh' modifié comme ca: nom: hjhjhkh => Ghh, couleur: #FFFFFF => #000000")
+                                   "compte (7) 'Ghh' modifié comme ca: nom: hjhjhkh => Ghh, couleur: #FFFFFF => #000000")
         cat = models.Cat.objects.get(pk=16)
         self.compare(cat.nom, 'Cat aded')
         self.compare(cat.couleur, '#000000')
@@ -255,200 +237,200 @@ class Test_import_money_journal_import_item_modif_effectives_cote_cat(Test_impor
         self.compare(obj.nom, 'Ghh')
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_5"))
-    def test_money_journal_element_import6(self):
+    def test_element_import6(self):
         """ttest si cat deja cree"""
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args,
-                     (u"attention la catégorie (16) 'Cat aded' type:d existe déja alors qu'on demande de la créer", ))
+                     ("attention la catégorie (16) 'Cat aded' type:d existe déja alors qu'on demande de la créer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_6"))
-    def test_money_journal_element_import7(self):
+    def test_element_import7(self):
         """ttest si modif alors que cat pas cree"""
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention la catégorie (1111) 'Cat aded' type:d n'existe pas alors qu'on demande de la modifier", ))
+            "attention la catégorie (1111) 'Cat aded' type:d n'existe pas alors qu'on demande de la modifier", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_8"))
     @override_settings(ID_CAT_OST=2)
-    def test_money_journal_element_import8(self):
+    def test_element_import8(self):
         """ttest si modif alors que cat par defaut"""
-        models.Cat.objects.create(pk=2, nom=u"Cat ost", type="r", couleur='#FFFFFF')
+        models.Cat.objects.create(pk=2, nom="Cat ost", type="r", couleur='#FFFFFF')
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request, u"impossible de modifier la cat (2) 'Cat aded' type:d")
+        self.assertmessagecontains(self.request, "impossible de modifier la cat (2) 'Cat aded' type:d")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_9"))
-    def test_money_journal_element_import9(self):
+    def test_element_import9(self):
         """ttest si modif cat avec le nom deja cree"""
         self.cat.type = 'r'
         self.cat.couleur = '#FFFFFF'
         self.cat.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"catégorie (16) 'Cat aded' type:d modifiée comme ca: couleur: #FFFFFF => #000000, type: r => d")
+                                   "catégorie (16) 'Cat aded' type:d modifiée comme ca: couleur: #FFFFFF => #000000, type: r => d")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_10"))
-    def test_money_journal_element_import10(self):
+    def test_element_import10(self):
         """ttest si suppr alors que cat pas cree"""
         self.cat.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention la catégorie (16) 'Cat aded' type:d n'existe pas alors qu'on demande de la supprimer", ))
+            "attention la catégorie (16) 'Cat aded' type:d n'existe pas alors qu'on demande de la supprimer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_11"))
-    def test_money_journal_element_import11(self):
+    def test_element_import11(self):
         """ttest si suppr alors que cat deja utilise ds ope"""
         self.cpt = models.Compte.objects.create(pk=7, nom='Ghh', couleur=0)
-        self.moyen = models.Moyen.objects.create(id=settings.MD_CREDIT, nom=u"dd", type="r")
+        self.moyen = models.Moyen.objects.create(id=settings.MD_CREDIT, nom="dd", type="r")
         self.ope = models.Ope.objects.create(compte=self.cpt, date=datetime.date(2014, 6, 15), montant=250, tiers=models.Tiers.objects.get_or_create(nom="tiers", defaults={'nom': "tiers"})[0], cat=self.cat, moyen=self.moyen)
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.compare((u"catégorie non supprimable (16) 'Cat aded' type:d car elle a des opérations rattachées", ),
+        self.compare(("catégorie non supprimable (16) 'Cat aded' type:d car elle a des opérations rattachées", ),
                      exception_context_manager.exception.args)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_12"))
     @override_settings(ID_CAT_OST=2)
-    def test_money_journal_element_import12(self):
+    def test_element_import12(self):
         """tente de supprimer une categorie par defaut"""
-        models.Cat.objects.create(pk=2, nom=u"Cat ost", type="r", couleur='#FFFFFF')
+        models.Cat.objects.create(pk=2, nom="Cat ost", type="r", couleur='#FFFFFF')
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.compare((u"impossible de supprimer la catégorie (2)", ), exception_context_manager.exception.args)
+        self.compare(("impossible de supprimer la catégorie (2)", ), exception_context_manager.exception.args)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_12_1"))
-    def test_money_journal_element_import12_1(self):
+    def test_element_import12_1(self):
         """ttest suprr d'une cat"""
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request, u"catégorie (Cat aded) #16 supprimée")
+        self.assertmessagecontains(self.request, "catégorie (Cat aded) #16 supprimée")
 
 
-class Test_import_money_journal_import_item_modif_effectives_cote_compte(Test_import_abstract):
+class Test_import_item_modif_effectives_cote_compte(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
-        self.lastmaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 15, 00, 25, 14))
+        self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
         self.cpt = models.Compte.objects.create(pk=7, nom='hjhjhkh', couleur=0)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_4"))
-    def test_money_journal_element_import5(self):
+    def test_element_import5(self):
         """exception si compte deja cree"""
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args,
-                     (u"attention le compte (7) 'Ghh' existe déja alors qu'on demande de le créer", ))
+                     ("attention le compte (7) 'Ghh' existe déja alors qu'on demande de le créer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_13"))
-    def test_money_journal_element_import13(self):
+    def test_element_import13(self):
         """ttest si modif compte avec le nom deja cree"""
         self.cpt.couleur = "#FFFFFF"
         self.cpt.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request, u"compte (7) 'hjhjhkh' modifié comme ca: couleur: #FFFFFF => #000000")
+        self.assertmessagecontains(self.request, "compte (7) 'hjhjhkh' modifié comme ca: couleur: #FFFFFF => #000000")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_14"))
-    def test_money_journal_element_import14(self):
+    def test_element_import14(self):
         """ttest si suppr alors que compte pas cree"""
         self.cpt.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention le compte 7 n'existe pas pour ce nom (hjhjhkh) alors qu'on demande de le supprimer", ))
+            "attention le compte 7 n'existe pas pour ce nom (hjhjhkh) alors qu'on demande de le supprimer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_15"))
-    def test_money_journal_element_import15(self):
+    def test_element_import15(self):
         """ttest si suppr alors que compte deja utilise ds ope"""
-        cat = models.Cat.objects.create(pk=16, nom=u"Cat aded", type="r", couleur='#FFFFFF')
-        moyen = models.Moyen.objects.create(id=settings.MD_CREDIT, nom=u"dd", type="r")
+        cat = models.Cat.objects.create(pk=16, nom="Cat aded", type="r", couleur='#FFFFFF')
+        moyen = models.Moyen.objects.create(id=settings.MD_CREDIT, nom="dd", type="r")
         models.Ope.objects.create(compte=self.cpt, date=datetime.date(2014, 6, 15), montant=250,
                                   tiers=models.Tiers.objects.get_or_create(nom="tiers", defaults={'nom': "tiers"})[0],
                                   cat=cat, moyen=moyen)
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args,
-                     (u"compte non supprimable (7) 'hjhjhkh' car il a des opérations ou des écheances rattachées", ))
+                     ("compte non supprimable (7) 'hjhjhkh' car il a des opérations ou des écheances rattachées", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_16"))
-    def test_money_journal_element_import16(self):
+    def test_element_import16(self):
         """ttest suppr d'un compte"""
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request, u"compte (7) 'hjhjhkh' supprimé")
+        self.assertmessagecontains(self.request, "compte (7) 'hjhjhkh' supprimé")
 
 
-class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_import_abstract):
+class Test_import_item_modif_effectives_cote_ope(Test_import_abstract):
     def setUp(self):
         self.request = self.request_get('outils')
-        self.lastmaj = pytz.timezone(settings.TIME_ZONE).localize(datetime.datetime(2014, 6, 15, 00, 25, 14))
-        self.cat = models.Cat.objects.create(pk=1, nom=u"Cat aded", type="d", couleur=0)
-        self.cat2 = models.Cat.objects.create(pk=2, nom=u"Cat aded2", type="d", couleur=0)
+        self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
+        self.cat = models.Cat.objects.create(pk=1, nom="Cat aded", type="d", couleur=0)
+        self.cat2 = models.Cat.objects.create(pk=2, nom="Cat aded2", type="d", couleur=0)
         self.cpt = models.Compte.objects.create(pk=1, nom='Ghh', couleur=0)
         self.cpt2 = models.Compte.objects.create(pk=2, nom='Ghh2', couleur=0)
-        self.moyen_credit = models.Moyen.objects.create(id=settings.MD_CREDIT, nom=u"rr", type="r")
-        self.moyen_debit = models.Moyen.objects.create(id=settings.MD_DEBIT, nom=u"dd", type="d")
+        self.moyen_credit = models.Moyen.objects.create(id=settings.MD_CREDIT, nom="rr", type="r")
+        self.moyen_debit = models.Moyen.objects.create(id=settings.MD_DEBIT, nom="dd", type="d")
         self.tiers = models.Tiers.objects.get_or_create(nom="Ope standart", defaults={'nom': "Ope standart"})[0]
         self.tiers2 = models.Tiers.objects.get_or_create(nom="tiers2", defaults={'nom': "tiers2"})[0]
         self.ope = models.Ope.objects.create(pk=66, compte=self.cpt2, date=datetime.date(2013, 6, 15), montant=25, tiers=self.tiers2,
                                              cat=self.cat2, moyen=self.moyen_credit)
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_17"))
-    def test_money_journal_element_import17(self):
+    def test_element_import17(self):
         """si un compte pour une ope n'existe pas"""
         self.ope.delete()
         self.cpt.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention le compte (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
+            "attention le compte (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_18"))
-    def test_money_journal_element_import18(self):
+    def test_element_import18(self):
         """si une categorie pour une ope n'existe pas"""
         self.ope.delete()
         self.cat.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention la catégorie (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
+            "attention la catégorie (1) n'existe pas alors qu'on le demande pour l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_19"))
-    def test_money_journal_element_import19(self):
+    def test_element_import19(self):
         """si une ope existe deja"""
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 existe déja alors qu'on demande de la créer", ))
+            "attention l'opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 existe déja alors qu'on demande de la créer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_20"))
-    def test_money_journal_element_import20(self):
+    def test_element_import20(self):
         """test ope cree sans probleme"""
         self.ope.delete()
         self.tiers.delete()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertmessagecontains(self.request, u"tiers 'Ope standart' crée")
-        self.assertEqual(unicode(models.Ope.objects.get(id=66)),
-                         u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: Ghh")
+        self.assertmessagecontains(self.request, "tiers 'Ope standart' créé")
+        self.assertEqual(str(models.Ope.objects.get(id=66)),
+                         "(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: Ghh")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_21"))
-    def test_money_journal_element_import21(self):
+    def test_element_import21(self):
         """test ope cree sans probleme"""
         self.ope.delete()
         self.cat.delete()
         self.cpt.delete()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
-        self.assertEqual(unicode(models.Ope.objects.get(id=66)),
-                         u"(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: hjhjhkh")
+        self.assertEqual(str(models.Ope.objects.get(id=66)),
+                         "(66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: hjhjhkh")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_22"))
-    def test_money_journal_element_import22(self):
+    def test_element_import22(self):
         """test si ope a mofifier n'existe pas"""
         self.ope.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 n'existe pas alors qu'on demande de la modifier", ))
+            "attention cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 n'existe pas alors qu'on demande de la modifier", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import23(self):
+    def test_element_import23(self):
         """test si ope mere"""
         fille = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=-10.25, tiers=self.tiers,
                                           cat=self.cat, moyen=self.moyen_debit)
@@ -456,10 +438,10 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         fille.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère")
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import24(self):
+    def test_element_import24(self):
         """test si ope fille"""
         mere = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=-10.25, tiers=self.tiers,
                                          cat=self.cat, moyen=self.moyen_debit)
@@ -467,29 +449,29 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", )
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import25(self):
+    def test_element_import25(self):
         """test si ope rapprochee"""
         rapp = models.Rapp.objects.create(nom="test_rapp")
         self.ope.rapp = rapp
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", )
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import26(self):
+    def test_element_import26(self):
         """test si ope avec compte ferme"""
         self.cpt2.ouvert = False
         self.cpt2.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", )
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import27(self):
+    def testelement_import27(self):
         """test si ope jumelle"""
         jumelle = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=10.25,
                                             tiers=self.tiers, cat=self.cat, moyen=self.moyen_credit)
@@ -497,28 +479,28 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", )
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_23"))
-    def test_money_journal_element_import28(self):
+    def test_element_import28(self):
         """test si modif d'ope pointee"""
         self.ope.pointe = True
         self.ope.save()
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", )
+                                   "impossible de modifier cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", )
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import31(self):
+    def test_element_import31(self):
         """test si ope n'existe pas alors qu'elle va etre supprimer"""
         self.ope.delete()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args,
-                     (u"attention cette opération 66 n'existe pas alors qu'on demande de la supprimer", ))
+                     ("attention cette opération 66 n'existe pas alors qu'on demande de la supprimer", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import32(self):
+    def test_element_import32(self):
         """test supprimeer une mere"""
         fille = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=-10.25, tiers=self.tiers,
                                           cat=self.cat, moyen=self.moyen_debit)
@@ -527,10 +509,10 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est mère", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import33(self):
+    def test_element_import33(self):
         """test si ope fille"""
         mere = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=-10.25, tiers=self.tiers,
                                          cat=self.cat, moyen=self.moyen_debit)
@@ -539,10 +521,10 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est fille", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import34(self):
+    def test_element_import34(self):
         """test si ope rapprochee"""
         rapp = models.Rapp.objects.create(nom="test_rapp")
         self.ope.rapp = rapp
@@ -550,20 +532,20 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est rapprochée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import35(self):
+    def test_element_import35(self):
         """test si ope avec compte ferme"""
         self.cpt2.ouvert = False
         self.cpt2.save()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car son compte est fermé", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import36(self):
+    def test_element_import36(self):
         """test si ope jumelle"""
         jumelle = models.Ope.objects.create(pk=67, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=10.25,
                                             tiers=self.tiers, cat=self.cat, moyen=self.moyen_credit)
@@ -572,30 +554,30 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est jumellée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import37(self):
+    def test_element_import37(self):
         """test si modif d'ope pointee"""
         self.ope.pointe = True
         self.ope.save()
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", ))
+            "impossible de supprimer cette opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 car elle est pointée", ))
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import38(self):
+    def test_element_import38(self):
         """test si ope modifie sans probleme"""
         self.ope.delete()
         self.ope = models.Ope.objects.create(pk=66, compte=self.cpt, date=datetime.date(2014, 6, 16), montant=-10.25,
                                              tiers=self.tiers, cat=self.cat, moyen=self.moyen_debit)
         lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.assertmessagecontains(self.request,
-                                   u"opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 supprimée")
+                                   "opération (66) le 16/06/2014 : -10.25 EUR tiers: Ope standart cpt: 1 supprimée")
 
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist_31"))
-    def test_money_journal_element_import39(self):
+    def test_element_import39(self):
         """test si ope modifie"""
         self.ope.delete()
         self.ope = models.Ope.objects.create(pk=66, compte=self.cpt, date=datetime.date(2014, 6, 15), montant=-10.25,
@@ -603,7 +585,8 @@ class Test_import_money_journal_import_item_modif_effectives_cote_ope(Test_impor
         with self.assertRaises(Lecture_plist_exception) as exception_context_manager:
             lecture_plist.import_items(lastmaj=self.lastmaj, request=self.request)
         self.compare(exception_context_manager.exception.args, (
-            u"attention cette opération 66 existe alors qu'on demande de la supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
+            "attention cette opération 66 existe alors qu'on demande de la supprimer mais elle est différente :\nDATE:\t2014-06-15!= 2014-06-16",))
+
 
 @override_settings(CODE_DEVICE_POCKET_MONEY='totototo')
 @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist"))
@@ -612,12 +595,7 @@ class Test_import_money_journal_export(Test_import_abstract):
 
     def setUp(self):
         self.request = self.request_get('outils')
-        self.request = self.request_get('outils')
         self.exp = Export_icompta_plist(request=self.request)
-        self.nettoyage()
-
-    def nettoyage(self, file_only=True):
-        """delete all the folder in log"""
         directory = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist", 'Applications',
                                  'Money Journal', 'log')
         efface = list()
@@ -625,19 +603,18 @@ class Test_import_money_journal_export(Test_import_abstract):
             for name in files:
                 efface.append(os.path.join(root, name))
                 os.remove(os.path.join(root, name))
-        if not file_only:
-            for root, dirs, files in os.walk(directory, topdown=False):
-                for name in dirs:
-                    efface.append(os.path.join(root, name))
-                    os.rmdir(os.path.join(root, name))
+        for root, dirs, files in os.walk(directory, topdown=False):
+            for name in dirs:
+                efface.append(os.path.join(root, name))
+                os.rmdir(os.path.join(root, name))
 
     def comp_file(self, filename, nom):
-        """conveniance function to test between file"""
+
         attendu = os.path.join("export_plist_attendu", 'Applications', 'Money Journal', 'log', '140', '3', '4', filename)
         recu = os.path.join("export_plist", 'Applications', 'Money Journal', 'log', '140', '3', '4', filename)
+        self.assert2filesequal(recu, attendu, nom=nom)
 
     def test_global(self):
-        with Replacer() as r:
             # on efface la table db_log
             models.Db_log.objects.all().delete()
             #cat modifie
@@ -650,7 +627,7 @@ class Test_import_money_journal_export(Test_import_abstract):
             models.Cat.objects.filter(id=4).delete()  # la cat 4 a ete efface
             models.Db_log.objects.create(datamodel="cat", id_model=4, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
             models.Compte.objects.filter(id=1).update(nom="compte_modifie")
-            models.Compte.objects.create(nom="Compte nouveau")
+            models.Compte.objects.create(id=3, nom="Compte nouveau")
             models.Db_log.objects.create(datamodel="compte", id_model=1, type_action="U", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
             models.Db_log.objects.create(datamodel="compte", id_model=3, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a01")
             #on mock les opes
@@ -668,13 +645,14 @@ class Test_import_money_journal_export(Test_import_abstract):
             models.Db_log.objects.create(datamodel="ope", id_model=17, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a16")
             models.Db_log.objects.create(datamodel="ope", id_model=18, type_action="I", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a17")
             models.Db_log.objects.create(datamodel="ope", id_model=19, type_action="D", uuid="51a6674d-7f28-427b-8cf7-25ad2ac07a18")
-            date_time_action=datetime.datetime.fromtimestamp(time.mktime(time.strptime("2014-06-23 18:51:40","%Y-%m-%d %H:%M:%S")))
+            date_time_action = datetime.datetime(2014, 6, 23, 18, 51, 40, tzinfo=tz.utc)
             models.Db_log.objects.all().update(date_time_action=date_time_action)
-            dt = pytz.utc.localize(datetime.datetime(2014, 01, 21, 19, 27, 14))
-            time_mock = test_datetime(2014, 06, 23, 00, 00, 00, delta=1, delta_type='minutes')
-            r.replace('gsb.utils.datetime.datetime', time_mock)
+            mock_date = self.add_minutes(tz.make_aware(datetime.datetime(2014, 6, 23, 0, 0, 0), timezone=tz.utc))
             #test effectif
-            nb = self.exp.all_since_date(dt)
+            with mock.patch('gsb.utils.timezone.now', mock_date.now):
+                nb = self.exp.all_since_date(datetime.datetime(2014, 1, 21, 19, 27, 14, tzinfo=tz.utc))
+            # compare nb 
+            compare(nb, collections.Counter({'global': 20, 'ope': 14, 'cat': 4, 'compte': 2}))
             #compare la liste des fichier
             attendu = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist_attendu", 'Applications',
                                    'Money Journal')
@@ -688,7 +666,6 @@ class Test_import_money_journal_export(Test_import_abstract):
             for root, dirs, files in os.walk(attendu, topdown=False):
                 for name in files:
                     list_fic_attendu.append(os.path.basename(os.path.join(root, name)))
-            compare(nb, collections.Counter({u'global':20,u'ope': 14, u'cat': 4, u'compte': 2}))
             compare(list_fic_recu, list_fic_attendu)
             #compare chaque fichier
             self.comp_file('1403481660000.log', "export_plist_cat_modif")

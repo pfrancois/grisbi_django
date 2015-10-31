@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 #from django.conf import settings  # @Reimport
 
 from django.contrib import messages
@@ -21,7 +21,7 @@ class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
         try:
             return utils.to_date(self.row['date'], "%d/%m/%Y")
         except utils.FormatException:
-            raise utils.FormatException(u"erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
+            raise utils.FormatException("erreur de date '%s' à la ligne %s" % (self.row['date'], self.ligne))
 
     @property
     def titre(self):
@@ -67,8 +67,8 @@ class Import_csv_ope_titre(import_base.Import_base):
         verif_format = False
         nb_ope = 0
         try:
-            with open(nomfich, 'r') as f_non_encode:
-                fich = self.reader(f_non_encode, encoding=self.encoding)
+            with open(nomfich, 'r', encoding=self.encoding) as f_non_encode:
+                fich = self.reader(f_non_encode)
                 #---------------------- boucle
                 for row in fich:
                     if row.ligne < 1:
@@ -80,7 +80,7 @@ class Import_csv_ope_titre(import_base.Import_base):
                             if not hasattr(row, attr):
                                 colonnes_oublies.append(attr)
                         if len(colonnes_oublies) > 0:
-                            raise import_base.ImportException(u"il manque la/les colonne(s) '%s'" % u"','".join(colonnes_oublies))
+                            raise import_base.ImportException("il manque la/les colonne(s) '%s'" % "','".join(colonnes_oublies))
                         else:
                             verif_format = True
                     ope = dict()
@@ -112,19 +112,19 @@ class Import_csv_ope_titre(import_base.Import_base):
         for ope in self.opes.created_items:
             compte = models.Compte.objects.get(id=ope['compte_id'])
             if compte.type != 't':
-                messages.warning(self.request, u'attention, compte non compte_titre %s ligne %s' % (compte.nom, ope['ligne']))
+                messages.warning(self.request, 'attention, compte non compte_titre %s ligne %s' % (compte.nom, ope['ligne']))
                 continue
             titre = models.Titre.objects.get(id=ope['titre_id'])
             nombre = ope['nombre']
             cours = ope['cours']
             if nombre == 0 and cours == 0:
-                messages.warning(self.request, u'attention, nombre et cours nul ligne %s' % ope['ligne'])
+                messages.warning(self.request, 'attention, nombre et cours nul ligne %s' % ope['ligne'])
             if nombre > 0:
                 compte.achat(titre=titre, nombre=nombre, prix=cours, date=ope['date'], frais=ope['frais'])
             else:
                 compte.vente(titre=titre, nombre=nombre, prix=cours, date=ope['date'], frais=ope['frais'])
             nb_ope += 1
-        messages.info(self.request, u"%s opés titres crées" % nb_ope)
+        messages.info(self.request, "%s opés titres crées" % nb_ope)
         if self.titres.nb_created > 0:
-            messages.info(self.request, u"%s titres crées" % self.titres.nb_created)
+            messages.info(self.request, "%s titres crées" % self.titres.nb_created)
         return True

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from StringIO import StringIO
+from io import StringIO
 import yaml
 
 from django.core.serializers.pyyaml import Serializer as YamlSerializer
 from django.core.serializers.python import Deserializer as PythonDeserializer
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 try:
     from yaml import CSafeDumper as SafeDumper
@@ -22,7 +22,7 @@ class DjangoSafeDumper_perso(SafeDumper):
         return self.represent_scalar('tag:yaml.org,2002:str', str(data))
 
     def represent_time(self, data):
-        value = '1970-01-01 %s' % unicode(data.isoformat())
+        value = '1970-01-01 %s+00:00' % str(data.isoformat())
         return self.represent_scalar('tag:yaml.org,2002:timestamp', value)
 
 DjangoSafeDumper_perso.add_representer(decimal.Decimal, DjangoSafeDumper_perso.represent_decimal)
@@ -34,13 +34,14 @@ class Serializer(YamlSerializer):
     Serialize database objects as nested dicts, indexed first by
     model name, then by primary key.
     """
+
     def start_serialization(self):
         self._current = None
         self.objects = {}
 
     # noinspection PyProtectedMember,PyProtectedMember
     def end_object(self, obj):
-        model = smart_unicode(obj._meta)
+        model = smart_text(obj._meta)
         pk = obj._get_pk_val()
 
         if model not in self.objects:
@@ -58,7 +59,7 @@ def Deserializer(stream_or_string, **options):
     Deserialize a stream or string of YAML data,
     as written by the Serializer above.
     """
-    if isinstance(stream_or_string, basestring):
+    if isinstance(stream_or_string, str):
         stream = StringIO(stream_or_string)
     else:
         stream = stream_or_string
@@ -67,9 +68,9 @@ def Deserializer(stream_or_string, **options):
     # NOTE: This could choke on large data sets, since it
     # constructs the flattened data list in memory
     data = []
-    for model, objects in yaml.load(stream).iteritems():
+    for model, objects in yaml.load(stream).items():
         # Add the model name back into each object dict
-        for pk, fields in objects.iteritems():
+        for pk, fields in objects.items():
             data.append({'model': model, 'pk': pk, 'fields': fields})
 
     # Deserialize the flattened data

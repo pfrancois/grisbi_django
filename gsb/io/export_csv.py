@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 from django.http import HttpResponse
 from .. import models
 from .. import utils
@@ -48,8 +48,7 @@ class Export_ope_csv(Export_view_csv_base):
         query = query.order_by('date', 'id')
         # initialement on elemine la seconde jambe des virement mais en fait il faut pas le faire car sinon pour l'autre jambe c'est pas bon
         # query = query.exclude(jumelle__isnull=False, montant__gte=0)
-        query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "ope", "moyen", "ope_titre_ost", "jumelle", "mere")
-
+        query = query.select_related('cat', "compte", "tiers", "ib", "rapp", "moyen", "ope_titre_ost", "jumelle", "mere")
         for ope in query:
                 # id compte date montant
             ligne = {'id': ope.id,
@@ -80,10 +79,10 @@ class Export_ope_csv(Export_view_csv_base):
             if ope.jumelle is not None:
                 if ope.jumelle.rapp is not None:  # jumelle rapprochee
                     if '>R' not in ligne['notes']:
-                        ligne['notes'] = ligne['notes'] + u'>R' + ope.jumelle.rapp.nom
+                        ligne['notes'] = ligne['notes'] + '>R' + ope.jumelle.rapp.nom
                 if ope.jumelle.pointe:  # jumelle pointee
                     if '>P' not in ligne['notes']:
-                        ligne['notes'] += u'>P'
+                        ligne['notes'] += '>P'
                 if ope.montant < 0:
                     ligne['tiers'] = "%s => %s" % (ope.compte.nom, ope.jumelle.compte.nom)
                 else:
@@ -112,7 +111,7 @@ class Export_cours_csv(Export_view_csv_base):
     form_class = Exportform_cours
     nomfich = "export_cours"
     fieldnames = ("id", "date", "nom", "isin", "cours")
-    titre = u"Export des cours pour des titres determinés"
+    titre = "Export des cours pour des titres determinés"
 
     def export(self, query):
         """
@@ -144,10 +143,11 @@ class Exportform_Compte_titre(export_base.Exportform_ope):
 
 
 class Export_ope_titre_csv(Export_view_csv_base):
+    """view pour exporter en csv les ope titres"""
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre
     nomfich = "export_ope_titre"
-    titre = u"export des opérations-titres"
+    titre = "export des opérations-titres"
     fieldnames = ("id", "date", "compte", "nom", "isin", "sens", "nombre", "cours", "montant_ope")
     # debug = True
 
@@ -166,9 +166,9 @@ class Export_ope_titre_csv(Export_view_csv_base):
                 'nom': objet.titre.nom,
                 'isin': objet.titre.isin}
             if objet.nombre > 0:
-                ligne['sens'] = u"achat"
+                ligne['sens'] = "achat"
             else:
-                ligne['sens'] = u"vente"
+                ligne['sens'] = "vente"
             ligne['cours'] = utils.floattostr(objet.cours)
             ligne['nombre'] = utils.floattostr(objet.nombre)
             ligne['montant_ope'] = utils.floattostr(objet.cours * objet.nombre)

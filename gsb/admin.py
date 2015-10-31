@@ -1,5 +1,5 @@
- # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+# -*- coding: utf-8 -*-
+
 
 from django.contrib import admin
 from django.contrib import messages
@@ -25,7 +25,6 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from collections import OrderedDict
 from . import model_field
-from admin_exporter.actions import export_as_csv_action
 
 # -------------ici les classes generiques------
 
@@ -82,11 +81,11 @@ class Rapprochement_filter(SimpleListFilter):
         in the right sidebar.
         """
         return (
-            ('rien', u'ni rapproché ni pointé'),
-            ('p', u'pointé uniquement'),
-            ('nrapp', u'non-rapproché'),
-            ('rapp', u'rapproché uniquement'),
-            ('pr', u'pointé ou rapproché')
+            ('rien', 'ni rapproché ni pointé'),
+            ('p', 'pointé uniquement'),
+            ('nrapp', 'non-rapproché'),
+            ('rapp', 'rapproché uniquement'),
+            ('pr', 'pointé ou rapproché')
         )
 
     def queryset(self, request, queryset):
@@ -122,8 +121,8 @@ class Ouinonfilter(SimpleListFilter):
         in the right sidebar.
         """
         return (
-            ('1', u'oui'),
-            ('0', u'non')
+            ('1', 'oui'),
+            ('0', 'non')
         )
 
     def queryset(self, request, queryset):
@@ -164,7 +163,7 @@ class Verifmere_filter(Ouinonfilter):
 
     def queryset(self, request, queryset):
         if self.value() == '1':
-            messages.info(request, u"attention requête sur l'ensemble de la base")
+            messages.info(request, "attention requête sur l'ensemble de la base")
             # les filles pointe alors que les mere non
             merep = gsbmodels.Ope.objects.filter(filles_set__pointe=True).filter(pointe=False).distinct().values_list('id', flat=True)
             # les mere pointe alors que les filles non
@@ -198,7 +197,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                                 )""" % (self.id_ope, self.table_annexe)
                 return super(Modeladmin_perso, self).queryset(request).extra(select={'nb_opes': sql, }, )
         else:
-            return super(Modeladmin_perso, self).queryset(request)
+            return super(Modeladmin_perso, self).get_queryset(request)
 
     def nb_opes(self, inst):
         """
@@ -216,10 +215,10 @@ class Modeladmin_perso(admin.ModelAdmin):
         nom_module = queryset[0]._meta.module_name
         if queryset.count() < 2:
             messages.error(request,
-                           u"attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
+                           "attention, vous devez selectionner au moins 2 %(type)s , vous en avez selectionné %(n)s" % {
                                'n': queryset.count(),
                                'type': nom_module}
-                          )
+                           )
             return
         obj_a = queryset[0]
         for obj_b in queryset:
@@ -227,17 +226,17 @@ class Modeladmin_perso(admin.ModelAdmin):
                 continue
             try:
                 with transaction.atomic():
-                    message = u"fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
+                    message = "fusion effectuée, pour le type \"%s\", \"%s\" a été fusionné dans \"%s\"" % (
                         nom_module,
                         obj_b,
                         obj_a)
                     obj_b.fusionne(obj_a)
                     messages.success(request, message)
             except Exception as inst:
-                message = inst.__unicode__()
+                message = inst.__str__()
                 messages.error(request, message)
 
-    fusionne.short_description = u"Fusion dans la première selectionnée"
+    fusionne.short_description = "Fusion dans la première selectionnée"
 
     def changelist_view(self, request, extra_context=None):
         self.change_list = True
@@ -293,7 +292,7 @@ class Ope_inline_admin(admin.TabularInline):
         else:
             return "(aucun-e)"
 
-    lien.short_description = u"ID"
+    lien.short_description = "ID"
 
 
 # ------------definition des classes
@@ -305,7 +304,7 @@ class Ope_cat(Ope_inline_admin):
 
 class Cat_admin(Modeladmin_perso):
     """classe admin pour les categories"""
-    actions = ['fusionne', export_as_csv_action]
+    actions = ['fusionne']
     list_editable = ('nom', 'couleur')
     list_display = ('id', 'nom', 'type', 'nb_opes', 'couleur')
     list_display_links = ('id',)
@@ -335,7 +334,7 @@ class Ope_ib(Ope_inline_admin):
 
 class Ib_admin(Modeladmin_perso):
     """admin pour les ib"""
-    actions = ['fusionne', export_as_csv_action]
+    actions = ['fusionne']
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'type', 'nb_opes')
     list_display_links = ('id',)
@@ -351,7 +350,7 @@ class Ib_admin(Modeladmin_perso):
 
 class Compte_admin(Modeladmin_perso):
     """admin pour les comptes normaux"""
-    actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp', export_as_csv_action]
+    actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
                                                                                              'solde_mini_autorise'),
               ('moyen_debit_defaut', 'moyen_credit_defaut', 'couleur'))
@@ -370,11 +369,11 @@ class Compte_admin(Modeladmin_perso):
         liste_id = queryset.values_list('id', flat=True)
         try:
             gsbmodels.Ope.objects.select_related().filter(compte__id__in=liste_id).update(pointe=False)
-            messages.success(request, u'suppression des statuts "pointé" dans les comptes %s' % queryset)
+            messages.success(request, 'suppression des statuts "pointé" dans les comptes %s' % queryset)
         except Exception as err:
             messages.error(request, err)
 
-    action_supprimer_pointe.short_description = u"Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
+    action_supprimer_pointe.short_description = "Supprimer tous les statuts 'pointé' dans les comptes selectionnés"
 
     class RappForm(forms.Form):
 
@@ -390,7 +389,7 @@ class Compte_admin(Modeladmin_perso):
         form = None
         query_ope = gsbmodels.Ope.objects.filter(pointe=True, compte__in=queryset).order_by('-date')
         if query_ope.filter(cat__nom="Non affecté").exists():
-            self.message_user(request, u"attention, au moins une operation n'est pas encore affectée")
+            self.message_user(request, "attention, au moins une operation n'est pas encore affectée")
             return HttpResponseRedirect(request.get_full_path())
         if 'apply' in request.POST:
             form = self.RappForm(request.POST)
@@ -418,7 +417,7 @@ class Compte_admin(Modeladmin_perso):
                         plural = 's'
                     rapp.date = form.cleaned_data['date']
                     rapp.save()
-                    self.message_user(request, u"le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
+                    self.message_user(request, "le compte %s a bien été rapproché (%s opération%s rapprochée%s)" % (
                         queryset[0], count, plural, plural))
                     return HttpResponseRedirect(request.get_full_path())
 
@@ -447,8 +446,8 @@ class Compte_admin(Modeladmin_perso):
 class Ope_changelist_Form(forms.ModelForm):
     class Meta(object):
         model = gsbmodels.Ope
-
-    date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
+        fields = '__all__'
+        widgets = {'date': forms.TextInput(attrs={'size': '10'}), }
 
 
 class Ope_admin(Modeladmin_perso):
@@ -463,7 +462,7 @@ class Ope_admin(Modeladmin_perso):
         'moyen__type', 'cat__type', 'cat__nom')
     search_fields = ['tiers__nom']
     list_editable = ('montant', 'pointe', 'date', 'cat', 'moyen')
-    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser', export_as_csv_action]
+    actions = ['action_supprimer_pointe', 'fusionne_a_dans_b', 'fusionne_b_dans_a', 'mul', 'cree_operation_mere', 'defilliser']
     save_on_top = True
     save_as = True
     ordering = ['-date', 'id']
@@ -485,9 +484,9 @@ class Ope_admin(Modeladmin_perso):
 
     def is_mere(self, obj):
         if obj.is_mere:
-            return u"opérations filles ci dessous"
+            return "opérations filles ci dessous"
         else:
-            return u"aucune opération fille"
+            return "aucune opération fille"
 
     def mere_fille(self, obj):
         if obj.is_fille:
@@ -508,7 +507,7 @@ class Ope_admin(Modeladmin_perso):
         else:
             return "(aucun-e)"
 
-    show_jumelle.short_description = u"Opération jumelle"
+    show_jumelle.short_description = "Opération jumelle"
 
     def show_mere(self, obj):
         if obj.mere_id:
@@ -530,7 +529,7 @@ class Ope_admin(Modeladmin_perso):
             else:
                 return "(aucun-e)"
 
-    oper_titre.short_description = u"compta matiere"
+    oper_titre.short_description = "compta matiere"
 
     def mul(self, request, queryset):
         # queryset.update(montant=models.F('montant') * -1)  #ca serait optimal de faire mais because virement pas facile
@@ -545,16 +544,16 @@ class Ope_admin(Modeladmin_perso):
                 o.save()
         return HttpResponseRedirect(request.get_full_path())
 
-    mul.short_description = u"Multiplier le montant des opérations selectionnnés par -1"
+    mul.short_description = "Multiplier le montant des opérations selectionnnés par -1"
 
     def action_supprimer_pointe(self, request, queryset):
         try:
             queryset.update(pointe=False)
-            messages.success(request, u'suppression des statuts "pointé" des opérations selectionnées')
-        except Exception, err:
-            messages.error(request, unicode(err))
+            messages.success(request, 'suppression des statuts "pointé" des opérations selectionnées')
+        except Exception as err:
+            messages.error(request, str(err))
 
-    action_supprimer_pointe.short_description = u'Suppression des statuts "pointé" des opérations selectionnées'
+    action_supprimer_pointe.short_description = 'Suppression des statuts "pointé" des opérations selectionnées'
 
     def has_delete_permission(self, request, obj=None):
         if obj is None:
@@ -587,13 +586,13 @@ class Ope_admin(Modeladmin_perso):
                 if mere is None:
                     mere = ope.mere
                 else:
-                    messages.error(request, u"les opé ont plusieurs mère")
+                    messages.error(request, "les opé ont plusieurs mère")
                     return
             if ope.is_mere:
-                messages.error(request, u"l'ope %s est déja une ope mère" % ope.id)
+                messages.error(request, "l'ope %s est déja une ope mère" % ope.id)
                 return
             if ope.rapp:
-                messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+                messages.error(request, "l'ope %s est déja rapprochée" % ope.id)
                 return
         date_ope = list(OrderedDict.fromkeys(queryset.order_by('id').values_list('date', flat=True)))
         if len(date_ope) > 1:
@@ -608,36 +607,36 @@ class Ope_admin(Modeladmin_perso):
             mere = gsbmodels.Ope.objects.create(date=date_ope,
                                                 montant=montant,
                                                 tiers_id=tiers_id,
-                                                cat=gsbmodels.Cat.objects.get(nom=u"Opération Ventilée"),
+                                                cat=gsbmodels.Cat.objects.get(nom="Opération Ventilée"),
                                                 moyen_id=settings.MD_CREDIT if montant > 0 else settings.MD_DEBIT,
                                                 compte_id=compte_id
-                                               )
-            messages.success(request, u"ope mere crée '%s' " % mere)
+                                                )
+            messages.success(request, "ope mere crée '%s' " % mere)
         else:
-            messages.info(request, u"on va utiliser cette operation mere '%s' " % mere)
+            messages.info(request, "on va utiliser cette operation mere '%s' " % mere)
         for ope in queryset:
             ope.mere = mere
             ope.save()
-            messages.success(request, u"ope '%s' mise à jour" % ope)
+            messages.success(request, "ope '%s' mise à jour" % ope)
 
-    cree_operation_mere.short_description = u"cree une opération mère pour les opérations selectionnées"
+    cree_operation_mere.short_description = "cree une opération mère pour les opérations selectionnées"
 
     @transaction.atomic
     def defilliser(self, request, queryset):
         if queryset.count() > 1:
             if queryset[0].is_fille:
                 if len(list(OrderedDict.fromkeys(queryset.order_by('id').values_list('mere', flat=True)))) > 1:
-                    messages.error(request, u"les opé ont plusieurs mère")
+                    messages.error(request, "les opé ont plusieurs mère")
                     return
                 for ope in queryset:
                     if ope.rapp:
-                        messages.error(request, u"l'ope %s est déja rapprochée" % ope.id)
+                        messages.error(request, "l'ope %s est déja rapprochée" % ope.id)
                         return
                     ope.mere = None
                     ope.save()
-                    messages.success(request, u"ope '%s' mise à jour" % ope)
+                    messages.success(request, "ope '%s' mise à jour" % ope)
             else:
-                messages.error(request, u"vous ne pouvez selectionnner que plusieurs filles")
+                messages.error(request, "vous ne pouvez selectionnner que plusieurs filles")
                 return
         else:
             ope = queryset[0]
@@ -645,15 +644,15 @@ class Ope_admin(Modeladmin_perso):
                 for o in ope.filles_set.all():
                     o.mere = None
                     o.save()
-                    messages.success(request, u"ope '%s' mise à jour" % o)
+                    messages.success(request, "ope '%s' mise à jour" % o)
                 ope.delete()
-                messages.success(request, u"ope mere effacee")
+                messages.success(request, "ope mere effacee")
 
             else:
-                messages.error(request, u"si vous en selectionner une seul, vous ne pouvez selection qu'une mere")
+                messages.error(request, "si vous en selectionner une seul, vous ne pouvez selection qu'une mere")
                 return
 
-    defilliser.short_description = u"rompt la relation entre les filles selectionné et la mère"
+    defilliser.short_description = "rompt la relation entre les filles selectionné et la mère"
 
 
 class Cours_admin(Modeladmin_perso):
@@ -664,13 +663,11 @@ class Cours_admin(Modeladmin_perso):
     fields = ('date', 'titre', 'valeur')
     ordering = ('-date',)
     date_hierarchy = 'date'
-    actions = [export_as_csv_action]
-    
 
 
 class Titre_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les titres"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
     list_display = ('id', 'nom', 'isin', 'type', 'last_cours')
     fields = ('nom', 'isin', 'type', 'show_tiers')
     readonly_fields = ('tiers', 'show_tiers')
@@ -688,7 +685,7 @@ class Titre_admin(Modeladmin_perso):
 
 class Moyen_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les moyens de paiements"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
     list_filter = ('type',)
     fields = ['nom', 'type']
     list_display = ('nom', 'type', 'nb_opes')
@@ -703,7 +700,7 @@ class Ope_tiers(Ope_inline_admin):
 
 class Tiers_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les tiers"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
     list_editable = ('nom',)
     list_display = ('id', 'nom', 'notes', 'is_titre')
     list_display_links = ('id',)
@@ -731,18 +728,18 @@ class Ech_admin(Modeladmin_perso):
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
     fields = ('date', 'date_limite', ('intervalle', 'periodicite'), 'valide', 'compte', ('montant', 'tiers'), ('cat', 'moyen', 'ib'),
               ('compte_virement', 'moyen_virement'), 'exercice', 'notes')
-    actions = ['check_ech',export_as_csv_action]
+    actions = ['check_ech']
     radio_fields = {'periodicite': admin.HORIZONTAL}
 
     def check_ech(self, request, queryset):
-        gsbmodels.Echeance.check(request=request, queryset=queryset)
+        gsbmodels.Echeance.check_if_necessary(request=request, queryset=queryset)
 
-    check_ech.short_description = u"Verifier si des echeances sont à enregistrer"
+    check_ech.short_description = "Verifier si des echeances sont à enregistrer"
 
 
 class Banque_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les banques"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
 
 
 class Ope_rapp(Ope_inline_admin):
@@ -751,7 +748,7 @@ class Ope_rapp(Ope_inline_admin):
 
 class Rapp_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les rapprochements"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
     list_display = ('id', 'nom', 'date')
     list_editable = ('nom',)
     inlines = [Ope_rapp]
@@ -763,7 +760,7 @@ class Rapp_admin(Modeladmin_perso):
 
 class Exo_admin(Modeladmin_perso):
     """classe de gestion de l'admin pour les exercices"""
-    actions = ['fusionne',export_as_csv_action]
+    actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')
 
 
@@ -774,19 +771,18 @@ class Ope_titre_admin(Modeladmin_perso):
     list_filter = ('date', 'compte', 'titre',)
     ordering = ('-date',)
     date_hierarchy = 'date'
-    actions = [export_as_csv_action]
 
     def show_ope(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_ost.id,))
         return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_ost))
 
-    show_ope.short_description = u"opération"
+    show_ope.short_description = "opération"
 
     def show_ope_pmv(self, obj):
         change_url = urlresolvers.reverse('admin:gsb_ope_change', args=(obj.ope_pmv.id,))
         return format_html('<a href="%s">%s</a>' % (mark_safe(change_url), obj.ope_pmv))
 
-    show_ope_pmv.short_description = u"opération relative aux plus ou moins values"
+    show_ope_pmv.short_description = "opération relative aux plus ou moins values"
 
     def has_delete_permission(self, request, obj=None):
         if obj is None:

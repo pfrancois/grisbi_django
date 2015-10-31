@@ -4,7 +4,7 @@ option_index: vue qui gere l'index de toutes les options possible accesibles vie
 gestion_echeances:vue qui gere les echeances
 """
 
-from __future__ import absolute_import
+
 from django.template import RequestContext
 from django.conf import settings
 from django.shortcuts import render_to_response
@@ -21,7 +21,7 @@ def verif_element_config(element, request, collection=None):
     if collection is not None:
         objet = collection.objects.filter(id=id_elem)
         if not objet.exists():
-            messages.error(request, u"%s n'existe pas" % element)
+            messages.error(request, "%s n'existe pas" % element)
 
 
 def verif_config(request):
@@ -52,7 +52,7 @@ def verif_config(request):
     verif_element_config("UTILISE_EXERCICES", request)
     return render_to_response(
         'generic.djhtm',
-        {'resultats': (u"vous trouverez les résultats de la verification de la config",),
+        {'resultats': ("vous trouverez les résultats de la verification de la config",),
          'titre_long': "verif config",
          'titre': "verif _config",
         },
@@ -62,7 +62,7 @@ def verif_config(request):
 
 class Echeance_view(Mytemplateview):
     template_name = 'generic.djhtm'
-    titre = u"écheances échus"
+    titre = "écheances échus"
 
     def get_context_data(self, **kwargs):
         return {
@@ -71,5 +71,5 @@ class Echeance_view(Mytemplateview):
 
     def dispatch(self, request, *args, **kwargs):
         """on a besoin pour le method decorator"""
-        Echeance.check(request)
+        Echeance.check_if_necessary(request)
         return super(Echeance_view, self).dispatch(request, *args, **kwargs)

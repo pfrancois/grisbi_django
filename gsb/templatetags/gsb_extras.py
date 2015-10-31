@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 from decimal import Decimal, InvalidOperation
 
 from django import template
 from django.utils import formats
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 # from django.utils.http import urlquote
@@ -29,7 +29,7 @@ def cur(value, symbol=None):
     neg_inf = -1e200 * 1e200
     nan = (1e200 * 1e200) / (1e200 * 1e200)
     special_floats = [str(pos_inf), str(neg_inf), str(nan)]
-    input_val = force_unicode(value)
+    input_val = force_text(value)
     try:
         if input_val in special_floats:
             val_decim = Decimal(0)
@@ -39,7 +39,7 @@ def cur(value, symbol=None):
         #       val_decim = Decimal(0)
     except InvalidOperation:
         try:
-            val_decim = Decimal(force_unicode(float(value)))
+            val_decim = Decimal(force_text(float(value)))
         except (ValueError, InvalidOperation, TypeError, UnicodeEncodeError):
             val_decim = Decimal(0)
     if Decimal('0.0000001') > val_decim > Decimal('-0.0000001'):
@@ -49,7 +49,7 @@ def cur(value, symbol=None):
 
 @register.filter(is_safe=True)
 def somme(value, arg):
-    return Decimal(force_unicode(value)) + Decimal(force_unicode(arg))
+    return Decimal(force_text(value)) + Decimal(force_text(arg))
 
 
 @register.filter(is_safe=True)
@@ -59,7 +59,7 @@ def centimes(value):
     @param value:le montant a renvoyer
     @type value:comme on veut
     """
-    return unicode(Decimal(force_unicode(value)) * Decimal(100))
+    return str(Decimal(force_text(value)) * Decimal(100))
 
 
 from django.template.defaultfilters import floatformat

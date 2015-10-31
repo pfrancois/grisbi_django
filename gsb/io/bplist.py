@@ -49,6 +49,7 @@ Plist parsing example:
 from collections import namedtuple
 import calendar
 import datetime
+import pytz
 import math
 import plistlib
 from struct import pack, unpack
@@ -381,6 +382,7 @@ class PlistReader(object):
         global apple_reference_date_offset
         result = unpack(">d", self.contents[self.currentOffset:self.currentOffset + 8])[0]
         result = datetime.datetime.utcfromtimestamp(result + apple_reference_date_offset)
+        result = result.replace(tzinfo=pytz.utc)
         self.currentOffset += 8
         return result
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8
-from __future__ import absolute_import
+
 import os
 import decimal
 import sys
@@ -142,7 +142,7 @@ except ImportError:
     from random import choice
 
     secret = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-    fichier = open(nomfich, 'w')
+    fichier = open(nomfich, 'w', encoding="utf-8")
     fichier.write("# -*- coding: utf-8 -*-")
     fichier.write("SECRET_KEY=%s" % secret)
     from .secret_key import *  # @UnusedWildImport

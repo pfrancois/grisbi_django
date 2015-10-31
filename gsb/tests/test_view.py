@@ -2,7 +2,7 @@
 """
 test models
 """
-from __future__ import absolute_import
+
 import decimal
 
 from django.core.urlresolvers import reverse
@@ -10,8 +10,6 @@ from django.core.urlresolvers import reverse
 from .test_base import TestCase
 from gsb import forms as gsb_forms
 
-# import os.path
-# from django.conf import settings
 import gsb.utils as utils
 import mock
 import datetime
@@ -114,7 +112,7 @@ class Test_views_general(Test_view_base):
         resp = self.client.get(reverse('gsb_cpt_titre_espece_all', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
-        self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Ensemble des opérations)')
+        self.assertEqual(resp.context['titre_long'], 'cpt_titre2 (Ensemble des opérations)')
         self.assertEqual(resp.context['compte'].id, 5)
         self.assertEqual(resp.context['nbrapp'], 0)
         self.assertEqual(resp.context['solde'], -1600)
@@ -130,7 +128,7 @@ class Test_views_general(Test_view_base):
         resp = self.client.get(reverse('gsb_cpt_titre_espece_rapp', args=(5,)))
         self.assertTemplateUsed(resp, template_name="gsb/cpt_placement_espece.djhtm")
         self.assertEqual(resp.context['titre'], 'cpt_titre2')
-        self.assertEqual(resp.context['titre_long'], u'cpt_titre2 (Opérations rapprochées)')
+        self.assertEqual(resp.context['titre_long'], 'cpt_titre2 (Opérations rapprochées)')
         self.assertEqual(resp.context['compte'].id, 5)
         self.assertEqual(resp.context['nbrapp'], 0)
         self.assertEqual(resp.context['solde'], -1600)
@@ -166,9 +164,9 @@ class Test_forms(Test_view_base):
         form = gsb_forms.OperationForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors,
-                         {'nouveau_tiers': [u'si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
+                         {'nouveau_tiers': ['si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau'],
                           'tiers': [
-                              u"si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]})
+                              "si vous ne choisissez pas un tiers, vous devez taper le nom du nouveau dans le champs 'nouveau tiers'"]})
 
     def test_virement_forms(self):
         """creation d'un nouveau virement sans probleme"""
@@ -183,8 +181,8 @@ class Test_forms(Test_view_base):
         self.assertEqual(form.cleaned_data['compte_destination'].id, 2)
         form.save()
         self.assertEqual(models.Ope.objects.count(), 15)
-        self.assertEqual(unicode(models.Ope.objects.filter(id__in=(14, 15)).order_by('id')),
-                         u"[<Ope: (14) le 02/09/2012 : -13.5 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (15) le 02/09/2012 : 13.5 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
+        self.assertEqual(str(models.Ope.objects.filter(id__in=(14, 15)).order_by('id')),
+                         "[<Ope: (14) le 02/09/2012 : -13.50 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (15) le 02/09/2012 : 13.50 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms2(self):
         """edition d'un virement deja crée sans probleme"""
@@ -200,7 +198,7 @@ class Test_forms(Test_view_base):
         form.save()
         self.assertEqual(models.Ope.objects.count(), 13)
         self.assertEqual(str(models.Ope.objects.filter(id__in=(8, 9)).order_by('id')),
-                         u"[<Ope: (8) le 02/09/2012 : -13.5 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (9) le 02/09/2012 : 13.5 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
+                         "[<Ope: (8) le 02/09/2012 : -13.50 EUR tiers: cpte1 => cptb2 cpt: cpte1>, <Ope: (9) le 02/09/2012 : 13.50 EUR tiers: cpte1 => cptb2 cpt: cptb2>]")
 
     def test_virement_forms_erreur(self):
         """ creation virement mais erreur car deux fois le meme compte"""
@@ -212,8 +210,8 @@ class Test_forms(Test_view_base):
         form = gsb_forms.VirementForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'compte_origine': [u"pas possible de faire un virement vers le même compte"],
-                                       'compte_destination': [u"pas possible de faire un virement vers le même compte"]})
+        self.assertEqual(form.errors, {'compte_origine': ["pas possible de faire un virement vers le même compte"],
+                                       'compte_destination': ["pas possible de faire un virement vers le même compte"]})
 
     def test_Ope_titre_addForm1(self):
         """ajout ope titre mais erreur car nombre de titre =0"""
@@ -222,7 +220,7 @@ class Test_forms(Test_view_base):
         form = gsb_forms.Ope_titre_addForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)
-        self.assertEqual(form.errors, {'nombre': [u'le nombre de titre ne peut être nul']})
+        self.assertEqual(form.errors, {'nombre': ['le nombre de titre ne peut être nul']})
 
     def test_Ope_titre_addForm3(self):
         """ajout ope titre normal"""
@@ -257,7 +255,7 @@ class Test_forms(Test_view_base):
         r = form.is_valid()
         self.assertFalse(r)
         self.assertEqual(form.errors,
-                         {'titre': [u'Sélectionnez un choix valide. Ce choix ne fait pas partie de ceux disponibles.']})
+                         {'titre': ['Sélectionnez un choix valide. Ce choix ne fait pas partie de ceux disponibles.']})
 
     def test_Ope_titre_add_achatForm1(self):
         """achat titre ok"""
@@ -283,7 +281,7 @@ class Test_forms(Test_view_base):
         r = form.is_valid()
         self.assertFalse(r)
         self.assertEqual(form.errors,
-                         {'nouveau_titre': [u'si vous ne choisissez pas un titre, vous devez taper le nom du nouveau']})
+                         {'nouveau_titre': ['si vous ne choisissez pas un titre, vous devez taper le nom du nouveau']})
 
     def test_Ope_titre_add_achatForm4(self):
         """achat titre mais nouveau_isin n'est pas la"""
@@ -308,7 +306,7 @@ class Test_forms(Test_view_base):
         cpt_titre = models.Compte.objects.get(id=5)
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors, {'titre': [u"titre pas en portefeuille", ]})
+        self.assertEqual(form.errors, {'titre': ["titre pas en portefeuille", ]})
 
     def test_Ope_titre_add_venteForm4(self):
         """ vente titre mais pas assez de titre en portefeuille"""
@@ -318,14 +316,14 @@ class Test_forms(Test_view_base):
         form = gsb_forms.Ope_titre_add_venteForm(data=form_data, cpt=cpt_titre)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors,
-                         {'titre': [u"titre pas assez en portefeuille pour que l'opération puisse s'effectuer", ]})
+                         {'titre': ["titre pas assez en portefeuille pour que l'opération puisse s'effectuer", ]})
 
     def testOpe_titreForm(self):
         """comme tout le reste depend directement des test django pas de probleme"""
         ope = models.Ope_titre.objects.get(id=2)
         form = gsb_forms.Ope_titreForm(instance=ope)
-        self.assertTrue('titre' in [k for k in form.fields.keys()])
-        self.assertTrue('compte' in [k for k in form.fields.keys()])
+        self.assertTrue('titre' in [k for k in list(form.fields.keys())])
+        self.assertTrue('compte' in [k for k in list(form.fields.keys())])
 
     # -------------------------------
 
@@ -335,7 +333,7 @@ class Test_forms(Test_view_base):
 
     def testMajtitre(self):
         form = gsb_forms.Majtitre(models.Titre.objects.all())
-        k = [k for k in form.fields.keys()]
+        k = [k for k in list(form.fields.keys())]
         self.assertTrue(len(k) == 7)
 
     def testSearchForm(self):

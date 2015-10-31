@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 import csv
-import cStringIO
-import codecs
+import io
 import time
 
 from django.contrib.auth.decorators import login_required
@@ -21,15 +20,9 @@ from .. import models
 class Writer_base(object):
     writer = None
     stream = None
-    Encoder = None
 
     def __init__(self, encoding="utf-8"):
-        self.queue = cStringIO.StringIO()
-        self.encoder = codecs.getincrementalencoder(encoding)()
-        self.stream = cStringIO.StringIO()
-        # Force BOM
-        #       if encoding=="utf-16":
-        #           f.write(codecs.BOM_UTF16)
+        self.stream = io.StringIO(newline="")
         self.encoding = encoding
 
     def writerow(self, row):
@@ -40,7 +33,8 @@ class Writer_base(object):
             self.writerow(row)
 
     def getvalue(self, close=True):
-        reponse = self.stream.getvalue()
+        gv_str = self.stream.getvalue()
+        reponse = gv_str.encode(self.encoding)
         if close:
             self.close()
         return reponse
@@ -59,23 +53,10 @@ class Csv_unicode_writer(Writer_base):
         # Redirect output to a queue
         super(Csv_unicode_writer, self).__init__(encoding)
         self.fieldnames = fieldnames
-        self.writer = csv.DictWriter(self.queue, fieldnames, dialect=dialect, **kwds)
+        self.writer = csv.DictWriter(self.stream, fieldnames, dialect=dialect, **kwds)
 
     def writerow(self, row):
-        d = dict((k, unicode(s).encode("utf-8")) for (k, s) in row.items())
-        self.writer.writerow(d)
-        # Fetch UTF-8 output from the queue ...
-        data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
-        # strip BOM
-        #      if self.encoding == "utf-16":
-        #          data = data[2:]
-        # write to the target stream
-        self.stream.write(data)
-        # empty queue
-        self.queue.truncate(0)
+        self.writer.writerow(row)
 
     def writeheader(self):
         self.writer.writerow(dict((fn, fn) for fn in self.fieldnames))
@@ -93,7 +74,7 @@ class Exportform_ope(gsb_forms.Baseform):
             raise NotImplementedError("model_collec non defini")
         super(Exportform_ope, self).clean()
         data = self.cleaned_data
-        if 'collection' not in data.keys():
+        if 'collection' not in list(data.keys()):
             return data
         ensemble = [objet.id for objet in data["collection"]]  # liste des id des comptes
         date_min = data['date_min']
@@ -104,7 +85,7 @@ class Exportform_ope(gsb_forms.Baseform):
         else:
             self.query = self.verif_collec(ensemble)
         if self.query.count() == 0:  # si des operations n'existent pas
-            raise forms.ValidationError(u"attention pas d'opérations pour la selection demandée")
+            raise forms.ValidationError("attention pas d'opérations pour la selection demandée")
         return data
 
     def verif_collec(self, ensemble):

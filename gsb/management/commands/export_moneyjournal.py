@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 import time
 import os
 import sqlite3 as sqlite
@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 from ... import models
 from ... import utils
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 
 class Command(BaseCommand):
@@ -83,7 +83,7 @@ def proc_sql_export(sql, log=None):
     list_cat_id = list(models.Cat.objects.order_by('id').values_list('id', flat=True))
     for cat in models.Cat.objects.order_by('nom'):
         param['id'] = cat.id
-        param['name'] = smart_unicode(cat.nom)
+        param['name'] = smart_text(cat.nom)
         param['color'] = int(utils.idtostr(cat, membre="couleur", defaut="#FFFFFF")[1:], 16)
         param['place'] = list_cat_id.index(cat.id)
         param['lastupdate'] = utils.datetotimestamp(cat.lastupdate)
@@ -91,7 +91,7 @@ def proc_sql_export(sql, log=None):
             param['type'] = 1
         else:
             param['type'] = 2
-        cur.execute(u"insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
+        cur.execute("insert into category VALUES(:id,:name,:type,:color,:place,:lastupdate);", param)
     sql.commit()
     log('cat et sous cat')
     # les devises
@@ -126,12 +126,12 @@ def proc_sql_export(sql, log=None):
     for cpt in liste_compte:
         i += 1
         param['id'] = cpt.id
-        param['name'] = smart_unicode(cpt.nom)
+        param['name'] = smart_text(cpt.nom)
         param['symbol'] = i % 9
         param['color'] = int(utils.idtostr(cpt, membre="couleur", defaut="FFFFFF")[1:], 16)
         param['place'] = liste_compte.index(cpt.id)
         param['lastupdate'] = utils.datetotimestamp(cpt.lastupdate)
-        cur.execute(u"insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
+        cur.execute("insert into payment VALUES(:id,:name,:symbol,:color,:place,:lastupdate);", param)
     sql.commit()
     log('comptes')
     log('debut ope')
@@ -188,7 +188,7 @@ def proc_sql_export(sql, log=None):
         param['place'] = None
         param['day'] = ope.date.strftime('%Y%m%d')
         param['lastupdate'] = time.mktime(ope.lastupdate.timetuple())
-        if ope.cat.nom not in (u"Opération Ventilée", "Virement"):
+        if ope.cat.nom not in ("Opération Ventilée", "Virement"):
             if ope.montant > 0:
                 if ope.cat.type == 'r':
                     param['category'] = utils.nulltostr(ope.cat.id)
@@ -202,7 +202,7 @@ def proc_sql_export(sql, log=None):
         else:
             param['category'] = utils.nulltostr(ope.cat.id)
             param['amount'] = 0
-        cur.execute(u"""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
+        cur.execute("""insert into record VALUES(:id,:payment,:category,:subcategory,:memo,:currency,
             :amount,:date,:photo,:voice,:payee,:note,:account,:type,:repeat,:place,:lastupdate,:day);""", param)
         if nbope % 1000 == 0:
             log("%s" % nbope)

@@ -49,7 +49,7 @@
 				<integer>4</integer>
 			</dict>
 			<key>lastUpdate</key>
-			<real>1403542300</real>
+			<real>1403549500</real>
 			<key>memo</key>
 			<dict>
 				<key>CF$UID</key>
@@ -66,7 +66,7 @@
 				<integer>0</integer>
 			</dict>
 			<key>payment</key>
-			<integer>3</integer>
+			<integer>2</integer>
 			<key>photo</key>
 			<integer>0</integer>
 			<key>pk</key>

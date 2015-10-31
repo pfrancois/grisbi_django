@@ -2,7 +2,7 @@
 """
 test import
 """
-from __future__ import absolute_import
+
 
 # from gsb import forms as gsb_forms
 from django.core.urlresolvers import reverse
@@ -51,16 +51,17 @@ class Test_import_csv1(Test_import_abstract):
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         self.maxDiff = None
         cl = self.cl
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")) as file_test:
-            fich = cl.reader(file_test, encoding=cl.encoding)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv"),
+                   encoding="iso-8859-1") as file_test:
+            fich = cl.reader(file_test)
             cl.tableau(fich, self.moyen_virement)
-        self.assertEqual([u"erreur de date '2013/45/12' à la ligne 1",
-                          u"erreur de date '' à la ligne 3",
-                          u"attention il faut deux bouts à un virement ligne 4",
-                          u'attention, virement impossible entre le même compte à la ligne 5',
-                          u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"],
-                        cl.erreur)
+        self.assertEqual(["erreur de date '2013/45/12' à la ligne 1",
+                          "erreur de date '' à la ligne 3",
+                          "attention il faut deux bouts à un virement ligne 4",
+                          'attention, virement impossible entre le même compte à la ligne 5',
+                          "le compte designé doit être un des deux comptes 'tiers' ligne 6",
+                          "Ce tiers 't1' ne peut être un titre à la ligne 8"],
+                          cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
 
     def test_import_erreur_champ_incomplet(self):
@@ -69,10 +70,10 @@ class Test_import_csv1(Test_import_abstract):
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         self.maxDiff = None
         cl = self.cl
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur.csv")) as file_test:
-            fich = cl.reader(file_test, encoding=cl.encoding)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur.csv"), encoding="iso-8859-1") as file_test:
+            fich = cl.reader(file_test)
             cl.tableau(fich, self.moyen_virement)
-        self.assertEqual(cl.erreur, [u"il manque la/les colonne(s) 'date'"])
+        self.assertEqual(cl.erreur, ["il manque la/les colonne(s) 'date'"])
 
     def test_import_moyen_par_defaut(self):
         self.cl.init_cache()
@@ -80,12 +81,12 @@ class Test_import_csv1(Test_import_abstract):
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         self.maxDiff = None
         cl = self.cl
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_2_moyens.csv")) as file_test:
-            fich = cl.reader(file_test, encoding=cl.encoding)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_2_moyens.csv"), encoding="iso-8859-1") as file_test:
+            fich = cl.reader(file_test)
             cl.tableau(fich, self.moyen_virement)
         attendu = [  # depense de 100E non p , rapproche, sans notes
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100'), 'date_val': None, 'tiers_id': 257,
-                      'ligne': 1, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': u'12345678',
+                      'ligne': 1, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '12345678',
                       'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11), 'notes': '', 'cat_id': 74,
                       'ib_id': None},  # recette de 10E rapproche
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('10'), 'date_val': None, 'tiers_id': 257,
@@ -96,21 +97,21 @@ class Test_import_csv1(Test_import_abstract):
     def test_erreur_import_file(self):
         cl = self.cl
         nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_erreur_de_date.csv")
-        retour = cl.import_file(nomfich)
+        retour = cl.import_file(nomfich, encoding="iso-8859-1")
         self.assertEqual(retour, False)
-        self.assertEqual([u"erreur de date '2013/45/12' à la ligne 1",
-                          u"erreur de date '' à la ligne 3",
-                          u"attention il faut deux bouts à un virement ligne 4",
-                          u'attention, virement impossible entre le même compte à la ligne 5',
-                          u"le compte designé doit être un des deux comptes 'tiers' ligne 6",
-                          u"Ce tiers 't1' ne peut être un titre à la ligne 8"],
-                        cl.erreur)
+        self.assertEqual(["erreur de date '2013/45/12' à la ligne 1",
+                          "erreur de date '' à la ligne 3",
+                          "attention il faut deux bouts à un virement ligne 4",
+                          'attention, virement impossible entre le même compte à la ligne 5',
+                          "le compte designé doit être un des deux comptes 'tiers' ligne 6",
+                          "Ce tiers 't1' ne peut être un titre à la ligne 8"],
+                          cl.erreur)
         self.assertEqual(models.Compte.objects.get(nom='cpt_titre1').type, 't')
 
     def test_import_file_vir(self):
         cl = self.cl
         nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_3.csv")
-        retour = cl.import_file(nomfich)
+        retour = cl.import_file(nomfich, encoding="iso-8859-1")
         self.assertEqual(retour, True)
         self.assertEqual(models.Ope.objects.count(), 18)
         # rine/rien
@@ -160,25 +161,25 @@ class Test_import_csv1(Test_import_abstract):
         self.assertEqual(models.Ope.objects.get(pk=18).rapp_id, None)
         self.assertEqual(models.Rapp.objects.count(), 2)
         self.assertmessagecontains(self.cl.request,
-                                   u"virement ope: (17) le 09/12/2013 : -100.00 EUR tiers: cpte1 => cptb3 cpt: cpte1 ligne 9")
+                                   "virement ope: (17) le 09/12/2013 : -100.00 EUR tiers: cpte1 => cptb3 cpt: cpte1 ligne 9")
         self.assertmessagecontains(self.cl.request,
-                                   u"virement ope: (18) le 09/12/2013 : 100.00 EUR tiers: cpte1 => cptb3 cpt: cptb3 ligne 9")
+                                   "virement ope: (18) le 09/12/2013 : 100.00 EUR tiers: cpte1 => cptb3 cpt: cptb3 ligne 9")
 
     def test_import_file_ope_titre(self):
         cl = self.cl
         nomfich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_4.csv")
-        retour = cl.import_file(nomfich)
+        retour = cl.import_file(nomfich, encoding="iso-8859-1")
         self.assertEqual(retour, True)
         self.assertEqual(models.Ope.objects.count(), 4)
         self.assertmessagecontains(self.cl.request,
-                                   u"ope_titre: (1) le 18/12/2011 : -1 EUR tiers: titre_ t1 cpt: cpt_titre1 ligne 1")
+                                   "ope_titre: (1) le 18/12/2011 : -1 EUR tiers: titre_ t1 cpt: cpt_titre1 ligne 1")
         self.assertmessagecontains(self.cl.request,
-                                   u"ope_titre: (2) le 24/09/2012 : -5 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 2")
+                                   "ope_titre: (2) le 24/09/2012 : -5 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 2")
         self.assertmessagecontains(self.cl.request,
-                                   u"ope_titre: (3) le 25/09/2012 : 5.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
+                                   "ope_titre: (3) le 25/09/2012 : 5.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
         self.assertmessagecontains(self.cl.request,
-                                   u"ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
-        self.assertmessagecontains(self.cl.request, u"attention, fausse opération sur titre ligne 4")
+                                   "ope_titre(pmv): (4) le 25/09/2012 : 0.00 EUR tiers: titre_ autre cpt: cpt_titre1 ligne 3")
+        self.assertmessagecontains(self.cl.request, "attention, fausse opération sur titre ligne 4")
         self.assertmessagecontains(self.cl.request, "impossible de vendre car le titre (autre (ZZ_2)) n'est pas en portefeuille ligne 5")
 
     def test_import_tableau(self):
@@ -187,12 +188,12 @@ class Test_import_csv1(Test_import_abstract):
         self.moyen_virement = self.cl.moyens.goc('', {'nom': "Virement", 'type': 'v'})
         self.maxDiff = None
         cl = self.cl
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_1.csv")) as file_test:
-            fich = cl.reader(file_test, encoding=cl.encoding)
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export_1.csv"), encoding="iso-8859-1") as file_test:
+            fich = cl.reader(file_test)
             cl.tableau(fich, self.moyen_virement)
         attendu = [  # depense de 100E non p , rapproche, sans notes
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 257, 'ligne': 1, 'rapp_id': 1, 'automatique': False,
-                      'virement': False, 'num_cheque': u'12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11),
+                      'virement': False, 'num_cheque': '12345678', 'moyen_id': 7, 'compte_id': 1, 'date': datetime.date(2011, 8, 11),
                       'notes': '', 'cat_id': 74, 'ib_id': None},  # recette de 10E rapproche
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 257,
                       'ligne': 2, 'rapp_id': 1, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 8,
@@ -203,22 +204,22 @@ class Test_import_csv1(Test_import_abstract):
                       'cat_id': 74, 'ib_id': 1},
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('10.00'), 'date_val': None, 'tiers_id': 258,
                       'ligne': 4, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2011, 8, 21),
-                      'notes': u'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
+                      'notes': 'fusion avec ope1', 'cat_id': 75, 'ib_id': 2},
                      {'ope_titre': True, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 5, 'rapp_id': 2, 'automatique': False,
                       'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 10, 29),
-                      'titre_id': 1, 'notes': u'20@5', 'cat_id': 64, 'ib_id': None},
+                      'titre_id': 1, 'notes': '20@5', 'cat_id': 64, 'ib_id': None},
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 6, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
                       'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2011, 10, 30), 'notes': '',
                       'cat_id': 65, 'ib_id': None},
                      {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1500.00'), 'date_val': None, 'tiers_id': 259, 'ligne': 7, 'rapp_id': None, 'automatique': False,
                       'virement': False, 'num_cheque': '', 'moyen_id': 9, 'compte_id': 2, 'date': datetime.date(2011, 11, 30),
-                      'titre_id': 1, 'notes': u'150@10', 'cat_id': 64, 'ib_id': None},
+                      'titre_id': 1, 'notes': '150@10', 'cat_id': 64, 'ib_id': None},
                      {'ope_titre': True, 'pointe': False, 'montant': Decimal('-1.00'), 'date_val': None, 'tiers_id': 261,
                       'ligne': 8, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2011, 12, 18),
-                      'titre_id': 2, 'notes': u'1@1', 'cat_id': 64, 'ib_id': None},
+                      'titre_id': 2, 'notes': '1@1', 'cat_id': 64, 'ib_id': None},
                      {'ope_titre': True, 'pointe': False, 'montant': Decimal('-5.00'), 'date_val': None, 'tiers_id': 262,
                       'ligne': 9, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '', 'moyen_id': 10, 'compte_id': 4, 'date': datetime.date(2012, 9, 24),
-                      'titre_id': 3, 'notes': u'5@1', 'cat_id': 64, 'ib_id': None},
+                      'titre_id': 3, 'notes': '5@1', 'cat_id': 64, 'ib_id': None},
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('99.00'), 'date_val': None, 'tiers_id': 258,
                       'ligne': 10, 'rapp_id': None, 'automatique': False, 'virement': False, 'num_cheque': '',
                       'moyen_id': 8, 'compte_id': 1, 'date': datetime.date(2012, 9, 24), 'notes': '', 'cat_id': 74,
@@ -229,10 +230,10 @@ class Test_import_csv1(Test_import_abstract):
                       'ib_id': None},
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 12, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
                       'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2012, 12, 18),
-                      'notes': u'>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
+                      'notes': '>Rcpte1201101', 'cat_id': 65, 'ib_id': None},
                      {'ope_titre': False, 'pointe': False, 'montant': Decimal('-100.00'), 'date_val': None, 'tiers_id': 260, 'ligne': 13, 'dest_id': 3, 'rapp_id': None, 'automatique': False,
                       'virement': True, 'num_cheque': '', 'moyen_id': 5, 'compte_id': 1, 'date': datetime.date(2013, 12, 18),
-                      'notes': u'>P', 'cat_id': 65, 'ib_id': None}]
+                      'notes': '>P', 'cat_id': 65, 'ib_id': None}]
         self.assertEqual(attendu, cl.opes.created_items)
 
 
@@ -240,20 +241,20 @@ class Test_import_csv1(Test_import_abstract):
 class Test_import_csv2(Test_import_abstract):
     def test_import_csv_simple_ok_global(self):
         """test d'integration"""
-        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export.csv")) as file_test:
+        with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export.csv"), encoding="iso-8859-1") as file_test:
             r = self.client.post(reverse('import_csv_ope_simple'), {'nom_du_fichier': file_test})
             # on efface les fichier crée par le test
             for name in glob.glob(os.path.join(settings.PROJECT_PATH, 'upload', 'import_simple*')):
                 os.remove(name)
         self.assertEqual(r.status_code, 302)
         self.assertQueryset_list(models.Tiers.objects.all(),
-                                 [u'tiers1', u'tiers2', u'cpte1 => cptb3', u'titre_ autre', u'Secu', u'titre_ t1',
-                                  u'titre_ t2'], 'nom')  # ne pas oublier le tiers cree automatiquement
-        self.assertEquals(models.Ope.objects.all().count(), 16)
+                                     ['tiers1', 'tiers2', 'cpte1 => cptb3', 'titre_ autre', 'Secu', 'titre_ t1',
+                                       'titre_ t2'], 'nom')  # ne pas oublier le tiers cree automatiquement
+        self.assertEqual(models.Ope.objects.all().count(), 16)
         self.assertQueryset_list(models.Cat.objects.all(),
-                                 [u'cat1', u'cat2', u'Frais bancaires', u"Opération Ventilée", u"Opération sur titre",
-                                  u"Revenus de placements:Plus-values", u'Impôts', u'Revenus de placements:interets',
-                                  u'Virement', u"Non affecté", u"Avance", u"Remboursement"],
+                                 ['cat1', 'cat2', 'Frais bancaires', "Opération Ventilée", "Opération sur titre",
+                                  "Revenus de placements:Plus-values", 'Impôts', 'Revenus de placements:interets',
+                                  'Virement', "Non affecté", "Avance", "Remboursement"],
                                  'nom')  # ne pas oublier les cat cree automatiquement
         self.assertQueryset_list(models.Rapp.objects.all(), ["cpt_titre2201101", "cpte1201101"], "nom")
         self.assertEqual(models.Rapp.objects.get(nom="cpte1201101").solde, 10)
@@ -304,14 +305,14 @@ class Test_import_base(Test_import_abstract):
     def test_cat_cache(self):
         """on teste si les categories par defaut sont bien crees"""
         import_base.Cat_cache(self.request_get("/outils"))
-        self.assertEqual(models.Cat.objects.get(nom=u"Opération sur titre").id, 64)
+        self.assertEqual(models.Cat.objects.get(nom="Opération sur titre").id, 64)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:Plus-values").id, 67)
         self.assertEqual(models.Cat.objects.get(nom="Revenus de placements:interets").id, 68)
-        self.assertEqual(models.Cat.objects.get(nom=u'Impôts').id, 54)
-        self.assertEqual(models.Cat.objects.get(nom=u'Virement').id, 65)
-        self.assertEqual(models.Cat.objects.get(nom=u"Opération Ventilée").id, 69)
-        self.assertEqual(models.Cat.objects.get(nom=u"Frais bancaires").id, 70)
-        self.assertEqual(models.Cat.objects.get(nom=u"Non affecté").id, 71)
+        self.assertEqual(models.Cat.objects.get(nom='Impôts').id, 54)
+        self.assertEqual(models.Cat.objects.get(nom='Virement').id, 65)
+        self.assertEqual(models.Cat.objects.get(nom="Opération Ventilée").id, 69)
+        self.assertEqual(models.Cat.objects.get(nom="Frais bancaires").id, 70)
+        self.assertEqual(models.Cat.objects.get(nom="Non affecté").id, 71)
 
     def test_cat_cache2(self):
         """test avec definition de l'ensemble avec nom defini"""
@@ -327,7 +328,7 @@ class Test_import_base(Test_import_abstract):
         """test normal"""
         cats = import_base.Cat_cache(self.request_get("/outils"))
         cats.goc("cat1")  # on cree
-        self.assertEqual(cats.goc("cat1"), models.Cat.objects.get(nom=u"cat1").id)  # on demande
+        self.assertEqual(cats.goc("cat1"), models.Cat.objects.get(nom="cat1").id)  # on demande
 
     def test_cat_cache4(self):
         """test integrity error"""
@@ -340,6 +341,7 @@ class Test_import_base(Test_import_abstract):
             cats.goc('test', {'nom': 'test', 'id': 1215, 'type': 'c'})
         with self.assertRaises(KeyError):
             _ = cats.id['test']
+            assert _ == _  # jamais fait
         with self.assertRaises(import_base.ImportException):
             cats.goc('test', {'nom': 'test', 'id': 1216, 'type': 'c'})
 
@@ -349,7 +351,7 @@ class Test_import_base(Test_import_abstract):
         cats.readonly = True
         with self.assertRaises(import_base.ImportException) as exc:
             cats.goc("cat1")
-        self.assertEqual(exc.exception.msg, u"Cat 'cat1' non créée parce que c'est read only")
+        self.assertEqual(exc.exception.msg, "Cat 'cat1' non créée parce que c'est read only")
 
     def test_cat_cache6(self):
         """on teste si on peut bien recuperer une cat deja existante"""

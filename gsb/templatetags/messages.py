@@ -24,16 +24,16 @@ class MessagesNode(template.Node):
         try:
             messages = context[self.messages]
             tag_prec = ""
-            out_str = u''
+            out_str = ''
             for m in messages:
                 # Add message
                 if tag_prec != "" and m.tags != tag_prec:  # ca veut dire que ce n'est pas le premier tag
-                    out_str += u'</ul>\n</div>\n'
+                    out_str += '</ul>\n</div>\n'
                 if m.tags != tag_prec:
-                    out_str += u'<div class="messages %s">\n<ul class="messages-list-%s">' % (m.tags, m.tags)
+                    out_str += '<div class="messages %s">\n<ul class="messages-list-%s">' % (m.tags, m.tags)
                     tag_prec = m.tags
-                out_str += u'<li>%s</li>' % m
-            out_str += u'</ul>\n</div>\n'
+                out_str += '<li>%s</li>' % m
+            out_str += '</ul>\n</div>\n'
             return out_str
         except KeyError:
             return ''

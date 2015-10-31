@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
+from django.utils import timezone
 import datetime
 import time
 import decimal
 import csv
-import codecs
+import unicodedata
 import math
 import os
 import fnmatch
 
-import pytz
-import mock
 
-
-# from inspector_panel.panels.inspector import debug
-import locale
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.encoding import force_unicode, smart_unicode
+from django.utils.encoding import force_text, smart_text
 from uuid import uuid4
 
 
@@ -26,9 +22,9 @@ class utils_Exception(Exception):
 
     def __init__(self, message):
         super(utils_Exception, self).__init__(message)
-        self.msg = smart_unicode(message)
+        self.msg = smart_text(message)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.msg
 
 
@@ -41,53 +37,6 @@ def uuid():
     return str(uuid4())
 
 
-class Compfr(object):
-    """operateur de comparaison avec un alphabet francais afin de pouvoir trier selon la norme francaise
-       que cela soit texte ou unicode"""
-
-    def __init__(self, decod='utf-8'):
-        self.decod = decod
-        self.loc = locale.getlocale()  # stocker la locale courante
-        self.espinsec = u'\xA0'  # espace insécable
-
-    def __call__(self, v1, v2):
-        """appel effectif de l'operateur"""
-        if isinstance(v1, str) or isinstance(v2, str) or isinstance(v1, unicode) or isinstance(v2, unicode):
-            # on convertit en unicode si nécessaire
-            if not isinstance(v1, unicode):
-                if isinstance(v1, str):
-                    v1 = v1.decode(self.decod)
-                else:
-                    v1 = "%s" % v1
-                    v1 = v1.decode(self.decod)
-            if not isinstance(v2, unicode):
-                if isinstance(v2, str):
-                    v2 = v2.decode(self.decod)
-                else:
-                    v2 = "%s" % v2
-                    v2 = v2.decode(self.decod)
-
-            # on retire les tirets et les blancs insécables
-            v1 = v1.replace(u'-', u'')
-            v1 = v1.replace(self.espinsec, u'')
-            v2 = v2.replace(u'-', '')
-            v2 = v2.replace(self.espinsec, u'')
-
-            # on retourne le résultat de la comparaison
-            locale.setlocale(locale.LC_ALL, '')
-            comp = locale.strcoll(v1, v2)
-            locale.setlocale(locale.LC_ALL, self.loc)  # retour à la locale courante
-
-            return comp  # retour du résultat de la comparaison
-        else:
-            if v1 < v2:
-                return -1
-            elif v1 > v2:
-                return 1
-            else:
-                return 0
-
-
 def validrib(banque, guichet, compte, cle):
     """fonction qui verifie la validite de la cle rib
         @return bool """
@@ -95,10 +44,10 @@ def validrib(banque, guichet, compte, cle):
     lettres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chiffres = "12345678912345678923456789"
     # subst letters if needed
-    banque = unicode(banque)
-    guichet = unicode(guichet)
-    compte = unicode(compte)
-    cle = unicode(cle)
+    banque = str(banque)
+    guichet = str(guichet)
+    compte = str(compte)
+    cle = str(cle)
     if len(banque) > 5 or len(guichet) > 5 or len(compte) > 11 or len(cle) > 2:
         raise ValueError
     for char in compte:
@@ -150,15 +99,15 @@ def is_number(s):
 
 def fr2decimal(s):
     """fonction qui renvoie un decimal en partant d'un nombre francais"""
-    s = force_unicode(s).strip()
+    s = force_text(s).strip()
     s = s.replace(',', '.')
     s = s.replace(' ', '')
     return decimal.Decimal(s)
 
 
 def strpdate(end_date, fmt="%Y-%m-%d"):
-    """ renvoie la date 
-    @param end_date: date
+    """ renvoie la date
+        @param end_date: date
         @param fmt: format de la date
     attention si s est None ou impossible renvoie None"""
     if isinstance(end_date, datetime.date) or isinstance(end_date, datetime.datetime):
@@ -172,7 +121,7 @@ def strpdate(end_date, fmt="%Y-%m-%d"):
 
 def now():
     """ now utilise pour mock dans les tests """
-    dt = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    dt = timezone.now()
     return dt
 
 
@@ -182,12 +131,24 @@ def today():
     return now().date()
 
 
+def utctime(t):
+    if timezone.is_aware(t):
+        return timezone.localtime(t, timezone=timezone.utc)
+    else:
+        return timezone.localtime(timezone.make_aware(t), timezone=timezone.utc)
+
+
+def sort_fr(t):
+    chnorm = unicodedata.normalize('NFKD', str(t))
+    return "".join([c for c in chnorm if not unicodedata.combining(c)])
+
+
 #------------------------------------format d'entree---------------------------------
 def to_unicode(var, defaut=''):
     """a partir d'une unicode"""
     if var is None:
         return defaut
-    var = force_unicode(var).strip()
+    var = force_text(var).strip()
     if var == "":
         return defaut
     try:
@@ -203,7 +164,7 @@ def to_id(var):
     """renvoie un entier positif"""
     if var is None:
         return None
-    var = force_unicode(var).strip()
+    var = force_text(var).strip()
     try:
         if var == "" or int(var) == 0 or var == "False":
             return None
@@ -219,8 +180,7 @@ def to_bool(var):
         return False
     if var is True or var is False:
         return var
-
-    var = force_unicode(var).strip()
+    var = force_text(var).strip()
     if var == "" or var == 0 or var == "0" or bool(var) is False:
         return False
     else:
@@ -231,7 +191,7 @@ def to_decimal(var):
     """renvoie un decimal"""
     if var is None:
         return 0
-    var = force_unicode(var).strip()
+    var = force_text(var).strip()
     try:
         return fr2decimal(var)  # si il y a une exception il est renvoyé 0
     except decimal.InvalidOperation:
@@ -269,17 +229,17 @@ def datetostr(s, defaut="0/0/0", param='%d/%m/%Y', gsb=False):
             else:
                 return s
         else:
-            raise FormatException(u"attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
+            raise FormatException("attention ce ne peut pas etre qu'un objet date et c'est un %s (%s)" % (type(s), s))
 
 
 def datetotimestamp(d):
-    if type(d) == datetime.date:
-        return (d - datetime.date(1970, 1, 1)).total_seconds()
-    if hasattr(d, "tzinfo"):
-        if d.tzinfo is not None and d.tzinfo.utcoffset(None) is not None:
-            return (d - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
+    if not isinstance(d, datetime.datetime) and isinstance(d, datetime.date):
+        return datetime.datetime.combine(d, datetime.datetime.min.time()).timestamp()
+    if isinstance(d, datetime.datetime):
+        if timezone.is_aware(d):
+            return timezone.localtime(d, timezone=timezone.utc).timestamp()
         else:
-            return (d - datetime.datetime(1970, 1, 1)).total_seconds()
+            return d.timestamp()
     else:
         return 0
 
@@ -294,7 +254,7 @@ def booltostr(s, defaut='0'):
     else:
         if isinstance(s, bool):
             # c'est ici le principe
-            return force_unicode(int(s))
+            return force_text(int(s))
         try:
             i = int("%s" % s)
             if not i:
@@ -302,7 +262,7 @@ def booltostr(s, defaut='0'):
             else:
                 return '1'
         except ValueError:
-            return force_unicode(int(bool(s)))
+            return force_text(int(bool(s)))
 
 
 def floattostr(s, nb_digit=7):
@@ -316,9 +276,9 @@ def typetostr(liste, s, defaut='0'):
     @param liste: liste a utiliser
     @param s: string comprenand le truc a chercher dans la liste
     @param defaut: reponse par defaut"""
-    liste = [force_unicode(b[0]) for b in liste]
+    liste = [force_text(b[0]) for b in liste]
     try:
-        s = force_unicode(liste.index(s) + 1)
+        s = force_text(liste.index(s) + 1)
     except ValueError:  # on a un cas à defaut
         s = defaut
     return s
@@ -340,14 +300,14 @@ def idtostr(obj, membre='id', defaut='0'):
     @param membre: l'attribut a demander si pas neant"""
     try:
         if getattr(obj, membre) is not None:
-            retour = unicode(getattr(obj, membre))
+            retour = str(getattr(obj, membre))
             if retour != '':
                 if retour[-1] == ":":  # cas des categories
                     retour = retour[0:-1]
         else:
-            retour = unicode(defaut)
+            retour = str(defaut)
     except (AttributeError, ObjectDoesNotExist):
-        retour = unicode(defaut)
+        retour = str(defaut)
     retour = retour.strip()
     return retour
 
@@ -360,22 +320,8 @@ def nulltostr(s):
 
 
 #------------------fonction basiques pour lecture ecriture------"""
-class UTF8Recoder(object):
-    """
-    Iterator that reads an encoded stream and reencodes the input to UTF-8
-    """
+class Excel_csv(csv.Dialect):
 
-    def __init__(self, fich, encoding):
-        self.reader = codecs.getreader(encoding)(fich)
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        return self.reader.next().encode("utf-8")
-
-
-class Excel_csv(object, csv.Dialect):
     """Describe the usual properties of Excel-generated CSV files."""
     delimiter = ';'
     quotechar = '"'
@@ -388,21 +334,21 @@ class Excel_csv(object, csv.Dialect):
 csv.register_dialect("excel_csv", Excel_csv)
 
 
-class Csv_unicode_reader(object):
+class Csv_unicode_reader():
+
     """
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
     """
     champs = None
 
-    def __init__(self, fich, dialect=Excel_csv, encoding="utf-8", **kwds):  # pylint: disable=W0231
+    def __init__(self, fich, dialect=Excel_csv, **kwds):  # pylint: disable=W0231
         self.line_num = 0
-        fich = UTF8Recoder(fich, encoding)
         self.reader = csv.DictReader(fich, dialect=dialect, fieldnames=self.champs, **kwds)
 
-    def next(self):
+    def __next__(self):
         self.line_num += 1
-        self.row = self.reader.next()
+        self.row = next(self.reader)
         return self
 
     def __iter__(self):
@@ -427,6 +373,7 @@ def find_files(path, recherche='*.*'):
         for base_name in files:
             if fnmatch.fnmatch(base_name, recherche):
                 yield os.path.join(root, base_name)
+
 
 class AttrDict(dict):
     """http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python"""
