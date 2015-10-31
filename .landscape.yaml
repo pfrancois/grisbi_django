@@ -2,3 +2,10 @@ strictness: medium
 uses:
     - django
 autodetect: yes
+test-warnings: no
+max-line-length: 300
+ignore-paths:
+	- gsb/test_files
+	- gsb/static
+	- gsb/fixtures
+	- gsb/tests
