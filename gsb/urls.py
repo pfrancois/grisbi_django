@@ -117,11 +117,9 @@ urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
-    urlpatterns = patterns('',
-                           (r'^500.html$',
-                            'django.views.defaults.server_error'),
-                           (r'^404.html$', TemplateView.as_view(template_name='404.html')),
-                           ) + urlpatterns
+    urlpatterns += patterns('', (r'^500.html$', 'django.views.defaults.server_error'),
+                                (r'^404.html$', TemplateView.as_view(template_name='404.html')),
+                            ) + urlpatterns
 
 # gestion de mes trucs perso
 # form tester
@@ -141,3 +139,6 @@ try:
 except ImportError:
     pass
 """
+urlpatterns += patterns('',
+                        (r'^adminactions/', include('adminactions.urls')),
+                        )

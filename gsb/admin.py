@@ -26,6 +26,13 @@ from django.db import transaction
 from collections import OrderedDict
 from . import model_field
 
+# ----------admin action -----------
+from django.contrib.admin import site
+import adminactions.actions as actions
+
+# register all adminactions
+actions.add_to_site(site)
+
 # -------------ici les classes generiques------
 
 
@@ -195,7 +202,7 @@ class Modeladmin_perso(admin.ModelAdmin):
                                                      )
                                       )
                                 )""" % (self.id_ope, self.table_annexe)
-                return super(Modeladmin_perso, self).queryset(request).extra(select={'nb_opes': sql, }, )
+                return super(Modeladmin_perso, self).get_queryset(request).extra(select={'nb_opes': sql, }, )
         else:
             return super(Modeladmin_perso, self).get_queryset(request)
 
