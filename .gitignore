@@ -1,58 +1,108 @@
-20040701.gsb
-sauvegarde.gsb
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.tmp*
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+#securite
 test.php
 .htaccess
 .metadata
-Untitled.pocketmoney
+secret_key.py
+settings.py
+
+#dev ide
 .project
 .buildpath
 .settings
-*.mo
-*.egg-info
-*.egg
-*.EGG
-*.EGG-INFO
-bin
-build
-develop-eggs
-downloads
-eggs
-fake-eggs
-parts
-dist
-.installed.cfg
-.mr.developer.cfg
+*.kpf
+.pydevproject
+.idea
+*.wpr
+*.wpu
+*.sublim*
+*.winmerge
+
+#git
 .hg
 .bzr
 .svn
-*.pyc
-*.pyo
-*.tmp*
+
+#application
+20040701.gsb
+sauvegarde.gsb
+Untitled.pocketmoney
+*.sqlite
+perso
+*.qif
 *.sqlite
 *.sql
 *.db
-settings.py
+downloads
 *.lnk
 *.db*
-.idea
 grisbi-manuel-txt-0.4.0.pdf
-secret_key.py
-*.kpf
-.pydevproject
-perso
-*.qif
 *.7z
-*.wpr
-*.wpu
 test.py
 sqlite2mysql.py
-*.winmerge
 reset.bat
-*.sublim*
 sql
 old
-.coverage
-covhtml
 restore.bat
 *.sqlite_bkp
-.__pycache__
+
