@@ -16,8 +16,8 @@ class Dategsbwidget(forms.DateInput):
 
     # noinspection PyClassHasNoInit
     class Media(object):
-        js = ("js/basiccalendar.js",)
-        css = {'all': ('css/calendar.css',)}
+        js = ("gsb/js/basiccalendar.js",)
+        css = {'all': ('gsb/css/calendar.css',)}
 
     def __init__(self, attrs=None):  # @UnusedVariable
         super(Dategsbwidget, self).__init__(attrs)
@@ -30,7 +30,7 @@ class Dategsbwidget(forms.DateInput):
             # Only add the 'value' attribute if a value is non-empty.
             final_attrs['value'] = force_text(self._format_value(value))
         cal = '<a href="javascript:editDate(\'%s\');" title="calendrier"><img src="%s" alt="calendrier"/></a>' % (
-            final_attrs['id'], settings.STATIC_URL + "img/calendar.png")
+            final_attrs['id'], settings.STATIC_URL + "gsb/img/calendar.png")
         return mark_safe(
             '<input%s /><span id="date_shct">%s</span><div class="editDate ope_date_ope" id="editDateId"></div>' % (
                 flatatt(final_attrs), cal))
