@@ -162,15 +162,15 @@ th {
 }
 
 /*gestion des forms*/
-.required {
+.required td{
     background : #009900;
 }
 
-/*
-.required:after{
-    content: "*";
+
+.required th :after{
+    content: " *";
 }
-*/
+
 ul.errorlist {
     margin  : 0 !important;
     padding : 0 !important;
