@@ -499,7 +499,7 @@ class Import_base(views.Myformview):
     def get_success_url(self):
         return reverse(self.url)
 
-    def get_form(self, form_class):
+    def get_form(self, form_class=None):
         form = super(Import_base, self).get_form(form_class)
         form.fields['nom_du_fichier'].label = "nom_du_fichier %s" % self.type_f
         return form

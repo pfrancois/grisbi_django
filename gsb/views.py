@@ -17,7 +17,7 @@ from django.views import generic
 from django.db import IntegrityError
 import gsb.utils
 from django.db import transaction
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 
 
 class Mytemplateview(generic.TemplateView):
@@ -527,8 +527,7 @@ def ope_titre_achat(request, cpt_id):
                           form.cleaned_data['cours'],
                           form.cleaned_data['date'],
                           '{0:.2f}'.format(form.cleaned_data['cours'] * form.cleaned_data['nombre']),
-                          settings.DEVISE_GENERALE)
-            )
+                          settings.DEVISE_GENERALE))
             return http.HttpResponseRedirect(compte.get_absolute_url())
     else:
         if titre_id:
@@ -745,7 +744,9 @@ def ajout_ope_titre_bulk(request, cpt_id):
                 i += 1
                 titres_forms.append(gsb_forms.ajout_ope_bulk_form(prefix=str(i),
                                                                   initial={'compte': compte, 'titre': titre, 'date': gsb.utils.today,
-                                                                  'nombre': 0, 'montant': 0}))
+                                                                           'nombre': 0, 'montant': 0}
+                                                                  )
+                                    )
     return render(request, 'gsb/maj_compte_titre.djhtm',
                   {'date_ope_form': date_ope_form, 'forms': titres_forms, 'compte_id': compte.id, 'titre': 'opération sur les titres suivants'})
 
@@ -796,6 +797,7 @@ class Rdt_titres_view(Myformview):
     titre = "rendement des titres"
 
     def form_valid(self, form):
+        # 
         if form.cleaned_data['date_max']:
             datel = form.cleaned_data['date_max']
             titre = "%s au %s" % (self.titre, datel.strftime('%d %m %Y'))
@@ -810,7 +812,7 @@ class Rdt_titres_view(Myformview):
         self.titre = titre
         final = list()
         for ligne in retour[1]:
-            liste_champ = SortedDict()
+            liste_champ = OrderedDict()
             for champ in retour[0]:
                 liste_champ[champ] = ligne[champ]
             final.append(liste_champ)

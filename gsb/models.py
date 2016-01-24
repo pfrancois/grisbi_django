@@ -1164,7 +1164,7 @@ class Ope(models.Model):
         get_latest_by = 'date'
         order_with_respect_to = 'compte'
         verbose_name = "opération"
-        ordering = ['-date']
+        #ordering = ['-date']
 
     @staticmethod
     def non_meres():

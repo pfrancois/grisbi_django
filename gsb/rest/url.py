@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from rest_framework.routers import DefaultRouter
 from . import view
 
@@ -17,7 +17,7 @@ router.register(r'Ope_Titres', view.OpeTitreViewSet)
 router.register(r'Ope', view.OpeViewSet)
 # The API URLs are now determined automatically by the router.
 # Additionally, we include the login URLs for the browseable API.
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^', include(router.urls)),
-)
+]

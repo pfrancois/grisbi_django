@@ -31,6 +31,5 @@
 </div>{% endif %}
 <div class="progress"><a href='{% url "index" %}'>retour</a></div>
 {% endblock content %}
-{% if user.is_authenticated %} <a href="/logout">logout</a>{% else %} <a href="/login">login</a>{% endif %}
 </body>
 </html>

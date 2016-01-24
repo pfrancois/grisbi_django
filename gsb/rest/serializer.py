@@ -3,6 +3,22 @@ from rest_framework import serializers
 from .. import models
 
 
+class OpeSerializer(serializers.ModelSerializer):
+    compte = serializers.StringRelatedField(read_only=True)
+    tiers = serializers.StringRelatedField(read_only=True)
+    cat = serializers.StringRelatedField(read_only=True)
+    exercice = serializers.StringRelatedField(read_only=True)
+    moyen = serializers.StringRelatedField(read_only=True)
+    ib = serializers.StringRelatedField(read_only=True)
+    montant = serializers.DecimalField(15, 2, coerce_to_string=False)
+
+    class Meta(object):
+        model = models.Ope
+        fields = (
+            'compte', 'date', 'date_val', 'montant', 'tiers', 'cat', 'moyen', 'ib', 'num_cheque', 'pointe', 'exercice',
+            'notes', 'uuid', 'lastupdate', 'date_created')
+
+
 class TiersSerializer(serializers.ModelSerializer):
     # titre= serializers.Field(source='titre.nom')
     class Meta(object):
@@ -81,9 +97,3 @@ class EcheanceSerializer(serializers.ModelSerializer):
             'date_created')
 
 
-class OpeSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = models.Ope
-        fields = (
-            'compte', 'date', 'date_val', 'montant', 'tiers', 'cat', 'moyen', 'ib', 'num_cheque', 'pointe', 'exercice',
-            'notes', 'uuid', 'lastupdate', 'date_created')

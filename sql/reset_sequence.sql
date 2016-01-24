@@ -19,3 +19,25 @@ SELECT setval(pg_get_serial_sequence('"auth_user_user_permissions"','id'), coale
 SELECT setval(pg_get_serial_sequence('"auth_user_groups"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "auth_user_groups";
 SELECT setval(pg_get_serial_sequence('"auth_user"','id'), coalesce(max("id"), 1), max("id") IS NOT null) FROM "auth_user";
 COMMIT;
+
+
+SELECT strftime('%Y', ope2.date) as annee, strftime('%m', ope2.date) as mois,
+       (SELECT SUM(ope.MONTANT)
+        FROM   gsb_ope AS ope
+        WHERE  strftime('%Y', ope.date) = strftime('%Y', ope2.date)
+          AND  strftime('%m', ope.date) <= strftime('%m', ope2.date)) AS CUMUL_AN_MOIS
+FROM   gsb_ope AS ope2
+where strftime('%Y', ope2.date) >= '2014'
+group by mois
+ORDER BY ope2.date;
+
+SELECT strftime('%Y', ope2.date) as annee, strftime('%m', ope2.date) as mois,ope2.cat_id
+       (SELECT SUM(ope.MONTANT)
+        FROM   gsb_ope AS ope
+        WHERE  strftime('%Y', ope.date) = strftime('%Y', ope2.date)
+          AND  strftime('%m', ope.date) <= strftime('%m', ope2.date)
+          AND ope.cat_id=ope2.cat_id) AS CUMUL_AN_MOIS
+FROM   gsb_ope AS ope2
+where strftime('%Y', ope2.date) >= '2014'
+group by mois, cat_id
+ORDER BY ope2.date;

@@ -4,82 +4,82 @@ from .. import models
 from . import serializer
 
 
-class TiersViewSet(viewsets.ModelViewSet):
+class TiersViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Tiers.objects.all()
     serializer_class = serializer.TiersSerializer
 
 
-class TitreViewSet(viewsets.ModelViewSet):
+class TitreViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Titre.objects.all()
     serializer_class = serializer.TitreSerializer
 
 
-class CoursViewSet(viewsets.ModelViewSet):
+class CoursViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     #@todo faire que ca demande un titre
     """
     queryset = models.Cours.objects.all()
     serializer_class = serializer.CoursSerializer
 
 
-class BanqueViewSet(viewsets.ModelViewSet):
+class BanqueViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Banque.objects.all()
     serializer_class = serializer.BanqueSerializer
 
 
-class CatViewSet(viewsets.ModelViewSet):
+class CatViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Cat.objects.all()
     serializer_class = serializer.CatSerializer
 
 
-class IbViewSet(viewsets.ModelViewSet):
+class IbViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Ib.objects.all()
     serializer_class = serializer.IbSarializer
 
 
-class ExerciceViewSet(viewsets.ModelViewSet):
+class ExerciceViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Exercice.objects.all()
     serializer_class = serializer.ExerciceSerializer
 
 
-class CompteViewSet(viewsets.ModelViewSet):
+class CompteViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Compte.objects.all()
     serializer_class = serializer.CompteSerializer
 
 
-class OpeTitreViewSet(viewsets.ModelViewSet):
+class OpeTitreViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Ope_titre.objects.all()
     serializer_class = serializer.Ope_titreSerializer
 
 
-class OpeViewSet(viewsets.ModelViewSet):
+class OpeViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,`update` and `destroy` actions.
+    This viewset automatically provides `list` and `detail` actions.
     """
     queryset = models.Ope.objects.all()
     serializer_class = serializer.OpeSerializer

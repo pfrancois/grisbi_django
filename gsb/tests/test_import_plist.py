@@ -3,7 +3,6 @@
 test import
 """
 
-import gsb.utils
 from django.test.utils import override_settings
 from django.conf import settings
 
@@ -20,6 +19,7 @@ from gsb.io.ecriture_plist_money_journal import Export_icompta_plist
 import mock
 from testfixtures import compare
 import collections
+
 
 class Test_element(Test_import_abstract):
     def test_ope(self):
@@ -55,7 +55,7 @@ class Test_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 20, 17, 47, 95469, tzinfo=tz.utc))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 20, 17, 47, 95470, tzinfo=tz.utc))
         self.compare(el.id, 66)
         self.compare(el.cat, 1)
         self.compare(el.automatique, False)
@@ -74,8 +74,7 @@ class Test_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,
-                     datetime.datetime(2014, 6, 17, 20, 17, 47, 95469, tzinfo=tz.utc))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 20, 17, 47, 95470, tzinfo=tz.utc))
         self.compare(el.id, 66)
         self.compare(el.cat, 1)
         self.compare(el.automatique, False)
@@ -108,7 +107,7 @@ class Test_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, True)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88254, tzinfo=tz.utc))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88255, tzinfo=tz.utc))
         self.compare(el.id, 7)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Ghh")
@@ -123,7 +122,7 @@ class Test_element(Test_import_abstract):
         self.compare(el.is_cat, False)
         self.compare(el.is_compte, True)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88254, tzinfo=tz.utc))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 21, 30, 34, 88255, tzinfo=tz.utc))
         self.compare(el.id, 7)
         self.compare(el.couleur, "#000000")
         self.compare(el.nom, "Ghh")
@@ -148,13 +147,13 @@ class Test_element(Test_import_abstract):
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403049014010.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
+        self.compare(el.datemaj, datetime.datetime(2014, 6, 17, 23, 50, 14, 10000, tzinfo=tz.utc))
         self.compare(el.action, 'm')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, True)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
+        self.compare(el.lastup, datetime.datetime(2014, 6, 17, 23, 50, 14, 10000, tzinfo=tz.utc))
         self.compare(el.id, 16)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Cat aded")
@@ -164,13 +163,13 @@ class Test_element(Test_import_abstract):
             os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                          'log', "1403049014020.log")).list_el[0]
         self.compare(el.device, 'MyHpyVfqnK')
-        self.compare(el.datemaj,  datetime.datetime(2014, 6, 17, 23, 50, 14, 19999, tzinfo=tz.utc))
+        self.compare(el.datemaj,  datetime.datetime(2014, 6, 17, 23, 50, 14, 20000, tzinfo=tz.utc))
         self.compare(el.action, 'd')
         self.compare(el.is_ope, False)
         self.compare(el.is_cat, True)
         self.compare(el.is_compte, False)
         self.compare(el.is_budget, False)
-        self.compare(el.lastup,  datetime.datetime(2014, 6, 17, 23, 50, 14, 9999, tzinfo=tz.utc))
+        self.compare(el.lastup,  datetime.datetime(2014, 6, 17, 23, 50, 14, 10000, tzinfo=tz.utc))
         self.compare(el.id, 16)
         self.compare(el.couleur, '#000000')
         self.compare(el.nom, "Cat aded")
