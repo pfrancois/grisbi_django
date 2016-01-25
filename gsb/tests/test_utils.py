@@ -175,6 +175,7 @@ class Test_utils1(TestCase):
 
 
 class Test_utils(TestCase):
+
     """test avec bdd"""
     fixtures = ['test.yaml']
 

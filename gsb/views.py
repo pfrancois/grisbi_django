@@ -797,7 +797,6 @@ class Rdt_titres_view(Myformview):
     titre = "rendement des titres"
 
     def form_valid(self, form):
-        # 
         if form.cleaned_data['date_max']:
             datel = form.cleaned_data['date_max']
             titre = "%s au %s" % (self.titre, datel.strftime('%d %m %Y'))

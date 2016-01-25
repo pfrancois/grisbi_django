@@ -5,6 +5,7 @@ from . import serializer
 
 
 class TiersViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -13,6 +14,7 @@ class TiersViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class TitreViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -21,6 +23,7 @@ class TitreViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CoursViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     #@todo faire que ca demande un titre
@@ -30,6 +33,7 @@ class CoursViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class BanqueViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -38,6 +42,7 @@ class BanqueViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CatViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -46,6 +51,7 @@ class CatViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IbViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -54,6 +60,7 @@ class IbViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ExerciceViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -62,6 +69,7 @@ class ExerciceViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CompteViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -70,6 +78,7 @@ class CompteViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class OpeTitreViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -78,6 +87,7 @@ class OpeTitreViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class OpeViewSet(viewsets.ReadOnlyModelViewSet):
+
     """
     This viewset automatically provides `list` and `detail` actions.
     """

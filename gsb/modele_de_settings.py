@@ -115,7 +115,8 @@ DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3',
                          'PASSWORD': '',  # Not used with sqlite3.
                          'HOST': '',  # Set to empty string for localhost. Not used with sqlite3.
                          'PORT': '',  # Set to empty string for default. Not used with sqlite3.}
-}}
+                         }
+             }
 if 'test' in sys.argv or 'testserver':
     TEST = True
 LOGIN_URL = "/login"
@@ -247,7 +248,8 @@ if DJANGO_TOOLBAR:
                             'debug_toolbar.panels.sql.SQLPanel',
                             'debug_toolbar.panels.signals.SignalsPanel',
                             'debug_toolbar.panels.logging.LoggingPanel',
-    )
+                            )
+
     INSTALLED_APPS += ('debug_toolbar',)
     # https://github.com/santiagobasulto/debug-inspector-panel
     # https://github.com/orf/django-debug-toolbar-template-timings

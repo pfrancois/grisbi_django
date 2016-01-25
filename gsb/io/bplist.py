@@ -79,8 +79,7 @@ class FloatWrapper(object):
 
 
 class Uid(int):
-    """Wrapper around integers for representing UID values. This
-       is used in keyed archiving."""
+    """Wrapper around integers for representing UID values. This is used in keyed archiving."""
 
     def __repr__(self):
         return "Uid(%d)" % self

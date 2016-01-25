@@ -11,6 +11,7 @@ from .. import widgets as gsb_field
 
 
 class Export_view_csv_base(export_base.ExportViewBase):
+
     def export(self, query):
         raise NotImplementedError("il faut initialiser")
 
@@ -143,6 +144,7 @@ class Exportform_Compte_titre(export_base.Exportform_ope):
 
 
 class Export_ope_titre_csv(Export_view_csv_base):
+
     """view pour exporter en csv les ope titres"""
     model_initial = models.Ope_titre
     form_class = Exportform_Compte_titre

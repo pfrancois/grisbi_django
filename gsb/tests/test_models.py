@@ -875,8 +875,8 @@ class Test_models(TestCase):
     def test_last_modif(self):
         o = models.Ope.objects.get(pk=4)
         o.save()
-        lup=o.lastupdate
-        lc=o.date_created
+        lup = o.lastupdate
+        lc = o.date_created
         time.sleep(3)
         o = models.Ope.objects.get(pk=4)
         o.save()
@@ -1347,6 +1347,7 @@ class Test_models(TestCase):
 
 
 class Test_models2(TestCase):
+
     def setUp(self):
         super(Test_models2, self).setUp()
         # on cree les elements indispensables

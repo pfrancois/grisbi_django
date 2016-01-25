@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 # from django.utils.http import urlquote
 from django.conf import settings
 # import logging
-
+from django.template.defaultfilters import floatformat
 register = template.Library()
 
 
@@ -60,9 +60,6 @@ def centimes(value):
     @type value:comme on veut
     """
     return str(Decimal(force_text(value)) * Decimal(100))
-
-
-from django.template.defaultfilters import floatformat
 
 
 @register.filter

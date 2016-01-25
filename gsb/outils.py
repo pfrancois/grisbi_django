@@ -55,7 +55,7 @@ def verif_config(request):
         {'resultats': ("vous trouverez les résultats de la verification de la config",),
          'titre_long': "verif config",
          'titre': "verif _config",
-        },
+         },
         context_instance=RequestContext(request)
     )
 

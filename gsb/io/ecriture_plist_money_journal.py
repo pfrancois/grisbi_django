@@ -31,6 +31,7 @@ def filename_for_moneyjournal():
 
 
 class List_element_base(dict):
+
     """classe abstraite pour list dictionnaire"""
 
     def add(self, obj, status):  # pylint:disable=unused-argument
@@ -45,6 +46,7 @@ class List_element_base(dict):
 
 
 class List_ope(List_element_base):
+
     """Classe qui gere les operations"""
 
     def add(self, obj, status):

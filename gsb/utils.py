@@ -18,6 +18,7 @@ from uuid import uuid4
 
 
 class utils_Exception(Exception):
+
     """une classe exception qui permet d'affcher tranquillement ce que l'on veut"""
 
     def __init__(self, message):
@@ -376,6 +377,7 @@ def find_files(path, recherche='*.*'):
 
 
 class AttrDict(dict):
+
     """http://stackoverflow.com/questions/4984647/accessing-dict-keys-like-an-attribute-in-python"""
 
     def __init__(self, *args, **kwargs):

@@ -29,6 +29,7 @@ __all__ = ['TestCase']
 class TestCase(Test_Case_django):
 
     class add_minutes:
+
         def __init__(self, date_init):
             self.date = date_init
 

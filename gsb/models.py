@@ -55,6 +55,7 @@ def has_changed(instance, fields):
 
 
 class Config(models.Model):
+
     """model generique pour tout ce qui est modifiable"""
     derniere_import_money_journal = models.DateTimeField(default=datetime.datetime(1970, 1, 1, tzinfo=tz.utc))
 
@@ -66,6 +67,7 @@ class Config(models.Model):
 
 
 class Tiers(models.Model):
+
     """
     un tiers, c'est a dire une personne ou un titre
     pour les titres, c'est remplis dans le champ note avec TYPE@ISIN
@@ -113,6 +115,7 @@ class Tiers(models.Model):
 
 
 class Titre(models.Model):
+
     """²
     les titres englobe les actifs financiers
     afin de pouvoir faire le lien dans les operations, il y a un ligne vers les tiers
@@ -294,6 +297,7 @@ class Titre(models.Model):
 
 
 class Cours(models.Model):
+
     """cours des titres"""
     date = models.DateField(default=utils.today, db_index=True)
     valeur = models_gsb.CurField(default=1.000, decimal_places=3)
@@ -317,6 +321,7 @@ class Cours(models.Model):
 
 
 class Banque(models.Model):
+
     """banques"""
     cib = models.CharField(max_length=5, blank=True, db_index=True)
     nom = models.CharField(max_length=40, unique=True, db_index=True)
@@ -347,6 +352,7 @@ class Banque(models.Model):
 
 
 class Cat(models.Model):
+
     """categories
     les sous categories n'existent pas en tant que tel, ce sont justes des categories plus longues"""
     typesdep = (('r', 'recette'), ('d', 'dépense'), ('v', 'virement'))
@@ -395,6 +401,7 @@ class Cat(models.Model):
 
 
 class Ib(models.Model):
+
     """imputations budgetaires
      c'est juste un deuxieme type de categories ou apparentes"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
@@ -432,6 +439,7 @@ class Ib(models.Model):
 
 
 class Exercice(models.Model):
+
     """listes des exercices des comptes
     attention, il ne faut confondre exercice et rapp. les exercices sont les même pour tous les comptes alors q'un rapp est pour un seul compte
     """
@@ -472,6 +480,7 @@ class Exercice(models.Model):
 
 
 class Compte(models.Model):
+
     """
     comptes (normal)
     """
@@ -727,7 +736,7 @@ class Compte(models.Model):
         if self.moyen_debit_defaut is not None:
             return self.moyen_debit_defaut
         else:
-            try:    
+            try:
                 return Moyen.objects.get(id=settings.MD_DEBIT)
             except Moyen.DoesNotExist:
                 raise Moyen.DoesNotExist()
@@ -751,7 +760,7 @@ class Compte(models.Model):
             return "opération ({}) crée ".format(ope)
         else:
             return "rien à modifier"
-    
+
     def ajustement_titre(self, datel, titre, nb_vrai, cours):
         datel = utils.strpdate(datel)
         nb_theorique = titre.nb(datel=datel, compte=self)
@@ -772,7 +781,9 @@ class Compte(models.Model):
 
 
 class Ope_titre(models.Model):
+
     """ope titre en compta matiere"""
+
     titre = models.ForeignKey(Titre, on_delete=models.CASCADE)
     compte = models.ForeignKey(Compte, verbose_name="compte titre", limit_choices_to={'type': 't'})
     nombre = models_gsb.CurField(default=0, decimal_places=6)
@@ -903,6 +914,7 @@ def verif_opetitre_rapp(sender, **kwargs):
 
 
 class Moyen(models.Model):
+
     """moyen de paiements
     commun à l'ensembles des comptes
     actuellement, les comptes ont tous les moyens sans possiblite de faire le tri
@@ -952,6 +964,7 @@ class Moyen(models.Model):
 
 
 class Rapp(models.Model):
+
     """rapprochement d'un compte"""
     nom = models.CharField(max_length=40, unique=True, db_index=True)
     date = models.DateField(null=True, blank=True, default=utils.today)
@@ -1002,6 +1015,7 @@ class Rapp(models.Model):
 
 
 class Echeance(models.Model):
+
     """echeance 'opération future prevue
     soit unique
     soit repete
@@ -1131,6 +1145,7 @@ class Echeance(models.Model):
 
 
 class Ope(models.Model):
+
     """operation"""
     compte = models.ForeignKey(Compte)
     date = models.DateField(default=utils.today, db_index=True)
@@ -1326,6 +1341,7 @@ def verif_ope_rapp(sender, **kwargs):
 
 
 class Virement(object):
+
     """raccourci pour creer un virement entre deux comptes"""
 
     def __init__(self, ope=None):

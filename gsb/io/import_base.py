@@ -34,11 +34,13 @@ class ImportException(utils.utils_Exception):
 
 
 class ImportForm1(gsb_forms.Baseform):
+
     """form d'importation, defini juste un fichier"""
     nom_du_fichier = gsb_forms.forms.FileField()
 
 
 class Property_ope_base(object):
+
     """defini toutes les proprietes d'une ope"""
 
     @property
@@ -136,6 +138,7 @@ class Property_ope_base(object):
 
 
 class Table(object):
+
     """obj avec cache
     c'est l'object abstract sur lequel tt les autres se reposes
     """
@@ -424,6 +427,7 @@ class Rapp_cache(Table):
 
 
 class Moyen_defaut_cache(object):
+
     def __init__(self):
         self.id = {}
         for c in models.Compte.objects.all():

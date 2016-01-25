@@ -102,8 +102,7 @@ class VirementForm(Baseform):
                                              self.cleaned_data['compte_destination'],
                                              self.cleaned_data['montant'],
                                              self.cleaned_data['date'],
-                                             self.cleaned_data['notes']
-                                            )
+                                             self.cleaned_data['notes'])
         else:
             virement_objet = Virement(self.ope)
         virement_objet.origine.moyen = self.cleaned_data['moyen_origine']
@@ -179,6 +178,7 @@ class Ope_titre_add_achatForm(Ope_titre_addForm):
 
 
 class Ope_titre_add_venteForm(Ope_titre_addForm):
+
     def __init__(self, cpt=None, *args, **kwargs):
         super(Ope_titre_add_venteForm, self).__init__(*args, **kwargs)
         self.fields['titre'].empty_label = None
@@ -205,6 +205,7 @@ class Ope_titre_add_venteForm(Ope_titre_addForm):
 
 
 class Ope_titreForm(Basemodelform):
+
     def __init__(self, *args, **kwargs):
         super(Ope_titreForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
@@ -240,6 +241,7 @@ class SearchForm(Baseform):
 
 
 class ajout_ope_bulk_form(Baseform):
+
     """premier form utilise ajout_ope_titre_bulk"""
     titre = forms.ModelChoiceField(Titre.objects.all())
     nombre = forms.DecimalField(localize=True)
@@ -248,5 +250,6 @@ class ajout_ope_bulk_form(Baseform):
 
 
 class ajout_ope_date_form(Baseform):
+
     """second form utilise ajout_ope_titre_bulk"""
     date = forms.DateField()

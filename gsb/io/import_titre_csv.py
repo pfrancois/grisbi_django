@@ -10,6 +10,7 @@ from .. import utils
 
 
 class Csv_unicode_reader_titre(utils.Csv_unicode_reader):
+
     """obligatoire :  cpt date titre nombre cours"""
 
     @property

@@ -26,6 +26,7 @@ __all__ = ['Test_import_csv1', 'Test_import_base', 'Test_import_csv2']
 
 
 class Test_import_abstract(TestCase):
+
     def setUp(self):
         super(Test_import_abstract, self).setUp()
         self.user = User.objects.create_user(username='admin', password='mdp', email="toto@toto.com")
@@ -34,6 +35,7 @@ class Test_import_abstract(TestCase):
 
 @override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv1(Test_import_abstract):
+
     """test import csv version sans jumelle ni ope mere bref en ne gerant pas les id mais gere les virement et les ope titre"""
 
     def setUp(self):
@@ -239,6 +241,7 @@ class Test_import_csv1(Test_import_abstract):
 
 @override_settings(CONVERSION_CPT_TITRE=True)
 class Test_import_csv2(Test_import_abstract):
+
     def test_import_csv_simple_ok_global(self):
         """test d'integration"""
         with open(os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "test_import_export.csv"), encoding="iso-8859-1") as file_test:
@@ -268,6 +271,7 @@ class Test_import_csv2(Test_import_abstract):
 
 
 class Test_import_base(Test_import_abstract):
+
     def test_import_base(self):
         """verification des property"""
         prop = import_base.Property_ope_base()

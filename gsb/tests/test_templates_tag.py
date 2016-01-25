@@ -14,6 +14,7 @@ __all__ = ['Test_templates_tags']
 
 
 class Test_templates_tags(SimpleTestCase):
+
     def test_gsb_extra_cur1(self):
         out = gsb_extras.cur(225.50, "EUR")
         self.assertEqual(out, "225,50 &#8364;")

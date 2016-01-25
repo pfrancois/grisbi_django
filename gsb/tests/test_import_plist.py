@@ -22,6 +22,7 @@ import collections
 
 
 class Test_element(Test_import_abstract):
+
     def test_ope(self):
         fich = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist", 'Applications', 'Money Journal',
                             'log', "1402954705000.log")
@@ -177,12 +178,14 @@ class Test_element(Test_import_abstract):
 
 
 class Test_check(Test_import_abstract):
+
     @override_settings(DIR_DROPBOX=os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "import_plist"))
     def test_element_check(self):
         self.compare(lecture_plist.check(), True)  # TODO improve it
 
 
 class Test_import_item_first_part(Test_import_abstract):
+
     def setUp(self):
         self.request = self.request_get('outils')
         self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
@@ -209,6 +212,7 @@ class Test_import_item_first_part(Test_import_abstract):
 
 
 class Test_item_modif_effectives_cote_cat(Test_import_abstract):
+
     def setUp(self):
         self.request = self.request_get('outils')
         self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
@@ -306,6 +310,7 @@ class Test_item_modif_effectives_cote_cat(Test_import_abstract):
 
 
 class Test_import_item_modif_effectives_cote_compte(Test_import_abstract):
+
     def setUp(self):
         self.request = self.request_get('outils')
         self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
@@ -357,6 +362,7 @@ class Test_import_item_modif_effectives_cote_compte(Test_import_abstract):
 
 
 class Test_import_item_modif_effectives_cote_ope(Test_import_abstract):
+
     def setUp(self):
         self.request = self.request_get('outils')
         self.lastmaj = datetime.datetime(2014, 6, 15, 00, 25, 14, tzinfo=tz.utc)
@@ -650,7 +656,7 @@ class Test_import_money_journal_export(Test_import_abstract):
             #test effectif
             with mock.patch('gsb.utils.timezone.now', mock_date.now):
                 nb = self.exp.all_since_date(datetime.datetime(2014, 1, 21, 19, 27, 14, tzinfo=tz.utc))
-            # compare nb 
+            # compare nb
             compare(nb, collections.Counter({'global': 20, 'ope': 14, 'cat': 4, 'compte': 2}))
             #compare la liste des fichier
             attendu = os.path.join(settings.PROJECT_PATH, "gsb", "test_files", "export_plist_attendu", 'Applications',

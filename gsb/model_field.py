@@ -4,13 +4,12 @@ import os
 
 from django.db import models
 from django import forms
-from django.db.models import DateTimeField
-from django_extensions.db.fields import CreationDateTimeField, ModificationDateTimeField
 import gsb.utils as utils
 
 
 # definition d'un moneyfield
 class CurField(models.DecimalField):
+
     """
     un champ decimal mais defini pour les monnaies
     """
@@ -30,7 +29,9 @@ class CurField(models.DecimalField):
         name, path, args, kwargs = super(CurField, self).deconstruct()
         return name, path, args, kwargs
 
+
 class ExtFileField(forms.FileField):
+
     """
     http://djangosnippets.org/snippets/977/
     Same as forms.FileField, but you can specify a file extension whitelist.
@@ -64,11 +65,11 @@ class ExtFileField(forms.FileField):
 
 
 class uuidfield(models.CharField):
+
     """tire de la
     https://github.com/gugu/django-uuid/blob/master/src/django_uuid/fields.py
     """
 
-    # noinspection PyUnusedLocal
     def __init__(self, verbose_name=None, name=None, auto=True, add=False, **kwargs):  # @UnusedVariable
         kwargs['max_length'] = 36
         self.auto = auto

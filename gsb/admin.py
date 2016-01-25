@@ -37,6 +37,7 @@ actions.add_to_site(site)
 
 
 class Date_perso_filter(DateFieldListFilter):
+
     """filtre date perso
     """
 
@@ -251,6 +252,7 @@ class Modeladmin_perso(admin.ModelAdmin):
 
 
 class Formsetreadonly(BaseInlineFormSet):
+
     def __init__(self, *args, **kwargs):
         super(Formsetreadonly, self).__init__(*args, **kwargs)
         self.can_delete = False
@@ -310,6 +312,7 @@ class Ope_cat(Ope_inline_admin):
 
 
 class Cat_admin(Modeladmin_perso):
+
     """classe admin pour les categories"""
     actions = ['fusionne']
     list_editable = ('nom', 'couleur')
@@ -340,6 +343,7 @@ class Ope_ib(Ope_inline_admin):
 
 
 class Ib_admin(Modeladmin_perso):
+
     """admin pour les ib"""
     actions = ['fusionne']
     list_editable = ('nom',)
@@ -356,6 +360,7 @@ class Ib_admin(Modeladmin_perso):
 
 
 class Compte_admin(Modeladmin_perso):
+
     """admin pour les comptes normaux"""
     actions = ['fusionne', 'action_supprimer_pointe', 'action_transformer_pointee_rapp']
     fields = ('nom', ('type', 'ouvert'), 'banque', ('guichet', 'num_compte', 'cle_compte'), ('solde_init', 'solde_mini_voulu',
@@ -451,6 +456,7 @@ class Compte_admin(Modeladmin_perso):
 
 
 class Ope_changelist_Form(forms.ModelForm):
+
     class Meta(object):
         model = gsbmodels.Ope
         fields = '__all__'
@@ -458,6 +464,7 @@ class Ope_changelist_Form(forms.ModelForm):
 
 
 class Ope_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les opes"""
     fields = (
         'compte', ('date', 'date_val'), 'montant', 'tiers', 'moyen', ('cat', 'ib'), ('pointe', 'rapp', 'exercice'),
@@ -663,6 +670,7 @@ class Ope_admin(Modeladmin_perso):
 
 
 class Cours_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les  cours des titres """
     list_display = ('date', 'titre', 'valeur')
     list_editable = ('valeur',)
@@ -673,6 +681,7 @@ class Cours_admin(Modeladmin_perso):
 
 
 class Titre_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les titres"""
     actions = ['fusionne']
     list_display = ('id', 'nom', 'isin', 'type', 'last_cours')
@@ -691,6 +700,7 @@ class Titre_admin(Modeladmin_perso):
 
 
 class Moyen_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les moyens de paiements"""
     actions = ['fusionne']
     list_filter = ('type',)
@@ -706,6 +716,7 @@ class Ope_tiers(Ope_inline_admin):
 
 
 class Tiers_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les tiers"""
     actions = ['fusionne']
     list_editable = ('nom',)
@@ -730,6 +741,7 @@ class Tiers_admin(Modeladmin_perso):
 
 
 class Ech_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les écheances d'operations"""
     list_display = ('id', 'valide', 'date', 'compte', 'compte_virement', 'montant', 'tiers', 'cat', 'intervalle', 'periodicite')
     list_filter = ('compte', 'compte_virement', 'date', 'periodicite')
@@ -745,6 +757,7 @@ class Ech_admin(Modeladmin_perso):
 
 
 class Banque_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les banques"""
     actions = ['fusionne']
 
@@ -754,6 +767,7 @@ class Ope_rapp(Ope_inline_admin):
 
 
 class Rapp_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les rapprochements"""
     actions = ['fusionne']
     list_display = ('id', 'nom', 'date')
@@ -766,6 +780,7 @@ class Rapp_admin(Modeladmin_perso):
 
 
 class Exo_admin(Modeladmin_perso):
+
     """classe de gestion de l'admin pour les exercices"""
     actions = ['fusionne']
     list_filter = ('date_debut', 'date_fin')

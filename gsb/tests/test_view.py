@@ -27,11 +27,13 @@ class Test_view_base(TestCase):
 
 
 class Test_urls(Test_view_base):
+
     def test_404(self):
         self.assertEqual(self.client.get('/gestion_bdd/gsb/ope/49810/').status_code, 404)
 
 
 class Test_views_general(Test_view_base):
+
     def test_view_index(self):
         """page d'acceuil"""
         resp = self.client.get('/')
@@ -141,6 +143,7 @@ class Test_views_general(Test_view_base):
 
 
 class Test_forms(Test_view_base):
+
     def test_form_ope_normal(self):
         """test form nouvel ope sans probleme"""
         form_data = {'compte': "1", 'date': "02/09/2012", 'date_val': "", 'montant': decimal.Decimal(24), 'tiers': "1",
@@ -174,7 +177,7 @@ class Test_forms(Test_view_base):
                      'moyen_destination': '5', 'montant': decimal.Decimal("13.50"), 'notes': 'ceci est des notes',
                      'pointe': ""
 
-        }
+                     }
         form = gsb_forms.VirementForm(data=form_data)
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['montant'], decimal.Decimal("13.50"))
@@ -190,7 +193,7 @@ class Test_forms(Test_view_base):
                      'moyen_destination': '5', 'montant': decimal.Decimal("13.50"), 'notes': 'ceci est des notes',
                      'pointe': ""
 
-        }
+                     }
         ope = models.Ope.objects.get(id=8)
         form = gsb_forms.VirementForm(data=form_data, ope=ope)
         self.assertTrue(form.is_valid())
@@ -206,7 +209,7 @@ class Test_forms(Test_view_base):
                      'moyen_destination': '5', 'montant': decimal.Decimal("13.50"), 'notes': 'ceci est des notes',
                      'pointe': ""
 
-        }
+                     }
         form = gsb_forms.VirementForm(data=form_data)
         r = form.is_valid()
         self.assertFalse(r)

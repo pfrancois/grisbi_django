@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*
 
 
-
 from django.contrib.admin.sites import AdminSite
 
 from .test_base import TestCase
@@ -13,6 +12,7 @@ request = None
 
 
 class Test_admin(TestCase):
+
     def setUp(self):
         super(Test_admin, self).setUp()
         self.site = AdminSite()

@@ -44,6 +44,7 @@ class Writer_base(object):
 
 
 class Csv_unicode_writer(Writer_base):
+
     """
     A CSV writer which will write rows to CSV file "f",
     which is encoded in the given encoding.
